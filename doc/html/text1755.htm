@@ -1,0 +1,429 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Transition Matrices</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1749.htm">[Next]</A><A  HREF = "text1754.htm">[Prev]</A> <A  HREF = "text1749.htm">[Right]</A> <A  HREF = "text1754.htm">[Left]</A> <A  HREF = "text1750.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "19452">Transition Matrices</A></H3>
+
+<P>
+<P>
+One area of interest in the theory of symmetric functions is the
+study of the change of bases between the five different bases.
+The matrices of change of base between the s<sub>&lambda;</sub>, h<sub>&lambda;</sub>, m<sub>&lambda;</sub> and the
+e<sub>&lambda;</sub> are all integer matrices. Only when changing 
+from one of these four bases to the p<sub>&lambda;</sub>, is the matrix 
+over the rationals. For a discussion of their computation and interactions see
+<A  HREF = "text1749.htm#bib_MacD">[Mac95, pages 54--58]</A>.
+<P>
+<P>
+In Magma there are routines available to obtain all these matrices. These 
+routines are described below. Some interactions of these matrices are verified
+in examples.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1755.htm#19453">Transition Matrices from Schur Basis</A>
+<LI> <A  HREF = "text1755.htm#19460">Transition Matrices from  Monomial Basis</A>
+<LI> <A  HREF = "text1755.htm#19465">Transition Matrices from Homogeneous Basis</A>
+<LI> <A  HREF = "text1755.htm#19473">Transition Matrices from Power  Sum Basis</A>
+<LI> <A  HREF = "text1755.htm#19479">Transition Matrices from Elementary Basis</A>
+</UL>
+<H4><A NAME = "19453">Transition Matrices from Schur Basis</A></H4>
+
+
+
+<H5><A NAME = "19454">SchurToMonomialMatrix(n): RngIntElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Computes the matrix for the expansion of a Schur function 
+indexed by a partition of weight n as a 
+sum of monomial symmetric functions. This matrix is also 
+known as the table of <I>Kostka</I> numbers. These are the numbers
+of tableaux of each shape and content.
+The content of a tableau prescribes its entries, so for example a tableau 
+with content [2, 1, 4, 1] has two 1's, one 2, four 3's and one 4.
+The entries of the
+matrix are non negative integers. The matrix is upper triangular.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19455">Example <TT>AlgSym_creation (H152E17)</TT></A></H3>
+Compute the base change matrix from the Schur functions to the monomial
+symmetric functions for degree 5. 
+The entries in this matrix are what are known as the <I>Kostka</I> numbers.
+They count the number of young tableaux on a given shape
+Look on the order of 
+the labelling partitions, and check whether the entry 3 in
+the upper right corner is right by
+generating the corresponding tableaux.
+<P>
+<P>
+<P>
+<PRE>
+&gt; M := SchurToMonomialMatrix(5);                  
+&gt; M;
+[1 1 1 1 1 1 1]
+[0 1 1 2 2 3 4]
+[0 0 1 1 2 3 5]
+[0 0 0 1 1 3 6]
+[0 0 0 0 1 2 5]
+[0 0 0 0 0 1 4]
+[0 0 0 0 0 0 1]
+&gt; Parts := Partitions(5);
+&gt; Parts;
+[
+    [ 5 ],
+    [ 4, 1 ],
+    [ 3, 2 ],
+    [ 3, 1, 1 ],
+    [ 2, 2, 1 ],
+    [ 2, 1, 1, 1 ],
+    [ 1, 1, 1, 1, 1 ]
+]
+&gt; #TableauxOnShapeWithContent(Parts[2], Parts[6]);
+3
+&gt; M[2,6];
+3
+</PRE>
+<HR>
+<H5><A NAME = "19456">SchurToHomogeneousMatrix(n): RngIntElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Computes the matrix for the expansion of a Schur function 
+indexed by a partition of weight n as a 
+sum of homogeneous symmetric functions. 
+The entries of the
+matrix are positive and negative integers. The matrix is lower triangular.
+It is the transpose of the matrix returned by <TT>MonomialToSchurMatrix(n)</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "19457">SchurToPowerSumMatrix(n): RngIntElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Computes the matrix for the expansion of a Schur function
+indexed by a partition of weight n as a
+sum of power sum symmetric functions.
+The entries of the matrix are rationals.
+</BLOCKQUOTE>
+<H5><A NAME = "19458">SchurToElementaryMatrix(n): RngIntElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Computes the matrix for the expansion of a Schur function 
+indexed by a partition of weight n as a 
+sum of elementary symmetric functions. 
+The entries of the
+matrix are positive and negative integers. The matrix is upper left triangular.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19459">Example <TT>AlgSym_trans (H152E18)</TT></A></H3>
+We verify by hand that the action of base change matrix is 
+the same as coercion.
+<P>
+<P>
+<PRE>
+&gt; S := SFASchur(Rationals());
+&gt; P := SFAPower(Rationals());
+&gt; NumberOfPartitions(4);
+5
+&gt; m := SchurToPowerSumMatrix(4);
+&gt; Partitions(4);
+[
+    [ 4 ],
+    [ 3, 1 ],
+    [ 2, 2 ],
+    [ 2, 1, 1 ],
+    [ 1, 1, 1, 1 ]
+]
+&gt; s := S.[3, 1] + 5*S.[1, 1, 1, 1] - S.[4];
+&gt; s;
+5*S.[1,1,1,1] + S.[3,1] - S.[4]
+&gt; p, c := Support(s);
+&gt; c;
+[ 5, 1, -1 ]
+&gt; p;
+[
+    [ 1, 1, 1, 1 ],
+    [ 3, 1 ],
+    [ 4 ]
+]
+&gt; cm := Matrix(Rationals(), 1, 5, [-1, 1, 0, 0, 5]);
+&gt; cm*m;
+[-7/4  4/3  3/8 -5/4 7/24]
+&gt; P!s;
+7/24*P.[1,1,1,1] - 5/4*P.[2,1,1] + 3/8*P.[2,2] + 4/3*P.[3,1] - 7/4*P.[4]
+</PRE>
+The coefficients of the coerced element are the reverse of the matrix product,
+consistent with the partition in the coerced element being in reverse order
+to those in <TT>Partitions(4)</TT>.
+<HR>
+<H4><A NAME = "19460">Transition Matrices from  Monomial Basis</A></H4>
+
+<P>
+<P>
+
+
+<H5><A NAME = "19461">MonomialToSchurMatrix(n): RngIntElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Computes the matrix for the expansion of a monomial symmetric  function
+indexed by a partition of weight n as a sum of Schur
+symmetric functions.  The entries of the matrix are positive and
+negative integers. The matrix is upper triangular.  It is the
+transpose of the matrix returned by <TT>SchurToHomogeneousMatrix(n)</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "19462">MonomialToHomogeneousMatrix(n): RngIntElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Computes the matrix for the expansion of a monomial symmetric function
+indexed by a partition of weight n as a
+sum of homogeneous symmetric functions.
+The entries are  positive and negative integers. 
+</BLOCKQUOTE>
+<H5><A NAME = "19463">MonomialToPowerSumMatrix(n): RngIntElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Computes the matrix for the expansion of a monomial symmetric function
+indexed by a partition of weight n as a
+sum of power sum symmetric functions.
+The entries are rationals. The matrix is lower triangular.
+<P>
+<P>
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "19464">MonomialToElementaryMatrix(n): RngIntElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Computes the matrix for the expansion of a monomial symmetric  function 
+indexed by a partition of weight n as a 
+sum of elementary symmetric functions. 
+The entries of the
+matrix are positive and negative integers. The matrix is upper left triangular.
+</BLOCKQUOTE>
+<H4><A NAME = "19465">Transition Matrices from Homogeneous Basis</A></H4>
+
+
+
+<P>
+<P>
+<H5><A NAME = "19466">HomogeneousToSchurMatrix(n): RngIntElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Computes the matrix for the expansion of a homogeneous symmetric  function 
+indexed by a partition of weight n as a 
+sum of Schur symmetric functions. 
+The entries of the
+matrix are positive  integers. The matrix is lower triangular.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19467">Example <TT>AlgSym_HS (H152E19)</TT></A></H3>
+It is known that the matrix computed by <TT>HomogeneousToSchurMatrix</TT> is 
+the transpose of the matrix computed by <TT>SchurToMonomialMatrix</TT>.
+<P>
+<P>
+<PRE>
+&gt; SchurToMonomialMatrix(7) eq Transpose(HomogeneousToSchurMatrix(7));
+true
+</PRE>
+<HR>
+<H5><A NAME = "19468">HomogeneousToMonomialMatrix(n): RngIntElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Computes the matrix M for the expansion of a homogeneous symmetric  function
+indexed by a partition of weight n as a
+sum of monomial symmetric functions.
+The entries of the
+matrix are positive  integers. The matrix has no zero entries.
+<P>
+The coefficient M<sub>&mu;, &lambda;</sub> in the expansion
+h<sub>&lambda;</sub> = &sum;<sub>&mu;</sub> M<sub>&mu;, &lambda;</sub> m<sub>&mu;</sub> is the number of
+non negative integer matrices with row sums &lambda;<sub>i</sub> and
+column sums &mu;<sub>j</sub>, see <A  HREF = "text1749.htm#bib_MacD">[Mac95, page 57]</A>. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19469">Example <TT>AlgSym_hm (H152E20)</TT></A></H3>
+The matrix converting from homogeneous basis to monomial basis is symmetric.
+<P>
+<P>
+<PRE>
+&gt; IsSymmetric(HomogeneousToMonomialMatrix(7));
+true
+</PRE>
+<HR>
+<H5><A NAME = "19470">HomogeneousToPowerSumMatrix(n): RngIntElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Computes the matrix for the expansion of a homogeneous symmetric  function
+indexed by a partition of weight n as a
+sum of power sum symmetric functions.
+The entries of the
+matrix are positive rationals. The matrix is upper triangular.
+<P>
+<P>
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "19471">HomogeneousToElementaryMatrix(n): RngIntElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Computes the matrix for the expansion of a homogeneous symmetric  function
+indexed by a partition of weight n as a
+sum of elementary symmetric functions.
+The entries of the
+matrix are   integers. The matrix is upper triangular.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19472">Example <TT>AlgSym_HE (H152E21)</TT></A></H3>
+It is known that the matrix compute by <TT>HomogeneousToElementaryMatrix</TT> 
+is the same as the matrix computed by <TT>ElementaryToHomogeneousMatrix</TT>.
+<P>
+<P>
+<PRE>
+&gt; HomogeneousToElementaryMatrix(7) eq ElementaryToHomogeneousMatrix(7);
+true
+</PRE>
+<P>
+<HR>
+<H4><A NAME = "19473">Transition Matrices from Power  Sum Basis</A></H4>
+
+<P>
+<P>
+
+
+<P>
+<P>
+<H5><A NAME = "19474">PowerSumToSchurMatrix(n): RngIntElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Computes the matrix for the expansion of a power sum  symmetric  function 
+indexed by a partition of weight n as a 
+sum of Schur symmetric functions. 
+The entries of the
+matrix are positive and negative integers. This matrix is 
+the character table of the symmetric group.
+<P>
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19475">Example <TT>AlgSym_character-table (H152E22)</TT></A></H3>
+The matrix returned by <TT>PowerSumToSchurMatrix</TT> is compared to the character
+table of the appropriate symmetric group.
+<P>
+<P>
+<PRE>
+&gt; PowerSumToSchurMatrix(5);
+[ 1 -1  0  1  0 -1  1]
+[ 1  0 -1  0  1  0 -1]
+[ 1 -1  1  0 -1  1 -1]
+[ 1  1 -1  0 -1  1  1]
+[ 1  0  1 -2  1  0  1]
+[ 1  2  1  0 -1 -2 -1]
+[ 1  4  5  6  5  4  1]
+&gt; CharacterTable(Sym(5));
+
+
+
+
+Character Table
+---------------
+
+
+
+
+-----------------------------
+Class |   1  2  3  4  5  6  7
+Size  |   1 10 15 20 30 24 20
+Order |   1  2  2  3  4  5  6
+-----------------------------
+p  =  2   1  1  1  4  3  6  4
+p  =  3   1  2  3  1  5  6  2
+p  =  5   1  2  3  4  5  1  7
+-----------------------------
+X.1   +   1  1  1  1  1  1  1
+X.2   +   1 -1  1  1 -1  1 -1
+X.3   +   4  2  0  1  0 -1 -1
+X.4   +   4 -2  0  1  0 -1  1
+X.5   +   5  1  1 -1 -1  0  1
+X.6   +   5 -1  1 -1  1  0 -1
+X.7   +   6  0 -2  0  0  1  0
+</PRE>
+In the character table the first row is the unity character, which corresponds
+to the first column of the transition matrix. The second row of the character table
+is the alternating character which corresponds to the last column of the 
+transition matrix. The first column of the character table contains the dimensions of the
+irreducible characters, this is the last row of the transition matrix.
+<HR>
+<H5><A NAME = "19476">PowerSumToMonomialMatrix(n): RngIntElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Computes the matrix for the expansion of a power sum  symmetric  function
+indexed by a partition of weight n as a
+sum of monomial symmetric functions.
+The entries of the
+matrix are positive integers. 
+The matrix is lower triangular.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "19477">PowerSumToHomogeneousMatrix(n): RngIntElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Computes the matrix for the expansion of a power sum  symmetric  function
+indexed by a partition of weight n as a
+sum of homogeneous symmetric functions.
+The entries of the
+matrix are integers.
+The matrix is upper triangular.
+<P>
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "19478">PowerSumToElementaryMatrix(n): RngIntElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Computes the matrix for the expansion of a power sum  symmetric  function
+indexed by a partition of weight n as a
+sum of elementary symmetric functions.
+The entries of the
+matrix are integers.
+The matrix is upper triangular.
+</BLOCKQUOTE>
+<H4><A NAME = "19479">Transition Matrices from Elementary Basis</A></H4>
+
+
+
+<P>
+<H5><A NAME = "19480">ElementaryToSchurMatrix(n): RngIntElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Computes the matrix for the expansion of an elementary  symmetric  function
+indexed by a partition of weight n as a
+sum of Schur symmetric functions.
+The entries of the
+matrix are positive integers.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "19481">ElementaryToMonomialMatrix(n): RngIntElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Computes the matrix M for the expansion of an elementary  symmetric  function
+indexed by a partition of weight n as a
+sum of monomial symmetric functions.
+The entries of the
+matrix are positive integers.
+<P>
+The coefficient M<sub>&mu;, &lambda;</sub> in the expansion
+e<sub>&lambda;</sub> = &sum;<sub>&mu;</sub> M<sub>&mu;, &lambda;</sub> m<sub>&mu;</sub> is the number of
+0-1 integer matrices with row sum &lambda;<sub>i</sub> and
+column sum &mu;<sub>j</sub>, see <A  HREF = "text1749.htm#bib_MacD">[Mac95, page 57]</A>. 
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19482">Example <TT>AlgSym_em (H152E23)</TT></A></H3>
+The matrix converting from elementary basis to monomial basis is symmetric.
+<P>
+<P>
+<PRE>
+&gt; IsSymmetric(ElementaryToMonomialMatrix(7));
+true
+</PRE>
+<HR>
+<H5><A NAME = "19483">ElementaryToHomogeneousMatrix(n): RngIntElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Computes the matrix for the expansion of a elementary  symmetric  function
+ indexed by a partition of weight n as a
+sum of homogeneous symmetric functions.
+</BLOCKQUOTE>
+<H5><A NAME = "19484">ElementaryToPowerSumMatrix(n): RngIntElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Computes the matrix for the expansion of a elementary  symmetric  function
+indexed by a partition of weight n as a
+sum of power sum symmetric functions.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text1749.htm">[Next]</A><A  HREF = "text1754.htm">[Prev]</A> <A  HREF = "text1749.htm">[Right]</A> <A  HREF = "text1754.htm">[Left]</A> <A  HREF = "text1750.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

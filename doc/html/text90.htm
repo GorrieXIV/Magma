@@ -1,0 +1,450 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Accessing and Modifying Sets</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text91.htm">[Next]</A><A  HREF = "text89.htm">[Prev]</A> <A  HREF = "text91.htm">[Right]</A> <A  HREF = "text89.htm">[Left]</A> <A  HREF = "text85.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "659">Accessing and Modifying Sets</A></H3>
+
+<P>
+<P>
+Enumerated sets can be modified by inserting or removing
+elements. Indexed sets allow some sequence-like operators
+for modification and access.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text90.htm#660">Accessing Sets and their Associated Structures</A>
+<LI> <A  HREF = "text90.htm#669">Selecting Elements of Sets</A>
+<LI> <A  HREF = "text90.htm#682">Modifying Sets</A>
+</UL>
+<H4><A NAME = "660">Accessing Sets and their Associated Structures</A></H4>
+
+
+
+<H5><A NAME = "661"># R : SetIndx -&gt; RngIntElt</A></H5>
+<H5># R : SetEnum -&gt; RngIntElt</H5>
+<H5># R : SetMulti -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Cardinality of the enumerated, indexed, or multi- set R.  Note that
+for a multiset, repetitions are significant, so the result may be
+greater than the underlying set.
+</BLOCKQUOTE>
+<H5><A NAME = "662">Category(S) : Any -&gt; Cat</A></H5>
+<H5>Type(S) : Any -&gt; Cat</H5>
+<BLOCKQUOTE>
+The category of the object S. For a set this will be one of
+<TT>SetEnum</TT>, <TT>SetIndx</TT>, <TT>SetMulti</TT>, or <TT>SetFormal</TT>.
+For a power set the type is one of <TT>PowSetEnum</TT>, <TT>PowSetIndx</TT>,
+<TT>PowSetMulti</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "663">Parent(R) : Set -&gt; Str</A></H5>
+<BLOCKQUOTE>
+Returns the parent structure of R, that is, the structure
+consisting of all (enumerated) sequences over the universe of R.
+</BLOCKQUOTE>
+<H5><A NAME = "664">Universe(R) : Set -&gt; Str</A></H5>
+<BLOCKQUOTE>
+Returns the `universe' of the (enumerated or indexed or multi- or formal)
+set R, that is, the common structure to which all elements of the set belong.
+An error is signalled when R is the null set.
+</BLOCKQUOTE>
+<H5><A NAME = "665">Index(S, x) : SetIndx, Elt -&gt; RngIntElt</A></H5>
+<H5>Position(S, x) : SetIndx, Elt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Given an indexed set S, and an element x, returns the index i 
+such that S[i]=x if such index exists, or return 0
+if x is not in S. If x is not in the universe of S, an
+attempt will be made to coerce it; an error occurs if this fails.
+</BLOCKQUOTE>
+<H5><A NAME = "666">S[i] : SetIndx, RngIntElt -&gt; Elt</A></H5>
+<BLOCKQUOTE>
+Return the i-th entry of indexed set S. If i &lt; 1 or i &gt; #S an
+error occurs.
+Note that indexing is <I>not</I> allowed on the left hand side.
+</BLOCKQUOTE>
+<H5><A NAME = "667">S[I] : SetIndx, [RngIntElt] -&gt; SetIndx</A></H5>
+<BLOCKQUOTE>
+The indexed set {S[i<sub>1</sub>], ..., S[i<sub>r</sub>]} consisting of terms selected from
+the indexed set S, according to the terms of the integer sequence I. If any
+term of I lies outside the range 1 to #S, then an error results. If I is
+the empty sequence, then the empty set with universe the same as that of S is
+returned.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "668">Example <TT>Set_Miscellaneous (H9E7)</TT></A></H3>
+We build an indexed set of sets to illustrate the use of the above
+functions.
+<P>
+<P>
+<PRE>
+&gt; B := {@ { i : i in [1..k] } : k in [1..5] @};
+&gt; B;
+{@
+   { 1 },
+   { 1, 2 },
+   { 1, 2, 3 },
+   { 1, 2, 3, 4 },
+   { 1, 2, 3, 4, 5 },
+@}
+&gt; #B;
+5
+&gt; Universe(B);
+Set of subsets of Integer Ring
+&gt; Parent(B);
+Set of indexed subsets of Set of subsets of Integer Ring
+&gt; Category(B);
+SetIndx
+&gt; Index(B, { 2, 1 });
+2
+&gt; #B[2];
+2
+&gt; Universe(B[2]);
+Integer Ring
+</PRE>
+<HR>
+<H4><A NAME = "669">Selecting Elements of Sets</A></H4>
+
+<P>
+<P>
+Most finite structures in Magma, including enumerated
+sets, allow one to obtain a random element using <TT>Random</TT>.
+There is an alternative (and often preferable) option for
+enumerated sets in the <TT>random{ }</TT> constructor.
+This makes it possible to choose a random element of the set
+without generating the whole set first.
+<P>
+Likewise, <TT>rep{ } </TT> is an alternative
+to the general <TT>Rep</TT> function returning a representative
+element of a structure, having the advantage of
+aborting the construction of the set as soon as one element
+has been found.
+<P>
+Here, E will again be an enumerable structure, that is,
+a structure that allows enumeration of its elements (see the Appendix for an
+exhaustive list).
+<P>
+Note that <TT>random{ e(x) : x in E | P(x) }</TT> does <I>not</I>
+return a random element of the set of values e(x), but rather
+a value of e(x) for a random x in E which satisfies P (and
+mutatis mutandis for <TT>rep</TT>).
+<P>
+See the subsection on Notation in the Introduction (Chapter <A  HREF = "text80.htm#588">INTRODUCTION TO AGGREGATES</A>) for
+conventions regarding e, x, E, P.
+
+
+<H5><A NAME = "670">Random(R) : SetIndx -&gt; Elt</A></H5>
+<H5>Random(R) : SetEnum -&gt; Elt</H5>
+<BLOCKQUOTE>
+A random element chosen from the enumerated, indexed or multi- set R.
+Every element has an equal probability of being chosen for enumerated
+or indexed sets, and a weighted probability in proportion to its
+multiplicity for multisets.
+Successive invocations of the function will result in independently 
+chosen elements being returned as the value of the function.
+If R is empty an error occurs.
+</BLOCKQUOTE>
+<H5><A NAME = "671">random{ e(x) : x in E | P(x) }</A></H5>
+<BLOCKQUOTE>
+Given an enumerated structure E and a Boolean expression P,
+return the value of the expression 
+e(y) for a randomly chosen element y of E for 
+which P(y) is true.
+<P>
+The expression P may be omitted if it is always true.
+</BLOCKQUOTE>
+<H5><A NAME = "672">random{ e(x<sub>1</sub>, ..., x<sub>k</sub>) : x<sub>1</sub> in E<sub>1</sub>,..., x<sub>k</sub> in E<sub>k</sub> | P(x<sub>1</sub>, ..., x<sub>k</sub>) }</A></H5>
+<BLOCKQUOTE>
+Given enumerated structures E<sub>1</sub>, ..., E<sub>k</sub>, and a Boolean expression
+P(x<sub>1</sub>, ..., x<sub>k</sub>), return the value of the expression
+e(y<sub>1</sub>, ..., y<sub>k</sub>) for a randomly chosen element
+&lt; y<sub>1</sub>, ..., y<sub>k</sub> &gt; of
+E<sub>1</sub> x ... x E<sub>k</sub>, for which P(y<sub>1</sub>, ..., y<sub>k</sub>)
+is true.
+<P>
+The expression P may be omitted if it is always true.
+<P>
+If successive structures E<sub>i</sub> and E<sub>i + 1</sub> are identical, then
+the abbreviation <TT>x<sub>i</sub>, x<sub>i + 1</sub> in E<sub>i</sub></TT> may be used.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "673">Example <TT>Set_Random (H9E8)</TT></A></H3>
+Here are two ways to find a `random' primitive element for a
+finite field.
+<P>
+<P>
+<PRE>
+&gt; p := 10007;
+&gt; F := FiniteField(p);
+&gt; proots := { z : z in F | IsPrimitive(z) };
+&gt; #proots;
+5002
+&gt; Random(proots);
+5279
+</PRE>
+This way, a set of 5002 elements is built (and primitivity is checked
+for all elements of F), and a random choice is made.
+Alternatively, we use <TT>random</TT>.
+<P>
+<P>
+<PRE>
+&gt; random{ x : x in F | IsPrimitive(x) };
+4263
+</PRE>
+In this case random elements in F are chosen until one is found that
+is primitive. Since almost half of F's elements are primitive, only
+very few primitivity tests will be done before success occurs.
+<HR>
+<H5><A NAME = "674">Representative(R) : SetIndx -&gt; Elt</A></H5>
+<H5>Rep(R) : SetIndx -&gt; Elt</H5>
+<H5>Representative(R) : SetEnum -&gt; Elt</H5>
+<H5>Rep(R) : SetEnum -&gt; Elt</H5>
+<BLOCKQUOTE>
+An arbitrary element chosen from the enumerated, indexed, or multi- set R.
+</BLOCKQUOTE>
+<H5><A NAME = "675">ExtractRep(~R, ~r) : SetEnum, Elt -&gt;</A></H5>
+<BLOCKQUOTE>
+Assigns an arbitrary element chosen from the enumerated set R to
+r, and removes it from R. Thus the set R is modified,
+as well as the element r. An error occurs if
+R is empty.
+</BLOCKQUOTE>
+<H5><A NAME = "676">rep{ e(x) : x in E | P(x) }</A></H5>
+<BLOCKQUOTE>
+Given an enumerated structure E and a Boolean expression P,
+return the value of the expression 
+<TT>e(y)</TT> for the first element y of E for which P(y) 
+is true. If P(x) is false for every element of E, an
+error will occur.
+</BLOCKQUOTE>
+<H5><A NAME = "677">rep{ e(x<sub>1</sub>, ..., x<sub>k</sub>) : x<sub>1</sub> in E<sub>1</sub>, ...,x<sub>k</sub> in E<sub>k</sub> | P(x<sub>1</sub>, ..., x<sub>k</sub>) }</A></H5>
+<BLOCKQUOTE>
+Given enumerated structures E<sub>1</sub>, ..., E<sub>k</sub>, and a Boolean expression
+P(x<sub>1</sub>, ..., x<sub>k</sub>), return the value of the expression
+e(y<sub>1</sub>, ..., y<sub>k</sub>) for the first element
+&lt; y<sub>1</sub>, ..., y<sub>k</sub> &gt; of
+E<sub>1</sub> x ... x E<sub>k</sub>, for which P(y<sub>1</sub>, ..., y<sub>k</sub>)
+is true.
+An error occurs if no element of E<sub>1</sub> x ... x E<sub>k</sub> satisfies
+P.
+<P>
+The expression P may be omitted if it is always true.
+<P>
+If successive structures E<sub>i</sub> and E<sub>i + 1</sub> are identical, then
+the abbreviation <TT>x<sub>i</sub>, x<sub>i + 1</sub> in E<sub>i</sub></TT> may be used.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "678">Example <TT>Set_ExtractRep (H9E9)</TT></A></H3>
+As an illustration of the use of <TT>ExtractRep</TT>, we modify an earlier
+example, and find cubes satisfying x<sup>3</sup> + y<sup>3</sup>=z<sup>3</sup> - 1 (with x, y, z &le;1000).
+<P>
+<P>
+<PRE>
+&gt; cubes := { Integers() | x^3 : x in [1..1000] };
+&gt; cc := cubes;
+&gt; min := { };
+&gt; while not IsEmpty(cc) do
+&gt;    ExtractRep(~cc, ~a);
+&gt;    for b in cc do
+&gt;       if a+b+1 in cubes then
+&gt;          min join:= { &lt;a, b&gt; };
+&gt;       end if;
+&gt;    end for;
+&gt; end while;
+&gt; { &lt; Iroot(x[1], 3), Iroot(x[2], 3) &gt; : x in min };
+{ &lt;138, 135&gt;, &lt;823, 566&gt;, &lt;426, 372&gt;, &lt;242, 720&gt;,
+       &lt;138, 71&gt;, &lt;426, 486&gt;, &lt;6, 8&gt; }
+</PRE>
+Note that instead of taking cubes over again, we only have to take
+cube roots in the last line (on the small resulting set) once.
+<HR>
+<H5><A NAME = "679">Minimum(S) : SetIndx -&gt; Elt, RngIntElt</A></H5>
+<H5>Min(S) : SetIndx -&gt; Elt, RngIntElt</H5>
+<H5>Minimum(S) : SetEnum -&gt; Elt</H5>
+<H5>Min(S) : SetEnum -&gt; Elt</H5>
+<H5>Minimum(S) : SetMulti -&gt; Elt</H5>
+<H5>Min(S) : SetMulti -&gt; Elt</H5>
+<BLOCKQUOTE>
+Given a non-empty enumerated, indexed, or multi- set S, such that
+<TT>lt</TT> and <TT>eq</TT> are defined on the universe of S, this function returns the minimum
+of the elements of S. If S is an indexed set, the position of the
+minimum is also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "680">Maximum(S) : SetIndx -&gt; Elt, RngIntElt</A></H5>
+<H5>Max(S) : SetIndx -&gt; Elt, RngIntElt</H5>
+<H5>Maximum(S) : SetEnum -&gt; Elt</H5>
+<H5>Max(S) : SetEnum -&gt; Elt</H5>
+<H5>Maximum(S) : SetMulti -&gt; Elt</H5>
+<H5>Max(S) : SetMulti -&gt; Elt</H5>
+<BLOCKQUOTE>
+Given a non-empty enumerated, indexed, or multi- set S, such that
+<TT>lt</TT> and <TT>eq</TT> are defined on the universe of S, this function returns the maximum
+of the elements of S. If S is an indexed set, the position of the
+maximum is also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "681">Hash(x) : Elt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a Magma object x which can be placed in a set, return the hash
+value of x used by the set machinery.  This is a fixed but arbitrary
+non-negative integer (whose maximum value is the maximum value of a C
+unsigned long on the particular machine).  The crucial property is
+that if x and y are objects and x equals y then the hash values
+of x and y are equal (even if x and y have different internal
+structures).  Thus one could implement sets manually if desired by the
+use of this function.
+</BLOCKQUOTE>
+<H4><A NAME = "682">Modifying Sets</A></H4>
+
+
+
+<H5><A NAME = "683">Include(~S, x) : SetEnum, Elt -&gt;</A></H5>
+<H5>Include(S, x) : SetEnum, Elt -&gt;  SetEnum</H5>
+<H5>Include(~S, x) : SetIndx, Elt -&gt;</H5>
+<H5>Include(S, x) : SetIndx, Elt -&gt; SetIndx</H5>
+<H5>Include(~S, x) : SetMulti, Elt -&gt;</H5>
+<H5>Include(S, x) : SetMulti, Elt -&gt; SetMulti</H5>
+<BLOCKQUOTE>
+Create the enumerated, indexed, or multi-
+set obtained by putting the element x in S (S is unchanged
+if S is not a multiset and x is already in S).
+If S is an indexed set, the element will be appended at the end.
+If S is a multiset, the multiplicity of x will be increased accordingly.
+If x is not in the universe of S, an
+attempt will be made to coerce it; an error occurs if this fails.
+<P>
+There are two versions of this: a procedure, where S is replaced
+by the new set, and a function, which returns the
+new set. The procedural version takes a reference
+~S to S as an argument.
+<P>
+Note that the procedural version is much more efficient since
+the set S will not be copied.
+</BLOCKQUOTE>
+<H5><A NAME = "684">Exclude(~S, x) : SetEnum, Elt -&gt;</A></H5>
+<H5>Exclude(S, x) : SetEnum, Elt -&gt; SetEnum</H5>
+<H5>Exclude(~S, x) : SetMulti, Elt -&gt;</H5>
+<H5>Exclude(S, x) : SetMulti, Elt -&gt; SetMulti</H5>
+<BLOCKQUOTE>
+Create a new set by removing
+the element x from S.
+If S is an enumerated set, nothing happens if x is not in S.
+If S is a multiset, the multiplicity of x will be decreased accordingly.
+If x is not in the universe of S, an
+attempt will be made to coerce it; an error occurs if this fails.
+<P>
+There are two versions of this: a procedure, where S is replaced
+by the new set, and a function, which returns the
+new set. The procedural version takes a reference
+~S to S as an argument.
+<P>
+Note that the procedural version is much more efficient since
+the set S will not be copied.
+</BLOCKQUOTE>
+<H5><A NAME = "685">ChangeUniverse(~S, V) : SetEnum, Str -&gt;</A></H5>
+<H5>ChangeUniverse(S, V) : SetEnum, Str -&gt; SetEnum</H5>
+<H5>ChangeUniverse(~S, V) : SetIndx, Str -&gt;</H5>
+<H5>ChangeUniverse(S, V) : SetIndx, Str -&gt; SetIndx</H5>
+<H5>ChangeUniverse(~S, V) : SetMulti, Str -&gt;</H5>
+<H5>ChangeUniverse(S, V) : SetMulti, Str -&gt; SetMulti</H5>
+<BLOCKQUOTE>
+Given an enumerated, indexed, or multi- set S with universe U and a
+structure V
+which contains U, construct a new set of the same type which consists
+of the elements of S coerced into V.
+<P>
+There are two versions of this: a procedure, where S is replaced
+by the new set, and a function, which returns the new set.
+The procedural version takes a reference
+~S to S as an argument.
+<P>
+Note that the procedural version is much more efficient since
+the set S will not be copied.
+</BLOCKQUOTE>
+<H5><A NAME = "686">CanChangeUniverse(S, V) : SetEnum, Str -&gt; Bool, SeqEnum</A></H5>
+<H5>CanChangeUniverse(S, V) : SetIndx, Str -&gt; Bool, SeqEnum</H5>
+<H5>CanChangeUniverse(S, V) : SetMulti, Str -&gt; Bool, SeqEnum</H5>
+<BLOCKQUOTE>
+Given an enumerated, indexed, or multi- set S with universe U
+and a structure V
+which contains U, attempt to construct a new set T of the same type
+which consists of the elements of S coerced into V; if
+successful, return <TT>true</TT> and T, otherwise return <TT>false</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "687">Example <TT>Set_Include (H9E10)</TT></A></H3>
+This example uses <TT>Include</TT> and <TT>Exclude</TT> to find a set (if it exists)
+of cubes of integers such that the elements of a given set R can be
+expressed as the sum of two of those.
+<P>
+<P>
+<PRE>
+&gt; R := { 218, 271, 511 };
+&gt; x := 0;
+&gt; cubes := { 0 };
+&gt; while not IsEmpty(R) do
+&gt;    x +:= 1;
+&gt;    c := x^3;
+&gt;    Include(~cubes, c);
+&gt;    Include(~cubes, -c);
+&gt;    for z in cubes do
+&gt;        Exclude(~R, z+c);
+&gt;        Exclude(~R, z-c);
+&gt;    end for;
+&gt; end while;
+</PRE>
+We did not record how the elements of R were obtained as sums of a pair
+of cubes. For that, the following suffices.
+<P>
+<P>
+<PRE>
+&gt; R := { 218, 271, 511 }; // it has been emptied !
+&gt; { { x, y } : x, y in cubes | x+y in R };
+{ 
+    { -729, 1000 },
+    { -125, 343 },
+    { -1, 512 },
+ }
+</PRE>
+<HR>
+<H5><A NAME = "688">SetToIndexedSet(E) : SetEnum -&gt; SetIndx</A></H5>
+<BLOCKQUOTE>
+Given an enumerated set E, this function returns an indexed set
+with the same elements (and universe) as E.
+</BLOCKQUOTE>
+<H5><A NAME = "689">IndexedSetToSet(S) : SetIndx -&gt; SetEnum</A></H5>
+<H5>Isetset(S) : SetIndx -&gt; SetEnum</H5>
+<BLOCKQUOTE>
+Given an indexed set S, this function returns an enumerated set
+with the same elements (and universe) as E.
+</BLOCKQUOTE>
+<H5><A NAME = "690">IndexedSetToSequence(S) : SetIndx -&gt; SeqEnum</A></H5>
+<H5>Isetseq(S) : SetIndx -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Given an indexed set S, this function returns a sequence
+with the same elements (and universe) as E.
+</BLOCKQUOTE>
+<H5><A NAME = "691">MultisetToSet(S) : SetMulti -&gt; SetEnum</A></H5>
+<BLOCKQUOTE>
+Given a multiset S, this function returns an enumerated set
+with the same elements (and universe) as S.
+</BLOCKQUOTE>
+<H5><A NAME = "692">SetToMultiset(E) : SetEnum -&gt; SetMulti</A></H5>
+<BLOCKQUOTE>
+Given an enumerated set E, this function returns a multiset
+with the same elements (and universe) as E.
+</BLOCKQUOTE>
+<H5><A NAME = "693">SequenceToMultiset(Q) : SeqEnum -&gt; SetMulti</A></H5>
+<BLOCKQUOTE>
+Given an enumerated sequence E, this function returns a multiset
+with the same elements (and universe) as E.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text91.htm">[Next]</A><A  HREF = "text89.htm">[Prev]</A> <A  HREF = "text91.htm">[Right]</A> <A  HREF = "text89.htm">[Left]</A> <A  HREF = "text85.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

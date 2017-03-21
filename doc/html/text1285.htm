@@ -1,0 +1,287 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Fundamental Invariants</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1286.htm">[Next]</A><A  HREF = "text1284.htm">[Prev]</A> <A  HREF = "text1286.htm">[Right]</A> <A  HREF = "text1284.htm">[Left]</A> <A  HREF = "text1272.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "13994">Fundamental Invariants</A></H3>
+
+<P>
+<P>
+<P>
+Let R=K[V]<sup>G</sup> be the invariant ring of the group G over the field K and
+suppose the degree of G is n.  A set of <I>fundamental invariants</I>
+for R is a generating set of R as an algebra over K.
+
+
+<H5><A NAME = "13995">FundamentalInvariants(R) : RngInvar -&gt; [ RngMPolElt ]</A></H5>
+
+<PRE>    Al: MonStgElt                       Default: "King"</PRE>
+
+<PRE>    MaxDegree: RngIntElt                Default: 0</PRE>
+<BLOCKQUOTE>
+Construct fundamental invariants for the invariant ring R=K[V]<sup>G</sup>
+as a sorted sequence (with increasing degrees) of polynomials of R.
+<P>
+As of V2.15, if R is non-modular, then by default the fundamental
+invariants are computed via the algorithm of S.King <A  HREF = "text1271.htm#bib_king_fund">[Kin07]</A>; the
+alternative algorithm (always used in the modular case), which computes
+the fundamental invariants by minimalizing the union of the primary and
+secondary invariants of R, may be selected by setting the parameter
+<TT>Al</TT> to <TT>"MinPrimSec"</TT>.
+<P>
+If the fundamental invariants are known to be bounded by degree d,
+then the parameter <TT>MaxDegree</TT> may be set to d to assist the
+King algorithm with an early stopping condition in the non-modular
+case.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13996">Example <TT>RngInvar_FundamentalInvariants (H116E8)</TT></A></H3>
+We construct fundamental invariants for the invariant ring R of the
+group G over Q, where G is permutation group consisting of two parallel
+copies of S<sub>3</sub> in degree 6.  Notice that the sequence of fundamental
+invariants is shorter and simpler than the sequence consisting of the
+primary invariants combined with the secondary invariants.
+<P>
+<P>
+<PRE>
+&gt; K := RationalField();
+&gt; G := PermutationGroup&lt;6 | (1,2,3)(4,5,6), (1,2)(4,5)&gt;;
+&gt; R := InvariantRing(G, K);
+&gt; PrimaryInvariants(R);    
+[
+    x1 + x2 + x3,
+    x4 + x5 + x6,
+    x1^2 + x2^2 + x3^2,
+    x4^2 + x5^2 + x6^2,
+    x1^3 + x2^3 + x3^3,
+    x4^3 + x5^3 + x6^3
+]
+&gt; SecondaryInvariants(R);  
+[
+    1,
+    x1*x4 + x2*x5 + x3*x6,
+    x1^2*x4 + x2^2*x5 + x3^2*x6,
+    x1*x4^2 + x2*x5^2 + x3*x6^2,
+    x1^2*x4^2 + 2*x1*x2*x4*x5 + 2*x1*x3*x4*x6 + x2^2*x5^2 + 2*x2*x3*x5*x6 + 
+        x3^2*x6^2,
+    x1^3*x4^3 + x1^2*x2*x4*x5^2 + x1^2*x3*x4*x6^2 + x1*x2^2*x4^2*x5 + 
+        x1*x3^2*x4^2*x6 + x2^3*x5^3 + x2^2*x3*x5*x6^2 + x2*x3^2*x5^2*x6 + 
+        x3^3*x6^3
+]
+&gt; FundamentalInvariants(R);
+[
+    x1 + x2 + x3,
+    x4 + x5 + x6,
+    x1^2 + x2^2 + x3^2,
+    x1*x4 + x2*x5 + x3*x6,
+    x4^2 + x5^2 + x6^2,
+    x1^3 + x2^3 + x3^3,
+    x1^2*x4 + x2^2*x5 + x3^2*x6,
+    x1*x4^2 + x2*x5^2 + x3*x6^2,
+    x4^3 + x5^3 + x6^3
+]
+</PRE>
+<HR>
+<H3><A NAME = "13997">Example <TT>RngInvar_TransitiveGroupsDegree7 (H116E9)</TT></A></H3>
+As in <A  HREF = "text1271.htm#bib_king_fund">[Kin07]</A>, we compute fundamental invariants for the invariant
+rings for all transitive groups of degree 7 (in characteristic zero).
+For each group, we print its order and a summary of the degrees (where
+the i-th element of the sequence gives the number of fundamental
+invariants of degree i).
+<P>
+<P>
+<PRE>
+&gt; function deg_summary(B)
+&gt;     degs := [TotalDegree(f): f in B];
+&gt;     return [#[j: j in degs | j eq d]: d in [1 .. Max(degs)]];
+&gt; end function;
+&gt;
+&gt; d := 7;
+&gt; time for i := 1 to NumberOfTransitiveGroups(d) do
+&gt;     G := TransitiveGroup(d, i);
+&gt;     R := InvariantRing(G, RationalField());
+&gt;     F := FundamentalInvariants(R);
+&gt;     printf "%o: Order: %o, Degrees: %o n", i, #G, deg_summary(F);
+&gt; end for;
+1: Order: 7, Degrees: [ 1, 3, 8, 12, 12, 6, 6 ]
+2: Order: 14, Degrees: [ 1, 3, 4, 6, 6, 3, 3 ]
+3: Order: 21, Degrees: [ 1, 1, 4, 5, 8, 8, 6 ]
+4: Order: 42, Degrees: [ 1, 1, 2, 3, 4, 7, 7, 5, 1 ]
+5: Order: 168, Degrees: [ 1, 1, 2, 2, 2, 2, 2 ]
+6: Order: 2520, Degrees: [ 1, 1, 1, 1, 1, 1, 1, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ]
+7: Order: 5040, Degrees: [ 1, 1, 1, 1, 1, 1, 1 ]
+Time: 1.610
+</PRE>
+Instead of computing over the rational field, for each group G we
+can instead compute over GF(p), where p is the smallest prime which does
+not divide the order of G.  This is faster, and it is conjectured
+that the resulting degrees are always the same as for the computation
+over the rationals.
+<P>
+<P>
+<PRE>
+&gt; d := 7;
+&gt; time for i := 1 to NumberOfTransitiveGroups(d) do
+&gt;     G := TransitiveGroup(d, i);
+&gt;     p := rep{p: p in [2 .. #G] | IsPrime(p) and #G mod p ne 0};
+&gt;     R := InvariantRing(G, GF(p));
+&gt;     F := FundamentalInvariants(R);
+&gt;     printf "%o: Order: %o, Degrees: %o n", i, #G, deg_summary(F);
+&gt; end for;
+1: Order: 7, Degrees: [ 1, 3, 8, 12, 12, 6, 6 ]
+2: Order: 14, Degrees: [ 1, 3, 4, 6, 6, 3, 3 ]
+3: Order: 21, Degrees: [ 1, 1, 4, 5, 8, 8, 6 ]
+4: Order: 42, Degrees: [ 1, 1, 2, 3, 4, 7, 7, 5, 1 ]
+5: Order: 168, Degrees: [ 1, 1, 2, 2, 2, 2, 2 ]
+6: Order: 2520, Degrees: [ 1, 1, 1, 1, 1, 1, 1, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ]
+7: Order: 5040, Degrees: [ 1, 1, 1, 1, 1, 1, 1 ]
+Time: 0.790
+</PRE>
+Finally, we can do the same for all transitive groups of degree 8 in
+about 2 minutes.
+<P>
+<P>
+<PRE>
+&gt; d := 8;
+&gt; time for i := 1 to NumberOfTransitiveGroups(d) do
+&gt;     G := TransitiveGroup(d, i);
+&gt;     p := rep{p: p in [2 .. #G] | IsPrime(p) and #G mod p ne 0};
+&gt;     R := InvariantRing(G, GF(p));
+&gt;     F := FundamentalInvariants(R);
+&gt;     printf "%o: Order: %o, Degrees: %o n", i, #G, deg_summary(F);
+&gt; end for;
+1: Order: 8, Degrees: [ 1, 4, 10, 18, 16, 8, 4, 4 ]
+2: Order: 8, Degrees: [ 1, 5, 9, 16, 8 ]
+3: Order: 8, Degrees: [ 1, 7, 7, 7 ]
+4: Order: 8, Degrees: [ 1, 6, 8, 12, 5 ]
+5: Order: 8, Degrees: [ 1, 4, 10, 19, 15, 7 ]
+6: Order: 16, Degrees: [ 1, 4, 5, 9, 8, 4, 2, 2 ]
+7: Order: 16, Degrees: [ 1, 3, 7, 12, 13, 9, 4, 4 ]
+8: Order: 16, Degrees: [ 1, 3, 6, 11, 12, 7, 2, 2 ]
+9: Order: 16, Degrees: [ 1, 5, 5, 8, 4 ]
+10: Order: 16, Degrees: [ 1, 4, 6, 11, 7, 2 ]
+11: Order: 16, Degrees: [ 1, 4, 6, 11, 7, 3 ]
+12: Order: 24, Degrees: [ 1, 2, 4, 8, 11, 12, 7 ]
+13: Order: 24, Degrees: [ 1, 3, 3, 7, 8, 11, 7 ]
+14: Order: 24, Degrees: [ 1, 3, 3, 8, 7, 9, 6, 1, 1 ]
+15: Order: 32, Degrees: [ 1, 3, 4, 7, 6, 4, 2, 2 ]
+16: Order: 32, Degrees: [ 1, 3, 5, 8, 7, 7, 4, 4 ]
+17: Order: 32, Degrees: [ 1, 3, 4, 7, 6, 4, 2, 2 ]
+18: Order: 32, Degrees: [ 1, 4, 4, 7, 3 ]
+19: Order: 32, Degrees: [ 1, 3, 3, 7, 6, 7, 5, 1 ]
+20: Order: 32, Degrees: [ 1, 3, 5, 9, 6, 4, 2, 1 ]
+21: Order: 32, Degrees: [ 1, 4, 4, 6, 4, 3, 2, 1 ]
+22: Order: 32, Degrees: [ 1, 4, 4, 7, 3, 1 ]
+23: Order: 48, Degrees: [ 1, 2, 3, 5, 6, 6, 5, 2 ]
+24: Order: 48, Degrees: [ 1, 3, 3, 6, 4, 3, 1 ]
+25: Order: 56, Degrees: [ 1, 1, 1, 4, 6, 13, 18, 23, 18, 6 ]
+26: Order: 64, Degrees: [ 1, 3, 3, 5, 3, 3, 2, 3, 1 ]
+27: Order: 64, Degrees: [ 1, 3, 5, 8, 6, 4, 2, 2 ]
+28: Order: 64, Degrees: [ 1, 3, 3, 5, 4, 4, 2, 2 ]
+29: Order: 64, Degrees: [ 1, 3, 3, 6, 3, 2, 1 ]
+30: Order: 64, Degrees: [ 1, 3, 3, 5, 3, 2, 3, 4, 3, 2, 1, 1 ]
+31: Order: 64, Degrees: [ 1, 4, 4, 6, 3, 1 ]
+32: Order: 96, Degrees: [ 1, 2, 2, 4, 3, 5, 4, 2, 2, 1, 1, 1 ]
+33: Order: 96, Degrees: [ 1, 2, 2, 4, 3, 6, 5, 5, 3 ]
+34: Order: 96, Degrees: [ 1, 2, 2, 5, 2, 5, 4, 3, 3 ]
+35: Order: 128, Degrees: [ 1, 3, 3, 5, 3, 2, 1, 1 ]
+36: Order: 168, Degrees: [ 1, 1, 1, 2, 2, 5, 6, 8, 10, 11, 8 ]
+37: Order: 168, Degrees: [ 1, 1, 1, 3, 1, 5, 5, 8, 9, 9, 7 ]
+38: Order: 192, Degrees: [ 1, 2, 2, 3, 3, 5, 4, 3, 2, 1, 1, 1 ]
+39: Order: 192, Degrees: [ 1, 2, 2, 4, 2, 2, 1 ]
+40: Order: 192, Degrees: [ 1, 2, 2, 3, 2, 2, 1, 1, 1, 3, 3, 2, 2, 1, 1, 1 ]
+41: Order: 192, Degrees: [ 1, 2, 2, 4, 2, 3, 2, 2, 1 ]
+42: Order: 288, Degrees: [ 1, 2, 2, 3, 2, 3, 2, 2, 1, 1 ]
+43: Order: 336, Degrees: [ 1, 1, 1, 2, 1, 3, 3, 5, 4, 6, 5, 4, 2 ]
+44: Order: 384, Degrees: [ 1, 2, 2, 3, 2, 2, 1, 1 ]
+45: Order: 576, Degrees: [ 1, 2, 2, 3, 2, 2, 1, 1, 0, 0, 0, 1 ]
+46: Order: 576, Degrees: [ 1, 2, 2, 3, 2, 2, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1 ]
+47: Order: 1152, Degrees: [ 1, 2, 2, 3, 2, 2, 1, 1 ]
+48: Order: 1344, Degrees: [ 1, 1, 1, 2, 1, 2, 2, 2, 1, 1 ]
+49: Order: 20160, Degrees: [ 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ]
+50: Order: 40320, Degrees: [ 1, 1, 1, 1, 1, 1, 1, 1 ]
+Time: 128.030
+</PRE>
+<HR>
+<H3><A NAME = "13998">Example <TT>RngInvar_S5Degree10 (H116E10)</TT></A></H3>
+We compute fundamental invariants of a degree-10 representation of
+S<sub>5</sub> acting on pairs.  See <A  HREF = "text1271.htm#bib_king_fund">[Kin07, p.11--12]</A>.
+First we compute the fundamental invariants mod 7 of the permutation
+representation (very difficult in practice hitherto).
+<P>
+<P>
+<PRE>
+&gt; G := PermutationGroup&lt;10 | (2,5)(3,6)(4,7),(1,5,8,10,4)(2,6,9,3,7)&gt;;
+&gt; #G;
+120
+&gt; R := InvariantRing(G, GF(7));
+&gt; time F := FundamentalInvariants(R);
+Time: 29.310
+&gt; {* Degree(f): f in F *};
+{* 1, 2^^2, 3^^4, 4^^7, 5^^10, 6^^13, 7^^13, 8^^4, 9^^2 *}
+</PRE>
+Finally, we can compute a matrix representation of G as a direct sum
+of irreducible representations of degrees 1, 4 and 5.  We then compute
+the fundamental invariants of the invariant ring of this representation
+mod 7.
+<P>
+<P>
+<PRE>
+&gt; Q := RationalField();
+&gt; R0 := InvariantRing(G, Q);
+&gt; P0 := PolynomialRing(R0);
+&gt; M := GModule(G, Q);
+&gt; Gl := MatrixGroup(M);
+&gt; C := CharacterTable(Gl);
+&gt; Pi := [&amp;+[Q!Integers()!c(g)*MatrixAlgebra(Q, 10)!g: g in Gl]/#G: c in C];
+&gt; Pi := [p: p in Pi | p ne 0];
+&gt; L := [sub&lt;M | Image(p)&gt;: p in Pi];
+&gt; G := MatrixGroup(DirectSum(DirectSum(L[1],L[2]),L[3]));
+&gt; G;
+MatrixGroup(10, Rational Field)
+Generators:
+    [   1    0    0    0    0    0    0    0    0    0]
+    [   0    1  1/3  1/3  1/3    0    0    0    0    0]
+    [   0    0  1/3 -2/3 -2/3    0    0    0    0    0]
+    [   0    0 -2/3  1/3 -2/3    0    0    0    0    0]
+    [   0    0 -2/3 -2/3  1/3    0    0    0    0    0]
+    [   0    0    0    0    0    1    0    0    0    0]
+    [   0    0    0    0    0    0    0    0    1    0]
+    [   0    0    0    0    0    0    0    0    0    1]
+    [   0    0    0    0    0    0    1    0    0    0]
+    [   0    0    0    0    0    0    0    1    0    0]
+
+    [   1    0    0    0    0    0    0    0    0    0]
+    [   0    0  1/3 -2/3 -2/3    0    0    0    0    0]
+    [   0    0 -2/3  1/3 -2/3    0    0    0    0    0]
+    [   0    0 -2/3 -2/3  1/3    0    0    0    0    0]
+    [   0    1  1/3  1/3  1/3    0    0    0    0    0]
+    [   0    0    0    0    0   -1   -1    1    1    0]
+    [   0    0    0    0    0   -1    0    0    0    1]
+    [   0    0    0    0    0   -1    0    1    0    0]
+    [   0    0    0    0    0    0   -1    0    0    0]
+    [   0    0    0    0    0    0   -1    1    0    0]
+&gt; Gp := ChangeRing(G, GF(7));
+&gt; #Gp;
+120
+&gt; Rp := InvariantRing(Gp);
+&gt; time Fp := FundamentalInvariants(Rp); 
+Time: 35.380
+&gt; {* Degree(f): f in Fp *};
+{* 1, 2^^2, 3^^4, 4^^7, 5^^10, 6^^13, 7^^13, 8^^4, 9^^2 *}
+&gt; [Degree(f): f in F] eq [Degree(f): f in Fp];
+true
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1286.htm">[Next]</A><A  HREF = "text1284.htm">[Prev]</A> <A  HREF = "text1286.htm">[Right]</A> <A  HREF = "text1284.htm">[Left]</A> <A  HREF = "text1272.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

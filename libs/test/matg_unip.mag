@@ -1,0 +1,118 @@
+the_tests := procedure(orig_gens)
+	
+	//needed, since constructing a matrix group does this automatically
+	orig_gens := [ Universe(orig_gens) | g : g in orig_gens | not IsIdentity(g) ]; 
+	
+	n := Degree(Universe(orig_gens));
+	F := CoefficientRing(Universe(orig_gens));
+	
+	G1 := UnipotentMatrixGroup<n, F | orig_gens>;
+
+	gens, trace, c := PCGenerators(G1);
+	_ := G1`PCGens;
+	_ := G1`PCGensTrace;
+
+	_ := Random(GL(n, F)) in G1;
+	
+	/* Tests: trace */
+	for i in [1..#gens] do
+		assert gens[i] eq Evaluate(trace[i], orig_gens)^c;
+	end for;
+
+	/* Tests: generators */
+	mp2 := WordMap(G1);
+	for g in orig_gens do
+		assert Evaluate(mp2(g), orig_gens) eq g;
+	end for;
+	for g in gens do
+		gg := g^(c^-1);
+		assert Evaluate(mp2(gg), orig_gens) eq gg;
+	end for;
+	
+	/* Tests: random elts */
+	for i in [1..20] do
+		g := Random(G1);
+		f := mp2(g);
+		assert Evaluate(f, orig_gens) eq g;
+	end for;
+
+	/* Construct pres (twice) */
+	H, phi, psi := PCPresentation(G1);
+	assert #G1 eq #H;
+	
+	/* Factored order test */
+	FO := FactoredOrder(G1);
+	assert &*[ Integers() | f[1]^f[2] : f in FO ] eq #G1;
+
+	/* Test presentation */
+	for i in [1..20] do
+		y := Random(G1);
+		assert psi(phi(y)) eq y;
+	end for;
+	for i in [1..20] do
+		y := Random(H);
+		assert phi(psi(y)) eq y;
+	end for;
+	for i in [1..20] do
+		y := Random(G1); z := Random(G1);
+		assert phi(y^-1) eq phi(y)^-1;
+		assert phi(y)*phi(z) eq phi(y*z);
+	end for;
+end procedure;
+
+
+print "random upper triangular matrices, char. 2";
+
+F := GF(2^8);
+n := 6;
+
+rnduptr := function()
+	m := IdentityMatrix(F, n);
+	for k in [1..Random([1..2*n])] do 
+		i := Random([1..n-1]);
+		j := Random([i+1..n]);
+		m[i][j] := Random(F);
+	end for;
+	return m;
+end function;
+
+sd1, sd2 := GetSeed();
+printf "   SetSeed(%o, %o)\n", sd1, sd2;
+orig_gens := [ GL(n, F) | rnduptr() : k in [1..n] ];
+the_tests(orig_gens);
+
+
+
+
+print "Classical sylow upper triangular matrices, char. 2";
+
+sylow_gens := SetToSequence(Generators(ClassicalSylow(GL(12,7),7)));
+the_tests(sylow_gens);
+
+
+
+
+print "Lie group w/random trans";
+
+R := RootDatum("A3");
+F := GF(5,2);
+G := GroupOfLieType(R, F);
+sr := StandardRepresentation(G);
+gl := Codomain(sr);
+
+sd1, sd2 := GetSeed();
+printf "   SetSeed(%o, %o)\n", sd1, sd2;
+mats0 := [ sr(g) : g in [ elt<G | <i,Random(F)> > : i in [1..NumPosRoots(R)] ] ];
+T := Random(gl);
+mats := [ m^T : m in mats0 ];
+the_tests(mats);
+
+
+print "Trivial group, char. 17";
+trivgens := [ GL(8, 17) | ];
+the_tests(trivgens);
+
+
+
+
+

@@ -1,0 +1,92 @@
+SetEchoInput(true);
+
+// 2 x 2 pairing over Q
+
+SetVerbose("CasselsTate", 1);
+
+sha := [];
+COUNT := 0;
+NUM := 1;
+
+//Es := sub< SteinWatkinsDatabase() | 10^7, 10^9 : Rank:=2 >; 
+Es := [ EllipticCurve([- 31373667, - 67638822174]) ];
+
+for E in Es do 
+
+  if COUNT ge NUM then break; end if;
+
+  r := AnalyticRank(E);
+  "Testing", E; "of conductor", Conductor(E), "and rank", r;
+
+  td := TwoDescent(E : RemoveTorsion);
+  if #td ne 2^r-1 then Append(~sha, E); end if;
+
+  pairing := Matrix(#td, [GF(2)| CasselsTatePairing(td[i],td[j]) : i,j in [1..#td]]);
+  if not IsZero(pairing) then 
+    COUNT +:= 1; 
+    pairing; assert IsSymmetric(pairing); 
+    assert #[R : R in Rows(pairing) | IsZero(R)] eq 2^r-1;
+  end if;
+
+end for;
+
+// 2 x 2 pairing over number field
+
+SetVerbose("TwoDescent", 1);
+SetVerbose("CasselsTate", 1);
+SetVerbose("Conic", 1);
+
+d := 3;
+K := NumberField(x^2 - d) where x is PolynomialRing(Rationals()).1;
+
+sha := [];
+COUNT := 0;
+NUM := 1;
+
+//Es := sub< SteinWatkinsDatabase() | 571, 10^9 : Rank:=0 >;
+Es := [EllipticCurve("37a1")];
+
+for E in Es do 
+
+  if COUNT ge NUM then break; end if;
+
+  Ed := QuadraticTwist(E, d);
+  EK := BaseChange(E, K);
+  r := AnalyticRank(E) + AnalyticRank(Ed);
+  "Testing", E; "of conductor", Conductor(E), "and rank", r, "over", DefiningPolynomial(K);
+
+  td := TwoDescent(EK : RemoveTorsion);
+  s := Ilog(2, 1+#td); assert 2^s eq 1+#td; "Selmer rank", s;
+  if s gt r then Append(~sha, E); assert IsEven(s-r); end if;
+  if s gt r then COUNT +:= 1; end if;
+
+  pairing := Matrix(#td, [GF(2)| CasselsTatePairing(td[i],td[j]) : i,j in [1..#td]]);
+  if not IsZero(pairing) then 
+    pairing; assert IsSymmetric(pairing); 
+    assert #[R : R in Rows(pairing) | IsZero(R)] eq 2^r-1;
+  end if;
+
+end for;
+
+/*
+x := PolynomialRing(K).1;
+pols := [ (-1254*K.1 + 2172)*x^4 + (44616*K.1 - 77280)*x^3 + (-587412*K.1 + 1017432)*x^2 
+           + (3340392*K.1 - 5785728)*x - 6989622*K.1 + 12106380, 
+          (22*K.1 + 60)*x^4 + (-96*K.1 - 320)*x^3 + (144*K.1 + 648)*x^2 
+           + (-80*K.1 - 592)*x + 8*K.1 + 208,
+          (23824*K.1 - 39293)*x^4 + (3095496*K.1 - 5336556)*x^3 + (4484034*K.1 - 7647774)*x^2 
+           + (44352*K.1 + 173884)*x - 1116650*K.1 + 2132332 ];
+td := [HyperellipticCurve(pol) : pol in pols];
+*/
+
+// 4 x 2 pairing, first nontrivial example 1309a1
+
+SetVerbose("CasselsTate", 2);
+
+E := EllipticCurve("1309a1");
+td := TwoDescent(E : RemoveTorsion);
+fd := FourDescent(td[1] : RemoveTorsion);
+assert #td eq 3 and #fd eq 2;
+ct := CasselsTatePairing(fd[1], td[2]);
+assert ct eq 1;
+

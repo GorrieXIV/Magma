@@ -1,0 +1,445 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>General L-series</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1518.htm">[Next]</A><A  HREF = "text1516.htm">[Prev]</A> <A  HREF = "text1518.htm">[Right]</A> <A  HREF = "text1516.htm">[Left]</A> <A  HREF = "text1513.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "17209">General L-series</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+In addition to the built-in L-series for the standard objects, Magma 
+provides machinery that allows the user to define L-series for arbitrary
+objects, provided that they admit a meromorphic continuation to the whole
+complex plane and satisfy a functional equation of the standard kind.
+To describe how this may be done, we need to introduce some terminology. 
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1517.htm#17210">Terminology</A>
+<LI> <A  HREF = "text1517.htm#17211">Constructing a General L-Series</A>
+<LI> <A  HREF = "text1517.htm#17215">Setting the Coefficients</A>
+<LI> <A  HREF = "text1517.htm#17217">Specifying the Coefficients Later</A>
+<LI> <A  HREF = "text1517.htm#17219">Generating the Coefficients from Local Factors</A>
+</UL>
+<H4><A NAME = "17210">Terminology</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+Recall that an <I>L-series</I> is a sum
+<P>
+  L(s) = &sum;<sub>n=1</sub>^&infin;(a<sub>n</sub>/n<sup>s</sup>),
+<P>
+where the coefficients a<sub>n</sub> are complex numbers, known as the Dirichlet
+coefficients of the L-series. For example, the Dirichlet coefficients
+of the classical Riemann zeta function are a<sub>n</sub>=1 for all n.
+We assume that, as in the case of Riemann zeta function, every L(s) 
+has a meromorphic continuation to the complex plane and has a functional 
+equation.  Technically, our assumptions are as follows:
+<P>
+<P>
+<P>
+<B>Assumption 1.</B> The defining series for L(s) converges
+for Re(s) sufficiently large. Equivalently, the <I>coefficients</I> 
+a<sub>n</sub> grow at worst as a polynomial function of n.
+<P>
+<B>Assumption 2.</B> L(s) admits a meromorphic continuation to the
+entire complex plane.
+<P>
+<B>Assumption 3.</B> The following exist: real positive <I>weight</I>,
+complex <I>sign</I> of absolute value 1, real positive <I>conductor</I>
+and the <I>&Gamma;-factor</I>
+<P>
+  &gamma;(s) = &Gamma;((s + &lambda;<sub>1</sub>/2)) ... &Gamma;((s + &lambda;<sub>d</sub>/2))
+<P>
+of <I>dimension</I> d&ge;1 and rational <I>&gamma;-shifts</I>
+&lambda;<sub>1</sub>, ... &lambda;<sub>d</sub>, such that
+<P>
+  L<sup> * </sup>(s)=(((conductor)/&pi;<sup>d</sup>))<sup>s/2</sup> &gamma;(s) L(s)
+<P>
+satisfies the <I>functional equation</I>
+<P>
+  L<sup> * </sup>(s) = (sign) .bar L<sup> * </sup>((weight) - s).
+<P>
+Here bar L is the <I>dual</I> L-series with complex conjugate coefficients
+L(s)=&sum;<sub>n=1</sub>^&infin;/line(a<sub>n</sub>)/n<sup>s</sup>.
+Note that the "weight" here is one more
+than the usual motivic notion of weight.
+<P>
+<B>Assumption 4.</B> The series L<sup> * </sup>(s) has finitely many simple <I>poles</I>
+and no other singularities.
+<P>
+<P>
+<P>
+Assumption 1 will almost certainly be true for any naturally arising
+L-function and Assumptions 2--4 are expected (but not proven)
+to be satisfied for most of the L-functions arising in geometry 
+and number theory.  In fact, there is a large class of so-called 
+<I>motivic L-functions</I> for which all of the above assumptions
+are conjectured to be true.  Essentially this class consists of 
+L-functions associated to cohomology groups of varieties over 
+number fields.  This is an extremely large class of L-functions
+that includes all of the standard examples.
+
+
+<H4><A NAME = "17211">Constructing a General L-Series</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+When computing the values L(s) for a complex number s, Magma relies 
+heavily on the functional equation. This means that the <I>emphasized</I> 
+parameters in Assumptions 1--4 (coefficients, weight, conductor, poles, etc.) 
+must be known before the computations can be carried out.
+<P>
+The generic <TT>LSeries</TT> function allows the user to construct an L-series 
+for a new object by specifying values for these parameters. In fact, this 
+function is used to construct all of the built-in L-series in Magma 
+and some of these will be used as examples to illustrate its use (see the 
+advanced examples section).
+
+
+<H5><A NAME = "17212">LSeries(weight, gamma, conductor, cffun) : FldReElt,[FldRatElt],FldReElt,Any -&gt; LSer</A></H5>
+
+<PRE>    Sign: FldComElt                     Default: 0</PRE>
+
+<PRE>    Poles: SeqEnum                      Default: []</PRE>
+
+<PRE>    Residues: SeqEnum                   Default: []</PRE>
+
+<PRE>    Parent: Any                         Default: </PRE>
+
+<PRE>    CoefficientGrowth: UserProgram      Default: </PRE>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+
+<PRE>    ImS: FldReElt                       Default: 0</PRE>
+
+<PRE>    Asymptotics: BoolElt                Default: <TT>true</TT></PRE>
+<H5>LSeries(HS, N, cffun) : HodgeStruc, RngIntElt, Any -&gt; LSer</H5>
+<BLOCKQUOTE>
+This is an alternative way to specify a generic L-series, with all
+the varargs of before. Instead of giving a real number for the functional
+equation reflection together with &gamma;-shifts, one passes a Hodge structure
+to the LSeries intrinsic instead.
+<P>
+For more examples, see the "Advanced Examples" Section <A  HREF = "text1523.htm#17285">Advanced Examples</A>.
+<P>
+It is strongly advised that whenever a generic L-series is defined the 
+user apply one of the functions <TT>CFENew</TT>
+or <TT>CheckFunctionalEquation</TT>.
+If one of the specified parameters (conductor, sign, etc.) happens to 
+be incorrect, the resulting L-series will not have a functional equation 
+and the values returned by the evaluation functions will be nonsense.
+Only by checking the functional equation will the user have an indication
+that something is wrong.
+</BLOCKQUOTE>
+<H5><A NAME = "17213">CheckFunctionalEquation(L) : LSer -&gt; FldComElt</A></H5>
+<H5>CFENew(L) : LSer -&gt; FldReElt</H5>
+
+<PRE>    t: FldReElt                         Default: 1.2</PRE>
+<BLOCKQUOTE>
+Given an L-series L, this intrinsic tests the functional equation 
+numerically and should ideally return 0 (to the current precision), 
+meaning that the test was passed.
+<P>
+The new preferred version is <TT>CFENew</TT>,
+which in many cases of reasonable interest can often require
+signficantly fewer terms (using a dynamic criterion, rather than
+a static one), sometimes by a factor of 5 or more.
+It also is much superior at keeping track of internal precision.
+However, it does not completely replicate the old machinery (particularly
+when poles/residues are present), and so <TT>CheckFunctionalEquation</TT>
+is also still available.
+<P>
+If the value returned is a significant distance from 0, either the 
+L-function does not have a functional equation or some of the 
+defining parameters (conductor, poles etc.) have been incorrectly 
+specified or not enough coefficients have been given. In the latter 
+case, <TT>CFENew</TT> or <TT>CheckFunctionalEquation</TT> is likely to return
+a number  reasonably close to 0 that measures the accuracy of computations.
+<P>
+As already mentioned, Magma can only work with L-functions that 
+satisfy the functional equation as in Section <A  HREF = "text1517.htm#17210">Terminology</A>. Whenever 
+an L-function is constructed, its functional equation is implicitly 
+used in all the L-series evaluations, even when L is evaluated
+in the region where the original Dirichlet series is absolutely 
+convergent. 
+<P>
+If either the sign in the functional equation or the residues of 
+L<sup> * </sup>(s) have not yet been computed, this function will first
+compute them. If the sign was undefined, it returns 
+|<TT>Sign</TT>| - 1 which, again, must be 0.
+<P>
+The optional technical parameter <TT>t</TT> is a point on the real line
+where Magma evaluates the two Theta functions associated to the 
+L-series and subtracts one from the other to get the value returned
+by <TT>CFENew</TT> or <TT>CheckFunctionalEquation</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17214">Example <TT>Lseries_lseries-checkfun (H133E19)</TT></A></H3>
+We attempt to define a truncated L-series of a quadratic character mod 3 
+(so &chi;(n) =0, 1, - 1 if n is 0,1 or 2 mod 3 respectively.)
+<P>
+<P>
+<P>
+<PRE>
+&gt; L := LSeries(1, [0], 3, [1,-1,0,1,-1,0] : Sign:=-1);
+&gt; CFENew(L);
+0.222346257403989419245646558069
+</PRE>
+This does not look right. In fact, the &gamma;-shifts are 0 for even
+quadratic characters, but 1 for odd ones,
+<P>
+<P>
+<PRE>
+&gt; L := LSeries(1, [1], 3, [1,-1,0,1,-1,0] : Sign:=-1);
+&gt; CheckFunctionalEquation(L);
+1.06372623587922089871296822624
+&gt; CFENew(L);
+7.47942058598558334301138589732E-18
+</PRE>
+This still does not look right (though <TT>CFENew</TT> will ignore <TT>Sign</TT>).
+We gave the wrong sign in the functional equation.
+<P>
+<P>
+<PRE>
+&gt; L := LSeries(1, [1], 3, [1,-1,0,1,-1,0] : Sign:=1);
+&gt; CFENew(L);
+7.47942058598558334301138589732E-18
+</PRE>
+This certainly looks better but it indicates that we did not give enough 
+coefficients to our L-series. We determine how many coefficients are
+needed to do computations with default precision (30 digits),
+<P>
+<P>
+<PRE>
+&gt; LCfRequired(L); // approx for old CheckFunctionalEquation
+11
+</PRE>
+<P>
+So 11 coefficients are needed and we provide them in the code
+below. 
+<P>
+<P>
+<P>
+<PRE>
+&gt; L := LSeries(1, [1], 3, [1,-1,0,1,-1,0,1,-1,0,1] : Sign:=1);
+&gt; CFENew(L);
+0.000000000000000000000000000000
+</PRE>
+<P>
+This a correct way to define our L-series. Even better is the
+following variant:
+<P>
+<P>
+<P>
+<PRE>
+&gt; L := LSeries(1, [1], 3, func&lt;n|((n+1) mod 3)-1&gt; : Sign:=1);
+&gt; CFENew(L);
+0.000000000000000000000000000000
+</PRE>
+<P>
+This allows Magma to calculate as many a<sub>n</sub> as it deems necessary
+using the provided function.
+<HR>
+<H4><A NAME = "17215">Setting the Coefficients</A></H4>
+
+
+
+<H5><A NAME = "17216">LSetCoefficients(L,cffun) : LSer, Any -&gt;</A></H5>
+<BLOCKQUOTE>
+This function defines the coefficients a<sub>n</sub> of the L-series L.
+The argument <I>cffun</I> can be one of the following:
+<P>
+<DL COMPACT class='compact'>
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>A sequence [a<sub>1</sub>, ..., a<sub>n</sub>];
+<P>
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>A function f(n) that returns a<sub>n</sub>;
+<P>
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>A function f(p, d) that computes the inverse 
+     of the local factor at p up to degree d.
+<P>
+<P>
+</DL>
+When a user-defined L-series is constructed by invoking the function
+<P>
+<P>
+<PRE>
+&gt; L := LSeries(weight,gamma,conductor,cffun: &lt;optional parameters&gt;);
+</PRE>
+this is actually equivalent to invoking the pair of functions
+<P>
+<P>
+<PRE>
+&gt; L := LSeries(weight,gamma,conductor,0: &lt;optional parameters&gt;);
+&gt; LSetCoefficients(L,cffun);
+</PRE>
+where the first line indicates that the coefficients will be supplied
+later and the second line actually specifies the coefficients.
+So the following description of the <I>cffun</I> argument for the
+function <TT>LSetCoefficients(L,cffun)</TT> applies to the main <TT>LSeries</TT>
+signature as well.
+<P>
+The first two ways to specify the a<sub>n</sub> are either to give a
+pre-computed sequence of coefficients up to a certain bound or
+to give the name of a function f(n) that computes the a<sub>n</sub>.
+(The other two ways are described in the two subsections that follow.)
+For instance, the following both define the Riemann
+zeta function with weight 1, one &gamma;-shift 0, conductor 1, sign 1,
+pole at s=1 with residue -1, all a<sub>n</sub>=1:
+<P>
+<P>
+<P>
+<PRE>
+&gt; V := [ 1 : k in [1..100] ];
+&gt; L := LSeries(1, [0], 1, V : Sign:=1, Poles:=[1], Residues:=[-1]);
+</PRE>
+or
+<P>
+<P>
+<PRE>
+&gt; f := func&lt;n|1&gt;;
+&gt; L := LSeries(1, [0], 1, f : Sign:=1, Poles:=[1], Residues:=[-1]);
+</PRE>
+<P>
+Of the two possibilities, the second one is safer to use in a sense that it
+lets Magma decide how many coefficients it needs in order to perform the 
+calculations to the required precision.  However, if the computation of 
+a<sub>n</sub> is costly and it involves previous coefficients, then it is probably
+better to write a function that computes a<sub>n</sub> recursively, storing
+them in a sequence and then passing it to <TT>LSeries</TT>.
+</BLOCKQUOTE>
+<H4><A NAME = "17217">Specifying the Coefficients Later</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+When specifying a finite list of coefficients it is necessary
+to know in advance  how many coefficients have to be computed.
+For this, Magma provides a function <TT>LCfRequired(L)</TT>
+(see Section <A  HREF = "text1518.htm#17220">Accessing the Invariants</A>).
+
+
+<HR>
+<H3><A NAME = "17218">Example <TT>Lseries_lseries-lcfrequired (H133E20)</TT></A></H3>
+We define L to be our own version of the Riemann zeta function
+(weight 1, one &gamma;-shift 0, conductor 1, sign 1,
+pole at s=1 with residue -1),
+but tell Magma that we will specify the coefficients later with the 4th
+parameter set to 0. Then we ask how many coefficients it needs
+to perform computations:
+<P>
+<P>
+<PRE>
+&gt; L := LSeries(1, [0], 1, 0: Sign:=1, Poles:=[1], Residues:=[-1]);
+&gt; N := LCfRequired(L); N;
+6
+</PRE>
+Now we compute the coefficient vector [a<sub>1</sub>, ..., a<sub>N</sub>].
+<P>
+<P>
+<PRE>
+&gt; vec := [1, 1, 1, 1, 1, 1];
+&gt; LSetCoefficients(L,vec);
+</PRE>
+Now we can evaluate our &zeta;-function
+<P>
+<P>
+<PRE>
+&gt; Evaluate(L,2);
+1.64493406684822643647241516665
+&gt; Pi(RealField())^2/6;
+1.64493406684822643647241516665
+</PRE>
+If we provide fewer coefficients, the computations will not have full
+precision but we can use <TT>CFENew</TT> or <TT>CheckFunctionalEquation</TT>
+to get an indication of the resulting accuracy.
+<P>
+<P>
+<PRE>
+&gt; LSetCoefficients(L, [1,1]);
+&gt; CFENew(L);
+1.49504837351354351195383363489E-10
+&gt; Evaluate(L, 2);
+1.64493406707833102002503055804
+&gt; $1 - Pi(RealField(28))^2/6;
+2.301045835526153913058838556E-10
+</PRE>
+Note that such good accuracy with just two coefficients is a singular
+phenomenon that only happens for L-functions with very small conductors.
+Normally, at least hundreds of coefficients are needed to compute
+L-values to this precision.
+<P>
+Note also that the last value <TT>Evaluate(L,2)</TT> in the example is much
+more precise than what one would get with the truncated version of the
+original defining series &zeta;<sub>trunc</sub>(s)=1 + 1/2<sup>s</sup> at s=2.
+The reason for this is that even in the region where the original
+Dirichlet series converges, the use of the functional equation usually
+speeds up the convergence.
+<HR>
+<H4><A NAME = "17219">Generating the Coefficients from Local Factors</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+The final and, in many cases, mathematically the most natural way
+to supply the coefficients is by specifying the so-called <I>local factors</I>.
+Recall that the coefficients
+for most L-series are <I>weakly multiplicative</I>,
+meaning that a<sub>mn</sub>=a<sub>m</sub>a<sub>n</sub> for m coprime to n.
+For such L-series, L(s) admits a <I>product formula</I>
+<P>
+  L(s) = &prod;_(p (prime)) (1/F<sub>p</sub>(p<sup> - s</sup>)),
+<P>
+where F<sub>p</sub>(x) is a formal power series in x with complex coefficients.
+For example, if L(s) arises from a variety over a number field
+(and this, as we already mentioned, essentially covers everything),
+then such a product formula holds. In this case the F<sub>p</sub>(x) are
+polynomials of degree d for those primes p not dividing the 
+conductor and are of smaller degree otherwise. Moreover, their 
+coefficients lie in the ring of integers of the field of definition 
+of the variety.
+<P>
+For L-functions with weakly multiplicative coefficients, Magma allows
+the coefficients to be defined by specifying the local factors, using 
+the function <TT>LSetCoefficients(L,f)</TT>
+where f is a user-defined function with two arguments p and d that
+computes F<sub>p</sub>(x), either as a full polynomial in x or as a power series
+in x of precision O(x<sup>d + 1</sup>). For example, the Riemann zeta function
+has F<sub>p</sub>(x)=1 - x for all p, so we can define it as follows,
+<P>
+<P>
+<P>
+<PRE>
+&gt; Z := LSeries(1, [0], 1, 0 : Poles:=[1], Residues:=[-1], Sign:=1);
+&gt; P&lt;x&gt; := PolynomialRing(Integers());
+&gt; LSetCoefficients(Z, func&lt;p,d | 1-x&gt; );
+</PRE>
+or as
+<P>
+<P>
+<PRE>
+&gt; P&lt;x&gt; := PowerSeriesRing(Integers());
+&gt; Z := LSeries(1, [0], 1, func&lt;p,d|1-x+O(x^(d+1))&gt; :
+               Poles:=[1], Residues:=[-1], Sign:=1);
+</PRE>
+
+
+<PRE></PRE> <A  HREF = "text1518.htm">[Next]</A><A  HREF = "text1516.htm">[Prev]</A> <A  HREF = "text1518.htm">[Right]</A> <A  HREF = "text1516.htm">[Left]</A> <A  HREF = "text1513.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

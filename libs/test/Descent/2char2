@@ -1,0 +1,40 @@
+
+NUM_TESTS := 5;
+
+counter := 0;
+while counter lt NUM_TESTS do 
+  n := Random([1,2,3]);
+  k := GF(2^n);
+  F<t> := FunctionField(k);
+  // choose a random E
+  repeat a1 := &+[Random(k)*t^i : i in [0..2 div n]]; until a1 ne 0;
+  repeat a2denom := &+[Random(k)*t^i : i in [0..2 div n]]; until a2denom ne 0;
+  a2 := &+[Random(k)*t^i : i in [0..2 div n]] / a2denom;
+  a3 := &+[Random(k)*t^i : i in [0..4 div n]];
+  a4 := &+[Random(k)*t^i : i in [0..6 div n]];
+  a6 := &+[Random(k)*t^i : i in [0..8 div n]];
+  try E := EllipticCurve([a1, a2, 0, a4, a6]); gotE := true;
+  catch err gotE := false; end try; // if singular
+  if not gotE then continue; end if;
+  counter +:= 1;
+  print "Seed =", GetSeed();
+  printf "Trying 2-isogeny descent for \nEllipticCurve(%o);\n", Coefficients(E);
+  SelAS, SelFrob, map1, map2 := TwoIsogenySelmerGroups(E);
+  dimAS := Ngens(SelAS);  dimFrob := Ngens(SelFrob);
+  if IsConstantCurve(E) then continue; end if;
+  "Check the L-function..."; time dimE := AnalyticInformation(E)[1];
+  print "\n AS dim =", dimAS, "   Frob dim =", dimFrob, "   Rank(E) =", dimE, "\n";
+  EFrob := EllipticCurve([ a^2 : a in Coefficients(E)]);
+  TE,TEmap := TorsionSubgroup(E);
+  TEFrob,TEFrobmap := TorsionSubgroup(EFrob);
+  tE := Valuation(#TE,2);  tEFrob := Valuation(#TEFrob,2);  assert tEFrob gt 0;
+  assert (tE eq 0 or 2^(tE-1)*TE.1@TEmap ne E!0)  // catch any more torsion bugs...
+     and (tEFrob eq 0 or 2^(tEFrob-1)*TEFrob.1@TEFrobmap ne EFrob!0);
+  sha := dimAS + dimFrob - dimE - 1;  assert sha ge 0;  assert IsEven(sha);
+  if sha gt 0 and dimE eq 0 then
+     assert Integers()!(AnalyticInformation(E)[3]*AnalyticInformation(EFrob)[3]) mod 2^sha eq 0;
+  end if;
+  if tE ge tEFrob then assert dimAS ge 1;
+  elif tEFrob gt tE then assert dimFrob ge 1; end if;
+end while;
+

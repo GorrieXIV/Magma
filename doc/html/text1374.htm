@@ -1,0 +1,596 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Resolution Graphs</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1375.htm">[Next]</A><A  HREF = "text1373.htm">[Prev]</A> <A  HREF = "text1375.htm">[Right]</A> <A  HREF = "text1373.htm">[Left]</A> <A  HREF = "text1372.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "15307">Resolution Graphs</A></H3>
+
+<P>
+<P>
+A resolution graph g is a graph with data associated to its vertices.
+The underlying graph is the dual graph of a blowup process.
+The vertices correspond to rational curves E, "exceptional curves",
+on some surface S which are contracted by some map f: S -&gt; P<sup>2</sup>,
+where P<sup>2</sup> is the projective plane.
+Such maps arise during the resolution process by blowups
+of a curve singularity, say p&isin;C where C is a curve in P<sup>2</sup>.
+In that context, C can be pulled back to S using f and the
+pullback can be decomposed (as an effective divisor on S) as
+<P>
+f<sup> * </sup>C = widetilde(C) + E<sub>C</sub>
+<P>
+where widetilde(C) is the <I>birational transform</I> of C and
+E<sub>C</sub> is an effective divisor supported on the union of the exceptional curves.
+The surface S is never realised as a geometric object.
+<P>
+For a vertex v of g, the corresponding rational curve is often denoted
+E<sub>v</sub>.
+The edges of g correspond to the intersections between different E:
+vertices v and w are joined by edges corresponding in some way to
+the points
+of intersection of the curves E<sub>v</sub> and E<sub>w</sub>.
+In the contexts used below, any two curves will meet at most in one point
+and that will be a transverse intersection.
+So the intersection number E<sub>v</sub>E<sub>w</sub> on S will be the number of edges
+between v and w, either zero or one,
+if they are distinct vertices and a selfintersection
+number associated to v otherwise.
+Thus the graph enables basic intersection calculations to be carried out
+implicitly on S.
+<P>
+The data associated to each vertex v is the following where E = E<sub>v</sub>:
+the selfintersection E<sup>2</sup>;
+the coefficient of E in some pullback divisor, often E<sub>C</sub> but this
+depends on the context;
+the coefficient of E in a representative of the canonical class of S
+locally supported on the exceptional curves;
+the number of transverse intersections of the birational transform
+widetilde(C) of C with E.
+At each vertex v, this data is often denoted s<sub>v</sub>, m<sub>v</sub>, k<sub>v</sub>, t<sub>v</sub>
+respectively.
+This is the coarsest kind data one could want.
+It enables basic intersection theory calculations (including calculating
+the contribution of a singularity p of a curve C to the genus of C).
+For more detailed calculations, the map f and the equation of the birational
+transform of C are held on patches along each E. In each case, the patch
+is an affine xy-plane with E as the line y=0 in it (although it is
+actually the closure of this patch and map that is recorded).
+<P>
+Resolution graphs are usually created implicitly by some geometrical
+algorithm like the resolution of a plane curve singularity. 
+The first creation methods below are of this nature.
+But graphs can also be created explicitly by providing the required data.
+How much data is required varies according to the purpose of the graph;
+some common alternatives are included here.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1374.htm#15308">Graphs, Vertices and Printing</A>
+<LI> <A  HREF = "text1374.htm#15316">Creation from Curve Singularities</A>
+<LI> <A  HREF = "text1374.htm#15319">Creation from Pencils</A>
+<LI> <A  HREF = "text1374.htm#15323">Creation by Hand</A>
+<LI> <A  HREF = "text1374.htm#15327">Modifying Resolution Graphs</A>
+<LI> <A  HREF = "text1374.htm#15336">Numerical Data Associated to a  Graph</A>
+</UL>
+<H4><A NAME = "15308">Graphs, Vertices and Printing</A></H4>
+
+<P>
+<P>
+Resolution graphs are less complicated as a type than the other
+graphs in Magma.
+They do not have associated vertex and edge sets.
+However, there is a resolution graph vertex type so that vertices can be
+passed between intrinsics.
+<P>
+Graph printing is similar to that of the underlying directed graph.
+An example is
+<P>
+<P>
+<PRE>
+The resolution graph on the Digraph
+Vertex  Neighbours
+
+1 ([ -2, 9, 1, 0 ])     2 ;
+2 ([ -4, 18, 2, 0 ])    3 ;
+3 ([ -2, 63, 9, 0 ])    4 6 ;
+4 ([ -2, 42, 6, 0 ])    5 ;
+5 ([ -2, 21, 3, 0 ])    ;
+6 ([ -1, 66, 10, 3 ])   ;
+</PRE>
+This is a graph on 6 vertices --- they are listed as one of the integers
+1, ..., 6 down the left. The integer corresponding to a vertex is called
+the <I>index</I> of the vertex.
+In brackets by each vertex v is a label of the form [s, m, k, t] where
+s is the selfintersection, m is the multiplicity (the interpretation of
+which is dependent on the context), k is the canonical
+multiplicity and t is the number of transverse intersections at v as
+described in the introduction.
+Next comes a space-separated list of the vertices at the far end of edges
+directed away from v.
+Until one is used to reading graphs in this way, and also even then, drawing
+the graph by hand is recommended.
+<P>
+The vertex labels can be shorter if some data is missing.
+The alternatives are [s], [s, t] and [s, m, t] in the previous notation.
+The most data consistent with what has been calculated for the graph
+will be displayed.
+<P>
+Notice that, although these really are printed as graph labels, the data in
+them should not be accessed as such.
+These labels are often unassigned, or assigned in an unexpected way.
+They are only intended for printing.
+There are dedicated functions below for retrieving data associated to a graph.
+
+
+<H5><A NAME = "15309">g eq h : GrphRes,GrphRes -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the resolution graphs g and h are the same object in Magma.
+</BLOCKQUOTE>
+<H5><A NAME = "15310">ResolutionGraphVertex(g,i) : GrphRes,RngIntElt -&gt; GrphResVert</A></H5>
+<H5>g ! i : GrphRes,RngIntElt -&gt; GrphResVert</H5>
+<BLOCKQUOTE>
+The vertex of the resolution graph g with index i.
+</BLOCKQUOTE>
+<H5><A NAME = "15311">Vertex(v) : GrphResVert -&gt; GrphVert</A></H5>
+<BLOCKQUOTE>
+The underlying directed graph vertex of the resolution graph vertex v.
+</BLOCKQUOTE>
+<H5><A NAME = "15312">ResolutionGraph(v) : GrphResVert -&gt; GrphRes</A></H5>
+<BLOCKQUOTE>
+The resolution graph of which v is a vertex.
+</BLOCKQUOTE>
+<H5><A NAME = "15313">IsVertex(g,v) : GrphRes,GrphResVert -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if v is a vertex of the resolution graph g.
+</BLOCKQUOTE>
+<H5><A NAME = "15314">Index(v) : GrphResVert -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The index of the underlying graph vertex of the resolution graph vertex v; 
+this is the integer appearing
+as the vertex identifier when the graph is printed.
+</BLOCKQUOTE>
+<H5><A NAME = "15315">v eq w : GrphResVert,GrphResVert -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the resolution graph vertices 
+v and w are the same object in Magma.
+</BLOCKQUOTE>
+<H4><A NAME = "15316">Creation from Curve Singularities</A></H4>
+
+<P>
+<P>
+Let C be a reduced plane curve, either affine or projective.
+See
+Chapter <A  HREF = "text1356.htm#14904">ALGEBRAIC CURVES</A>
+for details of how to create such a curve.
+Let p be a singular point of C.
+The intrinsic below calculates the
+dual graph of the resolution of p on C
+together with some auxiliary data.
+As in the introduction, the sequence of blowups required in the resolution
+is thought of as a morphism f: S -&gt; P<sup>2</sup> of projective
+surfaces; P<sup>2</sup> is the projective plane (which is the closure of the
+ambient plane of C if it is affine) while S is a surface not
+realised explicitly in Magma.
+<P>
+The target resolution is the minimum transverse resolution,
+sometimes called the log resolution, a resolution
+in which the birational
+transform widetilde(C) of C on S is nonsingular and transverse to
+the exceptional locus.
+However, there are circumstances under which a larger resolution will
+be calculated.
+This makes no difference to the geometric data arising from the resolution.
+
+
+<H5><A NAME = "15317">ResolutionGraph(C, p) : Sch, Pt -&gt; GrphRes</A></H5>
+
+<PRE>    M: RngIntElt                        Default: 1</PRE>
+
+<PRE>    K: RngIntElt                        Default: 1</PRE>
+<H5>ResolutionGraph(C, p) : Sch, Pt -&gt; GrphRes</H5>
+<BLOCKQUOTE>
+Calculate a transverse resolution graph of the
+plane curve singularity of C at the point p.
+If the point argument is missing and C is affine, the resolution is
+calculated at the origin, but in that case parameters cannot be assigned
+and take the default values.
+<P>
+The numerical parameters determine whether additional data is calculated:
+value 1, the default, enables the calculation while value 0 omits it.
+<P>
+The parameter <TT>M</TT> refers to the pullback multiplicities of C.
+It returns a sequence [ m<sub>v</sub> ] of rational numbers (although always integral
+in the current algorithms) corresponding to the vertices of the graph.
+These numbers have the following meaning:
+on the blownup surface S, as divisors,
+<P>
+f<sup> * </sup>C = widetilde(C) + &sum;m<sub>v</sub>E<sub>v</sub>
+<P>
+where the sum is taken over the vertices v of the graph and E<sub>v</sub>
+is the corresponding exceptional curve.
+<P>
+The parameter <TT>K</TT> refers to the canonical multiplicities along g.
+It returns a sequence [ k<sub>v</sub> ] of rational numbers (although again
+always integral)
+corresponding to the vertices of the graph.
+On the blownup surface S in a neighbourhood of the union of exceptional
+curves E the canonical class K<sub>S</sub> has a representative
+<P>
+K<sub>S</sub> = &sum;k<sub>v</sub>E<sub>v</sub>
+<P>
+where the sum is taken over the vertices of the graph.
+<P>
+The surface S is covered by affine plane patches.
+The map f to the projective plane can be calculated when restricted to
+these patches.
+In fact, the closure of these maps is calculated as a birational automorphism
+of the projective plane.
+All blowup algorithms arrange that the exceptional curve E<sub>v</sub> corresponding
+to a vertex v is (a patch on) L<sub>y</sub>, the second coordinate line "y=0",
+in the projective plane.
+So pulling C back to the plane using the patch map at v will 
+produce a curve having m<sub>v</sub>L<sub>y</sub> as a component.
+<P>
+The calculation of maps and pullbacks is expensive so some
+precautions are taken.
+First, the maps are only calculated at significant vertices of the graph:
+significant here means that the blowup procedure branches at that
+vertex, or that widetilde(C) meets the exceptional locus there.
+Second, the maps are calculated as a sequence of maps: the map required
+is the composition of these.
+The composition will be carried out automatically if needed.
+(In the current code, this can only be carried out if no field extensions
+have been made. This will be updated in due course.)
+<P>
+The calculation is carried out by tying together strings of blowups
+(done recursively in one go using a standard Newton polygon argument).
+The Newton polygon argument used automatically makes a curve transverse
+to all axes, not just to exceptional curves.
+These extra blowups do not invalidate numerical calculations made with the
+resolution graph (since minimality is never a condition) and they
+are essential when resolving irregular fibres of pencils.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15318">Example <TT>GrphRes_singularity (H121E1)</TT></A></H3>
+First make a curve with a singularity. The following curve
+demonstrates the typical way singularities with more than one
+Puiseux pair --- those which need the Newton algorithm to be
+repeated when calculating a resolution or local parametrisation ---
+arise.
+<P>
+<P>
+<PRE>
+&gt; A&lt;x,y&gt; := AffineSpace(Rationals(),2);
+&gt; C := Curve(A,(x^2 - y^3)^2 + x*y^6);
+</PRE>
+The interesting singularity is at the origin.
+The next two lines calculate the resolution graph of this
+singularity and display it.
+<P>
+<P>
+<PRE>
+&gt; g := ResolutionGraph(C,Origin(A));
+&gt; g;
+The resolution graph on the Digraph
+Vertex  Neighbours
+
+1 ([ -3, 4, 1, 0 ])     2 ;
+2 ([ -2, 12, 4, 0 ])    3 4 ;
+3 ([ -2, 6, 2, 0 ])     ;
+4 ([ -3, 14, 5, 0 ])    5 ;
+5 ([ -1, 30, 12, 1 ])   6 ;
+6 ([ -2, 15, 6, 0 ])    ;
+</PRE>
+The resulting graph has 6 vertices.
+So the transverse resolution of this singularity is achieved
+by 6 blowups. The order of blowup can be determined by the
+third column, the canonical class: this number strictly
+increases throughout the process, so curve E<sub>1</sub> is the first
+exceptional curve, E<sub>3</sub> is the second and so on until finally
+E<sub>5</sub> is extracted.
+This could also be deduced from the sequence of selfintersections,
+the first column.
+See how the birational image of C after blowing up only
+intersects E<sub>5</sub>, and then only in a single transverse point.
+In other words, C has a single place at the origin.
+<HR>
+<H4><A NAME = "15319">Creation from Pencils</A></H4>
+
+<P>
+<P>
+Let P be a jacobian pencil in the affine plane A<sup>2</sup>,
+that is, a pencil of the form f(x, y) = c as c varies.
+See
+Chapter <A  HREF = "text1321.htm#14366">SCHEMES</A>
+for details of how to create jacobian pencils.
+The resolution graph which can be created automatically is the
+regular resolution graph: that is, the minimal sequence of transverse
+blowups which resolve the rational map determined by P
+from the projective plane (the
+closure of A<sup>2</sup>) to the projective line.
+However, other resolution graphs can be constructed using more explicit
+creation functions.
+
+
+<H5><A NAME = "15320">ResolutionGraph(P) : LinearSys -&gt; GrphRes</A></H5>
+<BLOCKQUOTE>
+The resolution at infinity of the jacobian pencil P: f = c
+of some polynomial f as the value c varies defined on some affine
+space A.
+This resolution graph is thought of as being rooted with root vertex
+corresponding to the line at infinity of A.
+The multiplicities are those of the fibre of f at infinity.
+</BLOCKQUOTE>
+<H5><A NAME = "15321">ResolutionGraph(P,a,b) : LinearSys,RngElt,RngElt -&gt; GrphRes</A></H5>
+<BLOCKQUOTE>
+The resolution graph at infinity of the union of the two fibres of P
+above a and b.
+The multiplicities and canonical class are not calculated automatically
+for this graph.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15322">Example <TT>GrphRes_pencil (H121E2)</TT></A></H3>
+The following is a simple example of a pencil exhibiting interesting
+behaviour at infinity. It is taken from <A  HREF = "text1371.htm#bib_neumann">[Neu99]</A>.
+<P>
+First a pencil in some affine plane is made.
+<P>
+<P>
+<PRE>
+&gt; A&lt;x,y&gt; := AffineSpace(Rationals(),2);
+&gt; f := x^2*y - x;
+&gt; P := Pencil(A,f);
+&gt; P;
+The pencil defined by x^2*y - x
+</PRE>
+Then the regular resolution graph at infinity is calculated.
+<P>
+<P>
+<PRE>
+&gt; ResolutionGraph(P);
+The resolution graph on the Digraph
+Vertex  Neighbours
+
+1 ([ -1, 3, -3, 0 ])    2 5 ;
+2 ([ -3, 1, -2, 0 ])    3 ;
+3 ([ -1, 0, -2, 1 ])    4 ;
+4 ([ -2, 0, -1, 0 ])    ;
+5 ([ -2, 2, -2, 0 ])    6 ;
+6 ([ -2, 1, -1, 0 ])    7 ;
+7 ([ -1, 0, 0, 1 ])     ;
+</PRE>
+The resulting graph has 7 vertices. Vertex 1 corresponds to the line
+at infinity of the plane, or more properly to its birational image after
+blowing up.
+The pencil meets this line at two points, each of which have undergone
+three blowups in the resolution process.
+The vertex labels carry auxiliary data.
+The first column lists the selfintersections of the curves E<sub>v</sub> corresponding
+to the vertices v.
+The general fibre of the pencil meets a single exceptional curve above
+each of the points as shown by the fourth column.
+The fibre at infinity is 3E<sub>1</sub> + E<sub>2</sub> + 2E<sub>5</sub> + E<sub>6</sub> as shown in the second
+column.
+The third column gives the multiplicities of a canonical divisor on the
+blownup surface: K<sub>S</sub> can be represented by the divisor
+-3E<sub>1</sub> - 2E<sub>2</sub> - 2E<sub>3</sub> - E<sub>4</sub> - 2E<sub>5</sub> - E<sub>6</sub>.
+<P>
+It is known that the pencil P is irregular at infinity above 0.
+This can be seen by calculating the explicit resolution of the union of
+two fibres, f=0 and a general one, say f=1.
+<P>
+<P>
+<PRE>
+&gt; ResolutionGraph(P,0,1);
+The resolution graph on the Digraph
+Vertex  Neighbours
+
+1 ([ -1, 0 ])   2 5 ;
+2 ([ -3, 0 ])   3 ;
+3 ([ -1, 1 ])   4 ;
+4 ([ -2, 2 ])   ;
+5 ([ -2, 0 ])   6 ;
+6 ([ -2, 0 ])   7 ;
+7 ([ -1, 2 ])   ;
+</PRE>
+The multiplicities and canonical class have not been calculated by this
+function. Later in this chapter there are functions which will do this,
+although the multiplicities require some interpretation.
+The selfintersections have been calculated as before (and notice that the
+blowups at least appear to be exactly those of the previous resolution
+procedure; in fact they are indeed the same).
+The number of transverse intersections are now those of the union of
+the two fibres.
+Since the fibre above 1 is general it contributes one intersection at
+vertex 3 and one at vertex 7.
+So the intersections of the irregular fibre can be deduced, namely
+two at vertex 4 and one at vertex 7.
+<HR>
+<H4><A NAME = "15323">Creation by Hand</A></H4>
+
+<P>
+<P>
+A resolution graph can be created by hand.
+This can be fiddly if the underlying graph is complicated.
+See
+Chapter <A  HREF = "text1782.htm#19676">GRAPHS</A>
+for details on how to create a directed graph.
+
+
+<H5><A NAME = "15324">MakeResolutionGraph(g,s,t) : GrphDir,SeqEnum,SeqEnum -&gt; GrphRes</A></H5>
+<H5>MakeResolutionGraph(g,s) : GrphDir,SeqEnum -&gt; GrphRes</H5>
+<BLOCKQUOTE>
+The resolution graph on underlying directed graph g.
+Although it is not checked, the graph g should usually be a directed tree
+otherwise some reduction algorithms which might be invoked later
+might not work.
+In that case, moreover, its root must be the vertex of index 1.
+<P>
+The selfintersections of vertices correspond to the integer entries
+of the sequence s.
+If used, the number of transverse intersections of the putative resolved
+curve with each vertex correspond to the integer entries of the sequence t.
+</BLOCKQUOTE>
+<H5><A NAME = "15325">MakeResolutionGraph(N) : NwtnPgon -&gt; GrphRes</A></H5>
+<BLOCKQUOTE>
+The resolution graph corresponding to the Newton polygon N.
+</BLOCKQUOTE>
+<H5><A NAME = "15326">UnderlyingGraph(g) : GrphRes -&gt; GrphDir</A></H5>
+<BLOCKQUOTE>
+The underlying directed graph of the resolution graph g.
+</BLOCKQUOTE>
+<H4><A NAME = "15327">Modifying Resolution Graphs</A></H4>
+
+<P>
+<P>
+Any resolution graph, whether created by hand or not, can have its numerical
+data calculated or modified.
+There are also some functions for performing surgery on the underlying graph.
+<P>
+There are also functions which do the linear algebra calculations typical
+of the numerical calculations associated with resolution graphs.
+But beware: they each base their
+calculation on some part of the data of the graph but make no check that
+all numerical data is consistent at the end of calculation.
+
+
+<H5><A NAME = "15328">Connect(v,w) : GrphResVert,GrphResVert -&gt; GrphRes</A></H5>
+<BLOCKQUOTE>
+If v and w are vertices of distinct resolution graphs, return the
+graph comprising the union of these graphs joined by an edge from v
+to w.
+Selfintersections are inherited by the graph from its two components.
+Multiplicities, canonical class and transverse intersections will
+be inherited if calculated on both components.
+</BLOCKQUOTE>
+<H5><A NAME = "15329">CalculateCanonicalClass(~g) : GrphRes -&gt;</A></H5>
+<BLOCKQUOTE>
+Calculate the canonical class supported on the resolution graph 
+g using the selfintersections
+of the E<sub>v</sub> and the assumption that the E<sub>v</sub> are nonsingular rational curves
+meeting transversely.
+Note that this calculation uses only the selfintersections already
+associated to g.
+</BLOCKQUOTE>
+<H5><A NAME = "15330">Disconnect(v,w) : GrphResVert, GrphResVert -&gt; GrphRes</A></H5>
+<BLOCKQUOTE>
+If v and w are vertices of a resolution graph g, return the resolution
+graph with any edge joining them removed.
+The resulting graph may well be disconnected.
+The only data preserved is the selfintersections and transverse intersections.
+</BLOCKQUOTE>
+<H5><A NAME = "15331">Component(v) : GrphResVert -&gt; GrphRes</A></H5>
+<BLOCKQUOTE>
+The connected component of the resolution graph containing vertex v.
+</BLOCKQUOTE>
+<H5><A NAME = "15332">CalculateMultiplicities(~g) : GrphRes -&gt;</A></H5>
+<BLOCKQUOTE>
+Calculate the pullback multiplicities of the resolution graph 
+g using the selfintersections
+of the E<sub>v</sub>, the assumption that the E<sub>v</sub> are nonsingular rational curves
+meeting transversely, and the number of transverse intersections of
+widetilde(C) with the E<sub>v</sub>.
+It is assumed that g is the resolution graph of a curve singularity
+during this calculation, although that need not be the case.
+In general there will be some choice of multiplicities.
+If g is the resolution of a curve singularity, and if the multiplicity
+of that singularity is cached, then the correct multiplicities can
+be identified: the multiplicity along the first blownup curve is the
+same as that of the singularity; the curve which was blown up first
+can be identified
+since it alone has canonical multiplicity 1.
+<P>
+However, if g arose as the resolution at infinity of two fibres of a pencil,
+for instance,
+the multiplicities calculated here would depend on which two fibres were used.
+The result would be the unique divisor supported on g which when added
+to the birational transform of the two affine fibre patches was linearly
+equivalent to the zero divisor.
+In particular, if the two fibres were general, the calculation here would
+return -2 times the fibre at infinity.
+Otherwise the calculation will return a combination of that and the
+exceptional components of irregular finite fibres.
+The intrinsic which calculates the regular resolution graph of a pencil
+already takes this into account.
+</BLOCKQUOTE>
+<H5><A NAME = "15333">CalculateTransverseIntersections(~g) : GrphRes -&gt;</A></H5>
+<BLOCKQUOTE>
+Calculate the number of transverse intersections of widetilde(C) with
+each E<sub>v</sub> on the basis of their selfintersection numbers and
+multiplicities in the resolution graph g.
+</BLOCKQUOTE>
+<H5><A NAME = "15334">ModifySelfintersection(~v,n) : GrphResVert,RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Change the selfintersection at vertex v of a resolution graph to n.
+</BLOCKQUOTE>
+<H5><A NAME = "15335">ModifyTransverseIntersection(~v,n) : GrphResVert,RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Change the number of transverse intersections at vertex 
+v of a resolution graph to n.
+</BLOCKQUOTE>
+<H4><A NAME = "15336">Numerical Data Associated to a  Graph</A></H4>
+
+<P>
+<P>
+The meaning of the data given here depends on the context in
+which the graph was created. The case already discussed of a
+configuration of rational curves arising from the resolution
+of a curve singularity is the prototype.
+<P>
+Many of these functions can also be applied to a single
+vertex of a graph: 
+<P>
+<P>
+<TT>Selfintersection</TT>, <TT>CanonicalMultiplicity</TT>
+and so on.
+
+
+<H5><A NAME = "15337">Size(g) : GrphRes -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The number of vertices of the underlying graph of the resolution graph g.
+Typically, this is the number of exceptional curves in the
+resolution.
+</BLOCKQUOTE>
+<H5><A NAME = "15338">SelfIntersections(g) : GrphRes -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The selfintersections of the vertices of the resolution graph g.
+</BLOCKQUOTE>
+<H5><A NAME = "15339">Multiplicities(g) : GrphRes -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The multiplicities of the vertices of the resolution graph g in some divisor.
+</BLOCKQUOTE>
+<H5><A NAME = "15340">CanonicalClass(g) : GrphRes -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The multiplicities of the vertices of the resolution graph g in a local representative
+of the canonical class.
+</BLOCKQUOTE>
+<H5><A NAME = "15341">TransverseIntersections(g) : GrphRes -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The number of transverse intersections of some curve (usually used
+to create g) with the vertices of the resolution graph g.
+</BLOCKQUOTE>
+<H5><A NAME = "15342">GenusContribution(g) : GrphRes -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The contribution to the genus of a plane curve of a singularity
+having g as its resolution graph.
+</BLOCKQUOTE>
+<H5><A NAME = "15343">CartanMatrix(g) : GrphRes -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+The incidence matrix of the (undirected) graph underlying the resolution graph g with
+selfintersections on the diagonal.
+</BLOCKQUOTE>
+<H5><A NAME = "15344">Determinant(g) : GrphRes -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+The determinant of the Cartan matrix of the resolution graph g.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text1375.htm">[Next]</A><A  HREF = "text1373.htm">[Prev]</A> <A  HREF = "text1375.htm">[Right]</A> <A  HREF = "text1373.htm">[Left]</A> <A  HREF = "text1372.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Creation of Automorphism  Groups</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text765.htm">[Next]</A><A  HREF = "text763.htm">[Prev]</A> <A  HREF = "text765.htm">[Right]</A> <A  HREF = "text763.htm">[Left]</A> <A  HREF = "text762.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "8761">Creation of Automorphism  Groups</A></H3>
+
+<P>
+<P>
+An automorphism group of the finite group G may be created in one of 
+two ways. Firstly, the full automorphism group of G may be constructed 
+by invoking an appropriate lifting algorithm. Secondly, an arbitrary
+group of automorphisms A of G may be created by giving a set of
+generators for A defined in terms of their action on a set of generators 
+for G.
+
+
+<H5><A NAME = "8762">AutomorphismGroup(G): Grp -&gt; GrpAuto</A></H5>
+<BLOCKQUOTE>
+Given a finite group G, construct the full automorphism group F of
+G.  The group G may be a permutation group, a (finite) matrix group 
+or a finite soluble group given by a pc-presentation.  The function 
+returns the full automorphism group of G as a group of mappings (i.e., 
+as a group of type <TT>GrpAuto</TT>). If G is a permutation or matrix 
+group, then the automorphism group F is also computed as a finitely 
+presented group and can be accessed via the function <TT>FPGroup(F)</TT>. 
+A function <TT>PermutationRepresentation</TT> is provided that when applied 
+to F attempts to construct a faithful permutation representation of 
+reasonable degree (see below).
+<P>
+<P>
+<PRE>
+     SmallOuterAutGroup: RngIntElt       Default: 20000
+</PRE>
+<TT>SmallOuterAutGroup := <I>t</TT></I>: Specify the strategy for the backtrack 
+search when testing an automorphism for lifting to the next layer. If the 
+outer automorphism group O at the previous level has order at most t, 
+then the regular representation of O is used, otherwise the program tries 
+to find a smaller degree permutation representation of O. 
+<P>
+<P>
+<PRE>
+     Print: RngIntElt                    Default: 0
+</PRE>
+The level of verbose printing. The possible values are 0, 1, 2 or 3.
+<P>
+<P>
+<PRE>
+     PrintSearchCount: RngIntElt         Default: 1000
+</PRE>
+<TT>PrintSearchCount := <I>s</TT></I>: If <TT>Print := <I>3</TT></I>, then a message 
+is printed at each s-th iteration during the backtrack search for lifting 
+automorphisms.
+<P>
+<P>
+<P>
+In the case of a non-soluble group, the algorithm described in Cannon
+and Holt <A  HREF = "text761.htm#bib_autos-permg">[CH03]</A> is used. If G is a p-group of type 
+<A  HREF = "text707.htm#GrpPC"> <TT>GrpPC</TT></A> the algorithm described in Eick, Leedham-Green and O'Brien 
+<A  HREF = "text761.htm#bib_elo-auts">[ELGO02]</A> is used.  For more details see Section <A  HREF = "text718.htm#8215">p-group</A>.
+If G is of type <A  HREF = "text707.htm#GrpPC"> <TT>GrpPC</TT></A> but is not a p-group, the algorithm 
+of Smith <A  HREF = "text761.htm#bib_smith-thesis">[Smi94]</A>, as extended by Smith and Slattery, is used. 
+For more details see Section <A  HREF = "text718.htm#8204">Automorphism Group</A>.
+<P>
+<P>
+<P>
+When G is a non-soluble permutation or matrix group, the algorithm
+relies on a database of automorphism groups for the non-cyclic simple
+factors of G, hence the non-abelian composition factors of G
+must belong to a restricted list. In V2.11 this list includes all
+simple groups of order at most 1.6times10<sup>7</sup>, the alternating groups
+of degree at most 1000, all groups from several generic families,
+including PSL(2, q), PSL(3, q), PSL(4, p), PSL(5, p), 
+PSU(3, p) and PSp(4, p) and the sporadic groups M<sub>11</sub>, M<sub>12</sub>, 
+M<sub>22</sub>, M<sub>23</sub>, M<sub>24</sub>, J<sub>1</sub>, J<sub>2</sub>, J<sub>3</sub>, HS, McL, Co3,
+He and others. The list is being extended regularly.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8763">Example <TT>GrpAuto_autogp-full (H72E1)</TT></A></H3>
+We create a non-soluble group G of 4 x 4 matrices defined over 
+the field of 8-th roots of unity and construct its automorphism group.
+<P>
+<P>
+<P>
+<PRE>
+&gt; L&lt;zeta_8&gt; := CyclotomicField(8);
+&gt; i := -zeta_8^2; 
+&gt; t := zeta_8^3;
+&gt; G := MatrixGroup&lt; 4, L |
+&gt;            [ 1/2, 1/2, 1/2, 1/2,  
+&gt;              1/2,-1/2, 1/2,-1/2,
+&gt;              1/2, 1/2,-1/2,-1/2,  
+&gt;              1/2,-1/2,-1/2, 1/2 ],
+&gt;            DiagonalMatrix( [1,1,1,-1] ), 
+&gt;            DiagonalMatrix( [1,i,1,i] ),
+&gt;            DiagonalMatrix( [t,t,t,t] ) &gt;;
+&gt; Order(G);
+92160
+&gt; CompositionFactors(G);
+    G
+    |  Cyclic(2)
+    *
+    |  Alternating(6)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    1
+&gt; A := AutomorphismGroup(G);
+&gt; Order(A);
+92160
+</PRE>
+<HR>
+<H5><A NAME = "8764">AutomorphismGroup(G, Q, I): Grp, SeqEnum[GrpElt], SeqEnum[SeqEnum[GrpElt]] -&gt; GrpAuto</A></H5>
+<BLOCKQUOTE>
+Let G be a finite group and let Q be a sequence of elements which 
+generate G. Let &phi;<sub>1</sub>, ..., &phi;<sub>r</sub> be a sequence of automorphisms 
+of G that generate the group of automorphisms A. The group A is 
+specified by a sequence I of length r where the i-th term of I 
+defines &phi;<sub>i</sub> in terms of a sequence containing the images of the elements 
+of Q under the action of &phi;<sub>i</sub>. The function returns the group of
+automorphisms A of G.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text765.htm">[Next]</A><A  HREF = "text763.htm">[Prev]</A> <A  HREF = "text765.htm">[Right]</A> <A  HREF = "text763.htm">[Left]</A> <A  HREF = "text762.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,135 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Creating Homomorphisms</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text881.htm">[Next]</A><A  HREF = "text879.htm">[Prev]</A> <A  HREF = "text881.htm">[Right]</A> <A  HREF = "text879.htm">[Left]</A> <A  HREF = "text875.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "10060">Creating Homomorphisms</A></H3>
+
+<P>
+<P>
+<P>
+Because SLP-groups exist primarily to allow the user to write efficient
+code for evaluating words under a homomorphism, there are some extra
+features in the homomorphism constructor which rely on the user
+providing correct input.
+<P>
+When evaluating single words, it may not be desirable to explicitly
+construct the homomorphism. The <TT>Evaluate</TT> function uses the same
+evaluation mechanism as the homomorphisms and may a useful alternative.
+
+
+<H5><A NAME = "10061">hom&lt; G -&gt; H | L: parameters&gt; : GrpSLP, Grp -&gt; Map</A></H5>
+
+<PRE>    CheckCodomain: BoolElt              Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Return the group homomorphism &phi; : G -&gt; H defined by the
+list L.  The list may contain:
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>Elements of the codomain.  This form can only be used when
+all the preceding entries have given the image of the corresponding
+generator of G;
+<DT>(ii)</DT><DD>Generator-image pairs of the form <TT>G.i -&gt; x</TT> or <TT>&lt;G.i, x&gt;</TT>; 
+<DT>(iii)</DT><DD>A homomorphism &psi; from an SLP-group B to H
+where G has
+been defined as a result of adding redundant generators to B.  If this
+item appears, it must appear first.  After the remaining generators have
+been processed, any images which are not yet assigned are computed
+from  &psi;.
+If the parameter <TT>CheckCodomain</TT> has the value <TT>false</TT>, then it is
+assumed that the generator images lie in the codomain.</DL>
+</BLOCKQUOTE>
+<H5><A NAME = "10062">Evaluate(u, Q) : GrpSLPElt, [ GrpElt ] -&gt; GrpElt</A></H5>
+<H5>Evaluate(u, G) : GrpSLPElt, Grp -&gt; GrpElt</H5>
+<H5>Evaluate(v, Q) : [ GrpSLPElt ], [ GrpElt ] -&gt; GrpElt</H5>
+<H5>Evaluate(v, G) : [ GrpSLPElt ], Grp -&gt; GrpElt</H5>
+<BLOCKQUOTE>
+Evaluate the word u using the elements of Q as images of the
+generators of the parent of u. The sequence Q must contains at least as 
+many group elements as the parent of u has generators.
+<P>
+The second form evaluates all the words in v simultaneously, which is
+usually quicker than doing individual evaluations.
+<P>
+When the second argument is a group G, Q is taken as the sequence of
+generators of G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "10063">Example <TT>GrpSLP_ConstructingHomomorphisms (H81E2)</TT></A></H3>
+An illustration of the use of <TT>AddRedundantGenerators</TT> and the
+homomorphism constructing machinery.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := SLPGroup(2);
+&gt; M := GeneralLinearGroup(19, 7);
+&gt; P := RandomProcess(G);
+&gt; x := Random(P);
+&gt; #x;
+74
+</PRE>
+We evaluate x im M using the <TT>Evaluate</TT> function.
+<P>
+<P>
+<PRE>
+&gt; m := Evaluate(x, [M.1, M.2]);
+&gt; Order(m);
+118392315154200
+</PRE>
+If we wish to evaluate several different words, we may be better off
+using a homomorphism.
+<P>
+<P>
+<PRE>
+&gt; Q := [x^G.1, x^G.2, x^(G.1*G.2)];
+&gt; phi := hom&lt;G -&gt; M | M.1, M.2&gt;;
+&gt; time R1 := phi(Q);
+Time: 0.129
+</PRE>
+<P>
+<P>
+We note that x has become important since it is now a common
+sub-expression of several straight-line programs.  We can build
+a homomorphism which will store the image of x by adding x
+as a redundant generator and defining the same homomorphism
+from the resulting group.
+<P>
+<P>
+<P>
+<PRE>
+&gt; H := AddRedundantGenerators(G, [x]);
+&gt; QQ := [H | x: x in Q];
+</PRE>
+We will define psi as the unique map on H which matches phi.
+<P>
+<P>
+<PRE>
+&gt; psi := hom&lt;H -&gt; M | phi&gt;;
+&gt; time R2 := psi(QQ);
+Time: 0.000
+&gt; R1 eq R2;
+true
+</PRE>
+<P>
+In fact, if we had looked at the expression lengths of the straight-line
+programs involved, we would have found the following, which explains
+the significant speed up:
+<P>
+<P>
+<P>
+<PRE>
+&gt; [#x: x in Q];
+[ 75, 75, 75 ]
+&gt; [#x: x in QQ];
+[ 1, 1, 2 ]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text881.htm">[Next]</A><A  HREF = "text879.htm">[Prev]</A> <A  HREF = "text881.htm">[Right]</A> <A  HREF = "text879.htm">[Left]</A> <A  HREF = "text875.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

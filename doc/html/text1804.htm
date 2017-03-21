@@ -1,0 +1,778 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Automorphism Group of a  Graph or Digraph</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1805.htm">[Next]</A><A  HREF = "text1803.htm">[Prev]</A> <A  HREF = "text1805.htm">[Right]</A> <A  HREF = "text1803.htm">[Left]</A> <A  HREF = "text1782.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "19972">Automorphism Group of a  Graph or Digraph</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+The automorphism group functionality is an interface to B. McKay's
+<a  href="http://cs.anu.edu.au/~bdm/nauty/">nauty</a> V 2.6 program.
+For a paper describing <TT>nauty</TT> see <A  HREF = "text1781.htm#bib_bdm_nauty_paper">[McK81]</A>.
+There also exists a user's manual <A  HREF = "text1781.htm#bib_bdm_nauty_manual">[McK]</A>
+describing <TT>nauty</TT>'s essential features.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1804.htm#19973">The Automorphism Group Function</A>
+<LI> <A  HREF = "text1804.htm#19975"><TT>nauty</TT> Invariants</A>
+<LI> <A  HREF = "text1804.htm#19977">Graph Colouring and  Automorphism Group</A>
+<LI> <A  HREF = "text1804.htm#19978">Variants of Automorphism Group</A>
+<LI> <A  HREF = "text1804.htm#19984">Action of Automorphisms</A>
+</UL>
+<H4><A NAME = "19973">The Automorphism Group Function</A></H4>
+
+
+
+<H5><A NAME = "19974"></A><A NAME = "Graph:AutomorphismGroup">AutomorphismGroup</A>(G : parameters) : Grph -&gt; GrpPerm, GSet, GSet, PowMap, Map, Grph</H5>
+<BLOCKQUOTE>
+Compute the automorphism group of the graph G.  This returns the group A,
+the vertex and edge G-sets (in that order), the power structure (A)
+of all automorphisms of G, and the transfer map from A to (A).
+Note that G may be
+directed or undirected.  For small graphs (i.e. having less than 500
+vertices) the canonically labelled graph is also returned.
+<P>
+The automorphism group computation may be driven by 
+  several user parameters.
+There are four principal parameters:
+<TT>Canonical</TT>, <TT>Stabilizer</TT>, <TT>Invariant</TT> and <TT>Print</TT>. 
+Some of these parameters have associated parameters.
+<P>
+<P>
+<PRE>
+     Canonical: BoolElt                  Default: {<TT>false</TT>}
+</PRE>
+If the parameter <TT>Canonical</TT> is set to <TT>true</TT>, then the canonically
+labelled graph will be returned. If the graph has fewer than 500
+vertices then the default value for this parameter is <TT>true</TT>, while
+if the graph has 500 or more vertices, the default value is <TT>false</TT>.
+It is important to note that the canonically labelled graph 
+  is <I>dependent</I> upon all the parameters used to
+  compute the automorphism group.
+<P>
+<P>
+<PRE>
+     Stabilizer: [ { GrphVert } ]        Default: 
+</PRE>
+If the parameter <TT>Stabilizer</TT> is assigned a partition P of the
+vertex-set of G as its value, then the subgroup of the automorphism
+group of G that preserves the partition P will be computed. 
+The partition given as <TT>Stabilizer</TT> need not be a partition
+  of the full vertex-set of G.
+Any vertices not covered by the sets in <TT>Stabilizer</TT> are assumed 
+  to belong to an extra partition cell.
+<P>
+<P>
+<P>
+<PRE>
+     Invariant: MonStgElt                Default: 
+</PRE>
+Use the named invariant to assist the auto group
+computation. The invariant is specified by a string
+which is the name of a C function computing
+an invariant, as on pages 16--17 of the <TT>nauty</TT>
+manual <A  HREF = "text1781.htm#bib_bdm_nauty_manual">[McK]</A>.
+The default value for <TT>Invariant</TT> is 
+  <TT>"Null"</TT>  when G is an undirected graph,
+  or <TT>"adjacencies"</TT> when G is a digraph.
+For a more detailed discussion on invariants
+  see Subsection <A  HREF = "text1804.htm#19975"><TT>nauty</TT> Invariants</A>.
+<P>
+There are three optional associated parameters to <TT>Invariant</TT>:
+<P>
+<P>
+<PRE>
+     Minlevel: RngIntElt                 Default: 0
+</PRE>
+<P>
+<PRE>
+     Maxlevel: RngIntElt                 Default: 
+</PRE>
+<P>
+<PRE>
+     Arg: RngIntElt                      Default: 
+</PRE>
+An expression, depending upon the type of invariant.
+When G is undirected these three parameters take the values 
+  0, 1, and 0   respectively.
+When G is a digraph they take the values 0, 2, and 0 respectively.
+When <TT>Invariant</TT> is one of 
+"indsets", "cliques", "cellcliq", or "cellind",
+  the default value for <TT>Arg</TT> is 3.
+Again, see Subsection <A  HREF = "text1804.htm#19975"><TT>nauty</TT> Invariants</A> 
+  for more information.
+<P>
+<P>
+<P>
+<P>
+<P>
+<PRE>
+     Print: RngIntElt                    Default: 0
+</PRE>
+The integer valued parameter <TT>Print</TT> is used to control informative
+printing according to the following table:
+<P>
+<P>
+<TT>Print := 0</TT> : No output (default).
+<P>    
+<TT>Print := 1</TT> : Statistics are printed.
+<P>    
+<TT>Print := 2</TT> : Summary upon completion of each level.
+<P>    
+<TT>Print := 3</TT> : Print the automorphisms as they are discovered.
+<P>
+<P>
+<PRE>
+     IgnoreLabels: BoolElt               Default: <TT>false</TT>
+</PRE>
+By default, the automorphism group computation respects vertex labels
+  (colours).
+That is, elements of the group will only take a vertex to an identically
+labelled vertex.  
+The Boolean value <TT>IgnoreLabels</TT> will treat all
+vertices as identically labelled for the purposes of this computation.
+</BLOCKQUOTE>
+<H4><A NAME = "19975"><TT>nauty</TT> Invariants</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+Invariants can be used to supplement the built-in
+partition refinement code in <TT>nauty</TT>, to assist in the processing
+of difficult graphs.  Invariants are used with three parameters:
+<P>
+  <TT>Minlevel</TT>: the minimum depth in the search tree at which
+            an invariant is to be applied (default 0)
+<P>
+  <TT>Maxlevel</TT>: the maximum depth in the search tree at which
+             an invariant is to be applied (default 1 for undirected
+	graphs and 2 for digraphs)
+<P>
+  <TT>Arg</TT>: an integer argument which has a different meaning
+             (or no meaning) for each invariant
+<P>
+The root of the tree, corresponding to the partition provided by
+the user, has level 1.  Note that the invariants use an existing
+partition and attempt to refine it.  Thus it can be that an
+invariant fails to refine the partition at the root of the search
+tree but succeeds further down the tree.  In particular, all
+invariants necessarily fail at the root of the tree if the graph
+is vertex-transitive.
+<P>
+The invariants are :
+<P>
+<DL COMPACT class='compact'>
+<DT></DT><DD><TT>"default"</TT>
+<DT></DT><DD>Default --- No invariant is used.
+<P>
+<P>
+<DT></DT><DD><TT>"twopaths"</TT>
+<DT></DT><DD>Each vertex is classified according to the vertices reachable from 
+  along a path of length 2.  This is a cheap invariant sometimes 
+  useful for regular graphs.  <TT>Arg</TT> is not used.
+<P>
+<DT></DT><DD><TT>"adjtriang"</TT>
+<DT></DT><DD>This counts the number of common neighbours between pairs of
+  adjacent (if <TT>Arg</TT> = 0) or non--adjacent (if <TT>Arg</TT> = 1) vertices.
+  This is a fairly cheap invariant which can often work for
+  strongly regular graphs.
+<P>
+<DT></DT><DD><TT>"triples"</TT>
+<DT></DT><DD>This considers in detail the neighbourhoods of each triple of
+  vertices.  It often works for strongly regular graphs that
+  <TT>"adjtriang"</TT> fails on, but is more expensive.  <TT>Arg</TT> is not used.
+<P>
+<DT></DT><DD><TT>"quadruples"</TT>
+<DT></DT><DD>Similar to triples but using quadruples of vertices.  Much more
+  expensive but can work on graphs with highly regular structure
+  that <TT>"triples"</TT> fails on.  <TT>Arg</TT> is not used.
+<P>
+<DT></DT><DD><TT>"celltrips"</TT>
+<DT></DT><DD>Like <TT>"triples"</TT>, but only triples inside one cell are used.  One to
+  try for the bipartite incidence graphs of structures like block
+  designs (but won't work for projective planes).  <TT>Arg</TT> is not used.
+<P>
+<DT></DT><DD><TT>"cellquads"</TT>
+<DT></DT><DD>Like <TT>"quadruples"</TT>, but only quadruples inside one cell are used.
+  Originally designed for some exceptional graphs derived from
+  Hadamard matrices (where applying it at level 2 is best).
+  <TT>Arg</TT> is not used.
+<P>
+<DT></DT><DD><TT>"cellquins"</TT>
+<DT></DT><DD>Considers 5-tuples of vertices inside a cell.  Very expensive.
+  We don't know of a good application.  <TT>Arg</TT> is not used.
+<P>
+<DT></DT><DD><TT>"cellfano"</TT>
+<DT></DT><DD><TT>"cellfano2"</TT>
+<DT></DT><DD>These are intended for the bipartite graphs of projective planes
+  and similar highly regular structures.  <TT>"cellfano2"</TT> is cheaper, so
+  try it first.  <TT>Arg</TT> is not used.  The method is similar to counting
+  Fano subplanes.
+<P>
+<DT></DT><DD><TT>"distances"</TT>
+<DT></DT><DD>This uses the distance matrix of the graph.  It is good at 
+  partitioning general regular graphs (but not strongly regular
+  graphs).  Moderately cheap.  <TT>Arg</TT> is unused.
+<P>
+<DT></DT><DD><TT>"indsets"</TT>
+<DT></DT><DD>This uses the independent sets of size <TT>Arg</TT> (default 3).  Can be
+  successful for strongly regular graphs (for <TT>Arg</TT> &ge;4) or regular
+  bipartite graphs.
+<P>
+<DT></DT><DD><TT>"cliques"</TT>
+<DT></DT><DD>This uses the cliques of size <TT>Arg</TT> (default 3).  Can be successful
+  for strongly regular graphs (for <TT>Arg</TT> &ge;4).
+<P>
+<DT></DT><DD><TT>"cellind"</TT>
+<DT></DT><DD>This uses the independent sets of size <TT>Arg</TT> (default 3) that lie
+  entirely within one cell of the partition.  Try applying at level 2
+  for difficult vertex-transitive graphs.
+<P>
+<DT></DT><DD><TT>"cellcliq"</TT>
+<DT></DT><DD>This uses the cliques of size <TT>Arg</TT> (default 3) that lie entirely
+  within one cell of the partition. Try applying at level 2 for
+  difficult vertex-transitive graphs.
+<P>
+<DT></DT><DD><TT>"adjacencies"</TT>
+<DT></DT><DD>This is a simple invariant that corrects for a deficiency in the
+  built-in partition refinement procedure for directed graphs.  It is
+  the default in Magma for directed graphs.  Apply at a few levels,
+  say levels 1 - 5.  <TT>Arg</TT> is unused.
+<P>
+<P>
+<P>
+</DL>
+These invariants are further described 
+ on pages 16--17 of the <TT>nauty</TT> manual <A  HREF = "text1781.htm#bib_bdm_nauty_manual">[McK]</A>.
+Also, we provide a facility enabling users to test 
+  if a specific <TT>Invariant</TT> achieves a partition refinement
+  for a graph G.
+
+
+<H5><A NAME = "19976">IsPartitionRefined(G: parameters) : Grph -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only the invariant in <TT>Invariant</TT>
+  could refine the graph G's vertex-set partition.
+If no invariant is set in <TT>Invariant</TT> then the refinement
+  procedure which is tested is taken to be the 
+  default one.
+<P>
+Four parameters can be passed:
+<P>
+<P>
+<PRE>
+     Stabilizer: [ { Vert } ]            Default: 
+</PRE>
+<P>
+<PRE>
+     Invariant: MonStgElt                Default: 
+</PRE>
+<P>
+<PRE>
+     Arg: RngIntElt                      Default: 
+</PRE>
+<P>
+<PRE>
+     IgnoreLabels: BoolElt               Default: <TT>false</TT>
+</PRE>
+The parameters have the same meaning as for <A  HREF = "text1804.htm#Graph:AutomorphismGroup">AutomorphismGroup</A>.
+<P>
+<P>
+</BLOCKQUOTE>
+<H4><A NAME = "19977">Graph Colouring and  Automorphism Group</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+For any calls to <TT>nauty</TT> via Magma functions 
+  the graph colouring of a graph G 
+  (as set by <A  HREF = "text1813.htm#MultiGraph:AssignLabels">AssignLabels</A> or 
+  a similar function) is taken as an <I>intrinsic</I>
+  property of G.
+Consequently, the default automorphism group 
+  computed by <TT>nauty</TT> is the group for the coloured graph G.
+In particular this implies that, when G is coloured, 
+  this default automorphism group is <I>not</I>
+  G's full automorphism group.
+<P>
+<P>
+There are several Magma functions which make use of the 
+  automorphism group of a graph, and therefore rely 
+  on a call to <TT>nauty</TT>.
+We list them here:
+<P>
+<DL COMPACT class='compact'>
+<DT>1</DT><DD><TT>Diameter</TT>,
+<TT>DiameterPath</TT>,
+<TT>IsDistanceRegular</TT>,
+<TT>GirthCycle</TT>,
+<TT>Girth</TT>
+<P>
+<DT>2</DT><DD><TT>IsDistanceTransitive</TT>,
+<TT>IsTransitive</TT>,
+<TT>IsPrimitive</TT>,
+<TT>IsSymmetric</TT>, 
+<TT>IsIsomorphic</TT>,
+<TT>IsEdgeTransitive</TT>,
+<TT>EdgeGroup</TT>,
+<TT>OrbitsPartition</TT>,
+<TT>CanonicalGraph</TT>
+<P>
+<P>
+<P>
+</DL>
+The functions in Group 1 make use of the automorphism group
+  of the graph only as a means to improve efficiency.
+If some group has already been computed for the graph
+  under consideration then this group will be used.
+Otherwise the graph's default group is computed.
+<P>
+The functions in Group 2 all use the graph's default group.
+If a group A of the graph G has already been computed 
+  but is not G's default group (for example if 
+  a stabilizer of G was given when computing A)
+  then the graph's default group will be computed.
+Consequently, as an example, if G is coloured, <TT>IsTransitive(G)</TT>
+  will (always) return <TT>false</TT>.
+<P>
+For all these functions it is possible to drive 
+    the group computation by setting an appropriate <TT>Invariant</TT>
+    parameter.
+This is particularly useful when it is known 
+   that some invariant will speed up the group computation.
+This is achieved by first computing the group using
+    <A  HREF = "text1804.htm#Graph:AutomorphismGroup">AutomorphismGroup</A> while setting <TT>Invariant</TT>.
+This parameter is then remembered for any further (re)computation
+  of the default automorphism group, unless reset by a subsequent 
+  call to <TT>AutomorphismGroup</TT>.
+For convenience, the function <TT>IsIsomorphic</TT> accepts a parameter
+  suite very similar to that of the <TT>AutomorphismGroup</TT> function:
+  It is particularly useful when stabilizers need to be set.
+
+
+<H4><A NAME = "19978">Variants of Automorphism Group</A></H4>
+
+
+
+<H5><A NAME = "19979">CanonicalGraph(G) : Grph -&gt; Grph</A></H5>
+<BLOCKQUOTE>
+Given a graph G, return the canonically labelled graph isomorphic
+to G. 
+To see which automorphism group is computed see 
+    Subsection <A  HREF = "text1804.htm#19977">Graph Colouring and  Automorphism Group</A>.
+Users should be aware that the canonical graph is <I>dependent</I>
+  upon the invariant used when computing the automorphism group.
+Thus, the computation of the automorphism group of G 
+  using different invariants will produce
+  <I>different</I> canonical labellings.
+</BLOCKQUOTE>
+<H5><A NAME = "19980">EdgeGroup(G) : Grph -&gt; GrpPerm, GSet</A></H5>
+<BLOCKQUOTE>
+Returns the automorphism group of the graph G in its action on the
+edges of G, and the G-set of edges of G.
+To see which automorphism group is computed see 
+    Subsection <A  HREF = "text1804.htm#19977">Graph Colouring and  Automorphism Group</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "19981">IsIsomorphic(G, H : parameters ) : GrphDir, GrphDir -&gt; BoolElt, Map</A></H5>
+<H5>IsIsomorphic(G, H : parameters ) : GrphUnd, GrphUnd -&gt; BoolElt, Map</H5>
+<BLOCKQUOTE>
+This function returns <TT>true</TT> if the graphs G and H are isomorphic.
+If G and H are isomorphic, a second value is returned, namely a mapping
+between the vertices of G and the vertices of H giving the
+isomorphism.
+<P>
+The parameters accepted by <TT>IsIsomorphic</TT> are almost the same
+  as for <BR> 
+  <A  HREF = "text1804.htm#Graph:AutomorphismGroup">AutomorphismGroup</A>.
+The exceptions are:
+<P>
+<P>
+<PRE>
+     Stabilizer: [ { Vert } ]            Default: 
+</PRE>
+This sets the stabilizer set for <I>both</I> graphs G and H.
+If one wishes to set two distinct stabilizers then one would also use:
+<P>
+<P>
+<PRE>
+     Stabilizer2: [ { Vert } ]           Default: 
+</PRE>
+This sets the stabilizer set for the second graph H only.
+<P>
+<P>
+<P>
+<PRE>
+     IgnoreLabels: BoolElt               Default: <TT>false</TT>
+</PRE>
+This indicates whether or not to ignore the graph labelling 
+  for <I>both</I> graphs G and H.
+<P>
+Graph isomorphism is understood as mapping colours to colours
+  and stabilizers to stabilizers.
+Consequently comparing two graphs for isomorphism will always 
+  return <TT>false</TT> if one graph is coloured while the other one is not.
+Similarly two graphs can't be isomorphic if each is coloured
+  using a different set of colours.
+Moreover, it is a <TT>nauty</TT> requirement that in order 
+  to achieve mapping of stabilizers they must be compatible:
+  that is, they <I>must</I> have same-sized cells in the same order.
+<P>
+In general, to see which and how the graphs' automorphism groups 
+    are computed  see 
+    Subsection <A  HREF = "text1804.htm#19977">Graph Colouring and  Automorphism Group</A>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19982">Example <TT>Graph_AutomorphismGroup (H155E18)</TT></A></H3>
+We provide a very simple example of the use 
+  of <TT>AutomorphismGroup</TT> which shows how the automorphism
+  group and the corresponding canonical graph differ
+  depending on the labelling of the graph
+  and of the stabilizer given, if any.
+<P>
+<P>
+<PRE>
+&gt; G := Graph&lt;5 | { {1,2}, {2,3}, {3,4}, {4,5}, {5,1} }&gt;;
+&gt;  
+&gt; AssignLabels(VertexSet(G), ["a", "b", "a", "b", "b"]);
+&gt; A, _, _, _, _, C1 := AutomorphismGroup(G);
+&gt; A;
+Permutation group A acting on a set of cardinality 5
+Order = 2
+  (1, 3)(4, 5)
+&gt; C1;
+Graph
+Vertex  Neighbours
+
+1       3 5 ;
+2       4 5 ;
+3       1 4 ;
+4       2 3 ;
+5       1 2 ;
+
+&gt; B, _, _, _, _, C2 := AutomorphismGroup(G : IgnoreLabels := true);
+&gt; B;
+Permutation group B acting on a set of cardinality 5
+Order = 10 = 2 * 5
+  (2, 5)(3, 4)
+  (1, 2)(3, 5)
+&gt; C2;
+Graph
+Vertex  Neighbours
+
+1       2 3 ;
+2       1 4 ;
+3       1 5 ;
+4       2 5 ;
+5       3 4 ;
+
+&gt; C, _, _, _, _, C3 := AutomorphismGroup(G : Stabilizer :=
+&gt; [ { VertexSet(G) | 1, 2 } ]);
+&gt; C;
+Permutation group C acting on a set of cardinality 5
+&gt; #C;
+1
+&gt; C3;
+Graph
+Vertex  Neighbours
+
+1       3 4 ;
+2       3 5 ;
+3       1 2 ;
+4       1 5 ;
+5       2 4 ;
+</PRE>
+We now check that the graph returned by <TT>CanonicalGraph</TT>
+  is identical to C<sub>1</sub>:
+<P>
+<P>
+<PRE>
+&gt; C4 := CanonicalGraph(G);
+&gt; C4 eq C1;
+true
+</PRE>
+<HR>
+<H3><A NAME = "19983">Example <TT>Graph_GraphIsomorphim (H155E19)</TT></A></H3>
+These two examples should help clarify how <TT>IsIsomorphic</TT>
+  behaves for graphs for which a colouring is defined.
+The first example shows that two graphs cannot be isomorphic
+  if one is coloured while the other is not.
+This example also demonstrates the use of stabilizers.
+<P>
+<P>
+<PRE>
+&gt; G1 := CompleteGraph(5);
+&gt; AssignLabels(VertexSet(G1), ["a", "a", "b", "b", "b"]);
+&gt; G2 := CompleteGraph(5);
+&gt; IsIsomorphic(G1, G2);
+false
+&gt; IsIsomorphic(G1, G2 : IgnoreLabels := true);
+true
+&gt; 
+&gt; V1 := Vertices(G1);
+&gt; V2 := Vertices(G2);
+&gt; S1 := { V1 | 1, 2, 3};
+&gt; S2 := { V2 | 3, 4, 5};
+&gt;
+&gt; IsIsomorphic(G1, G2 : Stabilizer := [S1],
+&gt;       Stabilizer2 := [S2]);
+false
+&gt; IsIsomorphic(G1, G2 : Stabilizer := [S1],
+&gt;       Stabilizer2 := [S2], IgnoreLabels := true);
+true
+&gt; IsIsomorphic(G1, G2 : Stabilizer := [S1],
+&gt; IgnoreLabels := true);
+true
+&gt;
+&gt; SS1 := [ { V1 | 1}, {V1 | 2, 3} ];
+&gt; SS2 := [ { V2 | 3, 4}, { V2 | 1} ];
+&gt; IsIsomorphic(G1, G2 : Stabilizer := SS1, Stabilizer2 := SS2,
+&gt; IgnoreLabels := true);
+false
+&gt; 
+&gt; SS1 := [ {V1 | 2, 3}, { V1 | 1} ];
+&gt; IsIsomorphic(G1, G2 : Stabilizer := SS1, Stabilizer2 := SS2,
+&gt; IgnoreLabels := true);
+true
+</PRE>
+The second example shows that two graphs are isomorphic if and only 
+  if colours map to the <I>same</I> colours.
+<P>
+<P>
+<PRE>
+&gt; G1 := CompleteGraph(5);
+&gt; AssignLabels(VertexSet(G1), ["b", "b", "b", "a", "a"]);
+&gt; G2 := CompleteGraph(5);
+&gt; AssignLabels(VertexSet(G2), ["a", "a", "b", "b", "b"]);
+&gt; IsIsomorphic(G1, G2);
+true
+&gt; 
+&gt; G1 := CompleteGraph(5);
+&gt; AssignLabels(VertexSet(G1), ["a", "b", "b", "c", "c"]);
+&gt; G2 := CompleteGraph(5);
+&gt; AssignLabels(VertexSet(G2), ["a", "c", "b", "b", "c"]);
+&gt; IsIsomorphic(G1, G2);
+true
+&gt; 
+&gt; G1 := CompleteGraph(5);
+&gt; G2 := CompleteGraph(5);
+&gt; AssignLabels(VertexSet(G1), ["a", "a", "b", "b", "b"]);
+&gt; AssignLabels(VertexSet(G2), ["b", "b", "a", "a", "a"]);
+&gt; IsIsomorphic(G1, G2);
+false
+&gt; IsIsomorphic(G1, G2 : IgnoreLabels := true);
+true
+&gt; 
+&gt; G1 := CompleteGraph(5);
+&gt; AssignLabels(VertexSet(G1), ["b", "b", "b", "a", "a"]);
+&gt; G2 := CompleteGraph(5);
+&gt; AssignLabels(VertexSet(G2), ["b", "b", "c", "c", "c"]);
+&gt; IsIsomorphic(G1, G2);
+false
+&gt; IsIsomorphic(G1, G2 : IgnoreLabels := true);
+true
+</PRE>
+<HR>
+<H4><A NAME = "19984">Action of Automorphisms</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+The automorphism group A of a graph G is given in its action 
+on the standard support and it does not act directly on G. The 
+action of A on G is obtained using the G-set mechanism. 
+The two basic G-sets associated with the graph correspond to the 
+action of A on the set of vertices V and the set of edges V 
+of G. These two G-sets are given as return values of the function 
+<TT>AutomorphismGroup</TT> or may be constructed directly. Additional 
+G-sets associated with a graph may be built using the G-set 
+constructors. Given a G-set Y for A, the action of A on 
+Y may be studied using the permutation group functions that 
+allow a G-set as an argument
+In this section, only a few of the available functions are 
+described: see the section on G-sets for a complete list.
+
+
+<H5><A NAME = "19985">Image(a, Y, y) : GrpPermElt, GSet, Elt -&gt; Elt</A></H5>
+<BLOCKQUOTE>
+Let a be an element of the automorphism group A for the graph G
+and let Y be a G-set for A. Given an element y belonging 
+either to Y or to a G-set derived from Y, find the image of 
+y under a. 
+</BLOCKQUOTE>
+<H5><A NAME = "19986">Orbit(A, Y, y) : GrpPerm, GSet, Elt -&gt; GSet</A></H5>
+<BLOCKQUOTE>
+Let A be a subgroup of the automorphism group for the graph G 
+and let Y be a G-set for A. Given an element y belonging 
+either to Y or to a G-set derived from Y, construct the orbit 
+of y under A. 
+</BLOCKQUOTE>
+<H5><A NAME = "19987">Orbits(A, Y) : GrpPerm, GSet -&gt; [ GSet ]</A></H5>
+<BLOCKQUOTE>
+Let A be a subgroup of the automorphism group for the graph
+G and let Y be a G-set for G. This function constructs 
+the orbits of the action of A on Y.
+</BLOCKQUOTE>
+<H5><A NAME = "19988">Stabilizer(A, Y, y) : GrpPerm, GSet, Elt -&gt; GrpPerm</A></H5>
+<BLOCKQUOTE>
+Let A be a subgroup of the automorphism group for the graph G 
+and let Y be a G-set for A. Given an element y belonging 
+either to Y or to a G-set derived from Y, construct the 
+stabilizer of y in A. 
+</BLOCKQUOTE>
+<H5><A NAME = "19989">Action(A, Y) : GrpPerm, GSet -&gt; Hom(Grp), GrpPerm, GrpPerm</A></H5>
+<BLOCKQUOTE>
+Given a subgroup A of the automorphism group of the graph G,
+and a G-set Y for A, construct the homomorphism 
+&phi;: A -&gt; L, where the permutation group L gives 
+the action of A on the set Y.  The function returns:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>The natural homomorphism &phi;: A -&gt; L;
+<DT>(b)</DT><DD>The induced group L;
+<DT>(c)</DT><DD>The kernel of the action (a subgroup of A).</DL>
+</BLOCKQUOTE>
+<H5><A NAME = "19990">ActionImage(A, Y) : GrpPerm, GSet -&gt; GrpPerm</A></H5>
+<BLOCKQUOTE>
+Given a subgroup A of the automorphism group of the graph
+structure G, and a G-set Y for A, construct the 
+permutation group L giving the action of A on the set Y.
+</BLOCKQUOTE>
+<H5><A NAME = "19991">ActionKernel(A, Y) : GrpPerm, GSet -&gt; GrpPerm</A></H5>
+<BLOCKQUOTE>
+Given a subgroup A of the automorphism group of the graph G, 
+and a G-set Y for A, construct the kernel of the action of 
+A on the set Y.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19992">Example <TT>Graph_AutomorphismAction (H155E20)</TT></A></H3>
+We construct the Clebsch graph (a strongly regular graph) and 
+investigate the action of its automorphism group.
+<P>
+<P>
+<PRE>
+&gt; S := { 1 .. 5 };
+&gt; V := &amp;join[ Subsets({1..5}, 2*k) : k in [0..#S div 2]];
+&gt; E := { {u,v} : u,v in V | #(u sdiff v) eq 4 };
+&gt; G, V, E := StandardGraph( Graph&lt; V | E &gt;);
+&gt; G;                                                                   
+Graph
+Vertex  Neighbours
+
+1       4 6 8 10 12 ;
+2       5 6 9 12 14 ;
+3       9 10 12 13 16 ;
+4       1 7 9 14 16 ;
+5       2 7 8 10 16 ;
+6       1 2 13 15 16 ;
+7       4 5 12 13 15 ;
+8       1 5 9 11 13 ;
+9       2 3 4 8 15 ;
+10      1 3 5 14 15 ;
+11      8 12 14 15 16 ;
+12      1 2 3 7 11 ;
+13      3 6 7 8 14 ;
+14      2 4 10 11 13 ;
+15      6 7 9 10 11 ;
+16      3 4 5 6 11 ;
+&gt; A, AV, AE := AutomorphismGroup(G);
+&gt; A;
+Permutation group aut acting on a set of cardinality 16
+Order = 1920 = 2^7 * 3 * 5
+    (2, 15)(5, 11)(7, 14)(10, 12)
+    (3, 11)(8, 10)(9, 14)(13, 15)
+    (2, 11)(5, 15)(6, 8)(9, 16)
+    (2, 7)(4, 6)(9, 13)(14, 15)
+    (1, 2, 13, 15)(3, 11, 4, 5)(7, 10, 12, 14)(8, 9)
+&gt; CompositionFactors(A);
+    G
+    |  Cyclic(2)
+    *
+    |  Alternating(5)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    1
+&gt; IsPrimitive(A);                                                    
+true
+</PRE>
+From the composition factors we guess that the group is Sym(5)
+extended by the elementary abelian group of order 16. Let us 
+verify this and relate it to the graph. We begin by trying to get
+at the group of order 16. We ask for the Fitting subgroup.
+<P>
+<P>
+<PRE>
+&gt; F := FittingSubgroup(A);
+&gt; F;
+Permutation group F acting on a set of cardinality 16
+Order = 16 = 2^4
+    (1, 13)(2, 11)(3, 4)(5, 15)(6, 8)(7, 10)(9, 16)(12, 14)
+    (1, 10)(2, 9)(3, 12)(4, 14)(5, 8)(6, 15)(7, 13)(11, 16)
+    (1, 11)(2, 13)(3, 5)(4, 15)(6, 14)(7, 9)(8, 12)(10, 16)
+    (1, 12)(2, 6)(3, 10)(4, 7)(5, 16)(8, 11)(9, 15)(13, 14)
+</PRE>
+Since A is primitive, this looks as if it is an elementary 
+abelian regular normal subgroup:
+<P>
+<P>
+<PRE>
+&gt; EARNS(A) eq F;
+true
+</PRE>
+Thus, A has a regular normal subgroup N of order 16 which
+acts transitively on the vertices.  Therefore, the stabilizer of
+any point is a complement of N.
+<P>
+<P>
+<PRE>
+&gt; S1 := Stabilizer(A, AV, V!1);
+&gt; #S1;
+120
+&gt; IsTransitive(S1);
+false
+&gt; Orbits(S1);
+[
+    GSet{@ 1 @},
+    GSet{@ 3, 7, 9, 11, 15 @},
+    GSet{@ 2, 5, 4, 14, 16, 6, 13, 12, 8, 10 @}
+]
+&gt; exists(orbit){x : x in Orbits(S1) | #x eq 5};
+true
+&gt; orbit;
+GSet{@ 3, 7, 9, 11, 15 @}
+&gt; IsSymmetric(ActionImage(S1, orbit));
+true
+</PRE>
+So the stabilizer of the vertex 1 is Sym(5), acting
+faithfully on the 5 neighbours of vertex 1.
+<HR>
+<PRE></PRE> <A  HREF = "text1805.htm">[Next]</A><A  HREF = "text1803.htm">[Prev]</A> <A  HREF = "text1805.htm">[Right]</A> <A  HREF = "text1803.htm">[Left]</A> <A  HREF = "text1782.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

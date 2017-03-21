@@ -1,0 +1,87 @@
+// Gamma function
+// values on positive integers.
+
+for i in [1 .. 10] do
+    if Norm(Gamma(R!i) - Factorial(i - 1)) gt epsilon then
+	print "ERROR: Gamma(posint)", i, Norm(Gamma(R!i) - Factorial(i - 1));
+    end if;
+end for;
+
+// values on integer + half
+for i in [-10 .. 10] do
+    if Norm(GammaD(R!i) - Gamma(i + half)) gt epsilon then
+	print "ERROR: Gamma(int+half)", i, Norm(GammaD(R!i) - Gamma(i + half));
+    end if;
+end for;
+
+// Incomplete Gamma function(s)
+for i in [1 .. 10] do
+    ri := R!i;
+    for y in [-10 .. 10] do
+	ry := R!y;
+	g := Gamma(ri);
+	g0 := Gamma(ri, ry);
+	g3 := Gamma(ri, ry: Complementary);
+	if Norm(g - g0 - g3) gt epsilon then
+	    print "ERROR: Gamma vs Gamma0+Gamma3", Norm(g - g0 - g3);
+	end if;
+    end for;
+end for;
+
+// Erfc and Eint1
+rpi := 1/Sqrt(Pi(R, 100));
+for j in [1 .. 12] do
+    x := R!j / 3;
+    ce := Erfc(x);
+    if Norm(ce - rpi * Gamma(half, x^2)) gt epsilon then
+	print "ERROR: Erfc vs Gamma: ", x, Norm(ce - rpi * Gamma(half, x^2));
+    end if;
+    ei := ExponentialIntegralE1(x);
+    if Norm(ei - Gamma(zero, x)) gt epsilon then
+	print "ERROR: Eint1 vs Gamma: ", x, Norm(ei - Gamma(zero, x));
+    end if;
+end for;
+
+// LogGamma function
+for x in Q do
+    if Real(x) le zero and Real(x) eq Round(Real(x)) then
+	continue;
+    end if;
+    if Norm(LogGamma(x) - Log(Gamma(x))) gt epsilon then
+	print "ERROR: LogGamma() vs Log(Gamma()): ", x, Norm(LogGamma(x) - Log(Gamma(x)));
+    end if;
+    if Norm(Exp(LogGamma(x)) - Gamma(x)) gt epsilon then
+	print "ERROR: Exp(LogGamma()) vs Gamma(): ", x, Norm(Exp(LogGamma(x)) - Gamma(x));
+    end if;
+end for;
+
+// LogDerivative function
+gam := EulerGamma(R, 100);
+if Norm(LogDerivative(R!1) + gam) gt epsilon then
+    print "ERROR: Psi(1)";
+end if;
+if Norm(LogDerivative(R!2) + gam - 1) gt epsilon then
+    print "ERROR: Psi(2)";
+end if;
+if Norm(LogDerivative(R!3) + gam - 3/2) gt epsilon then
+    print "ERROR: Psi(3)";
+end if;
+
+pi := Pi(R, 100);
+// Riemann zeta function
+for j, k in [-10 .. 10] do
+    z := j/5 + i*k/5;
+    print z;
+    if IsOne(z) or IsZero(z) or z eq 2 then
+	continue;
+    end if;
+    rz := ZetaFunction(z);
+    if k eq 0 and j eq -2 then
+	fz := zero;
+    else
+	fz := 2*(2*pi)^(z-1) * Gamma(1-z) * ZetaFunction(1-z) * Sin(pi/2 * z);
+    end if;
+    if Norm(rz - fz) gt epsilon then
+	print "ERROR: Riemann Zeta: ", z, Norm(rz - fz);
+    end if;
+end for;

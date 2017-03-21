@@ -1,0 +1,3 @@
+174,1
+S,CliffordIndexOne,"C is a genus g curve canonically embedded in P^(g-1) which is either trigonal or is isomorphic to a smooth plane quintic (g=6). Returns a degree 3 map to P^1 over an extension field in the trigonal case, or an isomorphism onto a plane quintic in the other case",0,1,0,0,0,0,0,0,0,371,,376,-38,-38,-38,-38,-38
+S,CliffordIndexOne,"C is a genus g curve canonically embedded in P^(g-1) which is either trigonal or is isomorphic to a smooth plane quintic (g=6). X is the rational scroll surface containing C defined by the degree 2 polynomials in the ideal of C. Returns a degree 3 map to P^1 over an extension field in the trigonal case, or an isomorphism onto a plane quintic in the other case",0,2,0,0,0,0,0,0,0,380,,0,0,371,,376,-38,-38,-38,-38,-38

@@ -1,0 +1,311 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Isomorphisms</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text997.htm">[Next]</A><A  HREF = "text995.htm">[Prev]</A> <A  HREF = "text997.htm">[Right]</A> <A  HREF = "text995.htm">[Left]</A> <A  HREF = "text982.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "11270">Isomorphisms</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text996.htm#11271">Isomorphisms of Algebras</A>
+<LI> <A  HREF = "text996.htm#11273">Isomorphisms of Orders</A>
+<LI> <A  HREF = "text996.htm#11276">Isomorphisms of Ideals</A>
+<LI> <A  HREF = "text996.htm#11283">Examples</A>
+</UL>
+<H4><A NAME = "11271">Isomorphisms of Algebras</A></H4>
+
+<P>
+<P>
+<P>
+Two quaternion algebras A, B over a common field F are isomorphic
+algebras if and only if they share the same ramified places. Finding 
+an explicit isomorphism is much harder. Currently Magma embeds the 
+first standard generator of A into B and then finds another element
+perpendicular to that image having the correct minimal polynomial.
+In particular, this requires the construction of two points on a conic
+(or equivalently, the solution of two norm equations) over quadratic 
+extensions of F.
+
+
+<H5><A NAME = "11272">IsIsomorphic(A, B) : AlgQuat, AlgQuat -&gt; BoolElt, Map</A></H5>
+
+<PRE>    Isomorphism: BoolElt                Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given two quaternion algebras A, B over Q, F<sub>q</sub>(X) with q odd or
+a number field, this function returns <TT>true</TT> if and only if they are 
+isomorphic.
+<P>
+If the algebras are isomorphic and <TT>Isomorphism</TT> is set to true, an
+isomorphism A to B is also returned.
+</BLOCKQUOTE>
+<H4><A NAME = "11273">Isomorphisms of Orders</A></H4>
+
+<P>
+<P>
+<P>
+Two orders S, T in a quaternion algebra A are isomorphic if and only
+if they are conjugate in A.
+<P>
+In a definite algebra, we use the fact that this conjugation induces an
+isometry of the quadratic Z- or F<sub>q</sub>[X]-modules S and T equipped
+with the (absolute) norm form.
+Over an indefinite algebra, we use the fact that any connecting ideal I
+having left order S and right order T must be isomorphic to a right
+ideal of T. See <A  HREF = "text981.htm#bib_kirschmer-voight">[KV10]</A> for details.
+
+
+<H5><A NAME = "11274">IsIsomorphic(S, T) : AlgQuatOrd, AlgQuatOrd -&gt; BoolElt, Map, AlgQuatElt</A></H5>
+<H5>IsIsomorphic(S, T) : AlgAssVOrd[RngOrd], AlgAssVOrd[RngOrd] -&gt; BoolElt, Map, AlgQuatElt</H5>
+<H5>IsConjugate(S, T) : AlgAssVOrd, AlgAssVOrd -&gt; BoolElt, Map, AlgQuatElt</H5>
+
+<PRE>    FindElement: BoolElt                Default: <TT>false</TT></PRE>
+
+<PRE>    ConnectingIdeal: AlgAssVOrdIdl      Default: </PRE>
+<BLOCKQUOTE>
+Given orders S and T in a quaternion algebra A over Q, F<sub>q</sub>(X)
+(with q odd) or a number field, this function returns <TT>true</TT> if and 
+only if S and T are isomorphic.
+<P>
+For indefinite algebras, the orders are currently required to be maximal.
+<P>
+If <TT>FindElement</TT> is set, the second return value is an isomorphism from 
+S to T and the third return value is an element a with T = a<sup> - 1</sup> S a, 
+inducing the isomorphism.  For indefinite algebras, this search is expensive and 
+may sometimes fail (as in <TT>IsIsomorphic</TT> for ideals, see below).
+<P>
+For indefinite algebras defined over number fields, part of the computation 
+may be faster when a connecting ideal is specified using the parameter 
+<TT>ConnectingIdeal</TT>; this should be an ideal with left order S and right 
+order T.
+</BLOCKQUOTE>
+<H5><A NAME = "11275">Isomorphism(S, T) : AlgQuatOrd, AlgQuatOrd -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Given two isomorphic definite quaternion orders S, T over Z or F<sub>q</sub>[X]
+(with q odd), this function returns an algebra isomorphism. For orders 
+over number rings the intrinsic <TT>IsIsomorphic</TT> should be used with the 
+optional argument <TT>FindElement</TT> set.
+</BLOCKQUOTE>
+<H4><A NAME = "11276">Isomorphisms of Ideals</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+Two right (left) ideals I, J of an order O in a quaternion algebra A are 
+isomorphic O-modules if and only if xI=J (Ix=J) for some x &isin;A<sup> * </sup>. 
+<P>
+To decide whether I and J are isomorphic, we test whether the
+<I>colon ideal</I>
+(J:I) = {x &isin;A: xI &sub;J} (similarly defined if I, J are left ideals)
+is principal, or not.
+<P>
+Over Z, to accomplish this task we compute a Minkowski-reduced Gram matrix
+of (J:I) which produces an element of smallest norm.
+Over F<sub>q</sub>[X] we compute a Gram matrix which has dominant diagonal form
+(see <A  HREF = "text981.htm#bib_forms_fqx">[Ger03]</A>) which also produces a suitable element.
+Over other number rings R, we search (J:I) for an element of the
+required norm by computing a reduced basis. This method runs very quickly
+for "reasonably small" input. (See <A  HREF = "text981.htm#bib_kirschmer-voight">[KV10]</A>, <A  HREF = "text981.htm#bib_dembele-donnelly">[DD08]</A>
+for further details.)
+
+
+<H5><A NAME = "11277">IsIsomorphic(I, J) : AlgAssVOrdIdl, AlgAssVOrdIdl -&gt; BoolElt, AlgAssVElt</A></H5>
+<BLOCKQUOTE>
+Given ideals I and J of the same order O in a quaternion algebra A
+over Q, F<sub>q</sub>(X) (with q odd) or a number field, this function returns
+<TT>true</TT> if and only if the quaternion ideals I and J are isomorphic
+(left or right) O-ideals.
+If I and J are isomorphic, there exists some x&isin;A such that
+xI=J (in the case of right O-ideals) or Ix=J (for left ideals).
+For definite algebras, such an element x is always returned. For indefinite
+algebras over Z or a number ring, a search for such an element is made,
+and if one is found then it is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "11278">IsPrincipal(I) : AlgAssVOrdIdl -&gt; BoolElt, AlgQuatElt</A></H5>
+<BLOCKQUOTE>
+Given a left (or right) ideal I over Z, F<sub>q</sub>[X] or a number ring,
+this function returns <TT>true</TT> if and only if I is a principal ideal;
+if so, a generator is returned as the second value.
+</BLOCKQUOTE>
+<H5><A NAME = "11279">IsLeftIsomorphic(I, J) : AlgQuatOrdIdl, AlgQuatOrdIdl -&gt; BoolElt, Map, AlgQuatElt</A></H5>
+<H5>IsRightIsomorphic(I, J) : AlgQuatOrdIdl, AlgQuatOrdIdl -&gt; BoolElt, Map, AlgQuatElt</H5>
+<BLOCKQUOTE>
+Given two definite ideals over Z or F<sub>q</sub>[X] (with q odd) with the 
+same left (or right) order S, this function returns <TT>true</TT> if and 
+only if they are isomorphic as S-modules. The isomorphism and the 
+transforming scalar in the quaternion algebra are returned as second and 
+third values if <TT>true</TT>.  
+</BLOCKQUOTE>
+<H5><A NAME = "11280">IsLeftIsomorphic(I, J) : AlgAssVOrdIdl[RngOrd], AlgAssVOrdIdl[RngOrd] -&gt; BoolElt, AlgQuatElt</A></H5>
+<H5>IsRightIsomorphic(I, J) : AlgAssVOrdIdl[RngOrd], AlgAssVOrdIdl[RngOrd] -&gt; BoolElt, AlgQuatElt</H5>
+<BLOCKQUOTE>
+Given two left (or right) ideals I and J over a number ring, with the 
+same left order O, this function returns <TT>true</TT> if and only if they 
+are isomorphic as O-modules.  The isomorphism is given by multiplication 
+as a second return value.
+</BLOCKQUOTE>
+<H5><A NAME = "11281">LeftIsomorphism(I, J) : AlgQuatOrdIdl, AlgQuatOrdIdl -&gt;  Map, AlgQuatElt</A></H5>
+<BLOCKQUOTE>
+Given two isomorphic left ideals over a definite order S over Z or 
+F<sub>q</sub>[X], this function returns the S-module isomorphism between them, 
+followed by the quaternion algebra element which defines the isomorphism 
+by right-multiplication.
+</BLOCKQUOTE>
+<H5><A NAME = "11282">RightIsomorphism(I, J) : AlgQuatOrdIdl, AlgQuatOrdIdl -&gt; Map, AlgQuatElt</A></H5>
+<BLOCKQUOTE>
+Given two isomorphic right ideals over a definite order S over Z or 
+F<sub>q</sub>[X], this function returns the S-module isomorphism between them, 
+followed by the quaternion algebra element which defines the isomorphism 
+by left-multiplication.
+</BLOCKQUOTE>
+<H4><A NAME = "11283">Examples</A></H4>
+
+
+
+<HR>
+<H3><A NAME = "11284">Example <TT>AlgQuat_Isomorphism_algebras (H91E23)</TT></A></H3>
+In this example, we create two quaternion algebras over F<sub>7</sub>, show that 
+they are isomorphic and find an isomorphism between them.
+<P>
+<P>
+<PRE>
+&gt; F&lt;x&gt; := RationalFunctionField( GF(7) );
+&gt; Q1 := QuaternionAlgebra&lt; F | (x^2+x-1)*(x+1), x &gt;;
+&gt; a := x^3 + x^2 + 3;
+&gt; b := x^13 + 4*x^11 + 2*x^10 + x^9 + 6*x^8 + 4*x^5 + 3*x^4 + x;
+&gt; Q2:= QuaternionAlgebra&lt; F | a, b &gt;;
+&gt; ok, phi:= IsIsomorphic(Q1, Q2 : Isomorphism);
+&gt; ok;
+true
+&gt; forall{ &lt;x,y&gt; : x,y in Basis(Q1) |  phi(x*y) eq phi(x)*phi(y) };
+true
+</PRE>
+<HR>
+<H3><A NAME = "11285">Example <TT>AlgQuat_Isomorphism_example (H91E24)</TT></A></H3>
+In this example, we create two ideals, show that they have isomorphic right 
+orders, and then explicitly exhibit the isomorphism.
+<P>
+<P>
+<PRE>
+&gt; A := QuaternionAlgebra(37);
+&gt; S := MaximalOrder(A);
+&gt; ideals := LeftIdealClasses(S);
+&gt; _, I, J := Explode(ideals);
+&gt; R := RightOrder(I);
+&gt; Q := RightOrder(J);
+&gt; IsIsomorphic(R,Q);
+true
+</PRE>
+Now we find an element pi which conjugates R to Q,
+and then check that it has this property.
+<P>
+<P>
+<PRE>
+&gt; _, pi := Isomorphism(R,Q);
+&gt; J := lideal&lt; S | [ x*pi : x in Basis(J) ] &gt;;
+&gt; RightOrder(J) eq R;                        
+true
+</PRE>
+<HR>
+<H3><A NAME = "11286">Example <TT>AlgQuat_Left_Right_Isomorphisms (H91E25)</TT></A></H3>
+We construct two non-isomorphic left ideals with 
+the same left and right orders, then investigate their isomorphisms
+as right ideals. 
+<P>
+<P>
+<PRE>
+&gt; S := QuaternionOrder(37);
+&gt; ideals := LeftIdealClasses(S);
+&gt; _, I, J := Explode(ideals);
+&gt; R := RightOrder(I);
+&gt; _, pi := Isomorphism(R,RightOrder(J));
+&gt; J := lideal&lt; S | [ x*pi : x in Basis(J) ] &gt;;
+&gt; IsLeftIsomorphic(I,J);
+false
+&gt; IsRightIsomorphic(I,J);
+true Mapping from: AlgQuatOrd: I to AlgQuatOrd: J given by a rule [no inverse]
+1 + i - 2*k
+&gt; h, x := RightIsomorphism(I,J);
+&gt; y := [1,2,-1,3];
+&gt; y := &amp;+[y[i]*b[i] : i in [1 .. 4]] where b is Basis(I);
+&gt; h(y);
+[-73  15  31   4]
+&gt; x*y;
+-73 + 15*i + 31*j + 4*k
+</PRE>
+The existence of an isomorphism as a right ideal is due to the fact 
+that the two-sided ideals of R do not have non-isomorphic 
+counterparts in S.
+<P>
+<P>
+<PRE>
+&gt; TwoSidedIdealClasses(R);
+[ Ideal with basis Pseudo-matrix over Integer Ring
+1 * [1 0 0 0]
+[0 1 0 0]
+[0 0 1 0]
+[0 0 0 1]
+, Ideal with basis Pseudo-matrix over Integer Ring
+1 * [37  0 32 18]
+[ 0 37 10  2]
+[ 0  0  1  0]
+[ 0  0  0  1]
+ ]
+&gt; TwoSidedIdealClasses(S);
+[ Ideal with basis Pseudo-matrix over Integer Ring
+1 * [1 0 0 0]
+[0 1 0 0]
+[0 0 1 0]
+[0 0 0 1]
+ ]
+</PRE>
+Thus while <TT>Conjugate(I)*J</TT> is in the non-principal R-ideal 
+class, the ideal <TT>I*Conjugate(J)</TT> represents the unique principal 
+ideal class of S.
+<HR>
+<H3><A NAME = "11287">Example <TT>AlgQuat_Left_Right_Isomorphisms_Number_Field (H91E26)</TT></A></H3>
+We exhibit isomorphism testing for ideals of orders over number rings. 
+<P>
+<P>
+<PRE>
+&gt; P&lt;x&gt; := PolynomialRing(Rationals());
+&gt; F&lt;b&gt; := NumberField(x^3-3*x-1);
+&gt; Z_F := MaximalOrder(F);
+&gt; F := FieldOfFractions(Z_F);
+&gt; A&lt;alpha,beta,alphabeta&gt; := QuaternionAlgebra&lt;F | -3, b&gt;;
+&gt; O := Order([alpha,beta,alphabeta]);
+&gt; O;
+Order of Quaternion Algebra with base ring F
+with coefficient ring Maximal Equation Order with defining polynomial x^3 - 3*x
+    - 1 over its ground order
+&gt; I := ideal&lt;O | 2&gt;;
+&gt; I eq (I + ideal&lt;O | 2&gt;);
+true
+&gt; I eq (I + ideal&lt;O | 3&gt;);
+false
+&gt;
+&gt; Foo := InfinitePlaces(F);
+&gt; A := QuaternionAlgebra(ideal&lt;Z_F | 2*3*5&gt;, Foo);
+&gt; IsDefinite(A);
+true
+&gt; O := MaximalOrder(A);
+&gt; I := rideal&lt;O | Norm(O.2), O.2&gt;;
+&gt; J := rideal&lt;O | Norm(O.3), O.3&gt;;
+&gt; IsIsomorphic(I, J);
+true (F.2 + F.3) + (27/9190*F.1 - 143/9190*F.2 - 73/9190*F.3)*i +
+(-251/27570*F.1 + 7/2757*F.2 + 10/2757*F.3)*k
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text997.htm">[Next]</A><A  HREF = "text995.htm">[Prev]</A> <A  HREF = "text997.htm">[Right]</A> <A  HREF = "text995.htm">[Left]</A> <A  HREF = "text982.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

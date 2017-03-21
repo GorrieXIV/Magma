@@ -1,0 +1,266 @@
+Arith
+{
+  +Arith.spec
+}
+Algaem
+{
+  +Algaem.spec
+}
+BianchiNew
+{
+  +Bianchi.spec
+}
+Clstr
+{
+  support.m # old deprecated functions
+  cluster.m
+  degree.m
+  ratpoints.m
+  reduce.m
+  splitting.m
+}
+Crv
+{
+  class_group.m
+  curve_autisos.m
+  curve_quotient.m
+  curveindexcal.m
+  gen_crv_auto_gp.m
+  divisors.m
+  differentials.m
+  proj_embeddings.m
+  fld_fun.m
+  tangent.m
+  intersection.m
+  singularity.m
+  blowup_crv.m
+  plane_curves.m
+  special_curves.m
+  pushpull.m
+  random_crv.m
+  ord_pln_crv.m
+  ff_conversion_hack.m
+  lct-curve.m
+  inter.m
+}
+Crv/RegModel
+{
+  interface.m
+  main.m
+  regularity.m
+}
+Crv/GonalMaps
+{
+  +gon.spec
+}
+CrvRat
+{
+  autos.m
+  isoms.m
+  param.m
+  param_ord_pln_crv.m
+}
+CrvCon
+{
+  +CrvCon.spec
+}
+CrvEll
+{
+  +CrvEll.spec
+  +SEA.spec
+}
+CrvG1
+{
+  +CrvG1.spec
+}
+CrvG2
+{
+  +CrvG2.spec
+}
+CrvHyp
+{
+  +CrvHyp.spec
+}
+CrvMod
+{
+  +CrvMod.spec
+}
+CycCov
+{
+  +CycCov.spec
+}
+GrphRes
+{
+  DualGraph
+  {
+    numerical.m
+    linking.m
+    modify.m
+    rgraph.m
+    rvertex.m
+    sgraph.m
+    svertex.m
+    misc_graph.m
+  }
+  Resolution
+  {
+    adjoints.m
+    jacobian.m
+    germ.m
+    blowup.m
+    resolution.m
+    spine_res.m
+    recursive_res.m
+    pencil_res.m
+    ndual.m
+  }
+}
+GrpPSL2
+{
+ +GrpPSL2.spec
+}
+HypGeomMot
+{
+ +HypGeomMot.spec
+}
+LinearSys
+{
+  linsys.m
+  sub_linsys.m
+  elt_linsys.m
+  image_linsys.m
+}
+LSeries
+{
+  arithmetic.m
+  Lseries.m
+  NewLSeries.m
+  sympow.m
+  sympow_ec.m
+  sympow_formulas.m
+###  special_value.m
+  euler_factor.m
+  create.m
+  hodge.m
+  tensprod.m
+  hecke.m
+  HilbModForm.m
+  bsdnf.m
+  elltwist.m
+}
+MapSch
+{
+  maps.m
+  amb_map.m
+  compat.m
+  curve_maps.m
+  translation.m
+  projection.m
+  map_closure.m
+  matrix.m
+}
+ModBrdt
+{
+  +ModBrdt.spec
+}
+ModFrm
+{
+  +ModFrm.spec
+}
+ModFrmHil
+{
+  +ModFrmHil.spec
+}
+ModSS
+{
+  +ModSS.spec
+}
+ModSym
+{
+  +ModSym.spec
+}
+NwtnPgon
+{
+  curve.m
+  misc.m
+  valuation_creation.m
+  slopes.m
+}
+RepLoc
+{
+  LocalComp.m
+  RepLoc.m
+}
+Sch
+{
+  sch.m
+  hypersurface.m
+  irreducibility.m
+  jacobian.m
+  subset.m
+  singularity.m
+  constructions.m
+  points.m
+  tangent.m
+  pt.m
+  basechange.m
+  ambient.m
+  heights.m
+  fldfun_amb.m
+  compat.m
+  funcoord.m
+  maps.m
+  secs_and_tans.m
+  iso_projection.m
+  search.m
+  pointsffbynn.m
+  restrictionofscalars.m
+  extrasheaf.m
+  divisors.m
+  isolated_points.m
+  blowup.m
+  norm_form_of_sing.m
+  corank2.m
+  corank3.m
+  monosofdeg.m
+  reduction.m
+}
+CrvAnJac
+{
+  +CrvAnJac.spec
+}
+ModAbVar
+{
+    +ModAbVar.spec
+}
+GrdRng
+{
+    +RngGrd.spec
+}
+SrfDP
+{
+    +dp.spec
+}
+SrfHyp
+{
+    +resolve_classify.spec
+}
+ToricGeom
+{
+    +toric.spec
+}
+SmallModCrv
+{
+    +smallmodcrv.spec
+}
+Srfc
+{
+  can_coord.m
+  invariants.m
+  kod_enr.m
+  kod_dim_1.m
+  P4_surfaces.m
+  local_resolution.m
+  singularity.m
+  constructors.m
+}

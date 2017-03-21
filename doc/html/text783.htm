@@ -1,0 +1,402 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Finite Group Cohomology</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text772.htm">[Next]</A><A  HREF = "text782.htm">[Prev]</A> <A  HREF = "text772.htm">[Right]</A> <A  HREF = "text782.htm">[Left]</A> <A  HREF = "text773.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "8869">Finite Group Cohomology</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+This section describes Magma functions for computing the first 
+cohomology group of a finite group with coefficient 
+in a finite (not necessarily abelian) group. 
+These functions are based on <A  HREF = "text772.htm#bib_SH">[Hal05]</A>.
+<P>
+Let &Gamma; be a group. 
+A group A on which &Gamma; acts by group automorphisms from the right, 
+is called a <I>&Gamma;-group</I>.
+Given a &Gamma;-group A, define 
+<P>
+     H<sup>0</sup>(&Gamma;, A) :=  { a&isin;A | a<sup>&sigma;</sup> = a  (for all ) &sigma;&isin;&Gamma;  }. 
+<P>
+A <I>1-cocycle of &Gamma; on A</I> is a map 
+<P>
+     coc&alpha;: &Gamma; -&gt; A,    &sigma; |-&gt; coc&alpha;<sub>&sigma;</sub>,
+<P>
+such that 
+<P>
+     coc&alpha;<sub>&sigma;&tau;</sub> = (coc&alpha;<sub>&sigma;</sub>)<sup>&tau;</sup>  coc&alpha;<sub>&tau;</sub>
+            for all  &sigma;, &tau;&isin;&Gamma;.
+<P>
+Two cocycles coc&alpha;, coc&beta; on A are called 
+<I>cohomologous</I>  (with respect to a)
+if there exists   a&isin;A, 
+such that coc&beta;<sub>&sigma;</sub> = a<sup> - &sigma;</sup> .coc&alpha;<sub>&sigma;</sub> .a for 
+all &sigma;&isin;&Gamma;. 
+Note that being cohomologous is an equivalence relation. 
+<P>
+We denote by Z<sup>1</sup>(&Gamma;, A) the set of all 1-cocycles of &Gamma; on A.
+We denote by [coc&alpha;] the equivalence class of coc&alpha; and
+by H<sup>1</sup>(&Gamma;, A) the set of equivalence classes of 1-cocycles.
+<P>
+Z<sup>1</sup>(&Gamma;, A) and H<sup>1</sup>(&Gamma;, A) are <I>pointed sets</I>.
+<P>
+The constant map triv : &sigma; |-&gt; 1 is the distinguished element of 
+Z<sup>1</sup>(&Gamma;, A), called the <I>trivial 1-cocycle</I>.
+Its cohomology class is the distinguished element of H<sup>1</sup>(&Gamma;, A).
+<P>
+<P>
+A twisted form A<sub>coc</sub>&beta; of A by the cocycle coc&beta;&isin;Z<sup>1</sup>(&Gamma;, A) 
+is the same group A but with a different action of &Gamma; on it, given by
+<P>
+     a * &sigma; := a<sup>&sigma; coc&alpha;<sub>&sigma;</sub></sup> 
+       for &sigma;&isin;&Gamma;  and  a&isin;A.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text783.htm#8870">Creation of Gamma-groups</A>
+<LI> <A  HREF = "text783.htm#8876">Accessing Information</A>
+<LI> <A  HREF = "text783.htm#8880">One Cocycles</A>
+<LI> <A  HREF = "text783.htm#8891">Group Cohomology</A>
+</UL>
+<H4><A NAME = "8870">Creation of Gamma-groups</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+This section describes intrinsics dealing with cocycles and the first cohomology.
+
+
+<H5><A NAME = "8871">GammaGroup(Gamma, A, action) : Grp, Grp, Map[Grp, GrpAuto] -&gt; GGrp</A></H5>
+<BLOCKQUOTE>
+Given a group A and a group &Gamma; acting on it by the map <TT>action</TT>,
+return the object of type <TT>GGrp</TT>, which is the Group A together
+with this particular action of &Gamma;. The map <TT>action</TT> must be a 
+homomorphism from &Gamma; to the automorphism group of A.
+</BLOCKQUOTE>
+<P>
+If B is a normal subgroup of A and normalised by the action
+of &Gamma; on A (thus a  &Gamma;-group itself), then the action of
+&Gamma; on A induces in the natural way to A/B. It is possible 
+to create such a group:
+<H5><A NAME = "8872">InducedGammaGroup(A, B) : GGrp, Grp -&gt; GGrp</A></H5>
+<BLOCKQUOTE>
+Given a &Gamma;-group A and a normal subgroup B normalised by
+the action of &Gamma;, return the induced &Gamma;-group A/B.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8873">Example <TT>GrpCoh_createGGrp (H73E12)</TT></A></H3>
+Let &Gamma; act on A by conjugation:
+<P>
+<P>
+<PRE>
+&gt; A := SymmetricGroup(4);
+&gt; Gamma := sub&lt;A|(1,2,3), (1,2)&gt;;
+&gt; action := hom&lt; Gamma -&gt; Aut(A) |
+&gt;             g :-&gt; iso&lt; A -&gt; A | a :-&gt; a^g, a :-&gt; a^(g^-1) &gt; &gt;;
+&gt; A := GammaGroup( Gamma, A, action );
+&gt; A;
+Gamma-group:  Symmetric group acting on a set of cardinality 4
+Order = 24 = 2^3 * 3
+(1, 2, 3, 4)
+(1, 2)
+Gamma-action: Mapping from: GrpPerm: $, Degree 4 to
+Set of all automorphisms of GrpPerm: $, Degree 4, Order 2^3 * 3
+given by a rule [no inverse]
+Gamma:        Permutation group acting on a set of cardinality 4
+(1, 2, 3)
+(1, 2)
+&gt;
+</PRE>
+and B be a normal subgroup of A:
+<P>
+<P>
+<PRE>
+&gt; B := AlternatingGroup(4);
+&gt; AmodB := InducedGammaGroup( A, B );
+&gt; AmodB;
+Gamma-group:  Symmetric group acting on a set of cardinality 2
+Order = 2
+(1, 2)
+(1, 2)
+Gamma-action: Mapping from: GrpPerm: $, Degree 4, Order 2 * 3 to
+Set of all automorphisms of GrpPerm: $, Degree 2, Order 2
+given by a rule [no inverse]
+Gamma:        Permutation group acting on a set of cardinality 4
+Order = 6 = 2 * 3
+(1, 2, 3)
+(1, 2)
+Induced from another Gamma-group
+</PRE>
+<HR>
+<H5><A NAME = "8874">IsNormalised(B, action) : Grp, Map -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the group B is normalised by the action <TT>action</TT>, where
+<TT>action</TT> is as above.
+</BLOCKQUOTE>
+<H5><A NAME = "8875">IsInduced(AmodB) : GGrp -&gt; BoolElt, GGrp, GGrp, Map, Map</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> iff the &Gamma;-group <I>AmodB</I>  was created as an induced &Gamma;-group.
+If it is, then the &Gamma;-groups A, B, the projection and 
+representative maps are returned as well.
+</BLOCKQUOTE>
+<H4><A NAME = "8876">Accessing Information</A></H4>
+
+
+
+<H5><A NAME = "8877">Group(A) : GGrp -&gt; Grp</A></H5>
+<BLOCKQUOTE>
+Returns the group A as a <TT>Grp</TT> object to be used in Magma.
+</BLOCKQUOTE>
+<H5><A NAME = "8878">GammaAction(A) : GGrp -&gt; Map[Grp, GrpAuto]</A></H5>
+<BLOCKQUOTE>
+Returns the action of &Gamma; on A as a map.
+</BLOCKQUOTE>
+<H5><A NAME = "8879">ActingGroup(A) : GGrp -&gt; Grp</A></H5>
+<BLOCKQUOTE>
+Returns the group &Gamma; acting on A.
+</BLOCKQUOTE>
+<H4><A NAME = "8880">One Cocycles</A></H4>
+
+
+
+<H5><A NAME = "8881">OneCocycle(A, imgs) : GGrp, SeqEnum[GrpElt] -&gt; OneCoC</A></H5>
+<H5>OneCocycle(A, alpha) : GGrp, Map[Grp,Grp] -&gt; OneCoC</H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+If the map &alpha;:&Gamma; -&gt; A or the sequence <TT>imgs</TT> of images of the generators
+&Gamma;.1, ..., &Gamma;.n defines a 1-cocycle, return the 1-cocycle.
+By default, the map is checked to define a 1-cocycle. If it doesn't,
+<TT>OneCocycle</TT> will abort with an error. 
+This check can be disabled by setting the optional argument <TT>Check</TT> to <TT>false</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "8882">TrivialOneCocycle(A) : GGrp -&gt; OneCoC</A></H5>
+<BLOCKQUOTE>
+Return the trivial 1-cocycle.
+</BLOCKQUOTE>
+<H5><A NAME = "8883">IsOneCocycle(A, imgs) : GGrp, SeqEnum[GrpElt] -&gt; BoolElt, OneCoC</A></H5>
+<H5>IsOneCocycle(A, alpha) : GGrp, Map[Grp,Grp] -&gt; BoolElt, OneCoC</H5>
+<BLOCKQUOTE>
+Return true if the map &alpha;:&Gamma; -&gt; A or the sequence <TT>imgs</TT> of
+images of the generators &Gamma;.1, ..., &Gamma;.n defines a 1-cocycle
+and <TT>false</TT> otherwise. If <TT>true</TT>, return the cocycle as the second argument.
+<P>
+Note that <TT>IsOneCocycle</TT> does not abort with an error in contrast to <TT>OneCocycle</TT>
+if the map does not define a cocycle.
+</BLOCKQUOTE>
+<H5><A NAME = "8884">AreCohomologous(alpha, beta) : OneCoC, OneCoC -&gt; BoolElt, GrpElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the 1-cocycles &alpha; and &beta; are cohomologous.
+If they are, return the intertwining element as the second return value.
+</BLOCKQUOTE>
+<H5><A NAME = "8885">CohomologyClass(alpha) : OneCoC -&gt; SetIndx[OneCoC]</A></H5>
+<BLOCKQUOTE>
+Return the cohomology class of the 1-cocycle &alpha;.
+</BLOCKQUOTE>
+<H5><A NAME = "8886">InducedOneCocycle(AmodB, alpha) : GGrp, OneCoC -&gt; OneCoC</A></H5>
+<H5>InducedOneCocycle(A, B, alpha) : GGrp, Grp, OneCoC -&gt; OneCoC</H5>
+<BLOCKQUOTE>
+Given a 1-cocycle on A, return the induced 1-cocycle on <I>AmodB</I>. The
+second version will generate the induced &Gamma;-group A/B first.
+</BLOCKQUOTE>
+<H5><A NAME = "8887">ExtendedOneCocycle(alpha) : OneCoC -&gt; SetEnum[OneCoC]</A></H5>
+
+<PRE>    OnlyOne: BoolElt                    Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a 1-cocycle on an induced &Gamma;-group A/B, return the 
+set of all non-cohomologous 1-cocycles on A, which induce to &alpha;.
+If the optional argument <TT>OnlyOne</TT> is <TT>true</TT>, the set will 
+contain at most one 1-cocycle.
+If &alpha; is not extendible, the returned set is empty.
+</BLOCKQUOTE>
+<H5><A NAME = "8888">ExtendedCohomologyClass(alpha) : OneCoC -&gt; SetEnum[OneCoC]</A></H5>
+<BLOCKQUOTE>
+Given a 1-cocycle on an induced &Gamma;-group A/B, return the 
+the set of all non-cohomologous 1-cocycles on A, which induce to a cocycle
+in the cohomology class of &alpha;. If no such cocycles on A
+exist, the returned set is empty.
+</BLOCKQUOTE>
+<H5><A NAME = "8889">GammaGroup(alpha) : OneCoC -&gt; GGrp</A></H5>
+<BLOCKQUOTE>
+Return the &Gamma;-group on which &alpha; is defined.
+</BLOCKQUOTE>
+<H5><A NAME = "8890">CocycleMap(alpha) : OneCoC -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Return the <TT>Map</TT> object corresponding to &alpha;.
+</BLOCKQUOTE>
+<H4><A NAME = "8891">Group Cohomology</A></H4>
+
+
+
+<H5><A NAME = "8892">Cohomology(A, n) : GGrp, RngIntElt -&gt; SetEnum[OneCoC]</A></H5>
+<BLOCKQUOTE>
+Given a finite group A and an integer n (currently restricted to
+being 1) return the n-th cohomology group H<sup>n</sup>(&Gamma;, A). Since 
+the group A is not assumed to be abelian, only n=0, 1 can be used.
+Currently, only n=1 implemented. (The zero cohomology of A 
+is the subgroup of A centralised by &Gamma; and can be
+constructed using group theoretical methods available in Magma.)
+</BLOCKQUOTE>
+<H5><A NAME = "8893">OneCohomology(A) : GGrp -&gt; SetEnum[OneCoC]</A></H5>
+<BLOCKQUOTE>
+Return the first cohomology H<sup>1</sup>(&Gamma;, A).
+as a set of representatives of all cohomology classes.
+If the group A is abelian, existing code by Derek Holt is 
+used (see Chapter <A  HREF = "text773.htm#8812">COHOMOLOGY AND EXTENSIONS</A>).
+Otherwise use <A  HREF = "text772.htm#bib_SH">[Hal05]</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "8894">TwistedGroup(A, alpha) : GGrp, OneCoC -&gt; GGrp</A></H5>
+<BLOCKQUOTE>
+Given the &Gamma;-group A and a 1-cocycle &alpha; on it, return
+the twisted group A<sub>&alpha;</sub>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8895">Example <TT>GrpCoh_large example (H73E13)</TT></A></H3>
+First, we create the group A=D<sub>8</sub>. The returned group
+is the usual permutation group on the octagon. &Gamma; is
+the Normaliser of A in S<sub>8</sub> and is acting by conjugation.
+<P>
+<P>
+<PRE>
+&gt; A := DihedralGroup(8);
+&gt; Gamma := sub&lt; Sym(8) | (1, 2, 3, 4, 5, 6, 7, 8),
+&gt;    (1, 8)(2, 7)(3, 6)(4, 5), (2, 4)(3, 7)(6, 8) &gt;;
+&gt; A^Gamma eq A;
+true
+&gt; Gamma;
+Permutation group Gamma acting on a set of cardinality 8
+Order = 32 = 2^5
+    (1, 2, 3, 4, 5, 6, 7, 8)
+    (1, 8)(2, 7)(3, 6)(4, 5)
+    (2, 4)(3, 7)(6, 8)
+&gt; action := hom&lt; Gamma -&gt; Aut(A) |
+&gt;             g :-&gt; iso&lt; A -&gt; A | a :-&gt; a^g, a :-&gt; a^(g^-1) &gt; &gt;;
+&gt; A := GammaGroup( Gamma, A, action );
+</PRE>
+Now let B be the center of A and create the 
+induced &Gamma;-group A/B:
+<P>
+<P>
+<PRE>
+&gt; B := Center(Group(A));
+&gt; AmodB := InducedGammaGroup(A, B);
+</PRE>
+Create the trivial 1-cocycle on A/B and compute
+its cohomology class:
+<P>
+<P>
+<PRE>
+&gt; triv := TrivialOneCocycle(AmodB);
+&gt; CohomologyClass( triv );
+{@
+    One-Cocycle
+    defined by [
+    Id($),
+    Id($),
+    Id($)
+    ],
+    One-Cocycle
+    defined by [
+    Id($),
+    (1, 4)(2, 7)(3, 8)(5, 6),
+    (1, 4)(2, 7)(3, 8)(5, 6)
+    ],
+    One-Cocycle
+    defined by [
+    (1, 4)(2, 7)(3, 8)(5, 6),
+    Id($),
+    (1, 4)(2, 7)(3, 8)(5, 6)
+    ],
+    One-Cocycle
+    defined by [
+    (1, 4)(2, 7)(3, 8)(5, 6),
+    (1, 4)(2, 7)(3, 8)(5, 6),
+    Id($)
+    ]
+@}
+</PRE>
+Pick one of the cocycles in this class
+and compute the intertwining element:
+<P>
+<P>
+<PRE>
+&gt; alpha := Random($1);alpha;
+One-Cocycle
+defined by [
+(1, 4)(2, 7)(3, 8)(5, 6),
+(1, 4)(2, 7)(3, 8)(5, 6),
+Id($)
+]
+&gt; bo, a := AreCohomologous(alpha,triv);
+&gt; bo; a;
+true
+(1, 5)(2, 8)(3, 7)(4, 6)
+</PRE>
+Now create another cocycle on A/B and extend it to A:
+<P>
+<P>
+<PRE>
+&gt; alpha := OneCocycle( AmodB,
+&gt;                [Group(AmodB)| (1, 7, 4, 2)(3, 5, 8, 6),
+&gt;                               (1, 2, 4, 7)(3, 6, 8, 5),
+&gt;                               1 ] );
+&gt; ExtendedOneCocycle(alpha);
+{
+    One-Cocycle
+    defined by [
+    (1, 4, 7, 2, 5, 8, 3, 6),
+    (1, 2, 3, 4, 5, 6, 7, 8),
+    Id($)
+    ],
+    One-Cocycle
+    defined by [
+    (1, 8, 7, 6, 5, 4, 3, 2),
+    (1, 6, 3, 8, 5, 2, 7, 4),
+    Id($)
+    ]
+}
+</PRE>
+Pick a cocycle &beta; in this set and check if it really induces to 
+&alpha;:
+<P>
+<P>
+<PRE>
+&gt; beta := Rep($1);
+&gt; InducedOneCocycle(AmodB, beta) eq alpha;
+true
+</PRE>
+Finally, create the twisted group A<sub>&beta;</sub>:
+<P>
+<P>
+<PRE>
+&gt; A_beta := TwistedGroup(A, beta);
+&gt; A_beta;
+Gamma-group:  Permutation group acting on a set of cardinality 8
+Order = 16 = 2^4
+(1, 2, 3, 4, 5, 6, 7, 8)
+(1, 8)(2, 7)(3, 6)(4, 5)
+Gamma-action: Mapping from: GrpPerm: $, Degree 8, Order 2^5 to
+Set of all automorphisms of GrpPerm: $, Degree 8, Order 2^4
+given by a rule [no inverse]
+Gamma:        Permutation group acting on a set of cardinality 8
+Order = 32 = 2^5
+(1, 2, 3, 4, 5, 6, 7, 8)
+(1, 8)(2, 7)(3, 6)(4, 5)
+(2, 4)(3, 7)(6, 8)
+&gt;
+</PRE>
+<PRE></PRE> <A  HREF = "text772.htm">[Next]</A><A  HREF = "text782.htm">[Prev]</A> <A  HREF = "text772.htm">[Right]</A> <A  HREF = "text782.htm">[Left]</A> <A  HREF = "text773.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

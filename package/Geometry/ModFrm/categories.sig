@@ -1,0 +1,5 @@
+174,1
+T,ModFrm,ModFrmElt,0
+T,ModFrmElt,-,0
+A,ModFrm,43,ambient_space,base_ring,base_extend_map,associated_space_over_z,type,type_param,cusp,eis,new,cusp_new,eis_new,made_from_newform,is_cuspidal,cuspidal_subspace,is_new,new_subspace,is_eisenstein,eisenstein_subspace,eisenstein_series,dimension,dirichlet_character,is_gamma1,weight,level,mf_modular_symbols,newforms,which_newform,basis,q_expansion_basis,hecke_polynomial,t2_eigenvector,hecke_operator,atkin_operator,q_name,default_precision,approx_precision_bound,precision_bound,generated_by_auxiliary,wt_half_data,wt1_dihedral_forms,is_wt1_dihedral,wt1_auxil_modsyms,other_levels
+A,ModFrmElt,22,degree,element,is_newform,nebentype,mf_modular_symbols,parent,q_expansion,number_field_coercion_map,cyclotomic_embedding_map,weight,which_conjugate,first_conjugate,modp_reductions,padic_embeddings,complex_embeddings,eisenstein,wt1_dihedral_data,elliptic_curve,q_expansion_gadget,theta_data,created_from,values_at_cusps

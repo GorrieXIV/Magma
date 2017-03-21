@@ -1,0 +1,663 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Function Fields</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1365.htm">[Next]</A><A  HREF = "text1363.htm">[Prev]</A> <A  HREF = "text1365.htm">[Right]</A> <A  HREF = "text1363.htm">[Left]</A> <A  HREF = "text1356.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "15091">Function Fields</A></H3>
+
+<P>
+<P>
+An integral curve C has a coordinate ring that is an integral domain.
+The function field of the curve is the corresponding field of fractions
+in the affine case and the homogeneous degree 0 part of this in
+projective cases. The function field of an affine curve is isomorphic to
+that of its projective closure. As with schemes generally, a function
+field is attached to projective curves and the same object represents the
+function field of all of its affine patchs.
+<P>
+Furthermore, in the curve case, there is a unique (up to abstract scheme
+isomorphism) (ordinary) projective non-singular curve tilde(C) which is
+birationally equivalent to C (ie there are maps from C to tilde(C)
+which are defined at all but finitely many points and whose composite is
+the identity where defined) &lt;=&gt; tilde(C) has the same
+function field (up to isomorphism) as C.
+<P>
+When C is projective, tilde(C) is just the <I>normalisation</I> of C.
+The normalisation tilde(C) differs from C only at singular points of 
+the latter and C can be thought of as a singular model of tilde(C) and, 
+as is usual with curves, most of the functionality provided by the function 
+field and the objects attached - places, divisors etc. - can be more properly 
+thought of as relating to tilde(C). 
+The first section below treats function fields and some basic
+functions related to them and their elements.
+<P>
+From now on we assume that the reader is familiar with the
+notion of divisor, linear equivalence and their relationship with
+function fields. If not, there are very brief discussions of them at
+the beginning of each section and also in the introduction to this
+chapter, but you may also consult standard texts such as
+<A  HREF = "text1355.htm#bib_hartshorne">[Har77]</A> Chapter II, 6 (especially from page 136)
+and Chapter IV for a more serious treatment.
+<P>
+For functions working with elements of a function field of a scheme and the
+scheme itself see Section <A  HREF = "text1327.htm#14477">Function Fields and their Elements</A>.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1364.htm#15092">Function Fields</A>
+<LI> <A  HREF = "text1364.htm#15123">Representations of the Function  Field</A>
+<LI> <A  HREF = "text1364.htm#15126">Differentials</A>
+</UL>
+<H4><A NAME = "15092">Function Fields</A></H4>
+
+<P>
+<P>
+For the purposes of this section, function fields are fields of rational
+functions on a curve C.
+Let f be an element and p a nonsingular rational point of C.
+Then one can evaluate f at p
+and compute the order of a zero or a pole of f at p, an integer
+which is positive for zeros and negative for poles.
+This allows points of the curve to be considered as valuations
+of the function field.
+<P>
+In fact, the proper language for discussing valuations and function fields
+is that of <I>places</I> and <I>divisors</I>, which really correspond to 
+points of the projective normalisation tilde(C) of C and formal sums
+of these, and they are discussed in later sections.
+Functions in this section which take a point of a curve as an
+argument are convenient shorthands for functions taking a place
+and are only allowed when there is no ambiguity about which place is intended,
+which is why p is required to be non-singular.
+Functions which compute the zeros and poles of rational functions
+properly return divisors, so will be discussed later.
+<P>
+<P>
+Finally, function fields and divisor groups are cached so that
+recomputation is avoided. Although it is transparent in practice, it
+is worth remembering that the function fields and divisor groups are 
+always attached to the projective model of a curve, rather than to 
+any of the affine models.  Since these are all tightly related, it 
+doesn't make any difference.
+The support points of divisors will be returned as points on
+the projective model since they can quite easily lie at infinity on
+any particular affine model.
+For a completely clean treatment, it is possible to work exclusively
+with the projective model, although it is certainly not necessary.
+Indeed, for some time the elliptic curve machinery in Magma has
+happily presented affine models of curves together with projective points.
+
+
+<H5>HasFunctionField(C) : Crv -&gt; BoolElt</H5><P>
+
+
+<H5><A NAME = "15093">FunctionField(C) : Crv -&gt; FldFunFracSch</A></H5>
+<BLOCKQUOTE>
+The function field of the curve C, a field isomorphic to the field of 
+fractions of the coordinate ring of C.
+It can be assigned generator names using the diamond bracket
+notation, as in the example below. The function field will only exist
+when C is integral (reduced and irreducible) and this can be checked directly
+or by calling the function below if it is in doubt.
+</BLOCKQUOTE>
+<H5><A NAME = "15094">Curve(F) : FldFunFracSch -&gt; Crv</A></H5>
+<BLOCKQUOTE>
+The curve used to create the function field F, or the projective closure
+of that curve (if it was affine).
+The function field is stored on projective curves so that the same
+field is returned whenever it is called for from any patch of the
+projective curve.
+</BLOCKQUOTE>
+<H5><A NAME = "15095">F ! r : FldFunFracSch, RngElt -&gt; FldFunFracSchElt</A></H5>
+<BLOCKQUOTE>
+Coerce the ring element r into the function field F of a scheme. For
+the coercion to be successful r must be in a ring related to the scheme
+of F, e.g. the base ring or coordinate ring of (or a field of fractions of) 
+the scheme or one of its affine patches or a subscheme or super scheme.
+</BLOCKQUOTE>
+<H5><A NAME = "15096">ProjectiveFunction(f) : FldFunFracSchElt -&gt; RngFunFracElt</A></H5>
+<BLOCKQUOTE>
+Return the function f in the function field of a scheme as a function in
+projective coordinates (as an element in the field of fractions of the 
+coordinate ring of the projective scheme having function field the parent 
+of f).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15097">Example <TT>Crv_ff-creation-example (H120E24)</TT></A></H3>
+After creating a curve in the usual way we make its function field F.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(Rationals(),2);
+&gt; C := Curve(P,x^4 + 2*x*y^2*z + 5*y*z^3);
+&gt; F&lt;a,b&gt; := FunctionField(C);
+&gt; F;
+Function Field of Curve over Rational Field defined by
+x^4 + 2*x*y^2*z + 5*y*z^3
+&gt; Curve(F);
+Curve over Rational Field defined by
+x^4 + 2*x*y^2*z + 5*y*z^3
+&gt; b^2;
+b^2;
+</PRE>
+Once constructed, the function field will be stored
+with the curve (or its projective closure). Thus the same field will
+be returned from multiple function calls.
+<P>
+<P>
+<PRE>
+&gt; FunctionField(C) eq FunctionField(AffinePatch(C,3));
+true
+</PRE>
+<HR>
+<H5><A NAME = "15098">p @ f : Pt, FldFunFracSchElt -&gt; RngElt</A></H5>
+<H5>f(p) : Pt, FldFunFracSchElt -&gt; RngElt</H5>
+<H5>Evaluate(f, p) : RngElt, Pt -&gt; RngElt</H5>
+<BLOCKQUOTE>
+The ring element f(p) where f is an element of the function field
+of the curve on which p is a point.
+If f has a pole at p the value infinity is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "15099">Expand(f, p) : FldFunFracSchElt[Crv], PlcCrvElt -&gt; RngSerElt, FldFunFracSchElt</A></H5>
+<BLOCKQUOTE>
+Given an element f on a curve C and a place p of C return a series
+which is the expansion of f at p and the uniformizing element of p.
+</BLOCKQUOTE>
+<H5><A NAME = "15100">Completion(F, p) : FldFunFracSch[Crv], PlcCrvElt -&gt; RngSer, Map</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: 20</PRE>
+<BLOCKQUOTE>
+The completion of the function field F of the curve C at the place p
+of C and a map from F into its completion.
+</BLOCKQUOTE>
+<H5><A NAME = "15101">Degree(f) : FldFunFracSchElt[Crv] -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given an element f of the function field of a curve, return the degree of
+f. This is the degree of the map given by f to (P)<sup>1</sup> or the degree of
+the numerator and denominator of the principal divisor of f. If f is constant,
+then 0 is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "15102">Valuation(f, p) : RngElt, Pt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The degree of the zero of the function f at the point p where f is
+a function on the curve on which p is a point.
+A negative value indicates there is a pole of f at p.
+</BLOCKQUOTE>
+<H5><A NAME = "15103">Valuation(p) : Pt -&gt; Map</A></H5>
+<BLOCKQUOTE>
+The valuation of the function field of the curve on which p lies
+centred at the point p.
+This is a map from the function field to the integers.
+</BLOCKQUOTE>
+<H5><A NAME = "15104">UniformizingParameter(p) : Pt -&gt; FldFunFracSchElt</A></H5>
+<BLOCKQUOTE>
+A rational function on the curve of the nonsingular
+point p which having valuation 1 at p.
+</BLOCKQUOTE>
+<H5><A NAME = "15105">Module(S) : [FldFunFracSchElt[Crv]] -&gt; Mod, Map, [ModElt]</A></H5>
+
+<PRE>    Preimages: BoolElt                  Default: <TT>false</TT></PRE>
+
+<PRE>    IsBasis: BoolElt                    Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a sequence S of elements of a function field of a curve C
+return the module over the base ring of C generated by the elements of S.
+Also return the map from the module to the function field and a sequence of
+preimages of the elements of S if <TT>Preimages</TT> is <TT>true</TT>.
+<P>
+If <TT>IsBasis</TT> is <TT>true</TT> then the elements of S will be assumed to be a
+basis of the module.
+</BLOCKQUOTE>
+<H5><A NAME = "15106">Relations(S) : [FldFunFracSchElt[Crv]] -&gt; ModTupRng</A></H5>
+<H5>Relations(S, m) : [FldFunFracSchElt[Crv]], RngIntElt -&gt; ModTupRng</H5>
+<BLOCKQUOTE>
+Given a sequence S of elements of a function field of a curve C return
+the module over the base ring R of C of R-linear relations between the 
+elements of S.
+</BLOCKQUOTE>
+<H5><A NAME = "15107">Genus(C) : Crv -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The genus of the curve C.
+</BLOCKQUOTE>
+<H5><A NAME = "15108">FieldOfGeometricIrreducibility(C) : Crv -&gt; Rng, Map</A></H5>
+<BLOCKQUOTE>
+Return the algebraic closure of the base ring of C in the function
+field of C along with the map including the closure in the function field.
+</BLOCKQUOTE>
+<H5><A NAME = "15109">IsAbsolutelyIrreducible(C) : Crv -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the field of geometric irreducibility of the curve C
+is the base ring of C.
+</BLOCKQUOTE>
+<H5><A NAME = "15110">DimensionOfFieldOfGeometricIrreducibility(C): Crv -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The dimension of the field of geometric irreducibility of the curve C
+over the base ring of C.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15111">Example <TT>Crv_ff-elements-example (H120E25)</TT></A></H3>
+Having made a curve and its function field we make an element of the
+function field using its named generators a, b.
+The function is put into a convenient form which, for this F, ensures
+that the denominator is a polynomial in a alone.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(Rationals(),2);
+&gt; C := Curve(P,x^4 + 2*x*y^2*z + 5*y*z^3);
+&gt; F&lt;a,b&gt; := FunctionField(C);
+&gt; f := a/b;
+&gt; f;
+(-2*a*b - 5)/a^3
+</PRE>
+Now we choose a point of the curve and find that f has a pole there
+of order 3.
+<P>
+<P>
+<PRE>
+&gt; p := C ! [0,0,1];
+&gt; Evaluate(f,p);
+Infinity
+&gt; Valuation(f,p);
+-3
+</PRE>
+Computing the valuations of the generators we notice that a is
+a uniformising parameter at p --- indeed, it is the parameter automatically
+returned. Clearly the valuation of f=a/b at p should be 1 - 4= - 3
+as computed in the previous line.
+<P>
+<P>
+<PRE>
+&gt; vp := Valuation(p);
+&gt; vp(a), vp(b);
+1 4
+&gt; UniformizingParameter(p);
+a
+</PRE>
+<HR>
+<H5><A NAME = "15112">GapNumbers(C) : Crv -&gt; [RngIntElt]</A></H5>
+<BLOCKQUOTE>
+The gap numbers of the curve C.
+</BLOCKQUOTE>
+<H5><A NAME = "15113">WronskianOrders(C) : Crv -&gt; [RngIntElt]</A></H5>
+<BLOCKQUOTE>
+The Wronskian orders of the curve C.
+</BLOCKQUOTE>
+<H5><A NAME = "15114">NumberOfPlacesOfDegreeOverExactConstantField(C, m) : Crv[FldFin], RngIntElt -&gt; RngIntElt</A></H5>
+<H5>NumberOfPlacesDegECF(C, m) : Crv[FldFin], RngIntElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The number of places of degree m of the curve C defined over a finite
+field.
+Contrary to the <TT>Degree</TT> function the degree is here taken over the
+field of geometric irreducibility.
+</BLOCKQUOTE>
+<H5><A NAME = "15115">NumberOfPlacesOfDegreeOneOverExactConstantField(C) : Crv[FldFin] -&gt; RngIntElt</A></H5>
+<H5>NumberOfPlacesOfDegreeOneECF(C) : Crv[FldFin] -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The number of places of degree one of the curve C defined over a finite
+field.
+Contrary to the <TT>Degree()</TT> function the degree is here taken
+over the field of geometric irreducibility.
+</BLOCKQUOTE>
+<H5><A NAME = "15116">NumberOfPlacesOfDegreeOneOverExactConstantField(C, m) : Crv[FldFin], RngIntElt -&gt; RngIntElt</A></H5>
+<H5>NumberOfPlacesOfDegreeOneECF(C, m) : Crv[FldFin], RngIntElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The number of places of degree one in the constant field extension of
+degree m of the curve C. Contrary to the <TT>Degree()</TT>
+function the degree is here taken over the field of geometric
+irreducibility.
+</BLOCKQUOTE>
+<H5><A NAME = "15117">NumberOfPlacesOfDegreeOneECFBound(C) : Crv -&gt; RngIntElt</A></H5>
+<H5>NumberOfPlacesOfDegreeOneOverExactConstantFieldBound(C) : Crv[FldFin] -&gt; RngIntElt</H5>
+<H5>NumberOfPlacesOfDegreeOneECFBound(C, m) : Crv[FldFin], RngIntElt -&gt; RngIntElt</H5>
+<H5>NumberOfPlacesOfDegreeOneOverExactConstantFieldBound(C, m) : Crv[FldFin], RngIntElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+An upper bound on the number of places of degree one in the 
+constant field extension of
+degree m (if given) of the curve C. 
+Contrary to the <TT>Degree</TT> function the degree is here taken over the respective exact
+constant fields.
+</BLOCKQUOTE>
+<H5><A NAME = "15118">DivisorOfDegreeOne(C) : Crv[FldFin] -&gt; DivCrvElt</A></H5>
+<BLOCKQUOTE>
+Return a divisor of the curve C of degree 1 over its field of geometric
+irreducibility.
+</BLOCKQUOTE>
+<H5><A NAME = "15119">SerreBound(C) : Crv[FldFin] -&gt; RngIntElt</A></H5>
+<H5>SerreBound(C, m) : Crv[FldFin], RngIntElt -&gt; RngIntElt</H5>
+<H5>IharaBound(C) : Crv[FldFin] -&gt; RngIntElt</H5>
+<H5>IharaBound(C, m) : Crv[FldFin], RngIntElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The Serre and Ihara bounds of the number of places of degree 1 over the
+field of geometric irreducibility of the curve C over the extension of degree
+m of the base ring of C, which must be a finite field.
+</BLOCKQUOTE>
+<H5><A NAME = "15120">LPolynomial(C) : Crv[FldFin] -&gt; RngUPolElt</A></H5>
+<H5>LPolynomial(C, m) : Crv[FldFin], RngIntElt -&gt; RngUPolElt</H5>
+<H5>ZetaFunction(C) : Crv[FldFin] -&gt; FldFunRatUElt</H5>
+<H5>ZetaFunction(C, m) : Crv[FldFin], RngIntElt -&gt; FldFunRatUElt</H5>
+<BLOCKQUOTE>
+The L-polynomial and the &zeta; function of the projective normalisation of the curve C
+over the extension of degree m of the base ring of C, which must be a finite field.
+</BLOCKQUOTE>
+<H5><A NAME = "15121">ZetaFunctionOfCurveModel(C) : Crv[FldFin] -&gt; FldFunRatUElt</A></H5>
+
+<PRE>    Zfn: FldFunRatUElt                  Default: </PRE>
+<BLOCKQUOTE>
+Returns the &zeta; function of the actual curve model C rather than that of its projective
+normalisation tilde(C). C must still be a reduced and irreducible curve and defined over a finite
+field (F)<sub>q</sub> but it may be affine or singular.
+<P>
+The &zeta; function of C is defined by the usual formula in terms of the numbers
+#C((F)<sub>q<sup>n</sup></sub>) (see Appendix C of <A  HREF = "text1355.htm#bib_hartshorne">[Har77]</A>) and is still a rational function,
+even if C is affine and/or singular. From the definition, it is easy to see that the
+&zeta; function of C differs from that of tilde(C) as follows. We multiply by
+1 - t<sup>d</sup> to remove the contribution of a degree d place at infinity or lying over
+singular points of C
+and divide by 1 - t<sup>d</sup> to put back in the contribution of a Galois-conjugate set of singular points
+defined over (F)<sub>q<sup>d</sup></sub>.
+<P>
+The computation is performed in the obvious way, computing the places at infinity (in the
+affine case) and those over the singular locus using the standard function field machinery.
+The major work is in the initial computation of the &zeta; function of tilde(C),
+where <TT>ZetaFunction</TT> is called. If this &zeta; function is already known, it can be input
+via the parameter <TT>Zfn</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15122">Example <TT>Crv_crv-zfn-crv-mod (H120E26)</TT></A></H3>
+A simple example is where C is the usual affine Weierstrass model of an elliptic curve E.
+C is non-singular and only differs from E by the removal of the single k-rational point
+O at infinity. The &zeta; function of C is therefore the usual &zeta; function of E
+multiplied by 1 - t.
+<P>
+<P>
+<PRE>
+&gt; k := GF(7);
+&gt; E := EllipticCurve([k|0,5]);
+&gt; ze1 := ZetaFunction(E);
+&gt; ze1;
+(7*$.1^2 - $.1 + 1)/(7*$.1^2 - 8*$.1 + 1)
+&gt; A&lt;x,y&gt; := AffineSpace(k,2);
+&gt; C := Curve(A,y^2-x^3-5);
+&gt; ze2 := ZetaFunctionOfCurveModel(C);
+&gt; ze2;
+(-7*$.1^2 + $.1 - 1)/(7*$.1 - 1)
+&gt; ze2/ze1;
+-$.1 + 1
+</PRE>
+<HR>
+<H4><A NAME = "15123">Representations of the Function  Field</A></H4>
+
+<P>
+<P>
+<P>
+The function field of a scheme has very little direct functionality. But when 
+the scheme is a curve the function field is isomorphic to an algebraic function
+field as described in Chapter <A  HREF = "text442.htm#4512">ALGEBRAIC FUNCTION FIELDS</A>. This isomorphism is used 
+internally in
+many computations for curves. Although the isomorphic algebraic function field 
+can be retrieved from the function field of the scheme, this should not be
+necessary during ordinary usage of the curves. 
+
+
+<H5><A NAME = "15124">AlgorithmicFunctionField(F) : FldFunFracSch -&gt; FldFun, Map</A></H5>
+<BLOCKQUOTE>
+Given the function field F of a curve C, this function returns the background 
+algebraic function field, AF. As this is the object where such calculations as
+those involving places, divisors and differentials are performed, we refer to it 
+as the algorithmic or arithmetic function field. Since there are curve functions 
+which provide an interface to most of the functionality of this field via C, 
+F and its elements, the user can usually avoid accessing AF directly. However, 
+when it is required, it is also usually necessary to translate between elements 
+of F and AF.  A map from F to AF is thus also returned. This map is 
+invertible and its inverse is used to map elements the other way.
+</BLOCKQUOTE>
+<H5><A NAME = "15125">FunctionFieldPlace(p) : PlcCrvElt -&gt; PlcFunElt</A></H5>
+<H5>CurvePlace(C, p) : Crv, PlcFunElt -&gt; PlcCrvElt</H5>
+<H5>FunctionFieldDivisor(d) : DivCrvElt -&gt; DivFunElt</H5>
+<H5>CurveDivisor(C, d) : Crv, DivFunElt -&gt; DivCrvElt</H5>
+<H5>FunctionFieldDifferential(d) : DiffCrvElt -&gt; DiffFunElt</H5>
+<H5>CurveDifferential(C, d) : Crv, DiffFunElt -&gt; DiffCrvElt</H5>
+<BLOCKQUOTE>
+Return the place, divisor or differential of the algebraic function field
+corresponding to the place, divisor or differential of a curve or
+convert the place p, divisor or differential d of an algebraic function
+field into a place, divisor or differential of the curve C.
+</BLOCKQUOTE>
+<H4><A NAME = "15126">Differentials</A></H4>
+
+<P>
+<P>
+The space of differentials in Magma is the vector space of elements
+df over the function field of a curve, where f is any element of the function field
+and where the operator d satisfies the usual derivation conditions.
+This vector space is called the <I>differential space</I> and corresponds to
+the K&auml;hler differentials of <A  HREF = "text1355.htm#bib_hartshorne">[Har77]</A>, II.8.
+Note that the differential space is not explicitly a vector space
+in Magma. Rather, as so often when there are many different structures
+to be considered, a vector space together with a map to the
+space of differentials is given.
+(Of course, basic vector space arithmetic works on the space of differentials.)
+In fact, this is appropriate: after all, K&auml;hler differentials are
+merely a model of an object which one might prefer to define by
+its universal properties.
+
+
+<H5><A NAME = "15127">Creation of Differentials</A></H5>
+
+
+
+<H5><A NAME = "15128">DifferentialSpace(C) : Crv -&gt; DiffCrv</A></H5>
+<BLOCKQUOTE>
+The space of differentials of the curve C.
+</BLOCKQUOTE>
+<H5><A NAME = "15129">SpaceOfDifferentialsFirstKind(C) : Crv -&gt; ModFld, Map</A></H5>
+<H5>SpaceOfHolomorphicDifferentials(C) : Crv -&gt; ModFld, Map</H5>
+<BLOCKQUOTE>
+Given a curve C, this function returns a vector space V and a map 
+from V to the space of differentials of C with image the holomorphic 
+differentials on C.
+</BLOCKQUOTE>
+<H5><A NAME = "15130">BasisOfDifferentialsFirstKind(C) : Crv -&gt; [DiffCrvElt]</A></H5>
+<H5>BasisOfHolomorphicDifferentials(C) : Crv -&gt; [DiffCrvElt]</H5>
+<BLOCKQUOTE>
+Given a curve C, this function returns a basis for the space of holomorphic 
+differentials of C.
+</BLOCKQUOTE>
+<H5><A NAME = "15131">DifferentialSpace(D) : DivCrvElt -&gt; ModFld,Map</A></H5>
+<BLOCKQUOTE>
+Given a divisor D associated with curve C, this function returns a vector 
+space V and a map from V to the space of differentials of the curve C 
+containing the divisor D with image the differentials of &omega;<sub>C</sub>(D).
+Colloquially, this refers to the differentials whose zeros are at least the
+positive (or effective) part of D and whose poles are no worse than the
+negative part of D.
+</BLOCKQUOTE>
+<H5><A NAME = "15132">DifferentialBasis(D) : DivCrvElt -&gt; [DiffCrvElt]</A></H5>
+<BLOCKQUOTE>
+Given a divisor D on a curve, this function returns the basis of the 
+differential space of D.
+</BLOCKQUOTE>
+<H5><A NAME = "15133">Differential(a) : FldFunFracSchElt -&gt; DiffCrvElt</A></H5>
+<BLOCKQUOTE>
+The exact differential d(a) of the function field element a.
+</BLOCKQUOTE>
+<H5><A NAME = "15134">Operations on Differentials</A></H5>
+
+<P>
+<P>
+The space of differentials admits vector space operations over
+the function field of the curve. As such, it is one-dimensional so one can even
+divide two non-zero differentials to recover an element of the
+function field.
+
+
+<H5>f * x : RngElt,DiffCrvElt -&gt; DiffCrvElt</H5>
+
+<H5>x * f : DiffCrvElt,RngElt -&gt; DiffCrvElt</H5>
+
+<H5>x + y : DiffCrvElt,DiffCrvElt -&gt; DiffCrvElt</H5>
+
+<H5>- x : DiffCrvElt -&gt; DiffCrvElt</H5>
+
+<H5>x - y : DiffCrvElt,DiffCrvElt -&gt; DiffCrvElt</H5>
+
+<H5>x / r : DiffCrvElt,RngElt -&gt; DiffCrvElt</H5>
+
+<H5>x / y : DiffCrvElt,DiffCrvElt -&gt; FldFunFracSchElt</H5><P>
+
+
+The basic arithmetic in the space of differentials.
+Thought of as a vector space over the function field, this space
+is one-dimensional. The final operation uses this fact to return
+a function field element as the quotient of two differentials.
+
+
+<H5><A NAME = "15135">Identity(S) : DiffCrv -&gt; DiffCrvElt</A></H5>
+<BLOCKQUOTE>
+The identity differential of the differential space S of a curve.
+</BLOCKQUOTE>
+<H5><A NAME = "15136">Curve(S) : DiffCrv -&gt; Crv</A></H5>
+<BLOCKQUOTE>
+The curve for which S is the space of differentials.
+</BLOCKQUOTE>
+<H5><A NAME = "15137">Curve(a) : DiffCrvElt -&gt; Crv</A></H5>
+<BLOCKQUOTE>
+The curve to which the differential a belongs.
+</BLOCKQUOTE>
+<H5><A NAME = "15138">S eq T : DiffCrv,DiffCrv -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the two spaces of differentials S and T are
+the same.
+</BLOCKQUOTE>
+<H5><A NAME = "15139">a eq b : DiffCrvElt,DiffCrvElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the differentials a and b are equal.
+</BLOCKQUOTE>
+<H5><A NAME = "15140">a in S : Any,DiffCrv -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if a is an element of 
+the differential space S of a curve.
+</BLOCKQUOTE>
+<H5><A NAME = "15141">IsExact(a) : DiffCrvElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if a is known to be an exact differential, that is,
+if it is known to be of the form df.
+If this is not already known, no further attempt is made to determine that.
+</BLOCKQUOTE>
+<H5><A NAME = "15142">IsZero(a) : DiffCrvElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the differential a is the zero differential.
+</BLOCKQUOTE>
+<H5><A NAME = "15143">Valuation(d, P) : DiffCrvElt, PlcCrvElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The valuation of the differential d of a curve at the place P
+of the same curve.
+</BLOCKQUOTE>
+<H5><A NAME = "15144">Residue(d, P): DiffCrvElt, PlcCrvElt -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+The residue of the differential d of a curve at the place P of the
+same curve.
+</BLOCKQUOTE>
+<H5><A NAME = "15145">Divisor(d) : DiffCrvElt -&gt; DivCrvElt</A></H5>
+<BLOCKQUOTE>
+The divisor (f) + (dx) of the differential d = f dx of a curve.
+</BLOCKQUOTE>
+<H5><A NAME = "15146">Module(L) : [DiffCrvElt] -&gt; Mod, Map, [ ModElt ]</A></H5>
+
+<PRE>    IsBasis: BoolElt                    Default: <TT>false</TT></PRE>
+
+<PRE>    PreImages: BoolElt                  Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a sequence L of differentials of a curve C, return the module over
+the base ring of C generated by the differentials in L as an abstract 
+module and a map from the module into the space of differentials of C.
+<P>
+If the parameter <TT>IsBasis</TT> is set to <TT>true</TT> then the elements in L
+are assumed to be a basis for the module returned. If <TT>PreImages</TT> is
+set to <TT>true</TT> then a sequence of the preimages of the basis elements is
+also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "15147">Relations(L) : [DiffCrvElt] -&gt; ModTupFld</A></H5>
+<H5>Relations(L, m) : [DiffCrvElt], RngIntElt -&gt; ModTupFld</H5>
+<BLOCKQUOTE>
+Given a sequence L of differentials of a curve C, return the module over
+the base ring R of C of R-linear relations between the elements of L.
+If given, the argument m is used to compute a generating system for the
+relation module such that the corresponding generating system of 
+{ &sum;<sub>i=1</sub><sup>m</sup> v<sub>i</sub> a<sub>i</sub>  | v = (v<sub>i</sub>)<sub>i</sub> &isin;V  }
+consists of "small" elements where a<sub>i</sub> are the elements of L.
+</BLOCKQUOTE>
+<H5><A NAME = "15148">Cartier(a) : DiffCrvElt -&gt; DiffCrvElt</A></H5>
+<H5>Cartier(a, r) : DiffCrvElt,RngIntElt -&gt; DiffCrvElt</H5>
+<BLOCKQUOTE>
+Given a differential a belonging to a curve C and a positive
+integer r, this function returns the result of applying the Cartier 
+divisor to a r times (or just once if the argument r is omitted).
+More precisely,
+let C be a curve over the perfect field k with function field F, 
+x &isin;F be
+a separating variable and a = g dx &isin;&Omega;(C) with g &isin;F
+be a differential.  The Cartier operator is defined by  CA(a) =
+( - d<sup>p - 1</sup> g / dx<sup>p - 1</sup> )<sup>1/p</sup> dx. This function
+computes the r-th iterated application of CA to a.
+</BLOCKQUOTE>
+<H5><A NAME = "15149">CartierRepresentation(C) : Crv -&gt; AlgMatElt, SeqEnum[DiffCrvElt]</A></H5>
+<H5>CartierRepresentation(C, r) : Crv, RngIntElt -&gt; AlgMatElt, SeqEnum[DiffCrvElt]</H5>
+<BLOCKQUOTE>
+Given a curve C and a positive integer r, this function determines 
+a row representation matrix for action of the Cartier operator on a 
+basis of the space of holomorphic differentials of C, (applied r times). 
+More precisely,
+let C be a curve over the perfect field k, &omega;<sub>1</sub>, ..., &omega;<sub>g</sub> &isin;&Omega;(C) be a basis for the holomorphic
+differentials and r &isin;Z<sup>&ge;1</sup>.  Let M = (&lambda;<sub>i, j</sub>)<sub>i, j</sub>
+&isin;k<sup>g x g</sup> be the matrix such that  CA<sup>r</sup>(&omega;<sub>i</sub>) =
+&sum;<sub>m=1</sub><sup>g</sup> &lambda;<sub>i, m</sub> &omega;<sub>m</sub> for all 1 &le;i &le;g. This
+function returns M and (&omega;<sub>1</sub>, ..., &omega;<sub>g</sub>).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15150">Example <TT>Crv_curve-differentials (H120E27)</TT></A></H3>
+<P>
+In this example we create a curve known to have genus 3 (a nonsingular 
+plane quartic).  So it should have a three-dimensional space of holomorphic 
+differentials.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(Rationals(),2);
+&gt; C := Curve(P,x^4+y^4+z^4);
+&gt; Omega_C,phi := SpaceOfHolomorphicDifferentials(C);
+&gt; Omega_C;
+KModule of dimension 3 over Rational Field
+&gt; F&lt;a,b&gt; := FunctionField(C);
+&gt; phi;
+Mapping from: ModFld: Omega_C to Space of differentials of F
+</PRE>
+That is good.
+Now we make a differential and check whether it is exact (which it
+obviously is since that's how we made it).
+<P>
+<P>
+<PRE>
+&gt; f := a/b;
+&gt; df := Differential(f);
+&gt; df;
+(-a/(b^6 + b^2)) d(b)
+&gt; Curve(df) eq C;
+true
+&gt; IsExact(df);
+true
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1365.htm">[Next]</A><A  HREF = "text1363.htm">[Prev]</A> <A  HREF = "text1365.htm">[Right]</A> <A  HREF = "text1363.htm">[Left]</A> <A  HREF = "text1356.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

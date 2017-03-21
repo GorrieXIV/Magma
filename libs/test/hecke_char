@@ -1,0 +1,261 @@
+
+function RandomField(d,S)
+ while true do F:=Polynomial([Random([-S..S]) : i in [1..d]] cat [1]);
+  if IsIrreducible(F) then break; end if; end while; K<s>:=NumberField(F);
+ return K; end function;
+
+function rand(K)
+ return &+[Random([-100..100])*K.1^j : j in [0..Degree(K)-1]]; end function;
+
+function rand_ideal(FB) S:=[];
+ while #S eq 0 do
+  S:=[fb^Random([0..4]) : fb in FB | Random([0..4]) eq 1]; end while;
+ return &*S; end function;
+
+function get_random(K,LIMIT); r,v:=Signature(K);
+ while true do P:=[x : x in PrimesUpTo(50) | Random(1) eq 1];
+  while #P eq 0 do P:=[x : x in PrimesUpTo(50) | Random(1) eq 1]; end while;
+  F:=Factorization(&*P*IntegerRing(K));
+  if Random(1) eq 1 then
+   I:=F[Random([1..#F])][1]^Random([1..4]);
+   I*:=F[Random([1..#F])][1]^Random([0..2]);
+  elif Random(1) eq 1 then
+   I:=F[Random([1..#F])][1]^Random([1..2]);
+   I*:=F[Random([1..#F])][1]^Random([0..1]);
+  elif Random(1) eq 1 then
+   I:=F[Random([1..#F])][1]*F[Random([1..#F])][1]*F[Random([1..#F])][1];
+  else I:=1*IntegerRing(K);
+   for i in [1..Random([4..8])] do I*:=F[Random([1..#F])][1]; end for; end if;
+  if Norm(I) eq 1 and Random(4) ne 0 then continue; end if;
+  if Norm(I) lt LIMIT then break; end if; end while;
+ oo:=[i : i in [1..r] | Random(1) eq 1];
+ return DirichletGroup(I,oo),HeckeCharacterGroup(I,oo); end function;
+
+function test_subgroup(field_degree,field_size,
+                       field_count,modulus_count,element_count)
+ for u in [1..field_count] do K:=RandomField(field_degree,field_size); u,K;
+  for c in [1..modulus_count] do
+   DG,HG:=get_random(K,10^5); c,Norm(Modulus(DG));
+   // check Dirichlet-specific stuff
+   c1:=Random(DG); c2:=Random(DG);
+   /* check Dirichlet subgroups */
+   S1,m1:=sub<DG|[c1]>; S2,m2:=sub<DG|[c2]>;
+   assert S1 eq S1; assert S2 eq S2;
+   assert S1 subset DG; assert S2 subset DG;
+   assert S1!c1 eq c1; assert S2!c2 eq c2;
+   assert DG!S1!c1 eq c1; assert DG!S2!c2 eq c2;
+   assert m1(S1!c1) eq c1; assert m2(S2!c2) eq c2;
+   assert (S1!c1)*(S2!c2) eq (c1*c2);
+   assert (S1!c1)/(S2!c2) eq (c1/c2);
+   assert &*[Extend(x,DG) : x in Decomposition(S1!c1)] eq c1;
+   assert &*[Extend(x,DG) : x in Decomposition(S2!c2)] eq c2;
+   assert c1 eq Extend(AssociatedPrimitiveCharacter(c1),DG);
+   assert c2 eq Extend(AssociatedPrimitiveCharacter(c2),DG);
+   r:=Random([-10..10]); assert (S1!c1)^r eq c1^r; assert (S2!c2)^r eq c2^r;
+   M:=S1 meet S2; A:=S1+S2;
+   assert S1`AbGrp meet S2`AbGrp eq M`AbGrp;
+   assert S1`AbGrp+S2`AbGrp eq A`AbGrp;
+   assert S1 subset A; assert S2 subset A;
+   assert M subset A; assert M subset DG;
+   assert M subset S1; assert M subset S2;
+   /* check subgroup ops on elements, and multiplication/division of chars */
+   for i in [1..element_count] do r:=rand(K); // r;
+    r1:='@'(r,c1 : Raw); r2:='@'(r,c2 : Raw);
+    assert '@'(r,S1!c1 : Raw) eq r1; assert '@'(r,S2!c2 : Raw) eq r2;
+    assert '@'(r,A!c1 : Raw) eq r1; assert '@'(r,A!c2 : Raw) eq r2;
+    // check mult and division, at least on elements of integral norm
+    w:=Random([-10..10]); t1:=Type(Parent(r1)); t2:=Type(Parent(r2));
+    assert r1*w eq '@'(r,c1^w : Raw); assert r2*w eq '@'(r,c2^w : Raw);
+    if t1 ne RngInt then assert -r1 eq '@'(1/r,c1 : Raw); end if;
+    if t2 ne RngInt then assert -r2 eq '@'(1/r,c2 : Raw); end if;
+    assert r1+r2 eq '@'(r,c1*c2 : Raw); assert r1-r2 eq '@'(r,c1/c2 : Raw);
+   end for;
+   // check Hecke-specific stuff
+   h1:=Random(HG); h2:=Random(HG);
+   /* check Hecke subgroups */
+   H1,m1:=sub<HG|[h1]>; H2,m2:=sub<HG|[h2]>;
+   assert H1 eq H1; assert H2 eq H2;
+   assert H1 subset HG; assert H2 subset HG;
+   assert H1!h1 eq h1; assert H2!h2 eq h2;
+   assert HG!H1!h1 eq h1; assert HG!H2!h2 eq h2;
+   assert m1(H1!h1) eq h1; assert m2(H2!h2) eq h2;
+   assert (H1!h1)*(H2!h2) eq (h1*h2);
+   assert (H1!h1)/(H2!h2) eq (h1/h2);
+   assert h1 eq Extend(AssociatedPrimitiveCharacter(h1),HG);
+   assert h2 eq Extend(AssociatedPrimitiveCharacter(h2),HG);
+   r:=Random([-10..10]); assert (H1!h1)^r eq h1^r; assert (H2!h2)^r eq h2^r;
+   MH:=H1 meet H2; AH:=H1+H2;
+   assert H1`AbGrp meet H2`AbGrp eq MH`AbGrp;
+   assert H1`AbGrp+H2`AbGrp eq AH`AbGrp;
+   /* check subgroup ops on elements, and multiplication/division of chars */
+   time FB:=FactorBasis(K,1000);
+   for i in [1..element_count] do a:=rand_ideal(FB);
+    r1:='@'(a,h1 : Raw); r2:='@'(a,h2 : Raw);
+    assert '@'(a,H1!h1 : Raw) eq r1; assert '@'(a,H2!h2 : Raw) eq r2;
+    assert '@'(a,AH!h1 : Raw) eq r1; assert '@'(a,AH!h2 : Raw) eq r2;
+    w:=Random([-10..10]); t1:=Type(Parent(r1)); t2:=Type(Parent(r2));
+    assert r1*w eq '@'(a,h1^w : Raw); assert r2*w eq '@'(a,h2^w : Raw);
+    if t1 ne RngInt then assert -r1 eq '@'(a^(-1),h1 : Raw); end if;
+    if t2 ne RngInt then assert -r2 eq '@'(a^(-1),h2 : Raw); end if;
+    assert r1+r2 eq '@'(a,h1*h2 : Raw); assert r1-r2 eq '@'(a,h1/h2 : Raw);
+   end for;
+   if IsTrivialOnUnits(c1) then hl:=HeckeLift(c1);
+    assert DirichletRestriction(HeckeLift(S1!c1)) eq c1;
+    for i in [1..element_count] do r:=rand(K);
+     r1:='@'(r,c1 : Raw); if Type(Parent(r1)) eq RngInt then continue; end if;
+     r2:='@'(r*IntegerRing(K),hl : Raw);
+     r1:=[Integers()!r1,Modulus(Parent(r1))];
+     r1:=[r div Gcd(r1) : r in r1]; r1:=Integers(r1[2])!r1[1];
+     r2:=[Integers()!r2,Modulus(Parent(r2))];
+     r2:=[r div Gcd(r2) : r in r2]; r2:=Integers(r2[2])!r2[1];
+     assert r1 eq r2; end for; end if;
+   if IsTrivialOnUnits(c2) then hl:=HeckeLift(c2);
+    assert DirichletRestriction(HeckeLift(S2!c2)) eq c2;
+    for i in [1..element_count] do r:=rand(K);
+     r1:='@'(r,c2 : Raw); if Type(Parent(r1)) eq RngInt then continue; end if;
+     r2:='@'(r*IntegerRing(K),hl : Raw);
+     r1:=[Integers()!r1,Modulus(Parent(r1))];
+     r1:=[r div Gcd(r1) : r in r1]; r1:=Integers(r1[2])!r1[1];
+     r2:=[Integers()!r2,Modulus(Parent(r2))];
+     r2:=[r div Gcd(r2) : r in r2]; r2:=Integers(r2[2])!r2[1];
+     assert r1 eq r2; end for; end if;
+   assert IsPrimitive(AssociatedPrimitiveCharacter(c1));
+   assert IsPrimitive(AssociatedPrimitiveCharacter(c2));
+   psi1:=AssociatedPrimitiveCharacter(h1); L1:=LSeries(psi1);
+   psi2:=AssociatedPrimitiveCharacter(h2); L2:=LSeries(psi2);
+ LSetPrecision(L1,10); req:=LCfRequired(L1); req;
+ if not IsTrivial(psi1) and req lt 25000 then
+  req,CheckFunctionalEquation(L1); end if;
+ LSetPrecision(L2,10); req:=LCfRequired(L2); req;
+ if not IsTrivial(psi2) and req lt 25000 then
+  req,CheckFunctionalEquation(L2); end if;
+  end for; end for; return true; end function;
+
+function test_more(field_degree,field_size,
+                   field_count,modulus_count,element_count)
+ for u in [1..field_count] do K:=RandomField(field_degree,field_size); u,K;
+  time FB:=FactorBasis(MaximalOrder(K),1000);
+  for c in [1..modulus_count] do
+   DG,HG:=get_random(K,10^5); c,Norm(Modulus(DG));
+   chi:=Random(UnitTrivialSubgroup(DG)); psi:=HeckeLift(chi);
+   assert DirichletRestriction(psi) eq chi;
+   prim_chi:=AssociatedPrimitiveCharacter(chi);
+   prim_psi:=AssociatedPrimitiveCharacter(psi);
+   assert Extend(prim_chi,DG) eq chi; assert Extend(prim_psi,HG) eq psi;
+   for i in [1..element_count] do a:=rand(K);
+    r1:='@'(a,chi : Raw); r2:='@'(a,psi : Raw);
+    r3:='@'(a,prim_chi : Raw); r4:='@'(a,prim_psi : Raw);
+    if Type(Parent(r1)) eq RngInt then assert r2 eq 0; continue; end if;
+    m1:=Modulus(Parent(r1)); m2:=Modulus(Parent(r2)); M:=LCM(m1,m2);
+    v1:=(Integers()!r1)*(M div m1); v2:=(Integers()!r2)*(M div m2);
+    assert v1 eq v2;
+    m3:=Modulus(Parent(r3)); m4:=Modulus(Parent(r4)); // M:=LCM(m1,m2);
+    v3:=(Integers()!r3)*(M div m3); v4:=(Integers()!r4)*(M div m4);
+    assert v1 eq v3; assert v2 eq v4;
+    e:=rand_ideal(FB); r5:='@'(e,psi : Raw); r6:='@'(e,prim_psi : Raw);
+    if Type(Parent(r6)) eq RngInt then assert r5 eq 0; continue; end if;
+    if Type(Parent(r5)) eq RngInt then continue; end if;
+    m5:=Modulus(Parent(r5)); m6:=Modulus(Parent(r6)); M:=LCM(m5,m6);
+    v5:=(Integers()!r5)*(M div m5); v6:=(Integers()!r6)*(M div m6);
+    assert v5 eq v6;
+   end for; end for; end for;
+ return 0; end function;
+
+test_more(2,1000,3,3,3); // 100 fields will slow down too much, 
+test_more(3,100,3,3,3);
+test_more(4,10,3,3,3);
+test_more(5,5,3,3,3);
+test_more(6,3,3,3,3);
+test_more(7,2,3,3,3);
+test_more(8,1,3,3,3);
+test_more(9,1,3,3,3);
+test_more(10,1,3,3,3);
+
+////////////////////////////////////////////////////////////////////////
+
+y:=PolynomialRing(Rationals()).1;
+x:=PolynomialRing(Integers()).1;
+K:=NumberField(y^4+10*y^2+20);
+f1:=Factorization(5*IntegerRing(K))[1][1];
+f2:=Factorization(7*IntegerRing(K))[1][1];
+p2:=Factorization(2*IntegerRing(K))[1][1];
+H:=HeckeCharacterGroup(f1^2*p2);
+GR:=Grossencharacter(H.1,[[1,0],[1,0]]);
+GR:=AssociatedPrimitiveGrossencharacter(Extend(GR,f1^3*p2));
+H2:=HeckeCharacterGroup(p2);
+GR2:=Grossencharacter(H2.1,[[2,0],[1,1]]); // No root?
+L:=LSeries(AssociatedPrimitiveGrossencharacter(GR*GR));
+LSetPrecision(L,10); time assert Abs(CFENew(L)) lt 10^(-9);
+
+K:=NumberField(y^4+10*y^2+20);
+p5:=Factorization(5*IntegerRing(K))[1][1];
+p4:=Factorization(2*IntegerRing(K))[1][1];
+H:=HeckeCharacterGroup(p4);
+assert GrossenCheck(p4,[[2,0],[1,1]]);
+GR2:=Grossencharacter(H.1,[[2,0],[1,1]]); // No root?
+L:=LSeries(AssociatedPrimitiveGrossencharacter(GR*GR));
+LSetPrecision(L,10); time assert Abs(CFENew(L)) lt 10^(-9);
+
+////////////////////////////////////////////////////////////////////////
+
+K<s>:=NumberField(x^2+1);
+I:=Factorization(2*IntegerRing(K))[1][1]^3;
+HG:=HeckeCharacterGroup(I,[]);
+DG:=DirichletGroup(I,[]);
+GR:=Grossencharacter(HG.0,[[1,0]]);
+time assert Abs(CFENew(LSeries(GR))) lt 10^(-28);
+
+I:=Factorization(2*IntegerRing(K))[1][1]^2;
+HG:=HeckeCharacterGroup(I,[]);
+DG:=DirichletGroup(I,[]);
+GR:=Grossencharacter(HG.0,[[2,0]]);
+time assert Abs(CFENew(LSeries(GR))) lt 10^(-28);
+
+I:=Factorization(2*IntegerRing(K))[1][1]^0;
+HG:=HeckeCharacterGroup(I,[]);
+DG:=DirichletGroup(I,[]);
+GR:=Grossencharacter(HG.0,[[4,0]]);
+time assert Abs(CFENew(LSeries(GR))) lt 10^(-28);
+
+K<s>:=NumberField(x^2+3);
+I:=Factorization(3*IntegerRing(K))[1][1]^2;
+HG:=HeckeCharacterGroup(I,[]);
+DG:=DirichletGroup(I,[]);
+GR:=Grossencharacter(HG.0,[[1,0]]);
+time assert Abs(CFENew(LSeries(GR))) lt 10^(-28);
+
+I:=Factorization(3*IntegerRing(K))[1][1];
+HG:=HeckeCharacterGroup(I,[]);
+DG:=DirichletGroup(I,[]);
+GR:=Grossencharacter(HG.0,[[3,0]]);
+time assert Abs(CFENew(LSeries(GR))) lt 10^(-28);
+
+I:=Factorization(3*IntegerRing(K))[1][1]^0;
+HG:=HeckeCharacterGroup(I,[]);
+DG:=DirichletGroup(I,[]);
+GR:=Grossencharacter(HG.0,[[6,0]]);
+time assert Abs(CFENew(LSeries(GR))) lt 10^(-28);
+
+////////////////////////////////////////////////////////////////////////
+
+"sextics"; K:=NumberField(y^6 + 16*y^4 + 55*y^2 + 41 ); // disc is -6300224
+H:=HeckeCharacterGroup(1*IntegerRing(K)); // class number is 4
+GR:=Grossencharacter(H.1,[[2,0],[1,1],[0,2]]);
+LS:=LSeries(GR); LSetPrecision(LS,8); time assert Abs(CFENew(LS)) le 10^(-6);
+f3:=Factorization(3*IntegerRing(K))[1][1];
+GR:=Grossencharacter(Extend(H.1,f3),[[1,0],[1,0],[0,1]]);
+LS:=LSeries(GR); LSetPrecision(LS,8); time assert Abs(CFENew(LS)) le 10^(-6);
+
+K:=NumberField(x^6+x^5+x^4+x^3+x^2+x+1); // -7^5
+H:=HeckeCharacterGroup(1*IntegerRing(K)); // class number is 1
+f7:=Factorization(7*IntegerRing(K))[1][1];
+GR:=Grossencharacter(Extend(H.0,f7),[[1,0],[1,0],[0,1]]);
+LS:=LSeries(GR); LSetPrecision(LS,8); time assert Abs(CFENew(LS)) le 10^(-6);
+
+K:=NumberField(x^6+x^3+1); // -3^9
+H:=HeckeCharacterGroup(1*IntegerRing(K)); // class number is 1
+f3:=Factorization(3*IntegerRing(K))[1][1];
+GR:=Grossencharacter(Extend(H.0,f3^4),[[1,0],[1,0],[0,1]]);
+LS:=LSeries(GR); LSetPrecision(LS,8); time assert Abs(CFENew(LS)) le 10^(-6);
+GR:=Grossencharacter(Extend(H.0,f3^2),[[2,0],[1,1],[0,2]]);
+LS:=LSeries(GR); LSetPrecision(LS,8); time assert Abs(CFENew(LS)) le 10^(-6);

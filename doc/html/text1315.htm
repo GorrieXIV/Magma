@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Newton Polygons</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1316.htm">[Next]</A><A  HREF = "text1314.htm">[Prev]</A> <A  HREF = "text1316.htm">[Right]</A> <A  HREF = "text1314.htm">[Left]</A> <A  HREF = "text1297.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "14330">Newton Polygons</A></H3>
+
+<P>
+<P>
+<P>
+The Newton polygon of a differential operator L 
+and its Newton polynomials can be used to factorize L.
+A classical example of the Newton polygon uses the  
+derivation z.d/dz, where z is a generator of the basefield of L.
+This Newton polygon is known as <I>the</I> Newton polygon of L.
+Its definition, as used in magma, is given in Para 3 of <A  HREF = "text1296.htm#bib_vH97">[vH97b]</A> and
+is applicable to operators over a Laurent series ring with generator z, 
+as well as to
+operators over fields for which a set of places exist. 
+For fields in the latter category it is however not necessary to 
+restrict to the derivation z.d/dz
+based at z=0 (in other words: at the place (z)).
+More generally, the Newton polygon of L at the place (p) is
+the Newton polygon at t=0 after rewriting L as a differential
+operator tilde(L) in a local parameter t of (p), such that 
+derivation of tilde(L) is of the form t.d/dt.
+
+
+<H5><A NAME = "14331">NewtonPolygon(L) : RngDiffOpElt -&gt; NwtnPgon, RingDiffOpElt</A></H5>
+<BLOCKQUOTE>
+Returns the Newton Polygon of the differential operator L over a 
+differential Laurent series ring.
+This means that for the computation of the Newton polygon L may have had to 
+be rewritten as a differential operator tilde(L) over a differential Laurent 
+series ring C((t)), say, such that tilde(L) has derivation t.d/dt.
+The second argument returned is the operator tilde(L).
+</BLOCKQUOTE>
+<H5><A NAME = "14332">NewtonPolygon(L, p) : RngDiffOpElt, PlcFunElt -&gt; NwtnPgon, RingDiffOpElt</A></H5>
+<BLOCKQUOTE>
+Returns the Newton polygon of the differential
+operator L at the place p.
+The derivation of L must be defined with respect to a differential
+and the base ring of L should have one generator.
+For the computation of the Newton polygon another differential operator
+tilde(L), say, may have had to be calculated. 
+The differential of the derivation of tilde(L)
+has valuation -1 at the place p. 
+The differential operator tilde(L) is also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "14333">NewtonPolynomial(F) : NwtnPgonFace -&gt; RngUPolElt</A></H5>
+<BLOCKQUOTE>
+Returns the Newton polynomial of the face F of a Newton polygon.
+The Newton polygon must have been created with respect to a differential 
+operator.
+The Newton polynomial depends on a uniformizing element,
+therefore, its variable is well--defined up to scalar multiplication by
+a non--zero element.
+The definition of the Newton polynomial of a face that
+is used by magma, is given in Section 3 of <A  HREF = "text1296.htm#bib_vH97">[vH97b]</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "14334">NewtonPolynomials(L) : RngDiffOpElt -&gt; SeqEnum, SeqEnum</A></H5>
+<BLOCKQUOTE>
+Returns all Newton polynomials of L with respect to the faces of
+its Newton polygon. 
+The second argument returned is the corresponding slopes.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14335">Example <TT>RngDiff_example-newton-pgns-1 (H117E60)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; K := RationalDifferentialField(Rationals());
+&gt; F&lt;z&gt; := ChangeDerivation(K, K.1);
+&gt; Differential(F);
+(1/z) d(z)
+&gt; R&lt;D&gt; := DifferentialOperatorRing(F);
+&gt; L := 10*z*D^2+3*D-1;
+&gt; npgon, op := NewtonPolygon(L, Zeros(z)[1]);
+&gt; npgon;
+Newton Polygon of 10*z*$.1^2 + 3*$.1 - 1 over Algebraic function field 
+defined over Rational Field by
+$.2 - 4711 at (z)
+&gt; op;
+10*z*D^2 + 3*D + -1
+&gt; faces:= Faces(npgon);
+&gt; faces;
+[ &lt;0, 1, 0&gt;, &lt;-1, 1, -1&gt; ]
+&gt; _&lt;T&gt; := PolynomialRing(Rationals());
+&gt; NewtonPolynomial(faces[1]);
+3*T - 1
+&gt; NewtonPolynomial(faces[2]);
+10*T + 3
+</PRE>
+<HR>
+<H3><A NAME = "14336">Example <TT>RngDiff_example-newton-pgns-2 (H117E61)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; F&lt;z&gt; := RationalDifferentialField(Rationals());
+&gt; R&lt;D&gt; := DifferentialOperatorRing(F);
+&gt; L := D^2+z*D-3*z^2;
+&gt; npgon, op := NewtonPolygon(L, Zeros(1/z)[1]);
+&gt; op;
+1/z^2*$.1^2 + (-z^2 + 1)/z^2*$.1 + -3*z^2
+&gt; Differential(Parent(op));
+(-1/z) d(z)
+&gt; Valuation($1,Zeros(1/z)[1]);
+-1
+&gt; faces:= Faces(npgon);
+&gt; faces;
+[ &lt;-2, 1, -2&gt; ]
+&gt; _&lt;T&gt; := PolynomialRing(Rationals());
+&gt; NewtonPolynomial(faces[1]);
+T^2 - T - 3
+</PRE>
+<HR>
+<H3><A NAME = "14337">Example <TT>RngDiff_example-newton-pgns-3 (H117E62)</TT></A></H3>
+This example corresponds to Examples 3.46 and 3.49.2 from <A  HREF = "text1296.htm#bib_vdPS03">[vdPS03]</A>. 
+<P>
+<P>
+<PRE>
+&gt; S&lt;t&gt; := DifferentialLaurentSeriesRing(Rationals());
+&gt; R&lt;D&gt; := DifferentialOperatorRing(S);
+&gt; L := t*D^2+D-1;
+&gt; npgon, op := NewtonPolygon(L);
+&gt; L eq op;
+true
+&gt; Faces(npgon);
+[ &lt;0, 1, 0&gt;, &lt;-1, 1, -1&gt; ]
+&gt; _&lt;T&gt; := PolynomialRing(Rationals());
+&gt; NewtonPolynomials(L);
+[
+    T - 1,
+    T + 1
+]
+[ 0, 1 ]
+&gt; L := D^2+(1/t^2+1/t)*D+(1/t^3-2/t^2);
+&gt; npgon, op := NewtonPolygon(L);
+&gt; L eq op;
+true
+&gt; NewtonPolynomials(L);
+[
+    T + 1,
+    T + 1
+]
+[ 1, 2 ]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1316.htm">[Next]</A><A  HREF = "text1314.htm">[Prev]</A> <A  HREF = "text1316.htm">[Right]</A> <A  HREF = "text1314.htm">[Left]</A> <A  HREF = "text1297.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

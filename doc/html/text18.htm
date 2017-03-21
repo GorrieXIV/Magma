@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Random Object Generation</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text19.htm">[Next]</A><A  HREF = "text17.htm">[Prev]</A> <A  HREF = "text19.htm">[Right]</A> <A  HREF = "text17.htm">[Left]</A> <A  HREF = "text3.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "122">Random Object Generation</A></H3>
+
+<P>
+<P>
+Pseudo-random quantities are used in several Magma algorithms, and
+may also be generated explicitly by some intrinsics.  Throughout the
+Handbook, the word `random' is used for `pseudo-random'.
+<P>
+Since V2.7 (June 2000), Magma contains an implementation of the <I>Monster</I> random number generator of G. Marsaglia <A  HREF = "text2.htm#bib_Marsaglia">[Mar00]</A>.
+The period of this generator is 2<sup>29430</sup> - 2<sup>27382</sup>
+(approximately 10<sup>8859</sup>), and passes all of the stringent tests in
+Marsaglia's <I>Diehard</I> test suite <A  HREF = "text2.htm#bib_MarsagliaDiehard">[Mar95]</A>.
+Since V2.13 (July 2006), this generator is combined with the MD5 hash
+function to produce a higher-quality result.
+<P>
+Because the generator uses an internal array of machine integers,
+one `seed' variable does not express the whole state, so the method for
+setting or getting the generator state is by way of a pair of
+values: (1) the seed for initializing the array, and (2) the number of
+steps performed since the initialization.
+
+
+<H5><A NAME = "123">SetSeed(s, c) : RngIntElt, RngIntElt -&gt;</A></H5>
+<H5>SetSeed(s) : RngIntElt -&gt;</H5>
+<BLOCKQUOTE>
+(Procedure.)
+Reset the random number generator to have initial seed s
+(0 &le;s &lt; 2<sup>32</sup>), and advance to step c (0 &le;c &lt; 2<sup>64</sup>).
+If c is not given, it is taken to be 0.
+Passing
+<TT>-S</TT><I>n</I> to Magma at startup is equivalent to typing
+<TT>SetSeed(</TT><I>n</I><TT>);</TT> after startup.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "124">GetSeed() : -&gt; RngIntElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Return the initial seed s used to initialize the random-number generator
+and also the current step c.  This is the complement to the <TT>SetSeed</TT>
+function.
+</BLOCKQUOTE>
+<H5><A NAME = "125">Random(S) : Str -&gt; Elt</A></H5>
+<BLOCKQUOTE>
+Given a finite set or structure S, return a random element of S.
+</BLOCKQUOTE>
+<H5><A NAME = "126">Random(a, b) : RngIntElt, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Return a random integer lying in the interval [a, b], where a&le;b.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "127">Random(b) : RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Return a random integer lying in the interval [0, b], where b is
+a non-negative integer.
+Because of the good properties of the underlying
+Monster generator, calling <TT>Random(1)</TT> is a good safe way to
+produce a sequence of random bits.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "128">Example <TT>State_IsIntrinsic (H1E22)</TT></A></H3>
+We demonstrate how one can return to a previous random state by
+the use of <TT>GetSeed</TT> and <TT>SetSeed</TT>.
+We begin with initial seed 1 at step 0 and create a multi-set of 100,000 random
+integers in the range [1..4].
+<P>
+<P>
+<PRE>
+&gt; SetSeed(1); 
+&gt; GetSeed(); 
+1 0
+&gt; time S := {* Random(1, 4): i in [1..100000] *};
+Time: 0.490
+&gt; S;
+{* 1^^24911, 2^^24893, 3^^25139, 4^^25057 *}
+</PRE>
+We note the current state by <TT>GetSeed</TT>, and then print 10 random
+integers in the range [1..100].
+<P>
+<P>
+<PRE>
+&gt; GetSeed();
+1 100000
+&gt; [Random(1, 100): i in [1 .. 10]];
+[ 85, 41, 43, 69, 66, 61, 63, 31, 84, 11 ]
+&gt; GetSeed();
+1 100014
+</PRE>
+We now restart with a different initial seed 23 (again at step 0),
+and do the same as before, noting the different random integers produced.
+<P>
+<P>
+<PRE>
+&gt; SetSeed(23);
+&gt; GetSeed();
+23 0
+&gt; time S := {* Random(1, 4): i in [1..100000] *};
+Time: 0.500
+&gt; S;
+{* 1^^24962, 2^^24923, 3^^24948, 4^^25167 *}
+&gt; GetSeed();
+23 100000
+&gt; [Random(1, 100): i in [1 .. 10]];
+[ 3, 93, 11, 62, 6, 73, 46, 52, 100, 30 ]
+&gt; GetSeed();
+23 100013
+</PRE>
+Finally, we restore the random generator state to what it was after the
+creation of the multi-set for the first seed.  We then print the 10
+random integers in the range [1..100], and note that they are the
+same as before.
+<P>
+<P>
+<PRE>
+&gt; SetSeed(1, 100000);
+&gt; [Random(1, 100): i in [1 .. 10]];
+[ 85, 41, 43, 69, 66, 61, 63, 31, 84, 11 ]
+&gt; GetSeed();                       
+1 100014
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text19.htm">[Next]</A><A  HREF = "text17.htm">[Prev]</A> <A  HREF = "text19.htm">[Right]</A> <A  HREF = "text17.htm">[Left]</A> <A  HREF = "text3.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

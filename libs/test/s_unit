@@ -1,0 +1,86 @@
+
+// load "/magma/donnelly/libs/test/sunit";
+
+// Test S-unit calculations with various ClassGroup algorithms
+
+// Sep 2012, SRD
+
+_<x> := PolynomialRing(Rationals());
+
+POLS := [
+x^2 - NextPrime(10^7),
+x^3 - 10*1009,
+x^4 - 6060,
+//x^5 - x - 300,
+x^5 - x^4 - 4*x^3 + 3*x^2 + 3*x - 1
+];
+
+ALS := ["NoSieve"];
+ALS := ["NoSieve", "Sieve"];
+
+SetClassGroupBounds("GRH");
+
+SetVerbose("ClassGroup", 0);
+SetVerbose("ClassGroupSieve", 0);
+//SetKantVerbose("IDEAL_REP", 5);
+
+
+for f in POLS, al in ALS do
+
+    SetSeed(1, 0);
+
+    F<w> := NumberField(f);
+    ZF := Integers(F);
+    ZF := LLL(ZF);
+    D := Abs(Discriminant(ZF));
+
+    if al eq "Sieve" and 
+        (D lt 10^6 or Degree(ZF) eq 2 and D lt 10^12)
+    then
+        continue;
+    end if;
+
+    print "\n\n\nStarting", F;
+    time
+    C, mC := ClassGroup(ZF : Al:=al);
+    print "ClassGroup =", Invariants(C);
+
+    S := [ZF !! p : p in PrimesUpTo(100, F) [1..3]];
+
+    for test := 0 to 2 do
+
+        if test eq 1 then
+            // append an "other" prime
+            B := Max([Minimum(I) : I in FactorBasis(ZF)]);
+            p := B div 2;
+            repeat 
+                p := NextPrime(p);
+                F := Factorization(p*ZF);
+            until Norm(F[1,1]) eq p and Norm(F[#F,1]) gt B;
+            Append(~S, F[#F,1]);
+        elif test eq 2 then
+            Append(~S, Factorization(1000003*ZF)[1,1]);
+        end if;
+
+        print "Primes have norms", [Norm(P) : P in S];
+
+        U, mU := SUnitGroup(S);
+        Sunits := [U.i @ mU : i in [1..Ngens(U)] ];
+
+        print "S-units have norms", [Norm(u) : u in Sunits];
+
+        for u in Sunits do
+            assert Abs(Norm(u)) eq &* [Integers() | Norm(P)^Valuation(u,P) : P in S];
+            assert         u*ZF eq &* [PowerIdeal(ZF) | P^Valuation(u,P) : P in S];
+        end for;
+
+        CS := sub< C | [P @@ mC : P in S] >; 
+
+        Uvals := Matrix(Integers(), #S, [Valuation(u,P) : P in S, u in Sunits]);
+
+        assert IsIsomorphic(CS, AbelianGroup(ElementaryDivisors(Uvals)));
+
+    end for;
+
+end for;
+

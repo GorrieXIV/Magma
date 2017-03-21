@@ -1,0 +1,173 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Weil Descent</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text459.htm">[Next]</A><A  HREF = "text457.htm">[Prev]</A> <A  HREF = "text459.htm">[Right]</A> <A  HREF = "text457.htm">[Left]</A> <A  HREF = "text442.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "5042">Weil Descent</A></H3>
+
+<P>
+<P>
+<P>
+Weil Descent is a technique that can be applied to cryptosystem attacks
+amongst other things. The general idea is as follows. If C is a curve
+defined over field L and K is a subfield of L, the group of points 
+of the Jacobian of C, Jac(C), over L is isomorphic to the group of
+points of a higher-dimensional abelian variety, the <I>Weil restriction</I>
+of Jac(C), over K. If a curve D over K can be found along
+with an algebraic homomorphism defined over K from Jac(D) to this Weil
+restriction, it is usually possible to transfer problems about Jac(C)(L)
+(like discrete log problems) to Jac(D)(K). D will have larger genus than
+C, but we have descended to a smaller field. The advantage is that 
+techniques like Index calculus, where the time complexity depends more
+strongly on the field size than the genus, can now be applied.
+<P>
+An important special case is where C is an ordinary elliptic curve over
+a finite field of characteristic 2. In this case, Artin-Schreier theory
+gives a very concrete algorithm for computing a suitable D. This is the
+GHS attack (see <A  HREF = "text441.htm#bib_GHS">[Gau00]</A> or the chapter by F. He&szlig; in <A  HREF = "text441.htm#bib_ad_ECC">[Bla05]</A>).
+There is a corresponding function <A  HREF = "text1443.htm#CrvEll:ec_weil_desc">WeilDescent</A> in the 
+Elliptic Curve chapter that works with curves rather than function fields.
+<P>
+The functions below implement the GHS Weil Descent in a more general
+characteristic p setting.
+
+
+<H5><A NAME = "5043"></A><A NAME = "FldFunG:weil_desc">WeilDescent</A>(E,k) : FldFun, FldFin -&gt; FldFunG, Map</H5>
+<BLOCKQUOTE>
+The main function. E must be an "Artin-Schreier" function field over 
+finite field K, an extension of k, of the following form.
+If p is the characteristic of
+K, then the base field of E is a rational function field K(x) and
+E.1, the generator of E over K(x) has minimal polynomial of the
+form y<sup>p</sup> - y = c/x + a + b * x for a, b, c &isin;K. These parameters must
+satisfy b, c != 0 and at least one of the following conditions
+<P>
+<DL COMPACT class='compact'>
+<DT>i)  Trace<sub>K/k</sub>(b) != 0</DT><DD><DT>ii)  Trace<sub>K/k</sub>(c) != 0</DT><DD><DT>iii)  Trace<sub>K/F<sub>p</sub></sub>(a) = 0</DT><DD></DL>
+Then, if E<sub>1</sub> is the Galois closure of the separable field extension 
+E/k and [K:k]=n, there is an extension of the Frobenius generator
+of G(K/k) to an automorphism of E<sub>1</sub> which fixes x and is
+also of order n. If F is the fixed field of this extension, then
+it has exact constant field k and so
+it is the function field of a (geometrically irreducible) curve over
+k. This is the WeilDescent curve. It's algebraic function field
+F is the first return value.
+<P>
+Note that when p=2, E is the function field of an ordinary
+elliptic curve in characteristic 2 (multiply the defining equation
+by x<sup>2</sup> and take xy as the new y variable) and conversely,
+any such elliptic curve can be put into this form in multiple
+ways.
+<P>
+The second return value is a map from the divisors of E to the divisors
+of F which represents the homomorphism 
+Jac(Curve(E))(K) -&gt; Jac(Curve(F))(k). This map, however does not
+attempt any divisor reduction. For the characteristic 2
+<A  HREF = "text1443.htm#CrvEll:ec_weil_desc">WeilDescent</A> function
+on elliptic curves mentioned in the introduction, if F is hyperelliptic,
+the divisor map returned is the actual homomorphism from the elliptic curve
+(with function field E) to the Jacobian of the hyperelliptic curve with
+function field F. This may be more convenient for the user.
+<P>
+There are functions below that may be called to return the genus and other
+attributes of F before actually going through with its construction.
+<P>
+One important special case, worth noting here, is that when p = 2 and
+b or c is in k, then the degree of F is also 2 and so the
+descent curve is a hyperelliptic curve.
+</BLOCKQUOTE>
+<H5><A NAME = "5044">ArtinSchreierExtension(c,a,b) : FldFin, FldFin, FldFin -&gt; FldFun</A></H5>
+<BLOCKQUOTE>
+A convenience function to generate the function field which is an
+extension of K(x) by the (irreducible) polynomial
+y<sup>p</sup> - y - c/x - a - bx where K is a finite field which is the parent 
+of a, b, c and p is the characteristic of K.
+</BLOCKQUOTE>
+<H5><A NAME = "5045">WeilDescentDegree(E,k) : FldFun, FldFin -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+With E and k as in the main <TT>WeilDescent</TT> function,
+returns the degree of the descended function field F
+over its rational base field k(x). The computation only
+involves the Frobenius action on a, b, c and the descent
+isn't actually performed.
+</BLOCKQUOTE>
+<H5><A NAME = "5046">WeilDescentGenus(E,k) : FldFun, FldFin -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+With E and k as in the main <TT>WeilDescent</TT> function,
+returns the genus of the descended function field F
+over its rational base field k(x). The computation only
+involves the Frobenius action on a, b, c and the descent
+isn't actually performed.
+</BLOCKQUOTE>
+<H5><A NAME = "5047">MultiplyFrobenius(b,f,F) : RngElt, RngUPolElt, Map -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+This is a simple convenience function, useful for generating elements
+of K on which the Frobenius has a given minimal polynomial when
+considered as an F<sub>p</sub>-linear map (see the example below).
+<P>
+The argument b should be an element of a ring R, f a polynomial over ring
+R<sub>0</sub>, which is naturally a subring of R and F a map from
+R to itself.
+<P>
+If f = a<sub>0</sub> + a<sub>1</sub>x + ... then the function returns f(F)(b)
+which is a<sub>0</sub> + a<sub>1</sub>F(b) + a<sub>2</sub>F(F(b)) + ... .
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5048">Example <TT>FldFunG_ghs-descent (H44E45)</TT></A></H3>
+We demonstrate with an example of descent over a degree 31 extension
+in characteristic 2, which results in a genus 31 hyperelliptic function
+field, and a small characteristic 3 example.
+<P>
+<P>
+<PRE>
+&gt; SetSeed(1);
+&gt; k&lt;u&gt; := GF(2^5);
+&gt; K&lt;w&gt; := GF(2^155);
+&gt; Embed(k, K);
+&gt; k2&lt;t&gt; := PolynomialRing(GF(2));
+&gt; h := (t^31-1) div (t^5 + t^2 + 1);
+&gt; frob := map&lt; K -&gt; K | x :-&gt; x^#k &gt;;
+&gt; b := MultiplyFrobenius(K.1,h,frob);
+&gt; E := ArtinSchreierExtension(K!1, K!0, b);
+&gt; WeilDescentGenus(E, k);
+31
+&gt; WeilDescentDegree(E,k);
+2
+&gt; C,div_map := WeilDescent(E, k);
+&gt; C;
+Algebraic function field defined over Univariate rational function field over
+GF(2^5) by
+y^2 + u*y + u^18/($.1^32 + u^29*$.1^16 + u^14*$.1^8 + u^2*$.1^4 + $.1^2 +
+    u^9*$.1 + u^5)
+&gt; // get the image of the place representing a K-rational point
+&gt; pl := Zeroes(E!(BaseField(E).1)-w)[1];
+&gt; D := div_map(pl);
+&gt; Degree(D); //31*32
+992
+&gt; k := GF(3);
+&gt; K&lt;w&gt; := GF(3,4);
+&gt; a := w+1;
+&gt; c := w;
+&gt; b := c^3+c;
+&gt; E := ArtinSchreierExtension(c, a, b);
+&gt; WeilDescentDegree(E,k);
+27
+&gt; WeilDescentGenus(E,k);
+78
+&gt; C := WeilDescent(E, k);
+&gt; C;
+Algebraic function field defined over Univariate rational function field over
+GF(3) by
+y^27 + 2*y^9 + y^3 + 2*y + (2*$.1^18 + 2*$.1^12 + 2*$.1^9 + 2)/($.1^9 + $.1^3 +
+    1)
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text459.htm">[Next]</A><A  HREF = "text457.htm">[Prev]</A> <A  HREF = "text459.htm">[Right]</A> <A  HREF = "text457.htm">[Left]</A> <A  HREF = "text442.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

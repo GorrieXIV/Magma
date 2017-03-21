@@ -1,0 +1,588 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Automorphism Group</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text719.htm">[Next]</A><A  HREF = "text717.htm">[Prev]</A> <A  HREF = "text719.htm">[Right]</A> <A  HREF = "text717.htm">[Left]</A> <A  HREF = "text706.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "8204">Automorphism Group</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text718.htm#8205">General Soluble Group</A>
+<LI> <A  HREF = "text718.htm#8215">p-group</A>
+<LI> <A  HREF = "text718.htm#8220">Isomorphism and  Standard Presentations</A>
+</UL>
+<H4><A NAME = "8205">General Soluble Group</A></H4>
+
+<P>
+<P>
+In the case of a soluble non-p-group there are two algorithms available.
+By default, a lifting-based algorithm developed by M. Smith <A  HREF = "text705.htm#bib_smith-thesis">[Smi94]</A> and extended
+by Smith and Slattery to use second cohomology is used. Alternatively, there is also
+an algorithm developed by D. Howden <A  HREF = "text705.htm#bib_howden-thesis">[How12]</A>, which uses the automorphism group of
+a Sylow p-subgroup of G to construct the automorphism group of G.
+
+
+<H5><A NAME = "8206">Lifting Algorithm</A></H5>
+
+<P>
+<P>
+The automorphism group is computed step-by-step considering a
+series of factors of G by terms of a characteristic series
+<P>
+ G = G<sub>1</sub> &gt; G<sub>2</sub> &gt; ... &gt; G<sub>k</sub> &gt; 1
+<P>
+such that G<sub>i</sub>/G<sub>i + 1</sub> is elementary abelian for each i. 
+We compute the automorphism group
+Aut(G/G<sub>2</sub>) isomorphic to GL(d, p) for some integer d and prime p, and
+then lift through each of the elementary abelian layers G/G<sub>3</sub>, ..., G/G<sub>k - 1</sub>,
+finally arriving at Aut(G/G<sub>k</sub>) = Aut(G).
+<P>
+A group of type <TT>GrpAuto</TT> is returned.  Details of the computation can be seen by setting
+the verbose flag <TT>AutomorphismGroup</TT> to <TT>true</TT>, and the characteristic series is
+available as the attribute <TT>CharacteristicSeries</TT> on the returned group.
+<P>
+In addition to the
+usual properties of <TT>GrpAuto</TT> (such as <TT>Order</TT>, <TT>Ngens</TT>, etc.), two special fields,
+<TT>GenWeights</TT> and <TT>WeightSubgroupOrders</TT>, are provided for automorphism groups of
+(non p-group) pc-groups. These each relate to weight subgroups of the automorphism group. Let
+i be the largest subscript such that the automorphism acts trivially on G/G<sub>i</sub>.
+Then the automorphism is said to have weight 2i + 1 if it acts non-trivially on G<sub>i</sub>/G<sub>i + 1</sub>,
+and weight 2i + 2 if it acts trivially on G<sub>i</sub>/G<sub>i + 1</sub>.  Note that
+there are no automorphisms of weight 2.  The automorphisms of weight
+greater than or equal to a given value form a normal subgroup of A.
+
+
+<H5><A NAME = "8207">AutomorphismGroup(G): GrpPC -&gt; GrpAuto</A></H5>
+<BLOCKQUOTE>
+Given a soluble group G  presented by a pc-presentation, this function 
+returns the automorphism group of G as a group of type <TT>GrpAuto</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "8208">HasAttribute(A, "GenWeights") : GrpAuto, MonStgElt -&gt; BoolElt, [ RngIntElt ]</A></H5>
+<BLOCKQUOTE>
+If the attribute <TT>GenWeights</TT> is defined for A then the function returns 
+<TT>true</TT>, and a sequence of integers.
+This integer sequence indicates where each generator lies in the normal series
+of A corresponding to the action of the group on G (as described at the 
+beginning of the section).  If the attribute is not set then the sequence is 
+unassigned. The function call <TT>AutomorphismGroup(G)</TT>, where G has type 
+<TT>GrpPC</TT>, always returns an automorphism group with this attribute set. In this 
+case the sequence may also be obtained by the short form <TT>A`GenWeights</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "8209">HasAttribute(A, "WeightSubgroupOrders") : GrpAuto, MonStgElt -&gt; BoolElt, [ RngIntElt ]</A></H5>
+<BLOCKQUOTE>
+If the attribute <TT>WeightSubgroupOrders</TT> is defined for A then the
+function returns <TT>true</TT>, and a sequence of integers.  This sequence of
+integers gives the orders for the normal series of weight subgroups
+described at the beginning of the section.  If the attribute is not set
+then the sequence is unassigned. The function call <TT>AutomorphismGroup(G)</TT>, 
+where G has type <TT>GrpPC</TT>, always returns an automorphism group with this 
+attribute set. In this case the sequence may also be obtained by the short 
+form <TT>A`WeightSubgroupOrders</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8210">Example <TT>GrpPC_AutomorphismGroup (H68E22)</TT></A></H3>
+An example using <TT>AutomorphismGroup</TT> and
+some related features.
+We build a group based on the structure of
+a finite field (multiplicative group acting
+on the additive group) and then compute
+its automorphism group.  First, we set up the field.
+<P>
+<P>
+<PRE>
+&gt; E := GF(2);
+&gt; F := GF(8);
+&gt; V,phi := VectorSpace(F,E);
+&gt; d := Dimension(V);
+&gt; x := PrimitiveElement(F);
+</PRE>
+Then, define a pc-group to act and define the
+action based on the multiplication in the field.
+Compute the matrix by mapping the vectors back to the
+field, multiplying by x, and then
+recording the result.
+<P>
+<P>
+<PRE>
+&gt; C := CyclicGroup(GrpPC,Order(x));
+&gt; MR := MatrixRing(E, d);
+&gt; s := [];
+&gt; for i := 1 to d do
+&gt;  y := ((V.i)@@phi)*x;
+&gt;  s cat:= Eltseq(y);
+&gt; end for;
+</PRE>
+Turn the sequence of image components
+into a matrix and use the matrix to
+create a C-module.  Then use that module
+to create the split extension.
+<P>
+<P>
+<PRE>
+&gt; t := MR!s;
+&gt; M := GModule(C,[t]);
+&gt; G := Extension(M,C);
+&gt; G;
+GrpPC : G of order 56 = 2^3 * 7
+PC-Relations:
+    G.1^7 = Id(G), 
+    G.2^2 = Id(G), 
+    G.3^2 = Id(G), 
+    G.4^2 = Id(G), 
+    G.2^G.1 = G.3, 
+    G.3^G.1 = G.4, 
+    G.4^G.1 = G.2 * G.3
+</PRE>
+<P>
+Then we can compute the automorphism
+group of G.
+<P>
+<P>
+<PRE>
+&gt; A := AutomorphismGroup(G);
+&gt; A;
+A group of automorphisms of GrpPC : G
+Generators:
+    Automorphism of GrpPC : G which maps:
+        G.1 |--&gt; G.1^2
+        G.2 |--&gt; G.3 * G.4
+        G.3 |--&gt; G.2 * G.4
+        G.4 |--&gt; G.3
+    Automorphism of GrpPC : G which maps:
+        G.1 |--&gt; G.1
+        G.2 |--&gt; G.2 * G.3
+        G.3 |--&gt; G.3 * G.4
+        G.4 |--&gt; G.2 * G.3 * G.4
+    Automorphism of GrpPC : G which maps:
+        G.1 |--&gt; G.1 * G.2 * G.3
+        G.2 |--&gt; G.2
+        G.3 |--&gt; G.3
+        G.4 |--&gt; G.4
+    Automorphism of GrpPC : G which maps:
+        G.1 |--&gt; G.1 * G.3 * G.4
+        G.2 |--&gt; G.2
+        G.3 |--&gt; G.3
+        G.4 |--&gt; G.4
+    Automorphism of GrpPC : G which maps:
+        G.1 |--&gt; G.1 * G.4
+        G.2 |--&gt; G.2
+        G.3 |--&gt; G.3
+        G.4 |--&gt; G.4
+&gt; [Order(x):x in Generators(A)];
+[ 3, 2, 7, 2, 2 ]
+</PRE>
+<P>
+Next, we can use the automorphisms to create an extension of G.
+<P>
+<P>
+<PRE>
+&gt; b := A.1;
+&gt; Order(b);
+3
+&gt; tau := hom&lt;G-&gt;G|[b(G.i):i in [1..NPCgens(G)]]&gt;;
+&gt; D := CyclicGroup(GrpPC,Order(b));
+&gt; K := Extension(G,D,[tau]);
+&gt; K;
+GrpPC : K of order 168 = 2^3 * 3 * 7
+PC-Relations:
+    K.1^3 = Id(K), 
+    K.2^7 = Id(K), 
+    K.3^2 = Id(K), 
+    K.4^2 = Id(K), 
+    K.5^2 = Id(K), 
+    K.2^K.1 = K.2^2, 
+    K.3^K.1 = K.4 * K.5, 
+    K.3^K.2 = K.4, 
+    K.4^K.1 = K.3 * K.5, 
+    K.4^K.2 = K.5, 
+    K.5^K.1 = K.4, 
+    K.5^K.2 = K.3 * K.4
+&gt; #Classes(K);
+8
+</PRE>
+<P>
+Finally, we examine information about the weight subgroups. We list
+only the orders of the terms of the characteristic series in G in
+order to save space.
+<P>
+<P>
+<PRE>
+&gt; [Order(H): H in A`CharacteristicSeries];
+[ 56, 8, 1 ]
+&gt; A`GenWeights;
+[ 1, 3, 4, 4, 4 ]
+&gt; A`WeightSubgroupOrders;
+[ 168, 56, 56, 8 ]
+</PRE>
+<HR>
+<H5><A NAME = "8211">Lifting from the Automorphism Group of a Sylow p-subgroup</A></H5>
+
+<P>
+<P>
+The algorithm developed by D. Howden <A  HREF = "text705.htm#bib_howden-thesis">[How12]</A> follows a different
+strategy to the Smith-Slattery lifting approach.  Given a soluble group G,
+the algorithm determines a suitable Sylow p-subgroup P of G, and uses the
+automorphism group of P (using the algorithm for p-groups detailed below)
+to construct the automorphism group of G.
+<P>
+In cases where the automorphism group is soluble, the algorithm automatically
+constructs a pc-representation for it.  Solublility of the returned group
+can then be tested via the <TT>IsSoluble</TT> intrinsic. The pc-representation obtained using the
+<TT>PCGroup</TT> intrinsic, and pc-generators (as automorphism maps) via the
+<TT>PCGenerators</TT> intrinsic.
+<P>
+In some cases where the automorphism group is not soluble, the algorithm will
+construct a permutation representation during its construction.
+<P>
+A group of type <TT>GrpAuto</TT> is returned.  Details of the computation can be seen by setting
+the verbose flag <TT>AutomorphismGroupSolubleGroup</TT> to 1.
+<P>
+A variation of this algorithm can be used for isomorphism testing.
+
+
+<H5><A NAME = "8212">AutomorphismGroupSolubleGroup(G: parameters): GrpPC -&gt; GrpAuto</A></H5>
+<BLOCKQUOTE>
+Given a soluble group G  presented by a pc-presentation, this function
+returns the automorphism group of G as a group of type GrpAuto.
+<P>
+<P>
+<PRE>
+     p: [RngIntElt]                      Default: 1;
+</PRE>
+A prime p dividing the order of G.  The automorphism group of the Sylow p-subgroup
+is then used to construct the automorphism group of G.  If the p-core of G is trivial
+then an error is given.  The default value of p = 1 indicates that the algorithm should take p
+to be the prime giving the largest Sylow p-subgroup of G.
+</BLOCKQUOTE>
+<H5><A NAME = "8213">IsIsomorphicSolubleGroup(G, H: parameters) : GrpPC, GrpPC -&gt; BoolElt, Map</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the soluble groups G, H presented by pc-presentations, are isomorphic, and <TT>false</TT> otherwise.  Where the groups are isomorphic, a mapping G to H is also returned.
+<P>
+<P>
+<PRE>
+     p: [RngIntElt]                      Default: 1;
+</PRE>
+A prime p dividing the order of G (assuming that the orders of G and H are the same).
+The algorithm then tests Sylow p-subgroups of G and H for isomorphism and attempts to extend these isomorphisms
+to an isomorphism G to H.  If the p-cores of G and H are trivial then an error is given.  The default value of p = 1 indicates that the algorithm should take p to be the prime giving the largest Sylow p-subgroup of G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8214">Example <TT>GrpPC_AutomorphismGroupSolubleGroup (H68E23)</TT></A></H3>
+An example using <TT>AutomorphismGroupSolubleGroup</TT> and
+some related features.
+We use a group from the <TT>solgps</TT> library.
+<P>
+<P>
+<PRE>
+&gt; load solgps;
+&gt; G := G10();
+&gt; FactoredOrder(G);
+[ &lt;2, 18&gt;, &lt;7, 4&gt; ]
+&gt; time A := AutomorphismGroupSolubleGroup(G);
+Time: 18.220
+&gt; time R_A, phi_A := PCGroup(A);
+Time: 0.000
+&gt; FactoredOrder(R_A);
+[ &lt;2, 20&gt;, &lt;3, 2&gt;, &lt;7, 6&gt; ]
+</PRE>
+<HR>
+<H4><A NAME = "8215">p-group</A></H4>
+
+<P>
+<P>
+<P>
+For a description of the algorithm used to construct the 
+automorphism group of a p-group, see <A  HREF = "text705.htm#bib_elo-auts">[ELGO02]</A>.
+<P>
+While it is difficult  to state very firm guidelines for the 
+performance of the algorithm, our experience suggests that
+it has most difficulty in constructing automorphism
+groups of p-groups of "large" Frattini rank 
+(say rank larger than about 6) and p-class 2. 
+If the group has larger
+p-class, then it usually has more characteristic structure
+and the algorithm exploits this. The <I>order</I> of a group 
+is <I>not</I> a useful guide to the difficulty
+of the computation.
+<P>
+<TT>SetVerbose ("AutomorphismGroup", 1)</TT> provides
+information on the progress of the algorithm.
+
+
+<H5><A NAME = "8216">AutomorphismGroup(G: parameters): GrpPC -&gt; GrpAuto</A></H5>
+<BLOCKQUOTE>
+The group G is a p-group described by a pc-presentation.
+The function returns the automorphism group of G as a
+group of type <TT>GrpAuto</TT>.
+<P>
+<P>
+<PRE>
+     CharacteristicSubgroups: [GrpPC]    Default: [];
+</PRE>
+A list of known characteristic subgroups of G; these
+may improve the efficiency of the construction.
+Note that the algorithm simply accepts that the 
+supplied subgroups are fixed under
+the action of the automorphism group;
+it does <I>not</I> verify that they are in
+fact characteristic.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8217">Example <TT>GrpPC_pAutomorphismGroup (H68E24)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; G := SmallGroup (64, 78);
+&gt; A := AutomorphismGroup (G);
+&gt; #A;
+1024
+&gt; A.1;
+    Automorphism of GrpPC : G which maps:
+        G.1 |--&gt; G.1
+        G.2 |--&gt; G.2
+        G.3 |--&gt; G.1 * G.3
+        G.4 |--&gt; G.4
+        G.5 |--&gt; G.5
+        G.6 |--&gt; G.4 * G.6
+&gt; Order (A.1);
+4
+&gt; a := A.1^2; [a (G.i): i in [1..6]];
+[ G.1, G.2, G.3 * G.5, G.4, G.5, G.6 ]
+</PRE>
+<HR>
+<H5><A NAME = "8218">OrderAutomorphismGroupAbelianPGroup (A) : SeqEnum -&gt;  RngIntElt</A></H5>
+<BLOCKQUOTE>
+Order of automorphism group of abelian p-group G where 
+A = [a<sub>1</sub>, a<sub>2</sub>, ... ] and G = C<sub>a<sub>1</sub></sub> x C<sub>a<sub>2</sub></sub> x ... . 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8219">Example <TT>GrpPC_subgroupsabelianpgroups (H68E25)</TT></A></H3>
+Subgroups of C<sub>4</sub> x C<sub>8</sub> x C<sub>64</sub>.
+<P>
+<P>
+<PRE>
+&gt; NumberOfSubgroupsAbelianPGroup ([4, 8, 64]);
+[ 7, 35, 91, 139, 171, 171, 139, 91, 35, 7, 1 ]
+</PRE>
+Hence, for example, there are 7 subgroups of order 2 and 139 subgroups 
+of order 2<sup>4</sup>.
+<P>
+<P>
+<PRE>
+&gt; OrderAutomorphismGroupAbelianPGroup ([4, 8, 64]);
+4194304
+</PRE>
+<HR>
+<H4><A NAME = "8220">Isomorphism and  Standard Presentations</A></H4>
+
+<P>
+<P>
+The <TT>pQuotient</TT> command returns a power-conjugate presentation
+for a given p-group but this presentation depends on the
+user-supplied description of the group.  The Standard Presentation
+algorithm computes a "canonical" presentation for the p-group,
+which is independent of the user-supplied 
+description.  For a description of this algorithm, see
+<A  HREF = "text705.htm#bib_obrien-isom">[O'B94]</A>.
+<P>
+The canonical or <I>standard</I> presentation of a given p-group is the
+power-conjugate presentation obtained when a description
+of the group is computed using the default implementation
+of the p-group generation algorithm.
+<P>
+Hence, two groups in the same isomorphism class have identical
+standard presentations.  Given two p-groups, 
+if their standard presentations
+are identical, then the groups are isomorphic, otherwise
+they are not. Hence to decide whether two groups are isomorphic,
+we can first construct the standard presentation of each using
+the <TT>StandardPresentation</TT> function and then compare these presentations
+using the <TT>IsIdenticalPresentation</TT> function.
+<P>
+While it is difficult  to state very firm guidelines for the 
+performance of the algorithm, our experience suggests that
+the difficulty of deciding isomorphism between p-groups 
+is governed by their Frattini rank and is most practical
+for p-groups of rank at most 5.  The <I>order</I> of a group 
+is <I>not</I> a useful guide to the difficulty
+of the computation.  
+<P>
+<TT>SetVerbose ("Standard", 1)</TT> will provide
+information on the progress of the algorithm.
+
+
+<H5><A NAME = "8221">StandardPresentation(G): GrpPC -&gt; GrpPC, Map</A></H5>
+<H5>StandardPresentation(G: parameters): GrpPC -&gt; GrpAuto</H5>
+<BLOCKQUOTE>
+The group G is a p-group presented by an arbitrary 
+pc-presentation.  The group H defined by 
+its standard presentation is returned together
+with a map from G to H.
+<P>
+<P>
+<PRE>
+     StartClass: RngIntElt               Default: 1
+</PRE>
+If <TT>StartClass</TT> is k, then use <TT>pQuotient</TT> to construct
+the class k - 1 p-quotient of G and standardize the presentation
+only from class k onwards.  
+</BLOCKQUOTE>
+<H5><A NAME = "8222">IsIdenticalPresentation(G, H) : GrpPC, GrpPC -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if G and H have identical presentations, <TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "8223">IsIsomorphic(G, H) : GrpPC, GrpPC -&gt; BoolElt, Map, GrpPC</A></H5>
+<BLOCKQUOTE>
+The function returns 
+<TT>true</TT> if the p-groups G and H 
+are isomorphic, <TT>false</TT> otherwise.
+It constructs their standard presentations class by
+class, and checks for equality. If they are isomorphic,
+it also returns an isomorphism from G to H and the isomorphism class representative.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8224">Example <TT>GrpPC_StandardPresentation (H68E26)</TT></A></H3>
+In the next two examples, we  investigate whether 
+particular p-quotients of fp-groups are isomorphic.
+<P>
+<P>
+<PRE>
+&gt; F&lt;x, y, t&gt; := FreeGroup(3);
+&gt; G := quo&lt; F | x*y^2*x^-1=y^-2, y*x^2*y^-1=x^-2, x^2=t^2, y^2=(t^-1*x)^2,
+&gt;                      t*(x*y)^2=(x*y)^2*t &gt;;
+&gt; Q1 := pQuotient(G, 2, 3: Print := 1);
+Lower exponent-2 central series for G
+Group: G to lower exponent-2 central class 1 has order 2^3
+Group: G to lower exponent-2 central class 2 has order 2^7
+Group: G to lower exponent-2 central class 3 has order 2^11
+&gt; H := quo&lt; F | x*y^2*x^-1=y^-2, y*x^2*y^-1=x^-2, x^2=t^2*(x*y)^2,
+&gt;                      y^2=(t^-1*x)^2, t*(x*y)^2=(x*y)^2*t &gt;;
+&gt; Q2 := pQuotient(H, 2, 3: Print := 1);
+Lower exponent-2 central series for H
+Group: H to lower exponent-2 central class 1 has order 2^3
+Group: H to lower exponent-2 central class 2 has order 2^7
+Group: H to lower exponent-2 central class 3 has order 2^11
+</PRE>
+Now check whether the class 3 2-quotients are isomorphic.
+<P>
+<P>
+<PRE>
+&gt; IsIsomorphic(Q1, Q2);
+false
+</PRE>
+In the next example, we construct an explicit isomorphism 
+between two 5-groups.
+<P>
+<P>
+<PRE>
+&gt; F&lt;a, b&gt; := Group&lt;a, b | a^5, b^5, (a * b * a)^5 = (b, a, b) &gt;;
+&gt; G := pQuotient (F, 5, 6 : Print := 1);
+Lower exponent-5 central series for F
+Group: F to lower exponent-5 central class 1 has order 5^2
+Group: F to lower exponent-5 central class 2 has order 5^3
+Group: F to lower exponent-5 central class 3 has order 5^4
+Group: F to lower exponent-5 central class 4 has order 5^5
+Group: F to lower exponent-5 central class 5 has order 5^7
+Group: F to lower exponent-5 central class 6 has order 5^8
+&gt; G;
+GrpPC : G of order 390625 = 5^8
+PC-Relations:
+G.2^G.1 = G.2 * G.3, 
+G.3^G.1 = G.3 * G.4, 
+G.3^G.2 = G.3 * G.6 * G.7^4 * G.8^4, 
+G.4^G.1 = G.4 * G.5, 
+G.4^G.2 = G.4 * G.7 * G.8, 
+G.4^G.3 = G.4 * G.7^4 * G.8, 
+G.5^G.1 = G.5 * G.6, 
+G.5^G.2 = G.5 * G.7, 
+G.5^G.3 = G.5 * G.8^2, 
+G.6^G.2 = G.6 * G.8, 
+G.7^G.1 = G.7 * G.8^3
+&gt; K&lt;a, b&gt; := Group&lt;a, b | a^5, b^5, (b * a * b)^5 = (b, a, b) &gt;;
+&gt; H := pQuotient (K, 5, 6 : Print := 1);
+Lower exponent-5 central series for K
+Group: K to lower exponent-5 central class 1 has order 5^2
+Group: K to lower exponent-5 central class 2 has order 5^3
+Group: K to lower exponent-5 central class 3 has order 5^4
+Group: K to lower exponent-5 central class 4 has order 5^5
+Group: K to lower exponent-5 central class 5 has order 5^7
+Group: K to lower exponent-5 central class 6 has order 5^8
+&gt; H;
+GrpPC : H of order 390625 = 5^8
+PC-Relations:
+H.2^H.1 = H.2 * H.3, 
+H.3^H.1 = H.3 * H.4, 
+H.3^H.2 = H.3 * H.6^2 * H.7^2 * H.8^2, 
+H.4^H.1 = H.4 * H.5, 
+H.4^H.2 = H.4 * H.7, 
+H.4^H.3 = H.4 * H.7^4 * H.8, 
+H.5^H.1 = H.5 * H.6, 
+H.5^H.2 = H.5 * H.7, 
+H.5^H.3 = H.5 * H.8^2, 
+H.6^H.2 = H.6 * H.8, 
+H.7^H.1 = H.7 * H.8^3
+&gt; flag, phi := IsIsomorphic (G, H);
+&gt; flag;           
+true
+&gt; for g in PCGenerators (G) do print g, "---&gt;", phi (g); end for;
+G.1 ---&gt; H.1
+G.2 ---&gt; H.2^3 * H.4^3 * H.5^3 * H.6^2 * H.7^4 * H.8^3
+G.3 ---&gt; H.3^3 * H.5^3 * H.6^4 * H.8^3
+G.4 ---&gt; H.4^3 * H.6^3 * H.7^2 * H.8^3
+G.5 ---&gt; H.5^3 * H.8
+G.6 ---&gt; H.6^3
+G.7 ---&gt; H.7^4
+G.8 ---&gt; H.8^4
+</PRE>
+<P>
+The functions <TT>IsIsomorphic</TT> and <TT>StandardPresentation</TT>
+are expensive.
+Here we have a list of groups and we want to find
+any isomorphisms among the collection.
+Rather than repeatedly applying <TT>IsIsomorphic</TT>, we
+first construct and store standard presentations for each
+group in the sequence, and then quickly compare these using
+<TT>IsIdenticalPresentation</TT>.
+<P>
+<P>
+<PRE>
+&gt; F&lt;a, b&gt; := FreeGroup (2);
+&gt; p := 7;
+&gt; Q := [];
+&gt; for k := 1 to p - 1 do
+&gt;       G := quo&lt; F | a^p = (b, a, a), b^p = a^(k*p), (b, a, b)&gt;;
+&gt;       H := pQuotient (G, p, 10);
+&gt;       Q[k] := StandardPresentation (H);
+&gt; end for;
+</PRE>
+Now run over the list of standard presentations and check for equality.
+<P>
+<P>
+<PRE>
+&gt; for i in [2..p - 1] do
+&gt;    for j in [1.. i - 1] do
+&gt;       if IsIdenticalPresentation (Q[i], Q[j]) then
+&gt;          print "Standard Presentations  ", i, " and ", j, " are identical";
+&gt;       end if;
+&gt;    end for;
+&gt; end for;
+Standard Presentations   2  and  1  are identical
+Standard Presentations   4  and  1  are identical
+Standard Presentations   4  and  2  are identical
+Standard Presentations   5  and  3  are identical
+Standard Presentations   6  and  3  are identical
+Standard Presentations   6  and  5  are identical
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text719.htm">[Next]</A><A  HREF = "text717.htm">[Prev]</A> <A  HREF = "text719.htm">[Right]</A> <A  HREF = "text717.htm">[Left]</A> <A  HREF = "text706.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

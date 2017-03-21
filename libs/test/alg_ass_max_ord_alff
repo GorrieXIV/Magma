@@ -1,0 +1,82 @@
+//SetDebugOnError(true);
+SetEchoInput(true);
+
+procedure check_maximal_orders(A)
+
+    time MF := MaximalOrderFinite(A);
+    Discriminant(MF);
+    delete A`MaximalOrder;
+    time MMF := MaximalOrder(MF);
+    Discriminant(MMF);
+    assert Discriminant(MF) eq Discriminant(MMF);
+
+    time MI := MaximalOrderInfinite(A);
+    Discriminant(MI);
+    delete A`MaximalOrderInfinite;
+    time MMI := MaximalOrder(MI);
+    Discriminant(MMI);
+    assert Discriminant(MI) eq Discriminant(MMI);
+
+end procedure;
+
+F<t> := FunctionField(GF(23));
+M := MatrixAlgebra(F, 3);
+A := sub<M | M![t, t^2 + 1, 4, 6, t^3 + t + 1, t, 7 + t, 1 + t^3, t^5 + t^3 + 6]>;
+check_maximal_orders(M);
+check_maximal_orders(A);
+
+F<t> := FunctionField(GF(2));
+M := MatrixAlgebra(F, 3);
+A := sub<M | M![t, t^2 + 1, 1, 1, t^3 + t + 1, t, 1 + t, 1 + t^3, t^5 + t^3 + 1]>;
+check_maximal_orders(M);
+check_maximal_orders(A);
+
+procedure check_orders(O)
+    n := Norm(Discriminant(O))*Discriminant(BaseRing(O))^Dimension(O);
+    RO := RestrictionOfScalars(O);
+    assert Normalize(Discriminant(RO)) eq Normalize(n);
+
+    M := MaximalOrder(O);
+    Discriminant(M);
+    assert IsIntegral(Discriminant(O)/Discriminant(M));
+    assert Discriminant(M) eq Discriminant(MaximalOrderFinite(Algebra(O)));
+end procedure;
+
+P<x> := PolynomialRing(GF(23));
+P<y> := PolynomialRing(P);
+F<b> := FunctionField(y^3+y^2-3*x-1);
+A<alpha,beta,alphabeta> := QuaternionAlgebra<F | -3,b>;
+A := AssociativeAlgebra(A);
+O := Order(MaximalOrderFinite(F), [A | alpha, beta]);
+check_orders(O);
+
+procedure check_relative_maximal_orders(A)
+    check_maximal_orders(A);
+    time MF := MaximalOrderFinite(A);
+    RMF := RestrictionOfScalars(MF);
+    assert Normalize(Discriminant(RMF)) eq Normalize(Norm(Discriminant(MF))*Discriminant(BaseRing(MF))^Dimension(MF));
+    MFR := MaximalOrderFinite(RestrictionOfScalars(A));
+    assert Discriminant(MFR) eq Discriminant(RMF);
+
+    time MI := MaximalOrderInfinite(A);
+    RMI := RestrictionOfScalars(MI);
+    assert Valuation(Discriminant(RMI)) eq Valuation(CoefficientRing(RMI)!Norm(Discriminant(MI))*Discriminant(BaseRing(MI))^Dimension(MI));
+    MIR := MaximalOrderInfinite(RestrictionOfScalars(A));
+    assert CoefficientRing(RMI)!Discriminant(MIR) eq Discriminant(RMI);
+end procedure;
+
+check_relative_maximal_orders(A);
+
+P<x> := PolynomialRing(GF(3));
+P<y> := PolynomialRing(P);
+F<b> := FunctionField(y^5+y^2-x-1);
+A<alpha,beta,alphabeta> := QuaternionAlgebra<F | -5,b>;
+A := AssociativeAlgebra(A);
+
+check_relative_maximal_orders(A);
+
+MatrixAlgebra(RestrictionOfScalars(A)) eq MatrixAlgebra(RestrictionOfScalars(A, CoefficientField(F)));
+O := Order(MaximalOrderFinite(F), [A|alpha,beta]);
+
+check_orders(O);
+

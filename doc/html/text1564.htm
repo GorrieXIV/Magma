@@ -1,0 +1,431 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Arithmetic Fuchsian Groups</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1565.htm">[Next]</A><A  HREF = "text1563.htm">[Prev]</A> <A  HREF = "text1565.htm">[Right]</A> [____] <A  HREF = "text1563.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "17508">Arithmetic Fuchsian Groups</A></H3>
+
+<P>
+<P>
+In this section, we computing the basic invariants of 
+an arithmetic Fuchsian group &Gamma;.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1564.htm#17509">Creation</A>
+<LI> <A  HREF = "text1564.htm#17514">Quaternionic Functions</A>
+<LI> <A  HREF = "text1564.htm#17524">Basic Invariants</A>
+<LI> <A  HREF = "text1564.htm#17528">Group Structure</A>
+</UL>
+<H4><A NAME = "17509">Creation</A></H4>
+
+<P>
+<P>
+We begin by giving the basic constructors for arithmetic Fuchsian groups.
+
+
+<P>
+<H5><A NAME = "17510">FuchsianGroup(O) : AlgQuatOrd -&gt; GrpPSL2</A></H5>
+<H5>FuchsianGroup(O) : AlgAssVOrd -&gt; GrpPSL2</H5>
+<BLOCKQUOTE>
+Returns the arithmetic Fuchsian group &Gamma; corresponding
+to the group O<sup> * </sup> of units of reduced norm 1 in the
+quaternion order O.
+</BLOCKQUOTE>
+<H5><A NAME = "17511">FuchsianGroup(A) : AlgQuat -&gt; GrpPSL2</A></H5>
+<BLOCKQUOTE>
+Returns the arithmetic Fuchsian group &Gamma; corresponding
+to the group O<sup> * </sup> of units of reduced norm 1 in a 
+maximal order O in the quaternion algebra A.
+</BLOCKQUOTE>
+<H5><A NAME = "17512">FuchsianGroup(A, N) : AlgQuat, RngOrdIdl -&gt; GrpPSL2</A></H5>
+<H5>FuchsianGroup(A, N) : AlgQuat, RngIntElt -&gt; GrpPSL2</H5>
+<BLOCKQUOTE>
+Returns the arithmetic Fuchsian group &Gamma; corresponding to the group O<sup> * </sup> of units of reduced norm 1 in an order O of level N in the quaternion algebra A.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17513">Example <TT>GrpPSL2Shim_ConstructAFG1 (H137E1)</TT></A></H3>
+<P>
+In this example, we construct arithmetic Fuchsian groups in three ways.
+First, we construct the group associated to the quaternion algebra
+of discriminant 6 over Q.
+<P>
+<P>
+<P>
+<PRE>
+&gt; A := QuaternionAlgebra(6);
+&gt; G := FuchsianGroup(A);
+&gt; G;
+Arithmetic Fuchsian group arising from order of Quaternion Algebra with base
+ring Rational Field
+&gt; O := BaseRing(G);
+&gt; O;
+Order of Quaternion Algebra with base ring Rational Field
+with coefficient ring Integer Ring
+&gt; Discriminant(O);
+6
+&gt; Algebra(O) eq A;
+true
+</PRE>
+<P>
+Next, we construct a group "by hand", associated to the quaternion algebra
+over the totally real subfield F=Q(&zeta;<sub>9</sub>)^ + of Q(&zeta;<sub>9</sub>) ramified only 
+at two of the three real infinite places.
+<P>
+<P>
+<P>
+<PRE>
+&gt; K&lt;z&gt; := CyclotomicField(9);
+&gt; F := sub&lt;K | z+1/z &gt;;
+&gt; Degree(F);
+3
+&gt; Z_F := MaximalOrder(F);
+&gt; Foo := InfinitePlaces(F);
+&gt; A := QuaternionAlgebra(ideal&lt;Z_F | 1&gt;, Foo[2..3]);
+&gt; Discriminant(A);
+Principal Ideal of Z_F
+Generator:
+    [1, 0, 0]
+[ 2nd place at infinity, 3rd place at infinity ]
+&gt; O := MaximalOrder(A);
+&gt; G := FuchsianGroup(O);
+&gt; G;
+Arithmetic Fuchsian group arising from order of Quaternion Algebra with base
+ring Field of Fractions of Maximal Equation Order with defining polynomial x^3 -
+3*x - 1 over its ground order
+</PRE>
+<P>
+Lastly, we construct the group of level 3 inside a quaternion algebra
+ramified at 2&infin;<sub>1</sub> over Q(Sqrt(5)).
+<P>
+<P>
+<P>
+<PRE>
+&gt; F&lt;x&gt; := NumberField(Polynomial([-5,0,1]));
+&gt; Z_F := MaximalOrder(F);
+&gt; A := QuaternionAlgebra(ideal&lt;Z_F | 2&gt;, InfinitePlaces(F)[1..1]);
+&gt; G := FuchsianGroup(A, ideal&lt;Z_F | 3&gt;);
+&gt; O := BaseRing(G);
+&gt; O;
+Order of Quaternion Algebra with base ring Field of Fractions of Z_F
+with coefficient ring Maximal Order of Equation Order with defining polynomial 
+x^2 - 5 over its ground order
+&gt; Discriminant(O);
+Principal Ideal of Z_F
+Generator:
+    6/1*Z_F.1
+&gt; Discriminant(A);
+Principal Prime Ideal of Z_F
+Generator:
+    [2, 0]
+[ 1st place at infinity ]
+&gt; Level(G);
+Principal Ideal of Z_F
+Generator:
+    3/1*Z_F.1
+</PRE>
+<HR>
+<H4><A NAME = "17514">Quaternionic Functions</A></H4>
+
+<P>
+<P>
+In this section, we provide some functions related quaternion algebras which
+underlie the other functions in this chapter.
+<P>
+Let A be a quaternion algebra over a totally real field F, represented in standard form by &alpha;, &beta; &isin;A satisfying &alpha;<sup>2</sup>=a, &beta;<sup>2</sup>=b, and &beta;&alpha;= - &alpha;&beta;.  Suppose that A has a unique split real place v; we then take this place to be the identity and consider F as a subfield of R.  Then at least one of a, b&gt;0, and without loss
+of generality we may assume that a&gt;0.  
+<P>
+We then define the embedding 
+&iota;:A to M<sub>2</sub>(R), given by
+&alpha; |-&gt; (matrix(Sqrt(a) &amp; 0 cr 0 &amp; - Sqrt(a))),  
+  &beta; |-&gt; (matrix(0 &amp; Sqrt(|b|) cr sgn(b)Sqrt(|b|) &amp; 0)). 
+This particular choice of embedding is governed by the following.  The reduced norm nrd:A to R given by 
+&gamma; = x + y&alpha; + z&beta; + w&alpha;&beta; |-&gt; nrd(&gamma;)=x<sup>2</sup> - ay<sup>2</sup> - bz<sup>2</sup> + abw<sup>2</sup> 
+is not a Euclidean norm, so it is natural to instead take
+&gamma; |-&gt; nrd'(&gamma;)=x<sup>2</sup> + |a|y<sup>2</sup> + |b|z<sup>2</sup> + |ab|w<sup>2</sup>, 
+which corresponds to 
+ nrd'(&gamma;)=x<sup>2</sup> + y<sup>2</sup> + z<sup>2</sup> + w<sup>2</sup>(if )&iota;(&gamma;)=(matrix(x &amp; y cr z &amp; w)). 
+Combining this new norm, defined for the identity real place, with the ones corresponding to the nonidentity real places &sigma;, we may then define the definite norm
+ N(&gamma;) = nrd'(&gamma;) + &sum;<sub>&sigma; != id</sub> &sigma;(nrd(&gamma;)). 
+This norm (and the corresponding Gram matrix) on A are used in the application to fundamental domains (see the next section).
+
+
+<P>
+<H5><A NAME = "17515">QuaternionOrder(G) : GrpPSL2 -&gt; AlgQuatOrd</A></H5>
+<H5>BaseRing(G) : GrpPSL2 -&gt; AlgQuatOrd</H5>
+<BLOCKQUOTE>
+The order in some quaternion algebra that was used to define the Fuchsian group G.
+</BLOCKQUOTE>
+<H5><A NAME = "17516">QuaternionAlgebra(G) : GrpPSL2 -&gt; AlgQuat</A></H5>
+<BLOCKQUOTE>
+The quaternion algebra used to define the Fuchsian group G.
+</BLOCKQUOTE>
+<H5><A NAME = "17517">SplitRealPlace(A) : AlgQuat -&gt; PlcNum</A></H5>
+<BLOCKQUOTE>
+Returns the unique real place at which A is split, if it exists.
+</BLOCKQUOTE>
+<H5><A NAME = "17518">FuchsianMatrixRepresentation(A) : AlgQuat -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Returns the map A to M<sub>2</sub>(R) when A has a unique split place, as defined above.
+</BLOCKQUOTE>
+<H5><A NAME = "17519">DefiniteNorm(gamma) : AlgQuatElt -&gt; FldReElt</A></H5>
+<BLOCKQUOTE>
+Returns the definite norm of &gamma; &isin;A for A a quaternion algebra with a unique split real place, as defined above.
+</BLOCKQUOTE>
+<H5><A NAME = "17520">DefiniteGramMatrix(B) : SeqEnum[AlgQuatElt] -&gt; FldReElt</A></H5>
+<BLOCKQUOTE>
+Returns the definite Gram matrix for the basis B of a quaternion algebra A with a unique split real place, as defined above.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17521">Example <TT>GrpPSL2Shim_QuaternionicFunctions (H137E2)</TT></A></H3>
+<P>
+We begin by defining the quaternion algebra over F=Q(Sqrt(5)) which is
+ramified at the prime ideal 2 and the second real place &infin;<sub>2</sub>, as indexed
+by Magma.
+<P>
+<P>
+<PRE>
+&gt; F&lt;w&gt; := QuadraticField(5);
+&gt; Z_F := MaximalOrder(F);
+&gt; Foo := InfinitePlaces(F);
+&gt; A&lt;alpha,beta&gt; := QuaternionAlgebra(ideal&lt;Z_F | 2&gt;, [Foo[2]]);
+&gt; a, b := StandardForm(A);
+&gt; F!a, F!b;
+-1 w + 2
+</PRE>
+The algorithm is random; entering the preceding input again will produce 
+a different choice of a and b.  Next we perform an independent check
+that a and b define the same algebra.
+<P>
+<P>
+<PRE>
+&gt; IsIsomorphic(A, QuaternionAlgebra&lt; F | a, b &gt;);
+true
+</PRE>
+<P>
+We see that A is isomorphic to the algebra represented in standard form by 
+&alpha;<sup>2</sup>=a,  &beta;<sup>2</sup>=b,  &beta;&alpha;= - &alpha;&beta; 
+where a= - 1, b=2 + Sqrt(5).  (Note that the algorithm used to construct A
+is probabilistic, so a and b are not canonically given.)
+<P>
+We now demonstrate the real embedding corresponding to the split real place &infin;<sub>1</sub>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; v := SplitRealPlace(A);
+&gt; v;
+1st place at infinity
+&gt; iota := FuchsianMatrixRepresentation(A);
+&gt; iota(alpha);
+[0.0000000000000000000000000000000000000000000000000000000000000000000000000000
+    000000000000000000000000 1.000000000000000000000000000000000000000000000000
+    000000000000000000000000000000000000000000000000000]
+[-1.000000000000000000000000000000000000000000000000000000000000000000000000000
+    000000000000000000000000 0.000000000000000000000000000000000000000000000000
+    0000000000000000000000000000000000000000000000000000]
+&gt; iota(beta);
+[2.0581710272714922503219810475804504212387300996778194862815423526404796231583
+    78925542297104146968394 0.0000000000000000000000000000000000000000000000000
+    000000000000000000000000000000000000000000000000000]
+[0.0000000000000000000000000000000000000000000000000000000000000000000000000000
+    000000000000000000000000 -2.05817102727149225032198104758045042123873009967
+    7819486281542352640479623158378925542297104146968394]
+&gt; Sqrt(Evaluate(b, v));
+2.05817102727149225032198104758045042123873009967781948628154235264047962315837
+8925542297104146968394 
+&gt; DefiniteNorm(alpha);
+3.00000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000
+</PRE>
+<P>
+We see indeed that  
+&alpha; |-&gt; (matrix(0 &amp; 1 cr - 1 &amp; 0)),   
+&beta; |-&gt; (matrix(Sqrt(2 + &#8730;(5)) &amp; 0 cr 0 &amp; - Sqrt(2 + &#8730;(5))))
+and
+N(&alpha;)=nrd'(&alpha;) + &sigma;(nrd(&alpha;))=(0<sup>2</sup> + 1<sup>2</sup> + ( - 1)<sup>2</sup> + 0<sup>2</sup>) + 1=3.
+<HR>
+<H5><A NAME = "17522">MultiplicativeOrder(gamma) : AlgAssVOrdElt -&gt; SeqEnum</A></H5>
+<H5>MultiplicativeOrder(gamma) : AlgQuatElt -&gt; SeqEnum</H5>
+
+<PRE>    PlusMinus: BoolElt                  Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Computes the order of the element &gamma; of a quaternion algebra; 
+either a finite number or 0 if the element has infinite order.  
+If <TT>PlusMinus</TT> eq <TT>true</TT>, then compute the order in the group of 
+units modulo &#8723; 1.
+</BLOCKQUOTE>
+<H5><A NAME = "17523">Quaternion(g) : GrpPSL2Elt -&gt; AlgQuatElt</A></H5>
+<BLOCKQUOTE>
+For g an element of an arithmetic Fuchsian group, return the
+underlying element of the quaternionic order.
+</BLOCKQUOTE>
+<H4><A NAME = "17524">Basic Invariants</A></H4>
+
+<P>
+<P>
+In this section, we compute the basic invariants associated to an arithmetic Fuchsian group &Gamma;.   
+<P>
+The first is the hyperbolic volume vol(X) of the orbit space X=&Gamma;\Hh, which can be computed via a formula of Shimizu:
+vol(X)=((1 /2))<sup>d - 2</sup> &zeta;<sub>F</sub>( - 1) &prod;<sub>p | disc A</sub> (N(p) - 1)
+where d=[F:Q].
+This volume is normalized so that an ideal triangle (i.e. a triangle with all vertices on the boundary of Hh) has volume 1/2.  With this normalization, vol(X) takes rational values.
+<P>
+The next invariant is the signature of &Gamma;.  A point z &isin;Hh is an <I>elliptic point</I> of order k &ge;2 if the stabilizer of z under &Gamma;, which is a finite cyclic group, has order k.  There are only finitely many &Gamma;-conjugacy classes of elliptic points, also known as <I>elliptic cycles</I>.  If &Gamma; has t elliptic cycles of order m<sub>1</sub>, ..., m<sub>t</sub>, and X has genus g, then we say that &Gamma; has <I>signature</I> (g;m<sub>1</sub>, ..., m<sub>t</sub>).  
+<P>
+We compute the number of elliptic cycles of order k by a formula (too complicated to state here) which requires the computation of the relative class group of a CM extension of number fields.  The genus g can then be calculated by the Riemann-Hurwitz formula:
+ vol(X) = 2g - 2 + &sum;<sub>i=1</sub><sup>t</sup> (1 - (1 /m<sub>i</sub>)). 
+<P>
+<P>
+<P>
+
+
+<H5><A NAME = "17525">ArithmeticVolume(G) : GrpPSL2 -&gt; FldRatElt</A></H5>
+<BLOCKQUOTE>
+Returns the hyperbolic volume of the quotient of the upper half-plane by G 
+for an arithmetic Fuchsian group G.  The volume is normalized arithmetic
+volume, so the "usual" volume is divided by 2&pi;; this gives an ideal triangle
+volume 1/2.
+</BLOCKQUOTE>
+<H5><A NAME = "17526">EllipticInvariants(G) : GrpPSL2 -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Returns the number of elliptic cycles of the arithmetic Fuchsian group G
+as a sequence of elliptic orders and their multiplicities.
+</BLOCKQUOTE>
+<H5><A NAME = "17527">Signature(G) : GrpPSL2 -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Returns the signature of the arithmetic Fuchsian group G.
+</BLOCKQUOTE>
+<H4><A NAME = "17528">Group Structure</A></H4>
+
+<P>
+<P>
+We now compute a finite presentation for an arithmetic Fuchsian group &Gamma;.
+<P>
+If &Gamma; has signature (g;m<sub>1</sub>, ..., m<sub>t</sub>), then there exists a standard presentation for &Gamma;, generated (freely) by &alpha;<sub>1</sub>, &beta;<sub>1</sub>, ..., &alpha;<sub>g</sub>, &beta;<sub>g</sub>, &gamma;<sub>1</sub>, ..., &gamma;<sub>t</sub> with the relations
+ &gamma;<sub>1</sub><sup>m<sub>1</sub></sup>= ... =&gamma;<sub>t</sub><sup>m<sub>t</sub></sup>=[&alpha;<sub>1</sub>, &beta;<sub>1</sub>] ... [&alpha;<sub>g</sub>, &beta;<sub>g</sub>] &gamma;<sub>1</sub> ... &gamma;<sub>t</sub> = 1 
+where [&alpha;<sub>i</sub>, &beta;<sub>i</sub>]=&alpha;<sub>i</sub>&beta;<sub>i</sub>&alpha;<sub>i</sub><sup> - 1</sup>&beta;<sub>i</sub><sup> - 1</sup> is the commutator.
+In the special case where g=0, there exists an algorithm to reconstruct the standard presentation; if g&gt;0, we only obtain a finite presentation, and it is possible that the construction of a standard presentation may be algorithmically impractical.  
+<P>
+Our algorithm uses a fundamental domain F for &Gamma; (see section <A  HREF = "text1566.htm#17569">Fundamental Domains</A>).  In brief, we compute the set of elements which pair the sides of F; these elements are provably generators for the group &Gamma;, and the relations between them are given as the set of minimal loops in a graph which records the side pairings.  
+
+
+<H5><A NAME = "17529">Group(G) : GrpPSL2 -&gt; GrpFP, Map, Map</A></H5>
+<BLOCKQUOTE>
+Returns a presentation U for the arithmetic Fuchsian group G,
+a map U to G, and a map U to O where O is the
+quaternion order corresponding to G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17530">Example <TT>GrpPSL2Shim_BasicInvariants (H137E3)</TT></A></H3>
+<P>
+In this example, we compute the basic invariants of the arithmetic 
+Fuchsian group associated to a maximal order in the quaternion algebra
+of discriminant 6 over Q. 
+<P>
+<P>
+<P>
+<PRE>
+&gt; A := QuaternionAlgebra(6);
+&gt; O := MaximalOrder(A);
+&gt; G := FuchsianGroup(O);
+&gt; ArithmeticVolume(G);
+1/3
+&gt; EllipticInvariants(G);
+[ &lt;2, 2&gt;, &lt;3, 2&gt; ]
+&gt; Genus(G);
+0
+&gt; Signature(G);
+&lt;0, [2, 2, 3, 3]&gt;
+</PRE>
+<P>
+We verify the Riemann-Hurwitz formula 1/3 = 2.0 - 2 + 2(1 - (1 /2)) + 2(1 - (1 /3)).
+<P>
+We can also compute a finite presentation of this group.
+<P>
+<P>
+<P>
+<PRE>
+&gt; U, m := Group(G);
+&gt; U;
+Finitely presented group U on 3 generators
+Relations
+    U.1^2 = Id(U)
+    U.2^3 = Id(U)
+    U.3^3 = Id(U)
+    (U.2 * U.1 * U.3)^2 = Id(U)
+&gt; [Matrix(m(U.i)) : i in [1..2]];
+[
+    [-0.44721359549995793928183473374634344441856698198020262470211905349191088
+        22850343946302640398390408845 -1.09544511501033222691393956560182030636
+        1751136512834480425665136619270191207412304725356516468009374]
+    [1.095445115010332226913939565601820306361751136512834480425665136619270191
+        207412304725356516468009374 0.44721359549995793928183473374634344441856
+        69819802026247021190534919108822850343946302640398390408845],
+
+    [0.170820393249936908922752100619735659953958748115047636673027591262383066
+        3212351288138489551667724006 0.4184228011239092912722673110503248597003
+        073307330865863518420141891341904873780366272041685003642481]
+    [-2.86791254390708738946955138575621625166625481138975671478453458144009456
+        7944693063167063601605004483 -1.170820393249936908922752100619735659953
+        958748115047636673027591262383066321235128813848955166772401]
+]
+&gt; [A!Quaternion(m(U.i)) : i in [1..2]];
+[ -1/5*j + 1/5*k, -1/2 - 1/2*i + 3/10*j - 3/10*k ]
+</PRE>
+<P>
+Next we compute a more complicated example, exhibiting an elliptic cycle
+of order 11.  The group &Gamma; corresponds to F=Q(&zeta;<sub>11</sub>)^ + and
+A the quaternion algebra only at real places.  (See also the section
+on triangle groups.)
+<P>
+<P>
+<P>
+<PRE>
+&gt; K&lt;z&gt; := CyclotomicField(11);
+&gt; F := sub&lt;K | z+1/z &gt;;
+&gt; Foo := InfinitePlaces(F);
+&gt; Z_F := MaximalOrder(F);
+&gt; A := QuaternionAlgebra(ideal&lt;Z_F | 1&gt;, Foo[1..4]);
+&gt; G := FuchsianGroup(A);
+&gt; Signature(G);
+&lt;0, [ 2, 3, 11 ]&gt;
+&gt; U, m := Group(G);
+&gt; U;
+Finitely presented group U on 2 generators
+Relations
+    U.1^2 = Id(U)
+    U.2^3 = Id(U)
+    (U.1 * U.2^-1)^11 = Id(U)
+</PRE>
+<P>
+As a final example, we show that the finite presentation of G may indeed be
+quite complicated.  Here, we examine the (torsion-free) group associated to the
+quaternion algebra over Q with discriminant 35.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := FuchsianGroup(QuaternionOrder(35));
+&gt; Signature(G);
+&lt;3, []&gt;;
+&gt; time U := Group(G);
+Time: 78.870
+&gt; U;
+Finitely presented group U on 6 generators
+Relations
+    U.5 * U.4^-1 * U.5^-1 * U.1 * U.3 * U.2^-1 * U.3^-1 * U.6 * U.4 * 
+    U.2 * U.1^-1 * U.6^-1 = Id(U)
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1565.htm">[Next]</A><A  HREF = "text1563.htm">[Prev]</A> <A  HREF = "text1565.htm">[Right]</A> [____] <A  HREF = "text1563.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

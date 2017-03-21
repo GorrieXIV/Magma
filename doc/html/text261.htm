@@ -1,0 +1,460 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Numerical Linear Algebra</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text262.htm">[Next]</A><A  HREF = "text260.htm">[Prev]</A> <A  HREF = "text262.htm">[Right]</A> <A  HREF = "text260.htm">[Left]</A> <A  HREF = "text247.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "2435">Numerical Linear Algebra</A></H3>
+
+<P>
+<P>
+Magma has some limited capabilities with numerical linear algebra,
+that is, linear algebra over a real or complex field. The basis of
+these is the <TT>RQDecomposition</TT> (appropriate as Magma is row-based),
+and its companion <TT>QLDecomposition</TT>. Internally, Magma uses these
+functions to compute (e.g.) matrix inverses and determinants over
+<B>R</B> and <B>C</B>.
+<P>
+All of the intrinsics starting with <TT>Numeric</TT> can also be accessed
+with this word omitted (by extended types on a real/complex matrix),
+though for some purposes it is useful to remind oneself that numerical
+linear algebra is not always the same.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text261.htm#2440">Rank, Kernel, Solution, and Pseudoinverse</A>
+<LI> <A  HREF = "text261.htm#2448">Eigenvalues and the Singular Value Decomposition</A>
+</UL>
+<H5><A NAME = "2436">RQDecomposition(M) : Mtrx[RngReCom] -&gt; Mtrx, AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix M over a real or complex field, write M=RQ where R
+is of triangular form and Q orthogonal (or unitary in the complex case).
+In particular, R has the same dimensions as M; when M has more
+columns c than rows r, then R is of the form [Z|U] where Z
+is a zero matrix that has (c - r) columns and U is upper triangular.
+When r&gt;c then the bottom c rows of R form an upper triangular matrix.
+No normalisations are made except that Q has determinant 1.
+</BLOCKQUOTE>
+<H5><A NAME = "2437">QLDecomposition(M) : Mtrx[RngReCom] -&gt; AlgMatElt, Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a matrix M over a real or complex field, write M=QL where L
+is of triangular form and Q orthogonal (or unitary in the complex case).
+This function works simply by applying <TT>RQDecomposition</TT> to the transpose.
+</BLOCKQUOTE>
+<H5><A NAME = "2438">NumericalInverse(M) : Mtrx[RngReCom] -&gt; AlgMatElt</A></H5>
+
+<PRE>    Epsilon: FldReElt                   Default: </PRE>
+<BLOCKQUOTE>
+Given a square positive-dimension matrix over a real or complex field,
+compute its inverse. The <TT>Epsilon</TT> parameter allows one to specify
+what size of values should be considered to be zero (resulting in an
+inversion failure). By default, the value of <TT>Epsilon</TT> is computed
+in a way that is relative to the size of the entries and their precision.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2439">Example <TT>Mat_numerlinalg-examples (H26E11)</TT></A></H3>
+We give some examples of these decompositions.
+<P>
+<P>
+<PRE>
+&gt; RR := RealField(10);
+&gt; r := 4;
+&gt; c := 5;
+&gt; A := [RR!Random([-2^10..2^10])/2^9 : i in [1..r*c]];
+&gt; M := Matrix(r,c,A);
+&gt; M;
+[-0.1796875000 -1.394531250 -1.345703125 -0.4414062500 0.0000000000]
+[1.396484375 -1.496093750 -0.2617187500 -1.882812500 -1.679687500]
+[-1.169921875 -0.9062500000 1.707031250 -0.6582031250 1.480468750]
+[0.8867187500 -0.3359375000 0.5839843750 0.9707031250 1.896484375]
+&gt; R,Q := RQDecomposition(M); R, Q;
+[0.0000000000 1.767478576 0.8447303787 -0.05853296288 0.3765439489]
+[0.0000000000 0.0000000000 2.924272555 -0.2048205303 1.424771353]
+[0.0000000000 0.0000000000 0.0000000000 2.589389831 -1.011949267]
+[0.0000000000 0.0000000000 0.0000000000 0.0000000000 -2.403971597]
+
+[-0.1278237197 -0.4893124575 0.3070157953 0.6619247514 -0.4602513884]
+[-0.3369945746 -0.5416048144 -0.7236111740 0.05012569151 0.2587917417]
+[0.6155218516 -0.6003864917 0.06838441636 -0.4759773097 -0.1715752984]
+[-0.5959647961 -0.2953736282 0.5643042371 -0.4119965068 0.2634387749]
+[-0.3688557516 0.1397427076 -0.2429248231 -0.4037914284 -0.7888963320]
+&gt; Max([Abs(x) : x in Eltseq(R*Q-M)]);
+3.492459655E-10 10
+&gt; Max([Abs(x) : x in Eltseq(Transpose(Q)*Q-1)]);
+1.527951099E-10 14
+&gt; //
+&gt; CC&lt;i&gt; := ComplexField(5);
+&gt; r := 5;
+&gt; c := 3;
+&gt; A := [CC!Random([-2^10..2^10])/2^9 : j in [1..r*c]];
+&gt; B := [CC!Random([-2^10..2^10])/2^9 : j in [1..r*c]];
+&gt; M := Matrix(r,c,A) + i*Matrix(r,c,B);
+&gt; R,Q := RQDecomposition(M); R, Q;
+[-1.1471 + 1.0971*i      -2.6950 - 0.38148*i   0.47294 - 0.95428*i]
+[-0.25971 - 0.0084722*i  0.61157 + 0.49147*i   1.5717 - 0.61096*i]
+[0.30902 + 0.59626*i     0.79478 + 1.0406*i    -1.1157 - 1.6800*i]
+[0.00000                 1.2132 + 1.4143*i    -0.95447 + 0.14362*i]
+[0.00000                 0.00000               3.0078 - 0.24966*i]
+
+[0.42713 - 0.0038340*i   0.51414 - 0.56570*i     -0.39550 + 0.27712*i]
+[0.54343 + 0.60175*i    -0.087580 + 0.0038354*i   0.56113 + 0.14178*i]
+[0.33511 + 0.21874*i    -0.62188 + 0.14580*i     -0.65721]
+&gt; Max([Abs(x) : x in Eltseq(R*Q-M)]);
+0.00020472 3
+&gt; Max([Abs(x) : x in Eltseq(ConjugateTranspose(Q)*Q-1)]);
+0.00012207 9
+&gt; //
+&gt; r := 5;
+&gt; c := 5;
+&gt; A := [RR!Random([-2^10..2^10])/2^9 : j in [1..r*c]];
+&gt; M := Matrix(r,c,A);
+&gt; MI := NumericalInverse(M); MI;
+[0.5488038571 -0.3734925483 0.005386589048 0.4034292318 -0.6410457874]
+[0.3082898339 -0.5126616665 0.1612965318 -0.2971166681 0.07521900340]
+[-0.4446389269 0.4962564367 0.1565165202 -0.4722494193 0.2177560581]
+[-0.05815013416 -0.3372341073 0.03559373548 0.5402886617 -0.7996494168]
+[-0.9780538200 1.225635935 -0.4735623930 -1.060353816 1.356842221]
+&gt; Max([Abs(x) : x in Eltseq(M*MI-1)]);
+4.656612873E-10 4
+</PRE>
+<HR>
+<H4><A NAME = "2440">Rank, Kernel, Solution, and Pseudoinverse</A></H4>
+
+<P>
+<P>
+<P>
+To compute the kernel (thus also rank) of a matrix M or a solution to a
+system vM=w, the implementation first performs a QL decomposition internally.
+When L is of a strict triangular form, namely L=bigl((Z/A|T)bigr)
+where Z is zero and T is not only lower triangular but also invertible,
+then the information can be read off immediately.
+In particular, the rank r is the dimension of T,
+the kernel is the first k rows of Q where k is number of rows in Z,
+while vM=w requires vQL=w so v=w<sub>r</sub>T<sup> - 1</sup>Q<sub>r</sub><sup>T</sup> where w<sub>r</sub> and Q<sub>r</sub>
+are the rightmost r columns of w and Q; one checks vQ<sub>r</sub>A is
+(numerically) equal to the other columns of w.
+<P>
+When L is not of this form, then an arbitrary orthogonal/unitary
+transformation is performed on the input (on the right), and the algorithm
+is re-tried. This case occurs when the r rightmost columns of M
+are not linearly independent (Magma is internally working on the
+transpose of M in the RQ decomposition, so that the rightmost
+columns become the lowermost rows). Similarly, if a condition number for T
+is too large, such a randomising transform can be profitably applied.
+<P>
+Note that the kernel is returned as a matrix, and indeed has orthonormal rows.
+The same is true for the image.
+<P>
+The computation of the <TT>NumericalPseudoinverse</TT> is similar,
+being based on the <TT>QLDecomposition</TT> and possibly also transforming
+the columns on the right, to ensure that L is of the nice triangular form
+(this is internally called <TT>QLCDecomposition</TT>).
+The pseudoinverse of the row-independent (bottom) part B of L
+is then computed as the solution tilde P of tilde P BB<sup>star</sup>=B<sup>star</sup>,
+and one row-extends tilde P to the left (by zero columns)
+to get the full (numerical) pseudoinverse P.
+
+
+<H5><A NAME = "2441">NumericalRank(M) : Mtrx[RngReCom] -&gt; RngIntElt</A></H5>
+
+<PRE>    Epsilon: FldReElt                   Default: </PRE>
+<BLOCKQUOTE>
+Given a matrix over a real or complex field, compute its (numerical) rank.
+The <TT>Epsilon</TT> parameter allows one to specify what size of values
+should be considered to be zero. By default, the value of <TT>Epsilon</TT>
+is computed in a way that is relative to the size of the entries and
+their precision.
+</BLOCKQUOTE>
+<H5><A NAME = "2442">NumericalKernel(M) : Mtrx[RngReCom] -&gt; Mtrx</A></H5>
+
+<PRE>    Epsilon: FldReElt                   Default: </PRE>
+<BLOCKQUOTE>
+Given a matrix over a real or complex field, compute its (numerical) kernel.
+The <TT>Epsilon</TT> parameter allows one to specify what size of values
+should be considered to be zero. By default, the value of <TT>Epsilon</TT>
+is computed in a way that is relative to the size of the entries and
+their precision.
+<P>
+Exceptionally, <TT>Kernel</TT> returns a space, while <TT>NumericalKernel</TT>
+returns a basis matrix of it.
+</BLOCKQUOTE>
+<H5><A NAME = "2443">NumericalImage(M) : Mtrx[RngReCom] -&gt; Mtrx</A></H5>
+
+<PRE>    Epsilon: FldReElt                   Default: </PRE>
+<BLOCKQUOTE>
+Given a matrix over a real or complex field, compute its (numerical) image,
+that is, its row space.
+The <TT>Epsilon</TT> parameter allows one to specify what size of values
+should be considered to be zero. By default, the value of <TT>Epsilon</TT>
+is computed in a way that is relative to the size of the entries and
+their precision.
+<P>
+Exceptionally, <TT>Image</TT> returns a space, while <TT>NumericalImage</TT>
+returns a basis matrix of it.
+</BLOCKQUOTE>
+<H5><A NAME = "2444">NumericalSolution(M,w) : Mtrx[RngReCom], Mtrx[RngReCom] -&gt; Mtrx, Mtrx</A></H5>
+
+<PRE>    Epsilon: FldReElt                   Default: </PRE>
+<BLOCKQUOTE>
+Given a matrix M and a compatible matrix (or vector) w over a real
+or complex field, solve numerically for vM=w. This gives an error if
+there is no solution. The second return value is the kernel of M.
+The <TT>Epsilon</TT> parameter allows one to specify what size of values
+should be considered to be zero. By default, the value of <TT>Epsilon</TT>
+is computed in a way that is relative to the size of the entries and
+their precision.
+<P>
+Exceptionally, the second return value is a matrix for
+<TT>NumericalSolution</TT> and a space for <TT>Solution</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "2445">NumericalIsConsistent(M,w) : Mtrx[RngReCom], Mtrx[RngReCom] -&gt; BoolElt, Mtrx, Mtrx</A></H5>
+
+<PRE>    Epsilon: FldReElt                   Default: </PRE>
+<BLOCKQUOTE>
+Given a matrix M and a compatible matrix (or vector) w over a real
+or complex field, determine whether vM=w is numerically solvable.
+The second return value is a solution (when one exists)(,
+and the third return value is the (numerical) kernel of M.
+The <TT>Epsilon</TT> parameter allows one to specify what size of values
+should be considered to be zero. By default, the value of <TT>Epsilon</TT>
+is computed in a way that is relative to the size of the entries and
+their precision.
+<P>
+Exceptionally, the third return value is a matrix for
+<TT>NumericalIsConsistent</TT> and a space for <TT>IsConsistent</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "2446">NumericalPseudoinverse(M) : Mtrx[RngReCom] -&gt; Mtrx</A></H5>
+
+<PRE>    Epsilon: FldReElt                   Default: </PRE>
+<BLOCKQUOTE>
+Given a matrix M over a real or complex field, compute its pseudoinverse P
+such that PMP=P, MPM=M, (MP)<sup>star</sup>=MP and (PM)<sup>star</sup>=PM.
+The <TT>Epsilon</TT> parameter allows one to specify what size of values
+should be considered to be zero. By default, the value of <TT>Epsilon</TT>
+is computed in a way that is relative to the size of the entries and
+their precision. Note that the Magma intrinsic <TT>PseudoInverse</TT> is
+quite different (largely applicable for matrices over Euclidean domains).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2447">Example <TT>Mat_numerlinalg-examples2 (H26E12)</TT></A></H3>
+We give some examples for ranks, kernels, solutions, and pseudoinverses.
+<P>
+<P>
+<PRE>
+&gt; RR := RealField(10);
+&gt; r := 3;
+&gt; c := 5;
+&gt; S := [-2^10..2^10];
+&gt; A := [Vector([RR!Random(S)/2^9 : i in [1..c]]) : j in [1..r]];
+&gt; M := Matrix(A cat [A[1]+A[2]-A[3]]);
+&gt; M;
+[-1.347656250 -1.980468750 0.2070312500 0.2734375000 -1.273437500]
+[0.6464843750 1.726562500 -0.3769531250 0.2011718750 -1.646484375]
+[-0.1660156250 1.236328125 -1.500000000 1.119140625 -1.195312500]
+[-0.5351562500 -1.490234375 1.330078125 -0.6445312500 -1.724609375]
+&gt; NumericalRank(M);
+3
+&gt; NumericalKernel(M); // scaled to norm 1
+[-0.5000000001 -0.4999999998 0.4999999999 0.5000000002]
+&gt; v := Vector([RR!Random(S)/2^9 : i in [1..c]]);
+&gt; NumericalIsConsistent(M,v);
+false
+&gt; w := &amp;+[M[i] * Random(S)/2^9 : i in [1..r]];
+&gt; NumericalIsConsistent(M,w);
+true (1.174316406 0.4165039062 0.7807617187 0.8100585938)
+&gt; PI := NumericalPseudoinverse(M); PI;
+[-0.1991067080 0.1335911770 -0.1240987264 0.05858319545]
+[-0.1885126384 0.1881125824 0.02268111094 -0.02308116681]
+[-0.1331315985 0.1012317424 -0.2422989451 0.2103990890]
+[0.1423299946 -0.08451596130 0.1982404871 -0.1404264538]
+[-0.07615077666 -0.2393032832 -0.09708672579 -0.2183673341]
+&gt; Max([Abs(x) : x in Eltseq(PI*M*PI-PI)]);
+7.275957614E-11 9
+&gt; //
+&gt; CC&lt;i&gt; := ComplexField(30);
+&gt; r := 5;
+&gt; c := 4;
+&gt; A := [CC!Random([-2^30..2^30])/2^28 : j in [1..r*c]];
+&gt; B := [CC!Random([-2^30..2^30])/2^28 : j in [1..r*c]];
+&gt; M := Matrix(r,c,A) + i*Matrix(r,c,B);
+&gt; NumericalRank(M);
+4
+&gt; NumericalKernel(M);
+[0.208965559769595845191678654168 + 0.0334373308308175861091994295635*i
+ -0.0227045638063900267279802631268 - 0.354081499548224953341852663885*i
+ -0.220008165304096296179634856382 - 0.815082824683314746916890536889*i
+ 0.0146505331723745379341299824850 - 0.155641405430086914216739561265*i
+ 0.209604845631814749141329584762 - 0.219520964338492435702429703559*i]
+&gt; PI := NumericalPseudoinverse(M);
+&gt; Max([Abs(x) : x in Eltseq(PI*M*PI-PI)]);
+1.60521564392120817260990102530E-30 1
+&gt; Max([Abs(x) : x in Eltseq(M*PI*M-M)]);
+2.54399997817916409183980874314E-29 18
+&gt; Max([Abs(x) : x in Eltseq(M*PI-ConjugateTranspose(M*PI))]);
+7.88860905221011805411728565283E-30 25
+&gt; Max([Abs(x) : x in Eltseq(PI*M-ConjugateTranspose(PI*M))]);
+5.03961120551682881427899748034E-30 8
+</PRE>
+<HR>
+<H4><A NAME = "2448">Eigenvalues and the Singular Value Decomposition</A></H4>
+
+<P>
+<P>
+<P>
+Computing the eigenvalues of a real or complex square matrix is done by
+first computing the Hessenberg form (almost upper-triangular, but with
+possible nonzero entries on the immediate subdiagonal), and then applying
+iterative methods to achieve the Schur form (upper-triangular except for
+2-by-2 blocks with complex eigenvalues in the real case). Special methods
+are used in the case where the matrix is symmetric. The computation of the
+singular value decomposition works by first computing the bidiagonal form,
+and then similarly iterating.
+
+
+<H5><A NAME = "2449">NumericalHessenbergForm(M) : Mtrx[RngReCom] -&gt; Mtrx, Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a square matrix M over a real/complex field, compute a Hessenberg
+matrix H that is upper-triangular except for possible nonzero entries
+on the immediate subdiagonal, and an orthogonal/unitary transformation
+matrix Q such that H=QMQ<sup>star</sup> and QQ<sup>star</sup>=I (both equalities
+being numerically approximate). A procedure similar to the RQ decomposition
+is used, working on both rows and columns.
+</BLOCKQUOTE>
+<H5><A NAME = "2450">NumericalSchurForm(M) : Mtrx[RngReCom] -&gt; Mtrx, Mtrx</A></H5>
+
+<PRE>    Transform: BoolElt                  Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a square matrix M over a real/complex field, compute the Schur
+form S that is upper-triangular except for possible nonzero entries
+on the immediate subdiagonal corresponding to 2-by-2 real blocks with
+complex eigenvalues, and an orthogonal/unitary transformation matrix Q
+such that S=QMQ<sup>star</sup> and QQ<sup>star</sup>=I (both equalities being
+numerically approximate). First the Hessenberg form is calculated, and
+then the unwanted subdiagonal terms are removed by a iterative process.
+</BLOCKQUOTE>
+<H5><A NAME = "2451">NumericalEigenvalues(M) : Mtrx[RngReCom] -&gt; SeqEnum</A></H5>
+
+<PRE>    Balance: BoolElt                    Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a square matrix M over a real/complex field, compute numerical
+approximations to its eigenvalues. This operates by calculating the Schur
+form, and then returning the relevant eigenvalues. A form of Parlett-Reinsch
+balancing is used by default, to increase the precision of the answer.
+<P>
+Exceptionally, <TT>NumericalEigenvalues</TT> returns a sequence of reals
+or complexes, while <TT>Eigenvalues</TT> on real/complex matrix returns
+a tuple of eigenvalues and multiplicities, for reasons of backwards
+compatibility (the multiplicities really cannot be guaranteed in the
+numerical case). Note that <TT>NumericalEigenvalues</TT> always returns
+a full sequence of eigenvalues for a real input, while <TT>Eigenvalues</TT>
+will return only those which are (approximately) real.
+</BLOCKQUOTE>
+<H5><A NAME = "2452">NumericalEigenvectors(M, e) : Mtrx, FldComElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a square matrix M that is coercible into the complexes and an
+approximation e to an eigenvalue of it, attempt to find eigenvectors.
+This function uses <TT>NumericalKernel</TT>, though returns the result as
+a sequence of (row) vectors.
+</BLOCKQUOTE>
+<H5><A NAME = "2453">NumericalBidiagonalForm(M) : Mtrx[RngReCom] -&gt; Mtrx, Mtrx, Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a matrix M over a real/complex field, compute a bidiagonal form B
+and orthogonal/unitary transformations U, V such that B=UMV<sup>star</sup>.
+Here B is upper bidiagonal if the number of columns is at least as large
+as the number of rows, and else is lower bidiagonal.
+</BLOCKQUOTE>
+<H5><A NAME = "2454">NumericalSingularValueDecomposition(M) : Mtrx[RngReCom] -&gt; Mtrx, Mtrx, Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a matrix M over a real/complex field, compute the singular
+value decomposition S and orthogonal/unitary transformations U, V
+such that S=UMV<sup>star</sup>. Here S is diagonal in its upper-left corner,
+with the diagonal entries being nonnegative and sorted in increasing size.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2455">Example <TT>Mat_numerlinalg-examples3 (H26E13)</TT></A></H3>
+We give some examples for eigenvalues.
+<P>
+<P>
+<P>
+<PRE>
+&gt; RR := RealField(10);
+&gt; r := 5;
+&gt; c := 5;
+&gt; A := [RR!Random([-2^10..2^10])/2^9 : i in [1..r*c]];
+&gt; M := Matrix(r,c,A);
+&gt; H := NumericalHessenbergForm(M); H;
+[-1.387758248 0.2244522681 0.1050196798 -0.6292371533 1.500649611]
+[-1.737800256 -0.6560018402 -0.1292093616 -0.4045870847 -0.1501588456]
+[-0.0000000000 3.503611888 -0.4200132582 -1.521474700 -0.4771033714]
+[-0.0000000000 0.0000000000 1.241929396 -1.887789155 -1.398580785]
+[-0.0000000000 0.0000000000 0.0000000000 2.063240612 -1.882812500]
+&gt; S := NumericalSchurForm(M); S; // need not be diag in real case
+[-0.5276818045 2.970316193 -0.8183434354 -1.227178569 1.207265137]
+[-0.6560286404 0.1374330601 0.7474073924 -0.7405697671 0.4496312767]
+[0.0000000000 0.0000000000 -2.733003988 0.5326130259 -0.2389927500]
+[0.0000000000 0.0000000000 0.0000000000 -1.878704188 2.041990652]
+[0.0000000000 0.0000000000 0.0000000000 -2.574033133 -1.232418078]
+&gt; NumericalEigenvalues(M);
+[ -2.733003988,
+  -1.555561133 - 2.269742311*$.1, -1.555561133 + 2.269742311*$.1,
+  -0.1951243722 - 1.355735243*$.1, -0.1951243722 + 1.355735243*$.1 ]
+&gt; M := M + Transpose(M); // make symmetric
+&gt; NumericalEigenvalues(M); // all real
+[ -5.927297871, -4.230690093, -3.248785626, -1.661515789, 2.599539376 ]
+&gt; //
+&gt; // example with companion matrix of a polynomial
+&gt; //
+&gt; f:=Polynomial([Random(10^(12-j)) : j in [0..8]] cat [1]); f;
+x^9 + 8569*x^8 + 98753*x^7 + 533140*x^6 + 3583980*x^5 + 52066941*x^4 +
+    183889636*x^3 + 5743452355*x^2 + 22923098485*x + 725907276071
+&gt; NumericalEigenvalues(ChangeRing(CompanionMatrix(f),RR));
+[ -8557.467295,
+  -10.76902934 - 4.819656295*$.1, -10.76902934 + 4.819656295*$.1,
+  -4.602845057 - 8.104590519*$.1, -4.602845057 + 8.104590519*$.1,
+   2.007741523 - 8.923992632*$.1, 2.007741523 + 8.923992632*$.1,
+   7.597780247 - 5.110282521*$.1, 7.597780247 + 5.110282521*$.1 ]
+&gt; Sort([r[1] : r in Roots(f,ComplexField(10))],func&lt;x,y|Real(x)-Real(y)&gt;);
+[ -8557.467295,
+  -10.76902933 - 4.819656325*$.1, -10.76902933 + 4.819656325*$.1,
+  -4.602845059 - 8.104590521*$.1, -4.602845059 + 8.104590521*$.1,
+   2.007741527 - 8.923992640*$.1, 2.007741527 + 8.923992640*$.1,
+   7.597780251 - 5.110282532*$.1, 7.597780251 + 5.110282532*$.1 ]
+</PRE>
+<HR>
+<H3><A NAME = "2456">Example <TT>Mat_numerlinalg-examples4 (H26E14)</TT></A></H3>
+We give some examples for bidiagonal form and singular value decomposition.
+<P>
+<P>
+<P>
+<PRE>
+&gt; CC&lt;i&gt; := ComplexField(5);
+&gt; r := 4;
+&gt; c := 5;
+&gt; A := [CC!Random([-2^10..2^10])/2^9 : i in [1..r*c]];
+&gt; B := [CC!Random([-2^10..2^10])/2^9 : i in [1..r*c]];
+&gt; M := Matrix(r,c,A) + i*Matrix(r,c,B);
+&gt; X := NumericalBidiagonalForm(M); X;
+&gt; NumericalBidiagonalForm(M); // matrix over CC
+[2.1983 3.7789 0.00000 0.00000 0.00000]
+[0.00000 2.0496 1.8677 0.00000 0.00000]
+[0.00000 0.00000 2.6879 2.4315 0.00000]
+[0.00000 0.00000 0.00000 3.5035 0.00000]
+&gt; NumericalSingularValueDecomposition(M);
+[4.9265 0.00000 0.00000 0.00000 0.00000]
+[0.00000 4.5508 0.00000 0.00000 0.00000]
+[0.00000 0.00000 2.5876 0.00000 0.00000]
+[0.00000 0.00000 0.00000 0.73134 0.00000]
+&gt; [Sqrt(Real(x)) : x in NumericalEigenvalues(M*ConjugateTranspose(M))];
+[ 0.73122, 2.5876, 4.5506, 4.9265 ]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text262.htm">[Next]</A><A  HREF = "text260.htm">[Prev]</A> <A  HREF = "text262.htm">[Right]</A> <A  HREF = "text260.htm">[Left]</A> <A  HREF = "text247.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

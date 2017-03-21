@@ -1,0 +1,230 @@
+%******************************************************************************
+%
+%    conjugacy.tex  Ree conjugacy algorithm
+%
+%    File      : $HeadURL:: https://subversion.sfac.auckland.ac.nz/svn/prj_m#$:
+%    Author    : Henrik Bäärnhielm 
+%    Dev start : 2011-03-30
+%
+%    Version   : $Revision:: 1493                                            $:
+%    Date      : $Date:: 2008-11-26 00:22:36 +0000 (ons, 26 nov 2008)        $:
+%    Last edit : $Author:: jbaa004                                           $:
+%
+%    $Id:: design.tex 1493 2008-11-26 00:22:36Z jbaa004                      $:
+%
+%******************************************************************************
+
+\documentclass[twoside,a4paper,reqno,psamsfonts]{amsart}
+%\usepackage[swedish,english]{babel} 
+\usepackage[latin1]{inputenc} % svenska tecken skall tolkas
+%\usepackage{amsmath}
+%\usepackage{amsfonts} % for \mathbb
+%\usepackage{amsthm}
+\usepackage{amscd}
+\usepackage{amsopn}
+\usepackage{amstext}
+\usepackage{amsxtra}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{upref}
+\usepackage{textcase} % For correct case of swedish chars
+%\usepackage[algo2e,ruled,linesnumbered,algosection]{algorithm2e} % for typesetting algorithms
+%\usepackage{clrscode}
+%\renewcommand{\Comment}{$\hspace*{-0.075em} //$ } % Use // for comments
+\usepackage{bm} % for \boldsymbol
+%\usepackage{draftcopy}
+\usepackage{graphicx}
+\usepackage{setspace}
+\frenchspacing
+
+%\numberwithin{section}{chapter}
+\numberwithin{equation}{section}
+\numberwithin{figure}{section}
+%\numberwithin{algorithm}{chapter}
+
+\newcounter{algorithm}
+%\numberwithin{algorithm}{section}
+%\renewcommand{\thealgorithm}{\arabic{section}.\arabic{algorithm}}
+
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{cl}[thm]{Corollary}
+\newtheorem{pr}[thm]{Proposition}
+\newtheorem{axiom}[thm]{Axiom}
+\newtheorem{conj}[thm]{Conjecture}
+
+\theoremstyle{definition}
+\newtheorem{deff}[thm]{Definition}
+
+\theoremstyle{remark}
+\newtheorem{note}[thm]{Note}
+\newtheorem{rem}[thm]{Remark}
+
+%\renewcommand{\thetheorem}{Theorem~\arabic{chapter}.\arabic{theorem}}
+%\renewcommand{\thepr}{Proposition~\arabic{chapter}.\arabic{pr}}
+%\renewcommand{\thedeff}{Definition~\arabic{chapter}.\arabic{deff}}
+\providecommand{\abs}[1]{\left\lvert #1 \right\rvert}
+\providecommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\providecommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\providecommand{\floor}[1]{\lfloor #1 \rfloor}
+\providecommand{\set}[1]{\left\lbrace #1 \right\rbrace}
+\providecommand{\gen}[1]{\left\langle #1 \right\rangle}
+%\providecommand{\ord}[1]{\operatorname{ord}( #1 )}
+\providecommand{\Sym}[1]{\operatorname{Sym}( #1 )}
+\renewcommand{\Pr}[1]{\operatorname{Pr}[ #1 ]}
+%\renewcommand{\char}[1]{\operatorname{char}[ #1 ]}
+
+\newcommand{\field}[1]{\mathbb{#1}}
+\newcommand{\vect}[1]{\boldsymbol{\mathrm{#1}}}
+\newcommand{\N}{\field{N}}
+\newcommand{\Z}{\field{Z}}
+\newcommand{\R}{\field{R}}
+\newcommand{\Q}{\field{Q}}
+\newcommand{\OO}{\field{O}}
+\newcommand{\K}{\field{K}}
+\newcommand{\A}{\field{A}}
+\newcommand{\F}{\field{F}}
+\newcommand{\PS}{\field{P}}
+\newcommand{\GAP}{\textsf{GAP}}
+\newcommand{\MAGMA}{\textsc{Magma}}
+
+% for Cayley graphs
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\OV}{\mathcal{O}}
+
+\DeclareMathOperator{\lcm}{lcm}
+\DeclareMathOperator{\sgd}{sgd}
+\DeclareMathOperator{\mgm}{mgm}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\GL}{GL}
+\DeclareMathOperator{\PGL}{PGL}
+\DeclareMathOperator{\GF}{GF}
+\DeclareMathOperator{\IM}{Im}
+\DeclareMathOperator{\RE}{Re}
+\DeclareMathOperator{\I}{Id}
+%\DeclareMathOperator{\OR}{O}
+\DeclareMathOperator{\SL}{SL}
+\DeclareMathOperator{\GO}{GO}
+\DeclareMathOperator{\SO}{SO}
+\DeclareMathOperator{\Sz}{Sz}
+\DeclareMathOperator{\Sp}{Sp}
+\DeclareMathOperator{\SU}{SU}
+\DeclareMathOperator{\chr}{char}
+\DeclareMathOperator{\Aut}{Aut}
+\DeclareMathOperator{\Alt}{Alt}
+\DeclareMathOperator{\PSL}{PSL}
+\DeclareMathOperator{\PSp}{PSp}
+\DeclareMathOperator{\PPSL}{(P)SL}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator{\SLP}{\mathtt{SLP}}
+\DeclareMathOperator{\G2}{{^2}G_2}
+\DeclareMathOperator{\LargeRee}{{^2}F_4}
+\DeclareMathOperator{\Ree}{Ree}
+\DeclareMathOperator{\Gal}{Gal}
+\DeclareMathOperator{\Norm}{N}
+\DeclareMathOperator{\Cent}{C}
+\DeclareMathOperator{\Zent}{Z}
+\DeclareMathOperator{\EndR}{End}
+\DeclareMathOperator{\Hom}{Hom}
+\DeclareMathOperator{\Ker}{Ker}
+\DeclareMathOperator{\cln}{{:}}
+\DeclareMathOperator{\O2}{O_2}
+\DeclareMathOperator{\Op}{O_p}
+\DeclareMathOperator{\RP}{\bf{RP}}
+\DeclareMathOperator{\NP}{\bf{NP}}
+\DeclareMathOperator{\PP}{\bf{P}}
+\DeclareMathOperator{\coRP}{\bf{co-RP}}
+\DeclareMathOperator{\ZPP}{\bf{ZPP}}
+\DeclareMathOperator{\Imm}{Im}
+\DeclareMathOperator{\Mat}{Mat}
+\DeclareMathOperator{\Dih}{D}
+\DeclareMathOperator{\antidiag}{antidiag}
+
+
+\newcommand{\OR}[1]{\operatorname{O} \bigl( #1 \bigr)}
+%\newcommand{\cln}{\operatorname{O} ( #1 )}
+
+\title{Conjugating small Ree groups}
+
+\author{Henrik B\"a\"arnhielm}
+\address{Department of Mathematics \\ University of Auckland \\ Auckland \\ New Zealand}
+\urladdr{http://www.math.auckland.ac.nz/\textasciitilde henrik/}
+\email{henrik@math.auckland.ac.nz}
+
+\begin{document}
+
+%\begin{abstract}
+
+%\end{abstract}
+
+\maketitle
+
+Let $G = \Ree(q)$, where $q = 3^{2 m + 1}$ for some $m > 0$. Hence $G
+< \SO(7, q)$. In $G$, all involutions are conjugate. Let $j \in G$ be
+an involution and $C_j < G$ be its centraliser. Then $C_j \cong
+\gen{j} \times \PSL(2, q)$ and $C_j$ is maximal in $G$. The module of
+$C_j$ splits up as $M_3 \oplus M_4$ where $\dim M_i = i$, so the $-1$
+eigenspace of $j$ has dimension $4$. Hence $C_j$ acts as $\PSL(2,q)$
+on $M_3$ and as $\gen{j} \times \PSL(2,q)$ on $M_4$. Moreover, $M_3$
+is the exterior square of the natural module of $\PSL(2,q)$, and $M_4$
+(strictly speaking the derived group of the group acting on it) is a
+tensor product of twisted copies of the natural module of $\PSL(2, q)$.
+
+Let $C_3$ and $C_4$ be the groups (not derived groups) acting on $M_3$ and $M_4$, respectively. Let $N_3^1 = \Norm_{\SO(3, q)}(C_3)$ and $N_4^1 = \Norm_{\SO^{+}(4, q)}(C_4)$. Experimental evidence indicates that
+$\abs{N_3^1 : C_3} = 2$ and $\abs{N_4^1 : C4} = 2$.
+
+Let $N_3^2 = \Norm_{\GL(3, q)}(C_3)$ and $N_4^2 = \Norm_{\GL(4, q)}(C_4)$. Similarly, experimental evidence indicates that $\abs{N_3^2 : C_3} = 2(q-1)$ and $\abs{N_4^2 : C4} = 2(q-1)$.
+
+%I suppose the indices in normalisers in GL should follow if one can prove that the index in SO is as above. I thought you may have insight into this since you use involution centralisers heavily in the classical groups algorithm?
+
+%Note that if one instead starts with C_j̈́' \cong PSL(2,q) and similarly chop it up and compute normalisers, the index goes up to 4, as one would perhaps expect since the involution at the bottom has been removed.
+
+%The above indices suggests that the index of C_j in its normaliser in SO(7,q) is also 2. Would that also be easy to prove?
+
+
+Now to the algorithm itself. We are given a random conjugate $X$ of $G$ and should produce $c \in GL(7, q)$ such that $X^c = G$.
+
+%The old algorithm does this by finding a maximal parabolic in G and H and conjugating these to each other. The parabolic is found by considering the doubly transitive action, similarly as in the Suzuki case, but the involution centraliser is also involved and hence an SL2 oracle. It all comes out and correctness can be proved readily. When the parabolics have been conjugated to each other, one obtain x \in GL such that H^x = G^d for some diagonal matrix d. This is again similar to the Suzuki case, but in the Suzuki case we could then find d by solving some linear equations, by using the preserved forms of G and H and again using the doubly transitive action.
+%The similar game in the small Ree groups do not lead to linear equations. This is where the conjecture comes in.
+
+%The suggestion by Bill for a new algorithm is the following: Do not use the parabolics. Go for the involution centraliser directly. We can easily find an involution centraliser C_H < H and C_G < G. Of course, C_G can be explicitly written down without any search. If we can conjugate C_H to C_G in SO(7,q), we should almost be finished, since the index in the normaliser is 2. We should end up also conjugating H to G with probability 1/2, so if we fail (which we can detect using a fast test to see if H^c is the standard copy) we just try again with another C_H.
+
+%I don't know how to conjugate C_H to C_G inside SO, since the only method which seems available is to find standard generators and then find module isomorphisms. The corresponding change of basis elements would not be guaranteed to lie in SO. However, I hoped for the best and tried this.
+
+\begin{enumerate}
+\item Find $c_2 \in \GL(7, q)$ such that $X^{c_2}$ preserves the same form as G (using MeatAxe-based algorithm described in \cite{hcgt}). Let $H = X^{c_2}$.
+\item By random search, find an involution $j_H \in H$. Let \[ j_G = \diag(-1, 1, -1, 1, -1, 1, -1) \in G \] be the diagonal involution.
+\item Use \cite{bray00} to find centraliser $C_H < H$ of $j_H$. Write down centraliser $C_G < G$ of $j_G$.
+\item Let $M_H$ and $M_G$ be the given modules of $C_H$ and $C_G$. Find their indecomposable summands and corresponding change of bases $c_H$ and $c_G$ which exhibits these. Order the basis vectors so that those of the $3$-dimensional submodules come first.
+\item Let $C_H^4 < \GL(4, q)$ and $C_G^4 < \GL(4, q)$ be the projections of $C_H$ and $C_G$ acting on the $4$-dimensional submodules. Use the $\SL(2, q)$ oracle to constructively recognise and obtain SLPs of standard generators in input generators.
+%I don't know why the SL2 oracle always works here, since as stated above, the centralised involution acts as -1 on the 4-dim submodule.
+% It works because the SL2 algorithm works modulo scalars
+% Note that the standard generators only generates PSL, not 2:PSL. This is the case both on th 4-space and on the 7-space
+% We can add -1 as a standard generator on the 4-space, but does it make any difference?
+\item Using the standard generators, obtain a module isomorphism (using MeatAxe-based algorithm described in \cite{hcgt}) between the $4$-dimensional submodules, hence a change of basis $c_4$ such that ${C_H^4}^{c_4} = C_G^4$.
+\item Evaluate the SLPs of the standard generators on the input generators of $C_H$ and $C_G$ (in dimension $7$), then project these to the $3$-dimensional submodules and find a module isomorphism between those. Hence we similarly obtain a change of basis $c_3$.
+\item Let $d$ be the diagonal join of $c_3$ and $c_4$ and let $c = c_H^{-1} d c_G$. Then $C_H^c = C_G$.
+\item Now look at the form preserved by $H^c$. The form preserved by $G$ is
+\[\antidiag(1,1,1,-1,1,1,1).\] It turns out that the form preserved by $H^c$ is
+\[\antidiag(1,x,1,-x,1,x,1)\] where $x$ is a square in $\F_q$.
+%I have no idea why this happens. Do you have any idea why?
+% Experimentally, both c_3 and c_4 lie in SO. Why is that? The Hom-spaces have dimension (q-1), and (experimentally) only 4 of those lie in SO.
+% Also, why is c not preserving the form, even when c_3 and c_4 are? x comes up exactly on those vectors generating the 3-space?
+Because of this, we can write down a matrix $c_1$ such that $H^{c c_1}$ preserves the same form as $G$.
+
+\item Now $c c_1$ also preserves the same form as G, up to a scalar
+  $\alpha$. Hence $\alpha^{-1} c c_1 \in \SO(7, q)$. Then test if
+  $X^{c_2 \alpha^{-1} c c_1} = G$. Since there are at most two
+  conjugates of $G$ containing $C_G$, this happens with probability at
+  least $1/2$.
+
+\end{enumerate}
+
+
+
+\bibliographystyle{amsalpha}
+\bibliography{mgrp}
+
+\end{document}

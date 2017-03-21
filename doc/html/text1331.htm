@@ -1,0 +1,507 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Classification and Normal  Forms of Singularities</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1332.htm">[Next]</A><A  HREF = "text1330.htm">[Prev]</A> <A  HREF = "text1332.htm">[Right]</A> <A  HREF = "text1330.htm">[Left]</A> <A  HREF = "text1321.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "14535">Classification and Normal  Forms of Singularities</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+This section describes functionality to classify isolated singularities
+which are analytically hypersurface singularities as defined in the
+previous subsection <A  HREF = "text1330.htm#14529">Analytically Hypersurface Singularities</A>. The classification is up to
+analytic isomorphism. The singularities are specified by giving a
+multivariate polynomial or power series f such that the completion of the local
+ring of the singularity is isomorphic to the quotient by f of the power
+series ring in which it lies. The analytic classification comes down to
+finding nice spaces of relatively simple polynomials (the <I>normal forms</I>) -
+these form the classification families - such that any power series with
+a singularity at the origin is analytically equivalent to one of these
+normal forms. The classification type refers to the particular family that
+the normal form lies in. Elements of distinct families should not be
+analytically equivalent. The normal forms within a family should depend on a
+finite number of continuous parameters and at most finitely many forms
+within the family may be analytically equivalent to any given form
+(a finite group of family automorphisms is allowable).
+<P>
+The classification scheme we follow here is that
+of Arnold as described in Chapter 15 of <A  HREF = "text1320.htm#bib_AGZV85">[AGZV85]</A>. For those singularities
+that lie in one of the families of this classification, we determine the family and
+normal form. Note that his classification is
+a partial classification giving a finite set of multi-indexed, irreducible families occurring
+in the infinite stratification by Milnor number of the space of all isolated analytic 
+hypersurface singularities up to <I>stable equivalence</I>. However, his classification
+at least covers all singularities with Milnor number &le;16 and all irreducible families
+with constant Milnor number that have codimension &le;10 in the full space. It
+includes much more besides: any of his indexed families contain singularities with
+an infinite range of Milnor numbers as the (integer) index varies.
+<P>
+Any power series in characteristic != 2 with no constant or linear term can
+be analytically transformed into a diagonal quadratic part x<sub>1</sub><sup>2</sup> + ... + x<sub>r</sub><sup>2</sup>
+plus a power series in the remaining variables with all terms of degree &ge;3.
+<I>Stable equivalence</I> of power series means that the residual degree &ge;3 parts
+are analytically isomorphic.The <I>corank</I> refers to the number of variables not lying
+in the quadratic part.
+<P>
+Arnold's families are all <I>affine, polynomial</I>
+families : the normal forms for the family are a fixed polynomial plus a
+linear combination of a finite number of monomials, all in a subset of the variables 
+and all terms of which are of degree &ge;3, which is added to the diagonal quadratic
+form in the remaining variables.
+The degree &ge;3 part is the essential part and
+we sometimes use the term normal form to refer to just this component of the
+full normal form. It is a polynomial in a number of variables equal to the
+corank of the singularity.
+<P>
+For example, the normal forms
+of the corank 2 family denoted J<sub>k, 0</sub> by Arnold with k &gt; 2 are
+the polynomial f = x<sup>3</sup> + bx<sup>2</sup>y<sup>k</sup> + y<sup>3k</sup> (b is a constant here) added to an arbitrary
+linear combination of the k - 2 monomials xy<sup>2k + 1</sup>, ..., xy<sup>3k - 2</sup> and then added to
+the diagonal quadratic part. So if the number of variables is 3 - let them be x, y, z -
+we would have p(x, y) + z<sup>2</sup>, where p(x, y) is f plus the xy<sup>r</sup> part.
+If we have 4 variables x, y, z, t, we get p(x, y) + z<sup>2</sup> + t<sup>2</sup> etc. In our
+implementation, we actually transform to a normal form where the diagonal quadratic
+part consists of the initial variables and the essential corank part is in the
+last variables.
+<P>
+As well as computing the normal form, the user can ask for an
+explicit analytic isomorphism that transforms the original hypersurface equation
+to the normal form up to terms of any required precisional degree. If the precision
+is not specified, the transformation is computed up to terms of a sufficiently
+high degree to uniquely determine the normal form (i.e. the image of the truncated
+transformation is the normal form plus higher degree error terms that do not affect
+the analytic equivalence class). In the many cases of families
+where there is a natural weighting of the variables associated to the normal
+forms, the default precision may be different for different variables. This
+will be described more precisely in the intrinsic descriptions. 
+<P>
+Arnold's classification is over an algebraically-closed field. Implementationally,
+the hypersurfaces are generally given over number fields or finite fields.
+Although we transform and work over finite extensions when absolutely necessary,
+we try to avoid the overhead of forming too many field extensions. Thus, we often do
+not normalise completely when computing normal forms, returning an almost-normal
+form that can easily be transformed to the full normal form by the user if desired.
+The major way in which we avoid complete normalisation is in not
+replacing terms of the form ax<sup>r</sup> with x<sup>r</sup> by taking an rth root of a and
+transforming by x |-&gt; a<sup>( - 1/r)</sup>x. These scaling transformations to
+reduce a coefficient in the main polynomial to 1 are only applied
+in cases where no roots need be computed (e.g. we can transform axy<sup>3</sup> to xy<sup>3</sup> by
+mapping x to (1/a)x). In particular, the quadratic part
+of the normal form will be of the form a<sub>1</sub>x<sub>1</sub><sup>2</sup> + ... + a<sub>r</sub>x<sub>r</sub><sup>2</sup> for non-zero
+a<sub>1</sub>, ..., a<sub>r</sub> rather than x<sub>1</sub><sup>2</sup> + ... + x<sub>r</sub><sup>2</sup>. Beside avoiding these
+scalings, there are a few other places where we use a slightly different normal
+form to Arnold's in order to avoid field extensions. These will be listed in the
+relevant intrinsic descriptions.
+<P>
+The classification is over an (algebraically-closed) field of characteristic zero.
+However, for any particular family, the classification process leading to that
+family and the transformation to the specific normal forms within that family
+work in all but a small number of characteristics (the precise ones depending
+on the family). As it is often useful in computational geometry to work modulo a
+moderate size prime to avoid coefficient blow-up
+in Gr&ouml;bner basis operations, we put no restriction on the characteristic of
+the base fields over which the singularities are defined. We have tried
+to be very careful in the implementation to work out for precisely which characteristics
+each (indexed) family doesn't work and only disallow input at the point where we
+have reached a family and found that we have a bad characteristic for it. So, if the user
+is working in a positive characteristic the intrinsics may return a runtime error 
+at some stage. The error message indicates the apparent type of the singularity
+and warns that it is an invalid family for the characteristic.
+In valid cases, the polynomial normal forms are the same
+in the positive characteristic as in characteristic zero and the isomorphic transformation
+to the result can be computed to an arbitrarily high precision (the
+finite precision transformations returned are the truncations of genuine analytic
+isomorphisms in that characteristic).
+<P>
+The input hypersurfaces can be given as exact polynomials or defined by 
+the data records returned by the <TT>IsHypersurfaceSingularity</TT> intrinsic
+of the previous subsection. These records allow the computation to any desired
+precision of the expansion of a power series F that defines the singularity
+at the origin. This
+is sufficient to determine the family and normal form. In fact, if the Milnor
+number of the power series F is a
+finite number &mu; (it is finite for any isolated singularity in characteristic
+zero and for all of our families in the allowable characteristics) then any
+other power series that is equal to F up to terms of degree &mu; + 2 or higher,
+is (formally) analytically isomorphic to F. This gives a general upper degree bound
+in terms of Milnor number for the degree that expansion up to will determine the
+singularity up to isomorphism. Actually, the normal forms of the various families
+usually have highest degree terms of degree much lower than the Milnor number and
+we are careful in our implementation to only expand as far as necessary
+to determine the family, normal form and truncated transformation.
+<P>
+All of Arnold's families are of corank &le;4, with the majority of corank 2
+and 3. In the initial magma V2.21 release,  three of the corank 3 families
+and two of the more complex
+corank 2 families remain unimplemented. We hope to add the remaining corank 3 
+cases for a mid-year release.
+<P>
+The Arnold classification is a fundamental result in singularity theory and
+the functionality to be able to apply it to magma schemes should be useful
+in a number of situations. One of our future aims is to use it to speed up the
+formal desingularisation procedures for the wide range of singular
+surface models that only contain isolated hypersurface singularities. The normal forms are
+of a very simple shape - containing only a few monomials in the majority of cases - so the
+singularities should be much faster to resolve after transformation to normal form.
+
+
+<H5><A NAME = "14536">NormalFormOfHypersurfaceSingularity(f) : RngMPol -&gt; BoolElt, RngMPolElt, MonStgElt, Map</A></H5>
+
+<PRE>    get_trans: BoolElt                  Default: <TT>false</TT></PRE>
+
+<PRE>    d: RngIntElt                        Default: 0</PRE>
+
+<PRE>    fData: List                         Default: [**]</PRE>
+
+<PRE>    milnor_number: RngIntElt            Default: -1</PRE>
+<BLOCKQUOTE>
+The main intrinsic to classify an isolated hypersurface singularity, compute its Arnold normal 
+form and optionally compute to any desired precision an explicit analytic isomorphism to 
+that form. 
+<P>
+The argument f should be a multivariate polynomial over a field k giving the equation of an 
+affine hypersurface
+with a singularity at the origin (0, 0, ..., 0). The singularity does not have
+to be defined by a global hypersurface. It can be an analytically hypersurface singularity
+as described in the previous subsection <A  HREF = "text1330.htm#14529">Analytically Hypersurface Singularities</A>. To use the intrinsic
+in this context, the data record fdat returned as the fourth value by <TT>IsHypersurfaceSingularity</TT> is required. Then f should 
+be the expansion to some finite degree fdeg of the power series F defining the singularity
+(i.e. F = f + terms of degree &ge;fdeg + 1 where f should not be 0 here!) and parameter
+<TT>fData</TT> should be set to the two-element magma list <TT>[* fdat, fdeg *]</TT>. The element fdat
+will be used to expand f to higher precision if necessary. The intrinsic makes use of the
+Milnor number of the singularity. If this is already known, the user can pass it in using
+the parameter <TT>milnor_number</TT>. This can avoid an expensive recomputation for more
+complicated singularities. Note, however, that the wrong value passed in will result
+in runtime errors or invalid return values.
+<P>
+If an explicit analytic isomorphism &phi; from f to the normal form is also required, the
+parameter <TT>get_trans</TT> should be set to <TT>true</TT>. Let the variables of f be x<sub>1</sub>, ..., x<sub>n</sub>
+and let f<sub>0</sub> denote the normal form. Then there is a sequence of n power series in
+R = k[[x<sub>1</sub> ..., x<sub>n</sub>]] with constant term zero, [s<sub>1</sub> ..., s<sub>n</sub>], such that &phi; is 
+an isomorphism R -&gt; R, x<sub>i</sub> |-&gt; s<sub>i</sub>, mapping f to f<sub>0</sub>.
+The condition that &phi;
+is an isomorphism is equivalent to the matrix of coefficients of the degree 1 terms of
+the s<sub>i</sub> being invertible. When f<sub>0</sub> is in L[x<sub>1</sub>, ..., x<sub>n</sub>] for a finite
+field extension L of k, &phi; is defined by power series over L. Of course, we
+cannot represent the power series of the isomorphism exactly, so &phi; is represented
+by a magma homomorphism from L[x<sub>1</sub>, .., x<sub>n</sub>] (the base change of the parent ring of f
+to L) to itself which is defined by the sequence of polynomials p<sub>i</sub> which are
+the s<sub>i</sub> truncated to a sufficiently high degree.
+<P>
+The precision of the map representing &phi; is determined as follows. The default
+precision is the smallest to determine f<sub>0</sub> uniquely. The truncated polynomial map
+defined by the p<sub>i</sub> maps f to f<sub>0</sub> + e, with an error e. The precision of the map
+is such that e consists of terms of degree higher than those of f<sub>0</sub> with respect
+to a natural weighting of the variables and such that f<sub>0</sub> + e is analytically
+isomorphic to f<sub>0</sub> and no other normal form in the same (or different) family.
+Many of the families in the classification have <I>semiquasihomogeneous</I> normal
+forms in Arnold's terminology. This means that there is a positive (integer) weighting
+for the variables for which the fixed polynomial part g of the normal forms
+(see the introductory section above) is homogeneous (and non-degenerate) of weighted
+degree d<sub>0</sub> and the variable part (if it exists)
+is a linear combination of monomials of higher degree. In these cases, the default
+precision is the highest possible weighted degree
+of the monomials in the variable part (or d<sub>0</sub> if there is no variable part). What
+this means is that
+there might be much lower ordinary degree terms in the transformation error e for 
+higher weight variables. This convention may seem a little awkward at first but it seems
+to be the most natural thing in terms of the way that these cases are processed by
+the code. For non-semiquasihomogeneous cases or when parameter <TT>d</TT> is used (see below),
+the precision is always in terms of the ordinary degree of monomials.
+<P>
+If parameter <TT>d</TT> is set to
+a positive value (its default is 0), &phi; will be computed to a precision (in terms of
+ordinary degree) which is the maximum of d and the default (ordinary) degree needed
+to determine the normal form uniquely. That is, all terms in the error e are guaranteed
+to be of ordinary degree greater than d.
+<P>
+The first return value is <TT>true</TT> if the singularity lies in one of the families of
+Arnold's classification and <TT>false</TT> otherwise. If <TT>true</TT>, the second return value is
+the normal form f<sub>0</sub> of f and the third is a string giving the name of the
+family. If parameter <TT>get_trans</TT> is <TT>true</TT>, then a fourth return value is
+the polynomial map giving the (truncated) isomorphism from f to f<sub>0</sub> as
+described above.
+<P>
+As discussed in the introduction, the base field k can be of arbitrary characteristic.
+The only restriction on its magma type is that it must be a field for which
+finite separable extensions are constructible. A runtime error will occur if it turns
+out that the shape of the singularity is
+of a family type for which the characteristic of k is invalid. The apparent family
+type will be given in the error message. Characteristic 2 will lead to an error in
+virtually (but not quite) all cases. In particular, an error will result for characteristic
+2 fields whenever f has a non-trivial quadratic part. If the singularity is not
+isolated, this will be discovered when the Milnor number of f is computed (it will
+be infinite) and <TT>false</TT> will be returned.
+<P>
+We allow a non-singular point, which we class as a `singularity' of type A<sub>0</sub>
+for which the normal form is x<sub>1</sub>.
+<P>
+All of the families in the version of Arnold's classification that we use have corank
+&le;4 (see intro). The only corank 0 singularity is the A<sub>1</sub> singularity whose
+normal form is x<sub>1</sub><sup>2</sup> + ... + x<sub>n</sub><sup>2</sup>. As discussed in the introduction, to
+avoid excessive field extensions, we do not scale the variables in our
+transformations to normal form in order to make coefficients 1, so the normal
+form returned will actually be a<sub>1</sub>x<sub>1</sub><sup>2</sup> + ... + a<sub>n</sub>x<sub>n</sub><sup>2</sup> for some non-zero constants a<sub>i</sub>.
+<P>
+The corank 1 singularities are the A<sub>r</sub>, r &ge;2. The description strings for
+these are "A2", "A3" etc. The normal form for these are
+a<sub>1</sub>x<sub>1</sub><sup>2</sup> + ... + a<sub>n - 1</sub>x<sub>n - 1</sub><sup>2</sup> + a<sub>n</sub>x<sub>n</sub><sup>r + 1</sup> where, again, we do not scale
+the variables to make all of the a<sub>i</sub> equal to 1.
+<P>
+Corank 2 singularities are described below for the <TT>Corank2Case</TT> intrinsic.
+That intrinsic is used by this one but it has also been made available for the user to
+call directly. There are 3 families of corank 2 singularities
+that have not yet been covered.
+<P>
+Code for corank 3 in the initial release of V2.21 does not cover all of the families, 
+although we hope to complete it in a mid-year release. The families not yet included
+lead to a "not yet available" runtime error.
+<P>
+The only corank 4 case in the classification (sometime not included) is 
+O<sub>16</sub> (descriptor: "O16"). The normal form for these is the diagonal
+quadratic part added to a non-degenerate homogeneous cubic in 4 variables
+(non-degenerate meaning that it defines a non-singular projective cubic
+surface) and a 1-dimensional `variable' part (maybe zero) given by
+a homogeneous degree 4 polynomial in the 4 variables. The standard
+normalisation here is to transform the homogeneous cubic to the form
+x<sup>3</sup> + y<sup>3</sup> + z<sup>3</sup> + t<sup>3</sup> + (ax + by + cz + dt)<sup>3</sup> for constants a, b, c, d and the variable
+part is then given by a scaler multiple of the monomial xyzt. Again, to avoid
+a possibly large field extension and because not all non-singular cubics
+can be linearly transformed into this form, we currently take a lazy
+approach and do not attempt to normalise the cubic part into any
+particular shape. If this case occurs and the user really wants to
+try to get a transformation to the standard form, he may use
+intrinsic <A  HREF = "text1385.htm#srfc:pent-ideal">PentahedronIdeal</A> to construct a linear transformation
+in the last 4 variables to move the cubic part to the correct shape.
+Applying this to the full normal form returned will give the Arnold normal form.
+<P>
+The implementation follows the decision procedure laid out in
+Chapter 16 of <A  HREF = "text1320.htm#bib_AGZV85">[AGZV85]</A>. The transformations to full normal form
+given the lowest degree part are effected in a uniform manner via
+3 functions that respectively deal with the semiquasihomogeneous cases, the non-sqh
+cases that satisfy condition A for a Newton filtration (see page 212
+of <A  HREF = "text1320.htm#bib_AGZV85">[AGZV85]</A>), and finally the non sqh-cases for which the spectral 
+sequence analysis of Chapter 14 of <A  HREF = "text1320.htm#bib_AGZV85">[AGZV85]</A> applies. In many of the
+non-sqh cases, the sqh function is first applied to get to the fixed
+part of the normal form and then the relevant other function is used
+to find the variable part and kill off other terms.
+</BLOCKQUOTE>
+<H5><A NAME = "14537">Corank2Case(f) : RngMPol -&gt; BoolElt, RngMPolElt, MonStgElt, Map</A></H5>
+
+<PRE>    get_trans: BoolElt                  Default: <TT>false</TT></PRE>
+
+<PRE>    milnor_number: RngIntElt            Default: -1</PRE>
+
+<PRE>    d: RngIntElt                        Default: 0</PRE>
+
+<PRE>    fData: List                         Default: [**]</PRE>
+<BLOCKQUOTE>
+This is a direct version of the previous general intrinsic that only deals
+with the non-quadratic part of hypersurface singularities of corank 2 as defined in the
+introduction. Argument f should be a polynomial in two variables with all terms
+of degree at least 3 which is a defining equation for the singularity at the origin
+(0, 0). The parameter <TT>milnor_number</TT> if given a positive value can be used
+to input the known Milnor number of f to save a small amount of computation
+time. The remaining parameters and return values have the same meaning as for the general
+intrinsic. In particular <TT>fData</TT> can be used when f is the truncation of a
+power series F that gives the exact defining equation for the (analytically) hypersurface
+singularity.
+<P>
+The families of singularities covered by this case are, in Arnold's notation: D<sub>k</sub>, k &ge;4;
+E<sub>6k</sub>, E<sub>6k + 1</sub>, E<sub>6k + 2</sub>, k &ge;1; J<sub>k, i</sub>, k &ge;2, i &ge;0; X<sub>k, i</sub>,
+k, i &ge;1; Y<sup>1</sup><sub>r, s</sub>, r &ge;s &ge;1; Z<sub>6k + 5</sub>, Z<sub>6k + 6</sub>, Z<sub>6k + 7</sub>,
+k &ge;2; Z<sub>k, i</sub>, k &ge;1, i &ge;0; W<sub>12k</sub>, W<sub>12k + 1</sub>, W<sub>12k + 5</sub>, W<sub>12k + 6</sub>,
+k &ge;1; W<sub>k, i</sub>, k &ge;1, i &ge;0; W^#<sub>k, i</sub>, k &ge;1, i &ge;1; N<sub>16</sub>.
+<P>
+The description strings are the obvious translations of these: e.g., for Y<sup>1</sup><sub>2, 1</sub>,
+we return "Y^1_{2,1}". There are 3 multi-indexed families with atypical product
+normal forms that we haven't
+yet finished implementing: Y<sup>k</sup><sub>r, s</sub>, Z<sup>k</sup><sub>r</sub>, Z<sup>k</sup><sub>i, j</sub> for
+k &ge;2. Currently, if the analysis leads to one of these families, a runtime error
+results informing the user of the precise family type but warning that the exact
+normal form (and transformation) cannot currently be computed.
+<P>
+The expressions for normal forms over an algebraically-closed field for each family can be 
+found in Chapter 15 of <A  HREF = "text1320.htm#bib_AGZV85">[AGZV85]</A>. As stated in the introduction, in order to avoid
+unnecessary field extensions, the normal forms we return are either not fully normalised
+or are slightly different to those given there. Besides the ubiquitous avoidance of scaling 
+a variable x to transform a term of the form ax<sup>r</sup> to x<sup>r</sup> with r &ge;2, the following 
+variants are used.
+<P>
+For J<sub>k, 0</sub>, k &ge;2, instead of taking the quasihomogeneous
+part of the normal form to be ax<sup>3</sup> + bx<sup>2</sup>y<sup>k</sup> + cy<sup>3k</sup>, we instead use
+ax<sup>3</sup> + bxy<sup>2k</sup> + cy<sup>3k</sup>  (a, b, c != 0) except in the one case when transformation 
+to this by x |-&gt; x + uy<sup>k</sup> leads to c = 0. Then we use the
+usual form ax<sup>3</sup> + bx<sup>2</sup>y<sup>k</sup> + cy<sup>3k</sup> with 2b<sup>3</sup>=27a<sup>2</sup>c (this gives one isomorphism
+class over the algebraic closure on scaling x and y appropriately). The
+monomial basis for the variable part of the normal form remains xy<sup>2k + 1</sup>, ...,
+xy<sup>3k - 2</sup>.
+<P>
+Similarly, for Z<sub>k, 0</sub>, k &ge;1, instead of using y(ax<sup>3</sup> + bx<sup>2</sup>y<sup>k + 1</sup>k + cy<sup>3k + 3</sup>)
+for the quasihomogeneous part, we use y(ax<sup>3</sup> + bxy<sup>2k + 2</sup>k + cy<sup>3k + 3</sup>) except in the
+same unique case as above. The monomial basis for the variable part of the normal form
+remains xy<sup>2k + 4</sup>, ..., xy<sup>3k + 3</sup>.
+<P>
+Singularities of type N<sub>16</sub> have a normal form which is a homogeneous
+polynomial of degree 5 in x, y that is non-degenerate (i.e. it splits into distinct
+linear factors over the algebraic closure of the base field) plus a higher degree part
+which lies in a one-dimensional subspace of homogeneous polynomials of degree 6. 
+The normal form given
+by Arnold over an algebraically-closed field involves a linear transformation of
+the homogeneous part to a polynomial of the form x<sup>4</sup>y + ax<sup>3</sup>y<sup>2</sup> + bx<sup>2</sup>y<sup>3</sup> + xy<sup>4</sup>,
+in which case the full normal form is this degree 5 polynomial plus a term of
+the form cx<sup>3</sup>y<sup>3</sup>. As the transformation of the degree 5 part generally involves
+a field extension of degree 20 (2 roots of a degree 5 polynomial need to be added
+to the base field), we do not make this transformation. We leave the homogeneous
+degree 5 part f<sub>5</sub> as it first occurs and the full normal
+form returned will be of the form f<sub>5</sub> + f<sub>6</sub> where f<sub>6</sub> is a homogeneous degree 6
+part that lies in a one-dimensional subspace, depending on f<sub>5</sub>, of degree 6
+x, y-polynomials. As for the O<sub>16</sub> case in the general intrinsic, the user may
+determine the Arnold normal form by finding the linear translation on f<sub>5</sub> to
+map it to standard form and apply this transformation to f<sub>5</sub> + f<sub>6</sub>.
+</BLOCKQUOTE>
+<H5><A NAME = "14538">Corank3Case(f) : RngMPol -&gt; BoolElt, RngMPolElt, MonStgElt, Map</A></H5>
+
+<PRE>    get_trans: BoolElt                  Default: <TT>false</TT></PRE>
+
+<PRE>    milnor_number: RngIntElt            Default: -1</PRE>
+
+<PRE>    d: RngIntElt                        Default: 0</PRE>
+
+<PRE>    fData: List                         Default: [**]</PRE>
+<BLOCKQUOTE>
+This is the direct version of the general <TT>NormalFormOfHypersurfaceSingularity</TT>
+intrinsic that only deals
+with the non-quadratic part of hypersurface singularities of corank 3 as defined in the
+introduction. Argument f should be a polynomial in three variables with all terms
+of degree at least 3 which is a defining equation for the singularity at the origin
+(0, 0, 0). The parameters are exactly the same as for the above <TT>Corank2</TT> intrinsic.
+<P>
+The families of singularities covered by this case are, in Arnold's notation: 
+P<sub>k</sub>=T<sub>3, 3, k - 5</sub>, k &ge;8;
+R<sub>p, q</sub>=T<sub>3, p, q</sub>, 4 &le;p &le;q; T<sub>p, q, r</sub>, 4 &le;p &le;q &le;r;
+Q<sub>6k + 4</sub>, Q<sub>6k + 5</sub>, Q<sub>6k + 6</sub>, k &ge;1; Q<sub>k, i</sub>, k &ge;2, i &ge;0;
+S<sub>12k - 1</sub>, S<sub>12k</sub>, S<sub>12k + 4</sub>, S<sub>12k + 5</sub>, k &ge;1; S<sub>k, i</sub>, k &ge;1, i &ge;0;
+S^#<sub>k, i</sub>, k, i &ge;1; U<sub>12k</sub>, U<sub>12k + 4</sub>, k &ge;1; U<sub>k, i</sub>, k &ge;1, i &ge;0;
+V<sub>1, i</sub>, V^#<sub>1, i</sub>, i &ge;0. 
+<P>
+Again, the description strings contained in the third return value are obvious text translations
+of these. In the first release covering corank 3 singularities (V2.21, initial release), some of
+the later families have not yet been covered and these will give a "Not yet available" runtime
+error. These cases should be implemented and exported in a mid-year release. We do not
+cover the S<sup> * </sup>, U<sup> * </sup> and V<sup> * </sup> families that Arnold gives as particular classes with specific invariants
+but without precise normal forms. A singularity falling into one of these classes will result
+in a first return value of <TT>false</TT>.
+<P>
+Apart from the usual avoidance of root-scaling variables to transform, e.g., ax<sup>r</sup> to x<sup>r</sup> when
+r &ge;2, the only major difference between the normal forms computed and Arnold's versions is for P<sub>8</sub>.
+A P<sub>8</sub> singularity is one whose equation can be transformed into a homogeneous cubic (in 3 variables)
+that is non-singular as the equation for a projective (genus 1) curve. Arnold uses the normal form
+x<sup>3</sup> + y<sup>3</sup> + z<sup>3</sup> + axyz where a is the family parameter. We transform to a non-singular cubic
+but do not convert it to this specific form, partly to avoid the necessary field extensions. the
+user may use magma functions for elliptic curves to find the explicit transformation to Arnold's
+form. Two P<sub>8</sub> singularities given by homogeneous cubics are isomorphic if and only if the elliptic
+j-invariants are the same, where each cubic is considered as an elliptic curve by choosing any
+projective point on it as the origin. If the chosen origin is actually one of the 9 inflexion
+points of the cubic then an elliptic curve isomorphism between the two will be a linear transformation
+in the base variables which therefore gives an analytic isomorphism between the two singularities.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14539">Example <TT>Scheme_scheme-norm-form-sings (H118E19)</TT></A></H3>
+We give some examples of the analysis of isolated singularities.
+The first is a corank 2 E<sub>13</sub> singularity defined by a 3-variable
+polynomial (at the origin). For these singularities, the non-quadratic
+part (in variables y and z) of the (unscaled) normal form is ay<sup>3</sup> + byz<sup>5</sup>
+added to a cz<sup>8</sup> term where c may be zero.
+<P>
+<P>
+<PRE>
+&gt; Q := Rationals();
+&gt; P&lt;x,y,z&gt; := PolynomialRing(Q,3,"grevlex");
+&gt; f := z^8-3*z^7-3*x*z^5+3*y*z^5+z^6+3*x*z^4-3*y*z^4+2*y^4+3*x^2*z^2-6*x*y*z^2+
+&gt;   3*y^2*z^2+x^3-3*x^2*y+7*x*y^2-y^3-4*y^2*z+2*x^2-4*x*z+2*z^2;
+&gt; boo,f0,typ := NormalFormOfHypersurfaceSingularity(f);
+&gt; boo; f0; typ;
+true
+z^8 + 3*y*z^5 - y^3 + 2*x^2
+E13
+</PRE>
+The normal form has highest term of degree 8. Now, call the intrinsic again
+to get the transformation that takes f to f<sub>0</sub> up to terms of degree at
+least 9.
+<P>
+<P>
+<PRE>
+&gt; _,_,_,mp := NormalFormOfHypersurfaceSingularity(f : get_trans := true, d := 8);
+&gt; mp_err := mp(f)-f0;
+&gt; Min([TotalDegree(t) : t in Terms(mp_err)]);
+9 5440
+</PRE>
+For the second example, we take the singularity defined by a two-variable
+polynomial containing no terms of degree &le;3. Here, we can use the
+<TT>Corank2Case</TT> intrinsic directly. The singularity is of type Z<sub>1, 1</sub>.
+Although the polynomial may define an irreducible curve (as in this example),
+the singularity is non-normal and analytically reducible. The defining
+polynomial splits into a product of 2 irreducible factors in the power series
+ring. This can be seen from the normal form which is divisible by the
+linear factor y.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y&gt; := PolynomialRing(Rationals(),2,"grevlex");
+&gt; f :=  y^12-6*x*y^10+15*x^2*y^8+x^9+9*x^8*y+36*x^7*y^2+84*x^6*y^3+
+&gt;  126*x^5*y^4+126*x^4*y^5+64*x^3*y^6+36*x^2*y^7+9*x*y^8+y^9+2*x^8+
+&gt;  16*x^7*y+56*x^6*y^2+112*x^5*y^3+155*x^4*y^4+112*x^3*y^5+56*x^2*y^6+
+&gt;  16*x*y^7+2*y^8-6*x^5*y^2-x^3*y^4-3*x^2*y^5-4*x*y^6-2*y^7+x^6+2*x^4*y^2+
+&gt;  6*x^3*y^3+9*x^2*y^4+5*x*y^5-x^5-3*x^4*y-6*x^3*y^2-4*x^2*y^3+x^4+x^3*y;
+&gt; IsIrreducible(f);
+true
+&gt; boo,f0,typ := Corank2Case(f);
+&gt; boo; f0; typ;
+true
+y^9 + 2*y^8 - x^2*y^3 + x^3*y
+Z_{1,1}
+</PRE>
+As a final example, we consider an E<sub>7</sub> singularity p on a degree 6
+complete intersection surface in (P)<sup>4</sup>. Here, we cannot find a
+polynomial giving a global hypersurface defining p by simple elimination
+of a variable. However, p is <I>analytically</I> a hypersurface singularity
+(as all E<sub>7</sub> singularities are) and we use the 
+<TT>IsHypersurfaceSingularity</TT> intrinsic to give f, the truncation to degree
+3 of a power series F defining p analytically, and the fdat data object
+that allows expansion of F to higher degree.
+<P>
+Calling the main intrinsic with just f
+as an argument leads to a negative result (in fact, it is clear by inspection
+that f has a non-isolated singularity at the origin). A second call with the
+<TT>fData</TT> parameter included, however, leads to the correct result.
+<P>
+<P>
+<PRE>
+&gt; P4&lt;x,y,z,t,u&gt; := ProjectiveSpace(Q,4);
+&gt; X := Scheme(P4,[x^2+y*t+t^2,z^3+x*t*u+y^2*u-t*u^2]);
+&gt; p := X![0,0,0,0,1];
+&gt; _,f,_,fdat := IsHypersurfaceSingularity(p,3);
+&gt; R&lt;a,b,c&gt; := Parent(f);
+&gt; f;
+b^3 - c^3 + c^2
+&gt; NormalFormOfHypersurfaceSingularity(f);
+false
+&gt; boo,f0,typ := NormalFormOfHypersurfaceSingularity(f : fData := [*fdat,3*]);
+&gt; boo; f0; typ;
+true
+b*c^3 + b^3 + a^2
+E7
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1332.htm">[Next]</A><A  HREF = "text1330.htm">[Prev]</A> <A  HREF = "text1332.htm">[Right]</A> <A  HREF = "text1330.htm">[Left]</A> <A  HREF = "text1321.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

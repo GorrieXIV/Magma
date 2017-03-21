@@ -1,0 +1,104 @@
+
+////////////////////////////////////////////////////////////////////////////////////
+// Tests for the CrvRegModel stuff
+// Steve Donnelly, 2010
+////////////////////////////////////////////////////////////////////////////////////
+
+// TO DO : this code spends 35% of its time creating finite fields!
+
+
+// Affine plane curves
+
+A2<x,y>:=AffineSpace(Rationals(), 2);
+C:=Curve(A2, y^2-x^3+5*x);
+M:=RegularModel(C, 5);
+P:=C![0,0];
+Q:=C![5,10];
+_ := PointOnRegularModel(M, P);
+_ := PointOnRegularModel(M, Q);
+
+
+// Elliptic curves
+
+x := PolynomialRing(Rationals()).1;
+
+E := EllipticCurve([5,10]);
+pts := Points(E:Bound:=10^4);
+M2 := RegularModel(E, 2);
+M5 := RegularModel(E, 5);
+lifts2 := [PointOnRegularModel(M2, pt) : pt in pts];
+lifts5 := [PointOnRegularModel(M5, pt) : pt in pts];
+
+K<a> := NumberField(x^2 - 5); 
+K := OptimizedRepresentation(K);
+EK := BaseChange(E, K);
+P := 2*Integers(K);
+MK := RegularModel(EK, P);
+v := 56*a + 76;
+L := ext< K | Polynomial([-v, 0, 1]) >;
+pt := EK(L)! [L| 1+2*a, L.1];
+_ := PointOnRegularModel(MK, pt);
+Labs := AbsoluteField(L);
+LP, mLP := Completion(Labs, Integers(Labs)!!P);
+K_LP := Coercion(K,Labs) * mLP;
+pt := EK(K_LP)! [(1+2*a)@mLP, (L.1)@mLP];
+_ := PointOnRegularModel(MK, pt);
+
+
+// Hyperelliptic curves
+
+x := PolynomialRing(Rationals()).1;
+
+C := HyperellipticCurve(8*x^5-12*x^4+5*x^3-x, -x^2-1);
+P := C![1/2,3/4];
+M := RegularModel(C, 2);
+C1, C_C1 := SimplifiedModel(C);
+M1 := RegularModel(C1, 2);
+assert #ComponentGroup(M) eq 29;
+assert #ComponentGroup(M1) eq 29;
+_ := PointOnRegularModel(M, P);
+_ := PointOnRegularModel(M1, P@C_C1);
+
+f := x*(x-1)*(x-2)*(x-5)*(x-6);
+C := HyperellipticCurve(f);
+M := RegularModel(C, 2);
+P := C![3,-6];
+Q := C![10,120];
+R := C![0,0];
+P1 := P-Q;
+P2 := R-PointsAtInfinity(C)[1];
+P3 := P1+P2;
+K<w> := SplittingField(P3[1]);
+x1 := Roots(ChangeRing(P3[1],K))[1,1];
+x2 := Roots(ChangeRing(P3[1],K))[2,1];
+y1 := Sqrt(Evaluate(f,x1));
+y2 := Sqrt(Evaluate(f,x2));
+S1 := C(K)![x1,y1];
+S2 := C(K)![x2,y2];
+p := Factorization(2*Integers(K))[1][1];
+Kp, toKp := Completion(K, p);
+pts := [C(Kp)! [x@toKp : x in Eltseq(S)] : S in [S1,S2]];
+lifts := [PointOnRegularModel(M, pt) : pt in pts];
+// Lifting points defined over ramified extensions
+K := NumberField(x^2-3);
+P := C(K)! [4, 4*K.1];
+lift := PointOnRegularModel(M, P);
+p := Factorization(2*Integers(K))[1][1];
+Kp, toKp := Completion(K, p);
+Pp := C(Kp)! [x@toKp : x in Eltseq(P)];
+lift := PointOnRegularModel(M, Pp);
+
+C := HyperellipticCurve(x^7 + 2*x^6 - 2*x^5 + 7*x^4 + 3*x^3 + x^2 + 8*x + 4);
+M := RegularModel(C, 2);
+/* Examples that don't work yet
+K<w>:=NumberField(x^2+7);
+CK:=BaseChange(C,K);
+p:=Factorisation(2*Integers(K))[1,1];
+_,p:=IsPrincipal(p);
+RegularModel(CK,p);
+
+K<w>:=NumberField(x^2+11);
+CK:=BaseChange(C,K);
+p:=Factorisation(2*Integers(K))[1,1];
+RegularModel(CK,p);
+*/

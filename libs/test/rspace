@@ -1,0 +1,245 @@
+/*
+Test RSpaces and Vector Spaces over various rings.
+AKS 2/2/94.
+*/
+
+
+function random_vecs(M, rand_alg, k)
+    if rand_alg cmpeq Random then
+	res := [ Random(M) : i in [1 .. k] ];
+    else
+	R := BaseRing(M);
+	d := Dimension(M);
+	res := [M | &+[M | rand_alg(R) * M.j: j in [1 .. d]] : i in [1 .. k]];
+    end if;
+    // print "random_vecs", M, " = ", res;
+    return res;
+end function;
+
+rspace_test := procedure(R, n, smallish, rand_alg)
+    is_field := IsField(R);
+    assert n ge 1;
+    G := RSpace(R, n);
+
+    print "rspace_test:", G;
+    "Seed:", GetSeed();
+    cpu := Cputime();
+
+    assert CoefficientRing(G) eq R;
+    assert BaseRing(G) eq R;
+    U := sub<G | random_vecs(G, rand_alg, n - 1)>;
+    V := sub<G | random_vecs(G, rand_alg, n div 2)>;
+    W := sub<G | random_vecs(G, rand_alg, n div 3)>;
+
+    Spaces := [G, U, V, W];
+
+    for x in random_vecs(G, rand_alg, 5) do
+	sx := Support(x);
+	v := G ! [i in sx select 1 else 0 : i in [1 .. n]];
+	assert CharacteristicVector(G, sx) eq v;
+    end for;
+
+    if Regexp("FldFun|FldFin", Sprint(Type(R))) then
+	cconj := func<x | x>;
+    else
+	cconj := ComplexConjugate;
+    end if;
+
+    for S in Spaces do
+	Dim := Dimension(S);
+	print "Operations on single space of dimension", Dim;
+	assert Generic(S) eq G;
+	assert S subset G;
+	assert OverDimension(S) eq n;
+	ngens := Ngens(S);
+	assert Generators(S) eq { S.i : i in [1 .. ngens] };
+	assert Basis(S) eq [BasisElement(S, i): i in [1 .. Dim]];
+	BM := BasisMatrix(S);
+	assert BM eq Parent(BM) ! Basis(S);
+
+	z := S ! 0;
+	assert IsZero(z);
+	for i in [1 .. 5] do
+	    x := random_vecs(S, rand_alg, 1)[1];
+	    y := random_vecs(S, rand_alg, 1)[1];
+	    assert (-1) * x eq -x;
+	    assert 3 * x eq x + x + x;
+	    assert x * 4 eq x + x + x + x;
+	    assert x + y eq y + x;
+	    assert x - y eq -(y - x);
+	    assert x - x eq z;
+	    assert IsZero(x - x);
+	    assert InnerProduct(x, y) eq &+[x[i] * cconj(y[i]): i in [1 .. n]];
+	    nx := Normalize(x);
+	    ny := Normalize(y);
+	    assert nx eq Normalize(nx);
+	    assert ny eq Normalize(ny);
+	    assert Support(nx) eq Support(x);
+	    sx := Sort([i : i in Support(x)]);
+	    // print x, sx;
+	    if IsZero(x) then
+		assert #sx eq 0;
+	    else
+		f := sx[1];
+		if is_field then
+		    if not IsOne(nx[f]) then
+			"x:", x;
+			"f:", f;
+			"nx:", nx;
+		    end if;
+		    assert IsOne(nx[f]);
+		end if;
+		assert #{ i : i in [1 .. f - 1] | not IsZero(x[i]) } eq 0;
+	    end if;
+	end for;
+    end for;
+
+    len := #Spaces;
+    for i := 1 to len do
+	for j := i to len do
+	    S := Spaces[i];
+	    T := Spaces[j];
+	    Sdim := Dimension(S);
+	    Tdim := Dimension(T);
+
+	    if smallish then
+		print "Operations on double spaces of dimensions",
+		    Sdim, Tdim, "(with iterators)";
+	    else;
+		print "Operations on double spaces of dimensions", Sdim, Tdim;
+	    end if;
+
+	    ST := S meet T;
+	    assert ST subset S;
+	    assert ST subset T;
+
+	    if is_field then
+		QS, mS := quo<S | ST>;
+		assert QS eq S / ST;
+		QT, mT := quo<T | ST>;
+		assert QT eq T / ST;
+		// print S, ST, QS;
+		if smallish then
+		    for x in S do
+			im := x @ mS;
+			assert im in QS;
+			// print "x:", x, "im:", im;
+			assert (im@@mS) - x in S;
+			if x in ST then
+			    assert IsZero(im);
+			end if;
+		    end for;
+		else
+		    for x in [S.i : i in [1 .. Sdim]] cat
+			     random_vecs(S, rand_alg, 5) do
+			im := x @ mS;
+			assert im in QS;
+			assert (im@@mS) - x in S;
+			if x in ST then
+			    assert IsZero(im);
+			end if;
+		    end for;
+		end if;
+	    end if;
+	    SpT := S + T;
+	    assert S subset SpT;
+	    assert T subset SpT;
+	    SdT := DirectSum(S, T);
+	    TdS := DirectSum(S, T);
+	    assert Dimension(SdT) eq Sdim + Tdim;
+	    assert Dimension(TdS) eq Sdim + Tdim;
+	    M := SdT meet TdS;
+	    assert M subset SdT;
+	    assert M subset TdS;
+
+	    SB := Basis(S);
+	    k := #SB;
+	    im := random_vecs(T, rand_alg, k);
+	    f := hom<S -> T | im>;
+	    ker := Kernel(f);
+	    assert ker subset S;
+	    assert Image(f) subset T;
+	    assert IsIndependent(im) eq (Dimension(ker) eq 0);
+	    for i := 1 to k do
+		assert f(SB[i]) eq im[i];
+		if not( (im[i]@@f - SB[i]) in ker ) then
+		    print "S:", S;
+		    print "T:", T;
+		    print "SB:", SB;
+		    print "ker:", ker;
+		    print "im:", im;
+		    print "i:", i;
+		    print "im[i]:", im[i];
+		    print "im[i]@@f:", im[i]@@f;
+		    print "im[i]@@f-SB[i]:", im[i]@@f-SB[i];
+		    error "";
+		end if;
+	    end for;
+	end for;
+    end for;
+
+    t := Cputime(cpu);
+    print t, "seconds";
+end procedure;
+
+//rspace_test(RationalField(), 10, false, func<Q | Random(-5, 5)/Random(1, 5)>);
+
+rspace_test(GF(2), 10, false, Random);
+rspace_test(GF(2), 10, false, Random);
+rspace_test(GF(2), 100, false, Random);
+rspace_test(GF(3), 5, true, Random);
+rspace_test(GF(3), 50, false, Random);
+rspace_test(GF(4), 3, true, Random);
+rspace_test(GF(4), 50, false, Random);
+rspace_test(GF(5), 50, false, Random);
+rspace_test(GF(7), 50, false, Random);
+rspace_test(GF(9), 50, false, Random);
+rspace_test(GF(17), 2, true, Random);
+rspace_test(GF(17), 50, false, Random);
+rspace_test(GF(256), 50, false, Random);
+rspace_test(GF(257), 20, false, Random);
+rspace_test(GF(2^32 - 5, 1), 5, false, Random);
+rspace_test(GF(2^32 + 15, 1), 5, false, Random);
+rspace_test(GF(NextPrime(10^100: Proof := false), 1), 5, false, Random);
+rspace_test(GF(2, 100), 5, false, Random);
+
+rspace_test(Integers(), 20, false, func<Z | Random(-1, 1)>);
+rspace_test(Integers(), 10, false, func<Z | Random(-10^20, 10^20)>);
+rspace_test(RationalField(), 10, false, func<Q | Random(-5, 5)/Random(1, 5)>);
+
+anf_rand := func<K | K ! [Random(-1, 1): i in [1 .. Degree(K)]]>;
+b := 10^20;
+anf_rand_big := func<K | K ! [Random(-b, b): i in [1 .. Degree(K)]]>;
+
+rspace_test(CyclotomicField(5), 10, false, anf_rand);
+rspace_test(CyclotomicField(3), 5, false, anf_rand_big);
+rspace_test(QuadraticField(5), 10, false, anf_rand);
+rspace_test(QuadraticField(10^50+1), 3, false, anf_rand_big);
+
+func_field_rand :=
+    func<F |
+	&+[Random(-1, 1)*F.i: i in [1..r]] /
+	(&+[Random(-1, 1)*F.i: i in [1..r]] + 1)
+	where r is Rank(F)>;
+
+b := 10^20;
+func_field_rand_big :=
+    func<F |
+	&+[Random(-b, b)*F.i: i in [1..r]] /
+	(&+[Random(-b, b)*F.i: i in [1..r]] + 1)
+	where r is Rank(F)>;
+
+rspace_test(FunctionField(IntegerRing()), 3, false, func_field_rand_big);
+rspace_test(FunctionField(IntegerRing()), 5, false, func_field_rand);
+
+rspace_test(FunctionField(IntegerRing(), 8), 1, false, func_field_rand);
+rspace_test(FunctionField(IntegerRing(), 2), 3, false, func_field_rand);
+
+rspace_test(FunctionField(GF(23)), 5, false, func_field_rand);
+
+Z3 := RowSpace(IdentityMatrix(Integers(), 3));
+S := sub< Z3 | Rows(DiagonalMatrix([2,2,2])) >;
+Include(~S, Z3![2,0,0], ~new);
+assert not new;
+Include(~S, {Z3|[2,0,0],[3,0,0]}, ~new);
+assert new;

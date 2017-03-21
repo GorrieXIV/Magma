@@ -1,0 +1,532 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>The Order of the Group of Points</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1440.htm">[Next]</A><A  HREF = "text1438.htm">[Prev]</A> <A  HREF = "text1440.htm">[Right]</A> <A  HREF = "text1438.htm">[Left]</A> <A  HREF = "text1437.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16283">The Order of the Group of Points</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1439.htm#16284">Point Counting</A>
+<LI> <A  HREF = "text1439.htm#16295">Zeta Functions</A>
+<LI> <A  HREF = "text1439.htm#16298">Cryptographic Elliptic Curve Domains</A>
+</UL>
+<H4><A NAME = "16284">Point Counting</A></H4>
+
+<P>
+<P>
+<P>
+Magma contains an efficient implementation of the Schoof--Elkies--Atkin
+(SEA) algorithm, with Lercier's extension to base fields of characteristic 2,
+for computing the number of points on an elliptic curve over a finite field.
+There are also implementations of the faster p-adic canonical lift methods
+and the p-adic deformation method
+in small characteristic.  Calculations are performed in the smallest field over
+which the curve is defined, and the result is lifted to the original field.
+<P>
+Like all group functions on elliptic curves, these intrinsics really apply
+to a particular point set; the curve is identified with its base point
+set for the purposes of these functions.  To aid exposition only the
+versions that take the curves are shown but an appropriate point set
+(over a finite field) may be used instead.
+
+
+<H5><A NAME = "16285"># H : SetPtEll -&gt; RngIntElt</A></H5>
+<H5># E : CrvEll -&gt; RngIntElt</H5>
+<H5>Order(H) : SetPtEll -&gt; RngIntElt</H5>
+<H5>Order(E) : CrvEll -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The order of the group of K-rational points of E, where E is an
+elliptic curve defined over the finite field K.
+</BLOCKQUOTE>
+<H5><A NAME = "16286">FactoredOrder(H) : SetPtEll -&gt; RngIntElt</A></H5>
+<H5>FactoredOrder(E) : CrvEll -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+This function returns the factorisation of the order of the group
+of K-rational points of E, where E is an elliptic curve defined
+over the finite field K.
+This factorisation is stored on E and is reused when computing
+the order of points on E.
+</BLOCKQUOTE>
+<H5><A NAME = "16287">SEA(H : parameters) : SetPtEll -&gt; RngIntElt</A></H5>
+<H5><A NAME = "SEAf">SEA</A>(E : parameters) : CrvEll -&gt; RngIntElt</H5>
+
+<PRE>    Al: MonStgElt                       Default: em "Default"</PRE>
+
+<PRE>    MaxSmooth: RngIntElt                Default: &infin;</PRE>
+
+<PRE>    AbortLevel: RngIntElt               Default: 0</PRE>
+
+<PRE>    UseSEA: BoolElt                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+This is the internal algorithm used by the point counting routines, but it
+can be invoked directly on an elliptic curve E or a point set H
+if desired.  The most obvious reason to do this is
+because of the parameters <TT>AbortLevel</TT> and <TT>MaxSmooth</TT>, which
+allow the computation to be stopped early if it can be shown not to satisfy
+certain conditions (such as the order of the group being prime).
+<P>
+<P>
+<P>
+<B>Warning:</B> Unlike the external functions which call it (such as
+<TT>Order</TT> and <TT>FactoredOrder</TT>), <TT>SEA</TT> does not store the
+computed group order back on the curve itself and so functions which
+need the group order will have to recompute it.
+<P>
+<P>
+<P>
+The parameter <TT>Al</TT> can be set to one of <TT>"Enumerate"</TT>,
+<TT>"BSGS"</TT>, or <TT>"Default"</TT>.
+Setting <TT>Al</TT> to <TT>"Enumerate"</TT> causes the group order to be found by
+enumeration of all points on the curve and hence is only practical for
+small orders.
+Setting <TT>Al</TT> to <TT>"BSGS"</TT>
+is currently equivalent to setting <TT>Al</TT> to <TT>"Default"</TT>, which
+uses point enumeration for suitably small finite fields, the full
+Schoof--Elkies--Atkin algorithm if the characteristic is not small, and
+canonical lift methods or deformation if it is. Currently, small characteristic
+means p &lt; 1000. For p &lt; 37 or p &isin;{41, 47, 59, 71}, canonical lift is used;
+deformation is the chosen method for other small p.
+<P>
+The canonical lift methods use a range of techniques to lift a
+modular parameter of the curve to an unramified p-adic ring. If a
+Gaussian Normal Basis of type &le;2 exists for that ring
+(see <A  HREF = "text485.htm#has_gnb_func">HasGNB</A>)
+then the method of Lercier and Lubicz from <A  HREF = "text1436.htm#bib_ler_lub2">[LL03]</A> is used with
+some local adaptations by Michael Harrison to increase the speed for
+fields of moderate size.
+Otherwise, the MSST algorithm as described in <A  HREF = "text1436.htm#bib_msst">[Gau02]</A> is used
+for fields up to a certain size with Harley's recursive version
+(<A  HREF = "text1436.htm#bib_har_let">[Har]</A>) taking over for larger fields.
+<P>
+For p &lt; 10 and p = 13 the modular parameter used is a
+generator of the function field of a genus 0 modular curve
+X<sub>0</sub>(p<sup>r</sup>). The parameter gives a particularly nice modular
+polynomial &Phi; for use in the above-mentioned iterative
+lifting processes (see <A  HREF = "text1436.htm#bib_kohel-asia-crypt">[Koh03]</A>). In these cases
+&Phi; has a relatively simple factored form and evaluations are
+hand-coded for extra efficiency.
+<P>
+For p where X<sub>0</sub>(p) is hyperelliptic (excepting the anomalous
+case p = 37) we use a new method, developed by Michael Harrison,
+which lifts a <I>pair</I> of modular parameters corresponding to
+the x and y coordinates in a simple Weierstrass model of X<sub>0</sub>(p).
+<P>
+The deformation method uses code designed and implemented by
+Hendrik Hubrechts. It is based on ideas of Dwork, first used in the
+design of explicit computational algorithms by Alan Lauder, and works by
+computing the deformation over a family of curves of the Frobenius action on
+rigid cohomology by solving a certain differential equation p-adically.
+Details can be found in <A  HREF = "text1436.htm#bib_HHdef07">[Hub07]</A>. The method is used for E over
+F<sub>p<sup>n</sup></sub> with p &lt; 1000 for which the canonical lift method is not used
+and for n greater than a smallish bound that increases slowly with p.
+For such p and smaller n, either enumeration or small characteristic
+SEA is used.
+<P>
+To use Schoof--Elkies--Atkin in small characteristic (with Lercier's
+improvements) instead of canonical lift or deformation, set <TT>UseSEA</TT>
+to <TT>true</TT>.
+<P>
+The parameter <TT>MaxSmooth</TT> can be used to specify a limit on the
+number of small primes that divide the group order.
+That is, we will consider the group order to be "smooth" if it is
+divisible by the product of small primes and this product is larger
+than the value of <TT>MaxSmooth</TT>.  Then the possible values of
+<TT>AbortLevel</TT> have the following meanings:
+<DL COMPACT class='compact'>
+<DT></DT><DD>0 : Abort if the curve has smooth order.
+<DT></DT><DD>1 : Abort if both the curve and its twist have smooth order.
+<DT></DT><DD>2 : Abort if either the curve or its twist have smooth order.
+<P>
+<P>
+<P>
+</DL>
+If the early abort is triggered then the returned group order is 0.
+<P>
+One common use of these parameters is when searching for a curve with
+prime order.  Setting <TT>MaxSmooth := 1</TT> will cause the early
+termination of the algorithm if a small factor of the order is found.
+If, however, the algorithm did not abort then the group order is not
+necessarily prime --- this just means that no small prime dividing the
+order was encountered during the computation.
+<P>
+Note that the canonical lift methods give no intermediate data on the
+order of E, so <TT>MaxSmooth</TT> and <TT>AbortLevel</TT> have no effect
+when these methods are used.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16288">Example <TT>CrvEllFldFin_SEA (H127E1)</TT></A></H3>
+The first examples in characteristic 2 illustrate the increased speed
+when we work with fields that have GNBs available:
+<P>
+<P>
+<PRE>
+&gt; //example with no Gaussian Normal Basis (GNB)
+&gt; K&lt;w&gt; := FiniteField(2, 160); // finite field of size 2^160
+&gt; f&lt;x&gt; := MinimalPolynomial(w); f;
+x^160 + x^5 + x^3 + x^2 + 1
+&gt; E := EllipticCurve([K| 1, 0, 0, 0, w]);
+&gt; time #E;
+1461501637330902918203686141511652467686942715904
+Time: 0.050
+&gt; //example with a GNB of Type 1
+&gt; HasGNB(pAdicRing(2, 1), 162, 1);
+true
+&gt; K&lt;w&gt; := FiniteField(2, 162); // finite field of size 2^162
+&gt; f&lt;x&gt; := MinimalPolynomial(w); f;
+x^162 + x^7 + x^6 + x^5 + x^2 + x + 1
+&gt; E := EllipticCurve([K| 1, 0, 0, 0, w]);
+&gt; time #E;
+5846006549323611672814742626685174784085558341632
+Time: 0.010
+&gt; //example with a GNB of Type 2
+&gt; K&lt;w&gt; := FiniteField(2, 173); // finite field of size 2^173
+&gt; f&lt;x&gt; := MinimalPolynomial(w); f;
+x^173 + x^8 + x^5 + x^2 + 1
+&gt; E := EllipticCurve([K| 1, 0, 0, 0, w]);
+&gt; time #E;
+11972621413014756705924586057649971923911742202056704
+Time: 0.030
+</PRE>
+and here is an example in characteristic 3 (with type 1 GNB)
+<P>
+<P>
+<PRE>
+&gt; F := FiniteField(3, 100);
+&gt; j := Random(F);
+&gt; E := EllipticCurveWithjInvariant(j);
+&gt; time #E;
+515377520732011331036461505619702343613256090042
+Time: 0.010
+</PRE>
+Finally (for small characteristic), a case with p = 37
+where the deformation method is used.
+<P>
+<P>
+<PRE>
+&gt; F := FiniteField(37, 30);
+&gt; j := Random(F);
+&gt; E := EllipticCurveWithjInvariant(j);
+&gt; time #E;
+111186413610993811950186296693286649955782417767
+Time: 0.700
+</PRE>
+Here we can see the early abort feature in action:
+<P>
+<P>
+<PRE>
+&gt; p := NextPrime(10^9);
+&gt; p;
+1000000007
+&gt; K := GF(p);
+&gt; E := EllipticCurve([K | -1, 1]);
+&gt; time SEA(E : MaxSmooth := 1);
+0
+Time: 0.010
+&gt; time #E;
+1000009476
+Time: 0.070
+</PRE>
+For curves this small the amount of time saved by an early abort is
+fairly small, but for curves over large fields the savings can be
+quite significant.  As mentioned above, even when SEA does not abort
+there is no guarantee that the curve has prime order:
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([K | 0, 1]);
+&gt; time SEA(E : MaxSmooth := 1);
+1000000008
+&gt; IsSupersingular(E);
+true
+&gt; E := EllipticCurve([K | -30, 1]);
+&gt; time SEA(E : MaxSmooth := 1);
+1000035283
+&gt; Factorization($1);
+[ &lt;13, 1&gt;, &lt;709, 1&gt;, &lt;108499, 1&gt; ]
+</PRE>
+In the first case the curve was supersingular and so the order was
+easily computed directly; thus no early abort was attempted.  The
+latter case shows that small primes may not be looked at even when
+the curve is ordinary.
+<P>
+Next we find a curve with prime order (see also <A  HREF = "text1439.htm#ECDom">CryptographicCurve</A>):
+<P>
+<P>
+<PRE>
+&gt; for k in [1..p] do
+&gt;   E := EllipticCurve([K | k, 1]);
+&gt;   n := SEA(E : MaxSmooth := 1);
+&gt;   if IsPrime(n) then
+&gt;     printf "Found curve of prime order %o for k = %o\n", n, k;
+&gt;     break;
+&gt;   end if;
+&gt; end for;
+Found curve of prime order 999998501 for k = 29
+&gt; E;
+Elliptic Curve defined by y^2 = x^3 + 29*x + 1 over GF(1000000007)
+&gt; #E;
+999998501
+</PRE>
+<HR>
+<H5><A NAME = "16289">SetVerbose("SEA", v) : MonStgElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+This procedure changes the verbose printing level for the SEA algorithm
+which counts the number of points on an elliptic curve.  Currently the
+legal values for v are <TT>false</TT>, <TT>true</TT>, or an integer between 0 and
+5 (inclusive), where <TT>false</TT> is equivalent to 0 and <TT>true</TT> is equivalent
+to 1.  A nonzero value gives information during the course of the
+algorithm, increasing in verbosity for higher values of v.
+<P>
+<P>
+<P>
+<P>
+N.B. The previous name for this verbose flag, <TT>"ECPointCount"</TT> is now
+deprecated and will be removed in a future release.  It should continue to
+function in this release, but its verbose levels are different to those of
+<TT>"SEA"</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "16290">Order(H, r) : SetPtEll, RngIntElt -&gt; RngIntElt</A></H5>
+<H5>Order(E, r) : CrvEll, RngIntElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Returns the order of the elliptic curve
+E over the extension field of K of degree r, where
+K is the base field of E. The order is found by calculating the
+order of E over K and lifting.
+</BLOCKQUOTE>
+<H5><A NAME = "16291">Trace(H): SetPtEll -&gt; RngIntElt</A></H5>
+<H5>Trace(E): CrvEll -&gt; RngIntElt</H5>
+<H5>TraceOfFrobenius(E): CrvEll -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Returns the trace of the Frobenius endomorphism on the elliptic curve
+E, equal to q + 1 - n
+where q is the cardinality of the coefficient field and n is
+the order of the group of rational points of E.
+</BLOCKQUOTE>
+<H5><A NAME = "16292">Trace(H, r): SetPtEll, RngIntElt -&gt; RngIntElt</A></H5>
+<H5>Trace(E, r): CrvEll, RngIntElt -&gt; RngIntElt</H5>
+<H5>TraceOfFrobenius(H, r): SetPtEll, RngIntElt -&gt; RngIntElt</H5>
+<H5>TraceOfFrobenius(E, r): CrvEll, RngIntElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Returns the trace of the r-th power Frobenius endomorphism, where E
+is an elliptic curve over a finite field.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16293">Example <TT>CrvEllFldFin_Order (H127E2)</TT></A></H3>
+The computation of the order of a curve over a finite field invokes
+the SEA algorithm.  This data determines the number of points over
+all finite extensions, and is equivalent to the data for the trace
+of Frobenius.  The values of the trace of Frobenius and group order
+over all extensions are therefore a trivial computation.
+<P>
+<P>
+<PRE>
+&gt; K&lt;w&gt; := GF(2^133);
+&gt; E := EllipticCurve([K| 1, 0, 0, 0, w]);
+&gt; time #E;
+10889035741470030830869428720869868218880
+Time: 8.830
+&gt; FactoredOrder(E);
+[ &lt;2, 9&gt;, &lt;3, 4&gt;, &lt;5, 1&gt;, &lt;29, 1&gt;, &lt;1103, 1&gt;, &lt;3793, 1&gt;, &lt;16855669, 1&gt;,
+  &lt;25678053050475964927, 1&gt; ]
+&gt; time TraceOfFrobenius(E);
+-41441283053285452287
+Time: 0.000
+&gt; time TraceOfFrobenius(E, 3);
+1282596408769540337607822605365889523499049843333311465783809
+Time: 0.000
+</PRE>
+<HR>
+<H3><A NAME = "16294">Example <TT>CrvEllFldFin_Twists (H127E3)</TT></A></H3>
+The following code demonstrates the computation of twists of an
+elliptic curve over a finite field, and the relationship with the
+trace of Frobenius.
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurveFromjInvariant(GF(101^2)!0);
+&gt; Twists(E);
+[
+   Elliptic Curve defined by y^2 = x^3 + 1 over GF(101^2),
+   Elliptic Curve defined by y^2 = x^3 + (61*w + 91) over GF(101^2),
+   Elliptic Curve defined by y^2 = x^3 + (98*w + 16) over GF(101^2),
+   Elliptic Curve defined by y^2 = x^3 + (9*w + 66) over GF(101^2),
+   Elliptic Curve defined by y^2 = x^3 + (59*w + 76) over GF(101^2),
+   Elliptic Curve defined by y^2 = x^3 + (87*w + 81) over GF(101^2)
+]
+&gt; IsSupersingular(E);
+true
+</PRE>
+Since E is supersingular, so are the twists of E.  Hence the traces
+are divisible by the prime:
+<P>
+<P>
+<PRE>
+&gt; [ TraceOfFrobenius(F) : F in Twists(E) ];
+[ -202, -101, 101, 202, 101, -101 ]
+&gt; [ TraceOfFrobenius(F) : F in QuadraticTwists(E) ];
+[ -202, 202 ]
+</PRE>
+We see that the traces come in pairs; the trace of a curve is the
+negative of the trace of its quadratic twist.  This is not just true
+of the supersingular curves:
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurveFromjInvariant(GF(101^2)!12^3);
+&gt; Twists(E);
+[
+   Elliptic Curve defined by y^2 = x^3 + x over GF(101^2),
+   Elliptic Curve defined by y^2 = x^3 + (40*w + 53)*x over GF(101^2),
+   Elliptic Curve defined by y^2 = x^3 + (3*w + 99)*x over GF(101^2),
+   Elliptic Curve defined by y^2 = x^3 + (92*w + 19)*x over GF(101^2)
+]
+&gt; IsSupersingular(E);
+false
+&gt; [ TraceOfFrobenius(F) : F in Twists(E) ];
+[ -198, 40, 198, -40 ]
+&gt; [ TraceOfFrobenius(F) : F in QuadraticTwists(E) ];
+[ -198, 198 ]
+</PRE>
+<HR>
+<H4><A NAME = "16295">Zeta Functions</A></H4>
+
+
+
+<H5><A NAME = "16296">ZetaFunction(E) : CrvEll -&gt; FldFunRatUElt</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E over a finite field, the function returns the zeta
+function of E as a rational function in one variable.
+</BLOCKQUOTE>
+<P>
+Note that each of the function calls <TT>Order(E)</TT>, <TT>Trace(E)</TT>,
+and <TT>ZetaFunction(E)</TT> invoke the same call to the SEA algorithm
+and determine equivalent data.
+<HR>
+<H3><A NAME = "16297">Example <TT>CrvEllFldFin_Invariants to Read (H127E4)</TT></A></H3>
+The zeta function &zeta;<sub>E</sub>(t) of an elliptic curve E over a
+finite field F<sub>q</sub> is a rational function whose logarithmic
+derivative has the power series expansion:
+<P>
+((d log &zeta;<sub>E</sub>(t))/(d log t))
+   = &sum;<sub>n=1</sub><sup>&infin;</sup> |E(F<sub>q<sup>n</sup></sub>)| t<sup>n</sup>
+<P>
+The following example illustrates this property of &zeta;<sub>E</sub>(t).
+<P>
+<P>
+<PRE>
+&gt; p := 11;
+&gt; E := EllipticCurve([GF(p) | 1, 2]);
+&gt; Z := ZetaFunction(E);
+&gt; Q&lt;t&gt; := LaurentSeriesRing(Rationals());
+&gt; t*Derivative(Log(Evaluate(Z, t))) + O(t^7);
+16*t + 128*t^2 + 1264*t^3 + 14848*t^4 + 160976*t^5 + 1769600*t^6 + O(t^7)
+&gt; [ Order(E, n) : n in [1..6] ];
+[ 16, 128, 1264, 14848, 160976, 1769600 ]
+</PRE>
+<HR>
+<H4><A NAME = "16298">Cryptographic Elliptic Curve Domains</A></H4>
+
+<P>
+<P>
+<P>
+This section describes functions for generating/validating good cryptographic
+Elliptic Curve Domains.  The basic data of such a domain is an elliptic curve
+E over a finite field together with a point P on E such that the order
+of P is a large prime and the pair (E, P) satisfies the standard security
+conditions for being resistant to MOV and Anomalous attacks (see <A  HREF = "text1436.htm#bib_techrep_CORR">[JM00]</A>).
+
+
+<H5><A NAME = "16299"></A><A NAME = "ECDom">CryptographicCurve</A>(F) : FldFin -&gt; CrvEll, PtEll, RngIntElt, RngIntElt</H5>
+<H5>ValidateCryptographicCurve(E, P, ordP, h) : CrvEll, PtEll, RngIntElt, RngIntElt -&gt; BoolElt</H5>
+
+<PRE>    OrderBound: RngIntElt               Default: 2^{160}</PRE>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    UseSEA: BoolElt                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a finite field F, the first function finds an Elliptic Curve
+Domain over F; it generates random elliptic curves over F until a
+suitable one is found.
+For each generated curve E, the order #E is calculated and a check
+is made as to whether sieving #E by small primes leaves a strong pseudoprime
+p&ge;max(OrderBound, 4&#8730;(#F)).
+If so, the security conditions (which only depend on the order of P) are
+checked for p. Finally, if <TT>Proof</TT> is <TT>true</TT>, p is proven to be
+prime. If all of the above conditions hold true then a random point P on
+E of order p is found and E, P, p, #E/p are returned.
+<P>
+If the Schoof--Elkies--Atkins method is used for computing #E then the
+early abort mechanism (see <A  HREF = "text1439.htm#SEAf">SEA</A>) can help to shortcut the process
+when <TT>OrderBound</TT> is close to #F. However, when they apply, it is
+generally still quicker overall to use the much faster p-adic
+point-counting methods for large fields.
+To force the use of the SEA method
+for point-counting set <TT>UseSEA</TT> to <TT>true</TT>. This is not recommended!
+<P>
+Given data of the form returned by the first function as input, the second
+function verifies that it is valid data for a secure EC Domain with ordP
+satisfying the above inequality for p.
+If <TT>Proof</TT> is <TT>true</TT> (<I>resp.</I> <TT>false</TT>), ordP is proven
+to be prime (<I>resp.</I> subjected to a strong pseudoprimality test).
+<P>
+<TT>NB:</TT> For the first function, it is required that
+#F&ge;OrderBound (or 2 * OrderBound if F has
+characteristic 2 when all ordinary elliptic curves have even order).
+</BLOCKQUOTE>
+<H5><A NAME = "16300">SetVerbose("ECDom", v) : MonStgElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Set the verbose printing level for progress output when running the above
+functions. Currently the legal values for v are <TT>true</TT>, <TT>false</TT>, 0, 1,
+and 2 (<TT>false</TT> is the same as 0, and <TT>true</TT> is the same as 1).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16301">Example <TT>CrvEllFldFin_CryptographicCurve (H127E5)</TT></A></H3>
+<P>
+For a bit of extra speed, we look for curves over F = GF(2<sup>196</sup>)
+where a Type 1 GNB exists for p-adic point-counting (see <A  HREF = "text1439.htm#SEAf">SEA</A>).
+We begin by looking for a curve over F with a point whose order is
+greater than the default <TT>OrderBound</TT>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; SetVerbose("ECDom", 1);
+&gt; F := FiniteField(2, 196);
+&gt; E,P,ord,h := CryptographicCurve(F);
+Finished! Tried 2 curves.
+Total time: 1.721
+&gt; ord; h;
+12554203470773361527671578846370731873587186564992869565421
+8
+</PRE>
+Now we search for a curve whose order is twice a prime (the best we can do
+in characteristic 2!). This can be accomplished by setting <TT>OrderBound</TT>
+to half the field size.
+<P>
+<P>
+<PRE>
+&gt; E,P,ord,h := CryptographicCurve(F : OrderBound := 2^195);
+Finished! Tried 102 curves.
+Total time: 22.049
+&gt; ord; h;
+50216813883093446110686315385797359941852852162929185668319
+2
+&gt; ValidateCryptographicCurve(E, P, ord, h);
+Verifying primality of the order of P...
+true
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1440.htm">[Next]</A><A  HREF = "text1438.htm">[Prev]</A> <A  HREF = "text1440.htm">[Right]</A> <A  HREF = "text1438.htm">[Left]</A> <A  HREF = "text1437.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

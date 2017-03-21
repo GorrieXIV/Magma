@@ -1,0 +1,356 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Creation of a Group</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text709.htm">[Next]</A><A  HREF = "text707.htm">[Prev]</A> <A  HREF = "text709.htm">[Right]</A> <A  HREF = "text707.htm">[Left]</A> <A  HREF = "text706.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "7981">Creation of a Group</A></H3>
+
+<P>
+<P>
+A user can create a <TT>GrpPC</TT> representation of a finite
+soluble group in a variety of ways.  There are several built-in
+construction functions for creating standard examples such as
+cyclic or dihedral groups.  For greater flexibility, it is
+possible to define a group directly from a power-commutator
+presentation. One can
+also build new groups out of old groups using standard
+constructions such as direct product.  Finally, there are several
+conversion functions which will automatically compute a
+pc-presentation for an existing soluble group in some other category
+(such as permutation group or matrix group).  We will start with
+the first two styles of construction and describe the remaining two in
+later sections.
+<P>
+In each case, regardless of how the group was originally defined, Magma
+will store the group internally as a pc-presentation and will display
+the pc-presentation whenever the group is printed.  Normally when
+printing a pc-presentation, trivial conjugate relations are omitted.  
+In the case of a p-group, then trivial power relations (those indicating
+that a generator has order p) are also omitted.  The one exception to
+this policy is in the case of elementary abelian p-groups (which would
+have no relations displayed under the above policies).  In the elementary
+abelian case, Magma will display the power relations, even though they
+are trivial.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text708.htm#7982">Construction Functions</A>
+<LI> <A  HREF = "text708.htm#7988">Definition by Presentation</A>
+<LI> <A  HREF = "text708.htm#7992">Possibly Inconsistent Presentations</A>
+</UL>
+<H4><A NAME = "7982">Construction Functions</A></H4>
+
+<P>
+<P>
+The simplest method of producing a pc-presentation for a group is
+to use one of the built-in construction functions.  By specifying
+the category <TT>GrpPC</TT> as the first parameter of each
+function, we produce the desired representation.
+<P>
+It is also possible to obtain a pc-presentation for many small
+soluble groups by using the function <A  HREF = "text744.htm#GrpData:SmallGroup">SmallGroup</A> described
+in Chapter <A  HREF = "text742.htm#8510">DATABASES OF GROUPS</A>.
+
+
+<H5><A NAME = "7983">CyclicGroup(GrpPC, n) : Cat, RngIntElt -&gt; GrpPC</A></H5>
+<BLOCKQUOTE>
+The cyclic group of order n as a pc-group.
+</BLOCKQUOTE>
+<H5><A NAME = "7984">AbelianGroup(GrpPC, Q) : Cat, [RngIntElt] -&gt; GrpPC</A></H5>
+<BLOCKQUOTE>
+Construct the abelian group defined by the sequence
+Q = [n<sub>1</sub>, ..., n<sub>r</sub>] of positive integers as a pc-group. The
+function returns the abelian group which is the direct product of
+the
+cyclic groups C<sub>n<sub>1</sub></sub> x C<sub>n<sub>2</sub></sub> x ... x C<sub>n<sub>r</sub></sub>.
+</BLOCKQUOTE>
+<H5><A NAME = "7985">DihedralGroup(GrpPC, n) : Cat, RngIntElt -&gt; GrpPC</A></H5>
+<BLOCKQUOTE>
+The dihedral group of order 2 * n as a pc-group.
+</BLOCKQUOTE>
+<H5><A NAME = "7986">ExtraSpecialGroup(GrpPC, p, n : parameters) : Cat, RngIntElt, RngIntElt -&gt; GrpPC</A></H5>
+<BLOCKQUOTE>
+Given a small prime p and a small positive integer n, construct an
+extra-special group G of order p<sup>2n + 1</sup> in the category <TT>GrpPC</TT>.
+The isomorphism type of G may be selected using the parameter <TT>Type</TT>.
+<P>
+<P>
+<PRE>
+     Type: MonStgElt                     Default: "+"
+</PRE>
+Possible values for this parameter are "+" (default) and "-".
+<P>
+<P>
+If <TT>Type</TT> is set to "+", the function returns, for p = 2, the central
+product of n copies of the dihedral group of order 8, and for p &gt; 2
+it returns the unique extra-special group of order p<sup>2n + 1</sup> and exponent p.
+<P>
+<P>
+If <TT>Type</TT> is set to "-", the function returns for p = 2 the central
+product of a quaternion group of order 8 and n - 1 copies of the dihedral
+group of order 8, and for p &gt; 2 it returns the unique extra-special group
+of order p<sup>2n + 1</sup> and exponent p<sup>2</sup>. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7987">Example <TT>GrpPC_Standard (H68E1)</TT></A></H3>
+A pc-representation for the cyclic group C<sub>12</sub> can be computed
+as follows.
+<P>
+<P>
+<PRE>
+&gt; G := CyclicGroup(GrpPC, 12);
+</PRE>
+We can then check various properties of G.
+<P>
+<P>
+<PRE>
+&gt; Order(G);
+12
+&gt; IsAbelian(G);
+true
+&gt; IsSimple(G);
+false
+</PRE>
+If we simply print G, we will see the presentation which
+Magma has generated for this group.
+<P>
+<P>
+<PRE>
+&gt; G;
+GrpPC : G of order 12 = 2^2 * 3
+PC-Relations:
+    G.1^2 = G.2,
+    G.2^2 = G.3,
+    G.3^3 = Id(G)
+</PRE>
+Or, we could build a slightly different group.
+<P>
+<P>
+<PRE>
+&gt; H := AbelianGroup(GrpPC, [2,2,3]);
+&gt; Order(H);
+12
+&gt; IsCyclic(H);
+false
+</PRE>
+<HR>
+<H4><A NAME = "7988">Definition by Presentation</A></H4>
+
+<P>
+<P>
+While the standard construction functions are convenient, most groups
+cannot be defined in that way.  Complete flexibility in defining
+a soluble group can be obtained by directly specifying the group's
+pc-presentation.
+<P>
+One uses a power-conjugate presentation to define a soluble group
+by means of the <TT>PolycyclicGroup</TT> constructor, or the <TT>quo</TT>
+constructor for finitely presented groups.
+
+
+<H5><A NAME = "7989">PolycyclicGroup&lt; x<sub>1</sub>, ..., x<sub>n</sub> | R : parameters &gt; : List(Identifiers), List(GrpFPRel) -&gt; GrpPC, Map</A></H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    ExponentLimit: RngIntElt            Default: 20</PRE>
+
+<PRE>    Class: MonStgElt                    Default: </PRE>
+<BLOCKQUOTE>
+Construct the soluble group G defined by the power-conjugate presentation
+&lt; x<sub>1</sub>, ..., x<sub>n</sub> | R &gt;.
+<P>
+The construct x<sub>1</sub>, ..., x<sub>n</sub> defines names for the generators of G
+that are local to the constructor, i.e. they are used when writing down
+the relations to the right of the bar. However, no assignment of
+<I>values</I> to these variables is made. If the user wants to refer to
+the generators by these (or other) names, then the <I>generators assignment</I>
+construct must be used on the left hand side of an assignment statement.
+<P>
+<P>
+The construct R denotes a list of pc-relations. Thus, an
+element of R must be one of:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>A <I>power relation</I> a<sub>j</sub><sup>p<sub>j</sub></sup> = w<sub>jj</sub>,  1 &le;j &le;n, where
+w<sub>jj</sub> is 1 or a word in generators a<sub>j + 1</sub>, ..., a<sub>n</sub> for
+j &lt; n, and w<sub>jj</sub> = 1 for j = n, and p<sub>j</sub> a prime.
+<DT>(b)</DT><DD>A <I>conjugate relation</I> a<sub>j</sub><sup>a<sub>i</sub></sup> = w<sub>ij</sub>, 1 &le;i &lt; j &le;n,
+where w<sub>ij</sub> is a word in the generators a<sub>i + 1</sub>, ..., a<sub>n</sub>.
+<DT>(c)</DT><DD>A <I>power</I> a<sub>j</sub><sup>p<sub>j</sub></sup>,  1 &le;j &le;n and p<sub>j</sub> a prime, which is
+treated as the <I>power relation</I> a<sub>j</sub><sup>p<sub>j</sub></sup> = Id(F).
+<DT>(d)</DT><DD>A set of (a) -- (c).
+<DT>(e)</DT><DD>A sequence of (a) -- (c).
+<P>
+<P>
+<P>
+</DL>
+Note the following points:
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>A power relation must be present for each generator
+a<sub>i</sub>, i = 1, ..., n;
+<DT>(ii)</DT><DD>Conjugate relations involving commuting generators
+(i.e. of the form y<sup>x</sup>=y) may be omitted;
+<DT>(iii)</DT><DD>The words w<sub>ij</sub> must be in normal form.
+<P>
+<P>
+<P>
+</DL>
+In addition, one can alternatively specify a power-commutator presentation
+using commutator relations rather than conjugate relations. 
+<DL COMPACT class='compact'>
+<DT>(b')</DT><DD>A <I>commutator relation</I> (a<sub>j</sub>, a<sub>i</sub>) = w<sub>ij</sub>, 1 &le;i &lt; j &le;n,
+where w<sub>ij</sub> is a word in the generators a<sub>i + 1</sub>, ..., a<sub>n</sub>.
+<P>
+</DL>
+However, commutators and conjugates
+cannot be mixed in a single presentation.
+<P>
+A map f from the free group of rank n to G is returned as
+well.
+<P>
+The parameters <TT>Check</TT> and <TT>ExponentLimit</TT> may be used.  
+<TT>Check</TT> indicates whether or not the presentation is checked for
+consistency.  <TT>ExponentLimit</TT> determines the amount of space that
+will be used by the group to speed calculations.  Given <TT>ExponentLimit := e</TT>, 
+the group will precompute and store normal words for
+appropriate products a<sup>i</sup> * b<sup>j</sup> where a and b are generators
+and i and j are in the range 1 to e.
+<P>
+If the construction of an object in the category <TT>GrpPC</TT> fails because
+R is not a valid power-conjugate presentation, an attempt is made to
+construct a group in the category <A  HREF = "text832.htm#GrpGPC"> <TT>GrpGPC</TT></A>.
+This feature can be turned off by
+setting the parameter <TT>Class</TT> to <TT>"GrpPC"</TT>; an invalid power-conjugate
+presentation then causes a runtime error. Since, by default, the constructor 
+always returns a group in the category <TT>GrpPC</TT> if possible, this is the
+only effect of setting the parameter <TT>Class</TT> to <TT>"GrpPC"</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "7990">quo&lt; GrpPC : F | R : parameters &gt; : GrpFP, List(GrpFPRel) -&gt; GrpPC, Map</A></H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    ExponentLimit: RngIntElt            Default: 20</PRE>
+<BLOCKQUOTE>
+Given a free group F of rank n with generating set X, and a collection
+R of pc-relations on X, construct the soluble group G defined by the
+power-conjugate presentation &lt; X | R &gt;.
+<P>
+The construct R denotes a list of pc-relations.
+The syntax and semantics for the relations clause is identical to that
+appearing in the <TT>PolycyclicGroup</TT>-construct.
+<P>
+<P>
+This constructor returns a pc-group because the category <TT>GrpPC</TT> is stated.
+If no category were stated, it would return an fp-group.
+<P>
+The parameters <TT>Check</TT> and <TT>ExponentLimit</TT> may be used as described
+in the <TT>PolycyclicGroup</TT>-construct.
+<P>
+The natural homomorphism, F -&gt; G, is also returned.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7991">Example <TT>GrpPC_PolycyclicGroup (H68E2)</TT></A></H3>
+Consider the group of order 80 defined by the presentation
+<PRE>
+\  &lt; a, b, c, d, e | a^2 = c, b^2, c^2 = e, d^5, e^2, b^a = b*e, c^a = c, c^b = c,
+\       d^a = d^2, d^b = d, d^c = d^4, e^a = e, e^b = e, e^c = e, e^d = e &gt;.
+</PRE>
+Giving the relations in the form of a list, this presentation would be
+specified as follows:
+<P>
+<P>
+<PRE>
+&gt; G&lt;a,b,c,d,e&gt; := PolycyclicGroup&lt;a, b, c, d, e |
+&gt;              a^2 = c, b^2, c^2 = e, d^5, e^2,
+&gt;              b^a = b*e, d^a = d^2, d^c = d^4 &gt;;
+</PRE>
+Starting from a free group and giving the relations in the form of a set of relations, this
+presentation would be specified as follows:
+<P>
+<P>
+<PRE>
+&gt; F&lt;a,b,c,d,e&gt; := FreeGroup(5);
+&gt; rels := { a^2 = c, b^2 = Id(F), c^2 = e, d^5 = Id(F), e^2 = Id(F),
+&gt;      b^a = b*e, d^a = d^2, d^c = d^4 };
+&gt; G&lt;a,b,c,d,e&gt; := quo&lt; GrpPC : F | rels &gt;;
+</PRE>
+Notice that here we have redefined the variables a, ... , e to be the
+pc-generators in G.  Thus, when G is printed, Magma displays the
+following presentation:
+<P>
+<P>
+<PRE>
+&gt; G;
+GrpPC : G of order 80 = 2^4 * 5
+PC-Relations:
+    a^2 = c,
+    b^2 = Id(G),
+    c^2 = e,
+    d^5 = Id(G),
+    e^2 = Id(G),
+    b^a = b * e,
+    d^a = d^2,
+    d^c = d^4
+&gt; Order(G);
+80
+&gt; IsAbelian(G);
+false
+</PRE>
+<HR>
+<H4><A NAME = "7992">Possibly Inconsistent Presentations</A></H4>
+
+<P>
+<P>
+The <TT>PolycyclicGroup</TT> and <TT>quo</TT> constructors accept a parameter 
+<TT>Check</TT> which enables the user to suppress the automatic consistency 
+checking for input presentations.  This is primarily intended to be used 
+when it is certain that the input presentation is consistent, in order to 
+save time.  For instance, the presentation may have been generated from 
+some other reliable program, or even from an earlier Magma session.  
+This parameter should be used with care, since all of the Magma functions 
+assume that every <TT>GrpPC</TT> group is consistent.  The user will 
+encounter numerous bizarre results if an attempt is made to compute with 
+an inconsistent presentation.
+<P>
+On occasion, a user may wish to "try out" a series of pc-presentations, some of
+which may not be consistent.  The <TT>Check</TT> parameter can be used, along
+with the function <TT>IsConsistent</TT>, to test a presentation for consistency.
+
+
+<H5><A NAME = "7993">IsConsistent(G) : GrpPC -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if G has a consistent presentation, <TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7994">Example <TT>GrpPC_IsConsistent (H68E3)</TT></A></H3>
+The following example demonstrates generating a family of presentations, 
+and then checking consistency.  Of course, it is easy to predict the 
+outcome in this simple example.
+<P>
+<P>
+<PRE>
+&gt; F := FreeGroup(2);
+&gt; for p in [n: n in [3..10] | IsPrime(n)] do
+&gt;   r := [F.1^3=Id(F), F.2^p=Id(F), F.2^F.1=F.2^2];
+&gt;   G := quo&lt;GrpPC: F | r: Check:=false&gt;;
+&gt;   if IsConsistent(G) then
+&gt;     print "For p=",p," the group is consistent.";
+&gt;   else
+&gt;     print "For p=",p," the group is inconsistent.";
+&gt;   end if;
+&gt; end for;
+For p= 3  the group is inconsistent.
+For p= 5  the group is inconsistent.
+For p= 7  the group is consistent.
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text709.htm">[Next]</A><A  HREF = "text707.htm">[Prev]</A> <A  HREF = "text709.htm">[Right]</A> <A  HREF = "text707.htm">[Left]</A> <A  HREF = "text706.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

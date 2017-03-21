@@ -1,0 +1,49 @@
+"Source: Text/Commut/Ideal.text";
+"Line: 2125";
+"Date: Tue Jun  7 22:27:15 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Commut/Ideal.text, line: 2125
+// Example: H112E14 ()
+print "Example: H112E14";
+ei := GetEchoInput();
+SetEchoInput(true);
+P<x,y> := PolynomialRing(RationalField(),2);
+// we begin with a very simple example (prime ideal)
+I := Ideal((x - y^2)^2 - x*y^3);
+time Js := Normalisation(I); // function field method
+#Js;
+assert $1 eq 1;
+N := Js[1][1];
+N<[a]> := N;
+N;
+// Now try the basic function field method
+time Js := Normalisation(I: FFMin:=false);
+//get the same result here either way
+N := Js[1][1];
+N<[a]> := N;
+N;
+time Js := Normalisation(I:UseFF:=false); // try the general method
+J := Js[1][1];
+Groebner(J);
+J;
+// try the general method with UseMax (which applies here)
+time Js := Normalisation(I:UseFF:=false,UseMax:=true); 
+J := Js[1][1];
+Groebner(J);
+J;
+// now try a harder case - a singular affine form of modular curve X1(11)
+I := ideal<P | (x-y)*x*(y+x^2)^3-y^3*(x^3+x*y-y^2)>;
+time Js := Normalisation(I: FFMin := false);
+#Js;
+assert $1 eq 1;
+J := Js[1][1];
+Groebner(J);
+J;
+time Js := Normalisation(I);
+J := Js[1][1];
+Groebner(J);
+J;
+// Minimised result is a cubic equation in K[x,y] - as good as we could get!
+// This example takes MUCH longer with the general method - even setting
+// UseMax := true.
+SetEchoInput(ei);

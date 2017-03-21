@@ -1,0 +1,3 @@
+174,1
+S,EllipticCurveSearch,Search for elliptic curves with conductor(s) matching the first argument. This is a search routine only: it does not necessarily return all such curves! 'Effort' controls the length of the search (running time is roughly linear in this),1,0,1,82,0,303,2,0,0,0,0,0,0,0,148,,0,0,82,,82,-38,-38,-38,-38,-38
+S,EllipticCurveSearch,Search for elliptic curves with conductor(s) matching the first argument. This is a search routine only: it does not necessarily return all such curves! 'Effort' controls the length of the search (running time is roughly linear in this),0,2,0,0,0,0,0,0,0,148,,0,0,-52,,82,-38,-38,-38,-38,-38

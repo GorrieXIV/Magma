@@ -1,0 +1,76 @@
+/////////////////////////////////////////////////////////////////////////
+// equivalence
+// $Revision: 42149 $
+// $Date: 2013-02-20 01:04:53 +1100 (Wed, 20 Feb 2013) $
+// $LastChangedBy: kasprzyk $
+/////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////
+// Specific examples
+/////////////////////////////////////////////////////////////////////////
+"------\nPolytope Equivalence: Specific examples\n";
+
+P:=Polytope([[1/3]]);
+Q:=Polytope([[-1/3]]);
+bool,phi,u:=IsEquivalent(P,Q);
+assert bool and Image(phi,P) + u eq Q;
+
+P:=Polytope([[1/2,0]]);
+Q:=Polytope([[0,1/2]]);
+bool,phi,u:=IsEquivalent(P,Q);
+assert bool and Image(phi,P) + u eq Q;
+
+/////////////////////////////////////////////////////////////////////////
+// Randomly generated examples
+/////////////////////////////////////////////////////////////////////////
+n:=100;
+printf "------\nPolytope Equivalence: %o random examples\n",n;
+
+procedure report_error(P,Q)
+    printf "-----------------------------------------------------------\n\n";
+    printf "ERROR! Equivalence test failed for the following polytopes:\n\n";
+    printf "P := Polytope(%o);\n",[Eltseq(v) : v in Vertices(P)];
+    printf "Q := Polytope(%o);\n",[Eltseq(v) : v in Vertices(Q)];
+end procedure;
+
+function random_basis(d,k)
+    success:=false;
+    while not success do
+        M:=Matrix(d,d,[Random(-k,k) : i in [1..d^2]]);
+        success:=Abs(Determinant(M)) eq 1;
+    end while;
+    return M;
+end function;
+
+function random_point(L,k)
+    return L ! [Random(-k,k) : i in [1..Dimension(L)]];
+end function;
+
+function random_equivalent(P,k)
+    B:=random_basis(Dimension(Ambient(P)),k);
+    u:=random_point(Ambient(P),k);
+    return P * B + u;
+end function;
+
+t:=Cputime();
+for i in [1..n] do
+    d:=Random(2,6);
+    P:=RandomPolytope(d,5,3) / Random(1,3);
+    Q:=random_equivalent(P,4);
+    bool,phi,trans:=IsEquivalent(P,Q);
+    if not bool or Image(phi,P) + trans ne Q then
+        report_error(P,Q);        
+        assert false;
+    else
+    end if;
+end for;
+t:=Cputime(t);
+printf "Avrg Time: %os\n",t / n;
+
+/////////////////////////////////////////////////////////////////////////
+// Finally, clear the caches
+/////////////////////////////////////////////////////////////////////////
+"------\nClearing caches\n";
+
+CacheClearToricVariety();
+CacheClearToricLattice();

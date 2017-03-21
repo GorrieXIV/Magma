@@ -1,0 +1,703 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Matrix Group Actions</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text664.htm">[Next]</A><A  HREF = "text662.htm">[Prev]</A> <A  HREF = "text664.htm">[Right]</A> <A  HREF = "text662.htm">[Left]</A> <A  HREF = "text653.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "7602">Matrix Group Actions</A></H3>
+
+<P>
+<P>
+The functions described in this section apply only to finite groups for
+which a base and strong generating set may be constructed.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text663.htm#7603">Orbits and Stabilizers</A>
+<LI> <A  HREF = "text663.htm#7613">Orbit and Stabilizer Functions for Large Groups</A>
+<LI> <A  HREF = "text663.htm#7625">Action on Orbits</A>
+<LI> <A  HREF = "text663.htm#7633">Action on a Coset Space</A>
+<LI> <A  HREF = "text663.htm#7638">Action on the Natural G-Module</A>
+</UL>
+<H4><A NAME = "7603">Orbits and Stabilizers</A></H4>
+
+<P>
+<P>
+Let G be a matrix group and let M be its natural module. Now G has
+an action on the elements and submodules of M. A derived G-set for G 
+consists of the closure under the natural action of G of one of the following:
+<DL COMPACT class='compact'>
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>A set of vectors of M;
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>A set of k element subsets of vectors of M;
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>A set of k element sequences of vectors of M;
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>A set of submodules of M, each of which has fixed dimension k;
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>A cartesian product of G-sets.</DL>
+
+
+<H5><A NAME = "7604">u * g : ModTupRngElt, GrpMatElt -&gt; ModTupRngElt</A></H5>
+<BLOCKQUOTE>
+Given an element g belonging to the  matrix group G with natural 
+module M and an element  u of this module, return the vector u * g.
+</BLOCKQUOTE>
+<H5><A NAME = "7605">y ^ g : Elt, GrpMatElt -&gt; Elt</A></H5>
+<BLOCKQUOTE>
+Given an element g belonging to the  matrix group G with natural 
+module M and an object y which is an element of some derived 
+G-set of M, find the image of y under g.
+</BLOCKQUOTE>
+<H5><A NAME = "7606">y ^ G : Elt, GrpMat -&gt; SetEnum</A></H5>
+<H5>Orbit(G, y) : GrpMat, Elt -&gt; SetEnum</H5>
+<BLOCKQUOTE>
+Given a matrix group G with natural module M and an object y 
+which is either a vector of M, a submodule of M, or a tuple
+whose components are either vectors or submodules, find the orbit of 
+y under G.
+</BLOCKQUOTE>
+<H5><A NAME = "7607">OrbitBounded(G, y, b) : GrpMat, Elt, RngIntElt -&gt; BoolElt, SetEnum</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G with natural module M and an object y 
+which is either a vector of M, a submodule of M, or a tuple
+whose components are either vectors or submodules, return <TT>true</TT> if
+the orbit of y under G has length less than or equal to b.
+Otherwise the function returns <TT>false</TT>. If it returns <TT>true</TT>, then the
+orbit of y is returned as the second value.
+</BLOCKQUOTE>
+<H5><A NAME = "7608">Orbits(G) : GrpMat -&gt; [ SetIndx ]</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G with natural R-module M, construct the orbits 
+of G on the vectors of M. The orbits are returned as a sequence 
+of sets.
+</BLOCKQUOTE>
+<H5><A NAME = "7609">LineOrbits(G) : GrpMat -&gt; [ SetIndx ]</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G with natural R-module M, construct the orbits 
+of G on the rank-1 submodules of M. The orbits are returned as a 
+sequence of sets.
+</BLOCKQUOTE>
+<H5><A NAME = "7610">OrbitClosure(G, S) : GrpMat, { Elt } -&gt; GSet</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G with natural module M and a set S
+of vectors or subspaces of M, return the union of orbits of 
+the elements of S under the natural action of G on M.
+</BLOCKQUOTE>
+<H5><A NAME = "7611">Stabilizer(G, y) : GrpMat, Elt -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G with natural module M and an object y 
+which is either a vector of M, a submodule of M, or a tuple
+whose components are either vectors or submodules, determine the 
+stabilizer of y in G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7612">Example <TT>GrpMatGen_Orbits (H64E19)</TT></A></H3>
+We continue with the group J2A2 introduced above.
+<P>
+<P>
+<P>
+<PRE>
+&gt; V := RSpace(G);
+&gt; u := V![1,0,0,0,0,0];
+&gt; U := sub&lt; V | u &gt;;
+&gt; x := &lt; u, U &gt;;
+&gt; W := sub&lt; V | u, u*G.1 &gt;;
+&gt; u^G.1;
+(w^6 w^3 w^2   0   0   0)
+&gt; U^G.1;
+Vector space of degree 6, dimension 1 over GF(3, 2)
+Echelonized basis:
+(  1 w^5   2   0   0   0)
+&gt; W^G.1;
+Vector space of degree 6, dimension 2 over GF(3, 2)
+Echelonized basis:
+(  1 w^5   0   0   0   0)
+(  0   0   1   0   0   0)
+&gt; x^G.1;
+&lt;(w^6 w^3 w^2   0   0   0), Vector space of degree 6, 
+dimension 1 over GF(3, 2)
+Echelonized basis:
+(  1 w^5   2   0   0   0)&gt;
+&gt; H := sub&lt; G | G.1, G.2 &gt;;
+&gt; #Orbit(H, u);
+252
+&gt; #Orbit(H, U);
+63
+&gt; #Orbit(G, U);
+3150
+&gt; Stabilizer(G, U);
+MatrixGroup(6, GF(3^2)) of order 384 = 2^7 * 3
+Generators:
+[  2   0   0   0   0   0]
+[w^3   w   w   0   2 w^2]
+[w^5 w^7 w^7   0   1 w^2]
+[  0   0   1   2   1   0]
+[w^7 w^5   0   0   0 w^6]
+[  w w^3   0   0   0 w^6]
+
+
+[w^2   0   0   0   0   0]
+[w^5 w^5 w^5   0   w   0]
+[w^7 w^3 w^3   0   0 w^7]
+[w^2 w^3   w w^6   w w^3]
+[w^3   1 w^6   0   w w^7]
+[  w w^6   2   0   w w^7]
+
+
+[w^6   0   0   0   0   0]
+[  0   2   0   0   0   0]
+[  0   0 w^6   0   0   0]
+[w^2 w^7 w^6 w^2   0   0]
+[  w   0   w   0   2   0]
+[w^6 w^7 w^2   0   0 w^2]
+
+
+[  2   0   0   0   0   0]
+[  0   2   0   0   0   0]
+[  0   0   2   0   0   0]
+[  0   0   0   2   0   0]
+[  0   0   0   0   2   0]
+[  0   0   0   0   0   2]
+&gt; #Orbit(H, x);
+252
+&gt; #Orbit(H, W);
+28
+</PRE>
+<HR>
+<H4><A NAME = "7613">Orbit and Stabilizer Functions for Large Groups</A></H4>
+
+<P>
+<P>
+In this section we describe a number of constructions for orbits and
+stabilizers which in certain circumstances may be applicable to much
+larger groups than the functions described above.
+
+
+<P>
+<H5><A NAME = "7614">OrbitsOfSpaces(G, k) : GrpMat, RngIntElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Determine representatives and lengths for the orbits of all k-dimensional
+subspaces of the natural vector space under action of a matrix group 
+defined over a prime field; return a sequence of tuples each containing 
+an orbit length and representative. This function is very space-efficient
+and hence has a significantly larger range than the general-purpose 
+<TT>Orbits</TT>; however, only representatives and lengths are stored.
+Theoretical details of the algorithm used may be found in O'Brien 
+<A  HREF = "text652.htm#bib_obrien-pgroup">[O'B90]</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "7615">NumberOfFixedSpaces(x, s) : GrpMatElt, RngIntElt -&gt;  RngIntElt</A></H5>
+<H5>NumberOfFixedSpaces(x, s) : AlgMatElt, RngIntElt -&gt;  RngIntElt</H5>
+<BLOCKQUOTE>
+Return number of subspaces of dimension s fixed by matrix x.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7616">Example <TT>GrpMatGen_OrbitsOfSpaces (H64E20)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; G := GL (4, 5);
+&gt; H := ExteriorSquare (G);
+&gt; H;
+MatrixGroup(6, GF(5))
+Generators:
+    [2 0 0 0 0 0]
+    [0 2 0 0 0 0]
+    [0 0 1 0 0 0]
+    [0 0 0 2 0 0]
+    [0 0 0 0 1 0]
+    [0 0 0 0 0 1]
+
+
+    [0 0 0 1 0 0]
+    [1 0 0 0 1 0]
+    [1 0 0 0 0 0]
+    [0 1 0 0 0 1]
+    [0 1 0 0 0 0]
+    [0 0 1 0 0 0]
+&gt; O := OrbitsOfSpaces (H, 2);
+</PRE>
+We see that there are four orbits:
+<P>
+<P>
+<PRE>
+&gt; O;
+[
+    &lt;
+        4836,
+
+        Vector space of degree 6, dimension 2 over GF(5)
+        Generators:
+        (1 0 0 0 0 0)
+        (0 1 0 0 0 0)
+        Echelonized basis:
+        (1 0 0 0 0 0)
+        (0 1 0 0 0 0)
+    &gt;,
+
+    &lt;
+        96720,
+
+        Vector space of degree 6, dimension 2 over GF(5)
+        Generators:
+        (1 0 1 1 0 0)
+        (0 1 0 0 0 0)
+        Echelonized basis:
+        (1 0 1 1 0 0)
+        (0 1 0 0 0 0)
+    &gt;,
+
+    &lt;
+        251875,
+
+        Vector space of degree 6, dimension 2 over GF(5)
+        Generators:
+        (1 0 0 0 1 0)
+        (0 1 0 0 0 0)
+        Echelonized basis:
+        (1 0 0 0 1 0)
+        (0 1 0 0 0 0)
+    &gt;,
+
+    &lt;
+        155000,
+
+        Vector space of degree 6, dimension 2 over GF(5)
+        Generators:
+        (1 0 1 1 1 0)
+        (0 1 1 1 0 0)
+        Echelonized basis:
+        (1 0 1 1 1 0)
+        (0 1 1 1 0 0)
+    &gt;
+]
+</PRE>
+We compute the number of spaces of dimension 2 fixed by H.1 and the number
+of spaces of dimension 3 fixed by H.2.
+<P>
+<P>
+<PRE>
+&gt; NumberOfFixedSpaces(H.1, 2);
+1023
+&gt; NumberOfFixedSpaces(H.2, 3);
+2
+</PRE>
+<HR>
+<H5><A NAME = "7617">EstimateOrbit(G, v: parameters) : GrpMat, ModTupFldElt -&gt; RngIntElt, RngIntElt, RngIntElt</A></H5>
+<H5>EstimateOrbit(G, U: parameters) : GrpMat, ModTupFld -&gt; RngIntElt, RngIntElt, RngIntElt</H5>
+
+<PRE>    MaxSize: RngIntElt                  Default: 10000</PRE>
+
+<PRE>    NumberCoincidences: RngIntElt       Default: 15</PRE>
+<BLOCKQUOTE>
+Estimate the size of the orbit of the vector v or subspace U of 
+natural vector space 
+under the action of matrix group G by constructing at most <TT>MaxSize</TT> 
+random elements of the orbit and counting at most <TT>NumberCoincidences</TT> 
+coincidences. The function returns a lower bound, upper bound, and estimate 
+of size; if insufficient coincidences are found to estimate the orbit size,  
+the function returns 0.  Theoretical details of the algorithm used may be 
+found in Eick, Leedham-Green and O'Brien <A  HREF = "text652.htm#bib_elo-auts">[ELGO02]</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "7618">ApproximateStabiliser(G, A, U: parameters) : GrpMat, GrpMat, ModTupFld -&gt; GrpMat, GrpMat, RngIntElt, RngIntElt, RngIntElt</A></H5>
+
+<PRE>    ImageGenerators: SeqEnum            Default: []</PRE>
+
+<PRE>    MaxSize: RngIntElt                  Default: 10000</PRE>
+
+<PRE>    NumberCoincidences: RngIntElt       Default: 15</PRE>
+
+<PRE>    OrderCheck: BoolElt                 Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+A is image of representation of G and A acts on U, a subspace or
+vector. Approximate the stabiliser of U under A. 
+We assume either a 1 - 1 correspondence between generators of G and those
+of A, or between generators of G and those elements of A
+supplied as <TT>ImageGenerators</TT>.
+Elements of G whose images in A fix U are obtained by constructing at 
+most <TT>MaxSize</TT> elements of the orbit of U under A or until 
+we find <TT>Numbercoincidences</TT>
+repetitions in this orbit; if <TT>OrderCheck</TT> is <TT>true</TT>, 
+report the order of the subgroup S of A which 
+is found. Return preimage of S in G and S,
+together with a lower bound, upper bound, 
+and estimate of the size of orbit of U. 
+If insufficient coincidences are found to estimate the orbit size,  
+the function returns these last values as 0.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7619">Example <TT>GrpMatGen_OrbitsOfSpaces (H64E21)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; G := GL (4, 5);
+&gt; A := ExteriorSquare (G);
+&gt; V := VectorSpace (GF (5), 6);
+&gt; U := sub &lt; V | [Random (V): i in [1..2]]&gt;;
+&gt; U;
+Vector space of degree 6, dimension 2 over GF(5)
+Generators:
+(4 3 2 1 0 2)
+(3 2 2 4 4 1)
+Echelonized basis:
+(1 0 2 0 2 4)
+(0 1 3 2 4 2)
+&gt; EstimateOrbit (A, U);
+209316 594421 324272
+&gt; H, B, lb, ub, estimate := ApproximateStabiliser (G, A, U);
+&gt; #H, #B; 
+460800 230400
+</PRE>
+<HR>
+<H5><A NAME = "7620">StabiliserOfSpaces(Q) : SeqEnum -&gt; GrpMat, SeqEnum</A></H5>
+<BLOCKQUOTE>
+Determine the subgroup of GL(d, F), for F a finite field, which 
+stabilises the sequence Q of subspaces of the natural vector space.
+The function also returns generators for the largest unipotent subgroup 
+of the stabiliser. 
+For a description of this algorithm, see Schwingel <A  HREF = "text652.htm#bib_schwingel_thesis">[Sch00]</A>;
+this implementation was prepared by Eamonn O'Brien.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7621">Example <TT>GrpMatGen_StabiliserOfSpaces (H64E22)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; V := VectorSpace(GF (3), 4);
+&gt; Spaces := [sub&lt; V | [1,1,0,2]&gt;, sub &lt; V | [ 1, 0, 2, 0 ], [ 0, 1, 0, 0]&gt;];
+&gt; S, P := StabiliserOfSpaces(Spaces);
+&gt; #S;
+5184
+&gt; P;
+[
+    [1 1 0 0]
+    [0 1 0 0]
+    [0 1 1 0]
+    [0 1 0 1],
+
+
+    [2 0 2 0]
+    [0 1 0 0]
+    [1 0 0 0]
+    [1 0 2 1],
+
+
+    [1 0 1 2]
+    [0 1 0 0]
+    [0 0 2 2]
+    [0 0 1 0]
+]
+</PRE>
+Thus, the unipotent subgroup generated by P has order 3<sup>3</sup>.
+<HR>
+<H5><A NAME = "7622">IsUnipotent(G) : GrpMat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+If G is a p-subgroup of 
+GL(d, F), where F is a finite field of characteristic p, 
+then return <TT>true</TT>, else return <TT>false</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "7623">UnipotentStabiliser(G, U: parameters) : GrpMat, ModTupFld -&gt; GrpMat, ModTupFld, GrpMatElt, GrpSLPElt</A></H5>
+<BLOCKQUOTE>
+Given a unipotent subgroup G of GL(d, F), for F a finite field, 
+U a subspace of the natural vector space, determine the stabiliser 
+in G of U.  The function returns the stabiliser in G of U, 
+the <I>canonical</I> element C of the orbit of U under G, 
+an element x of G such that U<sup>x</sup> = C, and an SLP for x 
+as an element of <TT>WordGroup</TT>(G).  This function does <I>not</I> 
+compute the orbit of U under G, but instead constructs the canonical 
+element of the orbit.  Hence it can be used to decide whether or not two 
+subspaces belong to the same orbit.  For a description of this algorithm, 
+see <A  HREF = "text652.htm#bib_schwingel_thesis">[Sch00]</A>; this implementation was prepared by 
+Elliot Costi.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7624">Example <TT>GrpMatGen_UnipotentStabiliser (H64E23)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; V := VectorSpace(GF (3), 4);
+&gt; G := sub&lt; GL (4, 3) | 
+&gt;     [ 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1 ],
+&gt;     [ 2, 0, 2, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 2, 1 ],
+&gt;     [ 1, 0, 1, 2, 0, 1, 0, 0, 0, 0, 2, 2, 0, 0, 1, 0 ] &gt;;
+&gt; U := sub &lt; V | [ 1, 2, 0, 1 ],[ 2, 2, 1, 0 ]&gt;;
+&gt; S, C, x, w := UnipotentStabiliser(G, U);
+&gt; S;
+MatrixGroup(4, GF(3))
+Generators:
+    [2 1 2 0]
+    [0 1 0 0]
+    [1 1 0 0]
+    [1 1 2 1]
+&gt; #S;
+3
+&gt; Index(G, S);
+9
+</PRE>
+So the stabiliser of U has order 3 and U lies in an orbit of size 9.
+We print the canonical element of the orbit of U under G.
+The element x maps U to C and w evaluates to x.
+<P>
+<P>
+<PRE>
+&gt; C;
+Vector space of degree 4, dimension 2 over GF(3)
+Echelonized basis:
+(1 0 0 0)
+(0 1 2 0)
+&gt;  U^x; 
+Vector space of degree 4, dimension 2 over GF(3)
+Echelonized basis:
+(1 0 0 0)
+(0 1 2 0)
+&gt; W, phi := WordGroup (G);
+&gt;  phi (w);
+[1 0 2 1]
+[0 1 0 0]
+[0 0 0 1]
+[0 0 2 2]
+</PRE>
+<HR>
+<H4><A NAME = "7625">Action on Orbits</A></H4>
+
+
+
+<H5><A NAME = "7626">OrbitAction(G, T) : GrpMat, Elt -&gt; Hom(Grp), GrpPerm, GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G with natural module M, and a set T 
+consisting of either (a) elements of M, (b) submodules of M 
+or (c) tuples, form the G-closure Y of T and construct the 
+homomorphism &phi;: G -&gt; L, where the
+permutation group L gives the action of G on the set Y.
+The function returns:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>The natural homomorphism &phi;: G -&gt; L;
+<DT>(b)</DT><DD>The induced group L;
+<DT>(c)</DT><DD>The kernel of the action (a subgroup of G).</DL>
+</BLOCKQUOTE>
+<H5><A NAME = "7627">OrbitActionBounded(G, T, b) : GrpMat, Elt, RngIntElt -&gt; BoolElt, Hom(Grp), GrpPerm, GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G with natural module M, and a set T 
+consisting of either (a) elements of M, (b) submodules of M 
+or (c) tuples, form the G-closure Y of T. If the cardinality of 
+Y does not exceed b, then construct the homomorphism 
+&phi;: G -&gt; L, where the permutation group L 
+gives the action of G on the set Y. In this case the
+function returns:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>The boolean value <TT>true</TT>.
+<DT>(b)</DT><DD>The natural homomorphism &phi;: G -&gt; L;
+<DT>(c)</DT><DD>The induced group L;
+<DT>(d)</DT><DD>The kernel of the action (a subgroup of G).
+If the cardinality of Y exceeds b, simply return <TT>false</TT>.
+(The action of G on Y is not constructed in this case).
+ </DL>
+</BLOCKQUOTE>
+<H5><A NAME = "7628">OrbitImage(G, T) : GrpMat, Set -&gt; GrpPerm</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G with natural module M, and a set T
+consisting of either (a) elements of M, (b) submodules of M
+or (c) tuples, form the G-closure Y of T and return the 
+permutation group L giving the action of G on Y. 
+</BLOCKQUOTE>
+<H5><A NAME = "7629">OrbitImageBounded(G, T, b) : GrpMat, Set, RngIntElt -&gt; BoolElt, GrpPerm</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G with natural module M, and  set T
+consisting of either (a) elements of M, (b) submodules of M
+or (c) tuples, form the G-closure Y of T. If the cardinality 
+of Y does not exceed b,  return <TT>true</TT> together with the permutation 
+group L giving the action of G on Y. If the cardinality of Y 
+does exceed b, the action is not constructed and the single value
+<TT>false</TT> is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "7630">OrbitKernel(G, T) : GrpMat, Set -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G with natural module M, and a set T
+consisting of either (a) elements of M, (b) submodules of M
+or (c) tuples, form the G-closure Y of T and return the 
+the kernel of the action of G on Y.
+</BLOCKQUOTE>
+<H5><A NAME = "7631">OrbitKernelBounded(G, T, b) : GrpMat, Set, RngIntElt -&gt; BoolElt, GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G with natural module M, and set T
+consisting of either (a) elements of M, (b) submodules of M
+or (c) tuples, form the G-closure Y of T. If the cardinality 
+of Y does not exceed b, return the boolean value <TT>true</TT> together
+with the kernel of the action of G on Y. If the cardinality 
+of Y does exceed b, the kernel is not constructed and the 
+single value <TT>false</TT> is returned. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7632">Example <TT>GrpMatGen_Actions (H64E24)</TT></A></H3>
+We look for a small G-set for the group J2A2 (defined above)
+by examining eigenspaces of its generators. Having found a reasonably sized
+set, we then construct a permutation representation for G on this set.
+<P>
+<P>
+<P>
+<PRE>
+&gt; [ Factorization(CharacteristicPolynomial(G.i)) : i in [1..3] ];
+[
+    [
+          &lt;x^3 + w^5*x^2 + w^3*x + 2, 1&gt;,
+          &lt;x^3 + w^7*x^2 + w*x + 2, 1&gt;
+    ],
+    [
+          &lt;x + 2, 6&gt;
+    ],
+    [
+         &lt;x + w^2, 3&gt;,
+         &lt;x + w^6, 3&gt;
+    ]
+]
+&gt; y := Eigenspace(G.2, -2);
+&gt; y;
+Vector space of degree 6, dimension 3 over GF(3, 2)
+Echelonized basis:
+(1 0 0 1 2 1)
+(0 1 0 2 1 2)
+(0 0 1 1 2 1)
+&gt; #Orbit(G, y);
+280
+&gt; P := OrbitImage(G, y);
+&gt; P;
+Permutation group P of degree 280
+&gt; Order(P);
+604800
+&gt; CompositionFactors(P);
+    G
+    |  J2
+    1
+</PRE>
+<P>
+Thus, our group has the simple group J<sub>2</sub> of Janko as a composition 
+factor.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Order(G);
+1209600
+</PRE>
+<P>
+Hence the kernel of this action has order 2.
+<HR>
+<H4><A NAME = "7633">Action on a Coset Space</A></H4>
+
+
+
+<H5><A NAME = "7634">CosetAction(G, H) : GrpMat, GrpMat -&gt; Hom(Grp), GrpPerm, GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a subgroup H of the group G, construct the permutation
+representation of G given by the action of G on the set of (right)
+cosets of H in G. The function returns:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>The natural homomorphism f: G -&gt; L;
+<DT>(b)</DT><DD>The induced permutation group L;
+<DT>(c)</DT><DD>The kernel K of the action (a subgroup of G).</DL>
+</BLOCKQUOTE>
+<H5><A NAME = "7635">CosetImage(G, H) : GrpMat, GrpMat -&gt; GrpPerm</A></H5>
+<BLOCKQUOTE>
+Given a subgroup H of the group G, construct the image L of G
+given by the action of G on the set of (right) cosets of H in G.
+L is returned as a permutation group.
+</BLOCKQUOTE>
+<H5><A NAME = "7636">CosetKernel(G, H) : GrpMat, GrpMat -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a subgroup H of the group G, construct the kernel of the
+action of G on the set of (right) cosets of H in G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7637">Example <TT>GrpMatGen_CosetAction (H64E25)</TT></A></H3>
+We construct G = SL(3, 3), a subgroup H of G, and
+the permutation representation of G given by its action on the cosets
+of H.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := MatrixGroup&lt; 3, GF(3) | [0,2,0, 1,1,0, 0,0,1], [0,1,0, 0,0,1, 1,0,0] &gt;;
+&gt; Order(G);
+5616
+&gt; H := sub&lt; G | G.1^2, G.2 &gt;;
+&gt; Order(H);
+216
+&gt; P := CosetImage(G, H);
+&gt; P;
+Permutation group P of degree 26
+    (1, 2)(3, 4, 6, 5, 7, 9)(8, 11)(10, 13, 15, 20, 18, 17)
+      (12, 16, 21, 14, 19, 24)(23, 26)
+    (2, 3, 5)(4, 6, 8)(7, 10, 14)(9, 12, 17)(11, 15, 20)(13, 18, 23)
+      (16, 22, 21)(19, 25, 24)
+
+</PRE>
+<HR>
+<H4><A NAME = "7638">Action on the Natural G-Module</A></H4>
+
+<P>
+<P>
+A set of functions is provided for working with the action of G on
+the natural G-module M, for a matrix group G defined over a
+finite field.  Many of these functions are similar to those presented
+in the general module chapter.
+
+
+<H5><A NAME = "7639">GModule(G) : GrpMat -&gt; ModGrp</A></H5>
+<BLOCKQUOTE>
+The natural R[G]-module M for the matrix group G.
+</BLOCKQUOTE>
+<H5><A NAME = "7640">IsIrreducible(G) : GrpMat -&gt; BoolElt, ModGrp</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G, return <TT>true</TT> iff G acts irreducibly on 
+its natural module M.  If G acts reducibly on M, a proper submodule
+S of M is also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "7641">SubmoduleAction(G, S) : GrpMat -&gt; Map, GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G and a submodule S of the natural module
+M of G, return the action homomorphism f of G on S, together
+with the image of f.
+</BLOCKQUOTE>
+<H5><A NAME = "7642">SubmoduleImage(G, S) : GrpMat -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G and a submodule S of the natural module
+M of G, return the image of the action homomorphism of G on S.
+</BLOCKQUOTE>
+<H5><A NAME = "7643">QuotientModuleAction(G, S) : GrpMat -&gt; Map, GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G and a submodule S of the natural module
+M of G, return the quotient action homomorphism f of G on S, together
+with the image of f.
+</BLOCKQUOTE>
+<H5><A NAME = "7644">QuotientModuleImage(G, S) : GrpMat -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G and a submodule S of the natural module
+M of G, return the quotient image of the action homomorphism of G on S.
+</BLOCKQUOTE>
+<H5><A NAME = "7645">IsAbsolutelyIrreducible(G) : GrpMat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G, return <TT>true</TT> if and only if G acts absolutely 
+irreducibly on its natural module M.  In addition, if G is absolutely
+irreducible, the function returns the (matrix algebra) generator of the 
+endomorphism algebra E of M (which is always a field), and the dimension 
+of E.
+</BLOCKQUOTE>
+<H5><A NAME = "7646">AbsoluteRepresentation(G) : GrpMat -&gt; GrpMat, Map</A></H5>
+<BLOCKQUOTE>
+Given an irreducible matrix group G, return the isomorphic reduced-degree
+absolute representation A of G, which is over the absolute field of the
+natural module M of G and is absolutely irreducible, together with
+the corresponding isomorphism.
+</BLOCKQUOTE>
+<H5><A NAME = "7647">MinimalField(G) : GrpMat -&gt; FldFin</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field K, return the minimal 
+subfield of K over which G can be realised.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text664.htm">[Next]</A><A  HREF = "text662.htm">[Prev]</A> <A  HREF = "text664.htm">[Right]</A> <A  HREF = "text662.htm">[Left]</A> <A  HREF = "text653.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

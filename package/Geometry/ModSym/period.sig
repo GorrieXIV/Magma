@@ -1,0 +1,8 @@
+174,1
+S,IntegralMapping,"A surjective linear map from the ambient space of M to a vector space, such that the kernel of this map is the same as the kernel of the period mapping. Note that M must be defined over the rational numbers. This map is normalized so that the image of IntegralBasis(CuspidalSubspace(AmbientSpace(M))) is the standard Z-lattice",0,1,0,0,0,0,0,0,0,ModSym,,175,-38,-38,-38,-38,-38
+S,RationalMapping,"A surjective linear map from the ambient space of M to a vector space, such that the kernel of this map is the same as the kernel of the period mapping",0,1,0,0,0,0,0,0,0,ModSym,,175,-38,-38,-38,-38,-38
+S,DualModularSymbol,"The dual modular symbol associated to M, viewed as a map of Hecke modules M_k ----> M_k/Ker(Phi_M), where the quotient is viewed as an abstract *vector space.*",0,1,0,0,0,0,0,0,0,ModSym,,175,-38,-38,-38,-38,-38
+S,ModularSymbolEven,"The ""even modular symbol phi_M^+"", as on page 209 of Mazur, ""On the Arithmetic of Special Values of L-functions.""",0,2,0,0,0,0,0,0,0,148,,0,0,ModSym,,160,-38,-38,-38,-38,-38
+S,ModularSymbolEven,"The ""even modular symbol phi_M^+"", as on page 209 of Mazur, ""On the Arithmetic of Special Values of L-functions.""",0,2,0,0,0,0,0,0,0,267,,0,0,ModSym,,160,-38,-38,-38,-38,-38
+S,ModularSymbolOdd,"The ""odd modular symbol phi_M^-"", as on page 209 of Mazur, ""On the Arithmetic of Special Values of L-functions.""",0,2,0,0,0,0,0,0,0,148,,0,0,ModSym,,160,-38,-38,-38,-38,-38
+S,ModularSymbolOdd,"The ""odd modular symbol phi_M^-"", as on page 209 of Mazur, ""On the Arithmetic of Special Values of L-functions.""",0,2,0,0,0,0,0,0,0,267,,0,0,ModSym,,160,-38,-38,-38,-38,-38

@@ -1,0 +1,46 @@
+// Example: I96c40e3
+print "Example: I96c40e3";
+previous_setting := GetEchoInput();
+SetEchoInput(true);
+send := function(str, noise, decode)
+    C := BCHCode(GF(2), 15, 5);
+    GM := GeneratorMatrix(C);
+    InfSp := InformationSpace(C);
+    wds := Setseq(Set(InfSp));
+    STC := StringToCode;
+    CTS := CodeToString;
+    // from string to sequence of codewords
+    enc := [ wds[STC(str[i])] * GM :
+     i in [1..#str]];
+
+    // introduce noise
+    perturbate := function(v)
+        for i := 1 to Length(C) do
+            if Random(1000) / 1000 le noise then
+                v[i] := v[i] + 1;
+            end if;
+        end for;
+        return v;
+    end function;
+    rec := [ perturbate(v) : v in enc ];
+
+    // apply Decode algorithm if requested
+    if decode then
+        _, corr := Decode(C, rec);
+    else
+        corr := rec;
+    end if;
+
+    // convert non-codewords to the codeword for "X"
+    Xwd := wds[STC("X")] * GM;
+    corrB := [ v in C select v else Xwd : v in corr ];
+    // find index-positions for the codewords,
+    dec := [ Index(wds, InfSp!Coordinates(C, wd)) : wd in corrB ];
+    // convert the (illegal) index-positions
+    // of the unused codewords to the index for "x"
+    xindex := STC("x");
+    decB := [ i le 127 select i else xindex : i in dec ];
+
+    return &cat[ CTS(i) : i in decB ];
+end function;
+SetEchoInput(previous_setting);

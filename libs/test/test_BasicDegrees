@@ -1,0 +1,133 @@
+// The basic degrees of a Chevalley group of Lie type tp and rank n
+// The twisted types are included except for 3D4.
+
+basicDegrees := function(tp,n)
+  eps := [ 1 : i in [1..n]];
+  mult := 1;
+  case tp:
+    when "A":
+      deg := [2..n+1];
+    when "2A":
+      deg := [2..n+1];
+      eps := [ (-1)^i : i in [2..n+1]];
+    when "B","C":
+      deg := [2..2*n by 2];
+    when "2B":
+      error if n ne 2, "rank must be 2";
+      deg := [2,4]; 
+      eps := [1,-1];
+      mult := 2; // over Z[q^(1/2)]
+    when "D":
+      deg := [2..2*(n-1) by 2] cat [n];
+    when "2D":
+      deg := [2..2*(n-1) by 2] cat [n];
+      eps[n] := -1;
+    when "3D":
+      error "not available for type 3D";
+    when "E":
+      if n eq 6 then  
+        deg := [2,5,6,8,9,12];
+      elif n eq 7 then
+        deg := [2,6,8,10,12,14,18];
+      elif n eq 8 then
+        deg := [2,8,12,14,18,20,24,30];
+      else
+        error "rank must be 6, 7 or 8";
+      end if;
+    when "2E":
+      if n eq 6 then  
+        deg := [2,5,6,8,9,12];
+        eps := [1,-1,1,1,-1,1];
+      else
+        error "rank must be 6";
+      end if;
+    when "F":
+      if n eq 4 then
+        deg := [2,6,8,12];
+      else
+        error "rank must be 4";
+      end if;
+    when "2F":
+      if n eq 4 then
+        deg := [2,6,8,12];
+        eps := [1,-1,1,-1];
+        mult := 2; // over Z[q^(1/2)]
+      else
+        error "rank must be 4";
+      end if;
+    when "G":
+      if n eq 2 then
+        deg := [2,6];
+      else
+        error "rank must be 2";
+      end if;
+    when "2G":
+      if n eq 2 then
+        deg := [2,6];
+        eps := [1,-1];
+        mult := 2; // over Z[q^(1/2)]
+      else
+        error "rank must be 2";
+      end if;
+    else
+      error "unknown type " cat tp;
+  end case;
+  return deg, eps, mult;
+end function;
+
+test_deg := procedure(tp,rk)
+  deg1, eps1, mult := basicDegrees(tp,rk);
+  R := RootDatum(tp cat IntegerToString(rk));
+  deg2, eps2 := BasicDegrees(R);
+//  print tp, rk, deg1 eq deg2, eps1 eq eps2;
+  assert deg1 eq deg2 and eps1 eq eps2;
+end procedure;
+
+test_ABCD := procedure()
+  for tp in ["A","B","C","D"] do
+    for rk in [2..8] do
+      test_deg(tp,rk);
+    end for;
+  end for;
+
+  for tprk in [<"E",6>,<"E",7>,<"E",8>,<"F",4>,<"G",2>] do
+    tp := tprk[1];
+    rk := tprk[2];
+    test_deg(tp,rk);
+  end for;
+end procedure;
+
+
+test_2twist := procedure(tp,rk)
+  twtp := "2" cat tp;
+  deg1, eps1, mult := basicDegrees(twtp,rk);
+  name := tp cat IntegerToString(rk);
+// Sergei's code
+  R := TwistedRootDatum(name : Twist := 2);
+  deg2, eps2 := BasicDegrees(R);
+//  print twtp, rk, deg1 eq deg2, eps1 eq eps2;
+// Scott's code
+  S := RootDatum(name : Twist := 2);
+  if name ne "D3" then
+    assert deg1 eq deg2 and eps1 eq eps2;
+    assert R eq S;
+  end if;
+  deg3, eps3 := BasicDegrees(S);
+//  print twtp, rk, deg1 eq deg3, eps1 eq eps3;
+  assert deg1 eq deg3 and eps1 eq eps3;
+end procedure;
+
+test_twisted_deg := procedure()
+  start := 2;
+  for tp in ["A","D"] do
+    for rk in [start..8] do
+      test_2twist(tp,rk);
+    end for;
+    start +:= 1;
+  end for;
+  test_2twist("E",6);
+end procedure;
+
+test_ABCD();
+test_twisted_deg();
+

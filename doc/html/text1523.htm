@@ -1,0 +1,487 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Advanced Examples</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1512.htm">[Next]</A><A  HREF = "text1522.htm">[Prev]</A> <A  HREF = "text1512.htm">[Right]</A> <A  HREF = "text1522.htm">[Left]</A> <A  HREF = "text1513.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "17285">Advanced Examples</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1523.htm#17286">Handmade L-series of an Elliptic Curve</A>
+<LI> <A  HREF = "text1523.htm#17288">Self-made Dedekind Zeta Function</A>
+<LI> <A  HREF = "text1523.htm#17290">Handmade L-series of a hyperelliptic curve</A>
+<LI> <A  HREF = "text1523.htm#17292">Experimental Mathematics for  Small Conductor</A>
+<LI> <A  HREF = "text1523.htm#17294">Tensor Product of L-series Coming from l-adic Representations</A>
+<LI> <A  HREF = "text1523.htm#17296">Non-abelian Twist of an Elliptic Curve</A>
+</UL>
+<H4><A NAME = "17286">Handmade L-series of an Elliptic Curve</A></H4>
+
+
+
+<HR>
+<H3><A NAME = "17287">Example <TT>Lseries_lseries-elliptic-selfmade (H133E39)</TT></A></H3>
+This is an example of how the general <TT>LSeries</TT> function can be
+used to define the L-series for elliptic curves. This is essentially what
+<TT>LSeries(E)</TT> does:
+<P>
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([1,2,3,4,5]);
+&gt; N := Conductor(E);N;
+10351
+&gt; P&lt;x&gt; := PolynomialRing(Integers());
+</PRE>
+<P>
+The easiest way to define the coefficients is to provide the local factors.
+<P>
+<P>
+<P>
+<PRE>
+&gt; cf := func&lt; p,d|1 - TraceOfFrobenius(E,GF(p,1))*x
+&gt;                     +(N mod p ne 0 select p else 0)*x^2 &gt;;
+&gt; L := LSeries(2,[0,1],N,cf : Parent:=E, Sign:=RootNumber(E));
+</PRE>
+Compare this with the built-in function <TT>LSeries(E)</TT>
+<P>
+<P>
+<PRE>
+&gt; Evaluate(L,2);
+0.977431866894500508679039127647
+&gt; Evaluate(LSeries(E),2);
+0.977431866894500508679039127647
+</PRE>
+<HR>
+<H4><A NAME = "17288">Self-made Dedekind Zeta Function</A></H4>
+
+
+
+<HR>
+<H3><A NAME = "17289">Example <TT>Lseries_lseries-dedekind-selfmade (H133E40)</TT></A></H3>
+This is an example of how the general <TT>LSeries</TT> function may be
+used to define the Dedekind zeta function of a number field K.
+This is essentially what the function <TT>LSeries(K)</TT> does:
+<P>
+<P>
+<P>
+<P>
+<PRE>
+&gt; function DedekindZeta(K)
+&gt;   M := MaximalOrder(K);
+&gt;   r1,r2 := Signature(K);
+&gt;   gamma := [0: k in [1..r1+r2]] cat [1: k in [1..r2]];
+&gt;   disc := Abs(Discriminant(M));
+&gt;   P&lt;x&gt; := PolynomialRing(Integers());
+</PRE>
+<P>
+The coefficients are defined by means of local factors; for a prime p
+we take the product of 1 - x<sup>f<sub>k</sub></sup> where the f<sub>i</sub> are the residue degrees of
+primes above p. Note that this local factor has (maximal) degree [K:Q]
+if and only if p is unramified or, equivalently, if and only if p does not 
+divide the discriminant of K which is (up to sign) the conductor of our 
+zeta-function.
+<P>
+<P>
+<P>
+<PRE>
+&gt;   cf := func&lt;p,d|&amp;*[1-x^Degree(k[1]): k in Decomposition(M,p)]&gt;;
+</PRE>
+<P>
+Finally, the Dedekind zeta function has a pole at s=1 and we need its 
+residue (or, rather, the residue of &zeta;<sup> * </sup>(s)) which we compute using 
+the class number formula.
+<P>
+<P>
+<P>
+<PRE>
+&gt;   h := #ClassGroup(M);
+&gt;   reg := Regulator(K);
+&gt;   mu := #TorsionSubgroup(UnitGroup(M));
+&gt;   return LSeries(1, gamma, disc, cf: Parent:=K, Sign:=1, Poles:=[1],
+&gt;     Residues := [-2^(r1+r2)*Pi(RealField())^(r2/2)*reg*h/mu]);
+&gt; end function;
+&gt; Z := DedekindZeta(CyclotomicField(5)); Z;
+L-series of Cyclotomic Field of order 5 and degree 4
+&gt; Evaluate(Z,1);
+Runtime error: L*(s) has a pole at s = 1
+&gt; L := Z/RiemannZeta();
+&gt; Evaluate(L,1);
+0.339837278240523535464278781159
+</PRE>
+<HR>
+<H4><A NAME = "17290">Handmade L-series of a hyperelliptic curve</A></H4>
+
+
+
+<HR>
+<H3><A NAME = "17291">Example <TT>Lseries_lseries-genus2 (H133E41)</TT></A></H3>
+We construct an L-series of a hyperelliptic curve of genus 2.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P&lt;x&gt; := PolynomialRing(Integers());
+&gt; C := HyperellipticCurve([x^5+x^4,x^3+x+1]); C;
+Hyperelliptic Curve defined by y^2 + (x^3 + x + 1)*y = x^5 + x^4
+   over Rational Field
+</PRE>
+<P>
+There is an L-series attached to (H)<sup>1</sup>(C) or, equivalently,
+the (H)<sup>1</sup> of the Jacobian J of C. To define this L-series, 
+we need its local factors which, for primes p of good reduction of C,
+are given by <TT>EulerFactor(J,GF(p,1))</TT>. Let us look at the primes of
+bad reduction:
+<P>
+<P>
+<P>
+<PRE>
+&gt; Abs(Discriminant(C));
+169
+&gt; Factorization(Integers()!$1);
+[ &lt;13, 2&gt; ]
+</PRE>
+<P>
+There is one prime p=13 where the curve has bad reduction. There the fibre
+is a singular curve whose normalization is elliptic.
+<P>
+<P>
+<P>
+<PRE>
+&gt; A&lt;X,Y&gt; := AffineSpace(GF(13,1),2);
+&gt; C13 := Curve(A,Equation(AffinePatch(C,1)));
+&gt; GeometricGenus(C), GeometricGenus(C13);
+2 1
+&gt; SingularPoints(C13);
+{@ (9, 1) @}
+&gt; p := $1[1]; IsNode(p), IsCusp(p);
+false true
+&gt; C13A := Translation(C13,p)(C13);
+&gt; C13B := Blowup(C13A); C13B;
+Curve over GF(13) defined by
+X^3 + 12*X^2*Y + 7*X^2 + 12*X*Y + 12*Y^2 + 3*Y + 1
+&gt; E := EllipticCurve(ProjectiveClosure(C13B));
+</PRE>
+The local factor of C at p=13 is given by the Euler factor of this
+elliptic curve
+<P>
+<P>
+<PRE>
+&gt; EulerFactor(E);
+13*x^2 + 5*x + 1
+</PRE>
+<P>
+The conductor of L(C, s) is 13<sup>2</sup>, the same as the discriminant
+in this case. So, we define L(C, s):
+<P>
+<P>
+<P>
+<PRE>
+&gt; J := Jacobian(C);
+&gt; loc := func&lt;p,d|p eq 13 select EulerFactor(E) else EulerFactor(J, GF(p,1))&gt;;
+&gt; L := LSeries(2,[0,0,1,1],13^2,loc);
+</PRE>
+<P>
+Now we check the functional equation and compute a few L-values.
+(Most of the execution time will be spent generating coefficients,
+so the first call takes some time. After that, the computations 
+are reasonably fast.)
+<P>
+<P>
+<P>
+<PRE>
+&gt; CFENew(L);
+0.000000000000000000000000000000
+&gt; Evaluate(L,1);
+0.0904903908324296291135897572581
+&gt; Evaluate(L,2);
+0.364286342944364068154291450139
+</PRE>
+<P>
+This is roughly what the built-in function <TT>LSeries(C)</TT> does:
+<P>
+<P>
+<P>
+<PRE>
+&gt; LC:=LSeries(C);
+&gt; CFENew(LC);
+0.000000000000000000000000000000
+&gt; Evaluate(LC,1);
+0.0904903908324296291135897572581
+&gt; Evaluate(LC,2);
+0.364286342944364068154291450139
+</PRE>
+<HR>
+<H4><A NAME = "17292">Experimental Mathematics for  Small Conductor</A></H4>
+
+
+
+<HR>
+<H3><A NAME = "17293">Example <TT>Lseries_lseries-experimental (H133E42)</TT></A></H3>
+This example shows how one may construct the first 20 coefficients of
+the L-series of an elliptic curve of conductor 11 without knowing anything
+about either the curve or modular form theory.
+<P>
+The point is that for an L-series L(s)=&sum;a<sub>n</sub>/n<sup>s</sup>, the associated theta
+function (used in <TT>CFENew</TT> or <TT>CheckFunctionalEquation</TT>) is a series
+with a<sub>n</sub> as coefficients and terms that decrease very rapidly with n.
+This means that if we truncate the series to, for instance, just a<sub>1</sub> + a<sub>2</sub>/2<sup>s</sup>
+and call <TT>LSeries</TT> with the same parameters (weight, sign, etc.)
+as those for L(s) but just [a<sub>1</sub>, a<sub>2</sub>, 0, 0, 0, 0, ...] as the coefficient
+vector, then <TT>CheckFunctionalEquation</TT> will return a number reasonably
+close to 0, because the coefficients a<sub>n</sub> for n&gt;2 only make a small
+contribution.
+<P>
+With this in mind, we create an L-series that looks like that of an
+elliptic curve with conductor 11 and sign 1, that is, we take weight = 2,
+conductor = 1, gamma = [0,1], sign = 1 and no poles:
+<P>
+<P>
+<P>
+<PRE>
+&gt; L := LSeries(2, [0,1], 11, 0 : Sign:=1);
+</PRE>
+<P>
+Then taking a<sub>1</sub>=1, and recalling the requirement that all the coefficients
+must be weakly multiplicative, we try various a<sub>2</sub> to see which of the
+truncated L-series 1 + a<sub>2</sub>/2<sup>s</sup> is closest to satisfying a functional
+equation.  Using the knowledge that a<sub>2</sub> (and every other a<sub>n</sub>) is an 
+integer together with the Hasse-Weil bound, |a<sub>p</sub>|&lt;2Sqrt(p), we find 
+just 5 choices:
+<P>
+<P>
+<P>
+<PRE>
+&gt; for a_2 := -2 to 2 do
+&gt;   LSetCoefficients(L,[1,a_2]);
+&gt;   print a_2, CFENew(L);
+&gt; end for;
+-2 0.0150037010097490317173530048996
+-1 0.101579424986956534846398098015
+0 0.157218613580238064317855126848
+1 0.195989746558550757309403554281
+2 0.224553905951474457074100971432
+</PRE>
+<P>
+It seems that a<sub>2</sub>= - 2 is the best choice, so we set it. Note that
+this also determines a<sub>4</sub>, a<sub>8</sub>, etc. We next proceed to find a<sub>3</sub>
+in the same way.
+It might come as a surprise, but in this way we can find the first 30 or
+so coefficients correctly. (Actually, by using careful bounds, it is
+even possible to prove that these are indeed uniquely determined.)
+Here is code that finds a<sub>1</sub>, ..., a<sub>20</sub>:
+<P>
+<P>
+<P>
+<PRE>
+&gt; N := LCfRequired(L); N;
+48
+&gt; V := [0 : k in [1..N] ];   // keep a_p in here
+&gt; P&lt;x&gt; := PolynomialRing(Integers());
+&gt; function Try(V,p,a_p)  // set V[p]=a_p and try functional equation
+&gt;   V[p] := a_p;
+&gt;   LSetCoefficients(L, func&lt;p,d | 1-V[p]*x+(p eq 11 select 0 else p)*x^2 &gt;);
+&gt;   return Abs(CFENew(L));
+&gt; end function;
+&gt; for p in PrimesUpTo(20) do  // try a_p in Hasse-Weil range and find best one
+&gt;   hasse := Floor(2*Sqrt(p));
+&gt;   _,V[p] := Min([Try(V,p, a_p): a_p in [-hasse..hasse]]);
+&gt;   V[p] -:= hasse+1;
+&gt; end for;
+&gt; LSetCoefficients(L, func&lt;p,d | 1-V[p]*x+(p eq 11 select 0 else p)*x^2 &gt;);
+</PRE>
+<P>
+We list the coefficients that we found and apply
+<TT>CheckFunctionalEquation</TT> to them:
+<P>
+<P>
+<P>
+<PRE>
+&gt; LGetCoefficients(L,20);
+[* 1, -2, -1, 2, 1, 2, -2, 0, -2, -2, 1, -2, 4, 4, -1, -4, -2, 4, 0, 2 *]
+&gt; CFENew(L);
+5.62416733501076689050846061301E-17
+</PRE>
+<P>
+Compare this with the actual truth:
+<P>
+<P>
+<P>
+<PRE>
+&gt; qExpansion(Newforms("11A")[1],21);
+q - 2*q^2 - q^3 + 2*q^4 + q^5 + 2*q^6 - 2*q^7 - 2*q^9 - 2*q^10 + q^11 - 2*q^12
+   + 4*q^13 + 4*q^14 - q^15 - 4*q^16 - 2*q^17 + 4*q^18 + 2*q^20 + O(q^21)
+</PRE>
+<P>
+Such methods have been used by Stark in his experiments with L-functions 
+of number fields, and by Mestre to find restrictions on possible conductors
+of elliptic curves. In fact, by modifying our example
+(changing 11 to 1 ... 10 and sign = 1 to sign = &#8723; 1)
+one can show that for N&lt;11 there are no modular elliptic curves
+of conductor N.
+<HR>
+<H4><A NAME = "17294">Tensor Product of L-series Coming from l-adic Representations</A></H4>
+
+
+
+<HR>
+<H3><A NAME = "17295">Example <TT>Lseries_lseries-tensor (H133E43)</TT></A></H3>
+This is an example of using the tensor product for L-functions coming from
+l-adic representations. This is what <TT>LSeries(E,K)</TT> uses
+to construct L-series of elliptic curves over number fields.
+<P>
+<P>
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([ 0, 0, 0, 0, 1]); // Mordell curve
+&gt; P&lt;x&gt; := PolynomialRing(Integers());
+&gt; K := NumberField(x^3-2);
+&gt; LE := LSeries(E);
+&gt; LK := LSeries(K);
+</PRE>
+<P>
+We have now two L-functions, one associated to an elliptic curve and
+one to a number field. They both come from l-adic representations, and we
+can try to construct their tensor product. Actually, the function 
+<TT>TensorProduct</TT> requires us to specify exponents of the conductor and 
+the bad local factors of the tensor product representation, but we can 
+try and let Magma do it, hoping that nothing unusual happens. 
+We take the tensor product of the two L-series and divide it by 
+L(E, s) to speed up the computations.  Remember that L(K, s) has a 
+copy of the Riemann zeta function as a factor.
+<P>
+<P>
+<P>
+<PRE>
+&gt; L := TensorProduct(LE, LK, []) / LE;
+WARNING: 2 is ramified in each part of tensor prod
+WARNING: 3 is ramified in each part of tensor prod
+&gt; CFENew(L);
+0.0234062571006075114301535636259
+</PRE>
+The resulting L-function does not satisfy the required functional equation,
+so something unusual does happen at
+a prime where both E and K have bad reduction, which in this case
+must be either p=2 or p=3.
+<P>
+Let us check p=2.  We change the base field of E to K and look at
+its reduction at the unique prime above 2:
+<P>
+<P>
+<P>
+<PRE>
+&gt; EK := BaseChange(E,K);
+&gt; p := Decomposition(MaximalOrder(K),2)[1,1];
+&gt; LocalInformation(E,2);
+&lt;2, 4, 2, 3, IV, true&gt;
+&gt; loc, model:=LocalInformation(EK,p);loc,model;
+&lt;Prime Ideal
+Two element generators:
+[2, 0, 0]
+[0, 1, 0], 0, 0, 1, I0, true&gt;
+Elliptic Curve defined by y^2 + y = x^3 over K
+</PRE>
+<P>
+We see that E has acquired good reduction at p|2. This means that the
+inertia invariants at 2 of the l-adic representation associated to L,
+namely &rho;<sub>E</sub> tensor (&rho;<sub>K</sub> - &rho;<sub>Q</sub>) are <I>larger</I> than the
+tensor product of the corresponding inertia invariants, which is zero.
+Thus the local factor of L at 2 is not F<sub>p</sub>(x)=1
+(which is what <TT>TensorProduct</TT> assumed), but a polynomial of higher degree.
+In fact, it is the characteristic polynomial of Frobenius of the reduced
+curve E/K mod p, so F<sub>p</sub>(x)=1 - a<sub>2</sub>x + 2x<sup>2</sup> with a<sub>2</sub> given by
+<P>
+<P>
+<PRE>
+&gt; TraceOfFrobenius(Reduction(model, p));
+0
+</PRE>
+This is now the correct L-function (at p=3 the default procedure works)
+and the functional equation is satisfied
+<P>
+<P>
+<P>
+<PRE>
+&gt; L := TensorProduct(LE,LK,[&lt;2,4,1+2*x^2&gt;])/LE;
+WARNING: 3 is ramified in each part of tensor prod
+&gt; CFENew(L);
+7.88860905221011805411728565283E-31
+</PRE>
+<P>
+In fact, our L-series is the same as that constructed by
+<TT>LSeries(E,K)/LE</TT>.
+<HR>
+<H4><A NAME = "17296">Non-abelian Twist of an Elliptic Curve</A></H4>
+
+
+
+<HR>
+<H3><A NAME = "17297">Example <TT>Lseries_lseries-nonabtwist (H133E44)</TT></A></H3>
+<P>
+In this example we illustrate how to use <TT>LSeries(E,K)</TT> to experiment
+with the Birch-Swinnerton-Dyer conjecture for elliptic curves in non-abelian
+extensions of Q.
+<P>
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([0, 0, 0, 0, 1]);
+&gt; P&lt;x&gt; := PolynomialRing(Integers());
+&gt; K := NumberField(x^3-2);
+&gt; L := LSeries(E,K) / LSeries(E);
+&gt; lval := Evaluate(L, 1); lval;
+0.655371552164974435712378842491
+</PRE>
+<P>
+The series L is the L-function of non-abelian twist of E and it 
+appears that L(1) is non-zero. In other words, the analytic rank of 
+L(E/K, s) at s=1 is the same as that of L(E/Q, s).
+Tate's version of the Birch-Swinnerton-Dyer conjecture then predicts that
+the Mordell-Weil rank of E/K is the same as the rank over Q,
+so the elliptic curve has not acquired new independent points. This is
+something that can be confirmed by a Selmer group computation:
+<P>
+<P>
+<P>
+<PRE>
+&gt; EK := BaseChange(E,K);
+&gt; twoE := MultiplicationByMMap(E, 2);
+&gt; #SelmerGroup(twoE);
+2
+&gt; twoEK := MultiplicationByMMap(EK, 2);
+&gt; #SelmerGroup(twoEK);
+2
+</PRE>
+<P>
+Indeed, the 2-Selmer rank is 1 in both cases, as expected.
+Also, the second part of the Birch-Swinnerton-Dyer
+conjecture predicts that the following quotient should be rational:
+<P>
+<P>
+<PRE>
+&gt; p1, p2 := Explode(Periods(E));
+&gt; lval*Sqrt(Abs(Discriminant(K))) / (p1*Im(p2));
+1.33333333333333333333333333334
+</PRE>
+Finally, the same L-series can be defined via the Artin
+representation machinery:
+<P>
+<P>
+<PRE>
+&gt; triv,sign,rho:=Explode(ArtinRepresentations(K));
+&gt; L:=LSeries(E,rho);
+&gt; CentralValue(L);
+0.655371552164974435712378842491
+</PRE>
+<PRE></PRE> <A  HREF = "text1512.htm">[Next]</A><A  HREF = "text1522.htm">[Prev]</A> <A  HREF = "text1512.htm">[Right]</A> <A  HREF = "text1522.htm">[Left]</A> <A  HREF = "text1513.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,83 @@
+
+// Gary McConnell's example
+
+_<x> := PolynomialRing(Rationals());                                                           
+K1<a> := ext < Rationals() | x^2-3 > ;
+_<x> := PolynomialRing(K1);
+K2<r> := ext < K1 | x^2-5 >;
+_<x> := PolynomialRing(K2);
+K3<t> := ext < K2 | x^2-(5-r)/8 >;
+_<x> := PolynomialRing(K3);
+K4<ib> := ext < K3 | x^2-(5*a+(5+3*r)*t) >;
+_<x> := PolynomialRing(K4);
+K5<i> := ext < K4 | x^2+1 >;
+_<x> := PolynomialRing(K5);
+
+u_t := (1+r)/2 ; // note this takes t to its conjugate sqrt((5+r)/8)
+
+sigma_a := hom < K1 -> K5 | -K1.1 >;
+sigma_r := hom < K2 -> K5 | -K2.1 >;
+sigma_t := hom < K3 -> K5 | sigma_r, K3.1 * u_t >;
+
+u_ib := ((-1/2*r - 3/2)*t + 1/2*a);
+sigma_ib := hom < K4 -> K5 | sigma_t, K4.1 * u_ib >;
+sigma_ib := hom < K5 -> K5 | sigma_ib, K5.1 >;
+sigma_cxconj := hom < K5 -> K5 | -K5.1 >;
+sigma_a := hom < K2 -> K5 | sigma_a, K2.1 >;
+sigma_a := hom < K3 -> K5 | sigma_a, K3.1 >;
+u_a := ((-1/2*a*r - 1/2*a)*t + (1/4*r + 3/4))*i;
+sigma_a := hom < K4 -> K5 | sigma_a, u_a * K4.1 >;
+sigma_a := hom < K5 -> K5 | sigma_a, K5.1 >;
+sigma_id := hom < K1 -> K5 | K1.1 >;
+sigma_id := hom < K2 -> K5 | sigma_id, K2.1 >;
+sigma_id := hom < K3 -> K5 | sigma_id, K3.1 >;
+sigma_id := hom < K4 -> K5 | sigma_id, K4.1 >;
+sigma_id := hom < K5 -> K5 | sigma_id, K5.1 >;
+
+G < s_a,s_ib,s_cx > := FreeGroup(3);
+Q := quo < G | [s_a^2,s_ib^8,s_cx^2,s_cx*s_ib*s_cx*s_ib^7,s_a*s_ib*s_a*s_ib^3,s_cx*(s_a*s_ib)*s_cx*(s_a*s_ib^7) ] >;
+G<A, B, C> :=
+Group< A, B, C |
+      A^2, B^8, C^2, C*B*C*B^7, A*B*A*B^3, C*(A*B)*C*(A*B^7) >;
+
+// define map
+// e : G -> set of automorphisms of K5
+
+ABC := [sigma_a,sigma_ib,sigma_cxconj];
+
+function ee(g)
+ sigma := sigma_id;
+ word := Eltseq(g);
+ for w in word do
+   if w gt 0 then
+     sigma := sigma * ABC[w];
+   else
+     sigma := sigma * Inverse(ABC[-w]);
+   end if;
+ end for;
+ return sigma;
+end function;
+
+e := map< G -> PowerStructure(Map) | g :-> ee(g) >;
+
+PCG, mPCG := PCGroup(G);
+zeta_5 := Roots(x^4+x^3+x^2+x+1)[4][1];
+S5 := sub < PCG | { g : g in PCG | e((mPCG^-1)(g))(zeta_5) eq zeta_5 } >;
+assert IsNormal(PCG,S5);
+assert S5 subset PCG;
+assert #S5 eq 8;
+
+K5abs := AbsoluteField(K5);
+F00abs:=FixedField(K5abs, [e((mPCG^-1)(S5.1)),e((mPCG^-1)(S5.2)),e((mPCG^-1)(S5.3))]);
+assert AbsoluteDegree(F00abs) eq 4;
+assert IsNormal(F00abs);
+
+try
+  F00:=FixedField(K5,[e((mPCG^-1)(S5.1)),e((mPCG^-1)(S5.2)),e((mPCG^-1)(S5.3))]);
+  assert false;
+catch err
+  // check that the error is the expected one
+  // TO DO any more elegant way to do this??
+  assert "The given automorphisms do not fix" in err`Object;
+end try;
+

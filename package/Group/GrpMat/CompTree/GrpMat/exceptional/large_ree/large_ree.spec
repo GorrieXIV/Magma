@@ -1,0 +1,15 @@
+{
+	magma
+	{
+		ree.m
+		trick.m
+		ryba.m
+		involution.m
+		centraliser.m
+		conjugate.m
+		standard.m
+		maximals.m
+		sylow.m
+		bn.m
+	}
+}

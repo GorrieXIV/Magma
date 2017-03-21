@@ -1,0 +1,26 @@
+"Source: Text/Basics/FldForms.text";
+"Line: 1515";
+"Date: Tue Jun  7 22:27:15 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Basics/FldForms.text, line: 1515
+// Example: H29E21 ()
+print "Example: H29E21";
+ei := GetEchoInput();
+SetEchoInput(true);
+specialUnitaryGrp := function(F)
+  K := BaseRing(F); n := NumberOfRows(F);
+  J, sigma := StandardHermitianForm(n,K);
+  V := UnitarySpace(F,sigma);
+  S := UnitarySpace(J,sigma);
+  flag, phi := IsIsometric(S,V);
+  assert flag;
+  T := Matrix(K,n,n,[phi(S.i) : i in [1..n]]);
+  H := SpecialUnitaryGroup(n,K);
+  return sub<IsometryGroup(V) | [T^-1*H.i*T : i in [1..NumberOfGenerators(H)]]>;
+end function;
+K<z> := GF(9);
+F := Matrix(K,4,4,[1,z^7,z^6,2, z^5,2,z^6,z^6,  z^2,z^2,1,z^3, 2,z^2,z,0]);
+G := specialUnitaryGrp(F);
+flag where flag is IsIsomorphic(G,SU(4,3));
+assert $1;
+SetEchoInput(ei);

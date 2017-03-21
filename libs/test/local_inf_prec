@@ -1,0 +1,339 @@
+SetEchoInput(true);
+
+P<x> := PolynomialRing(Integers());
+
+Zp := pAdicRing(7 : Precision :=  50);
+U := UnramifiedExtension(Zp, 2);
+R := ext<U | map<Integers() -> P | k :-> x^3 + 7*x^2 + 7*x + 7>>;
+
+Qp := FieldOfFractions(Zp);
+QU := FieldOfFractions(U);
+QR := FieldOfFractions(R);
+
+assert Valuation(Evaluate(DefiningPolynomial(R), R.1)) ge R`DefaultPrecision;
+assert Valuation(Evaluate(DefiningPolynomial(U), U.1)) ge U`DefaultPrecision;
+assert Valuation(Evaluate(DefiningPolynomial(QR), QR.1)) ge QR`DefaultPrecision;
+assert Valuation(Evaluate(DefiningPolynomial(QU), QU.1)) ge QU`DefaultPrecision;
+
+assert RamificationDegree(R) eq 3;
+assert InertiaDegree(R) eq 1;
+assert RamificationDegree(U) eq 1;
+assert InertiaDegree(U) eq 2;
+
+assert Valuation(UniformizingElement(R)) eq 1;
+assert Valuation(UniformizingElement(U)) eq 1;
+assert Valuation(UniformizingElement(QR)) eq 1;
+assert Valuation(UniformizingElement(QU)) eq 1;
+
+assert Precision(U) eq Precision(Zp);
+assert Precision(R) eq 3*Precision(Zp);
+assert Prime(U) eq Prime(CoefficientRing(U));
+
+rf, rfm := ResidueClassField(U);
+assert Valuation(rfm(U.1) @@ rfm - U.1) ge 1;
+
+for i in [1 .. 5] do
+
+    r := &+[Random(0, 500)*R.1^i : i in [0 .. 2*Degree(R)]];
+    s := &+[Random(0, 300)*R.1^i : i in [0 .. 2*Degree(R)]];
+
+    assert r + s eq s + r;
+    assert Valuation(r + s) ge Minimum(Valuation(r), Valuation(s));
+    assert r - s eq -(s - r);
+    assert r*s eq s*r;
+    assert Valuation(r*s) eq Valuation(r) + Valuation(s);
+    //assert (r div s)*r + r mod s eq s; // eq 1/(s div r);
+    assert IsWeaklyEqual(r/s*(s/r), 1);
+    assert RelativePrecision((r/s)*(s/r) - 1) eq 0;//Precision(L);
+    assert r^4 eq r*r*r*r;
+
+    assert IsWeaklyZero(r + (-r));
+
+    assert IsWeaklyZero(Evaluate(MinimalPolynomial(r), r));
+    assert IsWeaklyZero(Evaluate(MinimalPolynomial(s), s));
+    assert IsWeaklyZero(Evaluate(CharacteristicPolynomial(r), r));
+    assert IsWeaklyZero(Evaluate(CharacteristicPolynomial(s), s));
+end for;
+
+R!0/5;
+QR!0/5;
+
+for i in [1 .. 5] do
+
+    r := &+[Random(0, 500)*QR.1^i : i in [0 .. 2*Degree(QR)]];
+    s := &+[Random(0, 300)*QR.1^i : i in [0 .. 2*Degree(QR)]];
+
+    assert r + s eq s + r;
+    assert Valuation(r + s) ge Minimum(Valuation(r), Valuation(s));
+    assert r - s eq -(s - r);
+    assert r*s eq s*r;
+    assert Valuation(r*s) eq Valuation(r) + Valuation(s);
+    assert r div s eq 1/(s div r);
+    assert RelativePrecision((r/s)*(s/r) - 1) eq 0;//Precision(L);
+    assert r^4 eq r*r*r*r;
+
+    assert IsWeaklyZero(r + (-r));
+    assert IsWeaklyZero(Evaluate(MinimalPolynomial(r), r));
+    assert IsWeaklyZero(Evaluate(MinimalPolynomial(s), s));
+end for;
+
+assert not IsOne(R!1);
+assert not IsMinusOne(-R!1);
+assert not IsOne(U!1);
+assert not IsMinusOne(-U!1);
+assert IsZero(R!0);
+assert Valuation(R!0) ge R`DefaultPrecision;
+assert IsZero(U!0);
+assert Valuation(U!0) ge U`DefaultPrecision;
+assert not IsOne(QR!1);
+assert not IsMinusOne(-QR!1);
+assert not IsOne(QU!1);
+assert not IsMinusOne(-QU!1);
+assert IsZero(QR!0);
+assert Valuation(QR!0) ge Precision(QR);
+assert IsZero(QU!0);
+assert Valuation(QU!0) ge Precision(QU);
+
+assert IsIntegral(U.1);
+assert IsIntegral(R.1);
+assert IsIntegral(UniformizingElement(R));
+assert not IsIntegral(1/UniformizingElement(R));
+
+assert IsIntegral(QU.1);
+assert IsIntegral(QR.1);
+assert IsIntegral(UniformizingElement(QR));
+assert not IsIntegral(1/UniformizingElement(QR));
+
+A, am := AutomorphismGroup(R);
+autos := [am(a) : a in A];
+autos_inv := [am(a^-1) : a in A];
+assert Minimum([Valuation(R.1 @ autos[i] @ autos_inv[i] - R.1) : i in [1 .. #autos]]) ge 0.95*R`DefaultPrecision;
+
+A, am := AutomorphismGroup(U);
+autos := [am(a) : a in A];
+autos_inv := [am(a^-1) : a in A];
+assert Minimum([Valuation(U.1 @ autos[i] @ autos_inv[i] - U.1) : i in [1 .. #autos]]) ge 0.95*(U)`DefaultPrecision;
+
+A, am := AutomorphismGroup(QR);
+autos := [am(a) : a in A];
+autos_inv := [am(a^-1) : a in A];
+assert Minimum([Valuation(QR.1 @ autos[i] @ autos_inv[i] - QR.1) : i in [1 .. #autos]]) ge 0.95*R`DefaultPrecision;
+
+A, am := AutomorphismGroup(QU);
+autos := [am(a) : a in A];
+autos_inv := [am(a^-1) : a in A];
+assert Minimum([Valuation(QU.1 @ autos[i] @ autos_inv[i] - QU.1) : i in [1 .. #autos]]) ge 0.95*U`DefaultPrecision;
+
+assert RelativePrecision(Discriminant(R) - -3724) eq 0;
+assert RelativePrecision(Discriminant(U) - 24) eq 0;
+assert Valuation(Discriminant(R, Zp)) eq 4;
+assert RelativePrecision(Discriminant(R, Zp) - 191713665024) eq 0;
+assert RelativePrecision(Discriminant(QR, QU) - -3724) eq 0;
+assert RelativePrecision(Discriminant(QU, Qp) - 24) eq 0;
+assert Valuation(Discriminant(QR, Qp)) eq 4;
+assert RelativePrecision(Discriminant(QR, Qp) - 191713665024) eq 0;
+
+assert IsRamified(R);
+assert IsRamified(QR);
+assert not IsUnramified(R);
+assert not IsUnramified(QR);
+assert IsTotallyRamified(R);
+assert IsTotallyRamified(QR);
+assert IsWildlyRamified(R) xor IsTamelyRamified(R);
+assert IsWildlyRamified(QR) xor IsTamelyRamified(QR);
+
+assert IsUnramified(U);
+assert IsUnramified(QU);
+
+f := FrobeniusAutomorphism(R);
+fL := f(R.1);
+i := 1;
+while not IsWeaklyZero(fL - R.1) do
+    fL := f(fL);
+    i +:= 1;
+end while;
+assert i eq InertiaDegree(R);
+assert f(UniformizingElement(R)) eq UniformizingElement(R);
+fL := f(R.1^30);
+i := 1;
+while not IsWeaklyZero(fL - R.1^30) do
+    fL := f(fL);
+    i +:= 1;
+end while;
+assert i eq InertiaDegree(R);
+
+f := FrobeniusAutomorphism(U);
+fL := f(U.1);
+i := 1;
+while not IsWeaklyZero(fL - U.1) do
+    fL := f(fL);
+    i +:= 1;
+end while;
+assert i eq InertiaDegree(U);
+assert f(UniformizingElement(U)) eq UniformizingElement(U);
+fL := f(U.1^30);
+i := 1;
+while not IsWeaklyZero(fL - U.1^30) do
+    fL := f(fL);
+    i +:= 1;
+end while;
+assert i eq InertiaDegree(U);
+
+f := FrobeniusAutomorphism(QR);
+fL := f(QR.1);
+i := 1;
+while not IsWeaklyZero(fL - QR.1) do
+    fL := f(fL);
+    i +:= 1;
+end while;
+assert i eq InertiaDegree(QR);
+assert f(UniformizingElement(QR)) eq UniformizingElement(QR);
+fL := f(QR.1^30);
+i := 1;
+while not IsWeaklyZero(fL - QR.1^30) do
+    fL := f(fL);
+    i +:= 1;
+end while;
+assert i eq InertiaDegree(QR);
+
+f := FrobeniusAutomorphism(QU);
+fL := f(QU.1);
+i := 1;
+while not IsWeaklyZero(fL - QU.1) do
+    fL := f(fL);
+    i +:= 1;
+end while;
+assert i eq InertiaDegree(QU);
+
+assert f(UniformizingElement(QU)) eq UniformizingElement(QU);
+fL := f(QU.1^30);
+i := 1;
+while not IsWeaklyZero(fL - QU.1^30) do
+    fL := f(fL);
+    i +:= 1;
+end while;
+assert i eq InertiaDegree(QU);
+
+URR := UnramifiedExtension(R, 3);
+URF := FieldOfFractions(URR);
+P := PolynomialRing(URR);
+RRR := ext<URR | map<Integers() -> P | k:-> Polynomial(URR, [R.1, 5*R.1^20, 1])>>;
+RRF := FieldOfFractions(RRR);
+
+rf, rfm := ResidueClassField(URR);
+assert Valuation(rfm(URR.1) @@ rfm - URR.1) ge 1;
+
+    r := &+[Random(0, 500)*RRR.1^i : i in [0 .. 2*Degree(RRR)]];
+    s := &+[Random(0, 300)*RRR.1^i : i in [0 .. 2*Degree(RRR)]];
+
+    assert r + s eq s + r;
+    assert Valuation(r + s) ge Minimum(Valuation(r), Valuation(s));
+    assert r - s eq -(s - r);
+    assert r*s eq s*r;
+    assert Valuation(r*s) eq Valuation(r) + Valuation(s);
+    // assert r div s eq 1/(s div r);
+    assert RelativePrecision((r/s)*(s/r) - 1) lt 1;
+    assert r^4 eq r*r*r*r;
+
+    assert IsWeaklyZero(r + (-r));
+    assert not IsOne(RRR!1);
+    assert not IsMinusOne(-RRR!1);
+
+    assert IsWeaklyZero(Evaluate(MinimalPolynomial(r), r));
+    assert IsWeaklyZero(Evaluate(MinimalPolynomial(s), s));
+    assert IsWeaklyZero(Evaluate(CharacteristicPolynomial(r), r));
+    assert IsWeaklyZero(Evaluate(CharacteristicPolynomial(s), s));
+
+    r := &+[Random(0, 500)*RRF.1^i : i in [0 .. 2*Degree(RRF)]];
+    s := &+[Random(0, 300)*RRF.1^i : i in [0 .. 2*Degree(RRF)]];
+
+    assert r + s eq s + r;
+    assert Valuation(r + s) ge Minimum(Valuation(r), Valuation(s));
+    assert r - s eq -(s - r);
+    assert r*s eq s*r;
+    assert Valuation(r*s) eq Valuation(r) + Valuation(s);
+    assert r div s eq 1/(s div r);
+    assert RelativePrecision((r/s)*(s/r) - 1) lt 1;
+    assert r^4 eq r*r*r*r;
+
+    assert IsWeaklyZero(r + (-r));
+    assert not IsOne(RRF!1);
+    assert not IsMinusOne(-RRF!1);
+    assert IsWeaklyZero(Evaluate(MinimalPolynomial(r), r));
+    assert IsWeaklyZero(Evaluate(MinimalPolynomial(s), s));
+
+assert not IsOne(RRR!1);
+assert not IsMinusOne(-RRR!1);
+assert not IsOne(URR!1);
+assert not IsMinusOne(-URR!1);
+assert IsZero(RRR!0);
+assert Valuation(RRR!0) ge (RRR)`DefaultPrecision;
+assert IsZero(URR!0);
+assert Valuation(URR!0) ge (URR)`DefaultPrecision;
+
+assert not IsOne(RRF!1);
+assert not IsMinusOne(-RRF!1);
+assert not IsOne(URF!1);
+assert not IsMinusOne(-URF!1);
+assert IsZero(RRF!0);
+assert Valuation(RRF!0) ge Precision(RRF);
+assert IsZero(URF!0);
+assert Valuation(URF!0) ge Precision(URF);
+
+assert IsIntegral(RRR.1);
+assert IsIntegral(UniformizingElement(RRR));
+assert not IsIntegral(1/UniformizingElement(RRR));
+
+assert IsIntegral(RRF.1);
+assert IsIntegral(UniformizingElement(RRF));
+assert not IsIntegral(1/UniformizingElement(RRF));
+
+A, am := AutomorphismGroup(URR);
+autos := [am(a) : a in A];
+autos_inv := [am(a^-1) : a in A];
+assert Minimum([Valuation(URR.1 @ autos[i] @ autos_inv[i] - URR.1) : i in [1 .. #autos]]) ge (URR)`DefaultPrecision - 5;
+
+A, am := AutomorphismGroup(RRR);
+autos := [am(a) : a in A];
+autos_inv := [am(a^-1) : a in A];
+assert Minimum([Valuation(RRR.1 @ autos[i] @ autos_inv[i] - RRR.1) : i in [1 .. #autos]]) ge (RRR)`DefaultPrecision - 5;
+
+Discriminant(RRR);
+
+assert IsRamified(RRR);
+assert not IsUnramified(RRR);
+assert IsTotallyRamified(RRR);
+assert IsWildlyRamified(RRR) xor IsTamelyRamified(RRR);
+
+for p in [2, 3, 5, 7, 17, 19, 23, 29] do 
+
+    Qp := pAdicField(p);
+    Qpx<x> := PolynomialRing(Qp);
+
+    for k in [1 .. 20] do
+	f := Qpx![Random(-100, 100)/Random(1, 100) : i in [1 .. Random(1, 10)]];
+	g := Qpx![Random(-100, 100)/Random(1, 100) : i in [1 .. Random(1, 10)]];
+
+	gcd, a, b := XGCD(f, g);
+	assert 
+	   &and[RelativePrecision(c) eq 0 : c in Coefficients(a*f + b*g - gcd)];
+    end for;
+
+
+    degs := [];
+    for k in [1 .. 20] do
+	f := Qpx![Random(-50, 50)/Random(1, 50) : i in [1 .. Random(1, 5)]];
+	g := Qpx![Random(-50, 50)/Random(1, 50) : i in [1 .. Random(1, 5)]];
+	g *:= f;
+	f *:= Qpx![Random(-50, 50)/Random(1, 50) : i in [1 .. Random(1, 5)]];
+
+	gcd, a, b := XGCD(f, g);
+	assert 
+	   &and[RelativePrecision(c) eq 0 : c in Coefficients(a*f + b*g - gcd)];
+	Append(~degs, Degree(gcd));
+    end for;
+    degs;
+    Sort(~degs);
+    assert degs[Ceiling(#degs/2.7)] gt 0;
+
+end for;

@@ -1,0 +1,486 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Rational Points and Group  Structure over Finite Fields</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1495.htm">[Next]</A><A  HREF = "text1493.htm">[Prev]</A> <A  HREF = "text1495.htm">[Right]</A> <A  HREF = "text1493.htm">[Left]</A> <A  HREF = "text1483.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16939">Rational Points and Group  Structure over Finite Fields</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1494.htm#16940">Enumeration of Points</A>
+<LI> <A  HREF = "text1494.htm#16942">Counting Points on the Jacobian</A>
+<LI> <A  HREF = "text1494.htm#16955">Deformation Point Counting</A>
+<LI> <A  HREF = "text1494.htm#16958">Abelian Group Structure</A>
+</UL>
+<H4><A NAME = "16940">Enumeration of Points</A></H4>
+
+
+
+<H5><A NAME = "16941">Points(J) : JacHyp -&gt; SetIndx</A></H5>
+<H5>RationalPoints(J) : JacHyp -&gt; SetIndx</H5>
+<BLOCKQUOTE>
+Given a Jacobian J of a hyperelliptic curve 
+defined over a finite field, determine all rational 
+points on the Jacobian J. 
+</BLOCKQUOTE>
+<H4><A NAME = "16942">Counting Points on the Jacobian</A></H4>
+
+<P>
+<P>
+Several algorithms are used to compute the order of a Jacobian
+depending of its size, its genus and its type.  In particular, in
+genus 2 it includes all the techniques described in <A  HREF = "text1482.htm#bib_gaudry_har">[GH00]</A>.
+The best current algorithms are the ones based on p-adic liftings.
+These are the defaults when they apply (see below) and the characteristic
+is not too large.
+In odd characteristic, Kedlaya's algorithm is used as described in
+<A  HREF = "text1482.htm#bib_kedlaya1">[Ked01]</A>. For characteristic 2, we have Mestre's canonical lift
+method as adapted by Lercier and Lubicz. Details can be found in
+<A  HREF = "text1482.htm#bib_ler-lub1">[LL]</A>. We also now have an implementation of Vercauteren's
+characteristic 2 version of Kedlaya (described in <A  HREF = "text1482.htm#bib_verc_ked">[Ver02]</A>). 
+As an added bonus, the p-adic methods actually give
+the Euler factor (see below).
+A verbose flag can be set to see which strategy is chosen and the
+progress of the computation.
+<P>
+The latest p-adic methods, faster than Kedlaya in odd characteristic,
+are those of Alan Lauder based on deformations over parametrised families.
+Magma incorporates an implementation for hyperelliptic families by Hendrik
+Hubrechts (see <A  HREF = "text1482.htm#bib_hubrechts_pc">[Hub06]</A> for details). This has a slightly 
+different interface to the other methods
+(which all run through the same top-level intrinsics) as it can be
+used to count points on several members of the family at once.
+
+
+<H5><A NAME = "16943">SetVerbose("JacHypCnt", v) : MonStgElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Set the verbose printing level for the point-counting on the
+Jacobians. Currently the legal values for v are <TT>true</TT>, <TT>false</TT>, 0, 1,
+2, 3 or 4  (<TT>false</TT> is the same as 0, and <TT>true</TT> is the same as 1).
+</BLOCKQUOTE>
+<H5><A NAME = "16944"># J : JacHyp -&gt; RngIntElt</A></H5>
+<H5>Order(J) : JacHyp -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Given the Jacobian J of a hyperelliptic curve defined over a 
+finite field, determine the order of the group of rational points.
+<P>
+<P>
+<P>
+There are 4 optional parameters which concern every genus.
+<P>
+<P>
+<PRE>
+     NaiveAlg: BoolElt                   Default: <TT>false</TT>
+</PRE>
+<P>
+<PRE>
+     ShanksLimit: RngIntElt              Default: 10<sup>12</sup>
+</PRE>
+<P>
+<PRE>
+     CartierManinLimit: RngIntElt        Default: 5 x 10<sup>5</sup>
+</PRE>
+<P>
+<PRE>
+     UseSubexpAlg: BoolElt               Default: <TT>true</TT>
+</PRE>
+The parameter <TT>NaiveAlg</TT> can be set to one if one want to use
+the naive algorithm for point counting, consisting in counting points
+on the curve over the first g extensions, where g is the genus.
+Setting this parameter to <TT>true</TT> annihilates the effects of the
+others.  By default, this strategy is used for small groups and
+Jacobians in characteristic 2 for which no group law is available.
+<P>
+In odd characteristic, Kedlaya's algorithm can be applied to curves
+of any genus and it is the default when the group is not too small or
+the characteristic too large.
+<P>
+In contrast, Mestre's characteristic 2 method has several conditions
+on its applicability. When these are satisfied and the genus is not too
+large or the group order too small, it is the default.
+<DL COMPACT class='compact'>
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>Firstly, the Jacobian must be ordinary. This is
+equivalent to the defining polynomial h(x) having degree g or
+g + 1 and having distinct roots (ie non-zero discriminant).
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>Next, there
+must be a group law available for a final elimination: the algorithm
+produces several possibilities for the characteristic polynomial of 
+Frobenius. If no group law is available, we attempt to replace the 
+curve with an isomorphic one for which one is. Note that a group
+law exists if there is a single point at infinity (degree of h(x) = g).
+<P>
+</DL>
+{Warning:} Even if these conditions are satisfied, the last
+phase of the algorithm may still fail for g &ge;4 in unusual cases.
+However, this is very rare. Finally, it should be noted that the main
+algorithm works over the smallest extension of the ground field K over
+which h(x) splits. It is therefore much faster if h(x) has all its
+roots in K.
+<P>
+<P>
+<P>
+When the genus is &gt; 4 or the canonical lift method doesn't apply,
+Vercauteren's version of Kedlaya is now used in its place.
+It is also used for genus 4 when
+an extension of the base field is required for Mestre: ie, h(x) 
+doesn't split.
+<P>
+<P>
+<PRE>
+     UseGenus2: BoolElt                  Default: <TT>false</TT>
+</PRE>
+For genus 2 the methods mentioned at the start are applied if the
+parameter <TT>UseGenus2</TT> is set to <TT>true</TT>. Otherwise they are now only 
+used for large characteristic.
+<P>
+If none of the above apply, the remaining methods are
+the subexponential algorithm, which uses the generic machinery of the
+function fields, and general group order algorithms of Shanks and Pollard.
+The subexponential algorithm will be the first choice if no group law is
+available or the genus is large and the base field small. It can be 
+disabled by setting <TT>UseSubexpAlg</TT> to <TT>false</TT>.
+<P>
+The parameter <TT>ShanksLimit</TT> determines when we switch from a
+memory-consuming Shanks' algorithm to a slower Pollard's method.  The
+value of the parameter <TT>CartierManinLimit</TT> is the maximal
+characteristic for which we may use the Cartier-Manin trick (see
+function <TT>EulerFactorModChar</TT> below).
+<P>
+<P>
+<P>
+The next 2 parameters are used only for the genus 2 methods in odd
+characteristic. 
+<P>
+<P>
+<PRE>
+     UseSchoof: BoolElt                  Default: <TT>true</TT>
+</PRE>
+<P>
+<PRE>
+     UseHalving: BoolElt                 Default: <TT>true</TT>
+</PRE>
+When the base field is large enough, it is better to firstly compute
+the cardinality of the Jacobian modulo some odd primes and some power
+of two.  These two parameters allow the user to disable one or both of
+these methods.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16945">Example <TT>CrvHyp_Jac_Point_Counting (H131E22)</TT></A></H3>
+<P>
+In the following sequence of examples the different point counting methods 
+are illustrated. The first example uses direct counting.
+<P>
+<P>
+<P>
+<PRE>
+&gt; SetVerbose("JacHypCnt",true);
+&gt; P&lt;x&gt; := PolynomialRing(GF(31));
+&gt; f := x^8 + 3*x^7 + 2*x^6 + 23*x^5 + 5*x^4 + 21*x^3 + 29*x^2 + 12*x + 9;
+&gt; J := Jacobian(HyperellipticCurve(f));
+&gt; time #J;
+Using naive counting algorithm.
+20014
+Time: 0.020
+</PRE>
+<HR>
+<H3><A NAME = "16946">Example <TT>CrvHyp_kedlaya (H131E23)</TT></A></H3>
+For the second example, we apply Kedlaya's algorithm to a genus curve 2 over 
+GF(3<sup>20</sup>).
+<P>
+<P>
+<P>
+<PRE>
+&gt; K := FiniteField(3,20);
+&gt; P&lt;x&gt; := PolynomialRing(K);
+&gt; f :=  x^5 + x + K.1;
+&gt; J := Jacobian(HyperellipticCurve(f));
+&gt; #J;
+Using Kedlaya's algorithm.
+Applying Kedlaya's algorithm
+Total time: 2.310
+12158175772023384771
+</PRE>
+<HR>
+<H3><A NAME = "16947">Example <TT>CrvHyp_kedlaya2 (H131E24)</TT></A></H3>
+For the third example, we apply Vercauteren's algorithm to a non-ordinary 
+genus curve 2 over GF(2<sup>25</sup>)..
+<P>
+<P>
+<P>
+<PRE>
+&gt; K := FiniteField(2,25);
+&gt; P&lt;x&gt; := PolynomialRing(K);
+&gt; f :=  x^5 + x^3 + x^2 + K.1;
+&gt; J := Jacobian(HyperellipticCurve([f,K!1]));
+&gt; time #J;
+Using Kedlaya/Vercauteren's algorithm.
+1125899940397057
+Time: 0.680
+</PRE>
+<HR>
+<H3><A NAME = "16948">Example <TT>CrvHyp_mestre (H131E25)</TT></A></H3>
+For the third example, we apply Mestre's algorithm to a genus 3 ordinary curve 
+over GF(2<sup>25</sup>).
+<P>
+<P>
+<P>
+<PRE>
+&gt; K := FiniteField(2,25);
+&gt; P&lt;x&gt; := PolynomialRing(K);
+&gt; h := x*(x+1)*(x+K.1);
+&gt; f :=  x^7 + x^5 + x + K.1;
+&gt; C := HyperellipticCurve([f,h]);
+&gt; J := Jacobian(C);
+&gt; #J;
+Using Mestre's method.
+Total time: 0.440
+37780017712685037895040
+&gt; SetVerbose("JacHypCnt",false);
+</PRE>
+<P>
+As the full Euler factor of J has been computed and stored  the number of points on
+C, the Zeta function for C and the Euler factor for C are now immediate.
+<P>
+<P>
+<P>
+<PRE>
+&gt; time #C;
+33555396
+Time: 0.000
+</PRE>
+<HR>
+<H3><A NAME = "16949">Example <TT>CrvHyp_shanks-pollard (H131E26)</TT></A></H3>
+<P>
+We compare the Shanks and Pollard methods for large prime fields.
+<P>
+<P>
+<P>
+<PRE>
+&gt; // Comparison between Shanks and Pollard:
+&gt; P&lt;x&gt; := PolynomialRing(GF(1000003));
+&gt; f := x^7 + 123456*x^6 + 123*x^5 + 456*x^4 + 98*x^3 + 76*x^2 + 54*x + 32;
+&gt; J := Jacobian(HyperellipticCurve(f));
+&gt; curr_mem := GetMemoryUsage();
+&gt; ResetMaximumMemoryUsage();
+&gt; time Order(J : ShanksLimit := 10^15);
+1001800207033014252
+Time: 19.140
+&gt; GetMaximumMemoryUsage() - curr_mem;
+133583360
+</PRE>
+<P>
+The computation took about 100 MB of central memory.  
+<P>
+<P>
+<P>
+<PRE>
+&gt; delete J`Order;   // clear the result which has been stored
+&gt; curr_mem := GetMemoryUsage();
+&gt; ResetMaximumMemoryUsage();
+&gt; time Order(J : ShanksLimit := 0);
+1001800207033014252
+Time: 95.670
+&gt; GetMaximumMemoryUsage() - curr_mem;
+0
+</PRE>
+<P>
+Now it takes almost no memory, but it is slower (and runtime may
+vary a lot).
+<HR>
+<H3><A NAME = "16950">Example <TT>CrvHyp_shanks-pollard (H131E27)</TT></A></H3>
+<P>
+In the case of genus 2 curves, the parameters <TT>UseSchoof</TT> and 
+<TT>UseHalving</TT> do help.
+<P>
+<P>
+<P>
+<PRE>
+&gt; // Using Schoof and Halving true is generally best in genus 2
+&gt; P&lt;x&gt; := PolynomialRing(GF(100000007));
+&gt; f := x^5 + 456*x^4 + 98*x^3 + 76*x^2 + 54*x + 32;
+&gt; J := Jacobian(HyperellipticCurve(f));
+&gt; time Order(J);
+10001648178050390
+Time: 7.350
+&gt; delete J`Order;
+&gt; time Order(J: UseSchoof := false, UseHalving := false);
+10001648178050390
+Time: 21.080
+</PRE>
+<P>
+But if the Jacobian is known in advance to be highly non--cyclic, it
+may be slightly better to switch them off.  The Jacobian below is the
+direct product of two copies of the same supersingular elliptic curve.
+<P>
+<P>
+<P>
+<PRE>
+&gt; // ... but not always for highly non-cyclic Jacobians
+&gt; P&lt;x&gt; := PolynomialRing(GF(500083));
+&gt; f := x^5 + 250039*x^4 + 222262*x^3 + 416734*x^2 + 166695*x + 222259;
+&gt; J := Jacobian(HyperellipticCurve(f));
+&gt; time Order(J);
+250084007056
+Time: 1.920
+&gt; delete J`Order;       
+&gt; time Order(J : UseSchoof:=false, UseHalving := false);
+250084007056
+Time: 1.870
+</PRE>
+<HR>
+<H5><A NAME = "16951">FactoredOrder(J) : JacHyp -&gt; [ &lt;RngIntElt, RngIntElt&gt; ]</A></H5>
+<BLOCKQUOTE>
+Given the Jacobian J of a hyperelliptic curve defined over a 
+finite field, the function returns the factorization of the order of the group 
+of rational points.
+</BLOCKQUOTE>
+<H5><A NAME = "16952">EulerFactor(J) : JacHyp -&gt; RngUPolElt</A></H5>
+<BLOCKQUOTE>
+Given the Jacobian J of a hyperelliptic curve defined over a 
+finite field, the function returns the Euler factor J, i.e. the reciprocal 
+of the characteristic polynomial of Frobenius acting on H<sup>1</sup>(J). 
+(see also <TT>ZetaFunction(C)</TT> which is essentially the same
+function and has the same behaviour).
+</BLOCKQUOTE>
+<H5><A NAME = "16953">EulerFactorModChar(J) : JacHyp -&gt; RngUPolElt</A></H5>
+<BLOCKQUOTE>
+Given the Jacobian J of a hyperelliptic curve defined over a finite
+field, the function returns the Euler factor J modulo the characteristic of the
+base field.  This function should not be used in high characteristic
+(say p should be &le;10<sup>6</sup>).
+</BLOCKQUOTE>
+<H5><A NAME = "16954">EulerFactor(J, K) : JacHyp, FldFin -&gt; RngUPolElt</A></H5>
+<BLOCKQUOTE>
+Given a Jacobian J of a hyperelliptic curve defined over the 
+rationals and a finite field K at which J has good reduction, 
+the function returns the Euler factor of the base extension of J to K.
+</BLOCKQUOTE>
+<H4><A NAME = "16955">Deformation Point Counting</A></H4>
+
+
+
+<H5><A NAME = "16956">JacobianOrdersByDeformation(Q, Y) : RngMPolElt, SeqEnum -&gt; SeqEnum</A></H5>
+<H5>EulerFactorsByDeformation(Q, Y) : RngMPolElt, SeqEnum -&gt; SeqEnum</H5>
+<H5>ZetaFunctionsByDeformation(Q, Y) : RngMPolElt, SeqEnum -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+These functions compute the orders of Jacobians (<I>resp.</I> Euler factors,
+<I>resp.</I> Zeta functions)
+of one or more hyperelliptic curves in a 1-parameter family over a finite
+field using deformation methods.
+<P>
+The 2-variable polynomial Q(x, z) should be in variables x and z over a finite 
+field of odd characteristic k. Currently Q must be monic of odd degree
+as a polynomial in x. z is the parameter and the family of curves is
+given by y<sup>2</sup>=Q(x, z).
+<P>
+The sequence Y should contain elements in a finite field extension K of k.
+The function then computes and returns the sequence of orders, Euler factors
+or Zeta functions
+associated to the hyperelliptic curves over K obtained by specialising the
+z parameter of Q(x, z) to the elements of Y.
+<P>
+Over a field of size p<sup>n</sup>, for n not too large,
+it is efficient to compute the results for several curves in the family at
+once, as roughly half of the computation for an individual curve is taken up in
+computing a Frobenius matrix that is then specialised to the parameter value.
+For a sequence of input parameter values, this part of the computation is
+only performed once at the start. However, as n becomes larger, the time
+taken for the specialisation at a particular value starts to dominate.
+<P>
+The field k over which the family is defined should be of small degree
+over the prime field. This is because Kedlaya's algorithm is applied over 
+k to a particular member of the family with the parameter specialised to 
+a k-value to initialise the deformation.
+<P>
+Similarly, the algorithm is much faster when Q(x, z) is of small degree in
+the parameter z. In practice, the degree of Q(x, z) as a polynomial in z, 
+probably shouldn't exceed 3 or 4 (linear is obviously best).
+<P>
+There are two further conditions on Q and Y which we will try to remove
+in the near future. The first is that no Y-value is zero. The second is that
+the generic discriminant of hat(Q) (resultant of hat(Q) and 
+&part;hat(Q)/&part;x w.r.t. x) must have leading coefficient (as
+a polynomial in z) a unit in W(k). Here, W(k) is the ring of integers
+of the unramified extension of Q<sub>p</sub> with residue class field k and 
+hat(Q) is a lift of Q to a 2-variable polynomial over W(k).
+By translating and scaling the parameter, the user may be able
+to effect these two conditions if they aren't initially satisfied.
+<P>
+As with the other point-counting functions, the verbose flag <TT>JacHypCnt</TT>
+can be used to output information during processing.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16957">Example <TT>CrvHyp_def_hyp_pt_cnt_ex (H131E28)</TT></A></H3>
+The following is a small example where the Euler factors for 4 random
+members of a linear family of elliptic curves are computed with a
+single call. The base field is F<sub>9</sub> and the parameter values are taken
+in F_(3<sup>40</sup>) which is the field over which the counting occurs.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Fp := FiniteField(3^2);
+&gt; R&lt;X,Y&gt; := PolynomialRing(Fp,2);
+&gt; Q  := X^3+X^2-2*X+Fp.1+Y*(X^2-X+1);
+&gt; Fq := ext&lt;Fp | 20&gt;;
+&gt; values := [Random(Fq) : i in [1..4]];
+&gt; EFs := EulerFactorsByDeformation(Q,values);
+&gt; EFs;
+[
+    1215766545905692&equiv;*$.1^2 + 852459373*$.1 + 1,
+    1215766545905692&equiv;*$.1^2 + 1088717005*$.1 + 1,
+    1215766545905692&equiv;*$.1^2 + 6911064226*$.1 + 1,
+    1215766545905692&equiv;*$.1^2 - 607949990*$.1 + 1
+]
+</PRE>
+<HR>
+<H4><A NAME = "16958">Abelian Group Structure</A></H4>
+
+
+
+<H5><A NAME = "16959">Sylow(J, p) : JacHyp, RngIntElt -&gt; GrpAb, Map, Eseq</A></H5>
+<BLOCKQUOTE>
+Given the Jacobian J of a hyperelliptic curve defined over a finite 
+field and a prime p, this function returns the Sylow p-subgroup of 
+the group of rational points of J, as an abstract abelian group A. 
+The injection from A to J is also returned as well as 
+the generators of the p-Sylow subgroup.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "16960">AbelianGroup(J) : JacHyp -&gt; GrpAb, Map</A></H5>
+
+<PRE>    UseGenerators: Bool                 Default: <TT>false</TT></PRE>
+
+<PRE>    Generators: SetEnum                 Default: </PRE>
+<BLOCKQUOTE>
+Given the Jacobian J of a hyperelliptic curve defined over a finite 
+field K, this function returns the group of rational points of J as 
+an abstract abelian group A.  The isomorphism from A to J(K) is 
+returned as a second value.
+<P>
+If <TT>UseGenerators</TT> is set then the group structure computation
+  is achieved by extracting relations from the user-supplied
+  set of generators in <TT>Generators</TT>.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "16961">HasAdditionAlgorithm(J) : JacHyp -&gt; Bool</A></H5>
+<BLOCKQUOTE>
+Returns true if and only if the Jacobian J has an addition algorithm.
+This is of interest when trying to construct the (abelian) group
+  structure of J: When no user-supplied generators are given,
+  such an algorithm must be present.
+<P>
+<P>
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text1495.htm">[Next]</A><A  HREF = "text1493.htm">[Prev]</A> <A  HREF = "text1495.htm">[Right]</A> <A  HREF = "text1493.htm">[Left]</A> <A  HREF = "text1483.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,39 @@
+"Source: Text/Algebra/AlgGen.text";
+"Line: 634";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Algebra/AlgGen.text, line: 634
+// Example: H84E1 ()
+print "Example: H84E1";
+ei := GetEchoInput();
+SetEchoInput(true);
+Q := MatrixAlgebra< Rationals(), 4 |
+   [0,1,0,0, -1,0,0,0, 0,0,0,-1, 0,0,1,0],
+   [0,0,1,0, 0,0,0,1, -1,0,0,0, 0,-1,0,0]>;
+i := Q.1;
+j := Q.2;
+k := i*j;
+Dimension(Q);
+assert $1 eq 4;
+MinimalPolynomial( (1+i+j+k)/2 );
+a := [ Q!1, i, j, (1+i+j+k)/2 ];
+T := MatrixAlgebra(Rationals(),4) ! &cat[ Coordinates(Q,a[i]) : i in [1..4] ];
+V := RSpace(Rationals(), 4);
+C := [ V ! Coordinates(Q, a[i]*a[j]) * T^-1 : j in [1..4], i in [1..4] ];   
+A := ChangeRing( Algebra< V | C >, Integers() );             
+IsAssociative(A);
+assert $1;
+AA := AssociativeAlgebra(A);
+AA;
+MinimalPolynomial(AA.4);
+for p in [ i : i in [1..100] | IsPrime(i) ] do
+   if not IsSimple( ChangeRing( AA, GF(p) ) ) then
+      print p;
+   end if;
+end for;
+assert $1 eq 2;
+CS, CF, T := CompositionSeries( ChangeRing( AA, GF(2) ) );
+T;
+MinimalPolynomial(AA.1 + AA.3);
+MinimalPolynomial(AA.2 + AA.3);
+SetEchoInput(ei);

@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Metacyclic p-groups</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text747.htm">[Next]</A><A  HREF = "text745.htm">[Prev]</A> <A  HREF = "text747.htm">[Right]</A> <A  HREF = "text745.htm">[Left]</A> <A  HREF = "text742.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "8553">Metacyclic p-groups</A></H3>
+
+<P>
+<P>
+<P>
+Magma contains functions for constructing all metacyclic groups of 
+order p<sup>n</sup>. It can also decide if a given p-group is metacyclic,
+construct invariants which distinguish this metacyclic group from all 
+others of this order, and construct a standard presentation for the
+group.
+<P>
+This section describes the functions for accessing these
+algorithms.  The functions were developed by 
+Mike Newman, Eamonn O'Brien, and Michael Vaughan-Lee.
+
+
+<H5><A NAME = "8554">MetacyclicPGroups(p, n: parameters) : RngIntElt, RngIntElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Return a list of the metacyclic groups of order p<sup>m</sup>,
+where p is a prime and n is a positive integer.
+<P>
+<P>
+<PRE>
+     PCGroups: BoolElt                   Default: <TT>true</TT>
+</PRE>
+If <TT>true</TT>, the groups returned are in category GrpPC, otherwise
+they are in category GrpFP  -- this will be faster if
+the groups have large class.
+</BLOCKQUOTE>
+<H5><A NAME = "8555">IsMetacyclicPGroup(P) : Grp -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+The group P is a p-group, either pc- or matrix or permutation group; if P
+is metacyclic, then return <TT>true</TT>, else <TT>false</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "8556">InvariantsMetacyclicPGroup(P) : Grp -&gt; Tup</A></H5>
+<BLOCKQUOTE>
+The group P is a metacyclic p-group, either pc- or matrix or permutation group; 
+return tuple of invariants which uniquely identify metacyclic p-group P.
+This tuple which contains at least four terms, &lt; r, s, t, n &gt; 
+has the following meaning:
+P has order p<sup>n + s</sup>; its derived quotient is C<sub>p<sup>r</sup></sub> x C<sub>p<sup>s</sup></sub>;
+its derived group is cyclic of order p<sup>n - r</sup>;
+it has exponent p<sup>n + s - t</sup>. 
+<P>
+If p = 2, then additional
+invariants are needed to distinguish among the groups.
+We record the abelian invariants of the centre of P.
+If s = 1 and the centre of P has order 2, then the
+2-group is maximal class and we record whether
+it is dihedral, quaternion or semidihedral.
+If s &gt; 1 then the group has two cyclic 
+central normal subgroups of order 2<sup>s - 1</sup> whose
+central quotients are both semidihedral, or dihedral
+and quaternion.  The invariant tuple  has length at most 6.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "8557">StandardMetacyclicPGroup(P): Grp -&gt; GrpPC</A></H5>
+<BLOCKQUOTE>
+The group P is a metacyclic p-group, either pc- or matrix or permutation group; 
+return metacyclic p-group having a canonical pc-presentation which
+is isomorphic to P. If two metacyclic p-groups
+have the same canonical presentation, then they are isomorphic.
+</BLOCKQUOTE>
+<H5><A NAME = "8558">NumberOfMetacyclicPGroups(p, n): RngIntElt, RngIntElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Return number of metacyclic groups of order p<sup>n</sup>.
+</BLOCKQUOTE>
+<H5><A NAME = "8559">HasAllPQuotientsMetacyclic(G): GrpFP -&gt; BoolElt, SeqEnum</A></H5>
+<H5>HasAllPQuotientsMetacyclic(G, p): GrpFP -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if for all primes p all p-quotients of the
+finitely-presented group G are metacyclic; otherwise
+return <TT>false</TT> and a description of the set of primes for which G 
+has non-metacyclic p-quotient. 
+<P>
+If a prime p is supplied as a second argument, then 
+the function returns <TT>true</TT> if all p-quotients of 
+G are metacyclic; otherwise it returns <TT>false</TT>. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8560">Example <TT>GrpData_meta (H71E6)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; X := MetacyclicPGroups (3, 6);
+&gt; #X;
+11
+&gt; X[4];
+GrpPC of order 729 = 3^6
+PC-Relations:
+    $.1^3 = $.3,
+    $.2^3 = $.4,
+    $.3^3 = $.6,
+    $.4^3 = $.5,
+    $.5^3 = $.6,
+    $.2^$.1 = $.2 * $.6^2
+&gt; H := SmallGroup (729, 59);
+&gt; IsMetacyclicPGroup (H);
+true
+&gt; I := InvariantsMetacyclicPGroup(H);
+&gt; I;
+&lt;2, 2, 2, 4, [], , &gt;
+&gt; S := StandardMetacyclicPGroup (H);
+GrpPC : S of order 729 = 3^6
+PC-Relations:
+    S.1^3 = S.3,
+    S.2^3 = S.4,
+    S.3^3 = S.6,
+    S.4^3 = S.5,
+    S.5^3 = S.6,
+    S.2^S.1 = S.2 * S.6^2
+&gt; /* find this group in list */ 
+&gt; [IsIdenticalPresentation (S, X[i]): i in [1..#X]];
+[ false, false, false, true, false, false, false, false, false, false, false ]
+&gt; /* so this group is #4 in list */
+&gt; NumberOfMetacyclicPGroups (19, 7);
+14
+&gt; Q := FreeGroup (4);
+&gt; G := quo &lt; Q |  Q.2^2, Q.4^3, Q.2 * Q.3 * Q.2 * Q.3^-1, Q.1^9&gt;;
+&gt; /* are all p-quotients of G metacyclic? */
+&gt; HasAllPQuotientsMetacyclic (G);
+false [ 3 ]
+&gt; /* the 3-quotient is not metacyclic */
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text747.htm">[Next]</A><A  HREF = "text745.htm">[Prev]</A> <A  HREF = "text747.htm">[Right]</A> <A  HREF = "text745.htm">[Left]</A> <A  HREF = "text742.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

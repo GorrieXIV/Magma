@@ -1,0 +1,1499 @@
+%******************************************************************************
+%
+%    design.tex  Composition Tree Design
+%
+%    File      : $HeadURL:: https://subversion.sfac.auckland.ac.nz/svn/prj_m#$:
+%    Author    : Henrik B‰‰rnhielm and Eamonn O'Brien
+%    Dev start : 2008-10-23
+%
+%    Version   : $Revision:: 1493                                            $:
+%    Date      : $Date:: 2008-11-26 11:22:36 +1100 (Wed, 26 Nov 2008)        $:
+%    Last edit : $Author:: jbaa004                                           $:
+%
+%    $Id:: design.tex 1493 2008-11-26 00:22:36Z jbaa004                      $:
+%
+%******************************************************************************
+
+\documentclass[twoside,a4paper,reqno,psamsfonts]{amsart}
+%\usepackage[swedish,english]{babel} 
+\usepackage[latin1]{inputenc} % svenska tecken skall tolkas
+%\usepackage{amsmath}
+%\usepackage{amsfonts} % for \mathbb
+%\usepackage{amsthm}
+\usepackage{amscd}
+\usepackage{amsopn}
+\usepackage{amstext}
+\usepackage{amsxtra}
+\usepackage{amssymb}
+\usepackage{stmaryrd}
+\usepackage{upref}
+\usepackage{textcase} % For correct case of swedish chars
+%\usepackage[algo2e,ruled,linesnumbered,algosection]{algorithm2e} % for typesetting algorithms
+\usepackage{clrscode}
+%\renewcommand{\Comment}{$\hspace*{-0.075em} //$ } % Use // for comments
+\usepackage{bm} % for \boldsymbol
+\usepackage{draftcopy}
+\usepackage{graphicx}
+\usepackage{setspace}
+\frenchspacing
+
+%\numberwithin{section}{chapter}
+\numberwithin{equation}{section}
+\numberwithin{figure}{section}
+%\numberwithin{algorithm}{chapter}
+
+\newcounter{algorithm}
+%\numberwithin{algorithm}{section}
+%\renewcommand{\thealgorithm}{\arabic{section}.\arabic{algorithm}}
+
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{cl}[thm]{Corollary}
+\newtheorem{pr}[thm]{Proposition}
+\newtheorem{axiom}[thm]{Axiom}
+\newtheorem{conj}[thm]{Conjecture}
+
+\theoremstyle{definition}
+\newtheorem{deff}[thm]{Definition}
+
+\theoremstyle{remark}
+\newtheorem{note}[thm]{Note}
+\newtheorem{rem}[thm]{Remark}
+
+%\renewcommand{\thetheorem}{Theorem~\arabic{chapter}.\arabic{theorem}}
+%\renewcommand{\thepr}{Proposition~\arabic{chapter}.\arabic{pr}}
+%\renewcommand{\thedeff}{Definition~\arabic{chapter}.\arabic{deff}}
+\providecommand{\abs}[1]{\left\lvert #1 \right\rvert}
+\providecommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\providecommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\providecommand{\floor}[1]{\lfloor #1 \rfloor}
+\providecommand{\set}[1]{\left\lbrace #1 \right\rbrace}
+\providecommand{\gen}[1]{\left\langle #1 \right\rangle}
+%\providecommand{\ord}[1]{\operatorname{ord}( #1 )}
+\providecommand{\Sym}[1]{\operatorname{Sym}( #1 )}
+\renewcommand{\Pr}[1]{\operatorname{Pr}[ #1 ]}
+%\renewcommand{\char}[1]{\operatorname{char}[ #1 ]}
+
+\newcommand{\field}[1]{\mathbb{#1}}
+\newcommand{\vect}[1]{\boldsymbol{\mathrm{#1}}}
+\newcommand{\N}{\field{N}}
+\newcommand{\Z}{\field{Z}}
+\newcommand{\R}{\field{R}}
+\newcommand{\Q}{\field{Q}}
+\newcommand{\OO}{\field{O}}
+\newcommand{\K}{\field{K}}
+\newcommand{\A}{\field{A}}
+\newcommand{\F}{\field{F}}
+\newcommand{\PS}{\field{P}}
+\newcommand{\GAP}{\textsf{GAP}}
+\newcommand{\MAGMA}{\textsc{Magma}}
+
+% for Cayley graphs
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\OV}{\mathcal{O}}
+
+\DeclareMathOperator{\lcm}{lcm}
+\DeclareMathOperator{\sgd}{sgd}
+\DeclareMathOperator{\mgm}{mgm}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\GL}{GL}
+\DeclareMathOperator{\PGL}{PGL}
+\DeclareMathOperator{\GF}{GF}
+\DeclareMathOperator{\IM}{Im}
+\DeclareMathOperator{\RE}{Re}
+\DeclareMathOperator{\I}{Id}
+%\DeclareMathOperator{\OR}{O}
+\DeclareMathOperator{\SL}{SL}
+\DeclareMathOperator{\GO}{GO}
+\DeclareMathOperator{\SO}{SO}
+\DeclareMathOperator{\Sz}{Sz}
+\DeclareMathOperator{\Sp}{Sp}
+\DeclareMathOperator{\SU}{SU}
+\DeclareMathOperator{\chr}{char}
+\DeclareMathOperator{\Aut}{Aut}
+\DeclareMathOperator{\Alt}{Alt}
+\DeclareMathOperator{\PSL}{PSL}
+\DeclareMathOperator{\PSp}{PSp}
+\DeclareMathOperator{\PPSL}{(P)SL}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator{\SLP}{\mathtt{SLP}}
+\DeclareMathOperator{\G2}{{^2}G_2}
+\DeclareMathOperator{\LargeRee}{{^2}F_4}
+\DeclareMathOperator{\Ree}{Ree}
+\DeclareMathOperator{\Gal}{Gal}
+\DeclareMathOperator{\Norm}{N}
+\DeclareMathOperator{\Cent}{C}
+\DeclareMathOperator{\Zent}{Z}
+\DeclareMathOperator{\EndR}{End}
+\DeclareMathOperator{\Hom}{Hom}
+\DeclareMathOperator{\Ker}{Ker}
+\DeclareMathOperator{\cln}{{:}}
+\DeclareMathOperator{\O2}{O_2}
+\DeclareMathOperator{\Op}{O_p}
+\DeclareMathOperator{\RP}{\bf{RP}}
+\DeclareMathOperator{\NP}{\bf{NP}}
+\DeclareMathOperator{\PP}{\bf{P}}
+\DeclareMathOperator{\coRP}{\bf{co-RP}}
+\DeclareMathOperator{\ZPP}{\bf{ZPP}}
+\DeclareMathOperator{\Imm}{Im}
+\DeclareMathOperator{\Mat}{Mat}
+\DeclareMathOperator{\Dih}{D}
+
+
+\newcommand{\OR}[1]{\operatorname{O} \bigl( #1 \bigr)}
+%\newcommand{\cln}{\operatorname{O} ( #1 )}
+
+\title{Composition Tree in MAGMA}
+
+\author{Henrik B\"a\"arnhielm}
+\address{Department of Mathematics \\ University of Auckland \\ Auckland \\ New Zealand}
+\urladdr{http://www.math.auckland.ac.nz/\textasciitilde henrik/}
+\email{henrik@math.auckland.ac.nz}
+
+\author{Charles Leedham-Green}
+\address{School of Mathematical Sciences \\ Queen Mary, University of London \\ Mile End Road \\ London \\ United Kingdom}
+\urladdr{http://www.maths.qmul.ac.uk/\textasciitilde crlg/}
+\email{c.r.leedham-green@qmul.ac.uk}
+
+\author{Eamonn O'Brien}
+\address{Department of Mathematics \\ University of Auckland \\ Auckland \\ New Zealand}
+\urladdr{http://www.math.auckland.ac.nz/\textasciitilde obrien/}
+\email{obrien@math.auckland.ac.nz}
+
+\begin{document}
+
+\begin{abstract}
+Design description and documentation for $\MAGMA$ implementation of \texttt{CompositionTree}.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+
+This is a description of the implementation of the
+\texttt{CompositionTree} $\MAGMA$ package. The motivation comes
+from the \emph{matrix group recognition project} \cite{crlg01, MR2258009}, where the desire is
+to compute the structure of a given matrix group. Permutation group
+techniques (BSGS) can be used for matrix groups up to a certain degree
+and finite field size, but beyond that something else is necessary.
+This package is intended for that purpose. 
+
+One would like to
+fit into the \emph{Soluble Radical} method of \cite[Chapter 10]{hcgt},
+since this enables the use of many algorithms that are implemented in
+$\MAGMA$.  The method of \cite{MR2429998, statherthesis} achieves
+this, but this package fit into an alternative and simpler approach.
+
+\begin{enumerate}
+\item Compute a \emph{composition tree} of the given matrix group,
+  which is what this package does. The overall strategy for this is
+  described in \cite{crlg01}, but new ideas from \cite{MR2289128} will
+  be used. 
+\item Compute a composition series of the group from the composition tree.
+\item Rearrange the composition factors in order to obtain a chief series. 
+\end{enumerate}
+
+This approach has the advantage that the algorithm of \cite{crlg01} is
+simpler than the one in \cite{MR2429998}, and therefore easier to
+implement and optimise. The rearranging is also a simple algorithm,
+and can use the composition tree as a black box with a well-defined
+interface, without knowing how it was produced. The disadvantage
+towards \cite{MR2429998} is that certain groups will require a lot of
+rearranging\footnote{The typical example is imprimitive matrix groups
+  like $\SL(2, 7) \wr \Sym{20}$.}.
+
+A composition tree of a group can be seen as a data structure for
+storing composition factors, which can be built up recursively. It can
+also be seen as a data structure that facilitates constructive
+membership testing (rewriting) in a group, using the algorithm
+described in \cite{crlg01}. The ability to perform rewriting is the
+only thing that is immediately available when a composition tree has
+been constructed, and it is an essential feature, which is also
+necessary in the recursive construction algorithm. It depends on the
+availability of rewriting algorithms in the finite simple groups, a
+dependency which is only almost satisfied. To efficiently obtain
+composition series we also need constructive recognition algorithms for
+finite simple groups. In the cases where implementations of these are
+not available, we have to rely on BSGS computations and on
+\cite{ryba_trick}.
+
+A \emph{rewriting} algorithm for a group $G$ is an algorithm for the
+\emph{constructive membership problem} in $G$: given $g \in U
+\geqslant G = \gen{X}$, decide whether or not $g \in G$, and if so
+express $g$ as a straight line program in $X$. The first component is
+the memberhip problem, and sometimes only the second component is
+called rewriting. The \emph{constructive recognition problem} is as
+follows: construct an isomorphism $\varphi$ from $G$ to a
+\emph{standard copy} $H$ of $G$ such that $\varphi(g)$ can be computed
+efficiently for every $g \in G$. Such an isomorphism is called
+\emph{effective}. Sometimes one also demands that $\varphi^{-1}$ is
+also effective.
+
+Constructing the composition factors from the tree requires more work,
+occasionally much more, typically when the tree includes leaves where
+we have to compute BSGS. This is the reason that constructing the tree
+and the series are separate operations. One may wish to only have the
+tree, if one is only interested in rewriting and not in the
+composition series.
+
+The overall strategy for building the composition tree is as follows.
+
+\begin{enumerate}
+\item Given a group $G$, construct an effective homomorphism $\phi : G
+  \to I$, for some group $I$, or notice that $G$ is simple. If $G$ is
+  simple, it is a leaf. Assume henceforth that $G$ is not simple.
+\item Construct a composition tree for $I$.
+\item Construct generators for $K := \Ker(\phi)$.
+\item Construct a composition tree for $K$.
+\item Put together the composition trees for $I$ and $K$ into a tree for $G$.
+\end{enumerate}
+
+Here, the ability of rewriting in $I$ is necessary in order to construct $K$.
+
+The overall strategy above does not by itself assume that the input is a matrix
+group, but this assumption is needed in the first step. From
+\cite{crlg01}, we can use Aschbacher's theorem \cite{aschbacher84} for
+matrix groups. This requires algorithms for deciding if $G$ lies in a
+certain Aschbacher class, and to construct the corresponding $\phi$.
+Such algorithms exist and are implemented in $\MAGMA$.
+
+As a consequence, in the matrix group context a leaf is not
+necessarily simple. A matrix leaf is either a classical group in
+natural representation or a central extension of a non-abelian finite
+simple group in matrix representation, \emph{i.e.} simple modulo
+scalars. Leaves can also be cyclic, not necessarily of prime order,
+but these are not stored as matrix groups.
+
+One can proceed in a similar way for permutation groups, using the
+O'Nan-Scott theorem instead of the Aschbacher theorem in order to
+implement the first step. However, in the permutation group context
+there is already an extensive library of algorithms which only require
+a BSGS. For a small base permutation group one can easily find a BSGS,
+so our goal in the permutation group context is only to apply
+reductions to small base groups and then use the existing permutation
+group machinery.
+
+\section{Interface for factor rearranging}
+\label{section:rearrange_interface}
+The algorithm that rearranges the composition factors requires the
+ability to construct a composition series together with a number of
+homomorphisms. For a group $G$, it requires the following.
+\begin{itemize}
+\item A composition series $\gen{1} = G_0 < G_1 < \dotsm < G_k = G$, hence generating sets for each $G_i$. 
+\item For each $i > 0$, an effective homomorphism $\varphi_i : G_i \to S_i$,
+  where $S_i$ is a \emph{standard copy} of $G_i / G_{i - 1}$. The
+  standard copy should be chosen so that computations inside $S_i$ are
+  as easy as possible. The kernel of $\varphi_i$ should be $G_{i -
+    1}$. However, it is allowed that $S_i$ is not simple, but a
+  central extension of a finite simple group. In this case,
+  $\Ker(\varphi_i) = (G_{i - 1} . Z) / Z$ where $Z =
+  \varphi_i^{-1}(\Zent(S_i))$. The typical example where this is
+  necessary is when $G_i / G_{i - 1} \cong \PSL(d, q)$, then $S_i =
+  \SL(d, q)$, because it is too expensive to explicitly write down $\PSL(d, q)$ (a permutation group) when $d$ or $q$ are large.
+\item For each $i > 0$, the effective inverse $\varphi_i^{-1}$.
+\item For each $i > 0$, a rewriting algorithm for $S_i$.
+\end{itemize}
+
+An additional requirement is an algorithm that, given $G$ and $g \in
+G$, returns the minimal $i$ such that $g \in G_i$. Given the above
+homomorphisms, this algorithm is as in Algorithm
+\ref{alg:factor_number}. It only relies on the observation that for
+any $j$, if $\varphi_j(g) = 1$ then $g \in \Ker(\varphi_j) = G_{j - 1}$ and
+therefore the required minimal $i$ is less than $j$.
+
+\begin{figure}[hb!]
+\begin{codebox} 
+\refstepcounter{algorithm}
+\label{alg:factor_number}
+\Procname{\kw{Algorithm} \ref{alg:factor_number}: $\proc{FactorNumber}(g)$}
+\li \For $i := k - 1$ \Downto $1$ \By $-1$
+\zi \Do
+\li $h := \varphi_i(g)$
+\li \If $S_i$ is simple
+\zi \Then \If $h \neq 1$
+\li \Then \Return{$i + 1$}
+    \End
+\li \Else \If $h \notin \Zent(S_i)$ 
+\li \Then \Return{$i + 1$}
+    \End
+    \End
+    \End
+\zi \kw{end}
+\li \Return{$1$}
+\end{codebox}
+\end{figure}
+
+\section{Data structure}
+A composition tree is stored as a full binary tree. Each node
+represents a group and has various data attached to it. The right
+child represents the image of a reduction and the left child
+represents the kernel. 
+
+If $G$ is the node group, the relationship is that the group $I$ of
+the right child should be the image of $G$ under a homomorphism
+$\phi$, and the group $K$ of left child is then $\Ker(\phi)
+\trianglelefteqslant G$. However, we need to generalise this slightly.
+It is allowed that the right child group is only the image of the
+homomorphism after dividing it by a subgroup of the group generated by
+its scalar flag. More details about this in Section
+\ref{section:scalars}. We also allow that the kernel is not strictly a
+subgroup, but isomorphic to a subgroup. The isomorphisms must be
+effective and should be constructed at the same time as $\phi$. This
+abstracts away the details of the mappings between the node and its
+children from the rest of the algorithm.
+
+This generalisation allows us to store the kernel in a different
+representation, which can be more efficient. For instance, if $\phi$
+is a tensor decomposition of a matrix group, then we want to store
+both the image and the kernel as matrix groups of smaller dimension.
+
+Here is a list of the important data elements stored in a node, after
+the composition tree rooted at the node is constructed.
+
+\begin{itemize}
+\item A list of input generators, generating the group $G$ of the
+  node. If the node is a right child, then these should be in
+  bijection with the input generators of the parent.
+\item An instance of the product replacement algorithm \cite{lg95, lgsm02, MR1829489, Pak00} on the input generators.
+\item A list of reduction algorithms that can be used to find a
+  reduction homomorphism, in a given order. If the group is a matrix
+  group, this is the list of Aschbacher reduction algorithms, but the
+  order may need to change at runtime. For example, if a matrix group is
+  tensor induced, then the kernel is a tensor product, so the order of
+  the reduction algorithms in the kernel can be changed so that the
+  tensor decomposition algorithm is first.
+\item A list of \emph{nice} generators, also generating $G$. In an
+  internal node, these consist of the nice generators of the kernel
+  and image. In a leaf the nice generators are not specified in
+  general, but for example in a classical group, they are the standard
+  generators of the leaf group. The idea is to replace the input
+  generators with a smaller generating set, which allows for having
+  shorter $\SLP$s in constructive membership testing.
+\item A list of $\SLP$s of the nice generators, in the input generators.
+\item A rewriting algorithm, that expresses any element of $G$ as an $\SLP$ in the nice generators.
+\item A list of elements used to verify the the subtree rooted at the
+  node. This is done by rewriting the elements using the constructed
+  rewriting algorithm, thus verifying that the elements lie in the
+  node group. These elements, that serve the purpose of quality control,
+  are called the \emph{mandarins} (after the government officials in
+  Imperial China.)
+\item A list of $\SLP$s of the mandarins, in the nice generators.
+\item A list of $\SLP$s of relators for a presentation on the nice generators.
+\item A list of lists of $\SLP$s of generators for each composition factor of $G$, in the nice generators.
+\item The three lists of homomorphisms described in Section \ref{section:rearrange_interface}.
+\item The scalar flag for $G$. If $G$ is a permutation group this is always the identity. If $G \leqslant \GL(d, q)$ it is a scalar matrix $\alpha \I_d$ where $\alpha \in \F_q^{\times}$.
+\end{itemize}
+
+In the case that the node is not a leaf, some additional data is stored.
+\begin{itemize}
+\item A list of $\SLP$s of the generators of the left child, the kernel, in the input generators of the node.
+\item The reduction homomorphism $\phi$.
+\end{itemize}
+
+In the case that the node is a leaf, there are also some additional data.
+
+\begin{itemize}
+\item The name of the leaf group, from \cite{general_recognition}.
+\item Generators of the standard copy $S$. This is typically the
+  corresponding finite simple group in a small degree representation.
+  Hence it is not necessarily isomorphic to the leaf group, in the
+  case where this is a central extension of the simple group.
+\item An effective isomorphism $\alpha : G \to S$.
+\item An effective isomorphism $\beta : S \to G$.
+\end{itemize}
+
+To be precise, $\alpha$ and $\beta$ are allowed to be isomorphisms
+modulo scalars. Hence we require that if $G \cong Z.S$ where $Z =
+\Zent(G)$ is a cyclic group, then $\beta(\alpha(g)) \in Z$ for every
+$g \in G$. If $G$ is a matrix group, then $Z$ consists of scalar
+matrices, because a matrix leaf is absolutely irreducible. If $G$ is a
+permutation group leaf which is a central extension of a simple group,
+then it is in fact simple, by the O'Nan-Scott theorem, so $Z =
+\gen{1}$ in this case.
+
+\section{General algorithm}
+We now describe aspects of the general composition tree algorithm.
+
+\subsection{Main recursion}
+The main algorithm proceeds as follows.
+\begin{enumerate}
+\item Try to find a reduction homomorphism $\phi : G \to I$. Hence we try each reduction algorithm in turn, until one succeeds, see Sections \ref{section:matrix_reductions} and \ref{section:perm_reductions}.
+\item If no reduction is found, the node is marked as a leaf and the main recursion is finished, see Section \ref{section:leaf_algorithm}. 
+\item Setup the data structure for the right child, and recursively find a composition tree.
+\item Find a probable generating set for $K$, see Section \ref{section:kernel_generation}.
+\item Recursively find a composition tree for $K$. This may provoke a crisis, see Section \ref{section:kernel_generation}.
+\item Setup the nice generators and the rewriting algorithm for the node.
+\item Verify the rewriting using the mandarins. This may provoke a crisis.
+\item Possibly construct a presentation from $I$ and $K$ and see if
+  $G$ satisfies it, see Section \ref{section:verification}. This may provoke a crisis.
+\end{enumerate}
+In the case of a crisis, if the node is safe we add more generators to $K$
+and proceed from that step, otherwise we send the crisis to the parent.
+
+\subsection{Kernel generation}
+\label{section:kernel_generation}
+
+We use two general methods for constructing a probable generating set
+for the kernel $K$. The first is the method described in
+\cite{crlg01}:
+\begin{enumerate}
+\item Construct a set $Y = \set{g_1, \dotsc, g_n}$ of random elements of $G$ using the random process in the node.
+\item Obtain $\SLP$s for $\set{\phi(g) : g \in Y} \subseteq I$, using
+  the rewriting algorithm in the right child.
+\item We obtain the $\SLP$s in the input generators of $I$, which are
+  in bijection with the input generators of $G$. Hence we can evaluate
+  the $\SLP$s in $G$ and obtain a set $\bar{Y} = \set{\bar{g}_1, \dotsc, \bar{g}_n}$ corresponding to $Y$.
+\item Now $g_i / \bar{g}_i \in K$ for each $i$, and this is a random
+  element of $K$.
+\end{enumerate}
+
+This method has no provable probability of success in general, and is
+only a heuristic. For a given group it is a Monte Carlo algorithm,
+although with unknown success probability, and as a heuristic it is
+very practical.
+
+The other method assumes that a presentation of $I \cong \gen{Y \mid
+  R}$ is available. In our case, $Y$ is the nice generating set of
+$I$, but we can easily rewrite the presentation on the input
+generators.
+\begin{enumerate}
+\item Let $G = \gen{X}$. Evaluate the relators $R$ on $X$. This relies on the
+  bijection between the input generators of $I$ and $X$, and produces
+  $Z_1 \subseteq K$.
+\item Map $X$ to $I$, obtain $\SLP$s and divide, as in the previous method, to obtain $Z_2 \subseteq K$.
+\item Now $Z = Z_1 \cup Z_2$ is a normal generating set for $K$. In other words, $K$ is the normal closure of $\gen{Z}$. Note that $\abs{Z} = \abs{R} + \abs{X}$.
+\item Use the algorithm in \cite{MR1235795} to construct probable
+  generators of the normal closure of $\gen{Z}$. This is a Monte Carlo
+  algorithm, and the number of generators it constructs depends on the
+  given error probability and the length of the longest subgroup chain
+  in $G$, usually denoted $l_G$.
+\end{enumerate}
+
+Note that there are no practical upper bounds on $l_G$. If $G
+\leqslant \GL(d, q)$ then $l_G \leqslant d^2$, and this bound is
+optimal since it is achieved by $p$-groups. If $\mathrm{O}_p(G) =
+\gen{1}$ then $l_G \leqslant d$, which is better but still not useful
+in practice, and this bound is also optimal. If $G \leqslant \Sym{n}$
+then $l_G \leqslant n$, again an optimal upper bound. In practice, we
+use a very small value of $l_G$.
+
+We prefer the second method of generating the kernel, whenever it can
+be used. It depends upon our ability to obtain presentations of the
+leaves, because we can construct a presentation of a node if both its
+children have presentations. A drawback is that the number of relators
+can be very large, and hence the number of kernel generators will be
+large.
+
+Note that both these methods of finding the kernel are Monte Carlo, so
+there is a possibility that we fail to find the full kernel. This has
+consequences for the design of the composition tree algorithm. It means that
+constructive membership testing is insecure, if it reports that an
+element does not lie in a group corresponding to some node, this may
+mean that some left child on the path from the node to the root was
+not calculated correctly. This situation is called a \emph{crisis},
+and if it occurs we must discard a part of the tree and recompute it.
+The mandarins are used to test constructive membership testing, to try
+to provoke a crisis.
+
+If there are several kernel computations on the path to the root, we
+have no way of knowing which one of them that is incorrect. We
+therefore introduce the notion of a \emph{safe} node.
+\begin{itemize}
+\item The root node is safe.
+\item A right child is safe if and only if its parent is safe.
+\item A left child is never safe unless it is calculated using some
+  special method that is guaranteed to give the full kernel.
+\end{itemize}
+Now if we get into a crisis during rewriting in some node, we must
+backtrack along the path from the node to the root, until we reach a
+safe node. We must discard the whole left subtree of this node, except
+that we store the generators of its left child. Then we can add more
+generators of this kernel and try again.
+
+\subsection{Verification}
+\label{section:verification}
+
+The composition tree algorithm is inherently probabilistic and there
+are many computations along the way which return results that may be
+wrong with some positive probability. In effect it is a Monte Carlo
+algorithm, although the success probability is unknown, and it is not
+clear that there exists a constant upper bound on this probability if
+the input is an arbitrary matrix group over a finite field.
+
+Therefore there is a positive probability that the composition tree is
+only a composition tree for a subgroup of the input group.
+
+To verify the composition tree, and hence eventually turn it a Las
+Vegas algorithm, we calculate a presentation from the composition tree
+and see if this is a presentation of the input group. In other words,
+we test if all the relators, which must be relators for a subgroup,
+are also relators in the input group.
+
+There are two options, either we verify during construction the
+composition tree, or afterwards. In the first case, when the
+composition trees of the right and left children have been
+constructed, they are immediately verified before putting them
+together.
+
+Presentations can be constructed recursively, given presentations of
+the image and kernel. For a leaf, we require that the leaf algorithm
+constructs a presentation on the nice generators. This is possible in
+theory for all finite simple groups except the small Ree groups \cite{MR2393425, pres2,
+  bray_sz_presentation, alt_sym_short_pres}, but not always possible in practice for every
+type of leaf, in which case we cannot construct a presentation for the
+composition tree.
+
+To construct a presentation recursively for $G$, assume that $I \cong
+\gen{X_I \mid R_I}$ and $K \cong \gen{X_K \mid R_K}$ are presentations
+for the image and kernel, where $X_I$ and $X_K$ are the nice
+generators and $R_I$ and $R_K$ are $\SLP$s of the relators. Recall
+that the nice generators of $G$ is $X_G = X_K \cup \phi^{-1}(X_I)$,
+where $\phi^{-1}(X_I)$ is calculated by evaluating the $\SLP$s of the
+nice generators of $I$ on the input generators of $G$. This relies on
+the bijection between the input generators of $G$ and $I$. Now proceed
+as follows.
+\begin{enumerate}
+\item Rewrite $R_I$ on $X_G$ to obtain $R_I^G = \set{r_1^G, \dotsc,
+    r_n^G}$ and evalute them on $X_G$ to obtain elements $Y_I \subseteq
+  G$.
+\item Since $R_I$ are relators of $I$, $Y_I \subseteq K$, so obtain $\SLP$s of $Y_I$ in $X_K$ and rewrite them on $X_G$, to obtain $R_I^K = \set{r_1^K, \dotsc, r_n^K}$. 
+\item Let $Z_I = \set{r_i^G / r_i^K : i = 1, \dotsc, n}$.
+\item Rewrite $R_K$ on $X_G$ to obtain $Z_K$.
+\item Let $R_K^G = \set{s_1^G, \dotsc, s_m^G}$ be the $\SLP$s in $X_G$
+  corresponding to \[\set{x^y : x \in X_K, y \in \phi^{-1}(X_I)}.\]
+  Evaluate them on $X_G$ to obtain elements $C \subseteq G$.
+\item Since $K$ is normal in $G$, $C \subseteq K$ and we can obtain $\SLP$s of $C$ in $X_K$. Rewrite these on $X_G$ to obtain $R_K^K = \set{s_1^K, \dotsc, s_m^K}$.
+\item Let $Z_C = \set{s_i^G / s_i^K : i = 1, \dotsc, m}$.
+\item Now $G \cong \gen{X_G \mid Z_I \cup Z_K \cup Z_C}$ is a presentation.
+\end{enumerate}
+
+Note that the number of relators in the presentation for $G$ is
+$\abs{R_K} + \abs{R_I} + \abs{X_K} \abs{X_I}$, which can grow large
+with the height of the tree.
+
+\section{Reduction database for matrix groups}
+\label{section:matrix_reductions}
+
+The basic use of the Aschbacher reductions is already described in
+\cite{crlg01}. Here we describe our use of these. The order in which they are described here is the standard order in which they are tried at runtime.
+
+\subsection{Unipotent}
+A group $G \leqslant \GL(d, p^e)$ is unipotent if and only if every $g
+\in G$ has order $p^k \leqslant d$. Moreover, $G$ is unipotent if and
+only if all composition factors of the module of $G$ have dimension
+$1$, and $G$ acts trivially on each such factor.
+
+We first employ a quick negative test to rule out most groups that are
+not unipotent: if some of the given generators of $G$ do not have
+order a power of $p$, then $G$ is not unipotent. If this test does not
+rule out $G$, then we use the MeatAxe to decompose the module of $G$
+and test if the composition factors behave as above.
+
+If the group is unipotent, then MeatAxe provides a change of basis
+matrix $c$ such that $G^c$ is lower triangular. Each subdiagonal of
+$G^c$ is then a vector space over $\F_p$ and hence an elementary
+abelian $p$-group, and the projection of $G^c$ to each such group is a
+homomorphism. Hence we obtain a reduction to the first non-zero
+subdiagonal.
+
+The image is elementary abelian and treated as PC-group, so it is a
+leaf. Hence we can readily obtain a presentation and therefore obtain
+the kernel using the presentation method.
+
+\subsection{MeatAxe reductions}
+There are several reductions coming from the MeatAxe \cite{Parker84, meataxe, better_meataxe}. Let $M$ be
+the module of $G \leqslant \GL(d, q)$. We first find the
+indecomposable summands of $M$, so $M \cong M_1 \oplus \dotsb \oplus
+M_k$. Then we find a composition series of each $M_i$, so $M_i =
+M_{i,n_i} > M_{i, n_i - 1} > \dotsb > M_{i, 1} > M_{i, 0} = 1$. This
+also provides a change of basis matrix $c_i \in \GL(M_i)$ that
+exhibits this series. Then $c = \bigoplus_{i = 1}^k c_i$ (diagonal
+join) exhibits the direct sum decomposition of $M$ as well as the
+composition series of each $M_i$. The corresponding composition series
+of $M$ is
+\begin{equation}
+1 = M_{1, 0} < M_{1, 1} < \dotsb < M_{1, n_1} < M_1 \oplus M_{2, 1} < \dotsb < M_1 \oplus M_2 < \dotsb < M
+\end{equation}
+
+Now $G^{c^{-1}}$ is both block lower triangular, corresponding to the
+composition factors of $M$, and block diagonal, coresponding to the
+direct summands of $M$. We obtain a homomorphism by projecting onto
+the diagonal blocks corresponding to the composition factors. The
+kernel of this is $\mathrm{O}_p(G)$. Since this is the first reduction
+in the composition tree, unless $G$ is unipotent from the start, the
+composition tree has the property that $\mathrm{O}_p(G)$ is the first
+kernel. Therefore the composition factors coming from
+$\mathrm{O}_p(G)$ will be at the bottom of the composition series
+constructed from the tree. This is a useful, because it avoids later
+rearranging of the (potentially large number of) composition factors
+of $\mathrm{O}_p(G)$.
+
+The group of the right child is now contained in $\GL(M_1) \times
+\dotsm \times \GL(M_k)$, embedded in $\GL(d, q)$. From this node we
+therefore obtain a homomorphism onto the first non-trivial summand
+block. The right child of this reduction is
+contained in $\GL(M_{1, 1}).\GL(M_{1, 2}). \dotsc . \GL(1, n_1)$,
+embedded in $\GL(M_1)$, so from this node we obtain a homomorphism onto
+the first non-trivial composition factor block of $M_1$.
+
+Continuing in this way, we obtain reductions to the groups acting on
+the composition factors of $M$. The reason for going via the summands
+is to ensure that the matrices are as sparse as possible, and to
+retain information on how $G$ acts on $M$. Moreover, we know that the
+reduction to the last factor inside each summand must be an
+isomorphism, because the kernel is trivial. If we had mapped to the
+composition factors immediately we would have lost this information
+and would had to calculate the kernel.
+
+\subsection{Absolute reducibility}
+Groups that act irreducibly but not absolutely irreducibly are part of
+the \emph{semilinear} Aschbacher class. However, here we consider
+these separately, because we have a much faster reduction homomorphism
+in this special case. An irreducible group $G \leqslant \GL(d, q)$ is
+absolutely reducible if is reducible when embedded into $\GL(d, q^e)$
+for some $e > 1$. The smallest such $e$ gives the \emph{splitting
+  field} $\F_{q^e}$ for $G$. Then $G$ has a faithful representation $G
+\to \GL(d/e, \F_{q^e})$, so we obtain an isomorphism. This isomorphism
+is in the $\MAGMA$ kernel and hence easy to calculate.
+
+\subsection{Semilinearity}
+For the general semilinear case we use part of \cite{MR1407872}, known
+as SMASH. In this case there exists $N \triangleleft G = \gen{X} \leqslant
+\GL(d, q)$ that is not absolutely irreducible, so it has a splitting
+field $\F_{q^e}$. Moreover, there exists a non-scalar $C \in \Zent(N)$
+such that for every $g \in G$ there exists $1 \leqslant i = i(g)
+\leqslant e$ such that $Cg = gC^{q^i}$. The SMASH algorithm provides
+$e$ and $C$, and we then obtain a homomorphism $G \to \Cent_e$,
+given by $g \mapsto i(g)$.
+
+In this case we can also immediately obtain generators for the kernel
+$K$. Let the image $I = \gen{Y} \leqslant \C_e$, where $\abs{Y} =
+\abs{X}$. Let $X = \set{x_1, \dotsc, x_m}$ and $Y = \set{y_1, \dotsc, y_m}$. 
+\begin{enumerate}
+\item Use the extended Euclidean
+algorithm to obtain $n = \gcd(y_1, \dotsc, y_m, \abs{I})$ and an
+expression $n = a_0 \abs{I} + \sum_{i = 1}^m a_i y_i$.
+\item Let $x = \prod_{i = 1}^m x_i^{a_i}$ and $h_i = x_i x^{-y_i/n}$ for $i = 1, \dotsc, m$. Then $\set{h_1, \dotsc, h_m}$ is a normal generating set for $K$.
+\item Let $k_0 = x^{\abs{I} / n}$ and $k_{i, j} = h_i^{x^j}$ for $i = 1, \dotsc, m$ and $j = 1, \dotsc, e$. 
+\item Now $K = \gen{\set{k_0} \cup \set{k_{i, j} : 1 \leqslant i \leqslant m, 1 \leqslant j \leqslant e}}$.
+\end{enumerate}
+
+\subsection{Imprimitivity}
+A matrix group $G \leqslant \GL(d, q)$ is imprimitive if it permutes a
+non-trivial direct sum decomposition of $V = \F_q^d$. Hence $V \cong
+V_1 \oplus \dotsm V_k$, where all $V_i$ are isomorphic and $G$
+permutes these. This provides a homomorphism $G \to \Sym{k}$. The
+SMASH algorithm is used to construct this homomorphism.
+
+The kernel consists of those elements that preserves the decomposition of $V$,
+and hence it is reducible. The SMASH algorithm provides a change of
+basis matrix such that the kernel is block diagonal, and hence we can
+immediately go to one of the MeatAxe reductions above, that map to the
+direct summands. However, we find generator for the kernel we have to
+use the general methods.
+
+\subsection{Tensor products}
+A matrix group $G \leqslant \GL(d, q)$ lie in this Aschbacher class if
+its natural module $V = \F_q^d$ has the structure of a tensor product
+$V \cong U \otimes W$, and $G$ respects this tensor product. It
+follows that $G \cong H_1 \circ H_2$ where $H_1 \leqslant \GL(U)$ and
+$H_2 \leqslant \GL(W)$. 
+
+We use \cite{tensorprodalg}, with implementation by Eamonn O'Brien, to
+obtain a change of basis matrix $c \in \GL(d, q)$ such that $G^c$ is
+an explicit Kronecker product. It is straightforward to obtain the
+factors of the Kronecker product, and hence we obtain a homomorphism
+$G \to H_1$. This homomorphism is in fact only a homomorphism modulo
+scalars, see Section \ref{section:scalars}.
+
+\subsection{Tensor induction}
+A matrix group $G \leqslant \GL(d, q)$ is tensor induced if its
+natural module $V = \F_q^d$ has the structure of a tensor product $V
+\cong U_1 \otimes U_2 \otimes \dotsm \otimes U_k$, where all $U_i$ are
+isomorphic and $G$ permutes the tensor factors. This defines a
+homomorphism $G \to \Sym{k}$.
+
+We use the algorithm of \cite{MR1925006}, with implementation by
+Eamonn O'Brien, to compute this homomorphism. 
+
+We have no special method of obtaining the kernel in this case, but we
+know that the kernel consists of those elements that preserves the tensor
+product of $V$, and hence it falls in the previous Aschbacher class.
+Hence we can immediately go to that reduction when processing the
+kernel.
+
+\subsection{Extra-special normalisers}
+A group $G \leqslant \GL(d, q)$ belongs to this Aschbacher class if it
+normalises an $r$-group $R$ of order $r^{2m + 1}$ or $2^{2m + 2}$,
+where $r$ is prime, $r^m = d$ and $r \mid q - 1$. If $r > 2$ then $R$
+is extraspecial, and if $r = 2$ then $R$ is either extraspecial or of
+symplectic type, that is, a central product of an extraspecial
+$2$-group and a cyclic group of order $4$.
+
+If $m = 1$ then the algorithm of \cite{MR2142090}, with implementation
+by Alice Niemeyer and Eamonn O'Brien, constructs a homomorphism $G \to
+\GL(2, r)$. If $m > 1$ then the algorithm of \cite{MR2257997}, with
+implementation by Henrik B‰‰rnhielm, constructs a homomorphism $G \to
+\GL(2n, r)$ or $G \to \Sym{r^n}$, where $1 \leqslant n \leqslant m$.
+
+The latter algorithm also provides the kernel of the homomorphism, but
+in the former case we have no special method of obtaining the kernel.
+
+\subsection{Smaller fields}
+In this case, $G \leqslant \GL(d, \F_q)$ is conjugate to $H \leqslant
+\GL(d, \F_s) Z$ where $Z = \Zent(\GL(d, \F_q))$ and $\F_s < \F_q$. If
+$H \leqslant \GL(d, \F_s)$ then this conjugation is an isomorphism $G
+\to H$, so there is no kernel. In the general case, we obtain a
+homomorphism $G \to H \cap Z$, so the image is a cyclic group. In
+fact, this is a homomorphism modulo scalars, see Section
+\ref{section:scalars}. The kernel is $H \cap \GL(d, \F_s)$, but we
+have no special method of obtaining this kernel.
+
+We use \cite{smallerfield}, with implementation by Eamonn O'Brien, to
+compute the change of basis and to compute the homomorphism.
+
+\subsection{C8}
+The Aschbacher class C8 consists of the normalisers of classical
+groups in natural representation. These are therefore not leaves,
+but classical groups in natural representation are leaves. We use
+three reductions to remove the decorations and obtain the classical
+groups. All involves homomorphisms to cyclic groups. Unfortunately
+this adds the requirement to calculate discrete logarithms,
+potentially in the whole of $\F_q^{\times}$, since constructive
+membership testing in a cyclic group is the discrete logarithm
+problem.
+
+To test if $G$ contains a classical group in natural representation,
+we use \cite{MR1444141, MR1625479, MR1717416} with implementation by
+Alice Niemeyer. If so, the node is marked as a leaf.
+
+In fact, none of these reductions to cyclic groups are restricted to
+the Aschbacher C8 class. They only rely on the existence of elements
+with non-trivial determinants, and on a preserved classical form, but
+a group may have these properties without being in the C8 class. 
+
+Since all these reductions have cyclic images, which are leaves, we
+can readily obtain presentations of the images and hence calculate the
+kernels using the presentation method.
+
+\subsubsection{Determinant}
+The determinant map for $G \leqslant \GL(d, q)$ is $g \mapsto \det(g)
+\in \F_q^{\times}$, so the image is a cyclic group. 
+
+\subsubsection{Form action}
+If $G \leqslant \GL(d, q)$ normalises a classical group $H$ which is
+not linear, then $H$ preserves a classical form $J$. Hence $g J
+\bar{g}^T = J$ for every $g \in H$, where $\bar{g} = g$ unless $H$ is
+a unitary group, in which case $\bar{g} = g^{\sqrt{q}}$ ($q$ is a square
+in this case). Then elements of $G$ preserves $J$ up to a scalar, so
+for each $g \in G$ there exists $\lambda_g \in \F_q^{\times}$ such
+that $g J \bar{g}^T = \lambda_g J$. Hence we obtain a homomorphism $g
+\mapsto \lambda_g$, again with the image being a cyclic group.
+
+To determine if the group preserves a classical form up to a scalar,
+one can use the MeatAxe, as described in \cite[Section ?]{hcgt}. This
+is implemented in MAGMA by Derek Holt.
+
+\subsubsection{Spinor norm}
+If $G \leqslant \GL(d, q)$ is an orthogonal group, then the previous
+C8 reductions make sure that $G \leqslant \SO(d, q)$. But $\SO(d, q)$
+is not perfect, and we again obtain a homomorphism $G \to \Cent_2$
+where $g \in G$ maps to its spinor norm. The kernel of this is
+$\Omega(d, q)$ which is simple modulo scalars.
+
+To calculate spinor norms, we use \cite[Theorem 5.6]{spinornorms08}, with
+implementation by Derek Holt.
+
+\subsection{C9}
+The Aschbacher class C9 consists of groups that are almost simple
+modulo scalars. Hence $G \leqslant \GL(d, q)$ is a C9 group if $S
+\leqslant G / Z \leqslant \Aut(S)$, where $Z = \Zent(G)$. It is
+well-known that the automorphism group of a finite simple group is a
+small extension of the simple group. In other words, $G \cong Z.S.E$
+where $Z$ consists of scalar matrices and $E$ is a small soluble
+group, usually cyclic. Because of our determinant reduction, $\abs{Z}
+\mid \gcd(d, q - 1)$.
+
+For groups in this class, we have to decide which finite simple group
+they contain and we have to split off the decorations on top in order
+to obtain a central extension of the simple group, which we treat as a
+leaf. 
+
+Here is an overview of our C9 method.
+
+\begin{enumerate}
+\item Calculate the \emph{stable derivative} $D = G^{(\infty)}$ of
+  $G$. This is done by computing commutators, taking normal closures
+  and testing for perfectness, see \cite{MR2429998} for more details.
+  By a well-known result, we have to compute at most $3$ derived
+  groups to obtain the stable derivative if $G$ is almost simple. Then
+  $D$ is simple modulo scalars, but now the scalars are restricted to
+  those in the Schur multiplier of $G$.
+\item Try to name $D$. This is done in several steps, and if anyone of
+  them succeeds we are done. It is possible that all fail, in which
+  case $D$ is probably not a C9 group.
+\begin{enumerate}
+\item Use a heuristic implemented by Derek Holt to test if $D$ may be
+  $\Alt(n)$ or $2{.}\Alt(n)$ (this requires knowledge of the centre),
+  and try to find $n$. This is done more efficiently if we know
+  $\Zent(D)$, so we first calculate it as in Section
+  \ref{section:c9_centre}. If the heuristic is successful, use the
+  constructive recognition algorithm \cite{MR1743388}, as
+  verification. We use the implementation by Derek Holt.
+\item Find a batch of random elements of $D$ and look at element
+  orders to see if $D$ is a sporadic group, and find its name. If this
+  appears to be the case, try to find projective standard generators
+  of the sporadic group, as verification. The standard generators are
+  given in the ATLAS \cite{atlas_www}.
+\item Find the characteristic of $D$ using \cite{blackbox_char}. This was implemented by Eamonn O'Brien.
+\item Find the name of $D$ and its defining field using
+  \cite{general_recognition} (this requires that the characteristic is
+  known). This was implemented by Eamonn O'Brien and Gunter Malle.
+\end{enumerate}
+\item Now we want to construct a homomorphism $G \to E$. This also
+  uses the same general method as in \cite{MR2429998, statherthesis}.
+  We try to find a complete set of coset representatives of $Z.S =
+  \gen{Z, D}$ in $G$, and then construct the permutation
+  representation of $G$ on these cosets. We employ a few observations
+  that help us with this.
+\begin{itemize}
+\item If $D$ is named as a sporadic, then $G$ is at most the full
+  automorphism group of this sporadic. We test this by trying to find
+  projective standard generators (we calculate projective/central orders
+  rather than precise orders of elements) of the automorphim group of
+  the sporadic, again using black box algorithms from
+  \cite{atlas_www}. If this succeeds, then we assume that $G$ is the
+  automorphism group rather than the simple group. Now we can obtain
+  generators for the simple group immediately using explicit words in
+  the automorphism group standard generators, given in
+  \cite{atlas_www}. For a sporadic group, the simple group has index
+  at most $2$ in its automorphism group, so in this case the maximum
+  number of coset representatives is $2$. On the other hand, if we
+  fail to find standard generators of the automorphim group, we assume
+  that $G$ is in fact already a central extension of the sporadic
+  group, and hence the node is a leaf.
+\item If $D$ was named as an alternating group, there are again at
+  most $2$ coset representatives.
+\item Since the naming algorithm provides the defining field of $G$,
+  we know if $G$ is a representation in defining characteristic. In
+  this case a conjecture\footnote{Scott Murray, personal
+    communication} states that $\abs{G : D} \leqslant \gcd(q - 1, m)
+  e$ where $m$ is the maximum sum of the highest weights of $G$, and
+  $e = 2$ if $G$ is an orthogonal group and $1$ otherwise. Since
+  $\abs{G : D} \geqslant \abs{E}$ this provides an upper bound on the
+  number of coset representatives. Moreover, we can calculate the
+  maximum highest weight sum for representations of degree up to
+  $250$ using \cite{MR1901354}.
+\end{itemize}
+If we learn that the maximum number of cosets is $1$, then we know
+immediately that the node is a leaf, and when enumerating coset
+representatives, we can stop when we have reached the maximum.
+
+The kernel of the map onto the coset representatives is found using
+the general methods.
+\end{enumerate}
+
+\section{Centre calculations}
+\label{section:c9_centre}
+In the C9 context, and in leaves, we need to obtain generators for
+$\Zent(G)$ as $\SLP$s in the generators of $G$. In fact, since $G$ is
+absolutely irreducible and contained in $\SL(d, q)$, the centre
+consists of scalar matrices and is therefore cyclic. We require a
+single centre generator. 
+
+We calculate the centre using the Monte Carlo algorithm \cite[Theorem
+4.15]{MR1829470}. In this context we know that an upper bound on the
+order is $\gcd(d, q - 1)$. Having found a generating set $X$ for the
+centre, we can calculate orders and take powers of the elements of $X$
+to obtain elements $c_i$ of order $p_i^{e_i}$, where $\abs{\gen{X}} =
+\prod_{i = 1}^n p_i^{e_i}$. Our single generator is then $c = \prod_i c_i$.
+
+\section{Scalar flags}
+\label{section:scalars}
+
+As has been indicated above, in some of the Aschbacher reductions we
+only obtain homomorphisms modulo scalars. Superficially this is only a
+detail, but it has implications for the whole composition tree design, 
+and it complicates matters.
+
+In the tensor product case, we have a group $G \leqslant \GL(d, q)$
+which preserves a tensor decomposition $V \cong U \otimes W$ of its
+natural module. This means that $G \cong H_1 \circ H_2$. The point is
+that $G$ is a central rather than a direct product, and the
+homomorphism is not $G \to H_1$ but $G \to H_1 / \Zent(H_1)$, so the
+image lives in $\PGL(U)$ not $\GL(U)$. However, we have no means of
+writing down a quotient of matrix groups, so we need to stay with
+$H_1$ as the image and somehow perform the quotient indirectly.
+
+As a consequence, the tensor decomposition algorithm
+\cite{tensorprodalg} which constructs the image of $G = \gen{X}$ under
+the tensor decomposition homomorphism $\phi$, only guarantee that the
+image $H = \gen{\phi(X)} \leqslant H_1 Z$ where $Z = \Zent(\GL(U))$.
+Moreover, this is true for every element $g$ that we map under $\phi$.
+It is only guaranteed that $\phi(g) \in H_1 Z$, not necessarily that
+$\phi(g) \in H_1$ and not even $\phi(g) \in H$. The actual image group
+of $G$ is not $H$ but $H / Z = H_1 Z / Z \cong H_1 / (H_1 \cap Z) =
+H_1 / \Zent(H_1)$.
+
+There is a similar behaviour in the smaller field, when the group $G
+\leqslant \GL(d, \F_q)$ can only be written over a smaller field
+$\F_s$ modulo scalars. The algorithm of \cite{smallerfield} constructs
+a homomorphism $G \to \F_q^{\times} / \F_s^{\times}$, but each computed image
+is only guaranteed to lie in $\F_q^{\times}$
+
+The method we have used to work around these obstacles is that each
+node in the composition tree with group $G$ has an associated
+\emph{scalar flag} $\lambda$. The whole issue only arises for matrix
+groups, so if $G$ is a permutation group then $\lambda = 1$, but if $G
+\leqslant \GL(d, q)$ then $\lambda \in \Zent(\GL(d, q))$, a scalar
+matrix. Now the matrix group we can work with in the node is $G$, but
+the group that the node really represents is $G \gen{\lambda}
+/\gen{\lambda}$. Hence the composition factors corresponding to the
+node are those of $G \gen{\lambda} / \gen{\lambda}$. The rewriting
+algorithm in the node must be able to take as input elements of $G
+\gen{\lambda}$, and the rewriting of $g \in G \gen{\lambda}$ is
+allowed to return an $\SLP$ that in $G$ evaluates to $g z$ for some $z
+\in \gen{\lambda}$.
+
+Every algorithm for processing a leaf must now be able to behave like
+this. For every reduction, we also have to determine what the scalar
+flags for the image and kernel nodes are, given the scalar flag in the
+node.
+
+All Aschbacher reduction algorithms are applied to $G = \gen{X}$, but
+the C8 reductions are applied to $G \gen{\lambda}$. This is because
+the C8 reductions will give different answers when applied to $G$ and
+$G \gen{\lambda}$. The input generators of the image are still the
+images of $X$, because we must maintain the bijection between these.
+
+\subsection{Scalar flag propagation}
+Let $\omega_q$ be a primitive element of $\F_q$. Assume the
+node group is $G$ with scalar flag $\lambda$, $\phi$ is the reduction
+homomorphism, $I$ is the group of the image and $K$ is the group of
+the kernel. Let $\lambda_I$ and $\lambda_K$ be the scalar flags of the
+image and kernel. These are defined as in Table
+\ref{tbl:scalar_propagation}.
+
+\begin{table}[ht!]
+\begin{tabular}{c|c|c}
+Reduction & $\lambda_I$ & $\lambda_K$ \\
+\hline
+Unipotent & $\phi(\lambda)$ & $1$ \\
+MeatAxe & $\phi(\lambda)$ & $1$ \\
+Absolute reducibility & $\phi(\lambda)$ & $\lambda$ \\
+Imprimitivity & $\phi(\lambda)$ $(=1)$  & $\lambda$ \\
+Semilinearity & $\phi(\lambda)$ $(=1)$  & $\lambda$ \\
+Tensor product & $\omega_q$  & $\lambda$ \\
+Tensor induction & $\phi(\lambda)$ $(=1)$  & $\lambda$ \\
+Extraspecial & $\phi(\lambda)$ & $\lambda$ \\
+Smaller field & $\phi(\lambda)$ & $\lambda$ \\
+Smaller field modulo scalars & $\omega_q^{\abs{\omega_q} / \lcm(\abs{\lambda}, \abs{\omega_s})}$ & $\lambda^{\abs{\lambda} / \gcd(\abs{\lambda}, n)}$ \\
+Determinant & $\phi(\lambda)$ $(=\lambda^n)$ & $\lambda^{\abs{\lambda} / \gcd(\abs{\lambda}, n)}$ \\
+Form action & $\phi(\lambda)$ $(=\lambda^n)$ & $\lambda^{\abs{\lambda} / \gcd(\abs{\lambda}, n)}$ \\
+Spinor norm & $\phi(\lambda)$ $(\in \set{0, 1})$ & $\lambda^{2 \lambda_I}$ \\
+C9 (coset action) & $\phi(\lambda)$ $(=1)$ & $\lambda$
+\end{tabular}
+\label{tbl:scalar_propagation}
+\caption{Scalar flag propagation}
+\end{table}
+
+In the smaller field case, $\F_s < \F_q$ is the smaller field. We define $n$ as follows.
+\begin{itemize}
+\item In the smaller field case, $n = \abs{\omega_s} = s - 1$.
+\item In the determinant case, $n = d$.
+\item In the form action case, non-unitary case, $n = 2$. In the unitary case, $n = \sqrt{q} + 1$ ($q$ is a square in this case). 
+\end{itemize}
+
+Most of the entries in the table comes from the observation that we
+have a homomorphism $G \to I$, and we define the induced homomorphism
+from $G / (G \cap \gen{\lambda})$. The image of this is $I / (I \cap
+\gen{\phi(\lambda)})$ so $\lambda_I = \phi(\lambda)$. In the tensor
+product case, as described above, the image is a projective matrix
+group, so we must divide out by the full scalar subgroup. In the
+smaller field case, the image are the scalars in the larger field
+modulo the scalars in the smaller field. Hence we divide out by the
+smaller scalars, except that there already be a scalar flag which we
+need to take into account. The kernel is a projective matrix group
+over the smaller field, so we divide out by the part of the scalar
+flag which lies in the smaller field.
+
+In many cases we know explicitly what $\phi(\lambda)$ is. If the image
+is a permutation group, the scalar flag will be the identity, because
+in each of these reductions a scalar will lie in the kernel of the
+homomorphism. It is easy to see that in the C8 cases, $\phi(\lambda) =
+\lambda^n$ where $n$ is as above.
+
+One can note that $\lambda_K$ is not always guaranteed to lie in $K$.
+This is ok within our design, since the actual kernel group is $K
+\gen{\lambda_K} / \gen{\lambda_K}$. However, in the C8 cases we must
+make sure that $\lambda_K \in K$, because we will apply the C8 tests in
+the kernel to $K \gen{\lambda_K}$. Hence the same C8 test may be
+succesful in the kernel if $\lambda_K \notin K$, which will lead to an
+infinite loop. 
+
+In the MeatAxe cases, it is easy to see that the kernel cannot contain any scalars, so the scalar flag is the identity.
+
+\subsection{Cyclic group element patches}
+As noted above, a leaf must be able to handle the case when there is a
+non-trivial scalar flag. From some of the reductions we obtain a
+cyclic image, which will be a leaf. The following situation arise in all these.
+
+Let $G = \gen{X}$ be the node group, $\phi : G \to I = \gen{Y_I}$ the
+reduction and $K = \Ker(\phi) = \gen{Y_K}$. Assume that $I$ is cyclic
+and let $\lambda$, $\lambda_I$ and $\lambda_K$ be the scalar flags for
+$G$, $I$ and $K$.
+
+Consider $g \in G \gen{\lambda}$ which we want to express as an $\SLP$
+in $X$. The first step is to express $\phi(g)$ as an $\SLP$ in $Y_I$.
+However, it is not guaranteed that $\phi(g) \in \gen{Y_I}$, only that
+$\phi(g)z_I \in I$ for some $z_I \in \gen{\lambda_I}$. Moreover, if we
+obtain an $\SLP$ $w$ of $\phi(g) z_I$, the next step is to evaluate
+$w$ on $X$ to obtain an element $h$ and then obtain an $\SLP$ of $g/h$
+in $Y_K$. But again, it is not guaranteed that $g/h \in \gen{Y_K}$.
+This is ok, we only require that $g / h \in K\gen{\lambda_K}$, but
+unfortunately this may not be true either.
+
+To be more precise, if $g = \bar{g} \lambda^i$, where $\bar{g} \in G$,
+then $\phi(g) = \phi(\bar{g}) \lambda_I^j$. This follows from the
+definition of $\lambda_I$ in Table \ref{tbl:scalar_propagation}. Note
+that we know neither $i$ nor $j$, and we want to avoid computing them,
+as this is a discrete logarithm computation. We obtain an $\SLP$ for
+$\phi(\bar{g})$, so $h = k \bar{g}$ for some $k \in K$. Hence $g / h =
+k^{-1} \lambda^i$, but we see from Table \ref{tbl:scalar_propagation}
+that it is possible that $\lambda^i \notin \gen{\lambda_K}$ and hence
+$g / h \notin K \gen{\lambda_K}$.
+
+What is needed is therefore an algorithm that, given $I$ and
+$\phi(g)$, finds $z_I \in \gen{\lambda_I}$ such that $\phi(g) z_I \in
+I$. Moreover, given $\lambda$ it should also find $z \in
+\gen{\lambda}$ such that $g z / h \in K\gen{\lambda_K}$.
+
+\begin{pr}
+\label{pr:scalar_patch}
+Let $C, \gen{\lambda} \leqslant \Cent_m$ and consider $x \in
+C\gen{\lambda}$. Given the list of primes dividing $m$, in polynomial
+time we can find $z \in \gen{\lambda}$ such that $xz \in C$.
+\end{pr}
+\begin{proof}
+Let
+\begin{align*}
+\abs{C} &= \prod_{i = 1}^n p_i^{a_i}, \\
+\abs{c} &= \prod_{i = 1}^n p_i^{b_i}, \\
+\abs{\lambda} &= \prod_{i = 1}^n p_i^{c_i}
+\end{align*}
+where each $p_i$ is prime, $a_i, b_i, c_i \geqslant 0$, $a_i + b_i +
+c_i > 0$ and $b_i \leqslant \max(a_i, c_i)$. Let $q_i = \abs{x} /
+p_i^{b_i}$ for $i = 1, \dotsc, n$, and observe that $\gcd(q_1, \dotsc,
+q_n) = 1$. Using the extended Euclidean algorithm, we can find integers $m_i$ such that $1 = \sum_{i = 1}^n q_i m_i$.
+
+Let $z_i = x^{m_i q_i}$ for $i = 1, \dotsc, n$. Then
+  \[ \prod_{i = 1}^n z_i = \prod_{i = 1}^n x^{m_i q_i} =
+  x^{\sum_{i = 1}^n m_i q_i} = x, \]
+and also $\abs{x^{q_i}} = p_i^{b_i}$. Since $\abs{z_i} =
+  (x^{q_i})^{m_i}$ it follows that $\abs{z_i} = p_i^{b_i}$
+  unless $\gcd(\abs{x^{q_i}}, m_i) > 1$. But the latter implies
+  that $p_i \mid m_i$ and since $p_i \mid q_j$ for every $j \neq i$ it
+  follows that $p_i \mid 1$, a contradiction. Therefore $\abs{z_i} =
+  p_i^{b_i}$.
+
+Now let
+\[ z^{-1} = \prod_{b_i > a_i} z_i \] and observe that if $b_i > a_i$
+then $b_i \leqslant c_i$. This implies that $\abs{z} \mid
+\abs{\lambda}$ and hence $z \in \gen{\lambda}$.
+
+Finally, $\abs{x z} = \prod_{b_i \leqslant a_i} z_i$, and since
+$\abs{z_i} = p_i^{b_i}$ it follows that $x z \in C$. Note that since
+we know a superset of the primes $p_i$, there is no need to factorise
+$\abs{C}$ and $\abs{c}$.
+\end{proof}
+
+Note that the result provides an algorithm for obtaining the patch
+element $z_I$. In this case, the cyclic groups
+under consideration all arise from some $\F_q^{\times}$, so we can
+factorise $q - 1$ once as preprocessing to obtain the list of possible
+primes.
+
+The element $z_I$ is unique up to multiplication by an element of $I
+\cap \gen{\lambda_I}$. It remains to find the other patch element $z
+\in \gen{\lambda}$. This is done differently depending on how
+$\lambda_I$ arose from $\lambda$. 
+
+\subsubsection{Determinant case}
+In this case, $\lambda_I = \lambda^d$, so $\lambda^i$ is a $d$-th root
+of $z_I^{-1}$. However, not all roots suffice. Clearly, all $d$th roots
+of $z_I$ are $\lambda^{-i} \sigma$ where $\sigma^d = 1$. Now $g / h
+\lambda^{-i} \sigma = k^{-1} \sigma$, so we must choose a root of
+$z_I$ such that $\sigma \in \gen{\lambda_K}$. 
+
+We have no knowledge of $\lambda^i$ or $\sigma$, only their product,
+which is the root of $z_I$. From Table \ref{tbl:scalar_propagation} we
+see that $\abs{\lambda_K} = \gcd(d, \abs{\lambda})$. Also,
+$\abs{\lambda^i \sigma} \geqslant \abs{\sigma} / \gcd(\abs{\sigma}, \abs{\lambda})$ so if $\abs{\lambda^i \sigma} \mid \abs{\lambda}$, then $\abs{\sigma}
+\mid \abs{\lambda}$. But $\abs{\sigma} \mid d$, so this implies that
+$\abs{\sigma} \mid \abs{\lambda_K}$, thus $\sigma \in \gen{\lambda_K}$.
+
+The crucial condition on the $d$th root $z$ of $z_I$ that we choose is
+therefore that $z \in \gen{\lambda}$.
+
+\subsubsection{Form action case}
+In this case it depends on the form type. In the non-unitary case,
+$\lambda_I = \lambda^2$, so we choose $z$ to be a square root of
+$z_I$. The argument why this works is the same as in the determinant case.
+
+The unitary case is more difficult. Recall that the \emph{norm} of
+$\F_q$ over $\F_{\sqrt{q}}$ is a homomorphism $\Norm : \F_q^{\times} \to \F_{\sqrt{q}}^{\times}$ defined by $\omega_q \mapsto \omega_q^{\sqrt{q} + 1}$.
+
+In this case $\lambda_I = \Norm(\lambda)$, so we want to choose $z \in
+\F_{\sqrt{q}}^{\times}$ such that $\Norm(z) = z_I$. This is a norm
+equation, which we can solve \cite[Proposition 2.2]{spinornorms08} and
+obtain a solution $z_0$. Again, the crucial condition is $z \in
+\gen{\lambda}$, but we may have $z_0 \notin \gen{\lambda}$. Each
+solution to the norm equation can be written in the form $z_0 z_1$
+where $\Norm(z_1) = 1$. Clearly, $\abs{z_0 z_1} \geqslant \abs{z_0} /
+\gcd(\abs{z_0}, \abs{z_1})$, and since $\Norm(z_1) = 1$ it follows
+that $\abs{z_1} \mid (\sqrt{q} + 1)$. Hence $\abs{z_0 z_1} \geqslant
+\abs{z_0} / \gcd(\abs{z_0}, \sqrt{q} + 1)$.
+
+There exists at least one solution $z \in \gen{\lambda}$ to the norm
+equation, so the above implies that $\abs{z_0} / \gcd(\abs{z_0},
+\sqrt{q} + 1)$ divides $\abs{\lambda}$. Therefore $\abs{z_0} \mid \lcm(\abs{\lambda}, \sqrt{q} + 1)$.
+
+Thus, $z_0 \in \gen{\lambda, \omega_q^{\sqrt{q} - 1}}$, since
+$\abs{\gen{\omega_q^{\sqrt{q} - 1}}} = \sqrt{q} + 1$, and we want to find
+$z_1 \in \gen{\omega_q^{\sqrt{q} - 1}}$ such that $z_0 z_1 \in
+\gen{\lambda}$. This is precisely the same situation we had above,
+when we were finding $z_I$. Therefore we can use the patching method
+of Proposition \ref{pr:scalar_patch} to obtain $z_1$.
+
+\subsubsection{Spinor norm case}
+In this case, $\lambda_I \in \set{0, 1}$. Accordingly, $z = \lambda^{z_I}$.
+
+\subsubsection{Smaller field case}
+In this case there is no need for a second patch element, so $z = 1$.
+
+\section{Reduction database for permutation groups}
+\label{section:perm_reductions}
+
+Our goal here is to provide reductions from general permutation groups
+to small base groups, which can be treated as leaves using BSGS
+methods. We do not quite do this, since we are missing the \lq\lq
+jellyfish'' algorithm.
+
+\subsection{Intransitivity}
+If $G \leqslant \Sym{n}$ is intransitive, then $\mathcal{X} = \set{1,
+  \dotsc, n}$ is split up into at least two orbits under the action of
+$G$. If $\mathcal{O} \subset \mathcal{X}$ is such an orbit, there is
+an induced action of $G$ on $\mathcal{O}$. It is straightforward to
+construct $\phi : G \to \Sym{\mathcal{O}}$. We have no special method
+of obtaining the kernel.
+
+\subsection{Imprimitivity}
+Similarly as with matrix groups, a transitive $G \leqslant \Sym{n}$ is
+imprimitive if it permutes the blocks in a non-trivial partition of
+$\mathcal{X} = \set{1, \dotsc, n}$. Here $\MAGMA$ provides all
+machinery for setting up the reduction homomorphism. We have no
+special method of obtaining the kernel.
+
+\subsection{Alternating groups natural representation}
+Another large base case are the alternating group in natural
+representation. We use the existing algorithm in $\MAGMA$ to see if $G
+= \Alt(n)$, and if so it is marked as a leaf, and handled using our
+special algorithm.
+
+\section{Leaf algorithm database}
+\label{section:leaf_algorithm}
+
+When we have a leaf, we first look at the type of the group. If it is
+not a matrix or a permutation group, we handle it accordingly.
+Otherwise, the group has either been named during the C9 reduction, or
+it is an unknown group.
+
+If it has been named, we consider the list of possible leaf algorithms
+for the family, and try each one in turn until one succeeds.
+
+The library of algorithms for handling the various types of leaves is
+in a sense the most critical component of the package and the one
+where most improvements are needed. 
+
+\subsection{Cyclic groups}
+The cyclic leaves have been discussed above. In $\MAGMA$ they arise as
+\texttt{GrpAb}, a finitely presented group, and are stored as such. It
+would have been slightly easier if they could be converted into
+PC-groups, but this is not possible if the order is larger than
+$2^{30}$.
+
+The gold copy of a cyclic group is the group itself. $\MAGMA$ always
+introduces a minimal generating set for a \texttt{GrpAb}, in this case
+a single generator, and we take the nice generator to be this
+generator.
+
+A presentation is straightforward to obtain: a single relation is
+required. If $G$ is the group with scalar flag $\lambda$, we can
+easily form $H = G\gen{\lambda} / \gen{\lambda}$ since the groups are
+finitely presented. The presentation is then $\gen{x | x^{\abs{H}}}$.
+
+The composition factors are also straightforward to obtain using
+existing $\MAGMA$ functionality.
+
+\subsection{Elementary abelian groups}
+These arise from the unipotent groups, and we store them in $\MAGMA$
+as \texttt{GrpPC}, a finitely presented group where the presentation
+is a power-commutator (PC) presentation. For \texttt{GrpPC} one can
+define homomorphisms slightly more freely. This is useful here, since
+$\MAGMA$ introduces a new generating set, which
+we take as nice generators, and we need to express these as words in
+our input generators. The gold copy is the group itself, on the nice
+generators.
+
+A presentation for a \texttt{GrpPC} is easy to obtain, since the group
+is already stored as a presentation. Since we have chosen the nice
+generators to be the $\MAGMA$ generators, the stored presentation is
+the one we need. 
+
+The composition factors are straightforward to obtain using
+existing $\MAGMA$ functionality.
+
+\subsection{Classical groups natural representation}
+These leaves are quasi-simple matrix groups, the families $\SL(d, q)$,
+$\Sp(d, q)$, $\SU(d, q)$ and $\Omega^{\epsilon}(d, q)$. They form the leaves in the C8 Aschbacher class. If $G =
+\gen{X} \leqslant \SL(d, q)$ is a leaf group of this type, we use the
+algorithms in \cite{classical_recognise}, with implementations by
+Eamonn O'Brien, to find standard generators $Y$ for $G$. This also
+provides a change of basis matrix $c \in \GL(d, q)$ such that
+$\gen{Y}^c = G$. We define the gold copy of $G$ to be $\gen{Y}$, so
+that $c$ also gives us isomorphisms to and from the gold copy. The
+nice generators are $Y^c$.
+
+The algorithms in \cite{costi_phd}, with implementation by Elliot
+Costi, provides constructive membership testing in the nice
+generators.
+
+We have presentations for the classical groups on the standard
+generators, hence on our nice generators.
+
+The composition factors consist of the simple group and the factors
+corresponding to $\Zent(G)$. In this case we do not write down the
+simple group explicitly, since it is a permutation group of large
+degree. The generators of the simple group factor is instead just the
+nice generators, so the $\SLP$s are immediate. Since $G$ is a
+classical group in natural representation, we can write down an
+explicit scalar matrix that generates $\Zent(G)$. Then we can obtain
+this as an $\SLP$ in the standard generators using the rewriting
+algorithm. The centre can easily be converted to a PC-group, we can
+take the quotient with the scalar flag, and then use existing
+$\MAGMA$ functionality to obtain the composition factors.
+
+Let $\omega$ be a primitive element of $\F_q$. Then $\Zent(G) = \gen{\omega^{(q - 1) / n}}$ where 
+\[n = \begin{cases}
+\gcd(d, q - 1) & G = \SL(d, q) \\
+\gcd(2, q - 1) & G = \Sp(d, q) \\
+3 & G = \SU(3, 4) \\
+\gcd(d, \sqrt{q} + 1) & G =†\SU(d, q), (d, q) \neq (3, 4) \\
+1 & G = \Omega^{\epsilon}(d, q), 2 \mid q \\
+1 & G = \Omega^0(d, q) \\
+2 & G = \Omega^{+}(d, q), 2 \mid (d(q - 1) / 4) \\
+1 & G = \Omega^{+}(d, q), 2 \nmid (d(q - 1) / 4) \\
+2 & G = \Omega^{-}(d, q), 2 \nmid (d(q - 1) / 4) \\
+1 & G = \Omega^{-}(d, q), 2 \mid (d(q - 1) / 4) 
+\end{cases} \]
+
+\subsection{Quasi-simple groups, C9}
+The C9 leaves are the most difficult ones, and those where we have
+fewest special leaf algorithms. We do have access to a number of
+algorithms, but not all work in the context we need.
+
+In the C9 leaf case we have $G \leqslant \GL(d, q)$, with scalar flag
+$\lambda$, and $G \cong Z.S$ where $S$ is a finite simple group and
+$Z$ is cyclic. Since $G$ is absolutely irreducible, $Z \leqslant
+\Zent(\GL(d, q))$ and hence consists of scalar matrices. Since we have
+applied the determinant map, $G \leqslant \SL(d, q)$, so $\abs{Z} \mid
+\gcd(d, q - 1)$. This is the only thing we can say about $Z$ in the
+general case. The extension $Z.S$ may split, it can even be a direct
+product, so $Z$ is not guaranteed to lie in the Schur multiplier of
+$S$. Hence $G$ is not necessarily perfect.
+
+We now want the leaf algorithms to handle such a $G$. Hence a leaf
+algorithm should provide maps $\alpha : G\gen{\lambda} \to H$, where
+$H \cong S$ or $H \cong Z_S . S$ is the gold copy. Here $Z_S$ are the
+scalars in the Schur multiplier of $S$, and we need to allow this
+situation, to correctly handle the case when $S \cong \PSL(d, q)$.
+Then we want $H = \SL(d, q)$ because we want to work with matrix
+groups.
+
+The leaf algorithm should also provide $\beta : H \to G$, which should
+be the inverse modulo scalars to $\alpha$. In other words,
+$\beta(\alpha(g)) \in Z\gen{\lambda}$ for every $g \in G\gen{\lambda}$.
+
+We need a notion of standard generators for $G$. This is given
+implicitly by the images under $\beta$ of the generators of $H$. Then
+the leaf algorithm should provide a rewriting facility that expresses
+any $g \in G\gen{\lambda}$ as an $\SLP$ in the standard
+generators, which evaluates to $h \in G\gen{\lambda}$ with the
+property that $g / h \in Z\gen{\lambda}$.
+
+Our nice generators for $G$ are the standard generators together with a
+generator for $Z$. We can find the centre of $G$ as described in
+Section \ref{section:c9_centre}. This allows us to obtain a rewriting
+algorithm for $G$ which is precise. We use the above leaf algorithm
+rewriting, so we obtain an element $x \in Z \gen{\lambda}$. If $Z =
+\gen{c}$ then $\abs{x} \mid \lcm(\abs{c}, \abs{\lambda})$. Observe
+that $y = x^{\abs{x} / \gcd(\abs{c}, \abs{x})} \in Z$, so we can
+express $y$ as an $\SLP$ in $c$. This is an instance of the discrete
+logarithm problem.
+
+Finally, we want the leaf algorithm to provide a presentation of $S$
+on the standard generators. This allows us to obtain a presentation
+for $G$. The presentation $\gen{x_1, \dotsc, x_n \mid r_1, \dotsc,
+  r_m}$ for $S$ is a presentation for $G/Z$. We want to obtain a
+presentation of $G$ on $\set{x_1, \dotsc, x_n, c}$. Each $r_i$
+evalutes to $c_i \in Z$, and we can express each $c_i$ as an $\SLP$
+$w_i$ in $c$, as above. The relators for $G$ are then $\set{r_i / w_i
+  : 1 \leqslant i \leqslant m} \cup \set{[x_i, c] : 1 \leqslant i \leqslant n} \cup \set{c^{\abs{c} / \gcd(\abs{c}, \abs{\lambda})}}$.
+
+To obtain composition factors in the C9 case is easy, since we can
+find the centre. We then proceed as in the C8 case.
+
+\subsubsection{Alternating groups}
+In this case we use \cite{MR1743388} with implementation by Derek
+Holt, extended by Eamonn O'Brien. This works exactly as we require.
+
+\subsubsection{Sporadic groups}
+For the sporadic groups we have to proceed in a slightly different
+way. For each sporadic group we designate a small-dimensional
+permutation or matrix representation as the gold copy $S$. Then we use
+the black box algorithms from \cite{atlas_www} to obtain standard
+generators in $G$ and in $S$. These algorithms work projectively and
+hence can be applied to $G$ without knowledge of $Z$. 
+
+To obtain a rewriting algorithm, we either use \cite{ryba_trick} or
+BSGS methods. This also allows us to define the maps $\alpha$ and
+$\beta$: express an element as an $\SLP$ in the standard generators in
+one group and evalute the $\SLP$ on the standard generators in the
+other group.
+
+For most sporadic groups we also have presentations on the standard
+generators, but in some cases we must use brute force methods.
+
+\subsubsection{Classical groups non-natural representation}
+This is the most difficult class of leaves. In the case where $S \cong
+\PSL(2, q)$ we use \cite{psl_recognition}, with implementation by
+Eamonn O'Brien, which works exactly as we require.
+
+In the case where $S \cong \PSL(3, q)$, and $G$ is a representation in
+defining characteristic, we use \cite{MR2356848}, with implementation
+by Henrik B‰‰rnhielm and Eamonn O'Brien, to obtain the map $\beta$.
+This algorithm cannot handle the case when $Z$ is not contained in the Schur multiplier of $G$. We work around
+this by computing the derived group $D \cong S$ of $G \gen{\lambda}$
+and executing the algorithm on $D$. The map $\beta$ allows us to
+obtain standard generators for $G$, and we define the nice generators
+as above. From \cite{MR2356848} we obtain rewriting ability in $D$,
+and all the standard generators lie in $D$, so can obtain them as
+$\SLP$s in the input generators of $D$ and hence in the input
+generators of $G$. For rewriting in $G\gen{\lambda}$ we use
+\cite{costi_phd}, with implementation by Elliot Costi, which works as
+we require. This also provides the map $\alpha$, in the same way as
+with the sporadic groups.
+
+When $S \cong \PSL(d, q)$, $d > 3$ and $G$ is a representation in
+defining characteristic, we use either \cite{small_deg_reps}, with
+implementation by Eamonn O'Brien or \cite{MR1804385} with
+implementation by Peter Brooksbank, Bruce Cox and Derek Holt, to
+obtain $\beta$. Similarly as above we first have to compute the
+derived group $D$ of $G\gen{\lambda}$. In this case we have no
+rewriting ability in $D$. However, we obtain $\alpha_0 : D \to \SL(d,
+q)$, so we can obtain the images of our input generators in the
+natural representation. Then we can use \cite{classical_recognise} to
+obtain the standard generators as $\SLP$s in the input generators. For
+rewriting in $G\gen{\lambda}$ we can again use \cite{costi_phd}, which
+also provides $\alpha$.
+
+When $G$ is not in defining characteristic, or if $G$ is a permutation
+group, then we use \cite{MR1804385}. We can obtain the nice generators
+as $\SLP$s in the input generators as above. To obtain rewriting
+ability in $G\gen{\lambda}$, we use BSGS methods or \cite{ryba_trick}.
+Since the map to $\SL(d, q)$ is from $D$, not $G\gen{\lambda}$, we
+cannot use it to map elements to the natural representation and use
+our natural representation rewriting ability.
+
+When $S \cong \PSp(d, q)$ and $q$ is odd, we use \cite{MR1958954,
+  MR2422320} with implementation by Peter Brooksbank and Derek Holt.
+This works in the same way as the black box $\PSL(d, q)$ case.
+
+In all these cases we have presentations on the standard generators.
+
+\subsubsection{Exceptional groups}
+The algorithms of \cite{baarnhielm05, baarnhielm_phd,
+  small_ree_recog}, with implementation by Henrik B‰‰rnhielm, handle
+the cases of Suzuki and Ree groups in most ways we require. The
+representations of the Suzuki groups in defining characteristic
+(characteristic $2$) have dimension $4^n$ for some $n \geqslant 1$, so
+$\abs{Z} \mid \gcd(4^n, 2^k - 1)$ and hence $Z = 1$. In black box
+context the Suzuki algorithms cannot handle the case when $Z \neq 1$.
+
+The algorithms for the Big Ree groups only handle the natural representation,
+dimension $26$, with defining field of size $q = 2^{2m + 1}$ for some $m > 0$.
+
+The algorithms for the small Ree groups only handle representations in
+defining characteristic (characteristic $3$). Such representations
+have dimension $7^n 3^{3k}$ where $n \geqslant 0$, $k \geqslant 0$ and
+$n + k > 0$.
+
+It follows from the following result that $Z = 1$ in the Ree group cases.
+
+\begin{lem}
+\begin{enumerate}
+\item For every $m > 0$, $13 \nmid (2^{2m + 1} - 1)$.
+\item For every $k > 0$, $7 \nmid (3^k - 1)$.
+\end{enumerate}
+\end{lem}
+\begin{proof}
+
+\end{proof}
+
+In the Suzuki case we have a presentation on the standard generators,
+but we have no presentations for the Ree groups, so in these cases we
+are forced to use existing $\MAGMA$ machinery.
+
+\subsection{Unknown groups}
+Because we do not have special algorithms for all classes of finite
+simple groups, it is inevitable that we need a backup strategy for
+groups we cannot handle. It is also possible that some Aschbacher
+algorithms fail to deduce that a give group lies in its category,
+which can result in that it falls into the C9 case. But then the
+naming algorithms may fail, since they assume that the group is almost
+simple modulo scalars. Hence we end up with a group which really is
+unknown. 
+
+In the first of these cases we either use BSGS techniques or
+\cite{ryba_trick} together with recursive applications of composition
+tree. In the second case we always use BSGS methods.
+
+More specifically, if $G = \gen{X}$ is the input group with scalar
+flag $\lambda$, and we have successfully named $G$, then we use
+\cite{ryba_trick} if the field or degree is larger than some specified
+bound. In this case the gold copy is $G$ and $X$ are the nice
+generators. For membership testing we apply \cite{ryba_trick} to $G
+\gen{\lambda}$, and membership testing in the centralisers are done
+using recursive applications of composition tree. Note that we then
+obtain $\SLP$s in $X \cup \set{\lambda}$, so we have to rewrite this
+to an $\SLP$ on $X$ (we set $\lambda = 1$). Presentations and
+composition factors are found using existing $\MAGMA$ machinery, which
+may be very expensive.
+
+If we cannot name $G$, or the the field and degree are small, we
+compute a BSGS of $G \gen{\lambda}$ using the random Schreier-Sims
+algorithm and possibly verify it using the Todd-Coxeter-Schreier-Sims
+algorithm. Then $\MAGMA$ provides constructive membership testing
+facilities in $G \gen{\lambda}$. As above, we need to rewrite the
+$\SLP$s to obtain them on $X$, without $\lambda$. The gold copy is
+$G$, and the nice generators are the strong generators. We can find a
+presentation on the strong generators, which is easier than in
+general, but can still be expensive. Composition factors are found
+using existing $\MAGMA$ machinery, which can be very expensive.
+
+\bibliographystyle{amsalpha}
+\bibliography{mgrp}
+
+\end{document}

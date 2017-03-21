@@ -1,0 +1,684 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Tensor Categories</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text609.htm">[Next]</A><A  HREF = "text607.htm">[Prev]</A> <A  HREF = "text609.htm">[Right]</A> <A  HREF = "text607.htm">[Left]</A> <A  HREF = "text603.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "6557">Tensor Categories</A></H3>
+
+<P>
+<P>
+<P>
+Magma allows tensors and tensor spaces to change categories. 
+Unless a user specifies otherwise,
+all tensors are assigned a category that is natural to the method
+by which it was created.
+For example a tensor created from an algebra will be assigned an 
+algebra category, whereas a tensor created by structure constants
+will be assigned the Albert homotopism category.  Tensor categories influence
+the behavior of commands such as kernels and images  
+as well as the algebraic invariants such as derivation algebras of a tensor.  
+<P>
+Our conventions follow <A  HREF = "text602.htm#bib_Wilson_division">[Wil13]</A>.  In particular given
+a tensor T framed by [U<sub>v</sub>, ..., U<sub>0</sub>] then a tensor category for
+T will specify a function A:{0 ... v}to {-1, 0, 1} along with
+a partition (P) of {0, ..., v} such that the following 
+rules apply to the tensors and morphisms in the category.
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>for each tensor T framed by [U<sub>v</sub>, ..., U<sub>0</sub>], if
+X&isin;(P), then 
+forall i, j&isin;X,   U<sub>i</sub>=U<sub>j</sub>.
+<P>
+<DT>(ii)</DT><DD>Given a second tensor S framed by [V<sub>v</sub>, ..., V<sub>0</sub>],
+a morphism f:T to S (Magma type <TT>Hmtp</TT>) will be a list
+[f<sub>v</sub>, ..., f<sub>0</sub>] of homomorphisms as follows:
+<DT></DT><DD>(Covariant) if A(i)=1 then f<sub>i</sub>:U<sub>i</sub>to V<sub>i</sub>;
+<DT></DT><DD>(Constant) if A(i)=0 then U<sub>i</sub>=V<sub>i</sub> and f<sub>i</sub>=1<sub>U<sub>i</sub></sub>; or else
+<DT></DT><DD>(Contravariant) A(i)= - 1 and f<sub>i</sub>:U<sub>i</sub> &lt;- V<sub>i</sub>.
+So if A(0)=1 then
+	&lt; &sum;_(i&isin;A<sup> - 1</sup>(1)) u<sub>i</sub> f<sub>i</sub>
+		+ &sum;_(j not&isin;A<sup> - 1</sup>( - 1)) v<sub>j</sub> &gt;<sub>S</sub>
+		= &lt; &sum;_(i&isin;A<sup> - 1</sup>(1)) u<sub>i</sub> 
+		+ &sum;_(j not&isin;A<sup> - 1</sup>( - 1)) v<sub>j</sub> f<sub>j</sub> &gt;<sub>T</sub> f<sub>0</sub>;
+if A(0)=0 then
+	&lt; &sum;_(i&isin;A<sup> - 1</sup>(1)) u<sub>i</sub> f<sub>i</sub>
+		+ &sum;_(j not&isin;A<sup> - 1</sup>( - 1)) v<sub>j</sub> &gt;<sub>S</sub>
+		= &lt; &sum;_(i&isin;A<sup> - 1</sup>(1)) u<sub>i</sub> 
+		+ &sum;_(j not&isin;A<sup> - 1</sup>( - 1)) v<sub>j</sub> f<sub>j</sub> &gt;<sub>T</sub>;
+else A(0)= - 1 and 
+	&lt; &sum;_(i&isin;A<sup> - 1</sup>(1)) u<sub>i</sub> f<sub>i</sub>
+		+ &sum;_(j not&isin;A<sup> - 1</sup>( - 1)) v<sub>j</sub> &gt;<sub>S</sub> f<sub>0</sub>
+		= &lt; &sum;_(i&isin;A<sup> - 1</sup>(1)) u<sub>i</sub> 
+		+ &sum;_(j not&isin;A<sup> - 1</sup>( - 1)) v<sub>j</sub> f<sub>j</sub> &gt;<sub>T</sub>.
+<P>
+</DL>
+Magma manages internally the differences between 
+vectors and covectors and more generally tensors and cotensors.
+Both types are issued the Magma type <TT>TenSpcElt</TT>.
+For operations sensitive to the difference, Magma stores a value of
+co/contra-variance of the tensor as a property of the tensor category.
+This the third general property stored in Magma's tensor category type
+<TT>TenCat</TT>.
+<P>
+We use the phrase tensor category exclusively for categories that describe tensors and tensor spaces.
+In other words, the data structure of a tensor category is a function 
+A:{0, ..., v} -&gt; {-1, 0, 1} and a partition P of {0, ..., v}.
+It is useful to distinguish from tensors and cotensors at the categorical level,
+so a tensor category is either covariant or contravariant as well 
+(in the latter case, referred to as a cotensor category).
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text608.htm#6558">Creating Tensor Categories</A>
+<LI> <A  HREF = "text608.htm#6565">Operations on Tensor Categories</A>
+<LI> <A  HREF = "text608.htm#6572">Categorical Operations</A>
+<LI> <A  HREF = "text608.htm#6573">Categorical Operations on Tensors</A>
+<LI> <A  HREF = "text608.htm#6588">Categorical Operations on Tensor  Spaces</A>
+<LI> <A  HREF = "text608.htm#6594">Homotopisms</A>
+</UL>
+<H4><A NAME = "6558">Creating Tensor Categories</A></H4>
+
+
+
+<H5><A NAME = "6559">TensorCategory(A, P) : [RngIntElt], SetEnum -&gt; TenCat</A></H5>
+<H5>TensorCategory(A, P) : Map, SetEnum -&gt; TenCat</H5>
+<BLOCKQUOTE>
+Sets up a covariant tensor space category with specified direction of
+arrows A, and a partition P indicating variables to be treated as
+equivalent.  The fiber A<sup> - 1</sup>(1) denotes the covariant variables,
+A<sup> - 1</sup>(0) identifies the constant variables, and A<sup> - 1</sup>( - 1) marks
+the contra-variant variables.  
+</BLOCKQUOTE>
+<H5><A NAME = "6560">CotensorCategory(A, P) : [RngIntElt], SetEnum -&gt; TenCat</A></H5>
+<H5>CotensorCategory(A, P) : Map, SetEnum -&gt; TenCat</H5>
+<BLOCKQUOTE>
+Sets up a contra-variant tensor space category with specified direction of
+arrows A, and a partition P indicating variables to be treated as
+equivalent.  The fiber A<sup> - 1</sup>(1) denotes the covariant variables,
+A<sup> - 1</sup>(0) identifies the constant variables, and A<sup> - 1</sup>( - 1) marks
+the contra-variant variables.  
+</BLOCKQUOTE>
+<H5><A NAME = "6561">HomotopismCategory(v : parameters) : RngIntElt -&gt; TenCat</A></H5>
+
+<PRE>    Contravariant: BoolElt              Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Returns Albert's homotopism category -- all modules categories are covariant 
+and 
+no duplicates considered.
+Set the optional parameter <TT>Contravariant</TT> to <TT>true</TT> to make it a cotensor category.
+</BLOCKQUOTE>
+<H5><A NAME = "6562">CohomotopismCategory(v) : RngIntElt -&gt; TenCat</A></H5>
+<BLOCKQUOTE>
+Returns the cohomotopism category -- all domain modules categories are 
+covariant, the codomain is contravariant, and no duplicates considered.
+</BLOCKQUOTE>
+<H5><A NAME = "6563">AdjointCategory(v, s, t) : RngIntElt, RngIntElt, RngIntElt -&gt; TenCat</A></H5>
+<H5>LinearCategory(v, s, t) : RngIntElt, RngIntElt, RngIntElt -&gt; TenCat</H5>
+<BLOCKQUOTE>
+Returns the tensor category where all modules are constant except in position 
+s and t.  Both s and t are in {0, ..., v}.
+Position s is covariant, position t is contravariant.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6564">Example <TT>Multilinear_TenCat_Const (H61E28)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; Cat := TensorCategory([1,-1,0],{{0},{1},{2}});
+&gt; Cat;
+Tensor category of Valence 2 (-&gt;,&lt;-,==) ({ 1 },{ 2 },{ 0 })
+&gt; 
+&gt; TS := KTensorSpace(GF(5),[5,3,4],Cat);
+&gt; TS;
+Tensor space of dimension 60 over GF(5) with valence 2
+U2 : Full Vector space of degree 5 over GF(5)
+U1 : Full Vector space of degree 3 over GF(5)
+U0 : Full Vector space of degree 4 over GF(5)
+&gt; TensorCategory(TS);
+Tensor category of Valence 2 (-&gt;,&lt;-,==) ({ 1 },{ 2 },{ 0 })
+&gt; 
+&gt; IsContravariant(TS);
+false
+</PRE>
+All the tensor constructors that allow a <TT>TenCat</TT> input can be used to make cotensors.
+<P>
+<P>
+<PRE>
+&gt; Cat := HomotopismCategory(2 : Contravariant := true);
+&gt; Cat;
+Cotensor category of valence 2 (-&gt;,-&gt;) ({ 1 },{ 2 })
+&gt; T := Tensor(GF(5),[2,2],[1..4],Cat);
+&gt; T;
+Cotensor of valence 1, U2 x U1 &gt;-&gt; K
+U2 : Full Vector space of degree 2 over GF(5)
+U1 : Full Vector space of degree 2 over GF(5)
+</PRE>
+<HR>
+<H4><A NAME = "6565">Operations on Tensor Categories</A></H4>
+
+<P>
+<P>
+<P>
+We have basic operations for tensor categories.
+
+
+<H5><A NAME = "6566">C1 eq C2 : TenCat, TenCat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Decides if the tensor categories are the same.
+</BLOCKQUOTE>
+<H5><A NAME = "6567">Valence(C) : TenCat -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the valence of the tensor category.
+</BLOCKQUOTE>
+<H5><A NAME = "6568">Arrows(C) : TenCat -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Returns the sequence of arrows of the tensor category. 
+A -1 signifies an a contravariant index, a 0 signifies a constant index, and a 1 signifies a covariant index.
+</BLOCKQUOTE>
+<H5><A NAME = "6569">RepeatPartition(C) : TenCat -&gt; SetEnum</A></H5>
+<BLOCKQUOTE>
+Returns the repeat partition for the tensor category.
+</BLOCKQUOTE>
+<H5><A NAME = "6570">IsCovariant(C) : TenCat -&gt; BoolElt</A></H5>
+<H5>IsContravariant(C) : TenCat -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Decides if the tensor category is covariant or contravariant.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6571">Example <TT>Multilinear_TenCat_Prop (H61E29)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; C1 := TensorCategory([1,1,-1,1],{{0,3},{1},{2}});
+&gt; C1;
+Tensor category of Valence 3 (-&gt;,-&gt;,&lt;-,-&gt;) ({ 1 },{ 2 },
+{ 0, 3 })
+&gt; 
+&gt; A := map&lt; {0..3} -&gt; {-1,0,1} | x :-&gt; 1 &gt;;
+&gt; C2 := TensorCategory(A,{{0..3}});
+&gt; C2;
+Tensor category of Valence 3 (-&gt;,-&gt;,-&gt;,-&gt;) ({ 0 .. 3 })
+&gt; 
+&gt; C1 eq C2;
+false
+&gt; RepeatPartition(C2);
+    { 0 .. 3 }
+&gt; Valence(C2);
+3
+&gt; Arrows(C2);
+[ 1, 1, 1, 1 ]
+</PRE>
+<HR>
+<H4><A NAME = "6572">Categorical Operations</A></H4>
+
+
+
+<H4><A NAME = "6573">Categorical Operations on Tensors</A></H4>
+
+<P>
+<P>
+<P>
+We include functions defined for the category of tensors.
+Most functions are currently defined only for Albert's homotopism category.
+
+
+<H5><A NAME = "6574">Subtensor(T, S) : TenSpcElt, List -&gt; TenSpcElt</A></H5>
+<BLOCKQUOTE>
+Returns the smallest submap of T containing S.
+</BLOCKQUOTE>
+<H5><A NAME = "6575">Subtensor(T, D, C) : TenSpcElt, List, Any -&gt; TenSpcElt</A></H5>
+<BLOCKQUOTE>
+Returns the smallest submap of T containing D in the domain and C in the 
+codomain.
+</BLOCKQUOTE>
+<H5><A NAME = "6576">IsSubtensor(T, S) : TenSpcElt, TenSpcElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Decides whether S is a subtensor of T.
+</BLOCKQUOTE>
+<H5><A NAME = "6577">LocalIdeal(T, S, I) : TenSpcElt, List, RngIntElt -&gt; TenSpcElt</A></H5>
+<BLOCKQUOTE>
+Returns the local ideal of T at I constaining S.
+</BLOCKQUOTE>
+<H5><A NAME = "6578">LocalIdeal(T, D, C, I) : TenSpcElt, List, Any, RngIntElt -&gt; TenSpcElt</A></H5>
+<BLOCKQUOTE>
+Returns the local ideal of T at I constaining D in the domain and C 
+in the codomain.
+</BLOCKQUOTE>
+<H5><A NAME = "6579">LocalIdeal(T, S, I) : TenSpcElt, TenSpcElt, RngIntElt -&gt; TenSpcElt</A></H5>
+<BLOCKQUOTE>
+Returns the local ideal of T at I constaining S as a submap.
+</BLOCKQUOTE>
+<H5><A NAME = "6580">IsLocalIdeal(T, S, I) : TenSpcElt, TenSpcElt, RngIntElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Decides if S is a local ideal of T at I.
+</BLOCKQUOTE>
+<H5><A NAME = "6581">Ideal(T, S) : TenSpcElt, List -&gt; TenSpcElt</A></H5>
+<BLOCKQUOTE>
+Returns the ideal of T containing S.
+</BLOCKQUOTE>
+<H5><A NAME = "6582">Ideal(T, D, C) : TenSpcElt, List, Any -&gt; TenSpcElt</A></H5>
+<BLOCKQUOTE>
+Returns the ideal of T containing D in the domain and C in the codomain.
+</BLOCKQUOTE>
+<H5><A NAME = "6583">Ideal(T, S) : TenSpcElt, TenSpcElt -&gt; TenSpcElt</A></H5>
+<BLOCKQUOTE>
+Returns the ideal of T containing S as a submap.
+</BLOCKQUOTE>
+<H5><A NAME = "6584">IsIdeal(T, S) : TenSpcElt, TenSpcElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Decides if S is an ideal of T.
+</BLOCKQUOTE>
+<H5><A NAME = "6585">LocalQuotient(T, S, I : parameters) : TenSpcElt, TenSpcElt, RngIntElt -&gt; TenSpcElt, Hmtp</A></H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Returns the local quotient of T by S at I. If you know S is a local 
+ideal of T at I, set <TT>Check</TT> to <TT>false</TT> to skip the verification.
+A homotopism is also returned, mapping from T to T/S.
+</BLOCKQUOTE>
+<H5><A NAME = "6586">Quotient(T, S : parameters) : TenSpcElt, TenSpcElt -&gt; TenSpcElt, Hmtp</A></H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<H5>T / S : TenSpcElt, TenSpcElt -&gt; TenSpcElt, Hmtp</H5>
+<BLOCKQUOTE>
+Returns the quotient of T by S. If you know S is an ideal of T, 
+set <TT>Check</TT> to <TT>false</TT> to skip the verification.
+A homotopism is also returned, mapping from T to T/S.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6587">Example <TT>Multilinear_Ten_Cat_Ops (H61E30)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; T := RandomTensor(GF(5),[4,4,2]);
+&gt; T := RandomTensor(GF(5),[4,4,2]);
+&gt; T;
+Tensor of valence 2, U2 x U1 &gt;-&gt; U0
+U2 : Full Vector space of degree 4 over GF(5)
+U1 : Full Vector space of degree 4 over GF(5)
+U0 : Full Vector space of degree 2 over GF(5)
+&gt; 
+&gt; F := Frame(T);
+&gt; L := [* F[1]![1,1,1,0], F[2]![0,0,0,1], F[3]![0,0] *];
+&gt; S := Subtensor(T,L);
+&gt; S;
+Tensor of valence 2, U2 x U1 &gt;-&gt; U0
+U2 : Vector space of degree 4, dimension 1 over GF(5)
+Generators:
+(1 1 1 0)
+Echelonized basis:
+(1 1 1 0)
+U1 : Vector space of degree 4, dimension 1 over GF(5)
+Generators:
+(0 0 0 1)
+Echelonized basis:
+(0 0 0 1)
+U0 : Vector space of degree 2, dimension 1 over GF(5)
+Generators:
+(0 2)
+Echelonized basis:
+(0 1)
+&gt; 
+&gt; IsSubtensor(T,S);
+true
+</PRE>
+Now we construct the ideal of T containing S.
+<P>
+<P>
+<PRE>
+&gt; I := Ideal(T,S);
+&gt; I;
+Tensor of valence 2, U2 x U1 &gt;-&gt; U0
+U2 : Vector space of degree 4, dimension 1 over GF(5)
+Generators:
+(1 1 1 0)
+Echelonized basis:
+(1 1 1 0)
+U1 : Vector space of degree 4, dimension 1 over GF(5)
+Generators:
+(0 0 0 1)
+Echelonized basis:
+(0 0 0 1)
+U0 : Full Vector space of degree 2 over GF(5)
+Generators:
+(1 0)
+(0 1)
+&gt; 
+&gt; IsIdeal(T,I);
+true
+</PRE>
+Finally, we construct the quotient of T by I.
+<P>
+<P>
+<PRE>
+&gt; T/I;
+Tensor of valence 2, U2 x U1 &gt;-&gt; U0
+U2 : Full Vector space of degree 3 over GF(5)
+U1 : Full Vector space of degree 3 over GF(5)
+U0 : Full Vector space of degree 0 over GF(5)
+Maps from U2 x U1 &gt;-&gt; U0 to V2 x V1 &gt;-&gt; V0.
+U2 -&gt; V2: Mapping from: Full Vector space of degree 4 over 
+GF(5) to Full Vector space of degree 3 over GF(5)
+U1 -&gt; V1: Mapping from: Full Vector space of degree 4 over 
+GF(5) to Full Vector space of degree 3 over GF(5)
+U0 -&gt; V0: Mapping from: Full Vector space of degree 2 over 
+GF(5) to Full Vector space of degree 0 over GF(5)
+</PRE>
+<HR>
+<H4><A NAME = "6588">Categorical Operations on Tensor  Spaces</A></H4>
+
+<P>
+<P>
+<P>
+We have categorical notions for tensor spaces as well.
+
+
+<H5><A NAME = "6589">SubtensorSpace(T, L) : TenSpc, [TenSpcElt] -&gt; TenSpc</A></H5>
+<BLOCKQUOTE>
+Returns the subtensor space of T generated by the tensors in the sequence L.
+</BLOCKQUOTE>
+<H5><A NAME = "6590">SubtensorSpace(T, t) : TenSpc, TenSpcelt -&gt; TenSpc</A></H5>
+<BLOCKQUOTE>
+Returns the subtensor space of T generated by the tensor t.
+</BLOCKQUOTE>
+<H5><A NAME = "6591">IsSubtensorSpace(T, S) : TenSpc, TenSpc -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Decides if the tensor space S is a subtensor space of T.
+</BLOCKQUOTE>
+<H5><A NAME = "6592">Quotient(T, S) : TenSpc, TenSpc -&gt; TenSpc</A></H5>
+<H5>T / S : TenSpc, TenSpc -&gt; TenSpc</H5>
+<BLOCKQUOTE>
+Returns the quotient tensor space of T by S.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6593">Example <TT>Multilinear_TenSpc_Cat_Ops (H61E31)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; T := KTensorSpace(GF(2),[4,4,2]);
+&gt; T;
+Tensor space of dimension 32 over GF(2) with valence 2
+U2 : Full Vector space of degree 4 over GF(2)
+U1 : Full Vector space of degree 4 over GF(2)
+U0 : Full Vector space of degree 2 over GF(2)
+&gt; 
+&gt; L := [ T.i : i in [1..Ngens(T)] | IsEven(i) ];
+&gt; S := SubtensorSpace(T, L);
+&gt; S;
+Tensor space of dimension 16 over GF(2) with valence 2
+U2 : Full Vector space of degree 4 over GF(2)
+U1 : Full Vector space of degree 4 over GF(2)
+U0 : Full Vector space of degree 2 over GF(2)
+&gt; SystemOfForms(Random(S));
+[
+    [0 0 0 0]
+    [0 0 0 0]
+    [0 0 0 0]
+    [0 0 0 0],
+
+    [1 0 0 0]
+    [0 1 0 1]
+    [1 0 0 0]
+    [0 0 1 0]
+]
+</PRE>
+Now we compute the quotient tensor space Q=T/S.
+<P>
+<P>
+<PRE>
+&gt; Q := T/S;
+&gt; Q;
+Tensor space of dimension 16 over GF(2) with valence 2
+U2 : Full Vector space of degree 4 over GF(2)
+U1 : Full Vector space of degree 4 over GF(2)
+U0 : Full Vector space of degree 2 over GF(2)
+&gt; SystemOfForms(Random(Q));
+[
+    [0 0 0 0]
+    [1 1 1 0]
+    [1 0 1 1]
+    [1 1 0 1],
+
+    [0 0 0 0]
+    [0 0 0 0]
+    [0 0 0 0]
+    [0 0 0 0]
+]
+&gt; SystemOfForms(Q![1 : i in [1..32]]);
+[
+    [1 1 1 1]
+    [1 1 1 1]
+    [1 1 1 1]
+    [1 1 1 1],
+
+    [0 0 0 0]
+    [0 0 0 0]
+    [0 0 0 0]
+    [0 0 0 0]
+]
+</PRE>
+<HR>
+<H4><A NAME = "6594">Homotopisms</A></H4>
+
+<P>
+<P>
+<P>
+Magma provides functions for homotopisms. Homotopisms are also equipped with a tensor category.
+
+
+<H5><A NAME = "6595">Constructions of Homotopisms</A></H5>
+
+
+
+<H5><A NAME = "6596">Homotopism(T, S, M) : TenSpcElt, TenSpcElt, List -&gt; Hmtp</A></H5>
+<H5>Homotopism(T, S, M, C) : TenSpcElt, TenSpcElt, List, TenCat -&gt; Hmtp</H5>
+<BLOCKQUOTE>
+Returns the homotopism from T to S given by the list of maps M and the category C. 
+The default tensor category is the same as tensor categories for T and S.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6597">Example <TT>Multilinear_Hmtp_Const (H61E32)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; TS := KTensorSpace(GF(4),[2,3,4]);
+&gt; T := Random(TS);
+&gt; S := Random(TS);
+&gt; M := [* Random(KMatrixSpace(GF(4),i,i)) : i in [2..4] *];
+&gt; H := Homotopism(T,S,M);
+&gt; H;
+Maps from U2 x U1 &gt;-&gt; U0 to V2 x V1 &gt;-&gt; V0.
+U2 -&gt; V2: 
+[    1     0]
+[    0     0]
+U1 -&gt; V1: 
+[    0   $.1 $.1^2]
+[    1     1   $.1]
+[  $.1   $.1 $.1^2]
+U0 -&gt; V0: 
+[    1     1   $.1 $.1^2]
+[    0     1 $.1^2   $.1]
+[    0     0   $.1 $.1^2]
+[  $.1 $.1^2   $.1     0]
+&gt; 
+&gt; 
+&gt; M[2] := map&lt; Frame(TS)[2] -&gt; Frame(TS)[2] | x :-&gt; x &gt;;
+&gt; H2 := Homotopism(T,S,M);
+&gt; H2;
+Maps from U2 x U1 &gt;-&gt; U0 to V2 x V1 &gt;-&gt; V0.
+U2 -&gt; V2: 
+[    1     0]
+[    0     0]
+U1 -&gt; V1: Mapping from: Full Vector space of degree 3 
+over GF(2^2) to Full Vector space of degree 3 over GF(2^2) 
+given by a rule [no inverse]
+U0 -&gt; V0: 
+[    1     1   $.1 $.1^2]
+[    0     1 $.1^2   $.1]
+[    0     0   $.1 $.1^2]
+[  $.1 $.1^2   $.1     0]
+</PRE>
+<HR>
+<H5><A NAME = "6598">Basic Operations with Homotopisms</A></H5>
+
+<P>
+<P>
+<P>
+We provide some operations for homotopisms.
+
+
+<H5><A NAME = "6599">H1 * H2 : Hmtp, Hmtp -&gt; Hmtp</A></H5>
+<BLOCKQUOTE>
+Returns the composition of the homotopisms H<sub>1</sub> and H<sub>2</sub>.
+</BLOCKQUOTE>
+<H5><A NAME = "6600">Domain(H) : Hmtp -&gt; TenSpcElt</A></H5>
+<BLOCKQUOTE>
+Returns the domain tensor of H.
+</BLOCKQUOTE>
+<H5><A NAME = "6601">Codomain(H) : Hmtp -&gt; TenSpcElt</A></H5>
+<BLOCKQUOTE>
+Returns the codomain tensor of H.
+</BLOCKQUOTE>
+<H5><A NAME = "6602">Maps(H) : Hmtp -&gt; List</A></H5>
+<BLOCKQUOTE>
+Returns the of maps for the various modules in the domain and codomain 
+tensors.
+</BLOCKQUOTE>
+<H5><A NAME = "6603">TensorCategory(H) : Hmtp -&gt; TenCat</A></H5>
+<BLOCKQUOTE>
+Returns the tensor category of H.
+</BLOCKQUOTE>
+<H5><A NAME = "6604">ChangeTensorCategory(H, C) : Hmtp, TenCat -&gt; Hmtp</A></H5>
+<H5>ChangeTensorCategory( H, C) : Hmtp, TenCat -&gt;</H5>
+<BLOCKQUOTE>
+Changes the tensor category of H to the given category.
+</BLOCKQUOTE>
+<H5><A NAME = "6605">Kernel(H) : Hmtp -&gt; TenSpcElt</A></H5>
+<BLOCKQUOTE>
+Returns the kernel of H as an ideal of its domain tensor.
+</BLOCKQUOTE>
+<H5><A NAME = "6606">Image(H) : Hmtp -&gt; TenSpcElt</A></H5>
+<BLOCKQUOTE>
+Returns the image of H as a submap of the codomain tensor.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6607">Example <TT>Multilinear_Hmtp_Ops (H61E33)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; T := RandomTensor(GF(7),[5,4,3]);
+&gt; F := Frame(T);
+&gt; 
+&gt; I := [* hom&lt; F[j] -&gt; F[j] | [&lt; F[j].i,F[j].i &gt; :
+&gt;   i in [1..Dimension(F[j])]] &gt; : j in [1..3] *];
+&gt; H := Homotopism(T,T,I);
+&gt; 
+&gt; Image(H);
+Tensor of valence 2, U2 x U1 &gt;-&gt; U0
+U2 : Full Vector space of degree 5 over GF(7)
+U1 : Full Vector space of degree 4 over GF(7)
+U0 : Full Vector space of degree 3 over GF(7)
+&gt; Kernel(H);
+Tensor of valence 2, U2 x U1 &gt;-&gt; U0
+U2 : Vector space of degree 5, dimension 0 over GF(7)
+U1 : Vector space of degree 4, dimension 0 over GF(7)
+U0 : Vector space of degree 3, dimension 0 over GF(7)
+</PRE>
+If the tensor is over vector spaces, then matrices can be used to create a homotopism.
+<P>
+<P>
+<PRE>
+&gt; M := [* RandomMatrix(GF(7),i,i) : i in [5,4,3] *];
+&gt; G := Homotopism(T,T,M);
+&gt; G;
+Maps from U2 x U1 &gt;-&gt; U0 to V2 x V1 &gt;-&gt; V0.
+U2 -&gt; V2: 
+[5 3 6 0 4]
+[6 0 0 1 1]
+[6 4 3 1 5]
+[3 4 6 1 4]
+[2 4 1 3 2]
+U1 -&gt; V1: 
+[5 5 0 3]
+[3 5 1 3]
+[3 6 1 5]
+[2 3 5 4]
+U0 -&gt; V0: 
+[6 4 1]
+[2 6 5]
+[1 2 3]
+</PRE>
+Homotopisms can be composed so long as Magma can compose each of the individual maps.
+<P>
+<P>
+<PRE>
+&gt; G*G;
+Maps from U2 x U1 &gt;-&gt; U0 to V2 x V1 &gt;-&gt; V0.
+U2 -&gt; V2: 
+[3 6 3 0 5]
+[0 5 1 4 2]
+[1 5 0 2 1]
+[2 4 4 2 2]
+[4 2 0 0 5]
+U1 -&gt; V1: 
+[4 3 6 0]
+[4 6 0 6]
+[4 3 4 3]
+[0 4 0 0]
+U0 -&gt; V0: 
+[3 1 1]
+[1 5 5]
+[6 1 6]
+</PRE>
+We can change the underlying category for the homotopism G to get a different morphism.
+<P>
+<P>
+<PRE>
+&gt; Cat := TensorCategory([1,-1,1],{{0},{1},{2}});
+&gt; G := Homotopism(T,T,M,Cat);
+&gt; G;
+Maps from U2 x U1 &gt;-&gt; U0 to V2 x V1 &gt;-&gt; V0.
+U2 -&gt; V2: 
+[5 3 6 0 4]
+[6 0 0 1 1]
+[6 4 3 1 5]
+[3 4 6 1 4]
+[2 4 1 3 2]
+U1 &lt;- V1: 
+[5 5 0 3]
+[3 5 1 3]
+[3 6 1 5]
+[2 3 5 4]
+U0 -&gt; V0: 
+[6 4 1]
+[2 6 5]
+[1 2 3]
+&gt; 
+&gt; Image(G);
+Tensor of valence 2, U2 x U1 &gt;-&gt; U0
+U2 : Full Vector space of degree 5 over GF(7)
+U1 : Vector space of degree 4, dimension 0 over GF(7)
+U0 : Vector space of degree 3, dimension 2 over GF(7)
+Echelonized basis:
+(1 0 4)
+(0 1 3)
+&gt; 
+&gt; Kernel(G);
+Tensor of valence 2, U2 x U1 &gt;-&gt; U0
+U2 : Vector space of degree 5, dimension 0 over GF(7)
+U1 : Full Vector space of degree 4 over GF(7)
+U0 : Vector space of degree 3, dimension 1 over GF(7)
+Echelonized basis:
+(1 4 0)
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text609.htm">[Next]</A><A  HREF = "text607.htm">[Prev]</A> <A  HREF = "text609.htm">[Right]</A> <A  HREF = "text607.htm">[Left]</A> <A  HREF = "text603.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,2 @@
+174,1
+S,InternalIsMinkowskiIndecomposable,"True if the polytope P is detected to be Minkowski indecomposable. Note that in dimension 3 or more this is a probabilistic algorithm, and returning false does NOT guarantee that a non-trivial Minkowski decomposition exists. You can reduce the probability of returning false when P actually is indecomposable by increasing the value of 'max_attempts' [default: 100]",0,1,0,0,0,0,0,0,0,TorPol,,36,-38,-38,-38,-38,-38

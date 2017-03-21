@@ -1,0 +1,306 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Base and Strong Generating Set</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text670.htm">[Next]</A><A  HREF = "text668.htm">[Prev]</A> <A  HREF = "text670.htm">[Right]</A> <A  HREF = "text668.htm">[Left]</A> <A  HREF = "text653.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "7698">Base and Strong Generating Set</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text669.htm#7699">Introduction</A>
+<LI> <A  HREF = "text669.htm#7700">Controlling Selection of a Base</A>
+<LI> <A  HREF = "text669.htm#7706">Construction of a Base and Strong Generating Set</A>
+<LI> <A  HREF = "text669.htm#7712">Defining Values for Attributes</A>
+<LI> <A  HREF = "text669.htm#7717">Accessing the Base and Strong  Generating Set</A>
+</UL>
+<H4><A NAME = "7699">Introduction</A></H4>
+
+<P>
+<P>
+Computing structural information for a matrix group G requires,
+in most cases, a representation of the set of elements of G. Magma
+represents this set by means of a <I>base and strong generating set,
+or BSGS </I> for G. Suppose the group G has the natural module M. A
+<I>base</I> B for G is a sequence of distinct elements and submodules 
+of M with the property that the identity is the only element of G that
+fixes B pointwise. A base B of length n determines a sequence of
+subgroups G<sup>(i)</sup>, 1 &le;i &le;n + 1, where G<sup>(i)</sup> is the
+stabilizer of the first i - 1 points of B. Given a base B for G,
+a subset S of G is said to be a <I>strong generating set</I> for G
+if G<sup>(i)</sup> = &lt; S &cap;G<sup>(i)</sup> &gt;, for i = 1, ..., n.
+<P>
+Unlike permutation groups, however, the orbits of the i-th base point
+under the stabilizer G<sup>(i)</sup> are not bounded by the degree, but rather,
+by (where the base point is a 1-dimensional subspace) (q<sup>n</sup> - 1)/(q - 1)
+where q is the cardinality of the coefficient field and n is the
+degree of G.  Clearly, it is essential to find small orbits if one
+is to compute with matrix groups in this manner.
+Unfortunately, there are no methods which are guaranteed to find short
+orbits.  There are, however, some heuristics developed by Scott Murray
+and Eamonn O'Brien which often find good base points.  These heuristics
+are used in Magma if the most likely standard base point would
+generate an orbit longer than 10000 (this bound may be changed).
+
+
+<H4><A NAME = "7700">Controlling Selection of a Base</A></H4>
+
+<P>
+<P>
+Given the difficulties in automatically finding a good base for a matrix
+group, it is possible to apply the Murray-O'Brien base point selection
+procedure and preset a suitable base manually.
+
+
+<H5><A NAME = "7701">GoodBasePoints(G: parameters) : GrpMat -&gt; []</A></H5>
+<BLOCKQUOTE>
+Apply the Murray--O'Brien base point selection procedure and return
+a sequence of vectors or subspaces according to the parameters.
+The procedure computes and sorts a collection of
+eigenspaces [V<sub>1</sub>, ..., V<sub>m</sub>] for a generating set for the matrix group G.
+The default action is then to return [V<sub>1</sub>.1, ..., V<sub>m</sub>.1, V<sub>1</sub>.2, ... ]
+where each new vector is only added if it is not in the span of the
+preceding vectors.
+<P>
+<P>
+<PRE>
+     Slots: RngIntElt                    Default: 10
+</PRE>
+Expand the number of generators to work with to <TT>Slots</TT> matrices by
+adding random words in the generators of G.
+<P>
+<P>
+<PRE>
+     NoCycle: RngIntElt                  Default: <TT>false</TT>
+</PRE>
+If <TT>NoCycle := true</TT>, instead of cycling through the eigenspaces,
+return the sequence
+[V<sub>1</sub>.1, ..., V<sub>1</sub>.((dim) V<sub>1</sub>), V<sub>2</sub>.1, ... ], with the addition
+of each vector subject to the same condition above.
+<P>
+<P>
+<PRE>
+     Eigenspaces: RngIntElt              Default: <TT>false</TT>
+</PRE>
+If <TT>Eigenspaces := true</TT>, then return the subsequence of the eigenspaces
+where all the eigenspaces have dimension d leq10.  If there are no
+such eigenspaces, all the eigenspaces are returned.
+</BLOCKQUOTE>
+<H5><A NAME = "7702">AssertAttribute(G, "Base", B) : GrpMat, MonStgElt, Tup -&gt;</A></H5>
+<BLOCKQUOTE>
+Set the base of the matrix group G to be [B[1], ..., B[n]] where the tuple B has n
+components.  An error will be reported if the matrix group G already has
+a base set.
+</BLOCKQUOTE>
+<H5><A NAME = "7703">HasAttribute(G, "Base") : GrpMat, MonStgElt -&gt; BoolElt, Tup</A></H5>
+<BLOCKQUOTE>
+Return whether the matrix group G has a base set, and if so, the base.
+</BLOCKQUOTE>
+<H5><A NAME = "7704">AssertAttribute(GrpMat, "FirstBasicOrbitBound", n) : Cat, MonStgElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Set the limit for the size of the first basic orbit to be n.
+If n is non-zero and the orbit of the first base point (a 1-dimensional
+subspace generated by a standard basis vector) has length exceeding n,
+then the Murray-O'Brien
+base point selection procedure is used to find a point more likely
+to have a short orbit.  This assertion will affect all matrix groups.
+If n = 1 then use of the Murray-O'Brien procedure is guaranteed.
+</BLOCKQUOTE>
+<H5><A NAME = "7705">HasAttribute(GrpMat, "FirstBasicOrbitBound") : Cat, MonStgElt -&gt; BoolElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Get the limit for the size of the first basic orbit.  This will always
+return <TT>true</TT> and the limit.
+</BLOCKQUOTE>
+<H4><A NAME = "7706">Construction of a Base and Strong Generating Set</A></H4>
+
+<P>
+<P>
+The functions described below give user control of the construction
+of a base and strong generating set (BSGS) of a finite matrix group.
+<P>
+Many functions described in this chapter require a group to have a BSGS.
+In case the given group does not have a BSGS, then one will be
+constructed using the default algorithm, which is equivalent to using
+the <TT>BSGS</TT> procedure described below.
+<P>
+It should be noted that if the user constructs a BSGS for a group G using 
+the <TT>RandomSchreier</TT> procedure, then other functions that require
+a BSGS will assume that the random BSGS is a complete BSGS. If this is not
+the case then results will be unpredictable.
+
+
+<H5><A NAME = "7707">BSGS(G) : GrpMat -&gt;</A></H5>
+<H5>BSGS(G, str) : GrpMat, MonStgElt -&gt;</H5>
+<BLOCKQUOTE>
+The general procedure for constructing a base and strong generating
+set for the matrix group G. This version uses the default algorithm 
+choices. Currently this is as follows: if the order of the group is known
+to the program
+then a BSGS is constructed using the random Schreier algorithm, if not
+then the Sims-Todd-Coxeter-Schreier procedure is used. 
+If <TT>str</TT> is the name of a sporadic group, we assume that
+G is a representation for this group and choose base points
+specific to this group. This should ensure better 
+performance.
+Information
+on the progress of these algorithms may be obtained by setting the
+verbose flags <TT>RandomSchreier</TT> and <TT>STCS</TT> <TT>true</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "7708">RandomSchreier(G: parameters) : GrpMat -&gt;</A></H5>
+<H5>RandomSchreier(G, str : parameters) : GrpMat, MonStgElt -&gt;</H5>
+
+<PRE>    Run: RngIntElt                      Default: 40</PRE>
+<BLOCKQUOTE>
+Construct a probable base and strong generating set for the group G.
+The strong generators are constructed from a set of randomly chosen
+elements of G.  The expectation is that if sufficiently many random elements
+are taken then, upon termination, the algorithm will have produced a
+BSGS for G. If the attribute Order is defined for G, the random Schreier
+will continue until a BSGS defining a group of the indicated order is
+obtained (except when the <TT>Run</TT> parameter is set - see below).
+In such circumstances this method is the fastest method of
+constructing a base and strong generating set for G. This is particularly
+so for groups of large degree.  If nothing is known about G, the random
+Schreier algorithm  provides a cheap way of obtaining lower bounds on the
+group's order.
+This procedure has one associated parameter <TT>Run</TT>,
+which takes a positive integer value.
+If the value of <TT>Run</TT> is n, then the algorithm terminates after n
+consecutive random elements are found to lie in the set defined by the
+current BSGS (default 40).  
+This will happen even if the Order attribute is defined for G.
+It should be emphasized that unpredictable results may arise if the user
+uses the base and strong generators produced by this algorithm, when, in
+fact, it does not constitute a complete BSGS for G. The <TT>Verify</TT>
+procedure, described below, may be used to check the completeness of
+the BSGS constructed by this function.
+<P>
+If <TT>str</TT> is the name of a sporadic group, we assume that
+G is a representation for this group and choose base points
+specific to this group. This should ensure better 
+performance.
+<P>
+Information on the progress of this algorithm may be obtained by setting the
+verbose flag <TT>RandomSchreier</TT> to <TT>true</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "7709">RandomSchreierBounded(G, L: parameters) : GrpMat, RngIntElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Causes a <TT>RandomSchreier</TT> to be attempted on G, with basic orbit lengths
+limited to at most L. If this limit is exceeded (for any one orbit) then the
+attempt is abandoned and <TT>false</TT> is returned. If <TT>true</TT> is returned then the result
+is the same as <TT>RandomSchreier</TT> applied to G.
+</BLOCKQUOTE>
+<H5><A NAME = "7710">ToddCoxeterSchreier(G) : GrpMat : -&gt;</A></H5>
+<BLOCKQUOTE>
+Construct a BSGS for the matrix group G using the Sims-Todd-Coxeter-Schreier algorithm. 
+Information on the progress of this algorithm may be obtained by setting the
+verbose flag <TT>STCS</TT> to <TT>true</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "7711">Verify(G) : GrpMat -&gt;</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G for which a possible BSGS is stored, verify 
+the correctness of the BSGS. If it is not complete, proceed to complete 
+it.  The Sims-Todd-Coxeter-Schreier method is used.
+<P>
+If G has no BSGS stored, then use of <TT>Verify</TT> is equivalent to 
+using the <TT>BSGS</TT> procedure described above.
+<P>
+Information
+on the progress of these algorithms may be obtained by setting the
+verbose flags <TT>RandomSchreier</TT> and <TT>STCS</TT> <TT>true</TT>.
+</BLOCKQUOTE>
+<H4><A NAME = "7712">Defining Values for Attributes</A></H4>
+
+
+
+<H5><A NAME = "7713">AssertAttribute(G, "Order", n) : GrpMat, MonStgElt, RngIntElt -&gt;</A></H5>
+<H5>AssertAttribute(G, "Order", Q) : GrpMat, MonStgElt, [Tup(RngIntElt, RngIntElt)] -&gt;</H5>
+<BLOCKQUOTE>
+Define the order of the matrix group G to be the integer n (factored
+integer Q).
+</BLOCKQUOTE>
+<H5><A NAME = "7714">AssertAttribute(G, "IsVerified", b) : GrpMat, MonStgElt, BoolElt -&gt;</A></H5>
+<BLOCKQUOTE>
+If the boolean variable b is <TT>true</TT>, the existing pseudo strong 
+generators for the matrix group G (possibly created by 
+<TT>RandomSchreier</TT>) are to be taken as correct.
+</BLOCKQUOTE>
+<H5><A NAME = "7715">HasAttribute(G, "Order") : GrpMat, MonStgElt -&gt; RngIntElt</A></H5>
+<H5>HasAttribute(G, "FactoredOrder") : GrpMat, MonStgElt -&gt; [Tup(RngIntElt, RngIntElt)]</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> iff the order of the group G is known. In that case, the
+order is also returned as the second value of the function.
+</BLOCKQUOTE>
+<H5><A NAME = "7716">HasAttribute(G, "IsVerified") : GrpMat, MonStgElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> iff the matrix group G has a verified set of strong generators.
+</BLOCKQUOTE>
+<H4><A NAME = "7717">Accessing the Base and Strong  Generating Set</A></H4>
+
+
+
+<H5><A NAME = "7718">Base(G) : GrpMat -&gt; [Elt]</A></H5>
+<BLOCKQUOTE>
+A base for the matrix group G. The base is returned as a
+sequence of points of &Omega;. If a base is not known, one
+will be constructed.
+</BLOCKQUOTE>
+<H5><A NAME = "7719">BasePoint(G, i) : GrpMat, RngIntElt -&gt; Elt</A></H5>
+<BLOCKQUOTE>
+The i-th base point for the matrix group G. A base
+and strong generating set must be known for G.
+</BLOCKQUOTE>
+<H5><A NAME = "7720">BasicOrbit(G, i) : GrpMat, RngIntElt -&gt; SetIndx</A></H5>
+<BLOCKQUOTE>
+The basic orbit at level i as defined by the current base for the
+matrix group G. This function assumes that a BSGS is known for
+G.
+</BLOCKQUOTE>
+<H5><A NAME = "7721">BasicOrbitLength(G, i) : GrpMat, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The length of the basic orbit at level i as defined by the current
+base for the matrix group G. This function assumes that a BSGS
+is known for G.
+</BLOCKQUOTE>
+<H5><A NAME = "7722">BasicOrbitLengths(G) : GrpMat -&gt; [RngIntElt]</A></H5>
+<BLOCKQUOTE>
+The lengths of the basic orbits as defined by the current base for
+the matrix group G. This function assumes that a BSGS is known
+for G.  The lengths are returned as a sequence of integers.
+</BLOCKQUOTE>
+<H5><A NAME = "7723">BasicStabilizer(G, i) : GrpMat, RngIntElt -&gt; GrpMat</A></H5>
+<H5>BasicStabiliser(G, i) : GrpMat, RngIntElt -&gt; GrpMat</H5>
+<BLOCKQUOTE>
+Given a matrix group G for which a base and strong generating set
+are known, and an integer i, where 1 &le;i &le;k with k the length
+of the base, return the subgroup of G which fixes the first i - 1 points
+of the base.
+</BLOCKQUOTE>
+<H5><A NAME = "7724">BasicStabilizerChain(G) : GrpMat -&gt; [GrpMat]</A></H5>
+<H5>BasicStabiliserChain(G) : GrpMat -&gt; [GrpMat]</H5>
+<BLOCKQUOTE>
+Given a matrix group G, return the stabilizer chain defined
+by the base as a sequence of subgroups of G. If a BSGS is not
+already known for G, it will be created.
+</BLOCKQUOTE>
+<H5><A NAME = "7725">NumberOfStrongGenerators(G) : GrpMat -&gt; RngIntElt</A></H5>
+<H5>Nsgens(G) : GrpMat -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The number of elements in the current strong generating set for the matrix group G.
+</BLOCKQUOTE>
+<H5><A NAME = "7726">StrongGenerators(G) : GrpMat -&gt; SetIndx(GrpMat)</A></H5>
+<BLOCKQUOTE>
+A set of strong generators for the matrix group G. If
+they are not currently available, they will be computed.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text670.htm">[Next]</A><A  HREF = "text668.htm">[Prev]</A> <A  HREF = "text670.htm">[Right]</A> <A  HREF = "text668.htm">[Left]</A> <A  HREF = "text653.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

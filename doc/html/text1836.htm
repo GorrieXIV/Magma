@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Coset Leaders</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1837.htm">[Next]</A><A  HREF = "text1835.htm">[Prev]</A> <A  HREF = "text1837.htm">[Right]</A> <A  HREF = "text1835.htm">[Left]</A> <A  HREF = "text1831.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "20398">Coset Leaders</A></H3>
+
+
+
+<H5><A NAME = "20399">CosetLeaders(C) : Code -&gt; {@ ModTupFldElt  @}, Map</A></H5>
+<BLOCKQUOTE>
+Given a code C with ambient space V over a finite field, return 
+a set of coset leaders (vectors of minimal weight in their 
+cosets) for C in V as an indexed set of vectors from V. Note that this
+function is only applicable when V and C are small.
+This function also returns a map from the syndrome space of C into
+the coset leaders (mapping a syndrome into its corresponding
+coset leader).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20400">Example <TT>CodeFld_CosetLeaders (H158E13)</TT></A></H3>
+We construct a Hamming code C, encode an information word using C,
+introduce one error, and then decode by calculating the syndrome of
+the "received" vector and applying the CosetLeaders map to the syndrome
+to recover the original vector.
+<P>
+<P>
+First we set C to be the third order Hamming Code over the finite field
+with two elements.
+<P>
+<P>
+<PRE>
+&gt; C := HammingCode(GF(2), 3);
+&gt; C;
+[7, 4, 3] Hamming code (r = 3) over GF(2)
+Generator matrix:
+[1 0 0 0 0 1 1]
+[0 1 0 0 1 0 1]
+[0 0 1 0 1 1 0]
+[0 0 0 1 1 1 1]
+</PRE>
+Then we set L to be the set of coset leaders of C in its ambient space V
+and f to be the map which maps the syndrome of a vector in V to its coset
+leader in L.
+<P>
+<P>
+<PRE>
+&gt; L, f := CosetLeaders(C);
+&gt; L;
+{@
+    (0 0 0 0 0 0 0),
+    (1 0 0 0 0 0 0),
+    (0 1 0 0 0 0 0),
+    (0 0 1 0 0 0 0),
+    (0 0 0 1 0 0 0),
+    (0 0 0 0 1 0 0),
+    (0 0 0 0 0 1 0),      
+    (0 0 0 0 0 0 1)
+@}
+</PRE>
+Since C has dimension 4, the degree of the information space I of C
+is 4.  We set i to be an "information vector" of length 4 in I, and
+then encode i using C by setting w to be the product of i by the
+generator matrix of C.
+<P>
+<P>
+<PRE>
+&gt; I := InformationSpace(C);
+&gt; I;         
+Full Vector space of degree 4 over GF(2)
+&gt; i := I ! [1, 0, 1, 1];
+&gt; w := i * GeneratorMatrix(C);
+&gt; w;         
+(1 0 1 1 0 1 0)     
+</PRE>
+Now we set r to be the same as w but with an error in the 7-th coordinate
+(so r is the "received vector").
+<P>
+<P>
+<PRE>
+&gt; r := w;         
+&gt; r[7] := 1;
+&gt; r;                
+(1 0 1 1 0 1 1)        
+</PRE>
+Finally we let s be the syndrome of r with respect to C, apply f to
+s to get the coset leader l, and subtract l from r to get the corrected
+vector v.  Finding the coordinates of v with respect to the basis of C
+(the rows of the generator matrix of C) gives the original information
+vector.
+<P>
+<P>
+<PRE>
+&gt; s := Syndrome(r, C);
+&gt; s;
+(1 1 1)      
+&gt; l := f(s);
+&gt; l;    
+(0 0 0 0 0 0 1)
+&gt; v := r - l;
+&gt; v;                     
+(1 0 1 1 0 1 0)                 
+&gt; res := I ! Coordinates(C, v);
+&gt; res;
+(1 0 1 1)
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1837.htm">[Next]</A><A  HREF = "text1835.htm">[Prev]</A> <A  HREF = "text1837.htm">[Right]</A> <A  HREF = "text1835.htm">[Left]</A> <A  HREF = "text1831.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

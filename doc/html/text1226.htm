@@ -1,0 +1,262 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Normalisation and Noether  Normalisation</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1227.htm">[Next]</A><A  HREF = "text1225.htm">[Prev]</A> <A  HREF = "text1227.htm">[Right]</A> <A  HREF = "text1225.htm">[Left]</A> <A  HREF = "text1214.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "13630">Normalisation and Noether  Normalisation</A></H3>
+
+<P>
+<P>
+Suppose I is an ideal of P = K[x<sub>1</sub>, ..., x<sub>n</sub>] with K a field,
+and I has dimension d.
+<P>
+A Noether normalisation of I is given by a set of d polynomials
+( f<sub>1</sub>, ..., f<sub>d</sub> ) of P, algebraically independent over K, for
+which  K[f<sub>1</sub>, ..., f<sub>d</sub>] &cap;I = 0  and 
+K[f<sub>1</sub>, ..., f<sub>d</sub>] -&gt; P/I is an integral extension. These
+always exist and if K is an infinite field, the f<sub>i</sub> can be chosen
+to be linear expressions in the x<sub>i</sub>.
+<P>
+If I is radical, then the normalisation of I here will refer to
+the integral closure of the affine ring P/I in its total ring of
+fractions. If I = bigcap P<sub>i</sub> with P<sub>i</sub> prime, then the normalisation
+is equal to the finite direct product of the normalisations of the P<sub>i</sub>
+as affine rings. It will be specified by a list of pairs (I<sub>i</sub>, &phi;<sub>i</sub>)
+where I<sub>i</sub> is a prime ideal with generic ring G<sub>i</sub>, a multivariate
+polynomial ring over K, and &phi;<sub>i</sub> a homomorphism from P to G<sub>i</sub>.
+The pairs represent the normalisation of each P<sub>i</sub> and the inclusion
+P/I -&gt; &prod;G<sub>i</sub>/I<sub>i</sub> induced by the &phi;<sub>i</sub> makes the RHS
+the integral closure of P/I.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1226.htm#13631">Noether Normalisation</A>
+<LI> <A  HREF = "text1226.htm#13634">Normalisation</A>
+</UL>
+<H4><A NAME = "13631">Noether Normalisation</A></H4>
+
+
+
+<H5><A NAME = "13632">NoetherNormalisation(I) : RngMPol -&gt; [RngMPolElt],Map,Map</A></H5>
+<H5>NoetherNormalization(I) : RngMPol -&gt; [RngMPolElt],Map,Map</H5>
+<BLOCKQUOTE>
+This function attempts to compute a Noether Normalisation for I,
+as described above, using <I>linear</I> combinations of the variables. The
+function is guaranteed to work if K has characteristic zero but may
+fail in unlucky cases in small characteristic.
+<P>
+The algorithm followed is basically that given in <A  HREF = "text1213.htm#bib_GrPf02">[GP02]</A> but with a
+simpler test for homogeneous ideals I, which gives a speed-up in that case.
+Also, subsets of the full sets of variables are considered before more
+general linear combinations.
+<P>
+The return values are
+<P>
+<P>
+<DL COMPACT class='compact'>
+<DT>1)</DT><DD>the sequence [f<sub>1</sub>, ..., f<sub>d</sub>].
+<DT>2)</DT><DD>h, an automorphism P -&gt; P given by a linear change of
+variables which maps the f<sub>i</sub> to the last d variables of P. Thus 
+(x<sub>n - d + 1</sub>, ..., x<sub>n</sub>) are a corresponding Noether normalising set of 
+polynomials for h(I).
+<DT>3)</DT><DD>the inverse of h.</DL>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13633">Example <TT>Ideal_NoetherNormalisation (H112E13)</TT></A></H3>
+<P>
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y&gt; := PolynomialRing(RationalField(),2);
+&gt; I := ideal&lt;P | x*y+x+2&gt;;
+&gt; fs,h,hinv := NoetherNormalisation(I);
+&gt; fs;
+[
+    x + y
+]
+&gt; J := ideal&lt;P | [h(b) : b in Basis(I)]&gt;; J;
+Ideal of Polynomial ring of rank 2 over Rational Field
+Order: Lexicographical
+Variables: x, y
+Basis:
+[
+    -x^2 + x*y + x + 2
+]
+&gt; // clearly x is integral over the last variable y in P/J
+</PRE>
+<HR>
+<H4><A NAME = "13634">Normalisation</A></H4>
+
+
+
+<H5><A NAME = "13635">Normalisation(I) : RngMPol -&gt; List</A></H5>
+<H5>Normalization(I) : RngMPol -&gt; List</H5>
+
+<PRE>    UseFF: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    FFMin: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    UseMax: BoolElt                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+This function computes the normalisation of the ideal I and returns
+the result as a list of pairs as described above. The ideal I must be
+radical - this is not checked in the function. Also the base field K
+must be perfect.
+<P>
+There are several options. The general algorithm used is that of De Jong
+as described in <A  HREF = "text1213.htm#bib_GrPf02">[GP02]</A>. However, if the generic polynomial ring 
+P of I has rank 2
+then Magma's powerful function field machinery can be applied to
+give a generally much faster algorithm. This is the default behaviour but
+can be bypassed by setting the parameter <TT>UseFF</TT> to <TT>false</TT>.
+<P>
+When the function field machinery is used, a correct result can be obtained
+extremely quickly, but the generic spaces of the solution ideals can be of
+quite high dimension.
+The default behaviour, controlled by the parameter <TT>FFMin</TT>, is to
+use a filtration by Riemann-Roch spaces to try to find a roughly minimal
+number of generators of the algebras G<sub>i</sub>/I<sub>i</sub> and return the
+corresponding ideal in the smaller number of variables as a more optimal
+presentation of the solution. This takes more time but is still usually
+faster than the general algorithm and tends to produce much nicer results.
+In some cases, the minimised solution is the same as the basic one but takes
+longer to generate. The minimising stage can be cut out by setting <TT>FFMin</TT>
+to <TT>false</TT>.
+<P>
+The general algorithm can avoid doing some work if it is known that certain
+conditions on I hold. One standard condition is that 
+  I &sube;M = &lt;x<sub>1</sub>, ..., x<sub>n</sub>&gt; and that P/I is locally normal away
+from M. This holds, for example, if the affine variety defined by I in
+K<sup>n</sup> is non-singular except at the origin. If this is known, then parameter
+<TT>UseMax</TT> can be set to {<TT>true</TT>} which will usually speed up the general
+algorithm (it has no effect if the function field method is used). However,
+if P/I is locally non-normal at other primes then this will produce an
+incorrect result. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13636">Example <TT>Ideal_Normalisation (H112E14)</TT></A></H3>
+<P>
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y&gt; := PolynomialRing(RationalField(),2);
+&gt; // we begin with a very simple example (prime ideal)
+&gt; I := Ideal((x - y^2)^2 - x*y^3);
+&gt; time Js := Normalisation(I); // function field method
+Time: 0.010
+&gt; #Js;
+1
+&gt; N := Js[1][1];
+&gt; N&lt;[a]&gt; := N;
+&gt; N;
+Ideal of Polynomial ring of rank 2 over Rational Field
+Order: Lexicographical
+Variables: a[1], a[2]
+Basis:
+[
+    -a[1]*a[2] + a[2]^2 - 2*a[2] + 1
+]
+&gt; // Now try the basic function field method
+&gt; time Js := Normalisation(I: FFMin:=false);
+Time: 0.010
+&gt; //get the same result here either way
+&gt; N := Js[1][1];
+&gt; N&lt;[a]&gt; := N;
+&gt; N;
+Ideal of Polynomial ring of rank 2 over Rational Field
+Order: Lexicographical
+Variables: a[1], a[2]
+Basis:
+[
+    -a[1]*a[2] + a[2]^2 - 2*a[2] + 1
+]
+&gt; time Js := Normalisation(I:UseFF:=false); // try the general method
+Time: 0.120
+&gt; J := Js[1][1];
+&gt; Groebner(J);
+&gt; J;
+Ideal of Polynomial ring of rank 4 over Rational Field
+Lexicographical Order
+Variables: $.1, $.2, $.3, $.4
+Groebner basis:
+[
+    $.1^2 + 2*$.1 + $.2 - 1,
+    $.1*$.2 - 2*$.1 + 2*$.2 - $.3 + $.4 - 4,
+    $.1*$.3 + $.3*$.4 + 2*$.3 - $.4^2,
+    $.1*$.4 - $.2 + 2,
+    $.2^2 - 4*$.2 - $.3*$.4 - 2*$.3 + $.4^2 + 4,
+    $.2*$.3 + $.3*$.4^2 + 2*$.3*$.4 - 2*$.3 - $.4^3,
+    $.2*$.4 + $.3 - 2*$.4,
+    $.3^2 - $.3*$.4^3 - 2*$.3*$.4^2 + $.4^4
+]
+&gt; // try the general method with UseMax (which applies here)
+&gt; time Js := Normalisation(I:UseFF:=false,UseMax:=true); 
+Time: 0.040
+&gt; J := Js[1][1];
+&gt; Groebner(J);
+&gt; J;
+Ideal of Polynomial ring of rank 3 over Rational Field
+Lexicographical Order
+Variables: $.1, $.2, $.3
+Groebner basis:
+[
+    $.1^2 - 4*$.1 - $.2*$.3 - 2*$.2 + $.3^2 + 4,
+    $.1*$.2 + $.2*$.3^2 + 2*$.2*$.3 - 2*$.2 - $.3^3,
+    $.1*$.3 + $.2 - 2*$.3,
+    $.2^2 - $.2*$.3^3 - 2*$.2*$.3^2 + $.3^4
+]
+&gt; // now try a harder case - a singular affine form of modular curve X1(11)
+&gt; I := ideal&lt;P | (x-y)*x*(y+x^2)^3-y^3*(x^3+x*y-y^2)&gt;;
+&gt; time Js := Normalisation(I: FFMin := false);
+Time: 0.110
+&gt; #Js;
+1
+&gt; J := Js[1][1];
+&gt; Groebner(J);
+&gt; J;
+Ideal of Polynomial ring of rank 5 over Rational Field
+Lexicographical Order
+Variables: $.1, $.2, $.3, $.4, $.5
+Groebner basis:
+[
+    $.1*$.3 - $.1 - 6*$.3 + $.4*$.5^2 - 4*$.4*$.5 + 6*$.4 - $.5^5 + $.5^4 + 
+        11*$.5^3 - 16*$.5^2 + 2*$.5 + 6,
+    $.1*$.4 + 2*$.3 - $.4*$.5^2 + 2*$.4*$.5 - 2*$.4 + $.5^4 - 4*$.5^3 + 4*$.5^2 
+        - 2,
+    $.1*$.5 - 2*$.3 + $.4 + $.5^3 - 2*$.5^2 + $.5 + 1,
+    $.2 - $.3 + $.5^3 - $.5^2,
+    $.3^2 + 3*$.3 - 2*$.4*$.5^2 + 4*$.4*$.5 - 4*$.4 - $.5^6 + 2*$.5^5 + $.5^4 - 
+        10*$.5^3 + 10*$.5^2 - 4,
+    $.3*$.4 - $.3 - $.4*$.5^3 + $.4*$.5^2 - $.4*$.5 + $.4 - $.5^4 + 2*$.5^3 - 
+        2*$.5^2 + 1,
+    $.3*$.5 + $.3 - $.4 - $.5^4 + 2*$.5^2 - $.5 - 1,
+    $.4^2 - 2*$.4*$.5^2 + $.4*$.5 + $.4 - $.5^5
+]
+&gt; time Js := Normalisation(I);
+Time: 1.110
+&gt; J := Js[1][1];
+&gt; Groebner(J);
+&gt; J;
+Ideal of Polynomial ring of rank 2 over Rational Field
+Lexicographical Order
+Variables: $.1, $.2
+Groebner basis:
+[
+    $.1^2*$.2 + 2*$.1*$.2 + $.1 - $.2^2 + 2*$.2 + 1
+]
+&gt; // Minimised result is a cubic equation in K[x,y] - as good as we could get!
+&gt; // This example takes MUCH longer with the general method - even setting
+&gt; // UseMax := true.
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1227.htm">[Next]</A><A  HREF = "text1225.htm">[Prev]</A> <A  HREF = "text1227.htm">[Right]</A> <A  HREF = "text1225.htm">[Left]</A> <A  HREF = "text1214.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

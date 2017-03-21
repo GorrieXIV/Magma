@@ -1,0 +1,6 @@
+174,1
+V,JacHypChabauty,3
+S,Chabauty0,"Returns the rational points on the curve of which J is the Jacobian, under the condition that J has Mordell-Weil rank zero",0,1,0,0,0,0,0,0,0,152,,151,-38,-38,-38,-38,-38
+S,Chabauty,"Given a point on the Jacobian of a hyperelliptic curve C, returns an indexed set of triples <x,z,v,k> such that there are at most k pairs of rational points (X:Y:Z) on C with (X:Z) congruent to (x:z) mod p^v, and such that there are no other rational points on C except the hyperelliptic points. J(Q) must have rank 1, and ptJ must have infinite order in J(Q). C must be in the simplified form y^2 = f(x)",0,2,0,0,0,0,0,0,0,148,,0,0,153,,151,-38,-38,-38,-38,-38
+S,FindPowerSeries,"Given a function f such that f(z, n) = F(z) + O(p^n), where F is a power series with coefficients in the p-adic integers: F(z) = f_0 + f_1 z + f_2 z^2 + ... with Valuation(f_m) >= d*m, where d is non-negative, this function finds the coefficients f_m up to O(p^n), for m up to k",0,5,0,0,0,0,0,0,0,-45,,0,0,148,,0,0,148,,0,0,41,,0,0,148,,286,-38,-38,-38,-38,-38
+S,FindPowerSeriesForChabauty,For internal use only,1,1,1,82,0,153,6,0,0,0,0,0,0,0,-45,,0,0,148,,0,0,148,,0,0,148,,0,0,82,,0,0,148,,286,-38,-38,-38,-38,-38

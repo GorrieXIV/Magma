@@ -1,0 +1,193 @@
+/*
+Faugere-type code test.
+AKS 2009.
+*/
+
+// 
+SetAssertions(true);
+VERB := true;
+VERB := false;
+
+//gon();
+
+function create_ideal(P, k, l, d, rand)
+    n := Rank(P);
+    return ideal<P |
+	[
+	    &+[rand() * &*[P.i^Random(0, d): i in [1..n]]: i in [1..l]]:
+	    i in [1..k]
+	]
+    >;
+end function;
+
+procedure ideal_test(K, n, k, l, d, rand)
+    if VERB then
+	"\n******************\n";
+    end if;
+
+    "*** Groebner test:", K, n, k, l, d;
+
+    //SetVerbose("GroebnerWalk", true);
+    //SetVerbose("Groebner", true);
+
+    P := PolynomialRing(K, n, "grevlex");
+    AssignNames(~P, [CodeToString(i + 96): i in [1 .. n]]);
+
+    I := create_ideal(P, k, l, d, rand);
+    J := create_ideal(P, k, l, d, rand);
+
+    if VERB then
+	"I:", I;
+	"J:", J;
+    end if;
+
+    Groebner(I);
+    Groebner(J);
+
+    _ := IsZeroDimensional(I);
+    _ := IsZeroDimensional(J);
+
+    if VERB then
+	"Groebner I:", I;
+	"Groebner J:", J;
+
+	"IsZeroDimensional(I):", IsZeroDimensional(I);
+	"IsZeroDimensional(J):", IsZeroDimensional(J);
+    end if;
+
+    S := I + J;
+    M := I meet J;
+    if VERB then
+	"M:", M;
+    end if;
+    T := I * J;
+    if VERB then
+	"T:", T;
+    end if;
+    C := ColonIdeal(I, J);
+    if VERB then
+	"C:", C;
+    end if;
+
+    assert I subset S;
+    assert J subset S;
+    assert M subset I;
+    assert M subset J;
+    assert T subset M;
+    if VERB then
+	"T eq M:", T eq M;
+    end if;
+
+    assert IsProper(I) eq (1 notin I);
+    assert IsZero(I) eq (#GroebnerBasis(I) eq 0);
+
+    F := &+Basis(I);
+    G := &+Basis(J);
+    H := &+Basis(M);
+
+    assert F in I;
+    assert G in J;
+    assert H in M;
+    assert IsInRadical(F, I);
+    assert IsInRadical(G, J);
+    assert IsInRadical(H, M);
+
+    assert NormalForm(F, I) eq 0;
+    assert NormalForm(G, J) eq 0;
+    assert NormalForm(F, J) in S;
+
+    NF := NormalForm([F, G, F*G + 1], J);
+
+    assert NF[1] eq NormalForm(F, J);
+    assert NF[2] eq 0;
+    assert NF[3] eq NormalForm(P!1, J);
+
+    if F ne 0 and G ne 0 then
+	assert SPolynomial(F, G) in S;
+    end if;
+
+    C := Coordinates(I, F);
+    assert &+[C[i]*BasisElement(I, i): i in [1..#C]] eq F;
+end procedure;
+
+/******************************************************************************/
+
+function cyclic_ring_c(P, n, c)
+    V := [P.i: i in [1 .. n]];
+    V cat:= V;
+    B := [
+        &+[&*[V[j]: j in [i .. i + k - 1]]: i in [1 .. n]]: k in [1 .. n - 1]
+    ];
+    B[n] := &*[V[i]: i in [1 .. n]] - c;
+    return Ideal(B);
+end function;
+
+function cyclic_c(R, n, c)
+    P<[x]> := PolynomialRing(R, n);
+    return cyclic_ring_c(P, n, c);
+end function;
+
+function cyclic(R, n)
+    return cyclic_c(R, n, 1);
+end function;
+
+/******************************************************************************/
+
+except_cyc6 :=
+    [<3, 21>, <5, 18>, <7, 18>, <9, 21>, <13, 20>, <25, 18>, <27, 21>];
+
+except_cyc6_A := AssociativeArray();
+for t in except_cyc6 do
+    except_cyc6_A[t[1]] := t[2];
+end for;
+
+small_q := [q: q in [2 .. 32] | IsPrimePower(q)];
+for q in small_q do
+    n := 6;
+    R := GF(q);
+    I := cyclic_c(R, 6, R.1);
+    Groebner(I);
+    l := #GroebnerBasis(I);
+    printf "Cyclic %o over %o: %o\n", n, R, l;
+    if IsDefined(except_cyc6_A, q) then
+	assert l eq except_cyc6_A[q];
+    else
+	assert l eq 17;
+    end if;
+
+    n := 4;
+    r := 3;
+    E<[x]> := ExteriorAlgebra(R, n);
+    M := EModule(E, r);
+    B := [[E.Random(1, n) + E.Random(1, n): j in [1 .. r]]: i in [1 .. 2]];
+    A := Matrix(B);
+    S := sub<M|B>;
+    syz := SyzygyModule(S);
+    assert BasisMatrix(syz)*BasisMatrix(S) eq 0;
+    _ := BettiNumbers(S);
+
+end for;
+
+
+/*
+
+rand := func<K| func<|Random(K)>>;
+ideal_testr := proc<K, n, k, l, d | ideal_test(K, n, k, l, d, rand(K))>;
+
+ideal_test(RationalField(), 2, 2, 3, 2, func<|Random(-10, 10)>);
+
+ideal_testr(GF(2), 10, 3, 3, 1);
+ideal_testr(GF(2), 6, 2, 5, 1);
+ideal_testr(GF(2), 3, 2, 5, 1);
+ideal_testr(GF(3), 5, 2, 3, 1);
+
+for q in
+    [
+	4, 5, 7, 9, 13, 16, 23, 3^5, 2^8, 2^10, 2^20, 2^32, 2^64, 2^100,
+	2965819, 11863279, NextPrime(2^32),
+	NextPrime(10^10), NextPrime(10^100)
+    ]
+do
+    ideal_testr(GF(q), 3, 2, 3, 3);
+end for;
+*/

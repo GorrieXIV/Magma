@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Using the Debugger</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "part2.htm">[Next]</A><A  HREF = "text77.htm">[Prev]</A> [_____] <A  HREF = "text77.htm">[Left]</A> <A  HREF = "text76.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "585">Using the Debugger</A></H3>
+
+<P>
+<P>
+<P>
+When use of the debugger is enabled and an error occurs, Magma will break
+into the command-line debugger.  The syntax of the debugger is modelled on the
+GNU GDB debugger for C programs, and supports the following commands
+(acceptable abbreviations for the commands are given in parentheses):
+<P>
+<DL COMPACT class='compact'>
+<DT></DT><DD>f{<TT>backtrace (bt)</TT>} Print out the stack of function and procedure
+calls, from the top level to the point at which the error occurred.  Each line
+i this trace gives a single <I>frame</I>, which consists of the
+function/procedure that was called, as well as all local variable definitions
+for that function.  Each frame is numbered so that it can be referenced in
+other debugger commands.
+<P>
+<DT></DT><DD>f{<TT>frame (f)</TT> n} Change the current frame to the frame numbered
+n (the list of frames can be obtained using the <TT>backtrace</TT> command).
+The current frame is used by other debugger commands, such as <TT>print</TT>, to
+determine the context within which expressions should be evaluated.  The
+default current frame is the top-most frame.
+<P>
+<DT></DT><DD>f{<TT>list (l) [n]</TT>} Print a source code listing for the current
+context (the context is set by the <TT>frame</TT> command).  If n is specified,
+then the <TT>list</TT> command will print n lines of source code; the default
+value is 10.
+<P>
+<DT></DT><DD>f{<TT>print (p)</TT> expr} Evaluate the expression expr in the current
+context (the context is set by the <TT>frame</TT> command).  The <TT>print</TT>
+command has semantics identical to evaluating the expression <TT>eval
+"expr"</TT> at the current point in the program.
+<P>
+<DT></DT><DD>f{<TT>identifiers (id)</TT>} Print a list of the assigned identifiers in
+the current context (the context is set by the <TT>frame</TT> command).  The
+<TT>identifiers</TT> command is equivalent to invoking the <TT>ShowIdentifiers</TT>
+intrinsic at the current point in the program.
+<P>
+<DT></DT><DD>f{<TT>help (h)</TT>} Print brief help on usage.
+<P>
+<DT></DT><DD>f{<TT>quit (q)</TT>} Quit the debugger and return to the Magma session.</DL>
+
+
+<HR>
+<H3><A NAME = "586">Example <TT>Debugger_debugger-example (H7E1)</TT></A></H3>
+We now give a sample session in the debugger.  In the following, we have
+written a function to evaluate f(n) = &Sigma;<sub>i=1</sub><sup>n</sup> 1 / n, but have in our
+implementation we have accidentally included the evaluation of the term at n =
+0.
+<P>
+<P>
+<P>
+<PRE>
+&gt; function f(n)
+&gt;   if n ge 0 then
+&gt;      return 1.0 / n + f(n - 1);
+&gt;   else
+&gt;      return 1.0 / n;
+&gt;   end if;
+&gt; end function;
+&gt; 
+&gt; SetDebugOnError(true);
+&gt; f(3);
+
+f(
+    n: 3
+)
+f(
+    n: 2
+)
+f(
+    n: 1
+)
+f(
+    n: 0
+)
+&gt;&gt;      return 1.0 / n + f(n - 1);
+                   ^
+Runtime error in '/': Division by zero
+
+debug&gt; p n     
+0
+debug&gt; p 1.0 / (n + 1)
+1.00000000000000000000000000000
+debug&gt; bt
+#0 *f(
+    n: 0
+) at &lt;main&gt;:1
+#1  f(
+    n: 1
+) at &lt;main&gt;:1
+#2  f(
+    n: 2
+) at &lt;main&gt;:1
+#3  f(
+    n: 3
+) at &lt;main&gt;:1
+debug&gt; f 1
+debug&gt; p n
+1
+debug&gt; p 1.0 / n
+1.00000000000000000000000000000
+</PRE>
+<PRE></PRE> <A  HREF = "part2.htm">[Next]</A><A  HREF = "text77.htm">[Prev]</A> [_____] <A  HREF = "text77.htm">[Left]</A> <A  HREF = "text76.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

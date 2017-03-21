@@ -1,0 +1,10 @@
+{
+    General
+    {
+	blocks.m
+    }
+    GrpPC
+    {
+	brauer_chtr_pc.m
+    }
+}

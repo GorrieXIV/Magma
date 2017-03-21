@@ -1,0 +1,851 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Built-in L-series</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1516.htm">[Next]</A><A  HREF = "text1514.htm">[Prev]</A> <A  HREF = "text1516.htm">[Right]</A> <A  HREF = "text1514.htm">[Left]</A> <A  HREF = "text1513.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "17171">Built-in L-series</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+An <I>L-series</I> or an <I>L-function</I> is an infinite sum
+L(s)=&sum;<sub>n=1</sub>^&infin;a<sub>n</sub>/n<sup>s</sup> in the complex variable s with complex
+coefficients a<sub>n</sub>. Such functions arise in many places in mathematics
+and they are usually naturally associated with some kind of mathematical
+object, for instance a character, a number field, a curve, a modular form
+or a cohomology group of an algebraic variety. The coefficients a<sub>n</sub> are
+certain invariants associated with that object. For example, in the case of
+a character &chi;: (Z/mZ)<sup> * </sup>to C<sup> * </sup> they are simply its values 
+a<sub>n</sub>=&chi;(n) when gcd(n, m)=1 and 0 otherwise.
+<P>
+Magma is able to associate an L-series to various types of object. 
+The intrinsic which provides access to such pre-defined L-series is
+<P>
+<P>
+<P>
+{<TT>LSeries(</TT><I>object: optional parameters</I><TT>)</TT>}
+<P>
+<P>
+<P>
+<P>
+Every such function returns a variable of type <TT>LSer</TT>. A range of
+functions may now be applied to this L-series object as described in 
+the following sections (and in fact more are available than listed),
+and these are independent of the object to which the L-series was
+originally associated. In fact, an object of type  <TT>LSer</TT> only
+"remembers" its origin for printing purposes.
+
+
+<H5><A NAME = "17172">RiemannZeta() : -&gt; LSer</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+The Riemann zeta function &zeta;(s) is returned.
+<P>
+The number of digits of precision to which the values &zeta;(s) are to be 
+computed may be specified using the <TT>Precision</TT> parameter. If it is
+omitted, the precision of the default real field will be used.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17173">Example <TT>Lseries_lseries-sig-riemann (H133E1)</TT></A></H3>
+<P>
+Check that &zeta;(2) agrees numerically with &pi;<sup>2</sup>/6.
+<P>
+<P>
+<PRE>
+&gt; L := RiemannZeta( : Precision:=40);
+&gt; Evaluate(L,2);
+1.644934066848226436472415166646025189219
+&gt; Pi(RealField(40))^2/6;
+1.644934066848226436472415166646025189219
+</PRE>
+<HR>
+<H5><A NAME = "17174">LSeries(K) : FldNum -&gt; LSer</A></H5>
+
+<PRE>    Method: MonStgElt                   Default: em "Default"</PRE>
+
+<PRE>    ClassNumberFormula: BoolElt         Default: <TT>false</TT></PRE>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Create the Dedekind zeta function &zeta;(K, s) of a number field K.
+The series is defined by &sum;<sub>I</sub> (Norm)<sub>K/Q</sub>(I)<sup> - s</sup>, where the
+sum is taken over the non-zero ideals I of the maximal order of K.
+For K=Q, the series coincides with the Riemann zeta function.
+<P>
+The optional parameter <TT>Method</TT> may be <TT>"Artin"</TT>, <TT>"Direct"</TT> or
+<TT>"Default"</TT> and specifies whether the zeta function should be computed
+as a product of L-series of Artin representations or directly, by counting
+prime ideals. (The default behaviour depends upon the field.)
+<P>
+For the <TT>"Direct"</TT> method,
+the Dedekind zeta function has a simple pole at s=1 whose residue must be
+known in order to compute the L-values. The class number formula gives
+an expression for this residue in terms of the number of real/complex
+embeddings of K, the regulator, the class number and the number of
+roots of unity in K. If the optional parameter <TT>ClassNumberFormula</TT>
+is set to <TT>true</TT>, then these quantities are computed on initialization
+(using Magma's functions <TT>Signature(K), Regulator(K),
+#ClassGroup(MaximalOrder(K))</TT> and <TT>#TorsionSubgroup(UnitGroup(K))</TT>)
+and it might take some time if the discriminant of K is large.
+If <TT>ClassNumberFormula</TT> is <TT>false</TT> (default)
+then the residue is computed numerically from the functional equation.
+This is generally faster, unless the discriminant of K is small and
+the precision is set to be very high.
+<P>
+The number of digits of precision to which the values &zeta;(K, s) are
+to be computed may be specified using the <TT>Precision</TT> parameter. If
+it is omitted the precision is taken to be that of the default real field.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17175">Example <TT>Lseries_lseries-sig-dedekind (H133E2)</TT></A></H3>
+This code computes the value of &zeta;(Q(i), s) at s=2.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x&gt; := PolynomialRing(Integers());
+&gt; K := NumberField(x^2+1);
+&gt; L := LSeries(K);
+&gt; Evaluate(L, 2);
+1.50670300992298503088656504818
+</PRE>
+<HR>
+<H3><A NAME = "17176">Example <TT>Lseries_lseries-sig-dedekind2 (H133E3)</TT></A></H3>
+The code computes &zeta;(F, 2) for F=Q(root 12 of 3).
+<P>
+<P>
+<PRE>
+&gt; R&lt;x&gt; := PolynomialRing(Rationals());
+&gt; F := NumberField(x^12-3);
+&gt; L := LSeries(F: Method:="Direct");
+&gt; Conductor(L), LCfRequired(L);
+1579460446107205632 92968955438
+</PRE>
+The set-up time for the direct method is negligible, but the L-value
+computation will take days for this number of coefficients.
+On the other hand, the normal closure of F is not too large and has
+only representations of small dimension:
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := GaloisGroup(F);
+&gt; #G, [Degree(ch): ch in CharacterTable(G)];
+24 [ 1, 1, 1, 1, 2, 2, 2, 2, 2 ]
+&gt; time L := LSeries(F : Method:="Artin");
+Time: 0.340
+</PRE>
+It took longer to define the L-series, but the advantage is that it is
+a product of L-series with very small conductors, and the L-value
+calculations are almost instant:
+<P>
+<P>
+<PRE>
+&gt; [Conductor(f[1]) : f in Factorisation(L)];
+[ 1, 12, 3888, 243, 576, 15552, 15552 ]
+&gt; time Evaluate(L, 2);
+1.63925427193646882835990708820
+Time: 0.840
+</PRE>
+<HR>
+<H3><A NAME = "17177">Example <TT>Lseries_armitage (H133E4)</TT></A></H3>
+This code follows an example of Serre and Armitage
+(see <A  HREF = "text1512.htm#bib_serre-root-number">[Ser71]</A>, <A  HREF = "text1512.htm#bib_armitage-root-number">[Arm71]</A>, <A  HREF = "text1512.htm#bib_friedlander-root-number">[Fri76]</A>)
+where the &zeta;-function of a field vanishes at the
+central point.
+<P>
+<P>
+<P>
+<PRE>
+&gt; _&lt;x&gt; := PolynomialRing(Rationals());
+&gt; K&lt;s5&gt; := NumberField( x^2-5 );
+&gt; L&lt;s205&gt; := NumberField( x^2-205 );
+&gt; C := Compositum(K,L);
+&gt; e1 := C!(5+s5);
+&gt; e2 := C!(41+s205);
+&gt; E := ext&lt;C | Polynomial( [ -e1*e2, 0, 1] )&gt;;
+&gt; A := AbsoluteField(E);
+&gt; DefiningPolynomial(A);
+x^8 - 820*x^6 + 223040*x^4 - 24206400*x^2 + 871430400
+&gt; Signature(A); // totally real
+8 0
+&gt; L := LSeries(A);
+&gt; LCfRequired(L); // approx value, with old CFE
+2739
+&gt; CFENew(L); // new vers of CheckFunctionalEquation
+0.000000000000000000000000000000
+&gt; Evaluate(L, 1/2); // zero as expected
+0.000000000000000000000000000000
+</PRE>
+<P>
+So the evaluation of L at 1/2 is zero as expected.  In fact, 
+L is a product, and one factor has odd sign:
+<P>
+<P>
+<P>
+<PRE>
+&gt; L`prod;
+[
+&lt;L-series of Riemann zeta function, 1&gt;,
+&lt;L-series of Artin representation Q8: (1,1,-1,1,-1) of ext&lt;Q|x^8-820*x^6+223040*
+   x^4-24206400*x^2+871430400&gt;, conductor 5, 1&gt;,
+&lt;L-series of Artin representation Q8: (1,1,1,-1,-1) of ext&lt;Q|x^8-820*x^6+223040*
+   x^4-24206400*x^2+871430400&gt;, conductor 41, 1&gt;,
+&lt;L-series of Artin representation Q8: (1,1,-1,-1,1) of ext&lt;Q|x^8-820*x^6+223040*
+   x^4-24206400*x^2+871430400&gt;, conductor 205, 1&gt;,
+&lt;L-series of Artin representation Q8: (2,-2,0,0,0) of ext&lt;Q|x^8-820*x^6+223040*x
+   ^4-24206400*x^2+871430400&gt;, conductor 42025, 2&gt;
+]
+&gt; [ ComplexField(9)!Sign(x[1]) : x in $1 ];
+[ 1.00000000, 1.00000000, 1.00000000, 1.00000000, -1.00000000 ]
+&gt; Sign(L`prod[5][1]);
+-1.00000000000000000000000000000
+</PRE>
+<P>
+This phenomenon happens fairly generally with symplectic representations,
+and quaternionic Galois groups give the most direct examples.
+The example of smallest conductor 2<sup>8</sup>3<sup>2</sup> appears to be for the
+field x<sup>8</sup> + 12x<sup>6</sup> + 36x<sup>4</sup> + 36x<sup>2</sup> + 9, while x<sup>8</sup> - x<sup>7</sup> + x<sup>6</sup> - 4x<sup>5</sup> + 5x<sup>4</sup> - 8x<sup>3</sup> + 4x<sup>2</sup> - 8x + 16
+has Galois group (SL)<sub>2</sub>((F)<sub>3</sub>) and conductor 163<sup>2</sup>.
+<HR>
+<H5><A NAME = "17178">LSeries(A) : ArtRep -&gt; LSer</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Creates the L-series of an Artin representation A. 
+(For information about Artin representations see Chapter <A  HREF = "text473.htm#5173">ARTIN REPRESENTATIONS</A>.)
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17179">Example <TT>Lseries_lseries-artin (H133E5)</TT></A></H3>
+L-series of the two characters of Gal(Q(i)/Q) isomorphic to C<sub>2</sub>.
+<P>
+<P>
+<PRE>
+&gt; K := QuadraticField(-1);
+&gt; triv,sign := Explode(ArtinRepresentations(K));
+&gt; Evaluate(LSeries(triv), 2);    // zeta(2)=pi^2/6
+1.64493406684822643647241516665
+&gt; Evaluate(LSeries(sign), 2);
+0.915965594177219015054603514933
+</PRE>
+<HR>
+<H3><A NAME = "17180">Example <TT>Lseries_lseries-a7 (H133E6)</TT></A></H3>
+We take a polynomial over Q with Galois group A<sub>7</sub> and the
+unique 6-dimensional irreducible Artin representation a of this group
+<P>
+<P>
+<PRE>
+&gt; load galpols;
+&gt; f:=PolynomialWithGaloisGroup(7,6); // Alt(7)
+&gt; K:=NumberField(f);
+&gt; A:=ArtinRepresentations(K);
+&gt; a:=A[2];a;
+Artin representation A7: (6,2,3,0,0,1,-1,-1,-1) of ext&lt;Q|x^7-2*x^6-7*x^5+11*x^4+
+   16*x^3-14*x^2-11*x+2&gt;
+</PRE>
+Its L-series with the default precision of 30 digits needs a lot
+of coefficients to compute with.
+<P>
+<P>
+<PRE>
+&gt; L:=LSeries(a);
+&gt; LCfRequired(L); // approx value
+1830809
+</PRE>
+We decrease the precision to 8 digits
+<P>
+<P>
+<PRE>
+&gt; L:=LSeries(a: Precision:=8);
+&gt; LCfRequired(L); // approx value with CheckFunctionalEquation
+52584
+</PRE>
+Now it takes under 15 seconds to verify the functional equation of L(a, s)
+and to compute its value at s=2.
+<P>
+<P>
+<PRE>
+&gt; CFENew(L); // new vers of CheckFunctionalEquation
+1.4901161E-8
+&gt; Evaluate(L,2);
+1.1105972
+</PRE>
+<HR>
+<H5><A NAME = "17181">LSeries(E) : CrvEll -&gt; LSer</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Create the L-series L(E, s) of an elliptic curve E defined over
+Q or over a number field.
+<P>
+The number of digits of precision to which the values L(E, s) are 
+to be computed may be specified using the <TT>Precision</TT> parameter. If
+it is omitted the precision is taken to be that of the default real field. 
+<P>
+Note that the computation time for evaluating an L-series grows roughly 
+like the square root of the conductor (or its norm to Q if the base 
+field is a number field). Therefore an evaluation might take an
+unreasonable amount of time if the conductor of E is much larger than, 
+say, 10<sup>10</sup> or so. If only the leading term at s=1 is required,
+over Q it is faster to use <TT>AnalyticRank</TT>
+or <TT>ConjecturalRegulator</TT>.
+<P>
+Note also for general number fields it is only conjectured 
+that L(E/K, s) has a meromorphic continuation to C and also possesses 
+a functional equation. This conjecture is implicitly used in the 
+computations. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17182">Example <TT>Lseries_lseries-sig-elliptic (H133E7)</TT></A></H3>
+Consider the curve E: y<sup>2</sup> + y=x<sup>3</sup> + x<sup>2</sup> over Q of conductor 43. It has
+Mordell-Weil rank equal to 1, so we expect L(E/Q, 1)=0 and L'(E/Q, 1)&ne;0
+by the Birch-Swinnerton-Dyer conjecture.
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([0,1,1,0,0]);
+&gt; Conductor(E);
+43
+&gt; L:=LSeries(E);
+&gt; Evaluate(L, 1);
+0.000000000000000000000000000000
+&gt; Evaluate(L, 1 : Derivative:=1);
+0.343523974618478230618071163922
+</PRE>
+Now base change E to K=Q(i). The Mordell-Weil rank of E over K is 2:
+<P>
+<P>
+<PRE>
+&gt; Rank(E) + Rank(QuadraticTwist(E,-1));
+2
+</PRE>
+So we expect L(E/K, s) to have a zero of order 2:
+<P>
+<P>
+<PRE>
+&gt; K := QuadraticField(-1);
+&gt; EK := BaseChange(E, K);
+&gt; L := LSeries(EK);
+&gt; Evaluate(L, 1);
+0.000000000000000000000000000000
+&gt; Evaluate(L, 1 : Derivative:=1) lt 10^-20;
+true
+&gt; Evaluate(L, 1 : Derivative:=2);
+1.62399545025600030722546910344
+</PRE>
+<HR>
+<H5><A NAME = "17183">LSeries(E, K) : CrvEll, FldNum -&gt; LSer</A></H5>
+
+<PRE>    Method: MonStgElt                   Default: em "Default"</PRE>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Given an elliptic curve E defined over the rationals and a number
+field K, create the L-series L(E/K, s) associated with E/K.
+Note that in general it is only conjectured that L(E/K, s)
+has an analytic continuation to C and possesses a functional equation.
+This conjecture is implicitly used in the computations.
+<P>
+Technically, the resulting L-series is the tensor product of two l-adic
+representations, the one associated to E/Q and the one
+associated to K/Q. <TT>Method</TT> specifies how
+<TT>LSeries(K)</TT> should be defined. It is the same parameter as for
+<TT>LSeries(FldNum)</TT>.
+Note that the conductor of the L-series L(E/K, s) usually increases
+very rapidly with the discriminant of K. Consequently,
+if the used method is <TT>"Direct"</TT> or the irreducible constituents
+of <TT>PermutationCharacter(K)</TT> have large dimension, the computation
+time may be quite substantial.
+<P>
+The number of digits of precision to which the values L(E/K, s) are
+to be computed may be specified using the <TT>Precision</TT> parameter. If
+it is omitted the precision is taken to be that of the default real field.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17184">Example <TT>Lseries_lseries-sig-ellnf (H133E8)</TT></A></H3>
+We take the curve E: y<sup>2</sup>=x<sup>3</sup> + x over the rationals and apply base change
+to obtain a curve over Q(Sqrt(5)).  The resulting L-series L(E, K, s)
+is in fact the product of L(E/Q, s) and L(F/Q, s) where F is E
+twisted by 5.
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([0, 0, 0, 1, 0]);
+&gt; F := QuadraticTwist(E, 5);
+&gt; L := LSeries(E, QuadraticField(5));
+&gt; Evaluate(L, 1);
+1.53733828470360522458966069195
+&gt; Evaluate(LSeries(E),1) * Evaluate(LSeries(F),1);
+1.53733828470360522458966069195
+</PRE>
+Here is another example over a cyclotomic field. The L-value
+computations are fast, as here they only involve one-dimensional twists:
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([0, 0, 0, 1, 0]);
+&gt; L := LSeries(E, CyclotomicField(11));
+&gt; time Evaluate(L, 1);
+0.000000000000000000000000000000
+Time: 1.560
+</PRE>
+<HR>
+<H5><A NAME = "17185">LSeries(E, A) : CrvEll, ArtRep -&gt; LSer</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Twisted L-series of an elliptic curve E/Q by an
+Artin representation A. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17186">Example <TT>Lseries_lseries-sig-ellartintwist (H133E9)</TT></A></H3>
+We take the elliptic curve 11A3 and twist it by the characters
+of Q(&zeta;<sub>5</sub>)/Q:
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve(CremonaDatabase(),"11A3");
+&gt; K := CyclotomicField(5);
+&gt; art := ArtinRepresentations(K);
+&gt; for A in art do Evaluate(LSeries(E,A),1); end for;
+0.253841860855910684337758923351
+0.685976714588516438169889514223 + 1.10993363969520543571381847366*$.1
+2.83803828204429619496466743332
+0.685976714588516438169889514223 - 1.10993363969520543571381847366*$.1
+</PRE>
+All the L-values are non-zero, so according to the
+Birch-Swinnerton-Dyer conjecture E has rank 0 over Q(&zeta;<sub>5</sub>).
+Indeed:
+<P>
+<P>
+<P>
+<PRE>
+&gt; #TwoSelmerGroup(BaseChange(E,K));
+1
+</PRE>
+<HR>
+<H3><A NAME = "17187">Example <TT>Lseries_lseries-etw-quaternion (H133E10)</TT></A></H3>
+As a higher-dimensional example, we twist E=X<sub>1</sub>(11)/Q
+by a 2-dimensional Artin representation that factors through a quaternion
+Galois group.
+<P>
+<P>
+<PRE>
+&gt; load galpols;
+&gt; E:=EllipticCurve("11a3");           // X_1(11)
+&gt; f:=PolynomialWithGaloisGroup(8,5);  // Quaternion Galois group
+&gt; K:=NumberField(f);
+&gt; A:=ArtinRepresentations(K);
+&gt; assert exists(a){a: a in A | Degree(a) eq 2};a;
+Artin representation Q8: (2,-2,0,0,0) of ext&lt;Q|x^8-12*x^6+36*x^4-36*x^2+9&gt;
+&gt; L:=LSeries(E,a: Precision:=10);
+&gt; LCfRequired(L);
+208818
+&gt; time Evaluate(L,1);
+1.678012769
+Time: 7.470
+&gt; Sign(L);
+1.000000000
+</PRE>
+<HR>
+<H5><A NAME = "17188">LSeries(C) : CrvHyp[FldRat] -&gt; LSer</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+
+<PRE>    LocalData: List                     Default: [* *]</PRE>
+<BLOCKQUOTE>
+Returns the L-series of a hyperelliptic curve C/Q.
+<P>
+The number of digits of precision to which the values L(C, s) are 
+to be computed may be specified using the <TT>Precision</TT> parameter. If
+it is omitted the precision is taken to be that of the default real field. 
+<P>
+If the conductor exponents and the local factors at (some of) the bad 
+primes are known in advance, they can be passed as a list of
+tuples <TT>&lt;prime,conductor exponent,local factor&gt;</TT>, e.g. 
+LocalData:=[ * &lt; 2, 11, 1 - x &gt; * ].
+<P>
+Current implementation can only compute the conductor at 2 when v<sub>2</sub>(&Delta;)&lt;12, 
+using Ogg's formula. If this is not the case, either the local factor at 2 
+must be supplied in LocalData, or the use of Ogg's formula at 2 forced with
+<TT>LocalData:="Ogg"</TT> or <TT>[* &lt;2,"Ogg"&gt; *]</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17189">Example <TT>Lseries_lseries-sig-crvhyp (H133E11)</TT></A></H3>
+We take the hyperelliptic curve y<sup>2</sup>=x<sup>5</sup> + 1 
+<P>
+<P>
+<PRE>
+&gt; R&lt;x&gt; := PolynomialRing(Rationals());
+&gt; C := HyperellipticCurve(x^5+1);
+&gt; L := LSeries(C: Precision:=18);
+&gt; LCfRequired(L);   // need this number of coefficients
+1809
+&gt; Evaluate(L,1);  // L(C,1)
+1.03140710417331776
+&gt; Sign(L); // sign in the functional equation
+1.00000000000000000
+</PRE>
+The L-value is non-zero, indicating that the Jacobian should have rank 0. In fact, it does:
+<P>
+<P>
+<PRE>
+&gt; RankBound(Jacobian(C));  
+0
+</PRE>
+<HR>
+<H5><A NAME = "17190">LSeries(C,K) : CrvHyp[FldRat],FldNum -&gt; LSer</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+
+<PRE>    LocalData: List                     Default: [* *]</PRE>
+<BLOCKQUOTE>
+The L-series associated to a hyperelliptic curve C/Q base changed 
+to a number field K.
+<P>
+The number of digits of precision to which the values L(C, s) are 
+to be computed may be specified using the <TT>Precision</TT> parameter. If
+it is omitted the precision is taken to be that of the default real field. 
+<P>
+Current implementation can only compute the conductor at 2 when v<sub>2</sub>(&Delta;)&lt;12, 
+using Ogg's formula. If this is not the case, the use of Ogg's formula 
+at 2 can be forced with <TT>LocalData:="Ogg"</TT>. Also, the local Galois 
+representation machinery is used in the computations, and it is 
+currently not implemented for some of the reduction types.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17191">Example <TT>Lseries_lseries-crvhyp-qnf (H133E12)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; R&lt;x&gt; := PolynomialRing(Rationals());
+&gt; C := HyperellipticCurve(x^5-x+1);
+&gt; K := CyclotomicField(4);
+&gt; L := LSeries(C,K: Precision:=12);
+&gt; CheckFunctionalEquation(L);
+0.000000000000
+</PRE>
+<HR>
+<H5><A NAME = "17192">LSeries(C) : CrvHyp[FldNum] -&gt; LSer</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+
+<PRE>    LocalData: List                     Default: [* *]</PRE>
+<BLOCKQUOTE>
+The L-series of a hyperelliptic curve C defined over a number field K.
+<P>
+The number of digits of precision to which the values L(C/K, s) are 
+to be computed may be specified using the <TT>Precision</TT> parameter. If
+it is omitted the precision is taken to be that of the default real field. 
+<P>
+If the conductor exponents and the local factors at (some of) the bad 
+primes are known in advance, they can be passed as a list of
+tuples <TT>&lt;prime ideal,conductor exponent,local factor&gt;</TT>, e.g. 
+LocalData:=[ * &lt; P, 11, 1 - x &gt; * ].
+<P>
+Current implementation can only compute the conductor at primes P|2 
+when v<sub>P</sub>(&Delta;)&lt;12, using Ogg's formula. 
+If this is not the case, either the local factor at 2 
+must be supplied in LocalData, or the use of Ogg's formula at 2 forced with
+<TT>LocalData:="Ogg"</TT> or <TT>[* &lt;P,"Ogg"&gt; *]</TT>.
+<P>
+A word of warning: as is it the case for most L-functions, the number of 
+Dirichlet coefficients necessary to compute with L(C/K, s) behaves roughly like 
+the square root of the conductor N of the L-function. For a curve C/K of 
+genus g and conductor N<sub>C</sub> (an ideal in O<sub>K</sub>), this conductor 
+is given by the formula
+<P>
+  N = |(Norm)<sub>K/Q</sub>(N<sub>C</sub>)|.|&Delta;<sub>K/Q</sub>|<sup>2g</sup>,
+<P>
+It grows very fast, and so in practice the use of these
+L-series is limited to small genus and small degree [K:Q], even for curves
+of small conductor. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17193">Example <TT>Lseries_lseries-crvhyp-nf (H133E13)</TT></A></H3>
+We take a hyperelliptic curve C of genus 2 over Q(i),
+<P>
+  C/Q(i):  y<sup>2</sup>  +  (x<sup>3</sup> + x<sup>2</sup> + x + 1)y  = - (i + 1)x<sup>3</sup> - (i + 1)x<sup>2</sup> - ix,
+<P>
+define its L-series L(C, s) and compute L(C, 1) and L'(C, 1).
+<P>
+<P>
+<PRE>
+&gt; K&lt;i&gt;:=CyclotomicField(4);
+&gt; R&lt;x&gt;:=PolynomialRing(K);
+&gt; C:=HyperellipticCurve((-i-1)*x^3+(-i-1)*x^2-i*x,x^3+x^2+x+1);
+&gt; L:=LSeries(C: Precision:=8);
+&gt; LCfRequired(L);                // need this many coefficients
+7855
+&gt; CheckFunctionalEquation(L);    // zero to correct precision
+-7.4505806E-9
+&gt; Evaluate(L,1);                 // L(C,1) is zero
+6.4853393E-10
+&gt; Evaluate(L,1: Derivative:=1);  // L'(C,1) is non-zero
+0.31311835
+</PRE>
+According to the Birch--Swinnerton-Dyer conjecture, 
+the Jacobian of C/Q(i) should have rank 1. 
+We can verify that it has indeed trivial 2-torsion, 2-Selmer group 
+of size 2, and that there are non-trivial rational points on C:
+<P>
+<P>
+<PRE>
+&gt; f:=HyperellipticPolynomials(SimplifiedModel(C));
+&gt; J:=Jacobian(HyperellipticCurve(f));
+&gt; #TwoTorsionSubgroup(J),#TwoSelmerGroup(J);
+1 2
+&gt; Points(C: Bound:=10);
+{@ (1 : 0 : 0), (1 : -1 : 0), (0 : -1 : 1), (0 : 0 : 1), (i - 1 : -1 : 1),
+   (i - 1 : -i - 1 : 1), (-i : 1 : 1), (-i : -1 : 1) @}
+</PRE>
+<HR>
+<H5><A NAME = "17194">LSeries(Chi) : GrpDrchElt -&gt; LSer</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Given a primitive dirichlet character
+&chi;: (Z/mZ)<sup> * </sup>to C<sup> * </sup>, create the associated
+Dirichlet L-series L(&chi;, s)=&sum;<sub>n=1</sub>^&infin;&chi;(n)/n<sup>s</sup>.
+The character &chi; must be defined so that its values fall in either
+the ring of integers, the rational field or a cyclotomic field.
+<P>
+The number of digits of precision to which the values L(&chi;, s) are 
+to be computed may be specified using the <TT>Precision</TT> parameter. If
+it is omitted the precision is taken to be that of the default real field. 
+<P>
+For information on Dirichlet characters, see Section <A  HREF = "text179.htm#1432">Dirichlet Characters</A>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17195">Example <TT>Lseries_lseries-sig-character (H133E14)</TT></A></H3>
+We define a primitive character &chi;: (Z/37Z)<sup> * </sup>to C<sup> * </sup>
+and construct the associated Dirichlet L-function.
+<P>
+<P>
+<PRE>
+&gt; G&lt;Chi&gt; := DirichletGroup(37, CyclotomicField(36));
+&gt; L := LSeries(Chi); 
+&gt; Evaluate(L,1); // depends on the chosen generator of G
+1.65325576836885655776002342451 - 0.551607898922910805875537715935*$.1
+</PRE>
+<HR>
+<H5><A NAME = "17196">LSeries(hmf) : ModFrmHilElt -&gt; LSer</A></H5>
+<BLOCKQUOTE>
+Given a cuspidal newform in a space of Hilbert modular forms, 
+this creates the associated L-series.
+Note that this is <B>not</B> implemented for Bianchi modular forms,
+as the computations of Hecke eigenvalues (particularly at bad primes)
+is not always feasible in that case.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17197">Example <TT>Lseries_lseries-hilbert-modfom (H133E15)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; K := NumberField(x^2 - 5) where x is PolynomialRing(Rationals()).1;
+&gt; H := HilbertCuspForms(K,7*Integers(K),[2,2]);
+&gt; f := NewformDecomposition(NewSubspace(H))[1];
+&gt; L := LSeries(Eigenform(f)); 
+&gt; LSetPrecision(L,9);
+&gt; LCfRequired(L); // approximate value, with old CFE
+198
+&gt; time CFENew(L); // new vers of CheckFunctionalEquation
+0.000000000
+Time: 9.690
+</PRE>
+<HR>
+<H5><A NAME = "17198">LSeries(psi) : GrpHeckeElt -&gt; LSer</A></H5>
+<H5>LSeries(psi) : GrossenChar -&gt; LSer</H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Given a primitive Hecke (Gr&ouml;ssen)character on ideals,
+construct the associated L-series.
+<P>
+For more information on these see Section <A  HREF = "text418.htm#4351">Hecke Gr&ouml;ssencharacters and their L-functions</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "17199">LSeries(f) : ModFrmElt -&gt; LSer</A></H5>
+
+<PRE>    Embedding: Map/UserProgram          Default: </PRE>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Given a modular form f, construct the L-series 
+L(f, s)=&sum;<sub>n=1</sub>^&infin;a<sub>n</sub>/n<sup>s</sup>, where f has the q-expansion
+&sum;<sub>n=0</sub>^&infin;a<sub>n</sub> q<sup>n</sup>. It is assumed that L(f, s) satisfies 
+a functional equation of the standard kind (see Section <A  HREF = "text1517.htm#17210">Terminology</A> 
+for the precise form of the functional equation).
+<P>
+The optional parameter <TT>embedding</TT> specifies a map which embeds the 
+coefficients of f into the complex field. By default this is the 
+identity map, so that the coefficients of f must be coercible into C.
+Otherwise, the value of the parameter must either be an object of type 
+<TT>Map</TT> or a user-defined function e(x) each having domain the base 
+ring of f and codomain the complex field (or values than can be coerced
+into the complex field).
+<P>
+The number of digits of precision to which the values L(f, s) are 
+to be computed may be specified using the <TT>Precision</TT> parameter. If
+it is omitted the precision is taken to be that of the default real field. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17200">Example <TT>Lseries_lseries-sig-modfrm (H133E16)</TT></A></H3>
+We define a newform of weight 2 and conductor 16.  It is not defined 
+over the integers but rather over B=Z[i].
+<P>
+<P>
+<P>
+<PRE>
+&gt; f := Newforms("G1N16k2A")[1]; f;
+q + (-a - 1)*q^2 + (a - 1)*q^3 + 2*a*q^4 + (-a - 1)*q^5 + 2*q^6 - 2*a*q^7 +
+   (-2*a + 2)*q^8 + a*q^9 + 2*a*q^10 + (a + 1)*q^11 + O(q^12)
+&gt; B:=BaseRing(f); B;
+Equation Order with defining polynomial x^2 + 1 over its ground order
+</PRE>
+The two distinct embeddings of B into the complex numbers give rise to 
+two modular forms, which can be accessed using the <TT>ComplexEmbeddings</TT> 
+function.
+<P>
+<P>
+<PRE>
+&gt; f1, f2 := Explode(ComplexEmbeddings(f)[1]);
+&gt; Coefficient(f,2), Coefficient(f1,2), Coefficient(f2,2);
+-a - 1
+-1.00000000000000000000000000000 + 1.00000000000000000000000000000*$.1
+   -1.00000000000000000000000000000 - 1.00000000000000000000000000000*$.1
+</PRE>
+Thus, f<sub>1</sub> and f<sub>2</sub> have genuine complex coefficients and we can construct
+the associated L-series and compute their L-values, for instance at s=1.
+<P>
+<P>
+<PRE>
+&gt; L1 := LSeries(f1);
+&gt; L2 := LSeries(f2);
+&gt; CFENew(L1); // new vers of CheckFunctionalEquation
+4.73316543132607083247037139170E-30
+&gt; CFENew(L2);
+4.73316543132607083247037139170E-30
+&gt; v1 := Evaluate(L1,1); v2 := Evaluate(L2,1); v1,v2;
+0.359306437003505684066327207778 + 0.0714704939991172686588458066909*$.1
+   0.359306437003505684066327207778 - 0.0714704939991172686588458066909*$.1
+</PRE>
+If instead we invoke <TT>LSeries(f)</TT>, Magma will note that f is 
+defined over a number field and complain that the coefficients of f 
+are not well-defined complex numbers.
+<P>
+<P>
+<PRE>
+&gt; L := LSeries(f);
+Runtime error: For f over a number field, you have to specify a complex
+   embedding
+</PRE>
+Instead of using <TT>ComplexEmbeddings</TT>, one can instead explicitly 
+specify an embedding of the coefficients of B into the complex numbers
+using the parameter <TT>Embedding</TT> with the function <TT>LSeries</TT> 
+The following statements define the same L-function as L<sub>2</sub> above.
+<P>
+<P>
+<P>
+<PRE>
+&gt; C&lt;i&gt; := ComplexField();
+&gt; L2A := LSeries(f: Embedding:=hom&lt; B -&gt; C | i &gt; );
+&gt; L2B := LSeries(f: Embedding:=func&lt; x | Conjugates(x)[1] &gt; );
+&gt; L2C := LSeries(f1: Embedding:=func&lt; x | ComplexConjugate(x) &gt; );
+</PRE>
+<P>
+Finally, we illustrate the very important fact that Magma expects,
+but does <I>not</I> check that the L-function associated to a modular form
+satisfies a functional equation.
+<P>
+<P>
+<P>
+<PRE>
+&gt; L := LSeries(f1+f2);  // or L:=LSeries(f: Embedding:=func&lt;x|Trace(B!x)&gt;);
+</PRE>
+<P>
+Although Magma is happy with this definition, it is in fact illegal.
+The modular form f has a character whose values lie in the field of
+the 4-th roots of unity.
+<P>
+<P>
+<PRE>
+&gt; Order(DirichletCharacter(f));
+4
+</PRE>
+<P>
+The two embeddings f<sub>1</sub> and f<sub>2</sub> of f have <I>different</I> (complex 
+conjugate) characters and f<sub>1</sub> + f<sub>2</sub> does not satisfy a functional 
+equation of the standard kind. Magma will suspect this when
+it tries to determine the sign in the functional equation and thereby
+print a warning:
+<P>
+<P>
+<PRE>
+&gt; Evaluate(L,1);
+ |Sign| is nowhere near 1, wrong functional equation?
+0.363706143196151750493063407843
+&gt; CFENew(L); // new vers of CheckFunctionalEquation
+0.293560852738072340956684556739
+</PRE>
+<P>
+The function <TT>CheckFunctionalEquation</TT> or <TT>CFENew</TT> should return 0
+(to current  precision), so the functional equation is not satisfied,
+and the result  of evaluating L will be a random number.
+So it is the <I>user's</I> responsibility to ensure that the modular form
+does satisfy a functional equation as described in Section <A  HREF = "text1517.htm#17210">Terminology</A>.
+<HR>
+<H5><A NAME = "17201">LSeries(S) : ModSym -&gt; LSer</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Given a 1-dimensional cuspidal modular symbol space, construct the L-series 
+determined by its Hecke operators (for the Euler factors). In fact, the
+dual Hecke operators are used for efficiency purposes.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17202">Example <TT>Lseries_lseries-sig-modsym (H133E17)</TT></A></H3>
+We give two examples, the first of a largish level where the computations
+might otherwise be difficult, and the second for one where the space
+has a nontrivial character.
+<P>
+<P>
+<P>
+<PRE>
+&gt; S := CuspidalSubspace(ModularSymbols(864,4,+1)); // wt 4 
+&gt; x := PolynomialRing(Integers()).1;
+&gt; K := Kernel([&lt;5,x-19&gt;,&lt;7,x-13&gt;],S); // 19 at p=5, 13 at p=7
+&gt; assert Dimension(K) eq 1;
+&gt; L := LSeries(K);
+&gt; LCfRequired(L); // approx for old CheckFunctionalEquation
+467
+&gt; CFENew(L);
+0.000000000000000000000000000000
+&gt; time DualHeckeOperator(K,997);
+[31536]
+Time: 0.040
+</PRE>
+<P>
+<P>
+<P>
+<PRE>
+&gt; chi := DirichletGroup(4).1; // nontrivial character modulo 4
+&gt; S := CuspidalSubspace(ModularSymbols(chi,5,+1)); // weight 5
+&gt; L := LSeries(S);
+&gt; CFENew(L);
+0.000000000000000000000000000000
+&gt; EulerFactor(L,2);
+4*x + 1
+&gt; DualHeckeOperator(S,2);
+[-4]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1516.htm">[Next]</A><A  HREF = "text1514.htm">[Prev]</A> <A  HREF = "text1516.htm">[Right]</A> <A  HREF = "text1514.htm">[Left]</A> <A  HREF = "text1513.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

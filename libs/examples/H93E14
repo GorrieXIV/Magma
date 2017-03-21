@@ -1,0 +1,41 @@
+"Source: Text/Algebra/AlgClff.text";
+"Line: 683";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Algebra/AlgClff.text, line: 683
+// Example: H93E14 ()
+print "Example: H93E14";
+ei := GetEchoInput();
+SetEchoInput(true);
+q := 3;
+r := 4;
+K := GF(3);
+Q := StandardQuadraticForm(2*r,K);
+C,V,f := CliffordAlgebra(Q);
+x := func< k,t |
+  k eq 1 select f(t*V.(r+2))*f(V.(r+1))-One(C)
+  else f(t*V.(r-k+2))*f(V.(r+k))-One(C) >;
+y := func< k,t |
+  k eq 1 select f(t*V.r)*f(V.(r-1))-One(C)
+  else f(t*V.(r-k+1))*f(V.(r+k-1))-One(C) >;
+n := func< k, t | x(k,t)*y(k,-t^-1)*x(k,t) >;
+h := func< k, t | n(k,t)*n(k,-1) >;
+w := n(1,1)*n(2,1)*n(3,1)*n(4,1);
+S := MinimalRightIdeals(C : Limit := 1)[1];
+Dimension(S);
+X := sub<GL(16,K) | ActionMatrix(S,h(2,2)), ActionMatrix(S,y(1,1)*x(3,1)*w) >;
+LieType(X,3);
+LMGOrder(X);
+assert $1 eq 19808719257600;
+Z := LMGCentre(X);
+#Z, IsElementaryAbelian(Z);
+SS := SpinPlus(8,K);
+#SS;
+E, phi := EvenSubalgebra(C);
+T := MinimalRightIdeals(E : Limit := 1)[1];
+Dimension(T);
+Y := sub<GL(8,K) | ActionMatrix(T,h(2,2)@@phi), 
+                   ActionMatrix(T,(y(1,1)*x(3,1)*w)@@phi) >;
+LieType(Y,3);
+LMGOrder(Y);
+SetEchoInput(ei);

@@ -1,0 +1,342 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Introduction and First Examples</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1731.htm">[Next]</A><A  HREF = "text1729.htm">[Prev]</A> <A  HREF = "text1731.htm">[Right]</A> [____] <A  HREF = "text1729.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "18981">Introduction and First Examples</A></H3>
+
+<P>
+<P>
+This is a package with tools to build and analyse
+finite-dimensional, finitely-generated, rational polyhedra.
+In general a polyhedron is the Minkowski sum of
+a rational polytope (the compact, convex hull of
+finitely many rational points) and a cone
+(the convex hull of finitely many rational half-lines
+emanating from the origin).
+<P>
+It is important to note that we are discussing only
+<I>rational</I> polyhedra: their vertices lie in
+in some finite-dimensional rational vector space
+L=Q<sup>n</sup> with the supporting hyperplanes represented
+in its dual (loosely speaking, all faces have rational
+gradients).
+There is a natural lattice in this setup: the integral
+sublattice Z<sup>n</sup> of L.
+This is a lattice only in the sense of being a Z-module;
+it does not come with a preferred definite quadratic form
+(or norm), and so, in particular, lengths of vectors are not defined.
+(We explain below how volumes are nevertheless defined
+relative to the integral lattice.)
+A point of L is called `integral' if it lies in
+the integral sublattice, but there is no requirement
+that vertices of polyhedra be integral.
+Notwithstanding all these remarks, we refer to such
+ambient spaces L as `lattices'.
+<P>
+This chapter is organised so that functions applying
+to compact polyhedra, namely polytopes, are collected
+together in coherent blocks as much as possible.
+Section <A  HREF = "text1731.htm#18984">Polytopes, Cones and Polyhedra</A> lists various
+ways of constructing polytopes, cones and polyhedra,
+including Minkowski sum and other arithmetical and
+set-theoretical operations.
+Section <A  HREF = "text1400.htm#15721">Making New Databases</A> presents the basic combinatorics
+associated to all polyhedra such as recovering
+their vertices or faces.
+The next section, Section <A  HREF = "text1400.htm#15721">Making New Databases</A>, is dedicated to
+polytopes. Most of the functions described here
+rely on compactness; they include enumeration of points
+and triangulation.
+Then Section <A  HREF = "text1400.htm#15721">Making New Databases</A> details functions that apply
+to polyhedra more generally, although this includes some
+functions that apply to cones in particular: computing
+the integral generators of C&cap;Z<sup>n</sup> as a semigroup,
+for example, where C is a cone in L.
+Finally, there is section outlining
+the functions that operate on the ambient lattices.
+These functions are not usually required, since for
+the most part the ambient space is a book-keeping
+device that the package handles automatically, but
+they arise as domains and codomains of maps.
+This provides a mechanism for modifying the
+integral sublattice, which can be used to change the
+underlying notion of which points count as integral.
+<P>
+Before starting, we outline the capabilities of the
+package by extended examples.
+The first illustrates the basic machinery
+available for the analysis of polytopes---that is,
+the compact convex hulls of finitely many points.
+
+
+<P>
+Our second example illustrates the machinery
+available for cones and polyhedra more generally.
+<HR>
+<H3><A NAME = "18982">Example <TT>Polyhedra_polytope-example (H149E1)</TT></A></H3>
+A polytope can be constructed as the convex hull of
+finitely many points; the points can be denoted simply
+as sequences of integers (or even rational numbers), although
+they will be cast as points of an ambient lattice (that is,
+a Q-vector space marked with a spanning lattice Z<sup>n</sup>).
+For example, we build a polytope P as the convex hull
+of the four points (1, 0, 0), (0, 1, 0), (1, - 3, 5) and ( - 2, 2, - 5).
+<P>
+<P>
+<PRE>
+&gt; P := Polytope([ [0,0,0], [1,0,0], [0,1,0], [1,-3,5], [-2,2,-5] ]);
+&gt; P;
+3-dimensional polytope P with 5 generators:
+    ( 0,  0,  0),
+    ( 1,  0,  0),
+    ( 0,  1,  0),
+    ( 1, -3,  5),
+    (-2,  2, -5)
+</PRE>
+No analysis of P has been carried out in its construction.
+In fact, one of its defining `generators' is not required,
+as can be seen from the vertices of P (which after this
+calculation will set as the default printing information).
+<P>
+<P>
+<PRE>
+&gt; Vertices(P);
+[
+    (1, 0, 0),
+    (0, 1, 0),
+    (1, -3, 5),
+    (-2, 2, -5)
+]
+&gt; P;
+3-dimensional polytope P with 4 vertices:
+    ( 1,  0,  0),
+    ( 0,  1,  0),
+    ( 1, -3,  5),
+    (-2,  2, -5)
+</PRE>
+One can extract the combinatorial components of P.
+Here we recover the facets of P, its faces of codimension 1,
+each of which is regarded as a polytope in its own right.
+<P>
+<P>
+<PRE>
+&gt; Facets(P);
+[
+    2-dimensional polytope with 3 vertices:
+        ( 1, -3,  5),
+        (-2,  2, -5),
+        ( 0,  1,  0),
+    2-dimensional polytope with 3 vertices:
+        ( 1, -3,  5),
+        (-2,  2, -5),
+        ( 1,  0,  0),
+    2-dimensional polytope with 3 vertices:
+        (1, -3,  5),
+        (0,  1,  0),
+        (1,  0,  0),
+    2-dimensional polytope with 3 vertices:
+        (-2,  2, -5),
+        ( 0,  1,  0),
+        ( 1,  0,  0)
+]
+</PRE>
+Computing the (integral) points contained in a
+polytope (including points on its boundary) is
+one of the principal operations for polytopes.
+<P>
+<P>
+<PRE>
+&gt; Points(P);
+[
+    (-2, 2, -5),
+    (0, 0, 0),
+    (0, 1, 0),
+    (1, -3, 5),
+    (1, 0, 0)
+]
+</PRE>
+The interior points or boundary points can be retrieved
+separately using <TT>InteriorPoints(P)</TT> and <TT>BoundaryPoint(P)</TT>.
+<P>
+One can also compute the volume of a polytope.
+<P>
+<P>
+<PRE>
+&gt; Volume(P);
+20
+</PRE>
+The volume is the lattice-normalised volume:
+(Vol)(P) = n! x (vol)(P), where (vol)(P) is
+the Euclidean volume of P.
+<P>
+The polar, or dual, to P can be computed.
+<P>
+<P>
+<PRE>
+&gt; D := Polar(P);
+&gt; D;
+3-dimensional polytope D with 4 vertices:
+    ( 3,  -1, -7/5),
+    (-1,   3,  9/5),
+    (-1,  -1,  1/5),
+    (-1,  -1, -3/5)
+</PRE>
+The polar of P is again a polytope in this case (simply
+because the origin lies in the strict interior of P),
+although its vertices need not be integral.
+<P>
+The Ehrhart series,
+<P>
+(Ehr)<sub>D</sub>(t) = &Sigma;<sub>n&ge;0</sub> # ( nD &cap;Z<sup>n</sup> ) t<sup>n</sup>,
+<P>
+computes the number of points in multiples of a polytope D.
+<P>
+<P>
+<PRE>
+&gt; EhrhartCoefficients(D,10);
+[ 1, 7, 33, 91, 193, 355, 585, 899, 1309, 1827, 2469 ]
+</PRE>
+The (infinite) Ehrhart series can be recovered as a rational function.
+<P>
+<P>
+<PRE>
+&gt; E&lt;t&gt; := EhrhartSeries(D);
+&gt; E;
+(t^7 + 4*t^6 + 15*t^5 + 12*t^4 + 12*t^3 + 15*t^2 + 4*t + 1)/(t^8 - 3*t^7 + 3*t^6
+    - t^5 - t^3 + 3*t^2 - 3*t + 1)
+</PRE>
+It is possible to make maps of the underlying lattices
+and apply them to polyhedra.
+<P>
+<P>
+<PRE>
+&gt; L := Ambient(P);
+&gt; K := Quotient(L![1,2,3]);
+&gt; K;
+2-dimensional toric lattice K = (Z^3) / &lt;1, 2, 3&gt;
+&gt; f := LatticeMap(L, K, Matrix(3,2,[1,0,0,1,0,0]));
+&gt; Q := Image(f,P);
+&gt; Vertices(Q);
+[
+    (1, 0),
+    (0, 1),
+    (1, -3),
+    (-2, 2)
+]
+</PRE>
+In this case the image polytope Q=f(P) is not a simplex.
+We can triangulate it.
+<P>
+<P>
+<PRE>
+&gt; Triangulation(Q);
+{
+    2-dimensional polytope with 3 vertices:
+        (1, 0),
+        (1, -3),
+        (0, 1)
+    2-dimensional polytope with 3 vertices:
+        (1, -3),
+        (-2, 2),
+        (0, 1)
+}
+</PRE>
+<HR>
+<H3><A NAME = "18983">Example <TT>Polyhedra_ (H149E2)</TT></A></H3>
+A ray is a rational half-line Q^ + v from the origin passing
+through a point v &isin;Q<sup>n</sup>.
+A cone is the convex hull of finitely many rays.
+<P>
+<P>
+<PRE>
+&gt; C := Cone([[2,2],[1,1/2]]);
+&gt; C;
+Cone C with 2 generators:
+    ( 2,   2),
+    ( 1, 1/2)
+</PRE>
+Although any non-zero point on a ray is enough to define it,
+often the non-zero integral point nearest the origin
+is preferred. As with polytopes, there is no analysis of
+a cone C on its construction, but the minimal generators
+are displayed once some function has forced their
+calculation.
+<P>
+<P>
+<PRE>
+&gt; Rays(C);
+[
+    (1, 1),
+    (2, 1)
+]
+&gt; C;
+2-dimensional simplicial cone C with 2 minimal generators:
+    (1, 1),
+    (2, 1)
+</PRE>
+A polyhedron is the Minkowski sum (simply denoted by a plus sign)
+of a polytope and a cone.
+<P>
+<P>
+<PRE>
+&gt; P := StandardSimplex(2);
+&gt; P + C;
+2-dimensional polyhedron with 2-dimensional finite part with 3
+vertices:
+    (1, 0),
+    (0, 1),
+    (0, 0)
+and 2-dimensional infinite part given by a cone with 2 minimal
+generators:
+    (2, 1),
+    (1, 1)
+</PRE>
+The polyhedron P + C is now subject to standard combinatorial
+analysis, such as computing its facets; some of these may
+be (compact) polytopes, while others may themselves be
+polyhedra described as the sum of a compact, or finite, part
+and a cone, or infinite part.
+<P>
+<P>
+<PRE>
+&gt; Facets(P + C);
+[
+    1-dimensional polytope with 2 vertices:
+        (1, 0),
+        (0, 0),
+    1-dimensional polyhedron with 0-dimensional finite part with one
+    vertex:
+        (0, 1)
+    and 1-dimensional infinite part given by a cone with one minimal
+    generator:
+        (1, 1),
+    1-dimensional polytope with 2 vertices:
+        (0, 1),
+        (0, 0),
+    1-dimensional polyhedron with 0-dimensional finite part with one
+    vertex:
+        (1, 0)
+    and 1-dimensional infinite part given by a cone with one minimal
+    generator:
+        (2, 1)
+]
+</PRE>
+<P>
+<P>
+<PRE>
+</PRE>
+<P>
+<P>
+<PRE>
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1731.htm">[Next]</A><A  HREF = "text1729.htm">[Prev]</A> <A  HREF = "text1731.htm">[Right]</A> [____] <A  HREF = "text1729.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,389 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Invariants</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1878.htm">[Next]</A><A  HREF = "text1876.htm">[Prev]</A> <A  HREF = "text1878.htm">[Right]</A> <A  HREF = "text1876.htm">[Left]</A> <A  HREF = "text1874.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "20883">Invariants</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1877.htm#20884">The Standard Form</A>
+<LI> <A  HREF = "text1877.htm#20887">Structures Associated with the  Gray Map</A>
+<LI> <A  HREF = "text1877.htm#20895">Coset Representatives</A>
+<LI> <A  HREF = "text1877.htm#20899">Information Space and Information Sets</A>
+<LI> <A  HREF = "text1877.htm#20905">Syndrome Space and Coset Leaders</A>
+<LI> <A  HREF = "text1877.htm#20910">Miscellaneous Functions</A>
+</UL>
+<H4><A NAME = "20884">The Standard Form</A></H4>
+
+<P>
+<P>
+A Z<sub>4</sub>-linear code is in <I>standard form</I> if its generator
+matrix is of the form:
+<P>
+vskip0.2cm
+<PRE>
+
+   [ I_{k_1}           A     B]
+   [       0    2I_{k_2}    2C]
+</PRE>vskip0.2cm
+<P>
+<P>
+where I<sub>k<sub>1</sub></sub> and I<sub>k<sub>2</sub></sub> are the k<sub>1</sub> x k<sub>1</sub> and k<sub>2</sub> x k<sub>2</sub>
+identity matrices, respectively, A and C are Z<sub>2</sub>-matrices,
+and B is a Z<sub>4</sub>-matrix.
+Any  Z<sub>4</sub>-linear code C is permutation-equivalent to a code S which 
+is in standard form.  Furthermore, the integers k<sub>1</sub> and k<sub>2</sub>, defined above,
+are unique <A  HREF = "text1873.htm#bib_Wan_Z4">[Wan97, Prop. 1.1]</A>.
+
+
+<H5><A NAME = "20885">StandardForm(C) : Code -&gt; Code, Map</A></H5>
+<BLOCKQUOTE>
+This function, given any Z<sub>4</sub>-linear code C, returns a
+permutation-equivalent code S in standard form, together with the
+corresponding isomorphism from C onto S.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20886">Example <TT>CodeZ4_StandardForm (H162E9)</TT></A></H3>
+The standard form is computed for a small Z<sub>4</sub> code.  Note that the
+number of rows in the generator matrix of the standard code
+may be less than that in the original code.
+<P>
+<P>
+<PRE>
+&gt; Z4 := IntegerRing(4);
+&gt; C := LinearCode&lt;Z4, 4 | [2,2,1,1], [0,2,0,2]&gt;;
+&gt; C;
+[4, 3, 2] Linear Code over IntegerRing(4)
+Generator matrix:
+[2 0 1 3]
+[0 2 0 2]
+[0 0 2 2]
+&gt; S, f := StandardForm(C);
+&gt; S;
+[4, 2, 2] Linear Code over IntegerRing(4)
+Generator matrix:
+[1 1 2 2]
+[0 2 2 0]
+&gt; #S;
+8
+&gt; #C;
+8
+&gt; f(C.1);
+(1 3 0 2)
+&gt; f(C.2);
+(0 2 2 0)
+&gt; f(C.3);
+(2 2 0 0)
+&gt; S.1@@f;
+(2 2 1 1)
+&gt; S.2@@f;
+(0 2 0 2)
+</PRE>
+<HR>
+<H4><A NAME = "20887">Structures Associated with the  Gray Map</A></H4>
+
+
+
+<H5><A NAME = "20888">MinRowsGeneratorMatrix(C) : CodeLinRng -&gt; ModMatRngElt</A></H5>
+<BLOCKQUOTE>
+A generator matrix for the code C over Z<sub>4</sub> of length n and type 2<sup>&gamma;</sup> 4<sup>&delta;</sup>, with the
+minimum number of rows, that is with &gamma; + &delta; rows: &gamma; rows of order
+two and &delta; rows of order four. It also returns the parameters &gamma; and &delta;.
+</BLOCKQUOTE>
+<H5><A NAME = "20889">SpanZ2CodeZ4(C) : CodeLinRng -&gt; CodeLinFld</A></H5>
+<BLOCKQUOTE>
+Given a code C over Z<sub>4</sub> of length n, return S<sub>C</sub>=&Phi;<sup> - 1</sup>(S<sub>bin</sub>) as a code over Z<sub>4</sub>,
+and the linear span of C<sub>bin</sub>, S<sub>bin</sub>=&lt; C<sub>bin</sub> &gt;, as a binary linear code of length 2n,
+where C<sub>bin</sub>=&Phi;(C) and &Phi; is the Gray map.
+</BLOCKQUOTE>
+<H5><A NAME = "20890">KernelZ2CodeZ4(C) : CodeLinRng -&gt; CodeLinRng</A></H5>
+<BLOCKQUOTE>
+Given a code C over Z<sub>4</sub> of length n,
+return its kernel K<sub>C</sub> as a subcode over Z<sub>4</sub> of C, and
+K<sub>bin</sub>=&Phi;(K<sub>C</sub>) as a binary linear subcode of C<sub>bin</sub> of length 2n,
+where C<sub>bin</sub>=&Phi;(C) and &Phi; is the Gray map.
+<P>
+The kernel K<sub>C</sub> contains the codewords v such that 2v * u &isin;C for all u &isin;C,
+where * denotes the component-wise product.
+Equivalently, the kernel K<sub>bin</sub>=&Phi;(K<sub>C</sub>) contains the codewords c&isin;C<sub>bin</sub> such that
+c + C<sub>bin</sub>=C<sub>bin</sub>, where C<sub>bin</sub>=&Phi;(C) and &Phi; is the Gray map. 
+</BLOCKQUOTE>
+<H5><A NAME = "20891">KernelCosetRepresentatives(C) : CodeLinRng -&gt; SeqEnum, SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a code C over Z<sub>4</sub> of length n, return the coset representatives [c<sub>1</sub>, ..., c<sub>t</sub>] as a sequence of codewords of C, such that C=K<sub>C</sub> &cup;bigcup<sub>i=1</sub><sup>t</sup> big( K<sub>C</sub> + c<sub>i</sub> big), where K<sub>C</sub> is the kernel of C as a subcode over Z<sub>4</sub>. It also returns the coset representatives of the corresponding binary code C<sub>bin</sub>=&Phi;(C) as a sequence of binary codewords [&Phi;(c<sub>1</sub>), ..., &Phi;(c<sub>t</sub>)], such
+ that C<sub>bin</sub>=K<sub>bin</sub> &cup;bigcup<sub>i=1</sub><sup>t</sup> big( K<sub>bin</sub> + &Phi;(c<sub>i</sub>)big), where K<sub>bin</sub>=&Phi;(K<sub>C</sub>) and &Phi; is the Gray map.
+</BLOCKQUOTE>
+<H5><A NAME = "20892">DimensionOfSpanZ2(C) : CodeLinRng -&gt; RngIntElt</A></H5>
+<H5>RankZ2(C) : CodeLinRng -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Given a code C over Z<sub>4</sub>, return the dimension of the linear span of C<sub>bin</sub>,
+that is, the dimension of &lt; C<sub>bin</sub> &gt;, where C<sub>bin</sub>=&Phi;(C) and &Phi; is the Gray map.
+</BLOCKQUOTE>
+<H5><A NAME = "20893">DimensionOfKernelZ2(C) : CodeLinRng -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a code C over Z<sub>4</sub>, return the dimension of the Gray map image of its kernel K<sub>C</sub> over Z<sub>4</sub>, that is
+the dimension of K<sub>bin</sub>=&Phi;(K<sub>C</sub>), where &Phi; is the Gray map.
+Note that K<sub>bin</sub> is always a binary linear code.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20894">Example <TT>CodeZ4_spain-Z4-5 (H162E10)</TT></A></H3>
+<P>
+<P>
+<P>
+<PRE>
+&gt; C := ReedMullerCodeRMZ4(0,3,5);
+&gt; DimensionOfKernelZ2(C);
+20
+&gt; DimensionOfSpanZ2(C);
+27
+&gt; K, Kb := KernelZ2CodeZ4(C);
+&gt; S, Sb := SpanZ2CodeZ4(C);
+&gt; K subset C;
+true
+&gt; C subset S;
+true
+&gt; Dimension(Kb) eq DimensionOfKernelZ2(C);
+true
+&gt; Dimension(Sb) eq DimensionOfSpanZ2(C);
+true
+</PRE>
+<HR>
+<H4><A NAME = "20895">Coset Representatives</A></H4>
+
+
+
+<H5><A NAME = "20896">CosetRepresentatives(C) : CodeLinRng -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a code C over Z<sub>4</sub> of length n, with ambient space V=Z<sub>4</sub><sup>n</sup>, return a set of coset
+representatives (not necessarily of minimal weight in their cosets) for C in V as an indexed set of vectors
+from V. The set of coset representatives {c<sub>0</sub>, c<sub>1</sub>, ..., c<sub>t</sub> } satisfies
+the two conditions that c<sub>0</sub> is the zero codeword, and  V=bigcup<sub>i=0</sub><sup>t</sup> big( C + c<sub>i</sub> big).
+Note that this function is only applicable when V and C are small.
+</BLOCKQUOTE>
+<H5><A NAME = "20897">CosetRepresentatives(C, S) : CodeLinRng, CodeLinRng -&gt; SeqEnum, SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a code C over Z<sub>4</sub> of length n, and a subcode S over Z<sub>4</sub> of C,
+return a set of coset representatives (not necessarily of minimal weight in their cosets)
+for S in C as an indexed set of codewords from C. The set of coset representatives 
+{c<sub>0</sub>, c<sub>1</sub>, ..., c<sub>t</sub> } satisfies the two conditions that c<sub>0</sub> is the zero codeword, 
+and  C= bigcup<sub>i=0</sub><sup>t</sup> big( S + c<sub>i</sub> big).  Note that this function is only applicable 
+when S and C are small.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20898">Example <TT>CodeZ4_spain-Z4-7 (H162E11)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; C := LinearCode&lt;Integers(4), 4 | [[1,0,0,3],[0,1,1,3]]&gt;;
+&gt; L := CosetRepresentatives(C);
+&gt; Set(RSpace(Integers(4),4)) eq {v+ci : v in Set(C), ci in L};
+true
+
+&gt; K := KernelZ2CodeZ4(C);
+&gt; L := CosetRepresentatives(C, K);
+&gt; {C!0} join Set(KernelCosetRepresentatives(C)) eq L;
+true
+&gt; Set(C) eq {v+ci : v in Set(K), ci in L};
+true
+</PRE>
+<HR>
+<H4><A NAME = "20899">Information Space and Information Sets</A></H4>
+
+
+
+<H5><A NAME = "20900">InformationSpace(C) : CodeLinRng -&gt; ModTupRng, ModTupFld, Map, Map</A></H5>
+<BLOCKQUOTE>
+Given a code C over Z<sub>4</sub> of length n and type 2<sup>&gamma;</sup> 4<sup>&delta;</sup>,
+return the Z<sub>4</sub>-submodule of Z<sub>4</sub><sup>&gamma; + &delta;</sup> isomorphic to Z<sub>2</sub><sup>&gamma;</sup> x Z<sub>4</sub><sup>&delta;</sup> such that the
+first &gamma; coordinates are of order two, that is, the space of information vectors for C.
+The function also returns the  (&gamma; + 2&delta;)-dimensional binary vector space, which is the space of information vectors for the
+corresponding binary code C<sub>bin</sub>=&Phi;(C), where &Phi; is the Gray map. Finally, for the encoding process, it also returns the corresponding
+isomorphisms f and f<sub>bin</sub> from these spaces of information vectors onto C and C<sub>bin</sub>, respectively.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20901">Example <TT>CodeZ4_spain-Z4-9 (H162E12)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; C := LinearCode&lt;Integers(4), 4 | [[2,0,0,2],[0,1,1,3]]&gt;;
+&gt; R, V, f, fbin := InformationSpace(C);
+&gt; G := MinRowsGeneratorMatrix(C);
+
+&gt; (#R eq #C) and (#V eq #C);
+true
+&gt; Set([f(i) : i in R]) eq Set(C);
+true
+&gt; Set([i*G : i in R]) eq Set(C);
+false
+
+&gt; i := R![2,3];
+&gt; c := f(i);
+&gt; c;
+(2 3 3 3)
+&gt; c in C;
+true
+&gt; i*G eq c;
+false
+
+&gt; ibin := V![1,1,0];
+&gt; cbin := fbin(ibin);
+&gt; cbin;
+(1 1 1 0 1 0 1 0)
+&gt; cbin in GrayMapImage(C);
+true
+&gt; cbin eq GrayMap(C)(c);
+true
+</PRE>
+<HR>
+<H5><A NAME = "20902">InformationSet(C) : CodeLinRng -&gt; ModTupRng, ModTupFld, Map, Map</A></H5>
+<BLOCKQUOTE>
+Given a code C over Z<sub>4</sub> of length n and type 2<sup>&gamma;</sup> 4<sup>&delta;</sup>, return an information set I=[i<sub>1</sub>, ..., i<sub>&gamma; + &delta;</sub>] &sube;{1, ..., n} for C such that the code C punctured on {1, ..., n} \ {i<sub>&gamma; + 1</sub>, ..., i<sub>&gamma; + &delta;</sub> } is of type 4<sup>&delta;</sup>, and the corresponding information set &Phi;(I)=[2i<sub>1</sub> - 1, ..., 2i<sub>&gamma;</sub> - 1, 2i<sub>&gamma; + 1</sub> - 1, 2i<sub>&gamma; + 1</sub>, ..., 2i<sub>&gamma; + &delta;</sub> - 1, 2i<sub>&gamma; + &delta;</sub>] &sube;{1, ..., 2n} for the binary code C<sub>bin</sub>=&Phi;(C), where &Phi; is the Gray map. The information sets I and &Phi;(I) are returned as a sequence of &gamma; + &delta; and &gamma; + 2&delta; integers, giving the coordinate positions that correspond to the information set of C and C<sub>bin</sub>, respectively.
+<P>
+An information set I for C is an ordered set of &gamma; + &delta; coordinate positions such that |C<sup>I</sup>|=2<sup>&gamma;</sup>4<sup>&delta;</sup>, where C<sup>I</sup>={v<sup>I</sup> : v&isin;C } and v<sup>I</sup> is the vector v restricted to the I coordinates. An information set J for C<sub>bin</sub> is an ordered set of &gamma; + 2&delta; coordinate positions such that |(C<sup>J</sup><sub>bin</sub>)|=2<sup>&gamma; + 2&delta;</sup>.
+</BLOCKQUOTE>
+<H5><A NAME = "20903">IsInformationSet(C, I) : CodeLinRng, [RngIntElt] -&gt; BoolElt, BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a code C over Z<sub>4</sub> of length n and type 2<sup>&gamma;</sup> 4<sup>&delta;</sup> and a sequence I &sube;{1, ..., n } or I &sube;{1, ..., 2n }, return <TT>true</TT> if and only if I&sube;{1, ..., n } is an information set for C. This function also returns another boolean, which is <TT>true</TT> if and only if I &sube;{1, ..., 2n } is an information set for the corresponding binary code C<sub>bin</sub>=&Phi;(C), where &Phi; is the Gray map.
+<P>
+An information set I for C is an ordered set of &gamma; + &delta; coordinate positions such that |C<sup>I</sup>|=2<sup>&gamma;</sup>4<sup>&delta;</sup>, where C<sup>I</sup>={v<sup>I</sup> : v&isin;C } and v<sup>I</sup> is the vector v restricted to the I coordinates. An information set J for C<sub>bin</sub> is an ordered set of &gamma; + 2&delta; coordinate positions such that |(C<sup>J</sup><sub>bin</sub>)|=2<sup>&gamma; + 2&delta;</sup>. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20904">Example <TT>CodeZ4_spain-Z4-10 (H162E13)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; C := HadamardCodeZ4(3,6);
+&gt; C;
+((32, 4^3 2^1)) Linear Code over IntegerRing(4)
+Generator matrix:
+[1 0 3 2 0 3 2 1 3 2 1 0 2 1 0 3 1 0 3 2 0 3 2 1 3 2 1 0 2 1 0 3]
+[0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3]
+[0 0 0 0 1 1 1 1 2 2 2 2 3 3 3 3 0 0 0 0 1 1 1 1 2 2 2 2 3 3 3 3]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2]
+
+&gt; I, Ibin := InformationSet(C);
+&gt; I;
+[ 16, 28, 31, 32 ]
+&gt; Ibin;
+[ 31, 55, 56, 61, 62, 63, 64 ]
+&gt; #PunctureCode(C, {1..32} diff Set(I)) eq #C;
+true
+&gt; Cbin := GrayMapImage(C);
+&gt; V := VectorSpace(GF(2), 7);
+&gt; #{V![c[i] : i in Ibin] : c in Cbin} eq #Cbin;
+true
+
+&gt; IsInformationSet(C, I);
+true false
+&gt; IsInformationSet(C, Ibin);
+false true
+
+&gt; IsInformationSet(C, [1, 2, 5, 17]);
+true false
+&gt; IsInformationSet(C, [1, 2, 3, 4, 9, 10, 33]);
+false true
+
+&gt; D := LinearCode&lt;Integers(4), 5 | [[2,0,0,2,0],[0,2,0,2,2],[0,0,2,2,0]]&gt;;
+&gt; IsInformationSet(D, [1,3,5]);
+true true
+</PRE>
+<HR>
+<H4><A NAME = "20905">Syndrome Space and Coset Leaders</A></H4>
+
+
+
+<H5><A NAME = "20906">SyndromeSpace(C) : CodeLinRng -&gt; ModTupRng, ModTupFld</A></H5>
+<BLOCKQUOTE>
+Given a code C over Z<sub>4</sub> of length n and type 2<sup>&gamma;</sup> 4<sup>&delta;</sup>,
+return the Z<sub>4</sub>-submodule of  Z<sub>4</sub><sup>n - &delta;</sup> isomorphic to
+Z<sub>2</sub><sup>&gamma;</sup> x Z<sub>4</sub><sup>n - &gamma; - &delta;</sup> such that the first &gamma;
+coordinates are of order two, that is, the space of syndrome vectors
+for C.  The function also returns the (2n - 2&delta; - &gamma;)-dimensional
+binary vector space,  which is the space of syndrome vectors for the
+corresponding binary code C<sub>bin</sub>=&Phi;(C), where &Phi; is the Gray
+map.  Note that these spaces are computed by using the function <TT>InformationSpace(C)</TT> applied to the dual code of C, produced by function
+<TT>Dual(C)</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "20907">Syndrome(u, C) : ModTupFldElt, CodeLinRng -&gt; ModTupRngElt</A></H5>
+<H5>Syndrome(u, C) : ModTupRngElt, CodeLinRng -&gt; ModTupRngElt</H5>
+<BLOCKQUOTE>
+Given a code C over Z<sub>4</sub> of length n and type 2<sup>&gamma;</sup> 4<sup>&delta;</sup>, 
+and a vector u  from the ambient space V=Z<sub>4</sub><sup>n</sup> or V<sub>2</sub>=Z<sub>2</sub><sup>2n</sup>, 
+construct the syndrome of u relative to the code C. This will be an 
+element of the syndrome space of C, considered as the Z<sub>4</sub>-submodule 
+of Z<sub>4</sub><sup>n - &delta;</sup> isomorphic to Z<sub>2</sub><sup>&gamma;</sup> x Z<sub>4</sub><sup>n - &gamma; - &delta;</sup> 
+such that the first &gamma; coordinates are of order two.
+</BLOCKQUOTE>
+<H5><A NAME = "20908">CosetLeaders(C) : CodeLinRng -&gt; SetIndx, Map</A></H5>
+<BLOCKQUOTE>
+Given a code C over Z<sub>4</sub> of length n, with ambient space
+V=Z<sub>4</sub><sup>n</sup>, return a set of coset leaders (vectors of minimal Lee weight
+in their cosets) for C in V as an indexed set of vectors from V. This
+function also returns a map from the syndrome space of C onto the coset
+leaders (mapping a syndrome into its corresponding coset leader). Note
+that this function is only applicable when V and C are small.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20909">Example <TT>CodeZ4_spain-Z4-11 (H162E14)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; C := LinearCode&lt;Integers(4), 4 | [[2,0,0,2],[0,1,1,3]]&gt;;
+&gt; R, V, f, fbin := InformationSpace(C);
+&gt; Rs, Vs := SyndromeSpace(C);
+
+&gt; #R * #Rs eq 4^Length(C);
+true
+&gt; #V * #Vs eq 4^Length(C);
+true
+
+&gt; i := R![2,3];
+&gt; c := f(i);
+&gt; c;
+(2 3 3 3)
+&gt; u := c;
+&gt; u[2] := u[2] + 3;
+&gt; u;
+(2 2 3 3)
+
+&gt; s := Syndrome(u, C);
+&gt; s in Rs;
+true
+&gt; H := Transpose(MinRowsGeneratorMatrix(Dual(C)));
+&gt; s eq u*H;
+true
+
+&gt; L, mapCosetLeaders := CosetLeaders(C);
+&gt; ev := mapCosetLeaders(s);
+&gt; ev;
+(0 3 0 0)
+&gt; ev in L;
+true
+&gt; u - ev eq c;
+true
+</PRE>
+<HR>
+<H4><A NAME = "20910">Miscellaneous Functions</A></H4>
+
+
+
+<H5><A NAME = "20911">Correlation(v) : ModTupRngElt -&gt; RngQuadElt</A></H5>
+<BLOCKQUOTE>
+Let v be a codeword over Z<sub>4</sub>. Define
+w<sub>j</sub> = #{k : v[k] = j} for  j = 0, ..., 3.
+Then the <I>correlation</I> of v is the Gaussian integer
+(w<sub>0</sub> - w<sub>2</sub>) + i * (w<sub>1</sub> - w<sub>3</sub>).
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text1878.htm">[Next]</A><A  HREF = "text1876.htm">[Prev]</A> <A  HREF = "text1878.htm">[Right]</A> <A  HREF = "text1876.htm">[Left]</A> <A  HREF = "text1874.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

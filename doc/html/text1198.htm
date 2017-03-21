@@ -1,0 +1,329 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Other Functions for Representation Decompositions</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1199.htm">[Next]</A><A  HREF = "text1197.htm">[Prev]</A> <A  HREF = "text1199.htm">[Right]</A> <A  HREF = "text1197.htm">[Left]</A> <A  HREF = "text1192.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "13403">Other Functions for Representation Decompositions</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+In this section, we describe more complicated functions for dealing with representation decompositions.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1198.htm#13417">Operations Related to the Symmetric Group</A>
+<LI> <A  HREF = "text1198.htm#13422">FusionRules</A>
+</UL>
+<H5><A NAME = "13404">FundamentalClosure(R, S) : RootDtm, SetEnum -&gt; SetEnum</A></H5>
+<BLOCKQUOTE>
+A set of fundamental roots in the minimal subsystem (not necessarily closed!) 
+of the root system R that contains all the roots in S. This function
+is equivalent to the <TT>fundam</TT> function in LiE. 
+<P>
+The set S should contain either roots or root indices; the returned set will
+then contain objects of the same type. 
+</BLOCKQUOTE>
+<H5><A NAME = "13405">Closure(R, S) : RootDtm, SetEnum -&gt; SetEnum</A></H5>
+<BLOCKQUOTE>
+A set of fundamental roots in the minimal subsystem (not necessarily closed!)
+of the root system R that contains all the roots in S. This function
+is equivalent to the <TT>closure</TT> function in LiE. 
+<P>
+The set S should contain either roots or root indices; the returned set will
+then contain objects of the same type. 
+</BLOCKQUOTE>
+<H5><A NAME = "13406">RestrictionMatrix(R, Q) : RootDtm, SeqEnum -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+For a simply connected root datum R and a sequence of roots Q forming
+a fundamental basis for a closed subdatum S of R, this function computes a
+restriction matrix for the fundamental Lie subgroup of type S of the Lie group 
+corresponding to R.
+<P>
+The sequence Q may contain either integers (where i corresponds to the i-th
+root of R) or vectors (interpreted as root vectors written in the root basis of R).
+<P>
+Note that the result is not unique. Moreover, if the result is to be used by <A  HREF = "text1196.htm#BranchFrTovM">Branch</A>
+or <A  HREF = "text1196.htm#Collect">Collect</A> the roots in Q must be positive roots, and their mutual inner products must
+be non-positive.
+</BLOCKQUOTE>
+<H5><A NAME = "13407"></A><A NAME = "LieRepDecRestrictionMatrix">RestrictionMatrix</A>(R, S) : RootDtm, RootDtm -&gt; AlgMatElt</H5>
+<BLOCKQUOTE>
+Let S be a sub root datum of R, constructed for example (but not necessarily) 
+using a call to <TT>sub&lt;...&gt;</TT>. Then the matrix M returned by this function maps 
+the fundamental weights of R to those of S. Note that, if the rank of S is 
+smaller than the rank of R, there will be more than one such matrix. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13408">Example <TT>LieReps_RestrictionMatrix (H110E15)</TT></A></H3>
+Constructing a restriction matrix
+<P>
+<P>
+<PRE>
+&gt; R := RootDatum("D4":  Isogeny := "SC");
+&gt; sub&lt;R | [1,3,4]&gt;;
+Root datum of dimension 4 of type A1 A1 A1
+[ 1, 3, 4, 13, 15, 16 ]
+&gt; S := RootDatum("A1A1A1T1" : Isogeny := "SC");
+&gt; M := RestrictionMatrix(R, S); M;
+[ 1  0  0 -1]
+[ 0  1  0 -2]
+[ 0  0  1 -1]
+[ 0  0  0  4]
+&gt; imgR := FundamentalWeights(R)*M; imgR;
+[ 1  0  0 -1]
+[ 0  1  0 -2]
+[ 0  0  1 -1]
+[ 0  0  0  4]
+&gt; FundamentalWeights(S);
+[1 0 0 0]
+[0 1 0 0]
+[0 0 1 0]
+/* M is of the required form, since: */
+&gt; [ BasisChange(S, BasisChange(S, imgR[i]
+&gt; : InBasis := "Standard", OutBasis := "Weight")
+&gt; : InBasis := "Weight", OutBasis := "Standard")
+&gt; : i in [1..4]
+&gt; ];
+[
+    (1 0 0 0),
+    (0 1 0 0),
+    (0 0 1 0),
+    (0 0 0 0)
+]
+</PRE>
+<HR>
+<H5><A NAME = "13409"></A><A NAME = "klpolynomialxy">KLPolynomial</A>(x, y) : GrpPermElt, GrpPermElt -&gt; RngUPolElt</H5>
+
+<PRE>    Ring: RngUPol                       Default: Z[X]</PRE>
+<BLOCKQUOTE>
+The Kazhdan-Lusztig polynomial P<sub>x, y</sub>. 
+We use the recursion given originally by Kazhdan and Lusztig <A  HREF = "text1191.htm#bib_kazhdan-lusztig">[KL79]</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "13410"></A><A NAME = "rpolynomialxy">RPolynomial</A>(x, y) : GrpPermElt, GrpPermElt -&gt; RngUPolElt</H5>
+
+<PRE>    Ring: RngUPol                       Default: Z[X]</PRE>
+<BLOCKQUOTE>
+The R-polynomial R<sub>x, y</sub>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13411">Example <TT>LieReps_KLPoly_RPoly (H110E16)</TT></A></H3>
+There is a relation between Kazhdan-Lusztig polynomials and R-polynomials. We should have, for any x, w &isin;W:
+<P>
+X<sup>l(w) - l(x)</sup> /line(P<sub>x, w</sub>) - P<sub>x, w</sub> = &sum;<sub>x &lt; y &le;w</sub> R<sub>x, w</sub> P<sub>y, w</sub>,
+<P>
+where the bar indicates a sign change of all the exponents. We need some fiddling around in order to implement this sign change, 
+since Magma doesn't support negative exponents at the moment, but we can make it work:
+<P>
+<P>
+<PRE>
+&gt; signchange := function(pol, pwr)
+&gt;     //returns X^pwr * bar(pol)
+&gt;     deg := Degree(pol);
+&gt;     P := Parent(pol);
+&gt;     if (deg gt pwr) then return "Failed: Can't do sign change"; end if;
+&gt;     return (P.1)^(pwr-deg)*P!Reverse(Eltseq(pol));
+&gt; end function;
+&gt; testKL := function(x, w)
+&gt;     W := Parent(x);
+&gt;     rng&lt;X&gt; := PolynomialRing(Integers());
+&gt;     lenw := CoxeterLength(W, w);
+&gt;     lenx := CoxeterLength(W, x);
+&gt;
+&gt;     if (lenx gt lenw) then
+&gt;         return "Failed: l(x) &gt; l(w) gives zero R and KL polynomials.";
+&gt;     end if;
+&gt;
+&gt;     /* Left hand side */
+&gt;     Pxw := KLPolynomial(x, w : Ring := rng);
+&gt;     lhs := signchange(Pxw, lenw - lenx);
+&gt;     if (Type(lhs) eq MonStgElt) then return lhs; end if;
+&gt;     lhs -:= Pxw;
+&gt;
+&gt;     /* Right hand side */
+&gt;     rhs := rng!0;
+&gt;     lvl := {w};
+&gt;     lvllen := lenw;
+&gt;     while (lvllen gt lenx and #lvl gt 0) do
+&gt;         for y in lvl do
+&gt;             rhs +:= RPolynomial(x,y : Ring := rng)*
+&gt;                         KLPolynomial(y, w : Ring := rng);
+&gt;         end for;
+&gt;         lvl := BruhatDescendants(lvl : z := x);
+&gt;         lvllen -:= 1;
+&gt;     end while;
+&gt;
+&gt;     /* Done */
+&gt;     printf "LHS: %o\n", lhs;
+&gt;     printf "RHS: %o\n", rhs;
+&gt;     return lhs eq rhs;
+&gt; end function;
+&gt; W := CoxeterGroup("D4");
+&gt; x := W.1*W.2*W.1;
+&gt; w := W.1*W.2*W.3*W.4*W.1*W.2;
+&gt; testKL(x,w);
+LHS: X^3 + X^2 - X - 1
+RHS: X^3 + X^2 - X - 1
+true
+</PRE>
+<HR>
+<H5><A NAME = "13412">Exponents(R) : RootDtm -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The exponents of a Root datum R form a sequence of numbers e<sub>1</sub>, ..., e<sub>r</sub>, where r is the rank of R, 
+such that the polynomial &sum;<sub>w &isin;W</sub> X<sup>l(w)</sup> decomposes as a product &prod;<sub>i=1</sub><sup>r</sup> &sum;<sub>j=0</sub><sup>e<sub>i</sub></sup> X<sup>j</sup>.
+They are given in weakly increasing order.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13413">Example <TT>LieReps_Exponents (H110E17)</TT></A></H3>
+Exponents of A<sub>3</sub>:
+<P>
+<P>
+<PRE>
+&gt; W := CoxeterGroup("A3"); #W;
+24
+&gt; P&lt;X&gt; := PolynomialRing(Integers());
+&gt; f := &amp;+[ X^(CoxeterLength(W, w)) : w in W ]; f;
+X^6 + 3*X^5 + 5*X^4 + 6*X^3 + 5*X^2 + 3*X + 1
+&gt; R := RootDatum("A3" : Isogeny := "SC");
+&gt; exp := Exponents(R); exp;
+[ 1, 2, 3 ]
+&gt; g := [ &amp;+[ X^j : j in [0..e] ] : e in exp ]; g;
+[
+     X + 1,
+     X^2 + X + 1,
+     X^3 + X^2 + X + 1
+]
+&gt; f eq &amp;*g;
+true
+</PRE>
+<HR>
+<H5><A NAME = "13414">ToLiE(D) : LieRepDec -&gt; MonStgElt</A></H5>
+<BLOCKQUOTE>
+The LiE equivalent of the decomposition D.
+</BLOCKQUOTE>
+<H5><A NAME = "13415">FromLiE(R, p) : RootDtm, MonStgElt -&gt; LieRepDec</A></H5>
+<BLOCKQUOTE>
+The decomposition of the representation over R that is equivalent to p, where p is a polynomial in LiE-syntax.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13416">Example <TT>LieReps_ToFromLiEEx (H110E18)</TT></A></H3>
+Conversion to and from LiE-syntax
+<P>
+<P>
+<PRE>
+&gt; R := RootDatum("B3" : Isogeny := "SC");
+&gt; D := LieRepresentationDecomposition(R, [1,2,3]);
+&gt; s := ToLiE(D); s;
+1X[1,2,3]
+&gt; FromLiE(R, s):Maximal;
+Highest weight decomposition of representation of:
+     R: Simply connected root datum of dimension 3 of type B3
+     Dimension of weight space:3
+     Weights:
+          [
+               (1 2 3)
+          ]
+     Multiplicities:
+          [ 1 ]
+</PRE>
+<HR>
+<H4><A NAME = "13417">Operations Related to the Symmetric Group</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+In this section, we describe some functions taken from LiE for dealing with the Symmetric group. 
+
+
+<H5><A NAME = "13418">ConjugationClassLength(l) : SeqEnum -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The order of the conjugation class of S<sub>n</sub> of permutations of cycle type l (for n the sum of the elements of l).
+</BLOCKQUOTE>
+<H5><A NAME = "13419">PartitionToWeight(l) : SeqEnum -&gt; SeqEnum</A></H5>
+<H5>PartitionToWeight(l) : ModTupRngElt -&gt; ModTupRngElt</H5>
+<BLOCKQUOTE>
+Let n be the number of parts of l, then the function returns the weight for a group of type A<sub>n - 1</sub> corresponding to &lambda;, expressed on the basis of fundamental weights.
+</BLOCKQUOTE>
+<H5><A NAME = "13420">WeightToPartition(v) : SeqEnum -&gt; SeqEnum</A></H5>
+<H5>WeightToPartition(v) : ModTupRngElt -&gt; ModTupRngElt</H5>
+<BLOCKQUOTE>
+Let n be the length of v, then v is interpreted as a weight for a group of type A<sub>n</sub>, and the expression of that weight in n + 1 partition coordinates is returned. When v is dominant, this is a partition with n + 1 parts.
+</BLOCKQUOTE>
+<H5><A NAME = "13421">TransposePartition(l) : SeqEnum -&gt; SeqEnum</A></H5>
+<H5>TransposePartition(l) : ModTupRngElt -&gt; ModTupRngElt</H5>
+<BLOCKQUOTE>
+The transpose partition of l.
+</BLOCKQUOTE>
+<H4><A NAME = "13422">FusionRules</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+In this section, we describe a function for computing fusion rules using the Kac-Walton
+formular, as described in Section 16.2 of <A  HREF = "text1191.htm#bib_FMS1997">[FMS97]</A>.
+
+
+<H5><A NAME = "13423">WZWFusion(R, v, w, k) : RootDtm, Any, Any, RngIntElt -&gt; SetMulti</A></H5>
+
+<PRE>    ReturnForm: MonStgElt               Default: "Auto"</PRE>
+<BLOCKQUOTE>
+Compute the fusion rules for weights v x w of R at level k using the Kac-Walton
+formula. The weights v and w may be given either as finite weights (i.e. vectors or
+sequences with rank(R) entries) or as affine weights (i.e. vectors or
+sequences with rank(R)+1 entries).
+<P>
+The optional argument <TT>ReturnForm</TT> should be "Auto" (in which case the weights returned
+will be finite weights or affine weights depending on what v and w are; the default), 
+"Finite" (in which case the weights returned are finite weights), 
+or "Affine" (in which case the weights returned are affine weights).
+<P>
+Note that R should be a weakly simply connected root datum.
+</BLOCKQUOTE>
+<H5><A NAME = "13424">WZWFusion(D, E, k) : LieRepDec, LieRepDec, RngIntElt -&gt; LieRepDec</A></H5>
+<BLOCKQUOTE>
+Compute the fusion rules for representations D and E at level k.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13425">Example <TT>LieReps_WZWFusion (H110E19)</TT></A></H3>
+Fusion rules at level 3 for B<sub>3</sub> (using finite weights first, affine weights second)
+<P>
+<P>
+<PRE>
+&gt; R := RootDatum("B3" : Isogeny := "SC");
+&gt; WZWFusion(R, [0,0,1],[1,0,1], 3);
+{*
+    (2 0 0),
+    (1 1 0),
+    (0 0 2),
+    (1 0 2),
+    (1 0 0),
+    (0 1 0)
+*}
+&gt; WZWFusion(R, [0,0,1],[1,0,1], 3 : ReturnForm := "Affine");
+{*
+    (2 0 0 1),
+    (1 0 2 0),
+    (0 1 0 1),
+    (1 0 0 2),
+    (0 0 2 1),
+    (1 1 0 0)
+*}
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1199.htm">[Next]</A><A  HREF = "text1197.htm">[Prev]</A> <A  HREF = "text1199.htm">[Right]</A> <A  HREF = "text1197.htm">[Left]</A> <A  HREF = "text1192.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

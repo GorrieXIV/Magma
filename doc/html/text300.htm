@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Lie Algebras and Bilinear Forms</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text301.htm">[Next]</A><A  HREF = "text299.htm">[Prev]</A> <A  HREF = "text301.htm">[Right]</A> <A  HREF = "text299.htm">[Left]</A> <A  HREF = "text291.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "2798">Lie Algebras and Bilinear Forms</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+If J is the matrix of a bilinear form, the Lie algebra of derivations of
+J consists of the matrices X such that XJ + JX<sup>tr</sup> = 0.
+
+
+<P>
+Another way to construct a Lie algebra from an alternating form
+&beta; with matrix J defined on a vector space V of dimension
+n over a field F is to set L = V direct-sum F and define the 
+multiplication by [e<sub>i</sub>, e<sub>j</sub>] = &beta;(e<sub>i</sub>, e<sub>j</sub>), where e<sub>1</sub>, e<sub>2</sub>, ..., e<sub>n</sub> is a basis for V. (All other structure constants are 0.)
+This is the (generalised) Heisenberg algebra.
+<H5><A NAME = "2799">DerivationAlgebra(J) : AlgMatElt -&gt; AlgLie</A></H5>
+
+<PRE>    Rep: MonStgElt                      Default: "Sparse"</PRE>
+
+<PRE>    Check: BoolElt                      Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The Lie algebra of derivations of the bilinear form with matrix J.
+The possible values for <TT>Rep</TT> are <TT>"Dense"</TT>, <TT>"Sparse"</TT>
+and <TT>"Partial"</TT> with the default being <TT>"Sparse"</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2800">Example <TT>FldForms_lieC3 (H29E22)</TT></A></H3>
+Construct the Lie algebra preserving the standard alternating form
+of rank 6 over the field of 7 elements and check that it is a simple 
+algebra of type C<sub>3</sub>.
+<P>
+<P>
+<PRE>
+&gt; J := StandardAlternatingForm(6,7);
+&gt; L := DerivationAlgebra(J);
+&gt; IsSimple(L);
+true
+&gt; SemisimpleType(L);
+C3
+</PRE>
+<HR>
+<H3><A NAME = "2801">Example <TT>FldForms_lieG2 (H29E23)</TT></A></H3>
+Over a field of characteristic 2, the Lie algebra of an alternating
+form is no longer simple.  In this example the Lie algebra L of the
+standard alternating form of rank 6 over GF(8) is of symplectic
+type C<sub>3</sub> but has an ideal I of type G<sub>2</sub>. The dimension of the
+centre of L is 1 and so the ideal I will appear as either
+the first or second composition factor.
+<P>
+<P>
+<PRE>
+&gt; J := StandardAlternatingForm(6,8);
+&gt; L := DerivationAlgebra(J);
+&gt; SemisimpleType(L);
+C3
+&gt; Dimension(Centre(L));
+1
+&gt; CF := CompositionFactors(L);
+&gt; CF;
+[
+    Lie Algebra of dimension 1 with base ring GF(2^3),
+    Lie Algebra of dimension 14 with base ring GF(2^3),
+    Lie Algebra of dimension 1 with base ring GF(2^3),
+    Lie Algebra of dimension 1 with base ring GF(2^3),
+    Lie Algebra of dimension 1 with base ring GF(2^3),
+    Lie Algebra of dimension 1 with base ring GF(2^3),
+    Lie Algebra of dimension 1 with base ring GF(2^3),
+    Lie Algebra of dimension 1 with base ring GF(2^3)
+]
+&gt; exists(I){I : I in CF | Dimension(I) eq 14 };
+true
+&gt; IsSimple(I);
+true
+&gt; SemisimpleType(I);
+G2
+</PRE>
+<HR>
+<H5><A NAME = "2802">HeisenbergAlgebra(J) : AlgMatElt -&gt; AlgLie</A></H5>
+
+<PRE>    Rep: MonStgElt                      Default: "Sparse"</PRE>
+
+<PRE>    Check: BoolElt                      Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The nilpotent Lie algebra whose structure constants are obtained
+from the alternating form with matrix J as described above.
+The possible values for <TT>Rep</TT> are <TT>"Dense"</TT>, <TT>"Sparse"</TT>
+and <TT>"Partial"</TT> with the default being <TT>"Sparse"</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2803">Example <TT>FldForms_heisenberg (H29E24)</TT></A></H3>
+Continuing the previous example we construct an explicit isomorphism
+between the quotient of L by its G<sub>2</sub> ideal and the Heisenberg
+algebra of the form.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Q := CS[1];
+&gt; W := L/Q;
+&gt; W;
+Lie Algebra of dimension 7 with base ring GF(2^3)
+&gt; Z := Centre(W);
+&gt; z := Z.1;
+&gt; exists(u1,v1){ &lt;u,v&gt; : u,v in W | u*v ne 0 and u*v eq z };
+true
+&gt; W1 := Centraliser(W,sub&lt;W|u1,v1&gt;);
+true
+&gt; exists(u2,v2){ &lt;u,v&gt; : u,v in W1 | u*v ne 0 and u*v eq z };
+true
+&gt; W2:= Centraliser(W1,sub&lt;W1|u2,v2&gt;);
+&gt; exists(u3,v3){ &lt;u,v&gt; : u,v in W2 | u*v ne 0 and u*v eq z };
+&gt; H := HeisenbergAlgebra(J);
+&gt; f := hom&lt; H -&gt; W | u1,u2,u3,v3,v2,v1,z &gt;;
+&gt; forall{ &lt;u,v&gt; : u,v in Basis(H) | f(u*v) eq f(u)*f(v) };
+true
+&gt; Kernel(f);
+Lie Algebra of dimension 0 with base ring GF(2^3)
+&gt; Image(f) eq W;
+true
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text301.htm">[Next]</A><A  HREF = "text299.htm">[Prev]</A> <A  HREF = "text301.htm">[Right]</A> <A  HREF = "text299.htm">[Left]</A> <A  HREF = "text291.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

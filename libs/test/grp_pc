@@ -1,0 +1,71 @@
+
+
+ClearVerbose();
+
+/*
+SetTrace(123456, true);
+SetDelCheck(true);
+SetMark(true);
+SetMS(true);
+*/
+
+test := procedure(G)
+    f := FactoredOrder(G);
+    Q := CompactPresentation(G);
+    H := PCGroup(Q);
+    assert IsIdenticalPresentation(G,H);
+    delete H;
+    D := DerivedSeries(G);
+    delete D;
+    if #G le 500 then
+	cl := Classes(G);
+	X := CharacterTable(G);
+	assert #cl eq #X;
+	degs := {* Integers()| x[1]:x in X *};
+	assert degs eq {* t[1]^^t[2] : t in CharacterDegrees(G)*};
+	delete cl, X, degs;
+	s := NormalSubgroups(G);
+	delete s;
+    end if;
+    if #f eq 1 then
+	S := LowerCentralSeries(G);
+	assert #S[#S] eq 1;
+	T := UpperCentralSeries(G);
+	assert T[#T] eq G;
+	assert #S eq #T;
+	delete S, T;
+    else
+	S := LowerCentralSeries(G);
+	T := UpperCentralSeries(G);
+	delete S, T;
+	C := CarterSubgroup(G);
+	D := CoveringSubgroup(G, IsNilpotent);
+	assert IsConjugate(G, C, D);
+	assert IsNilpotent(C);
+	assert C eq Normalizer(G, C);
+	delete C, D;
+    end if;
+end procedure;
+
+G := WreathProduct(SmallGroup(8,3), CyclicGroup(GrpPC,3));
+test(G);
+
+G := SmallGroup(480, 1201);
+test(G);
+
+G := SmallGroup(128, 153);
+test(G);
+
+G := SmallGroup(125, 4);
+assert pClass(pCoveringGroup(G)) eq 2;
+test(G);
+
+G := ExtraSpecialGroup(GrpPC, 2801, 1);
+test(G);
+
+/*
+mark_sweep;
+clear;
+mark_sweep;
+ShowActive();
+*/

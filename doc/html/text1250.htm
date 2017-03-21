@@ -1,0 +1,132 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Affine Algebras which are  Fields</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1251.htm">[Next]</A><A  HREF = "text1249.htm">[Prev]</A> <A  HREF = "text1251.htm">[Right]</A> <A  HREF = "text1249.htm">[Left]</A> <A  HREF = "text1244.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "13770">Affine Algebras which are  Fields</A></H3>
+
+<P>
+<P>
+If the ideal J of relations defining an affine algebra A =
+K[x<sub>1</sub>, ..., x<sub>n</sub>]/J, where K is a field, is <I>maximal</I>,
+then A is a field and may be used with any algorithms in
+Magma which work over fields.  Factorization of polynomials over such
+affine algebras is also supported (in any characteristic, since V2.10).
+The examples below will demonstrate some of the
+applications available.
+<P>
+Note that an affine algebra defined over a field which itself is a
+field also has finite dimension when considered as a vector space over
+its coefficient field, so all of the operations in the previous section
+are also available.
+
+
+<HR>
+<H3><A NAME = "13771">Example <TT>AlgAff_EllipticCurve (H114E4)</TT></A></H3>
+We create the function field F = Q(a, b, x) and then the affine
+algebra A = F[y]/&lt;y<sup>2</sup> - (x<sup>3</sup> + ax + b)&gt; (which is also equivalent
+to an algebraic function field).  This then allows us
+to create a generic elliptic curve E over A and compute the
+coordinates of multiples of a generic point easily.
+<P>
+<P>
+<PRE>
+&gt; Q := RationalField();
+&gt; F&lt;x, a, b&gt; := FunctionField(Q, 3);
+&gt; A&lt;y&gt; := AffineAlgebra&lt;F, y | y^2 - (x^3 + a*x + b)&gt;;
+&gt; IsField(A);
+true
+&gt; y^2;
+x^3 + x*a + b
+&gt; y^-1;
+1/(x^3 + x*a + b)*y
+&gt; E := EllipticCurve([A | a, b]);
+&gt; E;
+Elliptic Curve defined by y^2 = x^3 + a*x + b over Affine Algebra of rank 1 over
+    Rational function field of rank 3 over Rational Field
+    Variables: x, a, b
+&gt; p := E ! [x, y];                                                             
+&gt; p;
+(x : y : 1)
+&gt; q := 2*p;
+&gt; q;
+((1/4*x^4 - 1/2*x^2*a - 2*x*b + 1/4*a^2)/(x^3 + x*a + b) : (1/8*x^6 + 
+5/8*x^4*a + 5/2*x^3*b - 5/8*x^2*a^2 - 1/2*x*a*b - 1/8*a^3 - b^2)/(x^6 
++ 2*x^4*a + 2*x^3*b + x^2*a^2 + 2*x*a*b + b^2)*y : 1)
+&gt; c := LeadingCoefficient(q[2]);
+&gt; Denominator(c);
+x^6 + 2*x^4*a + 2*x^3*b + x^2*a^2 + 2*x*a*b + b^2
+&gt; Factorization($1);
+[
+    &lt;x^3 + x*a + b, 2&gt;
+]
+</PRE>
+<HR>
+<H3><A NAME = "13772">Example <TT>AlgAff_Factorization (H114E5)</TT></A></H3>
+Starting with the same affine algebra
+A = Q(a, b, x)F[y]/&lt;y<sup>2</sup> - (x<sup>3</sup> + ax + b)&gt;
+as in the last example, we factor some univariate polynomials over A.
+A is of course isomorphic to an absolute field, but the presentation
+given may be much more convenient to the user.
+<P>
+<P>
+<PRE>
+&gt; Q := RationalField();
+&gt; F&lt;x, a, b&gt; := FunctionField(Q, 3);
+&gt; A&lt;y&gt; := AffineAlgebra&lt;F, y | y^2 - (x^3 + a*x + b)&gt;;
+&gt; P&lt;z&gt; := PolynomialRing(A);      
+&gt; f := z^2 - (x^3 + a*x + b);
+&gt; f;
+z^2 + -x^3 - x*a - b
+&gt; time Factorization(f);
+[
+    &lt;z - y, 1&gt;,
+    &lt;z + y, 1&gt;
+]
+Time: 0.019
+</PRE>
+<HR>
+<H3><A NAME = "13773">Example <TT>AlgAff_MultiExtension (H114E6)</TT></A></H3>
+In this final example, A is isomorphic to an algebraic number field,
+but its presentation may be more convenient than an absolute presentation
+(and may lead to sparser expressions for elements).
+<P>
+<P>
+<PRE>
+&gt; Q := RationalField();
+&gt; A&lt;a,b,c&gt; := AffineAlgebra&lt;Q, a,b,c | a^2 - b*c + 1, b^2 - c + 1, c^2 + 2&gt;;
+&gt; P&lt;x&gt; := PolynomialRing(A);
+&gt; time Factorization(x^2 + 2);    
+[
+    &lt;x - c, 1&gt;,
+    &lt;x + c, 1&gt;
+]
+Time: 0.080
+&gt; time Factorization(x^2 - b*c + 1);
+[
+    &lt;x - a, 1&gt;,
+    &lt;x + a, 1&gt;
+]
+Time: 0.090
+&gt; MinimalPolynomial(a);
+x^8 + 4*x^6 + 2*x^4 - 4*x^2 + 9
+&gt; time Factorization(P ! $1);
+[
+    &lt;x - a, 1&gt;,
+    &lt;x + a, 1&gt;,
+    &lt;x - 1/3*a*b*c - 2/3*a*b + 1/3*a*c - 1/3*a, 1&gt;,
+    &lt;x + 1/3*a*b*c + 2/3*a*b - 1/3*a*c + 1/3*a, 1&gt;,
+    &lt;x^4 + 2*x^2 - 2*c - 1, 1&gt;
+]
+Time: 2.809
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1251.htm">[Next]</A><A  HREF = "text1249.htm">[Prev]</A> <A  HREF = "text1251.htm">[Right]</A> <A  HREF = "text1249.htm">[Left]</A> <A  HREF = "text1244.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

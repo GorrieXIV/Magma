@@ -1,0 +1,732 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Linear Systems</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1339.htm">[Next]</A><A  HREF = "text1337.htm">[Prev]</A> <A  HREF = "text1339.htm">[Right]</A> <A  HREF = "text1337.htm">[Left]</A> <A  HREF = "text1321.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "14721">Linear Systems</A></H3>
+
+<P>
+<P>
+Let f<sub>1</sub>, ..., f<sub>r</sub> be homogeneous polynomials of some common degree d on
+some projective space (P) defined over a field.
+The set of hypersurfaces
+<P>
+a<sub>1</sub>f<sub>1</sub> + ... + a<sub>r</sub>f<sub>r</sub> = 0
+<P>
+where the a<sub>i</sub>s are elements of the base field of (P)
+is an example of a linear system.
+This can be thought of as being the vector
+space of elements (a<sub>1</sub>, ..., a<sub>r</sub>) or even the projectivisation of
+that space (since multiplying the equation above by a constant doesn't change
+the hypersurface it defines and the equation 0=0 doesn't define a
+hypersurface at all).
+The same is true if f<sub>1</sub>, ..., f<sub>r</sub> are a finite collection of polynomials
+defined on some affine space.
+<P>
+All linear systems in Magma arise in a similar way to the above example.
+It doesn't matter whether the linear system is considered to be the collection
+of hypersurfaces or the collection of homogeneous polynomials or the vector
+space of coefficients;
+Magma allows each of these interpretations and the distinction is blurred
+in the text below.
+One should note that linear systems in Magma are being used in
+a very elementary way: compare with the discussion on plane conics and cubics
+in the first two chapters of Reid's Student Text <A  HREF = "text1320.htm#bib_uag">[Rei88]</A>.
+<P>
+Immediate applications of linear systems arise because of their
+close relationship to maps (consider the map to an r - 1-dimensional
+projective space defined by the polynomials f<sub>1</sub>, ..., f<sub>r</sub>)
+and their application to the extrapolation a scheme of some particular degree
+from a set of points lying on it or some subscheme of it.
+<P>
+More ambitious interpretations, as the zero-th coherent cohomology group
+of an invertible sheaf for instance, cannot be realised explicitly in
+Magma except inasmuch as the user can understand input and output
+easily in these terms.
+There is no analysis of linear systems on general schemes and so, in particular,
+no analysis of exact sequences of cohomology groups.
+<P>
+We give a brief description of the way in which linear systems work in Magma,
+an approach which echoes the more general definition.
+The <I>complete linear system on (P) of degree d</I> is the collection
+of all homogeneous polynomials of degree d on (P), or equivalently, the
+degree d hypersurfaces they define.
+Magma does not consider this to be a unique object: each time such a system
+is created, a completely new object will be created distinct from any
+previous creation.
+Its major attributes include a particular basis of degree d polynomials,
+which is always the standard monomial basis, and a vector space whose
+vectors correspond to the coefficients of a polynomial with respect to this
+basis.
+The vector space is called the <I>coefficient space</I> of the linear system.
+There are comparison maps: one to produce the vector of coefficients of
+polynomials with respect to the given basis and one to create a polynomial
+from a vector of coefficients.
+Most questions involving the analysis of linear systems are translated into the
+linear algebra setting, solved there and then translated back.
+<P>
+A general linear system corresponds to some vector subspace of the coefficient
+space of a complete linear system.
+The correspondence between vectors of coefficients and polynomials are computed
+at the level of the complete systems so that any two subsystems interpret
+coefficient vectors with respect to the same basis of polynomials.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1338.htm#14722">Creation of Linear Systems</A>
+<LI> <A  HREF = "text1338.htm#14741">Basic Algebra of Linear Systems</A>
+<LI> <A  HREF = "text1338.htm#14769">Linear Systems and Maps</A>
+</UL>
+<H4><A NAME = "14722">Creation of Linear Systems</A></H4>
+
+<P>
+<P>
+In practice, linear systems are not often created explicitly by hand.
+Typically, the complete linear system of all hypersurfaces of a
+given degree is created and then restricted by the imposition of
+geometrical conditions.
+For example, such a condition could require that all hypersurfaces pass
+through a particular point.
+<P>
+The creation methods below are split into three classes:
+(i) explicit initial creation methods;
+(ii) methods of imposing geometrical conditions; and
+(iii) creation of subsystems by nominating specific technical data calculated
+in advance by the user.
+
+
+<H5><A NAME = "14723">Explicit Creation</A></H5>
+
+<P>
+<P>
+Initially, we present three methods by which a linear system can be created.
+The complete linear system of degree d whose sections are all monomials
+of that degree has a special creation function.
+Alternatively, a sequence of monomials of some common degree can be specified
+to generate the sections of a linear system.
+The third constructor is useful for calculating the images of maps and
+has been seen before: given a scheme S and a map f it calculates
+the linear system of hypersurfaces which contain f(S).
+
+
+<H5><A NAME = "14724">LinearSystem(P,d) : Sch,RngIntElt -&gt; LinearSys</A></H5>
+<BLOCKQUOTE>
+The complete linear system on the affine or projective space P of degree d.
+In the projective case, this is the space of all homogeneous polynomials of
+degree d on P, whereas in the affine case it includes all polynomials of
+degree no bigger than d.
+The integer d must be strictly positive.
+</BLOCKQUOTE>
+<H5><A NAME = "14725">LinearSystem(P, d) : Sch, [RngIntElt] -&gt; LinearSys</A></H5>
+<BLOCKQUOTE>
+The complete linear system on the affine or projective space P of 
+multi-degree d. The length of d must be the number of gradings of P, i.e.
+one degree for each grading.
+In the projective case, this is the space of all homogeneous polynomials of
+degree d on P, whereas in the affine case it includes all polynomials of
+degree no bigger than d.
+The integers in d must be strictly positive.
+</BLOCKQUOTE>
+<H5><A NAME = "14726">LinearSystem(P,F) : Sch,SeqEnum[RngMPolElt] -&gt; LinearSys</A></H5>
+<BLOCKQUOTE>
+If P is a projective space and F is a sequence of homogeneous
+polynomials all of the same degree defined on P, or if P is an
+affine space and F is a sequence of polynomials defined on P
+this returns the linear system generated by these polynomials.
+If the polynomials in F are linearly independent they will be used as
+a basis of the sections of the resulting linear system, otherwise a
+new basis will be computed.
+</BLOCKQUOTE>
+<H5><A NAME = "14727">MonomialsOfWeightedDegree(X, D) : Sch, [RngIntElt] -&gt; SetIndx</A></H5>
+<BLOCKQUOTE>
+Return the monomials in the coordinate ring of the ambient of X
+having degree D[i] with respect to the ith grading of the ambient of X.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14728">Example <TT>Scheme_linsys-construction (H118E57)</TT></A></H3>
+In this example we construct two linear systems on a projective plane.
+Although they are created in slightly different ways, Magma recognises
+that they are the same. It does the computation as a subspace equality
+test in the corresponding `coefficient spaces'.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(Rationals(),2);
+&gt; L := LinearSystem(P,1);
+&gt; K := LinearSystem(P,[x+y,x-y,z+2*z+3*y]);
+&gt; L eq K;                
+true
+</PRE>
+<HR>
+<H5><A NAME = "14729">ImageSystem(f,S,d) : MapSch,Sch,RngIntElt -&gt; LinearSys</A></H5>
+<BLOCKQUOTE>
+The linear system on the codomain of the map of schemes f consisting of
+degree d hypersurfaces which contain f(S).
+An error is reported if the scheme S does not lie in the domain of f.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14730">Example <TT>Scheme_image-finder (H118E58)</TT></A></H3>
+This example demonstrates how one can use an intrinsic based on linear
+systems, <TT>ImageSystem</TT>, to find the equations of images of maps.
+The point is that sometimes the usual Gr&ouml;bner basis can be very
+difficult, so if one is interested in the equations of low degree
+then the linear algebra computation might be more convenient.
+<P>
+The curve C has one singularity analytically equivalent to
+the cusp u<sup>2</sup> = v<sup>5</sup> so is well-known to have genus 4.
+<P>
+<P>
+<PRE>
+&gt; Q := RationalField();
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(Q,2);
+&gt; C := Curve(P,x^5 + y^4*z + y^2*z^3);
+</PRE>
+The canonical embedding of C is therefore given by four conics having a
+common tangent with the curve at its singularity.
+<P>
+<P>
+<PRE>
+&gt; P3&lt;a,b,c,d&gt; := ProjectiveSpace(Q,3);
+&gt; phi := map&lt; P -&gt; P3 | [x^2,x*y,y^2,y*z] &gt;;
+</PRE>
+Unless C is hyperelliptic, its canonical image
+will be the complete intersection of a conic and a cubic in (P)<sup>3</sup>.
+<P>
+<P>
+<PRE>
+&gt; IC2 := Image(phi,C,2);
+&gt; IC3 := Image(phi,C,3);
+&gt; X := Intersection(IC2,IC3);
+&gt; Dimension(X);
+1
+&gt; IsNonsingular(X);
+true
+&gt; MinimalBasis(X);
+[ a*c - b^2, a^2*b + c^2*d + d^3 ]
+</PRE>
+In this case the Gr&ouml;bner basis of X has six elements so it is not so
+helpful for human comprehension.
+(Compare this with [Hartshorne, IV, Example 5.2.2].)
+<HR>
+<H5><A NAME = "14731">Geometrical Restrictions</A></H5>
+
+<P>
+<P>
+Consider the following example.
+Suppose that L is a linear system on the projective plane whose sections are
+generated by the monomials x<sup>2</sup>, xy, yz and let p=(1:0:0).
+The phrase `<I>one imposes the condition on sections of L that they pass
+through the point p</I>' refers to the construction of the subsystem of L,
+all of whose hypersurfaces pass through p.
+Explicitly, this involves solving the linear equation in a,b,c
+obtained by evaluating the equation
+<P>
+ax<sup>2</sup> + bxy + cyz = 0
+<P>
+at the point p.
+In this example, the equation is a=0 and the required subsystem
+is the one whose sections are generated by xy and yz.
+<P>
+The functions described in this section all determine a linear subsystem of a
+given linear system by imposing conditions on the sections of that system.
+
+
+<H5><A NAME = "14732">LinearSystem(L,p) : LinearSys,Pt -&gt; LinearSys</A></H5>
+<H5>LinearSystem(L,S) : LinearSys,SeqEnum -&gt; LinearSys</H5>
+<BLOCKQUOTE>
+Given a point p or a sequence S of points, create the subsystem of the
+linear system L
+comprising those hypersurfaces of L which pass through p or the points
+of S.
+</BLOCKQUOTE>
+<H5><A NAME = "14733">LinearSystem(L,p,m) : LinearSys,Pt,RngIntElt -&gt; LinearSys</A></H5>
+<BLOCKQUOTE>
+Create the subsystem of the linear system L comprising hypersurfaces
+which pass through the point p with multiplicity at least m.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14734">Example <TT>Scheme_subsystems (H118E59)</TT></A></H3>
+In this example we make some subsystems of linear systems by imposing
+conditions at points. In the first example, we construct the family
+of all curves having singularities with prescribed multiplicities at
+prescribed points.
+See Chapter <A  HREF = "text1356.htm#14904">ALGEBRAIC CURVES</A> for functions which apply to curves.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(Rationals(),2);    
+&gt; L := LinearSystem(P,6);
+&gt; p1 := P ! [1,0,0];
+&gt; p2 := P ! [0,1,0];
+&gt; p3 := P ! [0,0,1];
+&gt; p4 := P ! [1,1,1];
+&gt; L1 := LinearSystem(L,p1,3);
+&gt; L2 := LinearSystem(L1,p2,3);
+&gt; L3 := LinearSystem(L2,p3,3);
+&gt; L4 := LinearSystem(L3,p4,2);
+&gt; #Sections(L4);
+7
+&gt; C := Curve(P,&amp;+[ Random([1,2,3])*s : s in Sections(L4) ]);
+&gt; IsIrreducible(C);
+true
+&gt; Genus(C);
+0
+</PRE>
+In other words, L4 parametrises a six-dimensional family of rational
+plane curves.
+(At least, the general element of L4 is the equation of a rational
+plane curve --- there are certainly degenerate sections which factorise
+so don't define an irreducible curve at all.)
+It would be nice to be able to parametrise one of these curves.
+The problem is that we need to choose a general one in order that it
+be irreducible, but on the other hand we have very little chance
+of finding a rational point of a general curve.
+However, since this family is nice and big, we can simply impose
+another point condition on it yielding a rational point on each
+of the restricted elements.
+<P>
+<P>
+<PRE>
+&gt; p5 := P ! [2,1,1];
+&gt; L5 := LinearSystem(L4,P![2,1,1]);
+&gt; C := Curve(P,&amp;+[ Random([1,2,3])*s : s in Sections(L5) ]);
+&gt; IsIrreducible(C); 
+true
+&gt; Genus(C);
+0
+&gt; L&lt;u,v&gt; := ProjectiveSpace(Rationals(),1);
+&gt; phi := Parametrization(C, Place(C!p5), Curve(L));
+&gt; Ideal(Image(phi)) eq Ideal(C);
+true
+</PRE>
+To illustrate another feature of imposing point conditions on
+linear systems, we use a point that is not in the base field
+of the ambient space. Linear systems on an ambient spaces are defined
+over its base field, so nonrational points impose conditions as
+the union of their Galois conjugates.
+<P>
+<P>
+<PRE>
+&gt; A&lt;x,y&gt; := AffineSpace(FiniteField(2),2);
+&gt; L := LinearSystem(A,2);
+&gt; L;
+Linear system on Affine Space of dimension 2 Variables : x, y
+with 6 sections: 1 x y x^2 x*y y^2
+&gt; k1&lt;w&gt; := ext&lt; BaseRing(A) | 2&gt; ;
+&gt; p := A(k1) ! [1,w];
+&gt; p;
+(1, w)
+&gt; LinearSystem(L,p);
+Linear system on Affine Space of dimension 2
+Variables : x, y
+with 4 sections:
+
+x^2 + 1
+x*y + y
+x + 1
+y^2 + y + 1
+
+&gt; k2&lt;v&gt; := ext&lt; BaseRing(A) | 3&gt; ;
+&gt; q := A(k2) ! [1,v];
+&gt; LinearSystem(L,q);
+Linear system on Affine Space of dimension 2
+Variables : x, y
+with 3 sections:
+
+x^2 + 1
+x*y + y
+x + 1
+
+</PRE>
+Note the minimal polynomial of the y coordinate of the point
+(1, w) is of degree 2 so is visible in the restricted linear system.
+On the other hand, v is of order 3 so it imposes more conditions
+on the linear system.
+<HR>
+<H5><A NAME = "14735">LinearSystem(L,X) : LinearSys,Sch -&gt; LinearSys</A></H5>
+<BLOCKQUOTE>
+The subsystem of the linear system
+L comprising elements of L which contain the scheme X.
+The sections of this linear system is equal to the polynomials of the
+defining ideal of X whose homogeneous degree is the same as that of L.
+</BLOCKQUOTE>
+<H5><A NAME = "14736">LinearSystemTrace(L,X) : LinearSys,Sch -&gt; LinearSys</A></H5>
+<BLOCKQUOTE>
+The trace of the linear system L on the scheme X which lies in
+the ambient space of L.
+This merely simulates the restriction of the linear system L on
+X by taking the sections of L modulo the equations of X.
+The result is still a linear system on the common ambient space.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14737">Example <TT>Scheme_trace (H118E60)</TT></A></H3>
+In this example, we restrict the linear system of cubics in space
+to a scheme, which is in fact a twisted cubic curve.
+(The intrinsic <TT>Sections</TT> is defined in Section <A  HREF = "text1338.htm#14747">Geometrical Properties</A>.)
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z,t&gt; := ProjectiveSpace(Rationals(),3);
+&gt; L := LinearSystem(P,3);
+&gt; X := Scheme(P,[x*z-y^2,x*t-y*z,y*t-z^2]);
+&gt; #Sections(L);
+20
+&gt; L1 := LinearSystemTrace(L,X);
+&gt; #Sections(L1);
+10
+</PRE>
+Taking the sections of L modulo the equations of X reduces the dimension
+of the space of sections by 10. Of course, there is a choice being made
+about which particular trace sections to use --- in the end, the computation
+is that of taking a complement in a vector space of some vector subspace.
+<P>
+Since we recognise this scheme X as the image of a projective line,
+we can confirm that the result is correct.
+We make a map from the projective line to the space P which has image X.
+Then we check that the pullback L and L1 are equal on the projective line.
+In fact, since the linear system embedding the line is the complete
+system of degree 3, and L comprises degree 3 hypersurfaces on P,
+both pullbacks should give the complete linear system on the line
+of degree 3 x 3=9.
+(The intrinsic <TT>Pullback</TT> is defined in Section <A  HREF = "text1338.htm#14769">Linear Systems and Maps</A>.)
+<P>
+<P>
+<PRE>
+&gt; P1&lt;u,v&gt; := ProjectiveSpace(BaseRing(P),1);
+&gt; phi := map&lt; P1 -&gt; P | [u^3,u^2*v,u*v^2,v^3] &gt;;
+&gt; Ideal(phi(P1)) eq Ideal(X);
+true
+&gt; Pullback(phi,L) eq Pullback(phi,L1);
+true
+&gt; Pullback(phi,L1);
+Linear system on Projective Space of dimension 1
+Variables : u, v
+with 10 sections:
+u^9 u^8*v u^7*v^2 u^6*v^3 u^5*v^4 u^4*v^5 u^3*v^6 u^2*v^7 u*v^8 v^9
+</PRE>
+<HR>
+<H5><A NAME = "14738">Explicit Restrictions</A></H5>
+
+
+
+<H5><A NAME = "14739">LinearSystem(L,F) : LinearSys,SeqEnum -&gt; LinearSys</A></H5>
+<BLOCKQUOTE>
+The subsystem of the linear system L generated by the polynomials in
+the sequence F.
+An error results if the polynomials of F are not already sections of L.
+As before, the polynomials in F are used as a basis of the sections
+of the resulting linear system provided they are linearly independent,
+otherwise a new basis is computed.
+</BLOCKQUOTE>
+<H5><A NAME = "14740">LinearSystem(L,V) : LinearSys,ModTupFld -&gt; LinearSys</A></H5>
+<BLOCKQUOTE>
+The subsystem of the linear system L determined by the subspace V of
+the complete coefficient space of L.
+It is an error to call this if V is not a subspace of the coefficient
+space of L.
+</BLOCKQUOTE>
+<H4><A NAME = "14741">Basic Algebra of Linear Systems</A></H4>
+
+<P>
+<P>
+This section presents functions for the following tasks:
+(i) assessing properties of the data type;
+(ii) geometrical properties of linear systems;
+(iii) linear algebra operations.
+
+
+<H5><A NAME = "14742">Tests for Linear Systems</A></H5>
+
+
+
+<H5><A NAME = "14743">Ambient(L) : LinearSys -&gt; Prj</A></H5>
+<H5>AmbientSpace(L) : LinearSys -&gt; Prj</H5>
+<BLOCKQUOTE>
+The projective space on which the linear system L is defined.
+</BLOCKQUOTE>
+<H5><A NAME = "14744">L eq K : LinearSys,LinearSys -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the linear systems L and K are equal if considered
+as linear subsystems of some complete linear system.
+An error results if L and K lie in different complete linear systems.
+</BLOCKQUOTE>
+<H5><A NAME = "14745">IsComplete(L) : LinearSys -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the linear system L is the complete linear system of
+polynomials of some degree.
+</BLOCKQUOTE>
+<H5><A NAME = "14746">IsBasePointFree(L) : LinearSys -&gt; BoolElt</A></H5>
+<H5>IsFree(L) : LinearSys -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the linear system L has no base points.
+</BLOCKQUOTE>
+<H5><A NAME = "14747">Geometrical Properties</A></H5>
+
+
+
+<H5><A NAME = "14748">Sections(L) : LinearSys -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+A sequence whose elements form basis of the sections of the linear system L.
+By definition, this is a maximal set of linearly
+independent polynomials which are elements of L.
+</BLOCKQUOTE>
+<H5><A NAME = "14749">Random(LS) : LinearSys -&gt; RngMPolElt</A></H5>
+<BLOCKQUOTE>
+If the base field of LS admits random elements then this returns a
+random element of the space of sections in the linear system LS.
+If the base field is the rational field, then a section having small
+random rational coefficients is defined.  Otherwise, if there
+is no random element generator for the base field, the zero section
+is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "14750">Degree(L) : LinearSys -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The degree of the sections of the linear system L.
+</BLOCKQUOTE>
+<H5><A NAME = "14751">Dimension(L) : LinearSys -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The projective dimension of the linear system L.
+This is the maximal number of linearly independent sections of L minus 1.
+</BLOCKQUOTE>
+<H5><A NAME = "14752">BaseScheme(L) : LinearSys -&gt; SchProj</A></H5>
+<BLOCKQUOTE>
+The base scheme of the linear system L.
+This is simply the scheme defined by the sections of L.
+This function does not perform any tests on this scheme;
+it might be empty for example.
+</BLOCKQUOTE>
+<H5><A NAME = "14753">BaseComponent(L) : LinearSys -&gt; SchProj</A></H5>
+<BLOCKQUOTE>
+The hypersurface common to all the elements of the linear system L.
+</BLOCKQUOTE>
+<H5><A NAME = "14754">Reduction(L) : LinearSys -&gt; LinearSys</A></H5>
+<BLOCKQUOTE>
+The linear system L with its codimension 1 base locus removed.
+In other words, the linear system defined by the sections of L after
+common factors are removed.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14755">Example <TT>Scheme_ls-reduction (H118E61)</TT></A></H3>
+If one tries to impose too many point conditions on a linear system,
+the general elements will no longer be irreducible.
+From a quick genus calculation one might think that it was possible
+to impose singularities on multiplicities 2, 3, 4 on projective
+curves of degree 6 to reveal rational curves --- indeed g=10 - 1 - 3 - 6=0
+if the resulting curves are irreducible.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(Rationals(),2);
+&gt; L := LinearSystem(P,6);
+&gt; p1 := P ! [1,0,0];
+&gt; p2 := P ! [0,1,0];
+&gt; p3 := P ! [0,0,1];
+&gt; L1 := LinearSystem(L,p1,4);
+&gt; L2 := LinearSystem(L1,p2,3);
+&gt; L3 := LinearSystem(L2,p3,2);
+&gt; Sections(L3);
+[ x^2*y^3*z, x^2*y^2*z^2, x^2*y*z^3, x^2*z^4, x*y^3*z^2,
+    x*y^2*z^3, x*y*z^4, y^3*z^3, y^2*z^4 ]
+&gt; BaseComponent(L3);
+Scheme over Rational Field defined by z
+</PRE>
+But notice that every section is divisible by z. So the curve z=0
+is in the base locus of this linear system, that is, it is contained
+in every curve in the linear system L3.
+The intrinsic <TT>BaseComponent</TT> identifies this component.
+The intrinsic <TT>Reduction</TT> creates a new linear system by removing this
+codimension 1 base locus, as is seen below.
+First, however, we look at the complete set of prime components of the
+base scheme and see that, while there is only one codimension 1
+component which we already know, there is another component in higher
+codimension. When we reduce to remove the base component, this other
+piece of the base scheme remains, and other codimension 2 components
+also appear.
+<P>
+<P>
+<PRE>
+&gt; MinimalPrimeComponents(BaseScheme(L3));
+[
+    Scheme over Rational Field defined by
+    z,
+    Scheme over Rational Field defined by
+    x
+    y
+]
+&gt; L4 := Reduction(L3);
+&gt; Sections(L4);
+[ x^2*y^3, x^2*y^2*z, x^2*y*z^2, x^2*z^3, x*y^3*z, x*y^2*z^2,
+    x*y*z^3, y^3*z^2, y^2*z^3 ]
+&gt; MinimalPrimeComponents(BaseScheme(L4));
+[
+    Scheme over Rational Field defined by
+    x
+    y,
+    Scheme over Rational Field defined by
+    x
+    z,
+    Scheme over Rational Field defined by
+    y
+    z
+]
+&gt; [ RationalPoints(Z) : Z in $1 ];
+[
+    {@ (0 : 0 : 1) @},
+    {@ (0 : 1 : 0) @},
+    {@ (1 : 0 : 0) @}
+]
+</PRE>
+The linear system L4 has sections which are visibly those of L3 but
+with a single factor of z removed.
+It still has base locus but now that base locus comprises only points.
+Not surprisingly, it is exactly the three points which we imposed on
+curves in the first place.
+<HR>
+<H5><A NAME = "14756">BasePoints(L) : LinearSys -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+A sequence containing the basepoints of the linear system L if the base
+locus of L is finite dimensional.
+</BLOCKQUOTE>
+<H5><A NAME = "14757">Multiplicity(L,p) : LinearSys,Pt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The generic multiplicity of hypersurfaces of the linear system L at
+the point p.
+</BLOCKQUOTE>
+<H5><A NAME = "14758">Linear Algebra</A></H5>
+
+
+
+<H5><A NAME = "14759">CoefficientSpace(L) : LinearSys -&gt; ModTupFld</A></H5>
+<BLOCKQUOTE>
+The vector space corresponding to the linear system
+L whose vectors comprise the coefficients
+of the polynomial sections of L.
+</BLOCKQUOTE>
+<H5><A NAME = "14760">CoefficientMap(L) : LinearSys -&gt; ModTupFldElt</A></H5>
+<BLOCKQUOTE>
+The map from the polynomial ring that is the parent of the sections of the
+linear system L to the coefficient space of L.
+When evaluated at a polynomial f, this map will return
+vector of coefficients of f as a section of L.
+</BLOCKQUOTE>
+<H5><A NAME = "14761">PolynomialMap(L) : LinearSys -&gt; RngMPolElt</A></H5>
+<BLOCKQUOTE>
+The map from the coefficient space of the linear system L to the
+polynomial ring that is the parent of the sections of L.
+When evaluated at a vector v, this map will return
+the polynomial section of L whose coefficients with respect to the
+basis of L are v.
+</BLOCKQUOTE>
+<H5><A NAME = "14762">Complement(L,K) : LinearSys,LinearSys -&gt; LinearSys</A></H5>
+<BLOCKQUOTE>
+A maximal subsystem of the linear system L which does not contain any
+of the hypersurfaces of the linear system K.
+</BLOCKQUOTE>
+<H5><A NAME = "14763">Complement(L,X) : LinearSys,Sch -&gt; LinearSys</A></H5>
+<BLOCKQUOTE>
+A maximal subsystem of the linear system L comprising hypersurfaces not
+containing X.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14764">Example <TT>Scheme_creation-by-subspace (H118E62)</TT></A></H3>
+In this example we show to define linear systems by referring to subspaces
+of a coefficient space. The explicit translation intrinsics between the
+linear algebra language and the linear system language let one `see'
+what is happening in the background. We start by defining a linear
+system whose chosen sections are clearly not linearly independent.
+<P>
+<P>
+<PRE>
+&gt; A&lt;x,y&gt; := AffineSpace(FiniteField(2),2);
+&gt; L := LinearSystem(A,[x^2-y^2,x^2,y^2]);
+&gt; VL := CoefficientSpace(L);
+&gt; VL;
+KModule VL of dimension 2 over GF(2)
+&gt; W := sub&lt; VL | VL.1 &gt;;
+&gt; LinearSystem(L,W);
+Linear system on Affine Space of dimension 2
+Variables : x, y
+with 1 section:
+x^2
+&gt; phi := PolynomialMap(L);
+&gt; [ phi(v) : v in Basis(VL) ];
+[
+    x^2,
+    y^2
+]
+</PRE>
+Thus we see that Magma has chosen the obvious polynomial basis for
+the sections of L and disregarded the section x<sup>2</sup> - y<sup>2</sup>.
+<HR>
+<H5><A NAME = "14765">L meet K : LinearSys,LinearSys -&gt; LinearSys</A></H5>
+<H5>Intersection(L,K) : LinearSys,LinearSys -&gt; LinearSys</H5>
+<BLOCKQUOTE>
+The linear system whose coefficient space is the intersection of the
+coefficient spaces of the linear systems L and K.
+An error is reported unless L and K lie in the same complete
+linear system.
+</BLOCKQUOTE>
+<H5><A NAME = "14766">X in L : Sch,LinearSys -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the scheme X occurs among the hypersurfaces comprising
+the linear system L.
+</BLOCKQUOTE>
+<H5><A NAME = "14767">f in L : RngMPolElt,LinearSys -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the polynomial f is a section of the linear system L.
+That is, <TT>true</TT> if and only if f is in the linear span of the basis of
+sections defining L.
+</BLOCKQUOTE>
+<H5><A NAME = "14768">K subset L : LinearSys,LinearSys -&gt; BoolElt</A></H5>
+<H5>IsSubsystem(L,K) : LinearSys,LinearSys -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the coefficient space of the linear system K is
+contained in that of the linear system L.
+An error is reported if L and K do not lie in a common
+linear system.
+</BLOCKQUOTE>
+<H4><A NAME = "14769">Linear Systems and Maps</A></H4>
+
+<P>
+<P>
+The sequence of sections of a linear system may be used to construct a map
+from the projective space on which the sections are defined to another having
+the appropriate dimension.
+This is done directly using the <TT>map</TT> constructor as in
+Section <A  HREF = "text1336.htm#14599">Maps between Schemes</A>.
+For example, if L is a linear system on some projective space P then
+the corresponding map can be created as follows.
+<P>
+<P>
+<PRE>
+&gt; map&lt; P -&gt; Q | S &gt;
+&gt;              where Q is ProjectiveSpace(BaseRing(P),#S-1)
+&gt;              where S is Sections(L);
+</PRE>
+There is not a proper inverse to this operation: there is no reason
+why a map should be determined by linearly independent polynomials.
+However, the system determined by the polynomials defining a map is
+still important.
+It is sometimes called the <I>homoloidal system</I> of the map.
+
+
+<H5><A NAME = "14770">Pullback(f,L) : MapSch,LinearSys -&gt; LinearSys</A></H5>
+<BLOCKQUOTE>
+The linear system f<sup> * </sup>L on the domain of the map of schemes f where
+L is a linear system on the codomain of f.
+This requires care when f is not a regular map: it really produces the
+system of homaloids, that is, the substitution of the map equations into
+the linear system's sections.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text1339.htm">[Next]</A><A  HREF = "text1337.htm">[Prev]</A> <A  HREF = "text1339.htm">[Right]</A> <A  HREF = "text1337.htm">[Left]</A> <A  HREF = "text1321.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

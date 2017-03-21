@@ -1,0 +1,45 @@
+"Source: Text/Geometry/AlgSrf.text";
+"Line: 4803";
+"Date: Wed Jun  8 13:59:58 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/AlgSrf.text, line: 4803
+// Example: H122E25 ()
+print "Example: H122E25";
+ei := GetEchoInput();
+SetEchoInput(true);
+R3<x,y,z,t> := PolynomialRing(Rationals(),4,"grevlex");
+P3 := Proj(R3);
+//equation of the degree 3 surface:
+F := -x^2*z + x*z^2 - y*z^2 + x^2*t - y^2*t - y*z*t + x*t^2 + y*t^2;
+X3 := Scheme(P3,F);
+// get the ideal defining the union of the 3 lines:
+I1 := ideal<R3|[x,y]>;
+I2 := ideal<R3|[z,t]>;
+I3 := ideal<R3|[x-z,y-t]>;
+I := I1*I2*I3;
+I := Saturation(I);
+F2 := Basis(I)[5]; F2;
+ID := ColonIdeal(ideal<R3|[F,F2]>,I);
+ideal<R3|[F,F2]> eq (ID meet I);
+assert $1;
+// get basis of degree 3 graded part of ID
+ID3 := ID meet ideal<R3|Setseq(MonomialsOfDegree(R3,3))>;
+B3 := MinimalBasis(ID3);
+B3;
+// and a complementary subspace of F
+F in ideal<R3|Remove(B3,7)>;
+assert not $1;
+B3 := Remove(B3,7);
+// now map to the degree 6 Del Pezzo
+P6<a,b,c,d,e,f,g> := ProjectiveSpace(Rationals(),6);
+blow_down := map<X3->P6|B3>;
+X6 := blow_down(X3);
+Dimension(X6); Degree(X6);
+X3toX6 := iso<X3->X6|B3,[f,e,c,a]>;
+// now parametrise X6
+boo,prm := ParametrizeDegree6DelPezzo(X6);
+boo;
+assert $1;
+p2toX3 := Expand(prm*Inverse(X3toX6));
+p2toX3; 
+SetEchoInput(ei);

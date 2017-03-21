@@ -1,0 +1,185 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>External Files</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text35.htm">[Next]</A><A  HREF = "text33.htm">[Prev]</A> <A  HREF = "text35.htm">[Right]</A> <A  HREF = "text33.htm">[Left]</A> <A  HREF = "text29.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "293">External Files</A></H3>
+
+<P>
+<P>
+Magma provides a special <I>file</I> type for the reading and writing of
+external files.  Most of the standard C library functions can be applied
+to such files to manipulate them.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text34.htm#294">Opening Files</A>
+<LI> <A  HREF = "text34.htm#296">Operations on File Objects</A>
+<LI> <A  HREF = "text34.htm#307">Reading a Complete File</A>
+</UL>
+<H4><A NAME = "294">Opening Files</A></H4>
+
+
+
+<H5><A NAME = "295">Open(S, T) : MonStgElt, MonStgElt -&gt; File</A></H5>
+<BLOCKQUOTE>
+Given a filename (string) S, together with a type indicator T,
+open the file named by S and return a Magma file object associated
+with it.  Tilde expansion is performed on S.
+The standard C library function <TT>fopen()</TT> is used, so
+the possible characters allowed in T are the same as those allowed
+for that function in the current operating system, and have the
+same interpretation.  Thus one should give the value <TT>"r"</TT> for T
+to open the file for reading, and give the value <TT>"w"</TT> for T to
+open the file for writing, etc.  (Note that in the PC version of Magma,
+the character <TT>"b"</TT> should also be included in T if the file is
+desired to be opened in binary mode.)  Once a file object is created,
+various I/O operations can be performed on it --- see below.  A file
+is closed by deleting it (i.e. by use of the <TT>delete</TT> statement or
+by reassigning the variable associated with the file); there is no
+<TT>Fclose</TT> function.  This ensures that the file is not closed while
+there are still multiple references to it.  (The function is called
+<TT>Open</TT> instead of <TT>Fopen</TT> to follow Perl-style conventions.  The
+following functions also follow such conventions where possible.)
+</BLOCKQUOTE>
+<H4><A NAME = "296">Operations on File Objects</A></H4>
+
+
+
+<H5><A NAME = "297">Flush(F) : File -&gt;</A></H5>
+<BLOCKQUOTE>
+Given a file F, flush the buffer of F.
+</BLOCKQUOTE>
+<H5><A NAME = "298">Tell(F) : File -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a file F, return the offset in bytes of the file pointer within F.
+</BLOCKQUOTE>
+<H5><A NAME = "299">Seek(F, o, p) : File, RngIntElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Perform <TT>fseek(F, o, p)</TT>; i.e. move the file pointer of F to 
+offset o (relative to p: 0 means beginning, 1 means current, 2 means end).
+</BLOCKQUOTE>
+<H5><A NAME = "300">Rewind(F) : File -&gt;</A></H5>
+<BLOCKQUOTE>
+Perform <TT>rewind(F)</TT>; i.e. move the file pointer of F to the
+beginning.
+</BLOCKQUOTE>
+<H5><A NAME = "301">Put(F, S) : File, MonStgElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Put (write) the characters of the string S to the file F.
+</BLOCKQUOTE>
+<H5><A NAME = "302">Puts(F, S) : File, MonStgElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Put (write) the characters of the string S, followed by a newline
+character, to the file F.
+</BLOCKQUOTE>
+<H5><A NAME = "303">Getc(F) : File -&gt; MonStgElt</A></H5>
+<BLOCKQUOTE>
+Given a file F, get and return one more character from file F as a string.
+If F is at end of file, a special EOF marker string is returned;
+the function <TT>IsEof</TT> should be applied to the character to test for end
+of file.  (Thus the only way to loop over a file character by character is to
+get each character and test whether it is the EOF marker before processing it.)
+</BLOCKQUOTE>
+<H5><A NAME = "304">Gets(F) : File -&gt; MonStgElt</A></H5>
+<BLOCKQUOTE>
+Given a file F, get and return one more line from file F as a string.
+The newline character is removed before the string is returned.
+If F is at end of file, a special EOF marker string is returned; the
+function <TT>IsEof</TT> should be applied to the string to test for end
+of file.
+</BLOCKQUOTE>
+<H5><A NAME = "305">Ungetc(F, c) : MonStgElt, File -&gt; MonStgElt</A></H5>
+<BLOCKQUOTE>
+Given a character (length one string) C, together with a file F, perform
+<TT>ungetc(C, F)</TT>; i.e. push the character C back into the input buffer
+of F.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "306">Example <TT>IO_LineCount (H3E9)</TT></A></H3>
+We write a function to count the number of lines in a file.
+Note the method of looping over the characters of the file: we must get
+the line and then test whether it is the special EOF marker.
+<P>
+<P>
+<PRE>
+&gt; function LineCount(F)
+&gt;     FP := Open(F, "r");
+&gt;     c := 0;
+&gt;     while true do
+&gt;         s := Gets(FP);
+&gt;         if IsEof(s) then
+&gt;             break;
+&gt;         end if;
+&gt;         c +:= 1;
+&gt;     end while;
+&gt;     return c;
+&gt; end function;
+&gt; LineCount("/etc/passwd");
+59
+</PRE>
+<HR>
+<H4><A NAME = "307">Reading a Complete File</A></H4>
+
+
+
+<H5><A NAME = "308">Read(F) : MonStgElt -&gt; MonStgElt</A></H5>
+<BLOCKQUOTE>
+Function that returns the contents of the text-file with name
+indicated by the string F. Here F may be an expression returning
+a string.
+</BLOCKQUOTE>
+<H5><A NAME = "309">ReadBinary(F) : MonStgElt -&gt; BStgElt</A></H5>
+<BLOCKQUOTE>
+Function that returns the contents of the text-file with name
+indicated by the string F as a binary string.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "310">Example <TT>IO_Read (H3E10)</TT></A></H3>
+In this example we show how <TT>Read</TT> can be used to import the complete
+output
+from a separate C program into a Magma session. We assume
+that a file <TT>mystery.c</TT> (of which the contents are shown below)
+is present in the current directory. We first compile it, from within
+Magma, and then use it to produce output for the
+Magma version of our <TT>mystery</TT> function.
+<P>
+<P>
+<PRE>
+&gt; Read("mystery.c");
+#include &lt;stdio.h&gt;
+
+main(argc, argv)
+int     argc;
+char    **argv;
+{
+    int n, i;
+
+    n = atoi(argv[1]);
+
+    for (i = 1; i &lt;= n; i++)
+        printf("%d\n", i * i);
+
+    return 0;
+}
+&gt; System("cc mystery.c -o mystery");
+&gt; mysteryMagma := function(n)
+&gt;    System("./mystery " cat IntegerToString(n) cat " &gt;outfile");
+&gt;    output := Read("outfile");
+&gt;    return StringToIntegerSequence(output);
+&gt; end function;
+&gt; mysteryMagma(5);
+[ 1, 4, 9, 16, 25 ]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text35.htm">[Next]</A><A  HREF = "text33.htm">[Prev]</A> <A  HREF = "text35.htm">[Right]</A> <A  HREF = "text33.htm">[Left]</A> <A  HREF = "text29.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

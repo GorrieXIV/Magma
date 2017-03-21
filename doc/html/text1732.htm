@@ -1,0 +1,251 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Basic Combinatorics of Polytopes and Polyhedra</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1733.htm">[Next]</A><A  HREF = "text1731.htm">[Prev]</A> <A  HREF = "text1733.htm">[Right]</A> <A  HREF = "text1731.htm">[Left]</A> <A  HREF = "text1729.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "19033">Basic Combinatorics of Polytopes and Polyhedra</A></H3>
+
+<P>
+<P>
+Cones, polytopes and polyhedra have similar combinatorial
+features: they are composed of faces of various dimensions
+that meet in faces of lower dimensions.
+Some functions apply to all of these geometrical objects, some do not.
+<P>
+A face of a cone C is the intersection of C with an
+affine hyperplane whose defining equation is non-negative on C.
+A facet of a cone C is a codimension 1 face of C.
+Defintions for polytopes and polyhedra are similar.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1732.htm#19034">Vertices and Inequalities</A>
+<LI> <A  HREF = "text1732.htm#19048">Facets and Faces</A>
+</UL>
+<H4><A NAME = "19034">Vertices and Inequalities</A></H4>
+
+
+
+<H5><A NAME = "19035">Vertices(P) : TorPol -&gt; SeqEnum[TorLatElt]</A></H5>
+<BLOCKQUOTE>
+A sequence containing the vertices of the polyhedron P.
+</BLOCKQUOTE>
+<H5><A NAME = "19036">NumberOfVertices(P) : TorPol -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The number of vertices of the polyhedron P.
+</BLOCKQUOTE>
+<H5><A NAME = "19037">Rays(C) : TorCon -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The sequence of generators of the rays of the cone C (returned as
+primitive lattice points).
+If C is strictly convex, this is the same as the minimal (R)-generators.
+</BLOCKQUOTE>
+<H5><A NAME = "19038">Ray(C,i) : TorCon,RngIntElt -&gt; TorLatElt</A></H5>
+<BLOCKQUOTE>
+The ith ray of the of the cone C (in the order returned by <TT>Rays(C)</TT>).
+</BLOCKQUOTE>
+<H5><A NAME = "19039">LinearSpanEquations(C) : TorCon -&gt; SeqEnum</A></H5>
+<H5>LinearSpanEquations(Q) : [TorLatElt] -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+A sequence of equations defining the minimal linear subspace containing the
+cone C (or the sequence of toric lattice points Q).
+</BLOCKQUOTE>
+<H5><A NAME = "19040">LinearSpanGenerators(C) : TorCon -&gt; SeqEnum</A></H5>
+<H5>LinearSpanGenerators(Q) : [TorLatElt] -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+A sequence of generators of the minimal linear subspace containing the
+cone C (or the sequence of toric lattice points Q).
+</BLOCKQUOTE>
+<H5><A NAME = "19041">LinearSubspaceGenerators(C) : TorCon -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+A basis of the maximal linear subspace contained in the cone C.
+</BLOCKQUOTE>
+<H5><A NAME = "19042">Inequalities(C) : TorCon -&gt; SeqEnum</A></H5>
+<H5>Inequalities(P) : TorPol -&gt; SeqEnum,RngIntElt</H5>
+<H5>MinimalInequalities(C) : TorCon -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+If the cone C or polyhedron P lies in a toric lattice L, then return
+a finite sequence of vectors in the dual lattice check(L)
+which define supporting hyperplanes of C or P.
+The list is forced to be minimal for <TT>MinimalInequalities</TT>,
+but might not be otherwise.
+If the argument is a polyhedron, then an integer k is returned
+as a second return value, so that the first k inequalities correspond
+to the facets of P while the remaining cut out the subspace containing P.
+</BLOCKQUOTE>
+<H5><A NAME = "19043">MatrixOfInequalities(R,C) : Rng,TorCon -&gt; ModMatRngElt</A></H5>
+<H5>MatrixOfInequalities(C) : TorCon -&gt; ModMatRngElt</H5>
+<BLOCKQUOTE>
+The inequalities of C arranged in a matrix, with each row representing an inequality.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19044">Example <TT>Polyhedra_toric-polytope-inequalities-example (H149E4)</TT></A></H3>
+Build a polytope and recover the inequalities that define it: the
+second return value, 3, says that all three inequalities define
+facets of P---we see an example below where this is not the case.
+<P>
+<P>
+<PRE>
+&gt; P := Polytope([[1,0],[0,1],[-1,-1]]);
+&gt; Inequalities(P);
+[
+    &lt;(2, -1), -1&gt;,
+    &lt;(-1, -1), -1&gt;,
+    &lt;(-1, 2), -1&gt;
+]
+3
+</PRE>
+For each inequality use <TT>HalfspaceToPolyhedron(m,h)</TT> to define
+the corresponding halfspace, and then intersect them all to
+recover P---and finally recover the vertices we started with.
+<P>
+<P>
+<PRE>
+&gt; PP := &amp;meet  [HalfspaceToPolyhedron(H[1],H[2]) : H in Inequalities(P)];
+&gt; PP eq P;
+true
+&gt; PP;
+2-dimensional polytope PP with 3 vertices:
+    ( 0,  1),
+    (-1, -1),
+    ( 1,  0)
+</PRE>
+It can happen that a polytope does not span the ambient
+toric lattice in which it lies and that some of the inequalities
+are used to cut out the affine subspace that it does span.
+<P>
+<P>
+<PRE>
+&gt; Q := Polytope([[1,0,2],[0,1,2],[-1,0,2],[0,-1,2]]);
+&gt; Inequalities(Q);
+[
+    &lt;(1, -1, 0), -1&gt;,
+    &lt;(-1, -1, 0), -1&gt;,
+    &lt;(-1, 1, 0), -1&gt;,
+    &lt;(1, 1, 0), -1&gt;,
+    &lt;(0, 0, 1), 2&gt;,
+    &lt;(0, 0, -1), -2&gt;
+]
+4
+</PRE>
+In this case the final two inequalities are opposites
+of one another and cut out the affine hyperplane z=2.
+The second return value 4 indicates that the first 4
+inequalities are cutting out facets of the polytope while
+the remaining inequalities are cutting out the affine
+hyperplane.
+<HR>
+<H5><A NAME = "19045">NormalCone(P,F) : TorPol, TorPol -&gt; TorCon</A></H5>
+<BLOCKQUOTE>
+The (outer) normal cone of the face F of the polyhedron P.
+</BLOCKQUOTE>
+<H5><A NAME = "19046">NormalEdgeCones(P) : TorPol -&gt; [TorCon]</A></H5>
+<BLOCKQUOTE>
+The (outer) normal cones of the edges of the polyhedron P. The cones are presented in the same order as the edges of P; i.e. the i-th cone in the resulting sequence is the normal cone to the i-th edge returned by <TT>Edges(P)</TT> or <TT>EdgeIndices(P)</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "19047">InnerNormal(C) : TorCon -&gt; TorLatElt</A></H5>
+<H5>OuterNormal(C) : TorCon -&gt; TorLatElt</H5>
+<BLOCKQUOTE>
+For a Gorenstein cone C, i.e. a cone such that the primitive generators &rho;<sub>i</sub> of the rays of C lie in a common hyperplane, gives an element u in the dual lattice such that u(&rho;<sub>i</sub>) = - 1 (inner normal) or u(&rho;<sub>i</sub>) = 1 (outer normal).
+</BLOCKQUOTE>
+<H4><A NAME = "19048">Facets and Faces</A></H4>
+
+
+
+<H5><A NAME = "19049">[Future release] fVector(C) : TorCon -&gt; SeqEnum[RngIntElt]</A></H5>
+<H5>fVector(P) : TorPol -&gt; SeqEnum[RngIntElt]</H5>
+<BLOCKQUOTE>
+The f-vector of the polyhedron P or cone C.
+</BLOCKQUOTE>
+<H5><A NAME = "19050">[Future release] hVector(C) : TorCon -&gt; SeqEnum[RngIntElt]</A></H5>
+<H5>[Future release] hVector(P) : TorPol -&gt; SeqEnum[RngIntElt]</H5>
+<BLOCKQUOTE>
+The h-vector of the polyhedron P or cone C.
+</BLOCKQUOTE>
+<H5><A NAME = "19051">Facets(C) : TorCon -&gt; SeqEnum</A></H5>
+<H5>Facets(P) : TorPol -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+A sequence containing all facets of the toric cone C or polyhedron P.
+</BLOCKQUOTE>
+<H5><A NAME = "19052">FacetIndices(P) : TorPol -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+A sequence of sets describing the facets of the polytope P. The jth set
+gives the indices of the vertices of P which define the jth facet of P.
+</BLOCKQUOTE>
+<H5><A NAME = "19053">NumberOfFacets(P) : TorPol -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The number of facets of the polyhedron P.
+</BLOCKQUOTE>
+<H5><A NAME = "19054">Faces(C) : TorCon -&gt; SeqEnum</A></H5>
+<H5>Faces(P) : TorPol -&gt; SeqEnum</H5>
+<H5>Faces(C,i) : TorCon,RngIntElt -&gt; SeqEnum</H5>
+<H5>Faces(P,i) : TorPol,RngIntElt -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+A sequence containing all face cones of the toric cone C
+or polyhedron P, or only those of dimension i if an integer i is also specified.
+</BLOCKQUOTE>
+<H5><A NAME = "19055">FaceIndices(P,i) : TorPol,RngIntElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+A sequence of sets describing the i-dimensional faces of the polyhedron P.
+The jth set gives the indices of the vertices of P which define the jth
+i-dimensional face.
+</BLOCKQUOTE>
+<H5><A NAME = "19056">NumberOfFaces(P,i) : TorPol,RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The number of i-dimensional faces of the polyhedron P.
+</BLOCKQUOTE>
+<H5><A NAME = "19057">Edges(P) : TorPol -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+A sequence containing all the edges of the polyhedron P.
+</BLOCKQUOTE>
+<H5><A NAME = "19058">EdgeIndices(P) : TorPol -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+A sequence of sets describing the edges of the polyhedron P. The jth set
+gives the indices of the vertices of P which define the jth edge of P.
+</BLOCKQUOTE>
+<H5><A NAME = "19059">NumberOfEdges(P) : TorPol -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The number of edges of the polyhedron P.
+</BLOCKQUOTE>
+<H5><A NAME = "19060">Graph(P) : TorPol -&gt; GrphUnd</A></H5>
+<BLOCKQUOTE>
+The graph of the face lattice of the polyhedron P. The vertices of the graph
+are labeled by the dimension of the corresponding face.
+</BLOCKQUOTE>
+<H5><A NAME = "19061">FaceSupportedBy(C,H) : TorCon,TorLatElt -&gt; TorCon</A></H5>
+<BLOCKQUOTE>
+The face of the toric cone C supported by the toric lattice element
+H in the dual lattice to the one containing C
+(so H is a linear form on the ambient lattice of C).
+</BLOCKQUOTE>
+<H5><A NAME = "19062">IsSupportingHyperplane(v,h,P) : TorLatElt,FldRatElt,TorPol -&gt; BoolElt,RngIntElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the hyperplane defined by v.u = h
+is a supporting hyperplane of the polyhedron P, where v is a lattice
+point of the dual ambient lattice of P and h is a rational number.
+If so, also gives the sign &tau; such the hyperplane is
+a support of P (i.e. &tau; in {-1, 0, + 1} such that Sign(v.u - h) is either
+0 or &tau; for all u in P). If P is contained within the hyperplane, then &tau;
+will be 0.
+</BLOCKQUOTE>
+<H5><A NAME = "19063">SupportingCone(P,v) : TorPol,TorLatElt -&gt; TorCon</A></H5>
+<BLOCKQUOTE>
+The cone C such that C + v is a supporting cone of the polyhedron P,
+where v is a vertex of P.
+</BLOCKQUOTE>
+<H5><A NAME = "19064">IsFace(C,F) : TorCon,TorCon -&gt; BoolElt</A></H5>
+<H5>IsFace(P,F) : TorPol,TorPol -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if F is a face of the cone C or polyhedron P.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text1733.htm">[Next]</A><A  HREF = "text1731.htm">[Prev]</A> <A  HREF = "text1733.htm">[Right]</A> <A  HREF = "text1731.htm">[Left]</A> <A  HREF = "text1729.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

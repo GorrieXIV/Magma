@@ -1,0 +1,86 @@
+// test file for recognition paper 
+
+SetVerbose ("CompositionTree", 5);
+
+// AttachSpec ("../infmat.spec");
+load "start.m";
+SetVerbose ("Infinite", 1);
+SetEchoInput (true);
+
+// G_1 
+
+F<w>:= CyclotomicField(17);
+
+n:=24;
+
+MA:=MatrixAlgebra(F,n);
+
+diag:= Identity(MA);
+
+diag[n][n]:= w;
+
+P:= SymmetricGroup(n);
+
+M := sub<GL(n, F) | [PermutationMatrix (F, P.i): i in [1..Ngens
+(P)]]>;
+
+test1:= sub<GL(n,F)|diag, M>;
+
+x:= diag;
+
+x[1][n]:= w/2;
+
+for i:=2 to n do
+
+x[2][i]:= i*w^3/(i+1);
+
+end for;
+
+for i:=n-5 to n do
+
+x[n-5][i]:= (i+w^7)/(w^3*i+2);
+
+end for;
+
+x:= GL(n,F)!x;
+
+G_1:= sub<GL(n,F)|x*test1.1*x^-1,x*test1.2*x^-1,x*test1.3*x^-1>;
+
+SetSeed (1);
+time f, o := IsFinite (G_1: UseCongruence := true);
+f;
+o;
+time S := MySylow (G_1, 3);
+#S;
+time D := MyDerivedGroup (G_1);
+#D;
+
+
+// G_2
+
+d := 4; e := 2; n := 2; m := 1;
+d := 4; e := 2; n := 3; m := 2;
+// G := PrimitiveExample (d, e, n, m);
+P := PrimitiveGroup (n, m);
+DB := RationalMatrixGroupDatabase();
+G := Group(DB, d, e);
+G := WreathProduct (G, P);
+P := CyclotomicField (2);
+time G_2 := ConstructConjugate (G, P);
+G_2;
+Ngens (G_2);
+
+// X := Set (&cat ([Eltseq (x): x in Generators (G_2)]));
+// "Size of entries is ", [Ilog (10, Abs (Ceiling (x))) : x in X | x ne 0];    
+// D := {Denominator (x): x in X};
+// "Denoms are ", {Ilog (10, x): x in D};
+
+
+SetSeed (1);
+time IsFinite (G_2);
+time o := Order (G_2);
+"Factored Order is ", Factorisation (o);
+time Z := MyCentre (G_2);
+time F := MyFittingSubgroup (G_2);
+time R := MySolvableRadical (G_2);
+

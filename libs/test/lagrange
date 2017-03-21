@@ -1,0 +1,65 @@
+
+/////////////////////////////////////////////////////////
+// Test lagranges_method
+// April 2012, SRD
+/////////////////////////////////////////////////////////
+
+SetVerbose("Conic", 1);
+SetVerbose("ClassGroup", 0);
+SetVerbose("NormEquation", 0);
+
+_<x> := PolynomialRing(Rationals());
+
+TIMINGS := [];
+
+FIELDS := [
+  < 50,   x^2 + 6 >, 
+  < 10,   x^2 + 6*1001 >,
+  < 10,   x^2 - 6*10001 >,
+  < 10,   x^3 - 3300 >,
+  <  4,   (x^2 - 33)^2 + 22 >,
+  <  4,   x^5 - x - 35 >,
+  <  4,   (x^3 - 3)^2 - 15 >
+];
+
+
+for tup in FIELDS do
+  n := tup[1];
+  f := tup[2];
+  K := NumberField(f);
+
+  t := 0;
+
+  a := 1 + K.1^(Degree(K)-1);
+  b := a + 2*K.1;
+  i := 0;
+  while i lt n do
+    printf ".";
+    a +:= 2;
+    b +:= 1;
+    C := Conic([1, -a, -b]);
+
+    SetPrimalityProof(false);
+    bool := IsLocallySolvable(C);
+    SetPrimalityProof(true);
+
+    if bool then
+      i +:= 1;
+      printf "\n%o\n#%o\na = %o\nb = %o\n", f, i, a, b;
+
+      t0 := Cputime();
+      time 
+      bool, pt := HasRationalPoint(C);
+      t +:= Cputime(t0);
+    end if;
+  end while;
+
+  printf "\n\n\nDONE %o\n", f;
+  printf "\nAverage time for %o tests: %o\n\n\n\n", n, t/n;
+
+  Append(~TIMINGS, <f, n, t/n>);
+
+end for;
+
+TIMINGS;
+

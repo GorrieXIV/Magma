@@ -1,0 +1,47 @@
+Cop
+{
+  univmap.m
+}
+List
+{
+  misc.m
+}
+Map
+{
+  misc.m
+}
+SeqEnum
+{
+  sort.m
+  eseq_misc.m
+}
+SetMulti
+{
+  convert.m
+  reduct.m
+  minmax.m
+}
+SetIndx
+{
+  sort.m
+  convert.m
+}
+Tup
+{
+  misc.m
+}
+SetEnum
+{
+  misc.m
+}
+MonStgElt
+{
+  misc.m
+  strings.m
+  base64.m
+}
+Misc
+{
+  skewtableau.m
+  hermite.m
+}

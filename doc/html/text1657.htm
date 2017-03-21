@@ -1,0 +1,189 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Introduction</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1658.htm">[Next]</A><A  HREF = "text1656.htm">[Prev]</A> <A  HREF = "text1658.htm">[Right]</A> [____] <A  HREF = "text1656.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "18552">Introduction</A></H3>
+
+<P>
+<P>
+The first version of this package was released in V2.15
+(December 2008).  It has been developed further in each
+subsequent release, and is still under development.  
+We encourage users to send feedback regarding the package,
+and desirable features or improvements. 
+<P>
+The package contains implementations of two separate algorithms.
+The primary focus is on parallel weight 2.
+Higher weight spaces (including non-parallel weight) are also handled; 
+however some features are only available for weight 2, 
+and the main routines are better optimized in weight 2.     
+All levels &Gamma;<sub>0</sub>(N) are allowed; some spaces with 
+nontrivial character are also handled.
+<P>
+The main purposes of the current functionality are to efficiently 
+compute Hecke operators on these spaces, to decompose spaces into 
+newforms, and to efficiently obtain large numbers of eigenvalues 
+for newforms (at least those having small degree).  
+Some additional features such as Atkin-Lehner operators
+are also included.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1657.htm#18553">Definitions and Background</A>
+<LI> <A  HREF = "text1657.htm#18554">Algorithms and the Jacquet-Lang-lands Correspondence</A>
+<LI> <A  HREF = "text1657.htm#18555">Algorithm I (Using Definite  Quaternion Orders)</A>
+<LI> <A  HREF = "text1657.htm#18556">Algorithm II (Using Indefinite  Quaternion Orders)</A>
+<LI> <A  HREF = "text1657.htm#18557">Categories</A>
+<LI> <A  HREF = "text1657.htm#18558">Verbose Output</A>
+</UL>
+<H4><A NAME = "18553">Definitions and Background</A></H4>
+
+<P>
+<P>
+Hilbert modular forms are a generalization of classical modular forms
+where the modular group is replaced by a subgroup of GL<sub>2</sub>(Z<sub>F</sub>)
+where Z<sub>F</sub> is the ring of integers in a totally real number field.
+This section gives a brief and partly informal introduction to
+Hilbert modular forms.  The sections about the algorithms also 
+introduce quaternionic modular forms and the Jacquet-Langlands
+theory in order to use the package!
+<P>
+The books by Freitag <A  HREF = "text1655.htm#bib_freitag">[Fre90]</A> and Garrett <A  HREF = "text1655.htm#bib_garrett">[Gar90]</A>
+are good references for standard material on Hilbert modular forms.
+<P>
+Let F be a totally real field of degree n over Q, with ring of integers Z<sub>F</sub>.  
+Let v<sub>1</sub>, ..., v<sub>n</sub> be the embeddings of F into R.  
+For x&isin;F, we write x<sub>i</sub> as a shorthand for v<sub>i</sub>(x).  
+Each embedding v<sub>i</sub> induces an embedding v<sub>i</sub>:(Mat)<sub>2</sub>(F) -&gt; (Mat)<sub>2</sub>(R).  
+Extending our shorthand to matrices, for &gamma;&isin;(Mat)<sub>2</sub>(F) we write &gamma; for v<sub>i</sub>(&gamma;).  
+Let
+<P>
+GL<sub>2</sub>^ + (F) = { &gamma;&isin;GL<sub>2</sub>(F) : (det) &gamma;<sub>i</sub> &gt; 0  for  all  i }.
+<P>
+The group GL<sub>2</sub>^ + (F) acts on the cartesian product H<sup>n</sup> by the rule
+<P>
+&gamma;(&tau;, ..., &tau;<sub>n</sub>)=(&gamma;&tau;<sub>1</sub>, ..., &gamma;&tau;<sub>n</sub>)
+<P>
+where as usual GL<sub>2</sub>^ + (R) acts on H by linear fractional transformations.
+<P>
+Let &gamma;= pmatrix( a &amp; b  cr c &amp; d ) &isin;GL<sub>2</sub>(R) and &tau;&isin;H.  We define
+<P>
+j(&gamma;, &tau;) = c&tau; + d&isin;C.
+<P>
+For a <I>weight</I>  k=(k<sub>1</sub>, ..., k<sub>n</sub>) &isin;(Z<sub>&gt;0</sub>)<sup>n</sup>, 
+we define a right <I>weight-k action</I> of GL<sub>2</sub>^ + (F) on the space of complex-valued functions on H<sup>n</sup> by
+<P>
+(f(|<sub>k</sub>) &gamma;)(&tau;)=f(&gamma;&tau;)&prod;<sub>i=1</sub><sup>n</sup> ((det)&gamma;)<sup>k<sub>i</sub>/2</sup>j(&gamma;, &tau;<sub>i</sub>)<sup> - k<sub>i</sub></sup>
+<P>
+for f : H<sup>n</sup> to C and &gamma; &isin;GL<sub>2</sub>^ + (F).  
+The center F<sup> x </sup> of GL<sub>2</sub>^ + (F) acts trivially on such f.   
+Therefore, the weight-k action descends to an action of PGL<sub>2</sub>^ + (F)=GL<sub>2</sub>^ + (F)/F<sup> x </sup>.
+<P>
+Now let N be a (nonzero) ideal of Z<sub>F</sub>.  Define
+<P>
+&Gamma;<sub>0</sub>(N)= { pmatrix( a &amp; b  cr c &amp; d ) &isin;GL<sub>2</sub>^ + (Z<sub>F</sub>) : c&isin;N }.
+<P>
+A <I>Hilbert modular cusp form of weight-k and level &Gamma;<sub>0</sub>(N)</I> 
+is an analytic function f:H<sup>n</sup>to C such that f(|<sub>k</sub>)&gamma;=f 
+for all &gamma;&isin;&Gamma;<sub>0</sub>(N) and such that f vanishes at the cusps of &Gamma;<sub>0</sub>(N).  
+<P>
+<P>
+When F has narrow class number 1, it is possible to define double coset operators in the same way 
+as for classical modular forms; among these are Hecke operators, Atkin-Lehner operators and degeneracy maps.  
+More precisely, the definitions work for primes in the trivial ideal class.
+In the general case, the adelic definition of Hilbert modular forms is more convenient for the
+purpose of defining operators, among other considerations.  We refer to the book by Freitag <A  HREF = "text1655.htm#bib_freitag">[Fre90]</A>.
+
+
+<H4><A NAME = "18554">Algorithms and the Jacquet-Lang-lands Correspondence</A></H4>
+
+<P>
+<P>
+<P>
+Two separate algorithms are implemented for computing the Hecke action on 
+cuspidal spaces of Hilbert modular forms.  Both rely on the <I>Jacquet-Langlands correspondence</I>,
+which states that the Hecke action on a space of Hilbert cusp forms is the same as the
+Hecke action on a space of automorphic forms on some order in a suitable quaternion algebra.
+See <A  HREF = "text1655.htm#bib_hida">[Hid06]</A> for definitions of quaternionic automorphic forms and the correspondence.
+<P>
+Let F be a totally real field of degree n over Q. 
+Algorithm I uses a definite quaternion algebra over F (ramified at all n infinite places).
+Algorithm II uses the Shimura curve associated to a quaternion algebra ramified at exactly n - 1 infinite places.
+By default, the algorithm (and the quaternion order to be used) are selected automatically, 
+but can also be specified by the user.  
+The essential requirement is that the quaternion order can be ramified only at primes p
+for which the space is p-new.
+The required conditions are stated fully in the descriptions of the commands <TT>HilbertCuspForms</TT> 
+and <TT>NewSubspace</TT>.  It is worth noting that a different algorithm and order may be selected 
+for a newspace than for the space containing it.  In fact, there is more freedom for a new space; 
+in particular, over Q neither algorithm can compute full spaces, but can compute new subspaces for nonsquare levels.
+<P>
+Algorithm II is implemented only for parallel weight 2 (weight [2, 2, ..., 2]).
+In the current implementation, Algorithm I is more optimized than Algorithm II, 
+and therefore should be preferred in most cases.
+For spaces over odd degree fields with level not divisible by any small primes,
+Algorithm II may be preferable.
+<P>
+An exposition of both algorithms is given in <A  HREF = "text1655.htm#bib_dembele-voight">[DV12]</A>,
+in addition to the references mentioned in the following two sections.
+
+
+<H4><A NAME = "18555">Algorithm I (Using Definite  Quaternion Orders)</A></H4>
+
+<P>
+<P>
+<P>
+This algorithm, described in <A  HREF = "text1655.htm#bib_dembele-math-comp">[Dem07]</A> and <A  HREF = "text1655.htm#bib_dembele-donnelly">[DD08]</A>,
+is an efficient formulation of the Brandt module approach to computing modular forms.  
+<P>
+A key advantage of this algorithm is that the most expensive steps come in the 
+precomputation phase (computations depending only on the quaternion algebra). 
+This means that for a given number field, forms of many different levels and weights 
+can be computed based on the same precomputation.
+
+
+<H4><A NAME = "18556">Algorithm II (Using Indefinite  Quaternion Orders)</A></H4>
+
+<P>
+<P>
+<P>
+This algorithm, described in <A  HREF = "text1655.htm#bib_greenberg-voight">[GV11]</A>, is based on computing the
+homology of a Shimura curve (and therefore is closer to the usual modular symbols 
+algorithm over Q than Algorithm I).
+Voight's algorithm (<A  HREF = "text1655.htm#bib_voight-fundamental-domain">[Voi09]</A>) for the fundamental domain 
+of the action of the Fuchsian group on the upper half plane is applied. 
+The algorithm simultaneously determines a fundamental domain and generators and relations 
+for the fundamental group.
+From this a description of the homology is obtained, in such a way that the Hecke action 
+on it can then be explicitly calculated.
+
+
+<H4><A NAME = "18557">Categories</A></H4>
+
+<P>
+<P>
+The Magma category for spaces of Hilbert modular forms is <TT>ModFrmHil</TT>, 
+while elements in these spaces have type <TT>ModFrmHilElt</TT>.
+
+
+<H4><A NAME = "18558">Verbose Output</A></H4>
+
+<P>
+<P>
+To see some information printed during computation about what the program is doing, 
+use <TT>SetVerbose("ModFrmHil",n)</TT>, where <TT>n</TT> is 0 (silent, by default), 
+1 (prints concise information), 2 or 3 (which may display bulky data).
+
+
+<PRE></PRE> <A  HREF = "text1658.htm">[Next]</A><A  HREF = "text1656.htm">[Prev]</A> <A  HREF = "text1658.htm">[Right]</A> [____] <A  HREF = "text1656.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

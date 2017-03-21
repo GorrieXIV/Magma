@@ -1,0 +1,1000 @@
+/*
+Lattices Test.
+AKS 1/8/97.
+*/
+
+/*
+SetTrace(11085736, true);
+SetDelCheck(true);
+*/
+
+
+SetMark(true);
+
+if assigned slow then
+    slow := true;
+else
+    slow := false;
+end if;
+quick := not slow;
+
+ClearVerbose();
+//SetVerbose("Nullspace", 1);
+//SetVerbose("LLL", 1);
+//SetVerbose("Meataxe", 1);
+
+Z := IntegerRing();
+Q := RationalField();
+
+function toQ(X)
+    return ChangeRing(Parent(X), RationalField()) ! X;
+end function;
+
+function toQg(X)
+    return MatrixRing(Q, Degree(Parent(X))) ! Eltseq(X);
+end function;
+
+function random_vecs(L, k, r)
+    d := Dimension(L);
+    res := [L | &+[L | Random(-r,r) * L.j: j in [1 .. d]] : i in [1 .. k]];
+    return res;
+end function;
+
+function random_non_zero_vecs(L, k, r)
+    d := Dimension(L);
+    repeat
+	res := [L | &+[L | Random(-r,r) * L.j: j in [1 .. d]] : i in [1 .. k]];
+    until 0 notin res;
+    return res;
+end function;
+
+function denom_lcm(X)
+    return LCM([Denominator(x): x in Eltseq(toQ(X))]);
+end function;
+
+function scaled_numer_max(X)
+    d := denom_lcm(X);
+    return Max([Numerator(d * x): x in Eltseq(toQ(X))]);
+end function;
+
+function QAlg(S)
+    d := Degree(Universe(S));
+    M := RMatrixSpace(Q, d, d);
+    return sub<M | ChangeUniverse(S, M)>;
+end function;
+
+procedure group_test(G)
+    "\nGROUP TEST";
+    "Seed:", GetSeed();
+    //L: Minimal;
+    G: Magma;
+    "#G:", #G;
+
+    L := Lattice(G);
+
+    assert Group(L) eq G;
+    assert NaturalGroup(L) eq G;
+    assert NumberOfActionGenerators(L) eq Nagens(L);
+    assert NumberOfActionGenerators(L) eq Ngens(G);
+    assert forall{i: i in [1..Ngens(G)] | G.i eq ActionGenerator(L, i)};
+    assert forall{i: i in [1..Ngens(G)] | G.i eq NaturalActionGenerator(L, i)};
+
+    BG := BravaisGroup(G);
+    assert G subset BG;
+    // IntegralGroup?
+
+    IL := InvariantForms(G);
+    SL := SymmetricForms(G);
+    AL := AntisymmetricForms(G);
+
+    I := QAlg(IL);
+    S := QAlg(SL);
+    A := QAlg(AL);
+    dI := Dimension(I);
+    dS := Dimension(S);
+    dA := Dimension(A);
+    assert QAlg(InvariantForms(L)) eq I;
+    assert QAlg(SymmetricForms(L)) eq S;
+    assert QAlg(AntisymmetricForms(L)) eq A;
+//"I:", I:Maximal;
+//"num:", NumberOfInvariantForms(G);
+//"dI:", dI;
+    assert NumberOfInvariantForms(G) eq dI;
+    assert NumberOfInvariantForms(L) eq dI;
+    assert NumberOfSymmetricForms(G) eq dS;
+    assert NumberOfSymmetricForms(L) eq dS;
+    assert NumberOfAntisymmetricForms(G) eq dA;
+    assert NumberOfAntisymmetricForms(L) eq dA;
+    assert QAlg(InvariantForms(G, dI)) eq I;
+    assert QAlg(InvariantForms(L, dI)) eq I;
+    assert QAlg(SymmetricForms(G, dS)) eq S;
+    assert QAlg(SymmetricForms(L, dS)) eq S;
+    assert QAlg(AntisymmetricForms(G, dA)) eq A;
+    assert QAlg(AntisymmetricForms(L, dA)) eq A;
+
+    assert I eq S + A;
+    assert forall{F: F in SL | IsSymmetric(F) and
+		      forall{g: g in Generators(G) | g*F*Transpose(g) eq F}};
+    assert forall{F: F in AL | Transpose(F) eq -F and
+		      forall{g: g in Generators(G) | g*F*Transpose(g) eq F}};
+
+    F := PositiveDefiniteForm(G);
+    assert IsSymmetric(F) and IsPositiveDefinite(F) and
+	      forall{g: g in Generators(G) | g*F*Transpose(g) eq F};
+
+    E := EndomorphismRing(G);
+    dE := Dimension(E);
+//"E:", E:Maximal;
+    assert EndomorphismRing(L) eq E;
+    assert DimensionOfEndomorphismRing(G) eq dE;
+    assert DimensionOfEndomorphismRing(L) eq dE;
+    EL := Endomorphisms(G, dE);
+    assert EL subset E and #EL eq dE;
+    EL := Endomorphisms(L, dE);
+    assert EL subset E and #EL eq dE;
+
+    assert forall{
+	X: X in Generators(E) |
+	    forall{g: g in Generators(G) |
+		gg*X eq X*gg where gg is toQg(g)
+	}
+    };
+
+    C := CentreOfEndomorphismRing(G);
+    dC := Dimension(C);
+//"C:", C:Maximal;
+    assert CentreOfEndomorphismRing(L) eq C;
+    assert DimensionOfCentreOfEndomorphismRing(G) eq dC;
+    assert DimensionOfCentreOfEndomorphismRing(L) eq dC;
+    CL := CentralEndomorphisms(G, dC);
+    assert CL subset C and #CL eq dC;
+    CL := CentralEndomorphisms(L, dC);
+    assert CL subset C and #CL eq dC;
+
+    assert forall{
+	X: X in Generators(C) |
+	    forall{g: g in Generators(G) |
+		gg*X eq X*gg where gg is toQg(g)
+	}
+    };
+
+    assert C subset E;
+    assert C eq Centre(E);
+
+    LIMIT := 20;
+
+    Sub := Sublattices(G: Limit := LIMIT);
+
+    #Sub, "sublattice(s)";
+
+    if #G le 100 and #Sub lt LIMIT then
+	"Sub full test";
+	S1 := Set(Sub);
+	S2 := Set(Sublattices(G, PrimeDivisors(#G)));
+	assert #S1 eq #S2;
+	for x in S1 do
+	    for y in S2 do
+		if IsIsometric(x, y) then
+		    Exclude(~S2, y);
+		    continue x;
+		end if;
+	    end for;
+	    "S1:", S1: Magma;
+	    "S2:", S2: Magma;
+	    "x:", x: Magma;
+	    error "Iso not in S2";
+	end for;
+	assert #S2 eq 0;
+	/*
+	assert Set(Sub) eq
+	    &join{Set(Sublattices(G, p)): p in PrimeDivisors(#G)};
+	*/
+    end if;
+
+    for S in Sub do
+	assert NaturalGroup(S) eq G;
+//"S:", S;
+//"G:", G;
+	IP := InnerProductMatrix(S);
+	if IsOne(IP) then
+	    assert LatticeWithBasis(G, BasisMatrix(S)) eq S;
+	else
+	    assert LatticeWithBasis(G, BasisMatrix(S), IP) eq S;
+	end if;
+	H := Group(S);
+	assert #G ge 10^6 or #H eq #G;
+//"H:", H;
+    end for;
+
+end procedure;
+
+group_test(sub<GL(1, Z) |>);
+group_test(sub<GL(1, Z) | [-1]>);
+group_test(sub<GL(5, Z) |>);
+group_test(sub<GL(2, Z) | [0,-1, -1,0]>);
+group_test(sub<GL(3, Z) | [0,1,0, 0,0,1, -1,0,0]>);
+group_test(AutomorphismGroup(Lattice("E", 8)));
+
+rat_db := RationalMatrixGroupDatabase();
+for d := 2 to 12 do
+    for n := 1 to NumberOfGroups(rat_db, d) do
+	group_test(Group(rat_db, d, n));
+    end for;
+end for;
+
+// AKS 7/6/5: I'm sick of this taking ages:
+// group_test(AutomorphismGroup(Lattice("Lambda", 16): Depth := 1));
+// WRU 23/11/11 But now it should be quite quick:
+group_test(AutomorphismGroup(Lattice("Lambda", 16)));
+// group_test(AutomorphismGroup(Lattice("Lambda", 12): Depth := 1));
+
+procedure special_test(L)
+//SetMark(true); procedure()
+    "\nSPECIAL TEST";
+    "Seed:", GetSeed();
+    //L: Minimal;
+    L;
+    if not quick then
+	L: Magma;
+    end if;
+
+    CPU := Cputime();
+
+    R := BaseRing(L);
+    m := Rank(L);
+    n := Degree(L);
+    B := BasisMatrix(L);
+    M := InnerProductMatrix(L);
+    F := GramMatrix(L);
+
+    _ := Density(L);
+    _ := Density(L, RealField(100));
+
+    assert IsSymmetric(F);
+    assert Basis(L) eq [L.i: i in [1 .. m]];
+    for i := 1 to m do
+	for j := i to m do
+/*
+printf "i: %o, j: %o, Li: %o, Lj: %o, (): %o, F: %o\n",
+    i, j, L.i, L.j, (L.i,L.j), F[i][j];
+*/
+	    assert (L.i, L.j) eq F[i][j];
+	end for;
+    end for;
+
+    LB, T := LLLBasisMatrix(L);
+    assert toQ(LB) eq toQ(T) * toQ(B);
+    LF, T2 := LLLGramMatrix(L);
+    assert T2 eq T;
+    assert toQ(LF) eq toQ(T) * toQ(F) * toQ(Transpose(T));
+
+    d := Determinant(L);
+    assert Determinant(F) eq d;
+    assert Determinant(LF) eq d;
+
+    CL := CoordinateLattice(L);
+    assert toQ(GramMatrix(CL)) eq toQ(F);
+    BCL := BasisMatrix(CL);
+    assert Nrows(BCL) eq m and IsOne(MatrixRing(R, m)!BCL);
+
+    assert IsIntegral(L) eq forall{i: i in [1 .. m] | IsIntegral(F[i][i])};
+    assert IsEven(L) eq forall{
+	i: i in [1 .. m] | IsIntegral(x) and IsEven(Z!x) where x is F[i][i]
+    };
+
+    D := Dual(L);
+    DB := DualBasisLattice(L);
+    assert toQ(GramMatrix(DB)) eq toQ(GramMatrix(L))^-1;
+    delete DB;
+
+    if IsIntegral(L) then
+	DQ := DualQuotient(L);
+	assert #DQ ge 1;
+    end if;
+
+    // meet, subset, eq, quo, /, Index
+
+    if m le 40 then
+	"Minimum";
+	M := Minimum(L);
+	if IsIntegral(L) then
+	    assert M eq 1 or #ShortVectors(L, M - 1) eq 0;
+	else
+	    assert #ShortVectors(L, M/2) eq 0;
+	end if;
+
+	CloseList := [
+	    random_vecs(L, 1, 1)[1], 
+	    &+[L.i: i in [1..m]] / 2,
+	    random_vecs(StandardLattice(n), 1, 1)[1], 
+	    L.1 + 100*RSpace(Q, n).1,
+	    (L.1 + RSpace(Q, n).1)/2
+	];
+	CloseList := [
+	    w: w in CloseList |
+	    Norm(w) / LLLGramMatrix(L)[1][1] le 10^8
+	];
+	MQ := toQ(InnerProductMatrix(L));
+
+	"Shortest Vectors";
+	S := ShortestVectors(L);
+	K := KissingNumber(L);
+	assert K eq 2 * #S;
+	assert forall{v: v in S | Norm(v) eq M};
+	SS := Set(S);
+	assert #SS eq #S;
+
+	if m le 20 then
+	    SX := ShortestVectorsMatrix(L);
+	    if IsIntegral(L) then
+		assert ShortVectorsMatrix(L, 1, M) eq SX;
+	    else
+		assert ShortVectorsMatrix(L, M/2, M) eq SX;
+	    end if;
+	    assert {L | SX[i]: i in [1 .. Nrows(SX)]} eq SS;
+	    assert {t[1]: t in ShortVectors(L, M)} eq SS;
+	end if;
+
+	"Closest Vectors";
+	DiffList := [RationalField() | ];
+	CCList := [];
+	A := AmbientSpace(L);
+//printf "L := %m;\n", L;
+	for w in CloseList do
+    //"w:", w;
+	    C, d := ClosestVectors(L, w);
+    //"C, d:", C, d;
+	    assert forall{
+		v: v in C | InnerProduct(u*MQ, u) eq d where u is toQ(v - w)
+	    };
+	    CC := Set(C);
+	    assert #C eq #C;
+	    Append(~DiffList, d);
+	    Append(~CCList, CC);
+
+	    if m le 10 then
+//printf "w := %m;\n", w;
+		CX, dd := ClosestVectorsMatrix(L, w);
+		assert dd eq d;
+		wR := BaseRing(w);
+		for i := 1 to Nrows(CX) do
+		    assert CX[i] in L;
+		    assert Norm(A!Vector(wR, CX[i]) - w) eq dd;
+		end for;
+		if d ne 0 then
+		    assert CloseVectorsMatrix(L, w, d) eq CX;
+		    assert {L | CX[i]: i in [1 .. Nrows(CX)]} eq CC;
+		    assert {t[1]: t in CloseVectors(L, w, d)} eq CC;
+		end if;
+	    end if;
+	end for;
+
+	"Short Vectors Process";
+	if IsIntegral(L) then
+	    assert M eq 1 or IsEmpty(ShortVectorsProcess(L, M - 1));
+	else
+	    assert IsEmpty(ShortVectorsProcess(L, M/2));
+	end if;
+	Ms := 3 * M;
+	P := ShortVectorsProcess(L, M, Ms);
+	range := [M, Ms];
+	S := {};
+	small := false;
+	limit := 10000;
+	c := 0;
+	while c lt limit do
+	    v, s := NextVector(P);
+	    if v eq 0 then
+		assert IsEmpty(P);
+		small := true;
+		break;
+	    end if;
+	    assert Norm(v) eq s and s ge M and s le Ms;
+	    //assert L ! Eltseq(v) eq v;
+	    Include(~S, v);
+	    c +:= 1;
+	end while;
+	assert #S eq c;
+
+	"Close Vectors Process";
+	SmallList := [];
+	for i := 1 to #CloseList do
+	    w := CloseList[i];
+	    d := DiffList[i];
+	    assert d le 1 or IsEmpty(CloseVectorsProcess(L, w, d - 1));
+	    if d eq 0 then
+		d := Minimum(L);
+	    end if;
+	    ds := 3 * d;
+    //"d:", d;
+    //"L:", L;
+    //"w:", w;
+	    P := CloseVectorsProcess(L, w, d, ds);
+	    range := [d, ds];
+	    S := {};
+	    csmall := false;
+	    limit := 300;
+	    limit := 2000;
+	    c := 0;
+	    while c lt limit do
+		v, s := NextVector(P);
+		if s eq -1 then
+		    assert IsEmpty(P);
+		    csmall := true;
+		    break;
+		end if;
+		assert InnerProduct(u*MQ, u) eq s where u is toQ(v - w);
+		assert s ge d and s le ds;
+		//assert L ! Eltseq(v) eq v;
+		Include(~S, v);
+		c +:= 1;
+	    end while;
+	    assert #S eq c;
+	    Append(~SmallList, csmall);
+	end for;
+
+	if small then
+	    lasts := 3;
+	    for s := 2 to lasts/*K lt 1000 select 10 else 2*/ do
+		"Short vectors up to", s, "times minimum";
+		Ms := M * s;
+		T := ShortVectors(L, M, Ms);
+		assert SS subset {t[1]: t in T};
+		assert forall{
+		    t: t in T | Norm(t[1]) eq t[2] and t[2] ge M and t[2] le Ms
+		};
+	    end for;
+	    if IsIntegral(L) and Ms le 1000 then
+		"Theta series";
+		theta := ThetaSeries(L, Ms);
+		coeffs := [1] cat [0: i in [1 .. Ms]];
+		for t in T do
+		    i := Z!t[2] + 1;
+		    coeffs[i] +:= 2;
+		end for;
+		C := Coefficients(theta);
+		if #C lt #coeffs then C := C cat [0: i in [#C + 1 .. #coeffs]];
+		else C := C[1..#coeffs];
+		end if;
+		assert C eq coeffs;
+	    end if;
+	end if;
+
+	for s := 2 to 3/*K lt 1000 select 10 else 2*/ do
+	    "Close vectors up to", s, "times norm difference";
+	    for i := 1 to #CloseList do
+		if not SmallList[i] then
+		    continue;
+		end if;
+		w := CloseList[i];
+		d := DiffList[i];
+		if d eq 0 then
+		    ds := Minimum(L);
+		    T := CloseVectors(L, w, ds);
+		else
+		    ds := d * s;
+		    T := CloseVectors(L, w, d, ds);
+		end if;
+    //"w:", w;
+    //"ds:", ds;
+    //T;
+    //CCList[i];
+		assert CCList[i] subset {t[1]: t in T};
+		assert forall{
+		    t: t in T |
+			(InnerProduct(u*MQ, u) eq t[2]
+			    where u is toQ(t[1] - w)) and
+			t[2] ge d and t[2] le ds
+		};
+	    end for;
+	end for;
+
+	if scaled_numer_max(LLLGramMatrix(L)) le 10^10 then
+	    "Successive Minima";
+	    V, S := SuccessiveMinima(L);
+	    assert forall{i: i in [1 .. m] | Norm(S[i]) eq V[i]};
+	    assert IsIndependent(ChangeUniverse(S, RSpace(RationalField(), n)));
+	    LV := Sort([LF[i][i]: i in [1 .. m]]);
+	    assert forall{i: i in [1 .. m] | V[i] le LV[i]};
+	end if;
+    end if;
+
+    "Reduction";
+    LL, T := PairReduce(L);
+    assert toQ(BasisMatrix(LL)) eq toQ(T) * toQ(BasisMatrix(L));
+    LL, T := Seysen(L);
+    assert toQ(BasisMatrix(LL)) eq toQ(T) * toQ(BasisMatrix(L));
+    LL, T := LLL(L);
+    assert toQ(BasisMatrix(LL)) eq toQ(T) * toQ(BasisMatrix(L));
+    LL, T := Orthogonalize(L);
+    assert toQ(GramMatrix(LL)) eq toQ(GramMatrix(L));
+    assert IsDiagonal(InnerProductMatrix(LL));
+    //assert toQ(InnerProductMatrix(LL)) eq toQ(T)*toQ(BasisMatrix(L)) * toQ(T);
+    LL := Cholesky(L);
+
+    /*
+    P := PureLattice(L);
+    assert IsIntegral(P);
+    if false and IsIntegral(L) then
+	assert L subset P;
+	assert (Index(P, L) eq 1) eq (P eq L);
+    end if;
+    */
+
+    LF := toQ(LF);
+    LF := LCM([Denominator(x): x in Eltseq(LF)]) * LF;
+    if m le 13 and forall{1: i, j in [1 .. m] | Abs(LF[i][j]) le 2^10} then
+	"Automorphism Group";
+	CL := CoordinateLattice(L);
+	G := AutomorphismGroup(L);
+	//G;
+	if IsIntegral(L) then
+	    assert forall{
+		1: j in [1 .. i], i in [1 .. m], g in Generators(G) |
+		InnerProduct(CL.i, CL.j) eq Q ! InnerProduct(CL.i * g, CL.j * g)
+	    };
+	else
+	    CLQ := [toQ(CL.i): i in [1 .. m]];
+	    GQ := [toQg(G.i): i in [1 .. Ngens(G)]];
+	    assert forall{
+		1: j in [1 .. i], i in [1 .. m], g in GQ |
+		InnerProduct(CLQ[i], CLQ[j]) eq
+		InnerProduct(CLQ[i] * g, CLQ[j] * g)
+	    };
+	end if;
+	"Isometry";
+	LL, T := LLL(L);
+	A, TT := IsIsometric(L, LL);
+	assert A and TT*GramMatrix(L)*Transpose(TT) eq GramMatrix(LL);
+    end if;
+
+    /*
+    if m le 5 then
+	"CoveringRadius";
+	_ := CoveringRadius(L);
+    end if;
+    */
+
+    t := Cputime(CPU);
+    t, "seconds";
+//end procedure(); ShowActive();
+end procedure;
+
+procedure general_test(G)
+//SetMark(true); procedure()
+    "\nGENERAL TEST";
+    "Seed:", GetSeed();
+    //G: Minimal;
+    G;
+    if not quick then
+	G: Magma;
+    end if;
+
+    CPU := Cputime();
+
+    R := BaseRing(G);
+    m := Rank(G);
+    n := Degree(G);
+    r := 2;
+
+    big := Ilog2(Ceiling(&+Eltseq(GramMatrix(G)) / n^2)) ge 30;
+
+    over_z := R cmpeq Z;
+
+    smallish := n le 10;
+
+    U := sub<G | random_non_zero_vecs(G, m, r)>;
+    V := sub<G | random_non_zero_vecs(G, m div 2 + 1, r)>;
+    W := sub<G | random_non_zero_vecs(G, m div 3 + 1, r)>;
+
+    M := InnerProductMatrix(U);
+
+    if IsOne(M) then
+	assert U eq Lattice(BasisMatrix(U));
+	assert U eq Lattice(n, Eltseq(BasisMatrix(U)));
+//RES:	assert not over_z or U eq Lattice(RowSpace(BasisMatrix(U)));
+    end if;
+
+    assert U eq Lattice(BasisMatrix(U), M);
+    assert U eq Lattice(n, Eltseq(BasisMatrix(U)), M);
+//RES:    assert not over_z or U eq Lattice(RowSpace(BasisMatrix(U)), M);
+
+/*
+RESTORE:
+    if IsOne(M) and not big then
+	assert BasisMatrix(U) eq BasisMatrix(LatticeWithBasis(BasisMatrix(U)));
+	assert BasisMatrix(U) eq
+	    BasisMatrix(LatticeWithBasis(n, Eltseq(BasisMatrix(U))));
+	assert not over_z or BasisMatrix(U) eq
+		BasisMatrix(LatticeWithBasis(RSpaceWithBasis(BasisMatrix(U))));
+    end if;
+*/
+
+    assert BasisMatrix(U) eq BasisMatrix(LatticeWithBasis(BasisMatrix(U), M));
+    assert BasisMatrix(U) eq
+	BasisMatrix(LatticeWithBasis(n, Eltseq(BasisMatrix(U)), M));
+/*
+RESTORE:
+    assert not over_z or BasisMatrix(U) eq
+	BasisMatrix(LatticeWithBasis(RSpaceWithBasis(BasisMatrix(U)), M));
+*/
+
+/* RES:
+    assert GramMatrix(LatticeWithGram(GramMatrix(U))) eq GramMatrix(U);
+    assert GramMatrix(
+	       LatticeWithGram(Rank(U), Eltseq(GramMatrix(U)))
+	   ) eq GramMatrix(U);
+*/
+
+    Spaces := [G, U, V, W];
+
+    for S in Spaces do
+	Dim := Dimension(S);
+	m := Dim;
+	"Operations on single sublattice of dimension", Dim;
+
+//printf "S := %m;\n", S;
+//printf "G := %m;\n", G;
+	assert ext<S | G> eq G;
+	assert ext<S | Basis(G)> eq G;
+	assert MatrixRing(Z, m)!1 * S eq S;
+	assert (MatrixRing(Z, m) ! [Random(-1, 1): i in [1 .. m^2]]) * S
+		subset S;
+
+	assert 2 * S eq sub<S | 2 * BasisMatrix(S)>;
+	assert S * 2 eq 2 * S;
+	S3 := S / 3;
+	assert S subset S3;
+	assert Index(S3, S) eq 3^m;
+
+	assert S subset G;
+	assert Degree(S) eq n;
+	assert Basis(S) eq [S.i: i in [1 .. Dim]];
+	BM := BasisMatrix(S);
+	assert BM eq Parent(BM) ! &cat[Eltseq(v): v in Basis(S)];
+
+	z := S ! 0;
+	assert IsZero(z);
+	for i in [1 .. 5] do
+	    x := random_vecs(S, 1, r)[1];
+	    y := random_vecs(S, 1, r)[1];
+	    cx := Coordinates(x);
+	    cy := Coordinates(y);
+//"S:", S;
+//"x:", x;
+//"cx:", cx;
+	    assert Coordelt(S, cx) eq x;
+	    assert Coordelt(S, cy) eq y;
+	    assert &+[S | cx[i]*S.i: i in [1 .. m]] eq x;
+	    assert &+[S | cy[i]*S.i: i in [1 .. m]] eq y;
+	    assert Eltseq(CoordinateVector(x)) eq cx;
+	    assert Coordelt(G, CoordinateVector(G, x)) eq x;
+	    assert S ! Eltseq(x) eq x;
+	    assert Degree(x) eq n;
+	    assert (-1) * x eq -x;
+	    assert 3 * x eq x + x + x;
+	    assert x * 4 eq x + x + x + x;
+	    assert x + y eq y + x;
+	    assert x - y eq -(y - x);
+	    assert x - x eq z;
+	    assert IsZero(x - x);
+    //assert InnerProduct(x, y) eq &+[x[i] * y[i]: i in [1 .. n]];
+	    nx := Normalize(x);
+	    ny := Normalize(y);
+	    assert nx eq Normalize(nx);
+	    assert ny eq Normalize(ny);
+	    assert Support(nx) eq Support(x);
+	    sx := Sort([i : i in Support(x)]);
+	    // x, sx;
+	    if IsZero(x) then
+		assert #sx eq 0;
+	    else
+		f := sx[1];
+		assert nx[f] gt 0;
+		assert #{ i : i in [1 .. f - 1] | not IsZero(x[i]) } eq 0;
+	    end if;
+	end for;
+    end for;
+
+    len := #Spaces;
+    for i := 1 to len do
+	for j := i to len do
+	    S := Spaces[i];
+	    T := Spaces[j];
+	    Sdim := Dimension(S);
+	    Tdim := Dimension(T);
+
+	    "Operations on double spaces of dimensions", Sdim, Tdim;
+
+	    ST := S meet T;
+//"S:",S;
+//"T:",T;
+//"ST:",ST;
+	    assert ST subset S;
+	    assert ST subset T;
+
+	    QS, mS := quo<S | ST>;
+/*
+"S:", S;
+"T:", T;
+"QS:", QS;
+slash := S/ST;
+"S/ST:", slash;
+"#QS:", #QS;
+"#S/ST:", #slash;
+*/
+	    //assert #QS eq #(S / ST);	-- BAD: could have infinities!
+	    assert InvariantFactors(QS) eq InvariantFactors(S / ST);
+	    QT, mT := quo<T | ST>;
+//"T:",T;
+//"ST:",ST;
+//"QS:",QS;
+//"QT:",QT;
+	    for x in [S.i : i in [1 .. Sdim]] cat
+		     random_vecs(S, 5, r) do
+//"x:",x;
+		im := x @ mS;
+//"im:",im;
+//"Parent(im):",Parent(im);
+//"im@@mS:",im@@mS;
+		assert im in QS;
+		assert (im@@mS) - x in S;
+		if x in ST then
+		    assert IsIdentity(im);
+		end if;
+	    end for;
+	    SpT := S + T;
+//"SpT:",SpT;
+	    assert S subset SpT;
+	    assert T subset SpT;
+	    SdT := DirectSum(S, T);
+	    TdS := DirectSum(S, T);
+	    assert Dimension(SdT) eq Sdim + Tdim;
+	    assert Dimension(TdS) eq Sdim + Tdim;
+	    L := SdT meet TdS;
+	    assert L subset SdT;
+	    assert L subset TdS;
+
+	    /*
+	    SB := Basis(S);
+	    k := #SB;
+	    im := random_vecs(T, k, r);
+	    f := hom<S -> T | im>;
+	    ker := Kernel(f);
+	    assert ker subset S;
+	    assert Image(f) subset T;
+	    assert IsIndependent(im) eq (Dimension(ker) eq 0);
+	    for i := 1 to k do
+		assert f(SB[i]) eq im[i];
+		if not( (im[i]@@f - SB[i]) in ker ) then
+		    "S:", S;
+		    "T:", T;
+		    "SB:", SB;
+		    "ker:", ker;
+		    "im:", im;
+		    "i:", i;
+		    "im[i]:", im[i];
+		    "im[i]@@f:", im[i]@@f;
+		    "im[i]@@f-SB[i]:", im[i]@@f-SB[i];
+		    error "";
+		end if;
+	    end for;
+	    */
+	end for;
+    end for;
+
+    t := Cputime(CPU);
+    t, "seconds";
+//end procedure(); ShowActive();
+end procedure;
+
+procedure both_test(L)
+    general_test(L);
+    special_test(L);
+    C := CoordinateLattice(L);
+    if not (C cmpeq L) then
+	general_test(C);
+	special_test(C);
+    end if;
+end procedure;
+
+procedure both_test_denom(L)
+    both_test(L);
+    if Rank(L) le 15 then
+	both_test(L / Random(2, 10^20));
+    else
+	both_test(L / Random(2, 10));
+    end if;
+end procedure;
+
+if true then
+
+L := Lattice(GolayCode(GF(2), false), "A");
+_ := CoordinateRing(L);
+_ := CoveringRadius(StandardLattice(1));
+_ := Lattice("Kappa", 7);
+_ := Lattice("Lambda", 7);
+
+L := StandardLattice(8);
+v := L ! [1,1,1,1, 1,1,1,1];
+LL := Neighbour(L, v, 2);
+assert Minimum(LL) eq 2 and KissingNumber(LL) eq 240;
+
+//SetSeed(12345678);
+
+/*
+SetDelCheck(true);
+SetTrace(17216, true);
+SetMark(true);
+*/
+
+//SetMark(true);
+
+//SetSeed(1811973962);
+//general_test(CoordinateLattice(Lattice("D", 6)));
+
+//SetSeed(1015325847);
+//general_test(LatticeWithGram(1, [2]));
+
+i := 2;
+n := 15 div i;
+r := 10^(10*i);
+both_test(LatticeWithBasis(n, [Random(-r, r): i in [1..n^2]]));
+
+both_test_denom(Lattice("D", 4));
+
+if 1 eq 1 then
+    for i := 1 to 5 do
+	n := 5 div i;
+	r := 10^(i);
+	n := 15 div i;
+	r := 10^(10*i);
+	both_test(LatticeWithBasis(n, [Random(-r, r): i in [1..n^2]]));
+	if quick then
+	    break;
+	end if;
+	/*
+	*/
+    end for;
+end if;
+
+if 1 eq 1 then
+    l := 5;
+    for i := 1 to l do
+	if quick then
+	    break;
+	end if;
+	n := 15 div i;
+	r := 50 div (l + 1 - i);
+	both_test(LatticeWithBasis(n, [Random(-r, r): i in [1..n^2]]));
+    end for;
+end if;
+
+if 1 eq 1 then
+    for i := 1 to 5 do
+	n := 10 div i;
+	r := 10^(i);
+	both_test(
+	    LatticeWithBasis(n, [Random(-r, r)/Random(1, r): i in [1..n^2]])
+	);
+	if quick then
+	    break;
+	end if;
+break;
+    end for;
+end if;
+
+if 1 eq 1 then
+    for i in quick select [1 .. 4] else [1 .. 10] do
+	both_test_denom(StandardLattice(i));
+	both_test_denom(Lattice("A", i));
+	if i ge 3 then
+	    both_test(Lattice("D", i));
+	end if;
+    end for;
+end if;
+
+if 1 eq 1 then
+    both_test(Lattice("E", 6));
+    both_test(Lattice("E", 7));
+    both_test_denom(Lattice("E", 8));
+
+    for i in quick select [10] else [7 .. 13] do
+	both_test(Lattice("Kappa", i));
+    end for;
+
+    for i in quick select [8, 9, 12] else [1 .. 24] do
+	both_test(Lattice("Lambda", i));
+    end for;
+
+    for p in [p: p in [2 .. 11] | IsPrime(p)] do
+    break;
+	for n in [n: n in [2 .. 14] | GCD(n, p) eq 1] do
+	    C := BCHCode(GF(p), n, n div 2);
+	    if Dimension(C) gt 1 and Dimension(C) lt n then
+		both_test(Lattice(C, "A"));
+	    end if;
+	end for;
+    end for;
+end if;
+
+if 0 eq 1 then
+    if 0 eq 1 then
+	SetVerbose("LLL", 1);
+	SetVerbose("Meataxe", 1);
+	SetVerbose("Smith", 1);
+    end if;
+
+    for i := 1 to 5 do
+	n := 20 div i;
+	r := 10^(50*i);
+n := 15;
+r := 10^10;
+	n := 10 div i;
+	r := 10^(10*i);
+	both_test(LatticeWithBasis(n, [Random(-r, r): i in [1..n^2]]));
+	if 0 eq 1 then
+	    both_test(
+		LatticeWithBasis(n, [Random(-r, r)/Random(r): i in [1..n^2]])
+	    );
+	end if;
+break;
+    end for;
+end if;
+
+
+end if;
+
+F := MatrixRing(IntegerRing(), 4) ! \[
+1816136,15996540,-101664,-3495,15996540,5721746856,3960739,106809,
+-101664,3960739,46904,1560,-3495,106809,1560,52
+];
+L := LatticeWithGram(F);
+S := ShortVectors(L, 1, 52);
+assert #S eq 58;
+assert forall{t: t in S | Norm(t[1]) eq t[2]};
+assert SuccessiveMinima(L) eq [ 6, 6, 8, 52 ];
+
+
+L1 :=
+LatticeWithBasis(8, [ RationalField() | 2, 0, 0, 0, 0, 0, 0, 0, -1, 1, 0, 0, 0, 
+0, 0, 0, 0, -1, 1, 0, 0, 0, 0, 0, 0, 0, -1, 1, 0, 0, 0, 0, 0, 0, 0, -1, 1, 0, 0,
+0, 0, 0, 0, 0, -1, 1, 0, 0, 0, 0, 0, 0, 0, -1, 1, 0, 1/2, 1/2, 1/2, 1/2, 1/2, 
+1/2, 1/2, 1/2 ]);
+L2 :=
+LatticeWithBasis(8, \[ 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 
+0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 ],
+MatrixRing(IntegerRing(), 8) ! \[ 300709421670812, 237748976938784, 
+246786387122381, 206199918814541, 66579420654703, 192553597645450, 
+366700115590503, 556317246780462, 237748976938784, 187970751702340, 
+195115971873321, 163027215677612, 52639485181016, 152238066209322, 
+289922998888991, 439839415541312, 246786387122381, 195115971873321, 
+202532799040760, 169224272077765, 54640438562854, 158025001100089, 
+300943669078007, 456558769139977, 206199918814541, 163027215677612, 
+169224272077765, 141393662635780, 45654276668284, 132036222813811, 
+251450498770268, 381473152666419, 66579420654703, 52639485181016, 
+54640438562854, 45654276668284, 14741205081258, 42632874304308, 81190277026821, 
+123172994663964, 192553597645450, 152238066209322, 158025001100089, 
+132036222813811, 42632874304308, 123298058837658, 234809491906277, 
+356227239920189, 366700115590503, 289922998888991, 300943669078007, 
+251450498770268, 81190277026821, 234809491906277, 447172469778124, 
+678401087554574, 556317246780462, 439839415541312, 456558769139977, 
+381473152666419, 123172994663964, 356227239920189, 678401087554574, 
+1029195817496508 ]);
+
+a, T := IsIsometric(L1, L2);
+assert a;
+T*GramMatrix(L1)*Transpose(T) eq GramMatrix(L2);
+
+
+L := Lattice(2,[RealField()!10^70,0,0,10^70]);
+vec := RSpace(RealField(),2)![10^69,10^80+7];
+assert #ClosestVectors(L,vec) eq 1;
+
+
+/*
+clear;
+mark_sweep;
+ShowActive();
+*/

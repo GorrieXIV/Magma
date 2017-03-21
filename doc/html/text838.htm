@@ -1,0 +1,146 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Coset Spaces</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text839.htm">[Next]</A><A  HREF = "text837.htm">[Prev]</A> <A  HREF = "text839.htm">[Right]</A> <A  HREF = "text837.htm">[Left]</A> <A  HREF = "text831.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "9669">Coset Spaces</A></H3>
+
+
+
+<H5><A NAME = "9670"></A><A NAME = "GrpGPC:CosetTable">CosetTable</A>(G, H) : GrpGPC, GrpGPC -&gt; Map</H5>
+<BLOCKQUOTE>
+The (right) coset table for G over the subgroup H of finite index, relative
+to the polycyclic generators. This is defined to be a map
+{1, ..., |G:H|} x G -&gt; {1, ..., |G:H|}
+ describing the action of G on the enumerated set of right cosets of H in G by right multiplication.
+<P>
+The underlying set of right coset representatives is identical to the right transversal returned by <A  HREF = "text838.htm#GrpGPC:Transversal">Transversal</A> and <A  HREF = "text838.htm#GrpGPC:RightTransversal">RightTransversal</A> and the same enumeration of the elements is used.
+</BLOCKQUOTE>
+<H5><A NAME = "9671"></A><A NAME = "GrpGPC:Transversal">Transversal</A>(G, H) : GrpGPC, GrpGPC -&gt; {@ GrpGPCElt  @}, Map</H5>
+<H5><A NAME = "GrpGPC:RightTransversal">RightTransversal</A>(G, H) : GrpGPC, GrpGPC -&gt; {@ GrpGPCElt  @}, Map</H5>
+<BLOCKQUOTE>
+Given a group G and a subgroup H of G, this
+function returns:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>An indexed set of elements T of G forming a right transversal
+for G over H. The right transversal and its enumeration are identical to those internally used by the function <A  HREF = "text838.htm#GrpGPC:CosetTable">CosetTable</A>.
+<DT>(b)</DT><DD>The corresponding transversal mapping &phi;: G -&gt; T.
+If T = [t<sub>1</sub>, ..., t<sub>r</sub>] and g in G, &phi; is defined by
+&phi;(g) = t<sub>i</sub>, where g&isin;H * t<sub>i</sub>.</DL>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9672">Example <TT>GrpGPC_CosetTable (H77E7)</TT></A></H3>
+We compute a right transversal of a subgroup H of the infinite dihedral group G.
+<P>
+<P>
+<PRE>
+&gt; G&lt;a,b&gt; := DihedralGroup(GrpGPC, 0);
+&gt; H := sub&lt;G|a*b, b^10&gt;;
+&gt; Index(G, H);
+10
+&gt; RT, transmap := Transversal(G, H);
+&gt; RT;
+{@ Id(G), b^-1, b^-2, b^-3, b^-4, b^-5, b^-6, b^-7, b^-8, b^-9 @}
+&gt; transmap;
+Mapping from: GrpGPC: G to SetIndx: RT
+</PRE>
+From this a left transversal is easily obtained:
+<P>
+<P>
+<PRE>
+&gt; LT := {@ x^-1 : x in RT @};
+&gt; LT;
+{@ Id(G), b, b^2, b^3, b^4, b^5, b^6, b^7, b^8, b^9 @}
+</PRE>
+We construct the coset table and define a function
+RT x G -&gt; RT, describing the action of G on the set of right cosets of H in G.
+<P>
+<P>
+<PRE>
+&gt; ct := CosetTable(G, H);
+&gt; action := func&lt; r, g | RT[ct(Index(RT, r), g)] &gt;;
+&gt; action(Id(G), b); 
+b^-9
+</PRE>
+I.e. H * b = Hb<sup> - 9</sup>.
+<P>
+<P>
+<PRE>
+&gt; action(b^-4, a*b);
+b^-6
+</PRE>
+I.e. Hb<sup> - 4</sup> * (ab) = Hb<sup> - 6</sup>.
+<P>
+<P>
+<P>
+Note that the definition of the function <TT>action</TT> relies on the fact that 
+the computed right transversal and its enumeration are identical to those 
+internally used by the function <A  HREF = "text838.htm#GrpGPC:CosetTable">CosetTable</A>.
+<HR>
+<H5><A NAME = "9673"></A><A NAME = "GrpGPC:CosetAction">CosetAction</A>(G, H) : GrpGPC, GrpGPC -&gt; Map, GrpPerm, GrpGPC</H5>
+<BLOCKQUOTE>
+Given a subgroup H of the group G of finite index, construct the permutation representation of G, induced by the action of G on the set of (right) cosets of H in G. The function returns:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>The permutation representation f: G -&gt; L &le;(Sym)(|G:H|), induced by the action of G on the set of (right) cosets of H in G;
+<DT>(b)</DT><DD>The epimorphic image L of G under the representation f;
+<DT>(c)</DT><DD>The kernel K of the representation f.</DL>
+</BLOCKQUOTE>
+<H5><A NAME = "9674"></A><A NAME = "GrpGPC:CosetImage">CosetImage</A>(G, H) : GrpGPC, GrpGPC -&gt; GrpPerm</H5>
+<BLOCKQUOTE>
+Given a subgroup H of the group G of finite index, construct the permutation group, induced by the action of G on the set of (right) cosets of H in G. The returned group is the epimorphic image L of G under the permutation representation f: G -&gt; L &le;(Sym)(|G:H|), induced by the action of G on the set of (right) cosets of H in G.
+</BLOCKQUOTE>
+<H5><A NAME = "9675">CosetKernel(G, H) : GrpGPC, GrpGPC -&gt; GrpGPC</A></H5>
+<BLOCKQUOTE>
+Given a subgroup H of the group G of finite index, construct the kernel of the permutation representation f: G -&gt; L &le;(Sym)(|G:H|), induced by the action of G on the set of (right) cosets of H in G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9676">Example <TT>GrpGPC_CosetAction (H77E8)</TT></A></H3>
+We use the function <A  HREF = "text838.htm#GrpGPC:CosetAction">CosetAction</A> to construct a (non-faithful) permutation representation of the group G defined by the polycyclic presentation
+&lt; a, b, c  | b<sup>a</sup> = b * c, (a, c), (b, c) &gt;.
+<P>
+<P>
+<PRE>
+&gt; F&lt;a,b,c&gt; := FreeGroup(3);
+&gt; rels := [ b^a=b*c, b^(a^-1)=b*c^-1 ];
+&gt; G&lt;a,b,c&gt; := quo&lt;GrpGPC: F | rels&gt;;
+&gt; 
+&gt; S := sub&lt;G|(a*b)^3, c^7, b^21&gt;;
+&gt; Index(G, S);
+441
+&gt; pi, P, K := CosetAction(G, S);
+&gt; P;
+Permutation group P acting on a set of cardinality 441
+&gt; K;
+GrpGPC : K of infinite order on 3 PC-generators
+PC-Relations:
+    K.2^K.1 = K.2 * K.3^63, 
+    K.2^(K.-1) = K.2 * K.-3^63
+&gt; Index(G, K);
+3087
+</PRE>
+We express the generators of the kernel K in terms of the generators of G:
+<P>
+<P>
+<PRE>
+&gt; {@ G!x : x in PCGenerators(K) @};
+{@ a^21, b^21, c^7 @}
+</PRE>
+pi(S) is a point stabiliser in the transitive permutation group P of degree 441 and hence should have index 441 in P:
+<P>
+<P>
+<PRE>
+&gt; pi(S);
+Permutation group acting on a set of cardinality 441
+&gt; Index(P, pi(S));
+441
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text839.htm">[Next]</A><A  HREF = "text837.htm">[Prev]</A> <A  HREF = "text839.htm">[Right]</A> <A  HREF = "text837.htm">[Left]</A> <A  HREF = "text831.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

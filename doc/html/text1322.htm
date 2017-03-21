@@ -1,0 +1,678 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Introduction and First Examples</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1323.htm">[Next]</A><A  HREF = "text1321.htm">[Prev]</A> <A  HREF = "text1323.htm">[Right]</A> [____] <A  HREF = "text1321.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "14367">Introduction and First Examples</A></H3>
+
+<P>
+<P>
+Schemes are rather general objects of algebraic geometry.
+A standard reference is Hartshorne's introductory text <A  HREF = "text1320.htm#bib_hartshorne">[Har77]</A>.
+Included among all schemes are many familiar geometric objects such as
+plane curves.
+In Magma, one can work with many of these
+familiar objects but not with entirely general schemes.
+Roughly speaking, a scheme in Magma is any geometric object defined by
+the vanishing of polynomial equations in affine or projective space.
+In particular, there is no facility for defining a scheme <I>a priori</I>
+in terms of a collection of affine patches.
+Schemes are not automatically normalized.
+Maps between schemes can be defined by polynomials or quotients of polynomials.
+<P>
+The sections in this introduction contain examples covering the basic idioms
+understood by Magma, especially those for creation of geometric objects,
+and are intended to be the first place of reference for newcomers to
+this module.
+<P>
+The design of the general scheme module is not particularly subtle or difficult
+but the philosophy behind it does require a small amount of understanding.
+There are two things in particular.
+Firstly, while constructing geometric objects is easy, many of the
+constructors take an ambient scheme as an argument as well as some polynomials.
+Thus one's initial step is often to create some large ambient space
+which is not of primary interest but in which many schemes will lie.
+In doing so, one usually assigns names to the coordinate functions of this
+space, and it is these names which are used when writing the
+polynomials which define some scheme.
+Secondly, points are not considered to be elements of schemes, but rather
+elements of one of a series of <I>point sets</I> of schemes indexed by the rings
+containing the coefficients.
+(Mathematically speaking, these rings are really algebras over the base ring
+of the scheme, but in Magma the algebra structure is usually implicitly
+determined by coercion.)
+<P>
+<P>
+<P>
+The objects that can be created include
+<DL COMPACT class='compact'>
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>ambient spaces: affine space, projective space, rational
+scrolls or weighted projective space over a ring
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>schemes as subschemes: the zero locus of polynomials defined on a particular
+ambient space or on any other scheme
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>points of schemes: sequences of ring elements, possibly defined
+over some extension of the base ring
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>maps: sequences of polynomials or rational functions defined
+on the domain
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>linear systems: linear spaces of polynomials defined on ambient spaces
+<P>
+<P>
+</DL>
+Schemes may be defined quite generally over any ring k, although
+of course many functions require k to lie in some restricted class.
+The following restrictions hold:
+Gr&ouml;bner basis calculations may only be performed over an exact field or
+Euclidean domain;
+resultant calculations may only be carried out over a unique factorization domain;
+GCD calculations work over any exact field and the integers and over polynomial
+rings over either of these;
+the factorisation of polynomials is possible only over the integers,
+rationals, finite fields, algebraically closed fields, number fields and 
+function fields.
+Linear systems are based on the linear algebra module in Magma and
+so are restricted to ambient spaces defined over fields.
+<P>
+The functions described in this chapter are general ones that apply
+to all schemes. In particular situations additional functions are
+provided.
+For example, see
+Chapter <A  HREF = "text1356.htm#14904">ALGEBRAIC CURVES</A> 
+for many specialised functions that apply in the case of curves.
+In the final subsection of this introduction 
+we say a few words about the various
+different types of schemes that Magma admits.
+<P>
+To some extent we try to emulate Hartshorne's text <A  HREF = "text1320.htm#bib_hartshorne">[Har77]</A>
+although we remain only a fraction of the way through the material of that
+book and, of course, we have made innumerable compromises.
+<P>
+In the examples below, <TT>&gt;</TT> at the start of a line is the Magma prompt.
+It is followed by input which may be typed into a Magma session.
+The remaining lines are output which has been edited slightly in some
+circumstances, but should nonetheless match closely what appears on screen.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1322.htm#14368">Ambient Spaces</A>
+<LI> <A  HREF = "text1322.htm#14370">Schemes</A>
+<LI> <A  HREF = "text1322.htm#14372">Rational Points</A>
+<LI> <A  HREF = "text1322.htm#14374">Projective Closure</A>
+<LI> <A  HREF = "text1322.htm#14376">Maps</A>
+<LI> <A  HREF = "text1322.htm#14378">Linear Systems</A>
+<LI> <A  HREF = "text1322.htm#14380">Aside: Types of Schemes</A>
+</UL>
+<H4><A NAME = "14368">Ambient Spaces</A></H4>
+
+<P>
+<P>
+Most schemes are considered to live in an <I>ambient space</I>.
+These include affine and projective spaces, rational scrolls and products.
+They may be defined over any base ring.
+The main technical point is that they have an associated coordinate ring (or a
+homogeneous coordinate ring) that is a polynomial ring, possibly with one
+or more gradings associated to it.
+<P>
+The syntax for defining an affine space over a ring is similar to that
+employed when defining a polynomial ring over another ring. The angled bracket
+notation is used for assigning names to the coordinate functions.
+It is optional as in the case of polynomial rings.
+We illustrate by creating an affine 3-space over the finite field of 23
+elements with coordinates x, y, z.
+
+
+Having defined an ambient space A, polynomials in its coordinate functions
+can be created.
+These polynomials are elements of the coordinate ring of A.
+These polynomials (and sometimes also quotients of them) can be used to define
+geometric objects related to A. Elements of other polynomial rings
+have no meaning on A and their use will result in an error.
+<HR>
+<H3><A NAME = "14369">Example <TT>Scheme_EXAMPLE (H118E1)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; k := FiniteField(23);
+&gt; A&lt;x,y,z&gt; := AffineSpace(k,3);
+&gt; A;
+Affine Space of dimension 3
+Variables : x, y, z
+</PRE>
+Various attributes of A are cached and may be subsequently retrieved.
+<P>
+<P>
+<PRE>
+&gt; BaseRing(A);
+Finite field of size 23
+&gt; Dimension(A);
+3
+&gt; A.1;
+x
+&gt; CoordinateRing(A);
+Polynomial ring of rank 3 over GF(23)
+Lexicographical Order
+Variables: x, y, z
+</PRE>
+Projective spaces are normally defined in the same way, but they can
+also be defined with weights.
+<P>
+<P>
+<PRE>
+&gt; P&lt;u,v,w&gt; := ProjectiveSpace(k,[1,2,3]);
+&gt; P;
+Projective Space of dimension 2
+Variables : u, v, w
+Gradings : 
+1       2       3
+</PRE>
+<HR>
+<H4><A NAME = "14370">Schemes</A></H4>
+
+<P>
+<P>
+Subschemes of ambient spaces prescribed by the vanishing of finitely many
+polynomials may be defined.
+Just as a polynomial ideal in Magma belongs to some polynomial ring,
+so any scheme defined by polynomials is contained in some ambient space.
+In the case of ideals of polynomial rings the function <TT>Generic()</TT>
+recovers the polynomial overring. For schemes the analogous function is
+<TT>AmbientSpace()</TT> (or <TT>Ambient</TT>) which recovers the ambient space.
+<P>
+At the time a scheme is created the system only checks that the defining
+equations make sense --- that they are defined on the nominated ambient space,
+and are homogeneous if necessary --- and does not check other properties such as
+whether or not the scheme is empty.
+
+
+<P>
+In fact, it is possible to create schemes without reference to an ambient space.
+For instance, the intrinsic <TT>Spec</TT> may be applied to an affine algebra.
+But even so, the ambient space defined by the polynomial overring of that
+algebra is created in the background and may be recovered using the intrinsic
+<TT>Ambient</TT>.
+Many constructors require a reference to some overscheme to be 
+clear about <I>which</I> scheme the new object is meant to live in.
+<P>
+<P>
+<P>
+We note here that there is an important difference between affine schemes
+and projective ones. 
+<P>
+For affine schemes, the defining ideal (generated by the
+defining equations) is <I>unique</I>. That is, there is a 1 - 1 correspondence
+between subschemes of an affine ambient space and the ideals of the
+coordinate ring of that ambient.
+<P>
+On the other hand, for projective ambients, a given subscheme is defined by
+multiple homogeneous ideals of the ambient coordinate ring. In this case
+however, there is a <I>largest</I> defining ideal for each subscheme, which 
+we refer to as the <I>saturated</I> one.
+<P>
+The practical effect of this is that Magma may have to replace the original
+defining ideal of a projective scheme with the saturated ideal to
+guarantee the correct result of certain functions
+(see section <A  HREF = "text1324.htm#14418">Constructing Schemes</A> for more details).
+<HR>
+<H3><A NAME = "14371">Example <TT>Scheme_ex2 (H118E2)</TT></A></H3>
+In this example, the twisted cubic curve in projective 3-space is defined
+in terms of equations. The constructor takes these equations in a sequence
+as one of its arguments.
+<P>
+<P>
+<PRE>
+&gt; k := Rationals();
+&gt; P&lt;u,v,w,t&gt; := ProjectiveSpace(k,3);
+&gt; M := Matrix(CoordinateRing(P),2,3,[u,v,w,v,w,t]);
+&gt; eqns := Minors(M,2);
+&gt; C := Scheme(P,eqns);
+&gt; C;
+Scheme over Rational Field defined by
+u*w - v^2
+-u*t + v*w
+v*t - w^2
+&gt; AmbientSpace(C);
+Projective Space of dimension 3
+Variables : u, v, w, t
+&gt; Dimension(C);
+1
+&gt; IsNonsingular(C);
+true
+</PRE>
+<HR>
+<H4><A NAME = "14372">Rational Points</A></H4>
+
+<P>
+<P>
+<P>
+Although closed points of schemes may be defined as schemes in terms of
+polynomials, there is a far more convenient way to define them:
+simply coerce the coordinates of the point into the scheme.
+This is to allow points to be used in a mathematically
+colloquial way: one understands the statement "the point p lies on the
+curve C" to mean that the coordinates of p satisfy the equation of C,
+rather than to mean an inclusion between the two defining ideals.
+(It also avoids the ideal inclusion test which would be a much more
+expensive calculation.)
+
+
+<HR>
+<H3><A NAME = "14373">Example <TT>Scheme_ex3 (H118E3)</TT></A></H3>
+The points p=( - 1, 1), q=(1, 2) are created in the affine plane over the
+finite field of 31 elements. Magma's coercion operator, the <TT>!</TT>
+symbol, provides a concise notation for specifying natural reinterpretations
+of objects. In this case a
+sequence of integers is reinterpreted as a point of the finite plane.
+One of the points created below lies on the standard parabola C.
+<P>
+<P>
+<PRE>
+&gt; k := GF(31);
+&gt; A&lt;x,y&gt; := AffineSpace(k,2);
+&gt; p := A ! [-1,1];
+&gt; q := A ! [1,2];
+&gt; p,q;
+(30, 1) (1, 2)
+&gt; C := Scheme(A,y-x^2);
+&gt; p in C;
+true (30,1)
+&gt; q in C;
+false
+&gt; [-1,1] in C;
+true (30, 1)
+</PRE>
+<P>
+But this is only the beginning of the story.
+Objects in Magma are always considered to lie in some set or structure called
+their <I>parent</I>.
+Although it would be natural to take the scheme
+as the parent of points, instead points have a <I>point set</I> as
+their parent. Point sets are the Magma equivalent of "L-valued points"
+of schemes. If k is the base ring of a scheme X and L is some k-algebra,
+then the point set of X over L, denoted X(L),
+comprises points with coordinates in L.
+In the previous example, the sequences of coordinates were defined over
+the base ring k and the coercion created elements in the point set A(k).
+Predicates such as <TT>p in C</TT> were evaluated by testing whether the
+coordinates of p satisfied the equations of the scheme rather than by
+consulting their parents.
+If the point does happen to lie on C, then p is returned as a point of
+C as second return value. Note the difference between the apparently
+identical points (30, 1): the first, (p), lies in a point set of A while
+the second lies in a point set of C.
+The same effect was achieved using the sequence alone in the last line.
+<P>
+Point sets thus allow one to define points over
+extensions of k without having to define a new scheme over that extension.
+In the next fragment, we show how to make a point of C over an
+extension.
+<P>
+<P>
+<PRE>
+&gt; k1&lt;w&gt; := ext&lt; k | 2 &gt;;
+&gt; C(k1) ! [w^16,3];
+(w^16, 3)
+</PRE>
+An error is signalled if a point set is not nominated.
+<P>
+<P>
+<PRE>
+&gt; C ! [w^16,3];
+
+&gt;&gt;   C ! [w^16,3];
+       ^
+Runtime error in '!': Illegal coercion
+LHS: Sch
+RHS: [FldFinElt]
+</PRE>
+The moral is:
+<P>
+<P>
+<I>A point of a scheme is created by coercing a sequence of
+coordinates into a point set of the scheme.</I>
+<P>
+<P>
+While it is true that the "scheme ! coordinates" operation applies
+when the sequence is defined over the base ring, it might best be thought
+of as a convenient shorthand in predictable and simple situations.
+This is analogous to the situation when constructing sets or sequences.
+<P>
+<P>
+<PRE>
+&gt; C(k1) ! [w,w^2];
+(w, w^2)
+&gt; C(k) ! [w,w^2];
+
+&gt;&gt; C ! [w,w^2];
+     ^
+Runtime error in '!': Illegal coercion
+</PRE>
+This coercion fails since the coordinates do not belong to a field that
+embeds into k.
+<HR>
+<H4><A NAME = "14374">Projective Closure</A></H4>
+
+<P>
+<P>
+Affine schemes have projective closures and projective schemes have
+standard affine patches.
+For example, the projective plane has three standard affine patches,
+each of which may be recovered as illustrated in the following example.
+Here we compute the third affine patch, that is the patch
+whose points have nonzero first coefficient (in the projective space).
+
+
+Although the coercion of points is very flexible --- the affine point p
+can usually be used in place of the projective point <TT>PX ! p</TT> even when
+working in PX --- code which is explicit about this kind of coercion
+is probably more clear.
+<HR>
+<H3><A NAME = "14375">Example <TT>Scheme_ex4 (H118E4)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(Rationals(),2);
+&gt; A := AffinePatch(P,3);
+&gt; A;
+Affine Space of dimension 2
+Variables : $.1, $.2
+&gt; A&lt;u,v&gt; := A;
+&gt; A;
+Affine Space of dimension 2
+Variables : u, v
+&gt; P eq Codomain(ProjectiveClosureMap(A));
+true
+</PRE>
+Note that variable names on the patch, and also on closures, are not
+created automatically.
+Also, the relationship between patch and closure is cemented by a map.
+<P>
+The projective closures of all schemes contained in a
+single affine space will lie in a common projective space.
+Moreover, the closures of schemes lying in distinct affine patches of a
+single projective space will lie in that same space.
+In particular, the projective closures of different patches of a projective
+scheme will be identical.
+<P>
+<P>
+<PRE>
+&gt; X := Scheme(A,[u^2-v^3,u^2+v^3]);
+&gt; PX := ProjectiveClosure(X);
+&gt; PX;
+Scheme over Rational Field defined by
+z^3
+y^2
+&gt; AffinePatch(PX,3) eq X;                    // (1)
+true
+&gt; aX1:=AffinePatch(PX,1);
+&gt; IsEmpty(aX1);                              // (2)
+true
+&gt; ProjectiveClosure(aX1) eq PX;              // (2)
+true
+&gt; Y := Scheme(P,[x*y^2-z^3,x*y^2+z^3]);
+&gt; AffinePatch(Y,3);
+Scheme over Rational Field defined by
+u^2 - v^3
+u^2 + v^3
+&gt; AffinePatch(Y,3) eq X;                     // (3)
+true
+&gt; Y eq PX;
+false
+</PRE>
+This example shows several things. First it shows that taking the appropriate
+affine patch of a projective closure returns the same scheme again (1). Second,
+it shows that the projective closure of an affine patch always returns the
+exactly the same scheme and not a newly created version. This is not always
+mathematically correct and means that projective closure is dependent on how a
+scheme was created. Finally, it shows that projective schemes are "saturated
+at
+infinity", thereby removing the unnecessary x factor (3).
+<P>
+<P>
+Points are handled cleanly with respect to projective closure.
+<P>
+<P>
+<PRE>
+&gt; p := A ! [0,0];
+&gt; PX ! p;
+(1 : 0 : 0)
+</PRE>
+<HR>
+<H4><A NAME = "14376">Maps</A></H4>
+
+<P>
+<P>
+Maps between schemes are defined in terms of either polynomials
+or rational polynomials. When a function field exists for the domain,
+function field elements may also be used.
+When the domain or codomain is projective,
+that is, has at least one grading, then compatibility of the
+defining functions with the gradings will be checked.
+<P>
+Maps to projective spaces are normalised by clearing polynomial denominators.
+
+
+This code computes the intersection of the scheme which is image
+of f with the conic S (although note that S is defined only
+as a scheme here and not as a conic).
+Moving to an algebraic closure one sees a Galois 3-cycle of points
+among the rational points.
+Additional functions for analysis of the multiplicities of these
+intersections are described in
+Chapter <A  HREF = "text1356.htm#14904">ALGEBRAIC CURVES</A>.
+<HR>
+<H3><A NAME = "14377">Example <TT>Scheme_ex5 (H118E5)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; k := Rationals();
+&gt; P1&lt;s,t&gt; := ProjectiveSpace(k,1);
+&gt; P2&lt;x,y,z&gt; := ProjectiveSpace(k,2);
+&gt; f := map&lt; P1 -&gt; P2 | [s/t,s^2/(s^2 - t^2),t/s] &gt;;
+&gt; f;
+Mapping from: Prj: P1 to Prj: P2
+with equations : 
+s^4 - s^2*t^2
+s^3*t
+s^2*t^2 - t^4
+&gt; IsRegular(f);
+true
+&gt; Image(f);
+Scheme over Rational Field defined by
+-x^3*z + x^2*y^2 - 2*x*y^2*z + y^2*z^2
+</PRE>
+The images of points may be computed in the natural way:
+<P>
+<P>
+<PRE>
+&gt; p := P1 ! [3,2];
+&gt; f(p);
+(9/4 : 27/10 : 1)
+&gt; f(p) in Image(f);
+true (9/4 : 27/10 : 1)
+</PRE>
+And schemes may be pulled back by maps.
+<P>
+<P>
+<PRE>
+&gt; S := Scheme(P2,x^2 - y*z);
+&gt; Z := Pullback(f,S);
+&gt; Z;
+Scheme over Rational Field defined by
+s^8 - 2*s^6*t^2 - s^5*t^3 + s^4*t^4 + s^3*t^5
+&gt; RationalPoints(Z);
+{@ (1 : 1), (-1 : 1), (0 : 1) @}
+&gt; P := PointsOverSplittingField(Z); P;
+{@ (0 : 1), (-1 : 1), (1 : 1), (r1 : 1), (r2 : 1), (r3 : 1) @}
+&gt; Ring(Universe($1));
+Algebraically closed field with 3 variables
+Defining relations:
+[
+    r3^3 - r3 - 1,
+    r2^3 - r2 - 1,
+    r1^3 - r1 - 1
+]
+</PRE>
+<HR>
+<H4><A NAME = "14378">Linear Systems</A></H4>
+
+<P>
+<P>
+Linear systems in projective space are simply collections of hypersurfaces
+having a common degree which are parametrised linearly by a vector space.
+The set of all conics in the plane is an example, being parametrised by
+the 6-dimensional vector space of possible coefficients of a general
+conic:
+<P>
+(a, b, c, d, e, f) -&gt; (ax<sup>2</sup> + bxy + cy<sup>2</sup> + dxz + eyz + fz<sup>2</sup> = 0).
+<P>
+A linear system in Magma has associated with it a fixed basis of forms,
+called its <I>sections</I>, of the given degree which allows vectors of
+coefficients to be interpreted as hypersurfaces.
+In the example above, the basis is the set of monomials of degree 2
+and the bijection between vectors of coefficients and hypersurfaces is explicit.
+Linear systems are closely related to maps since their sections may be
+used to define a map from the space on which they are defined
+to some other projective space.
+<P>
+Let P be a projective plane over some field k with coordinates
+x, y, z.
+The linear system of conics on P is created.
+
+
+<HR>
+<H3><A NAME = "14379">Example <TT>Scheme_ex6 (H118E6)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; Q := RationalField();
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(Q,2);
+&gt; L := LinearSystem(P,2);
+&gt; L;
+Linear system on Projective Space of dimension 2
+Variables : x, y, z
+with 6 sections: x^2 x*y x*z y^2 y*z z^2
+&gt; Sections(L);
+[ x^2, x*y, x*z, y^2, y*z, z^2 ]
+</PRE>
+These sections are now used to make a map from the plane P to 5-space.
+Its image is the <I>Veronese surface</I>.
+<P>
+<P>
+<PRE>
+&gt; P5&lt;u0,u1,u2,u3,u4,u5&gt; := ProjectiveSpace(Q,5);
+&gt; phi := map&lt; P -&gt; P5 | Sections(L) &gt;;
+&gt; Image(phi);
+Scheme over Rational Field defined by
+-u0*u3 + u1^2
+-u0*u4 + u1*u2
+-u0*u5 + u2^2
+-u1*u4 + u2*u3
+-u1*u5 + u2*u4
+-u3*u5 + u4^2
+</PRE>
+Geometrical conditions may also be imposed on a linear system.
+For example, given a linear system L and a point p lying in the projective
+space on which L is defined, a subsystem of
+L consisting of those hypersurfaces of L which contain p
+may be defined implicitly.
+It may be checked (choosing more convenient coordinates) that
+the image of this new system is a projection of the Veronese surface from the
+point f(3, 2, 1) = (9, 6, 4, 3, 2, 1) lying on it.
+This is an embedding of the blowup of the plane P at the point (3, 2, 1)
+also known as the <I>cubic scroll</I>.
+<P>
+<P>
+<PRE>
+&gt; p := P ! [3,2,1];
+&gt; L1 := LinearSystem(L,p);
+&gt; L1;
+Linear system on Projective Space of dimension 2
+Variables : x, y, z
+with 5 sections:
+x^2 - 9*z^2
+x*y - 6*z^2
+x*z - 3*z^2
+y^2 - 4*z^2
+y*z - 2*z^2
+&gt; P4&lt;v0,v1,v2,v3,v4&gt; := ProjectiveSpace(Q,4);
+&gt; phi := map&lt; P -&gt; P4 | Sections(L1) &gt;;
+&gt; Image(phi);
+Scheme over Rational Field defined by
+-v0*v3 + v1^2 - 4*v2^2 + 12*v2*v4 - 9*v4^2
+-v0*v4 + v1*v2 - 2*v2^2 + 3*v2*v4
+-v1*v4 + v2*v3 - 2*v2*v4 + 3*v4^2
+</PRE>
+It may also be checked that this image can be described as the vanishing of
+the two by two minors of a certain matrix.
+<P>
+<P>
+<PRE>
+&gt; M := Matrix(3,[v0, v1 + (2*v2 - 3*v4), v2, v1 - (2*v2 - 3*v4), v3, v4]);
+&gt; Minors(M,2);
+[
+    v0*v4 - v1*v2 + 2*v2^2 - 3*v2*v4,
+    v1*v4 - v2*v3 + 2*v2*v4 - 3*v4^2,
+    v0*v3 - v1^2 + 4*v2^2 - 12*v2*v4 + 9*v4^2
+]
+&gt; ideal&lt; CoordinateRing(P4) | $1 &gt; eq Ideal(Image(phi));
+true
+</PRE>
+<HR>
+<H4><A NAME = "14380">Aside: Types of Schemes</A></H4>
+
+<P>
+<P>
+This section gives a general overview of the types of scheme that
+Magma admits. While it is not necessary to know this for most applications,
+it is a useful guide to our point of view and gives some indication of the
+different data structures used.
+<P>
+<P>
+<P>
+The main type is <TT>Sch</TT>.
+Very general functions such as <TT>BaseRing()</TT> apply at this level.
+Gr&ouml;bner basis calculations also apply.
+One level below this there are
+<DL COMPACT class='compact'>
+<DT></DT><DD><TT>Aff</TT> --- a type for affine spaces
+<DT></DT><DD><TT>Prj</TT> --- a type for projective spaces
+<DT></DT><DD><TT>Crv</TT> --- a type for curves
+<DT></DT><DD><TT>Clstr</TT> --- a type for zero-dimensional schemes, or clusters
+<P>
+<P>
+</DL>
+These inherit all the operations which apply at the level of <TT>Sch</TT>.
+The affine type is straightforward.
+The projective type contains spaces with graded polynomial coordinate rings.
+There are a number of subtypes of this which identify
+spaces with more than one grading.
+<P>
+Objects of the curve type <TT>Crv</TT> currently only include schemes defined by
+a single nontrivial equation in a two-dimensional ambient space.
+Functions which apply to the curve type are detailed in
+Chapter <A  HREF = "text1356.htm#14904">ALGEBRAIC CURVES</A>.
+The most powerful of those require certain irreducibility and separability
+conditions to be satisfied by the equation.
+<P>
+More specialised curve types are derived from <TT>Crv</TT>.
+They include <TT>CrvCon</TT> for plane conics especially those
+defined over the rationals where fast point-finding algorithms exist;
+<TT>CrvRat</TT> for rational curves for which a parametrisation algorithm exists;
+<TT>CrvEll</TT> for elliptic curves, probably the
+most sophisticated part of the entire geometry module; and
+<TT>CrvHyp</TT> for hyperelliptic curves where there are fast algorithms
+for computing on the jacobian.
+Each of these has a handbook chapter which presents their
+specialised functions.
+
+
+<PRE></PRE> <A  HREF = "text1323.htm">[Next]</A><A  HREF = "text1321.htm">[Prev]</A> <A  HREF = "text1323.htm">[Right]</A> [____] <A  HREF = "text1321.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

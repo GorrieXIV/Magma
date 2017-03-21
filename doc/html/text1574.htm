@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>q-Expansions</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1575.htm">[Next]</A><A  HREF = "text1573.htm">[Prev]</A> <A  HREF = "text1575.htm">[Right]</A> <A  HREF = "text1573.htm">[Left]</A> <A  HREF = "text1570.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "17628">q-Expansions</A></H3>
+
+<P>
+<P>
+<P>
+The following intrinsics give the q-expansion of
+a modular form (about the cusp &infin;).
+<P>
+Note that q-expansions are printed by default only to
+precision O(q<sup>1</sup>2). This may be adjusted using 
+<TT>SetPrecision</TT> (see below), which should be used to 
+control <I>printing only</I>; to control the amount of 
+precision computed <I>internally</I>, instead use <TT>qExpansion</TT>
+or <TT>qExpansionBasis</TT> and specify the desired precision.
+
+
+<H5><A NAME = "17629">qExpansion(f) : ModFrmElt -&gt; RngSerPowElt</A></H5>
+<H5>qExpansion(f, prec) : ModFrmElt, RngIntElt -&gt; RngSerPowElt</H5>
+<H5>PowerSeries(f) : ModFrmElt -&gt; RngSerPowElt</H5>
+<H5>PowerSeries(f, prec) : ModFrmElt, RngIntElt -&gt; RngSerPowElt</H5>
+<BLOCKQUOTE>
+The q-expansion (at the cusp &infin;) 
+of the modular form (or half-integral weight form) f 
+to absolute precision <TT>prec</TT>.
+This is an element of the power series ring over
+the base ring of the parent of f.
+</BLOCKQUOTE>
+<H5><A NAME = "17630">Coefficient(f, n) : ModFrmElt, RngIntElt -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+The nth coefficient of the q-expansion of the modular form f.
+</BLOCKQUOTE>
+<H5><A NAME = "17631">Precision(M) : ModFrm -&gt; RngIntElt</A></H5>
+<H5>SetPrecision(M, prec) : ModFrm, RngIntElt -&gt;</H5>
+<BLOCKQUOTE>
+When an element of the space M is printed, the q-expansion is
+displayed to this precision.  The default value is 12.
+<P>
+<B>Important note:</B> This controls <B>only printing.</B>  
+It does not control the precision used during calculations.
+For instance, the precision to which q-expansions are computed
+is controlled by the second argument in <TT>qExpansion</TT> and
+<TT>qExpansionBasis</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17632">Example <TT>ModFrm_qExpansion (H138E7)</TT></A></H3>
+In this example, we compute the q-expansion of a
+modular form f&isin;M<sub>3</sub>(&Gamma;<sub>1</sub>(11)) in several ways.
+<P>
+<P>
+<PRE>
+&gt; M := ModularForms(Gamma1(11),3); M;
+Space of modular forms on Gamma_1(11) of weight 3 and dimension 15 
+over Integer Ring.
+&gt; f := M.1; 
+&gt; f;
+1 + O(q^8)
+&gt; qExpansion(f);
+1 + O(q^8)
+&gt; Coefficient(f,16);  // f is a modular form, so has infinite precision
+-5457936
+&gt; qExpansion(f,17);
+1 + 763774*q^15 - 5457936*q^16 + O(q^17)
+&gt; PowerSeries(f,20);   // same as qExpansion(f,20)
+1 + 763774*q^15 - 5457936*q^16 + 14709156*q^17 - 12391258*q^18 - 
+    21614340*q^19 + O(q^20)
+</PRE>
+The "big-oh" notation is supported via addition of a modular
+form and a power series.
+<P>
+<P>
+<PRE>
+&gt; M&lt;q&gt; := Parent(f);
+&gt; Parent(q);
+Power series ring in q over Integer Ring
+&gt; f + O(q^17);
+1 + 763774*q^15 - 5457936*q^16 + O(q^17)
+&gt; 5*q - O(q^17) + f;
+1 + 5*q + 763774*q^15 - 5457936*q^16 + O(q^17)
+&gt; 5*q + f;
+1 + 5*q + O(q^8)
+</PRE>
+Default printing precision can be set using the command
+<TT>SetPrecision</TT>.
+<P>
+<P>
+<PRE>
+&gt; SetPrecision(M,16);
+&gt; f;
+1 + 763774*q^15 + O(q^16)
+</PRE>
+<HR>
+<H3><A NAME = "17633">Example <TT>ModFrm_WeierstrassPoints (H138E8)</TT></A></H3>
+The <TT>PrecisionBound</TT> intrinsic is related to Weierstrass
+points on modular curves.  
+Let N be a positive integer such that 
+S = S<sub>2</sub>(&Gamma;<sub>0</sub>(N)) has dimension at least 2.
+Then the point &infin; is a Weierstrass
+point on X<sub>0</sub>(N) if and only if 
+<TT>PrecisionBound(S : Exact := true)-1 ne Dimension(S)</TT>.
+<P>
+<P>
+<PRE>
+&gt; function InftyIsWP(N)
+&gt;    S := CuspidalSubspace(ModularForms(Gamma0(N),2));
+&gt;    assert Dimension(S) ge 2;
+&gt;    return (PrecisionBound(S : Exact := true)-1) ne Dimension(S);
+&gt; end function;
+&gt; [&lt;N,InftyIsWP(N)&gt; : N in [97..100]];
+[ &lt;97, false&gt;, &lt;98, true&gt;, &lt;99, false&gt;, &lt;100, true&gt; ]
+</PRE>
+It is an open problem to give a simple characterization
+of the integers N such that &infin; is a Weierstrass point
+on X<sub>0</sub>(N), though Atkin and others have made significant progress on 
+this problem (see, e.g., 1967 Annals paper <A  HREF = "text1569.htm#bib_atkin-weierstrass">[Atk67]</A>).
+I verified that if N&lt;3223 is square free, then &infin; is not
+a Weierstrass point on X<sub>0</sub>(N), which suggests a nice conjecture.
+<HR>
+<PRE></PRE> <A  HREF = "text1575.htm">[Next]</A><A  HREF = "text1573.htm">[Prev]</A> <A  HREF = "text1575.htm">[Right]</A> <A  HREF = "text1573.htm">[Left]</A> <A  HREF = "text1570.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

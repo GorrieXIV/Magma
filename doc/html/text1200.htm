@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Subalgebras of su(d)</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1191.htm">[Next]</A><A  HREF = "text1199.htm">[Prev]</A> <A  HREF = "text1191.htm">[Right]</A> <A  HREF = "text1199.htm">[Left]</A> <A  HREF = "text1192.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "13431">Subalgebras of su(d)</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+This section describes functions for studying irreducible simple subalgebras of the Lie algebra su(d) (cf. <A  HREF = "text1191.htm#bib_Dynkin57">[Dyn57]</A>).
+The verbose flag <TT>"SubSU"</TT> may be set to show details and progress of the various computations.
+<P>
+The algorithms and the implementation in this package are due to Robert Zeier.
+For more information about some of the algorithms used and the results obtained using this package we refer to
+<A  HREF = "text1191.htm#bib_ZS11">[ZSH11]</A>.
+
+
+<H5><A NAME = "13432"></A><A NAME = "IrreducibleSimpleSubalgebrasOfSU">IrreducibleSimpleSubalgebrasOfSU</A>(N) : RngIntElt -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+A list of all irreducible simple subalgebras occurring in the Lie algebra su(d),
+for 2 &le;d &le;N.
+</BLOCKQUOTE>
+<H5><A NAME = "IrreducibleSimpleSubalgebraTreeSU"></A><A NAME = "13433">IrreducibleSimpleSubalgebraTreeSU(Q, d) : SeqEnum[SeqEnum[Tup]], RngIntElt -&gt; GrphDir</A></H5>
+<BLOCKQUOTE>
+The subalgebra tree for degree d as a directed graph whose vertex labels describe subalgebras,
+derived from the list Q of irreducible subalgebras.
+The vertex labels are records with three fields: 
+<TT>algebra</TT>, a string containing the Cartan type of this subalgebra;
+<TT>weights</TT>, a sequence of highest weights (as sparse vectors) corresponding to irreducible representations (they are related by an outer automorphism if there is more than one highest weight);
+and <TT>type</TT>, an integer with values -1, 1, or 0 corresponding to irreducible representations of quaternionic, real, or complex type, respectively (the Frobenius-Schur indicator).
+</BLOCKQUOTE>
+<H5><A NAME = "13434">PrintTreesSU(Q, F) : SeqEnum[SeqEnum[Tup]], MonStgElt -&gt;</A></H5>
+
+<PRE>    FromDegree: RngIntElt               Default: 2</PRE>
+
+<PRE>    ToDegree: RngIntElt                 Default: |Q|</PRE>
+
+<PRE>    IncludeTrivial: BoolElt             Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Print the tree of subalgebras in the sequence Q (as obtained by a call to <A  HREF = "text1200.htm#IrreducibleSimpleSubalgebrasOfSU">IrreducibleSimpleSubalgebrasOfSU</A>)
+to the file with filename F. The file F will be overwritten. 
+<P>
+The resulting file will be a LaTeX document that may be typeset using <TT>latex</TT> followed by <TT>dvipdf</TT>, for instance.
+If the resulting file is large, the main memory allocated to TeX may have to be increased (the <TT>main_memory</TT> directive in <TT>texmf.cnf</TT>). Contact your system administrator in case of difficulty.
+<P>
+The optional arguments <TT>FromDegree</TT> and <TT>ToDegree</TT> limit which degrees are output; <TT>IncludeTrivial</TT> may be set
+to <TT>false</TT> to remove "trivial" cases (i.e. trivial trees) from the output. For d &ge;5 and d even, su(d) is considered trivial if it contains only the (proper) irreducible simple subalgebras C<sub>d/2</sub> (i.e. sp(d/2)), D<sub>d/2</sub> (i.e. so(d)), and 
+A<sub>1</sub> (i.e. su(2)); for d &ge;5 and d is odd, su(d) is considered trivial if it contains only B<sub>(d - 1)/2</sub> (i.e. so(d)) and A<sub>1</sub>.
+<P>
+The Lie algebras in the output are coloured according to type:
+red for -1, blue for 1, and black for 0 (see <A  HREF = "text1200.htm#IrreducibleSimpleSubalgebraTreeSU">IrreducibleSimpleSubalgebraTreeSU</A>). 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13435">Example <TT>LieReps_SubSU (H110E21)</TT></A></H3>
+We investigate subalgebras of su(d) for d up to 2<sup>10</sup>.
+<P>
+<P>
+<PRE>
+&gt; Q := IrreducibleSimpleSubalgebrasOfSU(2^10);
+&gt; t := IrreducibleSimpleSubalgebraTreeSU(Q, 12);
+&gt; t;
+Digraph
+Vertex  Neighbours
+1       2 4 ;
+2       3 ;
+3       ;
+4       ;
+&gt; r := VertexLabel(t, 1); r`algebra;
+rec&lt;recformat&lt;algebra: MonStgElt, weights, type: IntegerRing()&gt; | 
+    algebra := A11,
+    weights := [
+        Sparse matrix with 1 row and 11 columns over Integer Ring,
+        Sparse matrix with 1 row and 11 columns over Integer Ring
+    ],
+    type := 0&gt;
+&gt; r := VertexLabel(t, 2); r;
+rec&lt;recformat&lt;algebra: MonStgElt, weights, type: IntegerRing()&gt; | 
+    algebra := C6,
+    weights := [
+        Sparse matrix with 1 row and 6 columns over Integer Ring
+    ],
+    type := -1&gt;
+&gt; [ Matrix(w) : w in r`weights ];
+[
+    [1 0 0 0 0 0]
+]
+&gt; RepresentationDimension(RootDatum("C6"),[1,0,0,0,0,0]); 
+12
+&gt; r := VertexLabel(t, 3); r`algebra;
+A1
+&gt; [ Matrix(w) : w in r`weights ];
+[
+    [11]
+]
+&gt; RepresentationDimension(RootDatum("A1"),[11]);
+12
+&gt; r := VertexLabel(t, 4); r`algebra;
+D6
+</PRE>
+In this manner we have used <A  HREF = "text1200.htm#IrreducibleSimpleSubalgebraTreeSU">IrreducibleSimpleSubalgebraTreeSU</A> to obtain information
+about irreducible simple subalgebras of su(12): A<sub>11</sub> (su(12)) is the root of the tree, C<sub>6</sub> corresponds to a proper subalgebra of A<sub>11</sub>, and A<sub>1</sub> is a proper subalgebra of C<sub>6</sub>. In addition, we have used
+<A  HREF = "text1196.htm#RepresentationDimensionRv">RepresentationDimension</A> to verify the dimensions of the representations.
+Let us use <A  HREF = "text1196.htm#RepresentationDimensionRv">RepresentationDimension</A> to see what other su(d) the 
+Lie algebra of type C<sub>6</sub> should at the very least occur in:
+<P>
+<P>
+<PRE>
+&gt; V := RSpace(Integers(), 6);
+&gt; [ RepresentationDimension(RootDatum("C6"), v) : v in Basis(V) ];
+[ 12, 65, 208, 429, 572, 429 ]
+</PRE>
+We compare that to the list of su(d) it does occur in using <A  HREF = "text1200.htm#IrreducibleSimpleSubalgebraTreeSU">IrreducibleSimpleSubalgebraTreeSU</A>
+and obtain the weights for the case su(78).
+<P>
+<P>
+<PRE>
+&gt; [ i : i in [2..2^10] | exists{r : r in VertexLabels(
+&gt;    IrreducibleSimpleSubalgebraTreeSU(Q, i)) | r`algebra eq "C6"} ];
+[ 12, 65, 78, 208, 364, 429, 560, 572 ]
+&gt; t := IrreducibleSimpleSubalgebraTreeSU(Q, 78);
+&gt; l := VertexLabels(t);
+&gt; [ r`algebra : r in l ];
+[ A77, C39, A1, D39, B6, C6, E6, A2, A11, A12 ]
+&gt; r := l[6];
+&gt; [ Matrix(x) : x in r`weights ];
+[
+    [2 0 0 0 0 0]
+]
+</PRE>
+<PRE></PRE> <A  HREF = "text1191.htm">[Next]</A><A  HREF = "text1199.htm">[Prev]</A> <A  HREF = "text1191.htm">[Right]</A> <A  HREF = "text1199.htm">[Left]</A> <A  HREF = "text1192.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

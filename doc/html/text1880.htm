@@ -1,0 +1,712 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Decoding</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1881.htm">[Next]</A><A  HREF = "text1879.htm">[Prev]</A> <A  HREF = "text1881.htm">[Right]</A> <A  HREF = "text1879.htm">[Left]</A> <A  HREF = "text1874.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "20943">Decoding</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+This section describes functions for decoding vectors from the ambient
+space of a code over Z<sub>4</sub>, or the corresponding space over Z<sub>2</sub>
+under the Gray map, using four different algorithms: coset decoding,
+syndrome decoding, lifted decoding and permutation decoding.
+The reader is referred to <A  HREF = "text1873.htm#bib_FePuVi08">[FCPV08]</A>, <A  HREF = "text1873.htm#bib_FePuVi08a">[FCPV10]</A>, <A  HREF = "text1873.htm#bib_VZP2015">[VZP15]</A> for
+more information on coset decoding; to <A  HREF = "text1873.htm#bib_Sole">[HKC+94]</A>, <A  HREF = "text1873.htm#bib_sloane">[MS78]</A>, <A  HREF = "text1873.htm#bib_Wan_Z4">[Wan97]</A>
+on syndrome decoding; to <A  HREF = "text1873.htm#bib_Lift">[BZ01]</A>, <A  HREF = "text1873.htm#bib_Lift2">[GV98]</A> on lifted decoding; and
+to <A  HREF = "text1873.htm#bib_BV2015a">[BV16a]</A>, <A  HREF = "text1873.htm#bib_BV2015b">[BV16b]</A>, <A  HREF = "text1873.htm#bib_BeBoFeVi">[BBFCV15]</A> on permutation decoding.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1880.htm#20944">Coset Decoding</A>
+<LI> <A  HREF = "text1880.htm#20948">Syndrome Decoding</A>
+<LI> <A  HREF = "text1880.htm#20952">Lifted Decoding</A>
+<LI> <A  HREF = "text1880.htm#20956">Permutation Decoding</A>
+</UL>
+<H4><A NAME = "20944">Coset Decoding</A></H4>
+
+
+
+<H5><A NAME = "20945">CosetDecode(C, u : parameters) : CodeLinRng, ModTupFldElt -&gt; BoolElt, ModTupRngElt, ModTupFldElt</A></H5>
+<H5>CosetDecode(C, u : parameters) : CodeLinRng, ModTupRngElt -&gt; BoolElt, ModTupRngElt, ModTupFldElt</H5>
+
+<PRE>    MinWeightCode: RngIntElt            Default: </PRE>
+
+<PRE>    MinWeightKernel: RngIntElt          Default: </PRE>
+<BLOCKQUOTE>
+Given a code C over Z<sub>4</sub> of length n, and a vector u from the
+ambient space V=Z<sub>4</sub><sup>n</sup> or V<sub>2</sub>=Z<sub>2</sub><sup>2n</sup>, attempt to decode u
+with respect to C.  If the decoding algorithm succeeds in computing a
+vector u'&isin;C as the decoded version of u &isin;V, then the function
+returns <TT>true</TT>, u' and &Phi;(u'), where &Phi; is the Gray map.
+If the decoding algorithm does not succeed in decoding u, then the
+function returns <TT>false</TT>, the zero vector in V and the zero vector
+in V<sub>2</sub>.
+<P>
+The coset decoding algorithm considers the binary linear code
+C<sub>u</sub>=C<sub>bin</sub> &cup;(C<sub>bin</sub> + &Phi;(u)), when C<sub>bin</sub>=&Phi;(C)
+is linear.  On the other hand, when C<sub>bin</sub> is nonlinear, we
+have C<sub>bin</sub>=bigcup<sub>i=0</sub><sup>t</sup> ( K<sub>bin</sub> + &Phi;(c<sub>i</sub>)), where
+K<sub>bin</sub>=&Phi;(K<sub>C</sub>), K<sub>C</sub> is the kernel of C as a subcode over
+Z<sub>4</sub>, [c<sub>0</sub>, c<sub>1</sub>, ..., c<sub>t</sub>] are the coset representatives of C
+with respect to K<sub>C</sub> (not necessarily of minimal weight in their
+cosets) and c<sub>0</sub> is the zero codeword. In this case, the algorithm
+considers the binary linear codes K<sub>0</sub>=K<sub>bin</sub>&cup;(K<sub>bin</sub> + &Phi;(u)),
+K<sub>1</sub>=K<sub>bin</sub> &cup;(K<sub>bin</sub> + &Phi;(c<sub>1</sub>) + &Phi;(u)), ..., K<sub>t</sub>=K<sub>bin</sub>
+&cup;(K<sub>bin</sub> + &Phi;(c<sub>t</sub>) + &Phi;(u)).
+<P>
+If the parameter <TT>MinWeightCode</TT> is not assigned, then the
+minimum weight of C, which coincides with the minimum weight
+of C<sub>bin</sub>, denoted by d, is computed. Note that the minimum
+distance of C<sub>bin</sub> coincides with its minimum weight.  If C<sub>bin</sub>
+is linear and the minimum weight of C<sub>u</sub> is less than d, then
+&Phi;(u')=&Phi;(u) + e, where e is a word of minimum weight of
+C<sub>u</sub>; otherwise, the decoding algorithm returns <TT>false</TT>.  On the
+other hand, if C<sub>bin</sub> is nonlinear and the minimum weight of
+&cup;<sub>i=0</sub><sup>t</sup> K<sub>i</sub> is less than the minimum weight of K<sub>bin</sub>,
+then &Phi;(u')=&Phi;(u) + e, where e is a word of minimum weight
+of &cup;<sub>i=0</sub><sup>t</sup> K<sub>i</sub>; otherwise, the decoding algorithm returns
+<TT>false</TT>. If the parameter <TT>MinWeightKernel</TT> is not assigned,
+then the minimum Hamming weight of K<sub>bin</sub> is computed.
+</BLOCKQUOTE>
+<H5><A NAME = "20946">CosetDecode(C, Q : parameters) : CodeLinRng, [ModTupFldElt] -&gt; SeqEnum, SeqEnum, SeqEnum</A></H5>
+<H5>CosetDecode(C, Q : parameters) : CodeLinRng, [ModTupRngElt] -&gt; SeqEnum, SeqEnum, SeqEnum</H5>
+
+<PRE>    MinWeightCode: RngIntElt            Default: </PRE>
+
+<PRE>    MinWeightKernel: RngIntElt          Default: </PRE>
+<BLOCKQUOTE>
+Given a code C over Z<sub>4</sub> of length n, and a sequence Q of
+vectors from the ambient space V=Z<sub>4</sub><sup>n</sup> or V<sub>2</sub>=Z<sub>2</sub><sup>2n</sup>,  attempt
+to decode the vectors of Q with respect to C. This function is
+similar to the function <TT>CosetDecode(C, u)</TT> except that rather
+than decoding a single vector, it decodes a sequence of vectors and
+returns a sequence of booleans and two sequences of decoded vectors
+corresponding to the given sequence. The algorithm used and effect
+of the parameters <TT>MinWeightCode</TT> and <TT>MinWeightKernel</TT>
+are identical to those for the function <TT>CosetDecode(C, u)</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20947">Example <TT>CodeZ4_spain-Z4-12 (H162E19)</TT></A></H3>
+Starting with the Hadamard code C over Z<sub>4</sub> of length 16 and type 
+2<sup>0</sup>4<sup>3</sup>, a codeword c &isin;C is selected and then perturbed to give
+a vector u in the ambient space of C.  The vector u is then 
+decoded to recover c.
+<P>
+<P>
+<P>
+<PRE>
+&gt; C := HadamardCodeZ4(3, 5);
+&gt; C;
+((16, 4^3 2^0)) Linear Code over IntegerRing(4)
+Generator matrix:
+[1 0 3 2 0 3 2 1 3 2 1 0 2 1 0 3]
+[0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3]
+[0 0 0 0 1 1 1 1 2 2 2 2 3 3 3 3]
+&gt; d := MinimumLeeDistance(C);
+&gt; t := Floor((d-1)/2);
+&gt; t;
+7
+&gt; c := C ! [1,1,1,1,2,2,2,2,3,3,3,3,0,0,0,0];
+&gt; c in C;
+true
+&gt; u := c;
+&gt; u[5] := u[5] + 2;
+&gt; u[12] := u[12] + 1;
+&gt; u[13] := u[13] + 3;
+&gt; u[16] := u[16] + 2;
+&gt; c;
+(1 1 1 1 2 2 2 2 3 3 3 3 0 0 0 0)
+&gt; u;
+(1 1 1 1 0 2 2 2 3 3 3 0 3 0 0 2)
+&gt; grayMap := GrayMap(UniverseCode(Integers(4), Length(C)));
+&gt; grayMap(c-u);
+(0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 1 0 0 0 0 1 1)
+&gt; isDecoded, uDecoded := CosetDecode(C, u : MinWeightCode := d);
+&gt; isDecoded;
+true
+&gt; uDecoded eq c;
+true
+</PRE>
+<HR>
+<H4><A NAME = "20948">Syndrome Decoding</A></H4>
+
+
+
+<H5><A NAME = "20949">SyndromeDecode(C, u) : CodeLinRng, ModTupFldElt -&gt; BoolElt, ModTupRngElt, ModTupFldElt</A></H5>
+<H5>SyndromeDecode(C, u) : CodeLinRng, ModTupRngElt -&gt; BoolElt, ModTupRngElt, ModTupFldElt</H5>
+<BLOCKQUOTE>
+Given a code C over Z<sub>4</sub> of length n, and a vector u  from the
+ambient space V=Z<sub>4</sub><sup>n</sup> or V<sub>2</sub>=Z<sub>2</sub><sup>2n</sup>, attempt to decode u with
+respect to C. The decoding algorithm always succeeds in computing a
+vector u'&isin;C as the decoded version of u &isin;V, and the function
+returns <TT>true</TT>, u' and &Phi;(u'), where &Phi; is the Gray map.  
+Although the function never returns <TT>false</TT>, the first output parameter 
+<TT>true</TT> is given to be consistent with the other decoding functions.
+<P>
+The syndrome decoding algorithm consists of computing a table pairing
+each possible syndrome s with a vector of minimum Lee weight e<sub>s</sub>,
+called coset leader, in the coset of C containing all vectors having
+syndrome s. After receiving a vector u, its syndrome s is computed
+using the parity check matrix. Then, u is decoded into the codeword 
+c=u - e<sub>s</sub>.
+</BLOCKQUOTE>
+<H5><A NAME = "20950">SyndromeDecode(C, Q) : CodeLinRng, [ModTupFldElt] -&gt; SeqEnum, SeqEnum, SeqEnum</A></H5>
+<H5>SyndromeDecode(C, Q) : CodeLinRng, [ModTupRngElt] -&gt; SeqEnum, SeqEnum, SeqEnum</H5>
+<BLOCKQUOTE>
+Given a code C over Z<sub>4</sub> of length n, and a sequence Q of vectors
+from the ambient space V=Z<sub>4</sub><sup>n</sup> or V<sub>2</sub>=Z<sub>2</sub><sup>2n</sup>,  attempt to decode the
+vectors of Q with respect to C. This function is similar to the function
+<TT>SyndromeDecode(C, u)</TT> except that rather than decoding a single vector,
+it decodes a sequence of vectors and returns a sequence of booleans and
+two sequences of decoded vectors corresponding to the given sequence. The
+algorithm used is the same as that of function <TT>SyndromeDecode(C, u)</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20951">Example <TT>CodeZ4_spain-Z4-13 (H162E20)</TT></A></H3>
+The Hadamard code C over Z<sub>4</sub> of length 8 and type 2<sup>1</sup>4<sup>2</sup> is
+constructed. Next information bits are encoded using C and three errors
+are introduced to give the vector u.  Then u is decoded by calculating 
+its syndrome and applying the map, given by the CosetLeaders function, 
+to the syndrome to recover the original vector.
+<P>
+<P>
+<P>
+<PRE>
+&gt; C := HadamardCodeZ4(2, 4);
+&gt; C;
+((8, 4^2 2^1, 8)) Linear Code over IntegerRing(4)
+Generator matrix:
+[1 0 3 2 1 0 3 2]
+[0 1 2 3 0 1 2 3]
+[0 0 0 0 2 2 2 2]
+&gt; t := Floor((MinimumLeeDistance(C)-1)/2);
+&gt; t;
+3
+&gt; R, V, f, fbin := InformationSpace(C);
+&gt; i := R![2,1,0];
+&gt; c := f(i);
+&gt; c;
+(1 0 3 2 3 2 1 0)
+&gt; u := c;
+&gt; u[5] := u[5] + 3;
+&gt; u[7] := u[7] + 2;
+&gt; c;
+(1 0 3 2 3 2 1 0)
+&gt; u;
+(1 0 3 2 2 2 3 0)
+&gt; grayMap := GrayMap(UniverseCode(Integers(4), Length(C)));
+&gt; grayMap(c-u);
+(0 0 0 0 0 0 0 0 0 1 0 0 1 1 0 0)
+&gt; isDecoded, uDecoded := SyndromeDecode(C, u);
+&gt; isDecoded;
+true
+&gt; uDecoded eq c;
+true
+
+&gt; L, mapCosetLeaders := CosetLeaders(C);
+&gt; ev := mapCosetLeaders(Syndrome(u, C));
+&gt; ev;
+(0 0 0 0 3 0 2 0)
+&gt; u - ev eq c;
+true
+</PRE>
+<HR>
+<H4><A NAME = "20952">Lifted Decoding</A></H4>
+
+
+
+<H5><A NAME = "20953">LiftedDecode(C, u : parameters) : CodeLinRng, ModTupFldElt -&gt; BoolElt, ModTupRngElt, ModTupFldElt</A></H5>
+<H5>LiftedDecode(C, u : parameters) : CodeLinRng, ModTupRngElt -&gt; BoolElt, ModTupRngElt, ModTupFldElt</H5>
+
+<PRE>    AlgMethod: MonStgElt                Default: "Euclidean"</PRE>
+<BLOCKQUOTE>
+Given a code C over Z<sub>4</sub> of length n, and a vector u  from
+the ambient space V=Z<sub>4</sub><sup>n</sup> or V<sub>2</sub>=Z<sub>2</sub><sup>2n</sup>, attempt to decode
+u with respect to C. If the decoding algorithm succeeds in
+computing a vector u'&isin;C as the decoded version of u &isin;V,
+then the function returns <TT>true</TT>, u' and &Phi;(u'), where &Phi;
+is the Gray map.  If the decoding algorithm does not succeed in
+decoding u, then the function returns <TT>false</TT>, the zero vector
+in V and the zero vector in V<sub>2</sub> (in the Euclidean case it may
+happen that u' is not in C because there are too many errors
+in u to correct).
+<P>
+The lifted decoding algorithm comprises lifting decoding algorithms for two
+binary linear codes C<sub>0</sub> and C<sub>1</sub>, being the residue and torsion codes
+of C.  Let t<sub>0</sub> and t<sub>1</sub> be the error-correcting capability of C<sub>0</sub>
+and C<sub>1</sub>, respectively.  Assume the received vector u=c + e, where c&isin;C 
+and e &isin;V is the error vector.  Then, the lifted decoding algorithm
+can correct all error vectors e such that &tau;<sub>1</sub> + &tau;<sub>3</sub> &le;t<sub>0</sub> and
+&tau;<sub>2</sub> + &tau;<sub>3</sub> &le;t<sub>1</sub>, where &tau;<sub>i</sub> is the number of occurrences of
+i in e.
+<P>
+In the decoding process, the function <TT>Decode(C, u)</TT> for linear codes is
+used. The available algorithms for linear codes are: syndrome decoding and
+a Euclidean algorithm, which operates on alternant codes (BCH, Goppa, and
+Reed--Solomon codes, etc.).  If C<sub>0</sub> or C<sub>1</sub> is alternant, the Euclidean
+algorithm is used by default, but the syndrome algorithm will be used if
+the parameter <TT>AlgMethod</TT> is assigned the value <TT>"Syndrome"</TT>. For
+non-alternant codes C<sub>0</sub> and C<sub>1</sub>, only syndrome decoding is possible,
+so the parameter <TT>AlgMethod</TT> is not relevant.
+</BLOCKQUOTE>
+<H5><A NAME = "20954">LiftedDecode(C, Q : parameters) : CodeLinRng, [ModTupFldElt] -&gt; SeqEnum, SeqEnum, SeqEnum</A></H5>
+<H5>LiftedDecode(C, Q : parameters) : CodeLinRng, [ModTupRngElt] -&gt; SeqEnum, SeqEnum, SeqEnum</H5>
+
+<PRE>    AlgMethod: MonStgElt                Default: "Euclidean"</PRE>
+<BLOCKQUOTE>
+Given a code C over Z<sub>4</sub> of length n, and a sequence Q of vectors
+from the ambient space V=Z<sub>4</sub><sup>n</sup> or V<sub>2</sub>=Z<sub>2</sub><sup>2n</sup>,  attempt to decode
+the vectors of Q with respect to C. This function is similar to the
+function <TT>LiftedDecode(C, u)</TT> except that rather than decoding a
+single vector, it decodes a sequence of vectors and returns a sequence of
+booleans and two sequences of decoded vectors corresponding to the given
+sequence. The algorithm used and effect of the parameter <TT>AlgMethod</TT>
+are the same as for <TT>LiftedDecode(C, u)</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20955">Example <TT>CodeZ4_hadamard_decoding (H162E21)</TT></A></H3>
+The Hadamard code C over Z<sub>4</sub> of length 8 and type 2<sup>1</sup>4<sup>2</sup> is 
+constructed.  Then an information word is encoded using C, three 
+errors are introduced into the codeword c and then c is recovered
+by using the lifted decoding algorithm.
+<P>
+<P>
+<P>
+<PRE>
+&gt; C := HadamardCodeZ4(2, 4);
+&gt; C;
+((8, 4^2 2^1, 8)) Linear Code over IntegerRing(4)
+Generator matrix:
+[1 0 3 2 1 0 3 2]
+[0 1 2 3 0 1 2 3]
+[0 0 0 0 2 2 2 2]
+&gt; d := MinimumLeeDistance(C);
+&gt; t := Floor((d-1)/2);
+&gt; t;
+3
+&gt; C0 := BinaryResidueCode(C);
+&gt; C1 := BinaryTorsionCode(C);
+&gt; t0 := Floor((MinimumDistance(C0)-1)/2);
+&gt; t1 := Floor((MinimumDistance(C1)-1)/2);
+&gt; t0, t1;
+1 1
+</PRE>
+<P>
+Using the lifted decoding, it is possible to correct all error vectors e
+such that &tau;<sub>1</sub> + &tau;<sub>3</sub> &le;t<sub>0</sub>=1 and &tau;<sub>2</sub> + &tau;<sub>3</sub> &le;t<sub>1</sub>=1, where 
+&tau;<sub>i</sub> is the number of occurrences of i in e.  The following
+statements show that it is not possible to correct the error vector 
+e=(0 0 0 0 3 0 2 0) since &tau;<sub>2</sub> + &tau;<sub>3</sub>=2 &gt; 1, but it is possible 
+to correct the error vector e=(0 0 0 0 1 0 2 0) since 
+&tau;<sub>1</sub> + &tau;<sub>3</sub>=1 &le;1 and &tau;<sub>2</sub> + &tau;<sub>3</sub>=1 &le;1.
+<P>
+<P>
+<P>
+<PRE>
+&gt; R, V, f, fbin := InformationSpace(C);
+&gt; i := R![2,1,0];
+&gt; c := f(i);
+&gt; c;
+(1 0 3 2 3 2 1 0)
+
+&gt; u := c;
+&gt; u[5] := u[5] + 3;
+&gt; u[7] := u[7] + 2;
+&gt; c;
+(1 0 3 2 3 2 1 0)
+&gt; u;
+(1 0 3 2 2 2 3 0)
+&gt; e := u - c;
+&gt; e;
+(0 0 0 0 3 0 2 0)
+
+&gt; isDecoded, uDecoded := LiftedDecode(C, u);
+&gt; isDecoded;
+true
+&gt; uDecoded eq c;
+false
+
+&gt; u := c;
+&gt; u[5] := u[5] + 1;
+&gt; u[7] := u[7] + 2;
+&gt; c;
+(1 0 3 2 3 2 1 0)
+&gt; u;
+(1 0 3 2 0 2 3 0)
+&gt; e := u - c;
+&gt; e;
+(0 0 0 0 1 0 2 0)
+
+&gt; isDecoded, uDecoded := LiftedDecode(C, u);
+&gt; isDecoded;
+true
+&gt; uDecoded eq c;
+true
+</PRE>
+<HR>
+<H4><A NAME = "20956">Permutation Decoding</A></H4>
+
+<P>
+<P>
+<P>
+Let C be a code over Z<sub>4</sub> of length n and type 2<sup>&gamma;</sup> 4<sup>&delta;</sup>
+and C<sub>bin</sub>=&Phi;(C), where &Phi; is the Gray map.  A subset S &sube;Sym(2n) is an s-PD-set for C<sub>bin</sub> with respect to a subset of
+coordinate positions I&sube;{1, ..., 2n} if S is a subset of the
+permutation automorphism group of C<sub>bin</sub>, I is an information set for
+C<sub>bin</sub>, and every s-set of coordinate positions in {1, ..., 2n}
+is moved out of the information set I by at least one element of S, where
+1&le;s &le;t and t is the error-correcting capability of C<sub>bin</sub>.
+<P>
+If I=[i<sub>1</sub>, ..., i<sub>&gamma; + &delta;</sub>] &sube;{1, ..., n } is an
+information set for C such that the code obtained by puncturing C at 
+positions {1, ..., n} \ {i<sub>&gamma; + 1</sub>, ..., i<sub>&gamma; + &delta;</sub> } 
+is of type 4<sup>&delta;</sup>, then &Phi;(I)=[2i<sub>1</sub> - 1, ..., 2i<sub>&gamma;</sub> - 1, 2i<sub>&gamma; + 1</sub> - 1,
+2i<sub>&gamma; + 1</sub>, ..., 2i<sub>&gamma; + &delta;</sub> - 1, 2i<sub>&gamma; + &delta;</sub>] is an
+information set for C<sub>bin</sub>. It is also easy to see that if S is a
+subset of the permutation automorphism group of C, that is, S &sube;PAut(C) &sube;Sym(n), then &Phi;(S)=[ &Phi;(&tau;) : &tau; &isin;S]
+&sube;PAut(C<sub>bin</sub>) &sube;Sym(2n), where
+&Phi;(&tau;)(i)=cases(
+2&tau;(i/2), &amp;if i  is even, cr
+2&tau;((i + 1)/2) - 1 &amp;if i  is odd.cr) 
+<P>
+<P>
+Given a subset of coordinate positions I&sube;{1, ..., n} and
+a subset S &sube;Sym(n), in order to check that &Phi;(S) is an
+s-PD-set for C<sub>bin</sub> with respect to &Phi;(I), it is enough to check
+that S is a subset of the permutation automorphism group of C, I
+is an information set for C, and every s-set of coordinate positions
+in {1, ..., n} is moved out of the information set I by at least
+one element of S <A  HREF = "text1873.htm#bib_BV2015a">[BV16a]</A>, <A  HREF = "text1873.htm#bib_BV2015b">[BV16b]</A>.  
+
+
+<H5><A NAME = "20957">IsPermutationDecodeSet(C, I, S, s) : CodeLinRng, [RngIntElt], [GrpPermElt], RngIntElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a code C over Z<sub>4</sub> of length n and type 2<sup>&gamma;</sup> 4<sup>&delta;</sup>, a
+sequence I &sube;{1, ..., 2n }, a sequence S of elements in the
+symmetric group Sym(2n) of permutations on the set {1, ..., 2n },
+and an integer s&ge;1, return <TT>true</TT> if and only if S is an s-PD-set
+for C<sub>bin</sub>=&Phi;(C), where &Phi; is the Gray map, with respect to the
+information set I.
+<P>
+The arguments I and S can also be given as a sequence I &sube;{1, ..., n } and a sequence S of elements in the symmetric group
+Sym(n) of permutations on the set {1, ..., n }, respectively.
+In this case, the function returns <TT>true</TT> if and only if &Phi;(S) is
+an s-PD-set for C<sub>bin</sub>=&Phi;(C) with respect to the information set
+&Phi;(I), where &Phi;(I) and &Phi;(S) are the sequences defined as above.
+<P>
+Depending on the length of the code C, its type, and the integer s,
+this function could take some time to compute whether S or &Phi;(S)
+is an s-PD-set for C<sub>bin</sub> with respect to I or &Phi;(I),
+respectively. Specifically, if the function returns <TT>true</TT>, it is necessary
+to check &sum;<sub>i=1</sub><sup>s</sup> ((|I|)choose(i)) .((N - |I|)choose(s - i))
+s-sets, where N=n and |I|=&gamma; + &delta; when I is given as an
+information set for C, or N=2n and |I|=&gamma; + 2&delta; when I
+is given as an information set for C<sub>bin</sub>.
+<P>
+The verbose flag <TT>IsPDSetFlag</TT> is set to level 0 by default.  If it
+is set to level 1, the total time used to check the condition is shown.
+Moreover, the reason why the function returns <TT>false</TT> is also shown, that is,
+whether I is not an information set, S is not a subset of the permutation
+automorphism group or S is not an s-PD-set. If it is set to level 2,
+the percentage of the computation process performed is also printed.
+</BLOCKQUOTE>
+<H5><A NAME = "20958">PermutationDecode(C, I, S, s, u) : CodeLinRng, [RngIntElt], [GrpPermElt], RngIntElt, ModTupFldElt -&gt; BoolElt, ModTupRngElt, ModTupFldElt</A></H5>
+<H5>PermutationDecode(C, I, S, s, u) : CodeLinRng, [RngIntElt], [GrpPermElt], RngIntElt, ModTupRngElt -&gt; BoolElt, ModTupRngElt, ModTupFldElt</H5>
+<BLOCKQUOTE>
+The arguments for the intrinsic are as follows:
+<DL COMPACT class='compact'>
+<DT>-</DT><DD>C is a code over Z<sub>4</sub> of length n and type 2<sup>&gamma;</sup> 4<sup>&delta;</sup>; 
+<DT>-</DT><DD>I=[i<sub>1</sub>, ..., i<sub>&gamma; + &delta;</sub>] &sube;{1, ..., n } is the 
+information set for C given as a sequence of coordinate positions such that
+the code obtained by puncturing C at coordinate positions 
+{1, ..., n} \ {i<sub>&gamma; + 1</sub>, ..., i<sub>&gamma; + 1</sub>, ..., i<sub>&gamma; + &delta;</sub> } 
+is of type 4<sup>&delta;</sup>; 
+<DT>-</DT><DD>S is a sequence such that either S or &Phi;(S) is an s-PD-set for
+C<sub>bin</sub>=&Phi;(C), where &Phi; is the Gray map, with respect to &Phi;(I);
+<DT>-</DT><DD>s is an integer such that s &isin;{1, ..., t} where
+t is the error-correcting capability of C<sub>bin</sub>;  
+<DT>-</DT><DD>u is a vector from the ambient space V=Z<sub>4</sub><sup>n</sup> or V<sub>2</sub>=Z<sub>2</sub><sup>2n</sup>. 
+<P>
+</DL>
+Given the above assumptions, the function attempts to decode u with respect 
+to C.  If the decoding algorithm succeeds in computing a vector u'&isin;C as
+the decoded version of u &isin;V, then the function returns the values
+<TT>true</TT>, u' and &Phi;(u').  If the decoding algorithm does not succeed 
+in decoding u, then the function returns the values <TT>false</TT>, the zero 
+vector in V and the zero vector in V<sub>2</sub>.
+<P>
+Assume that the received vector &Phi;(u)=c + e, where u &isin;V, 
+c &isin;C<sub>bin</sub> and e &isin;V<sub>2</sub> is the error vector with at most 
+t errors.
+The permutation decoding algorithm proceeds by moving all errors
+in the received vector &Phi;(u) out of the information positions. 
+That is, the nonzero coordinates of e are moved out of the information 
+set &Phi;(I) for C<sub>bin</sub>, by using an automorphism of C<sub>bin</sub>.
+<P>
+Note that &Phi;(I) and &Phi;(S) are the sequences defined as above.
+Moreover, the function does not check whether I is an information
+set for C, nor whether S or &Phi;(S) is an s-PD-set for C<sub>bin</sub> 
+with respect to &Phi;(I), nor that s&le;t.
+</BLOCKQUOTE>
+<H5><A NAME = "20959">PermutationDecode(C, I, S, s, Q) : CodeLinRng, [RngIntElt], [GrpPermElt], RngIntElt, [ModTupFldElt] -&gt;  [BoolElt], [ModTupRngElt], [ModTupFldElt]</A></H5>
+<H5>PermutationDecode(C, I, S, s, Q) : CodeLinRng, [RngIntElt], [GrpPermElt], RngIntElt, [ModTupRngElt] -&gt;  [BoolElt], [ModTupRngElt], [ModTupFldElt]</H5>
+<BLOCKQUOTE>
+Given 
+<DL COMPACT class='compact'>
+<DT>-</DT><DD>a code C over Z<sub>4</sub> of length n and type 2<sup>&gamma;</sup> 4<sup>&delta;</sup>; 
+<DT>-</DT><DD>an
+information set I=[i<sub>1</sub>, ..., i<sub>&gamma; + &delta;</sub>] &sube;{1, ..., n
+} for C as a sequence of coordinate positions, such that the code
+C punctured on {1, ..., n} \ {i<sub>&gamma; + 1</sub>, ...,
+i<sub>&gamma; + &delta;</sub> } is of type 4<sup>&delta;</sup>; 
+<DT>-</DT><DD>a sequence S such that either
+S or &Phi;(S) is an s-PD-set for C<sub>bin</sub>=&Phi;(C), where &Phi; is
+the Gray map, with respect to &Phi;(I); 
+<DT>-</DT><DD>an integer s &isin;{1, ..., t},
+where t is the error-correcting capability of C<sub>bin</sub>; 
+<DT>-</DT><DD>and a sequence Q of vectors from the ambient space V=Z<sub>4</sub><sup>n</sup> or  V<sub>2</sub>=Z<sub>2</sub><sup>2n</sup>,
+<P>
+attempt to decode the vectors of Q with respect to C. This function is
+similar to the version of <TT>PermutationDecode</TT> that decodes a single
+vector except that it decodes a sequence of vectors and returns a 
+sequence of booleans and two sequences of decoded vectors corresponding 
+to the given sequence. The algorithm used is the same as that used by
+the single vector version of <TT>PermutationDecode</TT>.</DL>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20960">Example <TT>CodeZ4_spain-Z4-15 (H162E22)</TT></A></H3>
+First the Hadamard code C over Z<sub>4</sub> of length 32 and type 2<sup>1</sup>4<sup>3</sup> is
+constructed.  It is known that I=[17, 1, 2, 5] is an information set for C
+and S={ &pi;<sup>i</sup> : 1&le;i &le;8 }, where &pi;=(1, 24, 26, 15, 3, 22, 28, 13)
+(2, 23, 27, 14, 4, 21, 25, 16) (5, 11, 32, 20, 7, 9, 30, 18) 
+(6, 10, 29, 19, 8, 12, 31, 17), is a subset of the permutation automorphism
+group of C such that &Phi;(S) is a 7-PD-set for C<sub>bin</sub>=&Phi;(C) with
+respect to &Phi;(I). Then, choosing a codeword c of C, c is perturbed
+by the addition of an error vector to give a new vector u, and finally 
+permutation decoding is applied to u to recover c.
+<P>
+<P>
+<P>
+<PRE>
+&gt; C := HadamardCodeZ4(3, 6);
+&gt; C;
+((32, 4^3 2^1)) Linear Code over IntegerRing(4)
+Generator matrix:
+[1 0 3 2 0 3 2 1 3 2 1 0 2 1 0 3 1 0 3 2 0 3 2 1 3 2 1 0 2 1 0 3]
+[0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3 0 1 2 3]
+[0 0 0 0 1 1 1 1 2 2 2 2 3 3 3 3 0 0 0 0 1 1 1 1 2 2 2 2 3 3 3 3]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2]
+&gt; t := Floor((MinimumLeeDistance(C) - 1)/2);
+&gt; t;
+15
+&gt; I := [17, 1, 2, 5];
+&gt; p := Sym(32)!(1, 24, 26, 15, 3, 22, 28, 13)(2, 23, 27, 14, 4, 21, 25, 16)
+&gt;                 (5, 11, 32, 20, 7, 9, 30, 18)(6, 10, 29, 19, 8, 12, 31,17);
+&gt; S := [ p^i : i in [1..8] ];
+&gt; SetVerbose("IsPDSetFlag", 2);
+&gt; IsPermutationDecodeSet(C, I, S, 7);
+Checking whether I is an information set...
+Checking whether S is in the permutation automorphism group...
+Checking whether S is an s-PD-set...
+10 
+20 
+30 
+40 
+50 
+60 
+70 
+80 
+90 
+Took 136.430 seconds (CPU time)
+true
+&gt; SetVerbose("IsPDSetFlag", 0);
+&gt; c := C ! [1,2,3,0,0,1,2,3,3,0,1,2,2,3,0,1,3,0,1,2,2,3,0,1,1,2,3,0,0,1,2,3];
+&gt; c in C;
+true
+&gt; u := c;
+&gt; u[1] := c[1] + 2;
+&gt; u[2] := c[2] + 2;
+&gt; u[3] := c[3] + 1;
+&gt; u[16] := c[16] + 3;
+&gt; u[27] := c[27] + 1;
+&gt; u in C;
+false
+&gt; LeeDistance(u, c);
+7
+
+&gt; grayMap := GrayMap(UniverseCode(Integers(4), Length(C)));
+&gt; cbin := grayMap(c);
+&gt; ubin := grayMap(u);
+&gt; Distance(ubin, cbin);
+7
+&gt; isDecoded, uDecoded, ubinDecoded := PermutationDecode(C, I, S, 7, u);
+&gt; isDecoded;
+true
+&gt; uDecoded eq c;
+true
+&gt; ubinDecoded eq cbin;
+true
+
+&gt; isDecoded, uDecoded, ubinDecoded := PermutationDecode(C, I, S, 7, ubin);
+&gt; isDecoded;
+true
+&gt; uDecoded eq c;
+true
+&gt; ubinDecoded eq cbin;
+true
+</PRE>
+<HR>
+<H5><A NAME = "20961">PDSetHadamardCodeZ4(&delta;, m) : RngIntElt, RngIntElt -&gt; SeqEnum, SeqEnum, SeqEnum, SeqEnum, SeqEnum</A></H5>
+
+<PRE>    AlgMethod: MonStgElt                Default: "Deterministic"</PRE>
+<BLOCKQUOTE>
+Given an integer m&ge;5, and an integer &delta; such that 3&le;&delta;
+&le;&lfloor;(m + 1)/2 &rfloor;, the Hadamard code C over Z<sub>4</sub> of length
+n=2<sup>m - 1</sup> and type 2<sup>&gamma;</sup> 4<sup>&delta;</sup>, where &gamma;=m + 1 - 2&delta;,
+given by the function <TT>HadamardCodeZ4(&delta;, m)</TT>, is considered.
+The function returns an information set I=[i<sub>1</sub>, ..., i<sub>&gamma; + &delta;</sub>]
+&sube;{1, ..., n } for C together with a subset S of the
+permutation automorphism group of C such that &Phi;(S) is an s-PD-set
+for C<sub>bin</sub>=&Phi;(C) with respect to &Phi;(I), where &Phi; is the
+Gray map and &Phi;(I) and &Phi;(S) are defined above. The function
+also returns the information set &Phi;(I) and the s-PD-set &Phi;(S).
+For m&ge;1 and 1 &le;&delta; &le;2, the Gray map image of C is
+linear and it is possible to find an s-PD-set for C<sub>bin</sub>=&Phi;(C),
+for any s&le; &lfloor;(2<sup>m</sup>/(m + 1))  &rfloor; - 1, by using
+the function <TT>PDSetHadamardCode(m)</TT>.
+<P>
+The information sets I and &Phi;(I) are returned as sequences of
+&gamma; + &delta; and &gamma; + 2&delta; integers, giving the coordinate
+positions that correspond to the information sets for C and C<sub>bin</sub>,
+respectively. The sets S and &Phi;(S) are also returned as sequences of
+elements in the symmetric groups Sym(n) and Sym(2n) of permutations
+on the set {1, ..., n } and {1, ..., 2n }, respectively.  
+<P>
+A deterministic algorithm is used by default. In this
+case, the function returns the s-PD-set of size s + 1 with
+s=&lfloor;((2<sup>2&delta; - 2</sup> - &delta;)/&delta;) &rfloor;, which is the maximum
+value of s when &gamma;=0, as described in <A  HREF = "text1873.htm#bib_BV2015a">[BV16a]</A>. If the
+parameter <TT>AlgMethod</TT> is assigned the value <TT>"Nondeterministic"</TT>,
+the function tries to improve the previous result by finding an s-PD-set of
+size s + 1 such that &lfloor;((2<sup>2&delta; - 2</sup> - &delta;)/&delta;) &rfloor;&le;s
+&le;&lfloor;((2<sup>m - 1</sup> + &delta; - m - 1)/(m + 1 - &delta;)) &rfloor;.  In this case,
+the function starts from the maximum value of s and decreases it if
+the s-PD-set is not found after a specified time.
+</BLOCKQUOTE>
+<H5><A NAME = "20962">PDSetKerdockCodeZ4(m) : RngIntElt -&gt; SeqEnum, SeqEnum, SeqEnum, SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given an integer m&ge;4 such that 2<sup>m</sup> - 1 is not a prime number, the
+Kerdock code C over Z<sub>4</sub> of length n=2<sup>m</sup> and type 4<sup>m + 1</sup>, given by
+the function <TT>KerdockCodeZ4(m)</TT> is considered.  The function returns the
+information set I=[1, ..., m + 1] for C together with a subset S of the
+permutation automorphism group of C such that &Phi;(S) is an s-PD-set
+for C<sub>bin</sub>=&Phi;(C) with respect to &Phi;(I), where &Phi; is the Gray
+map and &Phi;(I) and &Phi;(S) are defined above. The function also returns
+the information set &Phi;(I)=[1, ..., 2m + 2] and the s-PD-set &Phi;(S).
+The size of the s-PD-set S is always &lambda; = s + 1, where &lambda;
+is the greatest divisor of 2<sup>m</sup> - 1 such that &lambda; &le;2<sup>m</sup>/(m + 1).
+<P>
+The information sets I and &Phi;(I) are returned as sequences of m + 1
+and 2m + 2 integers, giving the coordinate positions that correspond to
+the information sets for C and C<sub>bin</sub>, respectively. The sets S
+and &Phi;(S) are also returned as sequences of elements in the symmetric
+groups Sym(n) and Sym(2n) of permutations on the sets {1, ..., n }
+and {1, ..., 2n }, respectively. The s-PD-set S contains the s + 1
+permutations described in <A  HREF = "text1873.htm#bib_BV2015b">[BV16b]</A>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20963">Example <TT>CodeZ4_spain-Z4-16 (H162E23)</TT></A></H3>
+A 4-PD-set S of size 5 for the Hadamard code C over Z<sub>4</sub> of length 16 
+and type 2<sup>0</sup>4<sup>3</sup> is constructed. A check that it really is a 4-PD-set for C
+is then made. Note that &lfloor;((2<sup>2&delta; - 2</sup> - &delta;)/&delta;) &rfloor;=4.
+Finally, a codeword c of C is selected, perturbed by an error vector e 
+to give a vector u, to which permutation decoding is applied to recover c.
+<P>
+<P>
+<P>
+<PRE>
+&gt; C := HadamardCodeZ4(3, 5);
+
+&gt; I, S, Ibin, Sbin := PDSetHadamardCodeZ4(3, 5);
+&gt; s := #Sbin-1; s;
+4
+&gt; s eq Floor((2^(2*3-2)-3)/3);
+true
+&gt; IsPermutationDecodeSet(C, I, S, s);
+true
+&gt; IsPermutationDecodeSet(C, Ibin, Sbin, s);
+true
+
+&gt; c := C ! [3,2,1,0,1,0,3,2,3,2,1,0,1,0,3,2];
+&gt; R := UniverseCode(Integers(4), Length(C));
+&gt; u := R ! [2,3,2,0,1,0,3,2,3,2,1,0,1,0,3,3];
+&gt; u in C;
+false
+&gt; LeeDistance(u, c);
+4
+&gt; grayMap := GrayMap(R);
+&gt; cbin := grayMap(c);
+
+&gt; isDecoded, uDecoded, ubinDecoded := PermutationDecode(C, I, S, 4, u);
+&gt; isDecoded;
+true
+&gt; uDecoded eq c;
+true
+&gt; ubinDecoded eq cbin;
+true
+</PRE>
+<P>
+For the Hadamard code C over Z<sub>4</sub> of length 32 and type 2<sup>1</sup>4<sup>3</sup>,
+a 4-PD-set of size 5 can be constructed either by using the deterministic
+method (by default), or by using a nondeterministic method to obtain an 
+s-PD-set of size s + 1 with 4&le;s &le;7.
+In both cases, the given sets are checked for really being s-PD-sets 
+for C.
+<P>
+<P>
+<P>
+<PRE>
+&gt; C := HadamardCodeZ4(3, 6);
+
+&gt; I, S, Ibin, Sbin := PDSetHadamardCodeZ4(3, 6);
+&gt; s := #Sbin-1; s;
+4
+&gt; IsPermutationDecodeSet(C, I, S, s);
+true
+
+&gt; I, S, Ibin, Sbin := PDSetHadamardCodeZ4(3, 6 : AlgMethod := "Nondeterministic");
+&gt; s := #Sbin-1; s;
+6
+&gt; IsPermutationDecodeSet(C, I, S, s);
+true
+</PRE>
+<P>
+Finally, a 2-PD-set of size 3 is constructed for the Kerdock code of length 16 
+and type 2<sup>0</sup> 4<sup>5</sup>, and formally checked for being a 2-PD-set for this code.
+<P>
+<P>
+<P>
+<PRE>
+&gt; C := KerdockCode(4);
+
+&gt; I, S, Ibin, Sbin := PDSetKerdockCodeZ4(4);
+&gt; IsPermutationDecodeSet(C, I, S, 2);
+true
+&gt; IsPermutationDecodeSet(C, Ibin, Sbin, 2);
+true
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1881.htm">[Next]</A><A  HREF = "text1879.htm">[Prev]</A> <A  HREF = "text1881.htm">[Right]</A> <A  HREF = "text1879.htm">[Left]</A> <A  HREF = "text1874.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,190 @@
+SetEchoInput(true);
+
+P<x> := PolynomialRing(Integers());
+
+Zp := pAdicRing(7, 50);
+U := UnramifiedExtension(Zp, x^2 + 6*x + 3);
+R := TotallyRamifiedExtension(U, x^3 + 7*x^2 + 7*x + 7);
+L := LocalField(pAdicField(7, 50), MinimalPolynomial(R.1 + U.1, Zp));
+
+RR, m := RamifiedRepresentation(L);
+
+URR := UnramifiedExtension(RR, Polynomial(RR, [5, 10, 2, 1]));
+RRR := TotallyRamifiedExtension(URR, Polynomial(URR, [RR.1, 5*RR.1^20, 1])); 
+
+mp := MinimalPolynomial(RRR.1 + URR.1, RR);
+h := hom<PolynomialRing(RR) -> PolynomialRing(L) | Inverse(m), PolynomialRing(L).1>;
+LL := LocalField(L, h(mp));
+assert #Factorization(h(mp)) eq 1;
+assert #Factorization(Polynomial(LL, h(mp))) eq Degree(LL);
+
+RRLL, rrllm := RamifiedRepresentation(LL);
+assert Valuation(Evaluate(Polynomial(LL, h(MinimalPolynomial(RRLL.1, RR))), RRLL.1 @@ rrllm)) eq Precision(LL);
+assert RelativePrecision(Evaluate(Polynomial(LL, h(MinimalPolynomial(RRLL.1, RR))), RRLL.1 @@ rrllm)) eq 0;
+assert Valuation(Evaluate(Polynomial(LL, h(MinimalPolynomial(CoefficientRing(RRLL).1, RR))), 
+CoefficientRing(RRLL).1 @@ rrllm)) eq Precision(LL);
+assert RelativePrecision(Evaluate(Polynomial(LL, h(MinimalPolynomial(CoefficientRing(RRLL).1, RR))), 
+CoefficientRing(RRLL).1 @@ rrllm)) eq 0;
+assert Valuation(Evaluate(Polynomial(RRLL, [m(c) : c in Coefficients(DefiningPolynomial(LL))]), 
+rrllm(LL.1))) ge Precision(LL) - 1;
+assert RelativePrecision(Evaluate(Polynomial(RRLL, [m(c) : c in Coefficients(DefiningPolynomial(LL))]), 
+rrllm(LL.1))) eq 0;
+
+assert RelativePrecision(rrllm(RRLL.1 @@ rrllm) - RRLL.1) le 5;
+assert Valuation(rrllm(RRLL.1 @@ rrllm) - RRLL.1) ge Precision(LL) - 5;
+assert RelativePrecision(rrllm(CoefficientRing(RRLL).1 @@ rrllm) - CoefficientRing(RRLL).1) eq 0;
+
+assert Valuation(rrllm(LL.1) @@ rrllm - LL.1) eq Precision(LL) or RelativePrecision(rrllm(LL.1) @@ rrllm - LL.1) eq 0;
+
+assert IsIdentical(CoefficientRing(LL), L);
+assert Valuation(Evaluate(DefiningPolynomial(LL), LL.1)) ge Precision(LL);
+assert RelativePrecision(Evaluate(DefiningPolynomial(LL), LL.1)) eq 0;
+
+assert Degree(LL) eq RamificationDegree(LL)*InertiaDegree(LL);
+
+assert Valuation(UniformizingElement(LL)) eq 1;
+assert Valuation(InertialElement(LL)) eq 0;
+
+assert Valuation(LL.1) eq 0;
+
+assert Precision(LL) eq Precision(RRLL);
+assert Prime(LL) eq Prime(CoefficientRing(LL));
+
+QuotientRepresentation(LL);
+rf, rfm := ResidueClassField(LL);
+assert Valuation(rfm(LL.1) @@ rfm - LL.1) gt 0;
+
+for i in [1 .. 5] do
+
+    r := &+[Random(0, 500)*LL.1^i : i in [0 .. 2*Degree(LL)]];
+    s := &+[Random(0, 300)*LL.1^i : i in [0 .. 2*Degree(LL)]];
+
+    assert r + s eq s + r;
+    assert Valuation(r + s) ge Minimum(Valuation(r), Valuation(s));
+    assert r - s eq -(s - r);
+    assert r*s eq s*r;
+    assert RepresentationMatrix(r)*RepresentationMatrix(s) eq 
+						    RepresentationMatrix(r*s);
+    assert Valuation(r*s) eq Valuation(r) + Valuation(s);
+    assert Valuation((r/s)*(s/r) - 1) ge Precision(LL)*0.95;
+    assert r^4 eq r*r*r*r;
+
+    assert IsWeaklyZero(r + (-r));
+    assert IsOne(L!1);
+    assert IsMinusOne(-L!1);
+
+end for;
+
+hh := hom< LL -> QuotientRepresentation(LL) | QuotientRepresentation(LL).1>;
+assert Evaluate(hh(LL.1^20), LL.1) eq LL.1^20;
+ch := hom< L -> QuotientRepresentation(LL) | 2*L.1>;
+hh := hom< LL -> QuotientRepresentation(LL) | ch, QuotientRepresentation(LL).1>;
+assert Evaluate(hh(LL.1), LL.1) eq LL.1;
+
+assert &and[IsIntegral(b) : b in IntegralBasis(LL)];
+assert IsIntegral(LL.1);
+assert IsIntegral(UniformizingElement(LL));
+assert IsIntegral(InertialElement(LL));
+assert not IsIntegral(1/UniformizingElement(LL));
+
+A, am := AutomorphismGroup(LL);
+autos := [am(a) : a in A];
+autos_inv := [am(a^-1) : a in A];
+assert Minimum([Valuation(LL.1 @ autos[i] @ autos_inv[i] - LL.1) : i in [1 .. #autos]]) ge Precision(LL)*0.95;
+assert Maximum([RelativePrecision(LL.1 @ autos[i] @ autos_inv[i] - LL.1) : i in [1 .. #autos]]) eq 0;
+
+assert Degree(FixedField(LL, A), CoefficientRing(LL)) eq 1;
+assert Degree(F, CoefficientRing(LL)) eq Degree(LL)/#D where F is FixedField(LL, D) where D is DecompositionGroup(LL);
+assert Degree(FixedField(LL, I), CoefficientRing(LL)) eq Degree(LL)/#I where I is InertiaGroup(LL);
+i := 1;
+repeat
+    RG := RamificationGroup(LL, i);
+    assert Degree(FixedField(LL, RG), CoefficientRing(LL)) eq Degree(LL)/#RG;
+    i +:= 1;
+until #RG eq 1;
+
+Discriminant(LL);
+
+assert IsRamified(LL);
+assert not IsUnramified(LL);
+assert not IsTotallyRamified(LL);
+assert IsWildlyRamified(LL) xor IsTamelyRamified(LL);
+
+assert Degree(sub<LL | 1>) eq 1;
+assert Degree(sub<LL | LL.1>) eq Degree(LL);
+assert Degree(sub<LL | L.1>) eq 1;
+
+s, sm := sub<LL | 1>;
+SL, fm, rm := RelativeField(LL, sm);
+assert RelativePrecision(fm(SL.1) - LL.1) eq 0;
+assert RelativePrecision(rm(LL.1) - SL.1) eq 0;
+s, sm := sub<LL | LL.1>;
+SL, fm, rm := RelativeField(LL, sm);
+assert RelativePrecision(fm(SL.1) - LL.1) eq 0;
+assert RelativePrecision(rm(LL.1) - SL.1) eq 0;
+s, sm := sub<LL | L.1>;
+SL, fm, rm := RelativeField(LL, sm);
+assert RelativePrecision(fm(SL.1) - LL.1) eq 0;
+assert RelativePrecision(rm(LL.1) - SL.1) eq 0;
+
+U := UnramifiedExtension(pAdicField(5, 20), 4);
+L := LocalField(pAdicField(5, 20), DefiningPolynomial(U));
+UR, URm := RamifiedRepresentation(L);
+hh := hom<PolynomialRing(UR) -> PolynomialRing(L) | Inverse(URm), 
+PolynomialRing(L).1>;
+UU := UnramifiedExtension(UR, 4);
+LL := LocalField(L, hh(DefiningPolynomial(UU)));
+UUR, UURm := RamifiedRepresentation(LL);
+assert Valuation(UURm(LL.1) @@ UURm - LL.1) ge Precision(LL);
+assert RelativePrecision(UURm(UUR.1 @@ UURm) - UUR.1) eq 0;
+assert RelativePrecision(Evaluate(DefiningPolynomial(LL), UURm(LL.1))) eq 0;
+
+RF, RFm := ResidueClassField(Integers(UUR));
+rf, rfm := sub<RF | 8>;
+F := Factorization(Polynomial(UUR, DefiningPolynomial(rf)));
+r := -TrailingCoefficient(F[1][1]);
+S, sm := sub<LL | r @@ UURm>;
+
+SL, fm, rm := RelativeField(LL, sm);
+assert RelativePrecision(fm(SL.1) - LL.1) eq 0;
+assert RelativePrecision(rm(LL.1) - SL.1) eq 0;
+
+RS, ms := RamifiedRepresentation(S);
+assert Valuation(ms(S.1) @@ ms - S.1) ge Precision(S);
+assert RelativePrecision(ms(RS.1 @@ ms) - RS.1) eq 0;
+assert Valuation(Evaluate(hh(MinimalPolynomial(RS.1)), RS.1 @@ ms)) ge Precision(S);
+hh_inv := hom<PolynomialRing(L) -> PolynomialRing(UR) | URm, PolynomialRing(UR).1>;
+assert RelativePrecision(Evaluate(hh_inv(DefiningPolynomial(S)), ms(S.1))) eq 0;
+
+f := FrobeniusAutomorphism(LL);
+fL := f(LL.1);
+i := 1;
+while not IsWeaklyZero(fL - LL.1) do
+    fL := f(fL);
+    i +:= 1;
+end while;
+assert i eq Degree(LL);
+assert f(UniformizingElement(LL)) eq UniformizingElement(LL);
+fL := f(LL.1^15);
+i := 1;
+while not IsWeaklyZero(fL - LL.1^15) do
+    fL := f(fL);
+    i +:= 1;
+end while;
+assert i eq Degree(LL);
+
+A, am := AutomorphismGroup(LL);
+autos := [am(a) : a in A];
+autos_inv := [am(a^-1) : a in A];
+assert Minimum([Valuation(LL.1 @ autos[i] @ autos_inv[i] - LL.1) : i in [1 .. #autos]]) ge Precision(LL)*0.95;
+
+assert Degree(FixedField(LL, A), CoefficientRing(LL)) eq 1;
+assert Degree(F, CoefficientRing(LL)) eq Degree(LL)/#D where F is FixedField(LL, D) where D is DecompositionGroup(LL);
+assert Degree(FixedField(LL, I), CoefficientRing(LL)) eq Degree(LL)/#I where I is InertiaGroup(LL);
+i := 1;
+repeat
+    RG := RamificationGroup(LL, i);
+    assert Degree(FixedField(LL, RG), CoefficientRing(LL)) eq Degree(LL)/#RG;
+    i +:= 1;
+until #RG eq 1;
+

@@ -1,0 +1,173 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Cohomology</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text645.htm">[Next]</A><A  HREF = "text643.htm">[Prev]</A> <A  HREF = "text645.htm">[Right]</A> <A  HREF = "text643.htm">[Left]</A> <A  HREF = "text629.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "7260">Cohomology</A></H3>
+
+<P>
+<P>
+In the following description, G is a finite permutation group, p is a prime
+number, and K is the finite field of order p. Further,
+F is a finitely presented group having the same number of generators as G,
+and is such that its relations are satisfied by the corresponding generators of
+G. In other words, the mapping taking the i-th generator of F to the
+i-th generator of G must be an epimorphism. Usually this mapping will be an
+isomorphism, although this is not mandatory.
+The algorithms used are those of Holt, see <A  HREF = "text628.htm#bib_holt-multiplier">[Hol84]</A>,
+<A  HREF = "text628.htm#bib_holt-cover">[Hol85a]</A> and <A  HREF = "text628.htm#bib_holt-cohom">[Hol85b]</A>.
+
+
+<H5><A NAME = "7261">pMultiplicator(G, p) : GrpPerm, RngIntElt -&gt; [ RngIntElt ]</A></H5>
+<BLOCKQUOTE>
+Given the group G and a prime p, return the invariant factors 
+of the p-part of the Schur multiplicator of G.
+</BLOCKQUOTE>
+<H5><A NAME = "7262">pCover(G, F, p) : GrpPerm, GrpFP, RngIntElt -&gt; GrpFP</A></H5>
+<BLOCKQUOTE>
+Given the group G and the finitely presented group F such that G is
+an epimorphic image of G in the sense described above, return a 
+presentation for the p-cover of G, constructed as an extension of 
+the p-multiplier by F.
+</BLOCKQUOTE>
+<H5><A NAME = "7263">CohomologicalDimension(G, M, i) : GrpPerm, ModRng, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given the group G, the K[G]-module M and an integer i (equal to 
+1 or 2), return the dimension of the i-th cohomology group of G 
+acting on M.
+</BLOCKQUOTE>
+<H5><A NAME = "7264">ExtensionProcess(G, M, F) : GrpPerm, ModRng, GrpFP -&gt; Process</A></H5>
+<BLOCKQUOTE>
+Create an extension process for the group G by the module M.
+</BLOCKQUOTE>
+<H5><A NAME = "7265">Extension(P, Q) : Process -&gt; GrpFP</A></H5>
+<H5>[Future release] NextExtension(P) : Process -&gt; GrpFP</H5>
+<BLOCKQUOTE>
+Return the next extension of G as defined by the process P.
+</BLOCKQUOTE>
+<P>
+Assume that F is isomorphic to the permutation group G, and that 
+we wish to determine presentations for one or more extensions of the 
+K-module M by F, where K is the field of p elements.
+We first create an extension process using 
+<TT>ExtensionProcess(G, M, F)</TT>. The possible extensions of M by G
+are in one-one correspondence with the elements of the second cohomology 
+group H<sup>2</sup>(G, M) of G acting on M. Let b<sub>1</sub>, ..., b<sub>l</sub> be a basis
+of H<sup>2</sup>(G, M). A general element of H<sup>2</sup>(G, M) therefore has the form 
+a<sub>1</sub>b<sub>1</sub> + ... + a<sub>l</sub>b<sub>l</sub> and so can be defined by a sequence Q of 
+l integers [a<sub>1</sub>, ..., a<sub>l</sub>]. Now, to construct the corresponding 
+extension of M by G we call the function <TT>Extension(P, Q)</TT>. 
+The required extension is returned as a finitely presented group. If all the
+extensions are required then they may be obtained successively by 
+making p<sup>l</sup> calls to the function <TT>NextExtension</TT>. 
+<H5><A NAME = "7266">SplitExtension(G, M, F) : GrpPerm, ModRng, GrpFP -&gt; GrpFP</A></H5>
+<BLOCKQUOTE>
+The split extension of the module M by the group G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7267">Example <TT>GrpPerm_Cohomology (H63E36)</TT></A></H3>
+We construct a presentation for A<sub>6</sub> over its Schur
+multiplicator. First we find the size of the multiplicator by
+applying the <TT>pMultiplicator</TT> function to each relevant prime.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := Alt(6);
+&gt; &amp;cat [pMultiplicator(G, p[1]): p in FactoredOrder(G)];   
+[ 2, 3, 1 ]
+</PRE>
+<P>
+The multiplicator has order 2 x 3 = 6. We next construct the  
+two-fold cover of A<sub>6</sub>. We use the <TT>FPGroup</TT> function to
+get a presentation for A<sub>6</sub>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; F := FPGroup(G);
+&gt; F2 := pCover(G, F, 2);
+</PRE>
+<P>
+Now we construct a three-fold cover of the two-fold cover to get the
+extension we are after. First we need a permutation representation of 
+<TT>F2</TT>, the two-fold covering group.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G2 := DegreeReduction(CosetImage(F2, sub&lt;F2|&gt;));
+&gt; Degree(G2);
+144
+&gt; #G2;
+720
+&gt; F6 := pCover(G2, F2, 3);
+&gt; F6;
+Finitely presented group F6 on 4 generators
+Relations
+  F6.4^3 = Id(F6)
+  (F6.1, F6.4) = Id(F6)
+  (F6.2, F6.4) = Id(F6)
+  (F6.3, F6.4) = Id(F6)
+  F6.3^2 = Id(F6)
+  (F6.1, F6.3) = Id(F6)
+  (F6.2, F6.3) = Id(F6)
+  F6.1^4 * F6.3 = Id(F6)
+  F6.2^3 * F6.3 = Id(F6)
+  F6.1^-1 * F6.2^-1 * F6.1 * F6.2 * F6.1^-1 * F6.2^-1 * 
+  F6.1 * F6.2 * F6.3 * F6.4 = Id(F6)
+  F6.1^-1 * F6.2 * F6.1^2 * F6.2 * F6.1^2 * F6.2 * 
+  F6.1^-2 * F6.2 * F6.1^-1 * F6.3 * F6.4^-1 = Id(F6)
+  F6.2 * F6.1 * F6.2 * F6.1 * F6.2 * F6.1 * F6.2 * 
+  F6.1 * F6.2 * F6.1 * F6.3 * F6.4 = Id(F6)
+&gt; AbelianQuotientInvariants(F6);
+[]
+</PRE>
+<P>
+The group <TT>F6</TT> is the six-fold cover of A<sub>6</sub>. We easily see from 
+the presentation that the 3rd and 4th generators generate a central 
+cyclic subgroup of order 6. The sequence of invariants for the
+maximal abelian quotient of <TT>F6</TT> is empty, so <TT>F6</TT> is perfect.
+<HR>
+<H3><A NAME = "7268">Example <TT>GrpPerm_Cohomology-2 (H63E37)</TT></A></H3>
+We construct an extension of A<sub>5</sub>. This time the normal
+subgroup will be elementary abelian of order 2<sup>5</sup>, with the action of A<sub>5</sub>
+being the natural permutation action.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := Alt(5);
+&gt; M := PermutationModule(G, GF(2));
+&gt; CohomologicalDimension(G, M, 2);
+1
+</PRE>
+<P>
+The dimension of the 2nd cohomology group is 1 over GF(2), so there are
+two possible extensions. We will construct them both.
+<P>
+<P>
+<P>
+<PRE>
+&gt; F := FPGroup(G);
+&gt; P := ExtensionProcess(G, M, F);
+&gt; E0 := Extension(P, [0]);
+&gt; E1 := Extension(P, [1]);
+&gt; AbelianQuotientInvariants(E0);
+[ 2 ]
+&gt; AbelianQuotientInvariants(E1);
+[]
+</PRE>
+<P>
+The split extension, <TT>E0</TT>, is not perfect, but the non-split extension,
+<TT>E1</TT>, is a perfect group.
+<HR>
+<PRE></PRE> <A  HREF = "text645.htm">[Next]</A><A  HREF = "text643.htm">[Prev]</A> <A  HREF = "text645.htm">[Right]</A> <A  HREF = "text643.htm">[Left]</A> <A  HREF = "text629.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

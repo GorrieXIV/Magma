@@ -1,0 +1,9 @@
+{
+  blowup.m
+  ChevalleyBasis.m
+  anticanonicalP1xP1.m
+  csaDeg2.m
+  ChevalleyBasisQuad.m
+  anticanonicalSphere.m
+  delPezzo8.m
+}

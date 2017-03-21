@@ -1,0 +1,4 @@
+174,1
+S,EulerFactorsByDeformation,"For Q(x,z) a 2-variable polynomial over a finite field k of odd char. and Y a sequence of values in K, a finite extension of k, returns the sequence of Euler factors of the hyperelliptic curves y^2=Q(x,v) for v in Y",0,2,0,0,0,0,0,0,0,82,,0,0,63,,82,-38,-38,-38,-38,-38
+S,ZetaFunctionsByDeformation,"For Q(x,z) a 2-variable polynomial over a finite field k of odd char. and Y a sequence of values in K, a finite extension of k, returns the sequence of Zeta functions of the hyperelliptic curves y^2=Q(x,v) for v in Y",0,2,0,0,0,0,0,0,0,82,,0,0,63,,82,-38,-38,-38,-38,-38
+S,JacobianOrdersByDeformation,"For Q(x,z) a 2-variable polynomial over a finite field k of odd char. and Y a sequence of values in K, a finite extension of k, returns the sequence of orders of the Jacobians of the hyperelliptic curves y^2=Q(x,v) for v in Y",0,2,0,0,0,0,0,0,0,82,,0,0,63,,82,-38,-38,-38,-38,-38

@@ -1,0 +1,5 @@
+174,1
+A,Map,19,HighestWeightSpaces,HighestWeights,Weights,WeightSpaces,ExtendedTorus,WeightBase_B,WeightBase_vectB,WeightBase_Orbits,WeightBase_vectOrbit,WeightBase_J,WeightBase_Ws,WeightBase_Actions,WeightBase_M,WeightBase_WeylMxs,WeylRefl_hs,WeylRefl_wds,WeylRefl_reflmxs,WeylRefl_imWeightVect,WeylRefl_weightact
+A,Map,3,UnderlyingFunction,IsProjectiveRepresentation,ProjectiveKernelPower
+A,AlgLie,2,StandardRepresentation,AdjointRepresentation
+A,GrpLie,3,LieAlgebra,StandardRepresentation,AdjointRepresentation

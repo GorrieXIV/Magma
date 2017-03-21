@@ -1,0 +1,37 @@
+"Source: Text/Geometry/Lseries.text";
+"Line: 2512";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/Lseries.text, line: 2512
+// Example: H133E29 ()
+print "Example: H133E29";
+ei := GetEchoInput();
+SetEchoInput(true);
+K := NumberField(x^2 - 5) where x is PolynomialRing(Rationals()).1;
+SetStoreModularForms(K, true); // to save computation time
+f5 := Factorization(5*Integers(K))[1][1];
+H := HilbertCuspForms(K,2*3*f5,[2,4]);
+N := NewformDecomposition(NewSubspace(H)); // 4-dimensional
+f11 := Factorization(11*Integers(K))[1][1]; // get right form
+f := [f : f in N | HeckeEigenvalue(Eigenform(f),f11) eq -2*K.1-58][1];
+Lf := LSeries(Eigenform(f));
+psi := HeckeCharacterGroup(f5,[1,2]).1;
+Lpsi := LSeries(psi);
+R := PolynomialRing(Integers());
+TP := TensorProduct(Lf,Lpsi,[<f5,3,R!1>],K); // 5^4 in all, 1 from K
+H := HilbertCuspForms(K, 2*3*f5^2, [2,4]);
+time N := NewformDecomposition(NewSubspace(H));
+g := [g : g in N | Dimension(g) eq 1 and
+                 HeckeEigenvalue(Eigenform(g),f11) eq -2*K.1-58][1];
+Lg := LSeries(Eigenform(g));
+assert forall{ i : i in [1..3] |
+               LSeriesData(TP)[i] eq LSeriesData(Lg)[i] };
+// weak check of Euler factors
+assert forall{ p : p in PrimesUpTo(100) |
+               EulerFactor(TP, p : Degree:=1, Integral) eq
+               EulerFactor(Lg, p : Degree:=1, Integral) };
+// weak check of Euler over K
+assert forall{ p : p in PrimesUpTo(100, K) |
+               Round(Coefficient(EulerFactor(TP, p), 1)) eq
+               Round(Coefficient(EulerFactor(Lg, p), 1)) };
+SetEchoInput(ei);

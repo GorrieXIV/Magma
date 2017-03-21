@@ -1,0 +1,310 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Modules over a General Algebra</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1022.htm">[Next]</A><A  HREF = "text1025.htm">[Prev]</A> <A  HREF = "text1022.htm">[Right]</A> <A  HREF = "text1025.htm">[Left]</A> <A  HREF = "text1023.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "11570">Modules over a General Algebra</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1026.htm#11571">Introduction</A>
+<LI> <A  HREF = "text1026.htm#11572">Construction of Algebra Modules</A>
+<LI> <A  HREF = "text1026.htm#11575">The Action of an Algebra Element</A>
+<LI> <A  HREF = "text1026.htm#11580">Related Structures of an Algebra  Module</A>
+<LI> <A  HREF = "text1026.htm#11584">Properties of an Algebra Module</A>
+<LI> <A  HREF = "text1026.htm#11588">Creation of Algebra Modules from other Algebra Modules</A>
+<LI> <A  HREF = "text1026.htm#11595">Cyclic Algebras and their Modules</A>
+</UL>
+<H4><A NAME = "11571">Introduction</A></H4>
+
+<P>
+<P>
+<P>
+This section describes the functionality for modules over general
+algebras in Magma.
+A left-module over an algebra A is a module M together with a
+bilinear map A x M to M. A right-module over A is a module
+M together with a bilinear map M x A to M. Magma provides
+functionality for both kinds of modules. 
+
+
+<H4><A NAME = "11572">Construction of Algebra Modules</A></H4>
+
+
+
+<H5><A NAME = "11573">Module(A, m): Alg, Map[SetCart, ModRng] -&gt; ModAlg</A></H5>
+<BLOCKQUOTE>
+For an algebra A this function creates a module over A. If the
+module will be a left-module then m is a map from the Cartesian
+product A x M to M. If the module will be a right-module
+then m is a map from M x A to M. Here M has to be 
+an R-module, where R is the coefficient field of A.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11574">Example <TT>ModAlg_AlgModCreate (H95E14)</TT></A></H3>
+We create the right-module over the full matrix algebra of 
+3 x 3 - matrices acting on its natural module.
+<P>
+<P>
+<PRE>
+&gt; A:= MatrixAlgebra(Rationals(), 3);
+&gt; V:= RModule(Rationals(), 3);
+&gt; m:= map&lt; CartesianProduct(V, A) -&gt; V | t :-&gt; t[1]*t[2] &gt;;
+&gt; Module(A, m);
+Right Module of Full Matrix Algebra of degree 3 over Rational Field
+</PRE>
+<HR>
+<H4><A NAME = "11575">The Action of an Algebra Element</A></H4>
+
+
+
+<H5><A NAME = "11576">a ^ v : AlgElt, ModAlgElt -&gt; ModAlgElt</A></H5>
+<BLOCKQUOTE>
+Given an element v
+of a left-module over an algebra A, and
+an element a of A computes the result of letting a
+act on v.
+</BLOCKQUOTE>
+<H5><A NAME = "11577">v ^ a : ModAlgElt, AlgElt -&gt; ModAlgElt</A></H5>
+<BLOCKQUOTE>
+Given an element v
+of a right-module over an algebra A and
+an element a of A computes the result of letting a
+act on v.
+</BLOCKQUOTE>
+<H5><A NAME = "11578">ActionMatrix(M, a): ModAlg, AlgElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Given a module M over an algebra A
+and an element a 
+of A returns the matrix of the action of a on M. If M
+is a left-module then the i-th column of this matrix contains
+the coordinates of the image of a acting on the i-th basis element
+of M. If A is a right-module then the rows contain these
+coordinates.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11579">Example <TT>ModAlg_Action (H95E15)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; A:= MatrixAlgebra(Rationals(), 3);
+&gt; V:= RModule(Rationals(), 3);                             
+&gt; m:= map&lt; CartesianProduct(V, A) -&gt; V | t :-&gt; t[1]*t[2] &gt;;
+&gt; M:=Module(A, m);
+&gt; M.1^A.1;
+M: (1 0 0)
+&gt; ActionMatrix(M, A.2);
+[0 1 0]
+[0 0 1]
+[1 0 0]
+</PRE>
+<HR>
+<H4><A NAME = "11580">Related Structures of an Algebra  Module</A></H4>
+
+
+
+<H5><A NAME = "11581">Algebra(M): ModAlg -&gt; Alg</A></H5>
+<BLOCKQUOTE>
+This returns the algebra over which the algebra module M is defined.
+</BLOCKQUOTE>
+<H5><A NAME = "11582">CoefficientRing(M): ModAlg -&gt; Fld</A></H5>
+<BLOCKQUOTE>
+Returns the ground field of the algebra module M.
+</BLOCKQUOTE>
+<H5><A NAME = "11583">Basis(M): ModAlg -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Returns a sequence containing the basis vectors of the algebra 
+module M.
+</BLOCKQUOTE>
+<H4><A NAME = "11584">Properties of an Algebra Module</A></H4>
+
+
+
+<H5><A NAME = "11585">IsLeftModule(M): ModAlg -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+This returns <TT>true</TT> if the algebra module M is a left-module,
+and <TT>false</TT> if it is a right module.
+</BLOCKQUOTE>
+<H5><A NAME = "11586">IsRightModule(M): ModAlg -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+This returns <TT>true</TT> if the algebra module M is a right-module,
+and <TT>false</TT> if it is a left module.
+</BLOCKQUOTE>
+<H5><A NAME = "11587">Dimension(M): ModAlg -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The dimension of the algebra module M.
+</BLOCKQUOTE>
+<H4><A NAME = "11588">Creation of Algebra Modules from other Algebra Modules</A></H4>
+
+
+
+<H5><A NAME = "11589">DirectSum(Q): SeqEnum -&gt; ModAlg, SeqEnum, SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a sequence Q of algebra modules
+(all defined over
+the same algebra, and all left (respectively right) modules), 
+returns the module M that is the direct sum of the
+modules in Q. Furthermore, two sequences of mappings are returned. The
+i-th element of the first sequence is the embedding of the i-th
+element of Q into M. The i-th element of the second sequence
+is the projection of M onto the i-th element of Q.
+</BLOCKQUOTE>
+<H5><A NAME = "11590">SubalgebraModule(B, M): Alg, ModAlg -&gt; ModAlg</A></H5>
+<BLOCKQUOTE>
+Given an algebra module
+M over the algebra A, and a subalgebra B 
+of A, return M as a B-module.
+</BLOCKQUOTE>
+<H5><A NAME = "11591">ModuleWithBasis(Q): SeqEnum -&gt; ModAlg</A></H5>
+<BLOCKQUOTE>
+Given a sequence Q containing the elements of a particular basis of
+an algebra module M, create an algebra module that
+is isomorphic to M, but with basis Q. (Or, more precisely, the basis
+vectors of the module V that is returned are in bijection with Q.
+The action of an algebra element on the i-th basis vector of V
+is computed by computing it on the i-th vector in Q and expressing
+the result as a linear combination of the elements of Q. The resulting
+coordinates are used to form the corresponding element of V.) This can
+be used to compute the action of algebra elements with respect to a
+given basis of M.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11592">Example <TT>ModAlg_OtherMod (H95E16)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; A:= MatrixAlgebra(Rationals(), 3);
+&gt; V:= RModule(Rationals(), 3);                             
+&gt; m:= map&lt; CartesianProduct(V, A) -&gt; V | t :-&gt; t[1]*t[2] &gt;;
+&gt; M:=Module(A, m);
+&gt; N:=DirectSum([ M, M ]);                    
+&gt; ActionMatrix(N, A.1);
+[1 0 0 0 0 0]
+[0 0 0 0 0 0]
+[0 0 0 0 0 0]
+[0 0 0 1 0 0]
+[0 0 0 0 0 0]
+[0 0 0 0 0 0]
+&gt; W:= ModuleWithBasis([ M.1+M.2+M.3, M.2+M.3, M.3 ]);
+&gt; ActionMatrix(W, A.1);
+[ 1 -1  0]
+[ 0  0  0]
+[ 0  0  0]
+</PRE>
+<HR>
+<H5><A NAME = "11593">sub&lt; M | S &gt; : ModAlg, [ModAlgElt] -&gt; ModAlg</A></H5>
+<H5>sub&lt; M | e1, ..., en &gt; : ModAlg, ModAlgElt, ..., ModAlgElt -&gt; ModAlg</H5>
+<BLOCKQUOTE>
+Return the submodule of M containing the elements in the sequence S
+or the elements e1, ..., en.
+</BLOCKQUOTE>
+<H5><A NAME = "11594">quo&lt; M | S &gt; : ModAlg, [ModAlgElt] -&gt; ModAlg</A></H5>
+<H5>quo&lt; M | e1, ..., en &gt; : ModAlg, ModAlgElt, ..., ModAlgElt -&gt; ModAlg</H5>
+<H5>quo&lt; M | S &gt; : ModAlg, ModAlg -&gt; ModAlg</H5>
+<BLOCKQUOTE>
+Construct the quotient module of M by the submodule S of M, the submodule
+containing the elements in the sequence S or the elements e1, ..., en.
+</BLOCKQUOTE>
+<H4><A NAME = "11595">Cyclic Algebras and their Modules</A></H4>
+
+<P>
+<P>
+Magma supports similarity testing of modules over cyclic associative rings and cyclic groups.
+Module similarity over general rings and groups is graph isomorphism hard.  The algorithms
+here are based on <A  HREF = "text1022.htm#bib_BW_Module-iso">[BW15]</A>.
+
+
+<H5><A NAME = "11596">IsCyclic(R) : AlgAss  -&gt; BoolElt, AlgAssElt</A></H5>
+<BLOCKQUOTE>
+Decide if the algebra is generated by a single element, and return such a generator.
+</BLOCKQUOTE>
+<H5><A NAME = "11597">IsSimilar(M, N) : ModRng, ModRng -&gt; BoolElt, Map</A></H5>
+<BLOCKQUOTE>
+Decides if the given modules are similar; requires that one of the given modules have a cyclic coefficient ring.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11598">Example <TT>ModAlg_Star_Alg (H95E17)</TT></A></H3>
+In Magma modules of a group or algebra are defined by the action of a fixed
+generating set of the algebra.  Therefore isomorphism of modules in Magma
+assumes the given modules have been specified by the same generating set.
+This can lead to a stricter interpretation of isomorphism than perhaps intended
+in some situations.  Consider the following example comparing two
+1-dimensional vector spaces over the field GF(9).
+<P>
+<P>
+<PRE>
+&gt; R := MatrixAlgebra(GF(3),2);     
+&gt; A := sub&lt;R| [R!1, R![0,1,2,0]]&gt;;
+&gt; B := sub&lt;R| [R!1, R![1,1,2,1]]&gt;;
+&gt; A eq B;   // Both are a field GF(9).
+true
+&gt; M := RModule(A); // A 1-dim. GF(9) vector space.
+&gt; N := RModule(B); // A 1-dim. GF(9) vector space.
+&gt; IsIsomorphic(M,N);
+false
+&gt; MinimalPolynomial(A.2);
+$.1^2 + 1
+&gt; MinimalPolynomial(B.2);
+$.1^2 + $.1 + 2
+</PRE>
+Isomorphism of the two modules M and N failed because the two
+vector spaces are specified by different generators of GF(9), as confirmed
+by the minimum polynomials of the generators.  Module similarity allows
+the comparison of modules specified by different generating sets, so
+in this example theses to vector spaces can be proven equivalent.
+<P>
+<P>
+<PRE>
+&gt; IsSimilar(M,N);
+true 
+[2 0]
+[0 2]
+</PRE>
+Similarity can be used to compare modules given by algebras that are conjugate, but
+perhaps not equal.  
+<P>
+<P>
+<PRE>
+&gt; p := RandomIrreduciblePolynomial(GF(101), 10); 
+&gt; q := RandomIrreduciblePolynomial(GF(101), 10); 
+&gt; X := CompanionMatrix(p);
+&gt; Y := CompanionMatrix(q);
+&gt; A := sub&lt;Parent(X)|[X]&gt;;      // Finite field of size 101^10
+&gt; B := sub&lt;Parent(Y)|[Y]&gt;;      // Finite field of size 101^10
+&gt; M := RModule(A);              // 1-dim vector space over A.
+&gt; N := RModule(B);              // 1-dim vector space over B.
+&gt; IsIsomorphic(M,N);            // Not isomorphic as A and B are distinct.
+false
+&gt; cyc, f := IsSimilar(M,N);     // But similar as A is isomorphic to B.
+&gt; // f conjugates A into B?
+&gt; forall { a : a in Generators (A) | f * a * f^-1 in B };
+true
+&gt; // and f is a semilinear transform M-&gt;N ?
+&gt; forall{ i : i in [1..Ngens (M)] | forall { j : j in [1..Ngens (A)] | (Vector
+&gt; (M.i * A.j) * f) eq (Vector(M.i)*f)*(f^(-1)*A.j*f) } };
+true
+</PRE>
+Similarity is presently available for cyclic algebras.  This can be tested and
+a generator returned.
+<P>
+<P>
+<PRE>
+&gt; M := RandomMatrix(GF(9), 100, 100);
+&gt; A := sub&lt; Parent(M) | [ M^(Random(50)) : i in [1..10]] &gt;;
+&gt; Ngens(A);
+&gt; IsCyclic(A);
+true
+...
+</PRE>
+<PRE></PRE> <A  HREF = "text1022.htm">[Next]</A><A  HREF = "text1025.htm">[Prev]</A> <A  HREF = "text1022.htm">[Right]</A> <A  HREF = "text1025.htm">[Left]</A> <A  HREF = "text1023.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

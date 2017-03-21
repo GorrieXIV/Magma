@@ -1,0 +1,176 @@
+/*
+Tests the Smith Normal Form algorithm and its relatives
+Allan Steel, 1/12/92
+*/
+
+//SetVerbose("Smith", 1);
+
+function random_equivalent(e, r, c, n)
+    X := RMatrixSpace(Integers(), r, c) ! 0;
+    for i := 1 to #e do
+	X[i, i] := e[i];
+    end for;
+
+    R := {-1, 1};
+    for count := 1 to n do
+	i := Random(1, r);
+	repeat j := Random(1, r); until j ne i;
+	AddRow(~X, Random(R), i, j);
+
+	i := Random(1, c);
+	repeat j := Random(1, c); until j ne i;
+	AddColumn(~X, Random(R), i, j);
+    end for;
+    return X;
+end function;
+
+procedure test_det(X, E)
+    if Nrows(X) ne Ncols(X) then
+	return;
+    end if;
+
+    T := Cputime();
+//"Det X", X;
+    D := Determinant(X);
+    "Determinant Time:", Cputime(T);
+
+//"Det", D;
+    assert (D eq 0) eq (#E lt Nrows(X));
+    if not (D eq 0 or Abs(D) eq &*E) then
+	X: Magma;
+    end if;
+    assert D eq 0 or Abs(D) eq &*E;
+end procedure;
+
+procedure check_hermite(X, H)
+    p := RandomPrime(23);
+    K := GF(p);
+    XK := Matrix(K, X);
+    HK := Matrix(K, H);
+
+    XE := EchelonForm(XK);
+    HE := EchelonForm(HK);
+    if XE ne HE then
+	X: Magma;
+	error "FAIL";
+    end if;
+end procedure;
+
+procedure test_elementary_divisors(e, r, c, n, ones, ~X)
+    exp := [1 : i in [1..ones]] cat e;
+    printf "Test ED; %o by %o, rank %o, %o\n", r, c, #exp, exp;
+
+    t := Cputime();
+    X := random_equivalent(exp, r, c, n);
+    "Random Time:", Cputime(t);
+    "Density:", Density(X);
+//X: Magma;
+
+    t := Cputime();
+    f := ElementaryDivisors(X);
+    if f ne exp then
+	Parent(X);
+	printf "X := %m;\n", X;
+	"Got f:", f;
+	"Should be:", exp;
+	error "WRONG";
+    end if;
+    "Elementary Divisors Time:", Cputime(t);
+    test_det(X, f);
+
+    t := Cputime();
+    H := HermiteForm(X);
+    "Hermite Time:", Cputime(t), "\n";
+    check_hermite(X, H);
+end procedure;
+
+function random_elementary_divisors(ones, n, b, s)
+    return [1: i in [1 .. ones]] cat
+	[i eq 1 select b else Self(i - 1) * Random(1, s): i in [1 .. n]];
+end function;
+
+//while true do
+for n in [2 .. 50] cat [100, 200] do
+    b := 1;
+    for s in (n lt 50 select [2, 3, 5, 10, 20, 1000] else [2, 50]) do
+	ones := Random(3*(n div 4), n - 1);
+	e := random_elementary_divisors(ones, n - ones, b, s);
+	o := Random(0, n div 2);
+	r := n + o + Random(0, n div 3);
+	c := n + o + Random(0, n div 3);
+	test_elementary_divisors(e, r, c, n * Random(3, 10), o, ~X);
+	r := n + o;
+	c := n + o;
+	test_elementary_divisors(e, r, c, n * Random(3, 10), o, ~X);
+//break n;
+    end for;
+end for;
+//end while;
+
+//SetQuitOnError(false);
+//error "done";
+
+procedure smith_test(x, r, c, do_trans)
+    r, "rows,", c, "cols:";
+    t := Cputime();
+
+    "Seed:", GetSeed();
+    e := ElementaryDivisors(x);
+    //"Elementary Divisors:", e;
+    test_det(x, e);
+
+    if do_trans then
+	s, p, q := SmithForm(x);
+	"Calculated Smith";
+	assert p*x*q eq s;
+	"Correct Transformation matrices";
+
+	f := [s[i, i]: i in [1 .. Min(r, c)]];
+	if f ne e then
+	    Parent(x);
+	    x;
+	    f;
+	    e;
+	    assert f eq e;
+	end if;
+    end if;
+
+    "Time:", Cputime(t), "\n";
+end procedure;
+
+for r in [20 .. 40 by 4] do
+    m := MatrixRing(Integers(), r);
+    x := m![Random(-1, 1): i in [1..r*r]];
+    smith_test(x, r, r, true);
+end for;
+
+for r in [40 .. 60 by 4] do
+    m := MatrixRing(Integers(), r);
+    x := m![Random(0, 1): i in [1..r*r]];
+    smith_test(x, r, r, true);
+end for;
+
+for r in [70 .. 100 by 5] do
+    m := MatrixRing(Integers(), r);
+    x := m![Random(-1, 1): i in [1..r*r]];
+    smith_test(x, r, r, false);
+end for;
+
+"Testing AbelianQuotientInvariants...";
+
+G := function(alpha, n)
+    return Group<a, b, d, e | a^2 = b^n =
+    a * b^-1 * a * b * e^(alpha - 1) * a * b^2 * a * b^-2 = 1,
+    e = a * b * a * b^-1, d^b = e,
+    (e * b)^n = (d, e^(alpha - 1)) = 1, e^b = e^alpha * d>;
+end function;
+G7_8<a, b, d, e> := G(7, 8);
+R := ncl<G7_8 | e^3>;
+k := Rewrite(G7_8, R: Simplify := false);
+
+//SetVerbose("Smith", true); 
+time E := AbelianQuotientInvariants(k);
+E;
+assert E eq [ 2, 2, 2, 2, 102, 37842 ];
+
+//quit;

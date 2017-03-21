@@ -1,0 +1,591 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Radical and Decomposition of Ideals</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1226.htm">[Next]</A><A  HREF = "text1224.htm">[Prev]</A> <A  HREF = "text1226.htm">[Right]</A> <A  HREF = "text1224.htm">[Left]</A> <A  HREF = "text1214.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "13613">Radical and Decomposition of Ideals</A></H3>
+
+<P>
+<P>
+<P>
+Magma has algorithms for computing the full radical and the
+primary decomposition of ideals.
+See <A  HREF = "text1213.htm#bib_BeckerWeispfenning">[BW93, chapter 8]</A>, for the relevant definitions
+and theory.  The implementation of the algorithms presented here in
+Magma was based on the algorithms presented in that chapter.
+Currently these algorithms work only for ideals of polynomial rings
+over fields (Euclidean rings will be supported in the future).
+<P>
+There are also functions for some easier decompositions than the
+full primary decomposition: radical decompositions, equidimensional
+decompositions and triangular decompositions for zero-dimensional ideals.
+The theory behind these is discussed in the relevant function description.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1225.htm#13614">Radical</A>
+<LI> <A  HREF = "text1225.htm#13617">Primary Decomposition</A>
+<LI> <A  HREF = "text1225.htm#13624">Triangular Decomposition</A>
+<LI> <A  HREF = "text1225.htm#13627">Equidimensional Decomposition</A>
+</UL>
+<H4><A NAME = "13614">Radical</A></H4>
+
+
+
+<H5><A NAME = "13615"></A><A NAME = "dpoly_ideal:Radical">Radical</A>(I) : RngMPol -&gt; RngMPol</H5>
+<BLOCKQUOTE>
+Given an ideal I of a polynomial ring P over a field, return the
+radical of I.  The radical R of I is defined to be the set of all
+polynomials f &isin;P such that f<sup>n</sup> &isin;I for some n &ge;1.  The radical
+R is also an ideal of P, containing I.
+The function works for an ideal defined over any field
+over which polynomial factorization is available.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13616">Example <TT>Ideal_Radical (H112E9)</TT></A></H3>
+We compute the radical of an ideal of Q[x, y, z, t, u] (which is not
+zero-dimensional).
+<P>
+<P>
+<PRE>
+&gt; P&lt;x, y, z, t, u&gt; := PolynomialRing(RationalField(), 5);
+&gt; I := ideal&lt;P |
+&gt; x + y + z + t + u,
+&gt; x*y + y*z + z*t + t*u + u*x,
+&gt; x*y*z + y*z*t + z*t*u + t*u*x + u*x*y,
+&gt; x*y*z*t + y*z*t*u + z*t*u*x + t*u*x*y + u*x*y*z,
+&gt; x*y*z*t*u&gt;;
+&gt; R := Radical(I);
+&gt; Groebner(R);
+&gt; R;
+Ideal of Polynomial ring of rank 5 over Rational Field
+Order: Lexicographical
+Variables: x, y, z, t, u
+Homogeneous, Dimension &gt;0, Radical
+Groebner basis:
+[
+    x + y + z + t + u,
+    y^2 + y*t - z*u - u^2,
+    y*z,
+    y*u + z*u + u^2,
+    z^2*u + z*u^2,
+    z*t,
+    t*u
+]
+&gt; // Check that t*u is in the radical of I by another method:
+&gt; IsInRadical(t*u, I);
+true
+</PRE>
+<HR>
+<H4><A NAME = "13617">Primary Decomposition</A></H4>
+
+
+
+<H5><A NAME = "13618"></A><A NAME = "dpoly_ideal:PrimaryDecomposition">PrimaryDecomposition</A>(I) : RngMPol -&gt; [ RngMPol ], [ RngMPol ]</H5>
+<BLOCKQUOTE>
+Given an ideal I of a polynomial ring over a field, return the
+primary decomposition of I, and also the sequence of associated
+prime ideals.
+See <A  HREF = "text1217.htm#dpoly_ideal:IsPrimary">IsPrimary</A> for the definition of a primary ideal.
+The primary decomposition of I is returned
+as two parallel sequences Q and P of ideals, both of length k,
+having the following
+properties:
+<P>
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>The ideals of Q are primary.
+<DT>(b)</DT><DD>The intersection of the ideals of Q is I.
+<DT>(c)</DT><DD>The ideals of P are the associated primes of Q; i.e., P[i] is
+the radical of Q[i] (so P[i] is prime) for 1 &le;i &le;k.
+<DT>(d)</DT><DD>Q is minimal: no ideal of Q contains the intersection of the rest of
+the ideals of Q and the associated prime ideals in P are distinct.
+<DT>(e)</DT><DD>Q and P are sorted so that P is always unique and Q is unique
+if I is zero-dimensional.  If I is not zero-dimensional, then an embedded
+component of Q (one whose associated prime contains another associated
+prime from P) will not be unique in general.  Yet Magma will always
+return the same values for Q and P, given the same I.
+<P>
+<P>
+</DL>
+The function works for an ideal defined over any field
+over which polynomial factorization is available
+(inseparable field extensions are handled by an algorithm due to
+Allan Steel <A  HREF = "text1213.htm#bib_SteelInsep">[Ste05]</A>).
+<P>
+NB: if one only wishes to compute the prime components P, then
+the next function <A  HREF = "text1225.htm#dpoly_ideal:RadicalDecomposition">RadicalDecomposition</A> should be used,
+since this may be much more efficient.
+</BLOCKQUOTE>
+<H5><A NAME = "13619"></A><A NAME = "dpoly_ideal:RadicalDecomposition">RadicalDecomposition</A>(I) : RngMPol -&gt; [ RngMPol ]</H5>
+<BLOCKQUOTE>
+Given an ideal I of a polynomial ring over a field, return the
+prime decomposition of the radical of I.  This is equivalent to
+applying the function <A  HREF = "text1225.htm#dpoly_ideal:PrimaryDecomposition">PrimaryDecomposition</A> to the radical of I,
+but may be a much more efficient than using that method.
+The (prime) radical decomposition of I is returned
+as a sequence P of ideals of length k having the following properties:
+<P>
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>The ideals of P are prime.
+<DT>(b)</DT><DD>The intersection of the ideals of P is the radical of I.
+<DT>(c)</DT><DD>P is minimal: no ideal of P contains the intersection of the rest of
+the ideals of P.
+<DT>(e)</DT><DD>P is sorted so that P is always unique.
+Thus Magma will always
+return the same values for P, given the same I.
+<P>
+<P>
+</DL>
+The function works for an ideal defined over any field
+over which polynomial factorization is available.
+</BLOCKQUOTE>
+<H5><A NAME = "13620">ProbableRadicalDecomposition(I) : RngMPol -&gt; [ RngMPol ]</A></H5>
+<BLOCKQUOTE>
+Given an ideal I of a polynomial ring P over a field, return a probabilistic
+prime decomposition of the radical of I as a sequence of ideals of P.
+This function is like the
+function <A  HREF = "text1225.htm#dpoly_ideal:RadicalDecomposition">RadicalDecomposition</A> except that the ideals returned may
+not be prime, but the time taken may be much less.
+</BLOCKQUOTE>
+<H5><A NAME = "13621">MinimalDecomposition(S) : [ RngMPol ] -&gt; [ RngMPol ]</A></H5>
+<BLOCKQUOTE>
+Given a set or sequence S of ideals of a polynomial ring over a field,
+with I = &cap;<sub>J&isin;S</sub> J (so that S describes a decomposition of I),
+return a minimal decomposition M of I as a subset of S such that I
+= &cap;<sub>J&isin;M</sub> J also (so none of the ideals in the decomposition M
+are redundant).
+</BLOCKQUOTE>
+<H5><A NAME = "13622">SetVerbose("Decomposition", v) : MonStgElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Change verbose printing for the (Primary/Radical) Decomposition
+algorithm to be v.
+Currently the legal values for v are <TT>true</TT>, <TT>false</TT>, 0, 1, or 2.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13623">Example <TT>Ideal_PrimaryDecomposition (H112E10)</TT></A></H3>
+We compute the primary decomposition of the same ideal of Q[x, y, z, t, u]
+(which is not zero-dimensional).
+<P>
+<P>
+<PRE>
+&gt; P&lt;x, y, z, t, u&gt; := PolynomialRing(RationalField(), 5);
+&gt; I := ideal&lt;P |
+&gt; x + y + z + t + u,
+&gt; x*y + y*z + z*t + t*u + u*x,
+&gt; x*y*z + y*z*t + z*t*u + t*u*x + u*x*y,
+&gt; x*y*z*t + y*z*t*u + z*t*u*x + t*u*x*y + u*x*y*z,
+&gt; x*y*z*t*u&gt;;
+&gt; IsZeroDimensional(I);
+false
+&gt; Q, P := PrimaryDecomposition(I);
+</PRE>
+We next print out the primary components Q and associated primes P.
+<P>
+<P>
+<PRE>
+&gt; Q;
+[
+    Ideal of Polynomial ring of rank 5 over Rational Field
+    Order: Lexicographical
+    Variables: x, y, z, t, u
+    Homogeneous, Dimension 1, Non-radical, Primary, Non-prime
+    Groebner basis:
+    [
+        x + 1/2*z + 1/2*u,
+        y + 1/2*z + 1/2*u,
+        z^2 + 2*z*u + u^2,
+        t
+    ],
+    Ideal of Polynomial ring of rank 5 over Rational Field
+    Order: Lexicographical
+    Variables: x, y, z, t, u
+    Homogeneous, Dimension 1, Non-radical, Primary, Non-prime
+    Groebner basis:
+    [
+        x + 2*z + t,
+        y - z,
+        z^2,
+        u
+    ],
+    Ideal of Polynomial ring of rank 5 over Rational Field
+    Order: Lexicographical
+    Variables: x, y, z, t, u
+    Homogeneous, Dimension 1, Non-radical, Primary, Non-prime
+    Groebner basis:
+    [
+        x + z + 2*u,
+        y,
+        t - u,
+        u^2
+    ],
+    Ideal of Polynomial ring of rank 5 over Rational Field
+    Order: Lexicographical
+    Variables: x, y, z, t, u
+    Homogeneous, Dimension 1, Non-radical, Primary, Non-prime
+    Groebner basis:
+    [
+        x - u,
+        y + t + 2*u,
+        z,
+        u^2
+    ],
+    Ideal of Polynomial ring of rank 5 over Rational Field
+    Order: Lexicographical
+    Variables: x, y, z, t, u
+    Homogeneous, Dimension 1, Non-radical, Primary, Non-prime
+    Groebner basis:
+    [
+        x,
+        y + 2*t + u,
+        z - t,
+        t^2
+    ],
+    Ideal of Polynomial ring of rank 5 over Rational Field
+    Order: Lexicographical
+    Variables: x, y, z, t, u
+    Homogeneous, Dimension 0, Non-radical, Primary, Non-prime
+    Size of variety over algebraically closed field: 1
+    Groebner basis:
+    [
+        x + y + z + t + u,
+        y^2 + y*t + 2*y*u - z*t + z*u + u^2,
+        y*z^2 - y*z*t + y*t*u - y*u^2 + z^2*t - z^2*u + z*t*u - 2*z*u^2 + t^2*u 
+            + t*u^2 - u^3,
+        y*z*t^2 - 2*y*z*u^2 + 3*y*t*u^2 - 2*y*u^3 + z^3*t - z^3*u - z^2*t^2 + 
+            4*z^2*t*u - 4*z^2*u^2 + z*t^2*u + 2*z*t*u^2 - 5*z*u^3 + 3*t^2*u^2 + 
+            2*t*u^3 - 2*u^4,
+        y*z*t*u + y*z*u^2 - y*t^2*u - 4*y*t*u^2 + 3*y*u^3 - z^3*t + z^3*u + 
+            z^2*t^2 - 3*z^2*t*u + 4*z^2*u^2 - 2*z*t*u^2 + 6*z*u^3 - t^3*u - 
+            5*t^2*u^2 - 3*t*u^3 + 3*u^4,
+        y*z*u^3 - 5/2*y*t*u^3 + 3/2*y*u^4 + 1/4*z^3*t^2 + 1/2*z^3*u^2 - 
+            3/4*z^2*t^3 + 5/4*z^2*t^2*u - 1/4*z^2*t*u^2 + 9/4*z^2*u^3 - 
+            9/4*z*t^3*u + 1/4*z*t^2*u^2 - 3/4*z*t*u^3 + 13/4*z*u^4 - t^3*u^2 - 
+            5/2*t^2*u^3 - 7/4*t*u^4 + 3/2*u^5,
+        y*t^3*u - 17/4*y*t*u^3 + 13/4*y*u^4 + 1/8*z^3*t^2 + 5/4*z^3*u^2 - 
+            19/8*z^2*t^3 + 13/8*z^2*t^2*u - 5/8*z^2*t*u^2 + 33/8*z^2*u^3 - 
+            33/8*z*t^3*u - 7/8*z*t^2*u^2 - 31/8*z*t*u^3 + 49/8*z*u^4 + t^4*u + 
+            1/2*t^3*u^2 - 15/4*t^2*u^3 - 31/8*t*u^4 + 13/4*u^5,
+        y*t^2*u^2 - 3/4*y*t*u^3 - 1/4*y*u^4 + 3/8*z^3*t^2 - 1/4*z^3*u^2 - 
+            1/8*z^2*t^3 + 7/8*z^2*t^2*u + 1/8*z^2*t*u^2 - 5/8*z^2*u^3 - 
+            3/8*z*t^3*u + 11/8*z*t^2*u^2 - 5/8*z*t*u^3 - 5/8*z*u^4 + 1/2*t^3*u^2
+            + 3/4*t^2*u^3 - 5/8*t*u^4 - 1/4*u^5,
+        y*t*u^4 - 2/3*z^2*t^4 + 13/15*z^2*t^2*u^2 - 1/5*z^2*t*u^3 - 
+            31/15*z*t^4*u + 3/5*z*t^3*u^2 - 2/5*z*t^2*u^3 + 23/15*z*t*u^4 - 
+            3/5*t^4*u^2 + 2/15*t^3*u^3 - 1/3*t^2*u^4 + t*u^5,
+        y*u^5 - 1/2*z^2*t^4 - 1/2*z^2*t^2*u^2 + 1/2*z^2*t*u^3 + 1/2*z^2*u^4 - 
+            3/2*z*t^4*u - 3*z*t^3*u^2 + 5/2*z*t*u^4 + 3/2*z*u^5 - 1/2*t^4*u^2 - 
+            2*t^3*u^3 - 2*t^2*u^4 + 1/2*t*u^5,
+        z^7,
+        z^4*t - z^4*u - z^3*t^2 - 3*z^3*u^2 + 2*z^2*t^3 + 2*z^2*t^2*u - 
+            9*z^2*t*u^2 - 3*z^2*u^3 + 7*z*t^3*u + 2*z*t^2*u^2 - z*u^4 + 
+            2*t^3*u^2 - t^2*u^3 + t*u^4,
+        z^4*u^2 + 7/3*z^2*t^4 - 40/3*z^2*t^2*u^2 + 8*z^2*t*u^3 - 3*z^2*u^4 + 
+            22/3*z*t^4*u - 20*z*t^3*u^2 + 2*z*t^2*u^3 + 31/3*z*t*u^4 - 2*z*u^5 +
+            t^4*u^2 - 41/3*t^3*u^3 - 10/3*t^2*u^4 + 2*t*u^5,
+        z^3*t^3 + 1/3*z^2*t^4 + 2/3*z^2*t^2*u^2 + z^2*t*u^3 + 1/3*z*t^4*u - 
+            2*z*t^3*u^2 - z*t^2*u^3 + 1/3*z*t*u^4 - 2/3*t^3*u^3 - 1/3*t^2*u^4,
+        z^3*t*u - z^2*t^3 + 3*z^2*t*u^2 - 3*z*t^3*u + z*t*u^3 - t^3*u^2,
+        z^3*u^3 - 1/3*z^2*t^4 + 7/3*z^2*t^2*u^2 - 2*z^2*t*u^3 + 2*z^2*u^4 - 
+            4/3*z*t^4*u + 7*z*t^3*u^2 - 2*z*t^2*u^3 - 13/3*z*t*u^4 + z*u^5 + 
+            14/3*t^3*u^3 + 4/3*t^2*u^4 - t*u^5,
+        z^2*t^5 - 3*z*t*u^5 + 17/2*t^5*u^2 + 33/2*t^4*u^3 + 9*t^3*u^4 + 
+            15/2*t^2*u^5,
+        z^2*t^3*u - z^2*t^2*u^2 + z*t^3*u^2,
+        z^2*t^2*u^3 - 4/5*z*t*u^5 + 16/5*t^5*u^2 + 59/10*t^4*u^3 - 
+            11/10*t^3*u^4,
+        z^2*t*u^4 - 4/5*z*t*u^5 + 47/10*t^5*u^2 + 42/5*t^4*u^3 - 31/10*t^3*u^4 -
+            1/2*t^2*u^5,
+        z^2*u^5 + 6*z*t*u^5 - 2*t^5*u^2 - 4*t^4*u^3 - 4*t^3*u^4 - 7*t^2*u^5,
+        z*t^5*u + z*t*u^5 - 5/2*t^5*u^2 - 11/2*t^4*u^3 - 3*t^3*u^4 - 
+            5/2*t^2*u^5,
+        z*t^4*u^2 + 2/5*z*t*u^5 - 11/10*t^5*u^2 - 17/10*t^4*u^3 - 1/5*t^3*u^4 - 
+            1/2*t^2*u^5,
+        z*t^3*u^3 + 1/5*z*t*u^5 - 3/10*t^5*u^2 - 3/5*t^4*u^3 - 1/10*t^3*u^4 - 
+            1/2*t^2*u^5,
+        z*t^2*u^4 + 2/5*z*t*u^5 - 8/5*t^5*u^2 - 16/5*t^4*u^3 - 1/5*t^3*u^4,
+        t^6,
+        t^5*u^3,
+        t^4*u^4,
+        t^3*u^5,
+        u^6
+    ]
+]
+&gt; P;
+[
+    Ideal of Polynomial ring of rank 5 over Rational Field
+    Order: Lexicographical
+    Variables: x, y, z, t, u
+    Homogeneous, Dimension 1, Radical, Prime
+    Groebner basis:
+    [
+        x,
+        y,
+        z + u,
+        t
+    ],
+    Ideal of Polynomial ring of rank 5 over Rational Field
+    Order: Lexicographical
+    Variables: x, y, z, t, u
+    Homogeneous, Dimension 1, Radical, Prime
+    Groebner basis:
+    [
+        x + t,
+        y,
+        z,
+        u
+    ],
+    Ideal of Polynomial ring of rank 5 over Rational Field
+    Order: Lexicographical
+    Variables: x, y, z, t, u
+    Homogeneous, Dimension &gt;0, Radical, Prime
+    Groebner basis:
+    [
+        x + z,
+        y,
+        t,
+        u
+    ],
+    Ideal of Polynomial ring of rank 5 over Rational Field
+    Order: Lexicographical
+    Variables: x, y, z, t, u
+    Homogeneous, Dimension 1, Radical, Prime
+    Groebner basis:
+    [
+        x,
+        y + t,
+        z,
+        u
+    ],
+    Ideal of Polynomial ring of rank 5 over Rational Field
+    Order: Lexicographical
+    Variables: x, y, z, t, u
+    Homogeneous, Dimension 1, Radical, Prime
+    Groebner basis:
+    [
+        x,
+        y + u,
+        z,
+        t
+    ],
+    Ideal of Polynomial ring of rank 5 over Rational Field
+    Order: Lexicographical
+    Variables: x, y, z, t, u
+    Homogeneous, Dimension 0, Radical, Prime
+    Size of variety over algebraically closed field: 1
+    Groebner basis:
+    [
+        x,
+        y,
+        z,
+        t,
+        u
+    ]
+]
+</PRE>
+Notice that P[6] contains other ideals of P so Q[6] is an embedded
+primary component of I.  Thus the first 5 ideals of Q would the same be in
+any primary decomposition of I, while Q[6] could be different in another
+primary decomposition of I.  Finally, notice that the prime decomposition of
+the radical of I is the same as P except for the removal of P[6]
+to satisfy the uniqueness condition.  The structure of the variety of
+I can be easily understood by examining the prime decomposition of
+the radical.
+<P>
+<P>
+<PRE>
+&gt; RP := RadicalDecomposition(I);                                               
+&gt; #RP;
+5
+&gt; Set(RP) eq { P[i]: i in [1 .. 5] };
+true
+</PRE>
+<HR>
+<H4><A NAME = "13624">Triangular Decomposition</A></H4>
+
+<P>
+<P>
+<P>
+Let T be a zero-dimensional ideal of the polynomial ring
+K[x<sub>1</sub>, ..., x<sub>n</sub>], where K is a field.
+T is called <I>triangular</I> if its Gr&ouml;bner
+basis G has length n and the initial term of the i-th polynomial
+of G is of the form x<sub>i</sub><sup>e<sub>i</sub></sup> for each i.
+Any <I>radical</I> zero-dimensional ideal has a decomposition
+as an intersection of triangular ideals.
+The algorithm in Magma for primary decomposition now (since V2.4)
+first computes a triangular decomposition and then decomposes each
+triangular component to primary ideals since the computation of
+a triangular decomposition is usually fast.  See <A  HREF = "text1213.htm#bib_Lazard">[Laz92]</A> for
+further discussion of triangular ideals.
+
+
+<H5><A NAME = "13625">TriangularDecomposition(I) : RngMPol -&gt; [ RngMPol ], BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a zero-dimensional ideal I of a polynomial ring over a field
+with <I>lexicographical</I> order, return a triangular decomposition of
+I as a sequence Q of ideals such that the intersection of the
+ideals of Q equals I and for each ideal J of Q which is
+radical, J is triangular (see above for the definition of a
+triangular ideal).  A second return value indicates whether I
+is proven to be radical.
+If I is radical,
+all entries of Q are triangular.  Computing a triangular
+decomposition will often be faster than computing the full primary
+decomposition and may yield sufficient information for a specific problem.
+The algorithm implemented is that given in <A  HREF = "text1213.htm#bib_Lazard">[Laz92]</A>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13626">Example <TT>Ideal_TriangularDecomposition (H112E11)</TT></A></H3>
+We compute the triangular decomposition of the (radical) Cyclic-5
+roots ideal and compare it with the full primary decomposition of
+the same ideal.
+<P>
+<P>
+<PRE>
+&gt; R&lt;x, y, z, t, u&gt; := PolynomialRing(RationalField(), 5);
+&gt; I := ideal&lt;R |
+&gt;     x + y + z + t + u,
+&gt;     x*y + y*z + z*t + t*u + u*x,
+&gt;     x*y*z + y*z*t + z*t*u + t*u*x + u*x*y,
+&gt;     x*y*z*t + y*z*t*u + z*t*u*x + t*u*x*y + u*x*y*z,
+&gt;     x*y*z*t*u - 1&gt;;
+&gt; IsRadical(I);
+true
+&gt; time T := TriangularDecomposition(I);
+Time: 0.000
+&gt; time Q, P := PrimaryDecomposition(I);
+Time: 0.010
+&gt; #T;
+9
+&gt; #Q;
+20
+</PRE>
+So we notice that although I decomposes into 9 triangular ideals,
+some of these ideals must decompose further since the primary decomposition
+consists of 20 prime ideals.  We examine the first entry of T.  Notice
+that it is at least triangular (it has 5 polynomials and for each variable
+there is a polynomial whose leading monomial is a power of that variable).
+<P>
+<P>
+<PRE>
+&gt; T[1];
+Ideal of Polynomial ring of rank 5 over Rational Field
+Order: Lexicographical
+Variables: x, y, z, t, u
+Inhomogeneous, Dimension 0
+Groebner basis:
+[
+    x - 6/5*t^5 - 4*t^4 - 3*t^3 - 3*t^2 - 3*t - 9/5,
+    y - 2/5*t^5 - 2*t^4 - 3*t^3 - 2*t^2 - 2*t - 8/5,
+    z + 8/5*t^5 + 6*t^4 + 6*t^3 + 5*t^2 + 6*t + 22/5,
+    t^6 + 4*t^5 + 5*t^4 + 5*t^3 + 5*t^2 + 4*t + 1,
+    u - 1
+]
+&gt; IsPrimary(T[1]);
+false
+&gt; D := PrimaryDecomposition(T[1]);
+&gt; #D;
+2
+&gt; D;
+[
+    Ideal of Polynomial ring of rank 5 over Rational Field
+    Order: Lexicographical
+    Variables: x, y, z, t, u
+    Inhomogeneous, Dimension 0, Radical, Prime
+    Size of variety over algebraically closed field: 2
+    Groebner basis:
+    [
+        x - 1,
+        y - 1,
+        z + t + 3,
+        t^2 + 3*t + 1,
+        u - 1
+    ],
+    Ideal of Polynomial ring of rank 5 over Rational Field
+    Order: Lexicographical
+    Variables: x, y, z, t, u
+    Inhomogeneous, Dimension 0, Radical, Prime
+    Size of variety over algebraically closed field: 4
+    Groebner basis:
+    [
+        x + t^3 + t^2 + t + 1,
+        y - t^3,
+        z - t^2,
+        t^4 + t^3 + t^2 + t + 1,
+        u - 1
+    ]
+]
+</PRE>
+<HR>
+<H4><A NAME = "13627">Equidimensional Decomposition</A></H4>
+
+
+
+<H5><A NAME = "13628">EquidimensionalPart(I) : RngMPol -&gt; RngMPol</A></H5>
+<H5>EquidimensionalDecomposition(I) : RngMPol -&gt; [ RngMPol ]</H5>
+<H5>FineEquidimensionalDecomposition(I) : RngMPol -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Let I be an ideal of a polynomial ring P over a field. Currently for
+the two decomposition functions, it is <I>assumed</I> that I has no 
+embedded associated primes
+(e.g., when I is radical). In this case, it can be much faster to compute
+an equidimensional decomposition rather than a full primary or radical
+one. The equidimensional decomposition is the set of ideals which are the
+intersections of all primary components of I associated to primes of the
+same dimension. This decomposition (often trivial) is useful for certain
+constructions involving the Jacobian ideal.
+<P>
+The first function just computes the highest-dimensional decomposition component.
+The second performs the straight decomposition. The third gives a
+slightly finer decomposition for the convenience of some applications. In it,
+each equidimensional component is possibly further split so that, for each
+final equidimensional factor there is a single set of variables which
+constitute a maximally independent set of every primary component of the
+factor (<I>cf</I> <A  HREF = "text1224.htm#dpoly_ideal:Dimension">Dimension</A>). A sequence of pairs
+consisting of each factor and the indices of its set of variables is returned.
+<P>
+The algorithm from <A  HREF = "text1213.htm#bib_GrPf02">[GP02]</A> is used in the general case. When I
+is homogeneous, a faster, more module-theoretic method is employed for
+the first two functions. This involves first expressing P/I as a finite module
+M over a linear Noether Normalisation (described in the next section) S of
+I. Then if E(I) is the equidimensional part of I, E(I)/I as a submodule
+of M is equal to the kernel of the natural map of M to its double dual over
+S, Hom<sub>S</sub>(Hom<sub>S</sub>(M, S), S). Working with modules over S rather than over P
+here allows the "reduction to dimension 0". We could directly over P, 
+doing a similar computation but with Hom<sub>S</sub> replaced by some Ext<sup>i</sup><sub>P</sub>
+(see <A  HREF = "text1213.htm#bib_EHV_92">[EHV92]</A>).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13629">Example <TT>Ideal_EquidimensionalDecomposition (H112E12)</TT></A></H3>
+<P>
+<P>
+<P>
+<PRE>
+&gt; P&lt;x, y, z&gt; := PolynomialRing(RationalField(), 3);
+&gt; P1 := ideal&lt;P|x*y+y*z+z*x&gt;; // dimension 2 prime
+&gt; P2 := ideal&lt;P|x^2+y,y*z+2&gt;; // dimension 1 prime
+&gt; P3 := ideal&lt;P|x*y-1,y+z&gt;;   // dimension 1 prime
+&gt; I := P1 meet P2 meet P3;
+&gt; time rd := RadicalDecomposition(I);
+Time: 3.720
+&gt; time ed := EquidimensionalDecomposition(I);
+Time: 0.070
+&gt; #ed;
+2
+&gt; ed[1] eq P1;
+true
+&gt; ed[2] eq (P2 meet P3);
+true
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1226.htm">[Next]</A><A  HREF = "text1224.htm">[Prev]</A> <A  HREF = "text1226.htm">[Right]</A> <A  HREF = "text1224.htm">[Left]</A> <A  HREF = "text1214.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

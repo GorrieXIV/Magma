@@ -1,0 +1,249 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Global Geometry of Schemes</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1333.htm">[Next]</A><A  HREF = "text1331.htm">[Prev]</A> <A  HREF = "text1333.htm">[Right]</A> <A  HREF = "text1331.htm">[Left]</A> <A  HREF = "text1321.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "14540">Global Geometry of Schemes</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+Many of the names of intrinsics in this section come from the usual
+terminology of algebraic geometry.
+A reference for them is Hartshorne's book <A  HREF = "text1320.htm#bib_hartshorne">[Har77]</A>, especially
+Chapter II, Section 3.
+
+
+<H5><A NAME = "14541">Dimension(X) : Sch -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The dimension of the scheme X.
+If X is irreducible then the meaning of this is clear, but in general it
+returns only the dimension of the highest dimensional component of X.
+The dimension of an empty scheme will be returned as -1.
+If the dimension is not already known, a Gr&ouml;bner basis calculation is
+employed. If X is projective in a multi-graded ambient then it is
+saturated before this calculation takes place. The computation method
+involves computing the <TT>Dimension</TT> of the <TT>Ideal</TT> of the scheme,
+and then (for projective schemes) subtracting the number of gradings.
+</BLOCKQUOTE>
+<H5><A NAME = "14542">Codimension(X) : Sch -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The codimension of the scheme X in its ambient space.
+In fact, this number is calculated as the difference of <TT>Dimension(A)</TT>
+and <TT>Dimension(X)</TT> where A is the ambient space, so if X is not
+irreducible this number is the codimension of a highest dimensional
+component of X.
+</BLOCKQUOTE>
+<H5><A NAME = "14543">Degree(X) : Sch -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The degree of the scheme X.
+</BLOCKQUOTE>
+<H5><A NAME = "14544">ArithmeticGenus(X) : Sch -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The arithmetic genus of a scheme X. The ambient space of X
+must be ordinary projective space.
+</BLOCKQUOTE>
+<H5><A NAME = "14545">IsEmpty(X) : Sch -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the scheme X has no points over any 
+algebraic closure of its base field.  This intrinsic tests if the ideal 
+of X is trivial (in a sense to be interpreted separately according to 
+whether X is affine or projective) and then applies the Nullstellensatz.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14546">IsNonsingular(X) : Sch -&gt; BoolElt</A></H5>
+
+<PRE>    FullCheck: BoolElt                  Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the scheme X is nonsingular over
+an algebraic closure of its base field (i.e. smooth) and also equidimensional
+if parameter <TT>FullCheck</TT> is <TT>false</TT>, which is the default.
+The test <TT>IsEmpty</TT> for the emptiness of the scheme is applied to the
+scheme defined by the vanishing of appropriately sized minors of the
+Jacobian matrix of X.
+<P>
+If <TT>FullCheck</TT> is set to <TT>true</TT>, then the test is just for smoothness and
+the scheme does not have to be equidimensional. However, this involves a 
+potentially expensive decomposition of X into equidimensional components,
+with the Jacobian criterion being applied to each one if no two intersect.
+<P>
+This smoothness test is a valid test for affine schemes or ones in ordinary
+or product projective space. For other ambients, the Jacobian test applied
+this way will not necessarily give correct results for a closed subset of
+X where it intersects singularities of the ambient space.
+<P>
+For X in a weighted projective ambient (i.e., one with a single grading consisting of
+positive integer weights), we have now extended the non-singularity test to the
+full scheme using <TT>WeightedAffinePatch</TT>. The bad subscheme which intersects
+the singularities of the ambient is computed and the test is done along this
+by pulling over to appropriate weighted affine patches. As these patches can be
+in quite high-dimensional ambients with a number of additional equations, this
+can be quite a heavy computation in general. We have added a number of speed-ups,
+computing the equations of X in the patch by a simplified method, where
+appropriate, and also by performing the generally much faster point singularity
+test after decomposing a cluster and base-field extending when the bad subscheme
+has zero-dimensional components. There is a singular K3-surface example below
+where the computations are very slow without these speed-ups.
+</BLOCKQUOTE>
+<H5><A NAME = "14547">IsSingular(X) : Sch -&gt; BoolElt</A></H5>
+
+<PRE>    FullCheck: BoolElt                  Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the scheme X either has a singular point or fails to be
+equidimensional over an algebraic closure of its base field. This is just the negation
+of the previous intrinsic and the <TT>FullCheck</TT> parameter and extra functionality
+for weighted projective space is the same as for that.
+</BLOCKQUOTE>
+<H5><A NAME = "14548">SingularSubscheme(X) : Sch -&gt; Sch</A></H5>
+<BLOCKQUOTE>
+The subscheme of the scheme X defined by the vanishing of the appropriately
+sized minors of the jacobian matrix of X.
+If X is not equidimensional, its lower dimensional components will
+be contained in this scheme whether they are singular or not.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14549">Example <TT>Scheme_wps-singularities (H118E20)</TT></A></H3>
+In this example we give two examples of full singularity checks
+in weighted projective space. The first is a singular K3-surface
+from the K3-database that is in a highly-weighted space
+(P)(4, 5, 6, 15, 10). The full check is very slow without the
+simplifications, but the bad subscheme which requires additional
+checking via weighted patches is zero-dimensional and the reduction
+to point singularity checks really speeds things up. 
+<P>
+<P>
+<PRE>
+&gt; Q := Rationals();
+&gt; P&lt;x,y,z,t,u&gt; := ProjectiveSpace(Q,[4,5,6,15,10]);
+&gt; X := Scheme(P,[2*x^5*y^2 + 3*x^6*z + y^6 + 4*x*y^4*z + 3*x^2*y^2*z^2 +
+&gt;     x^3*z^3 + 5*x^5*u + z^5 + y^4*u + 3*x*y^2*z*u +
+&gt;     3*x^2*z^2*u + 3*y^3*t + 2*x*y*z*t + 3*y^2*u^2 +
+&gt;     5*x*z*u^2 + 3*y*t*u + 4*u^3 + 3*t^2,
+&gt; 4*y^2 + x*z]);
+&gt; time IsNonsingular(X);
+false
+Time: 0.150
+</PRE>
+The second example uses the rather artificial (P)(1, 2, 2) weighted
+plane. If x is the first variable, we take the subscheme X defined by
+x<sup>2</sup>. The weighted plane is isomorphic to the ordinary projective
+plane in such a way that X corresponds to the line x=0. So, clearly,
+X is non-singular but the straight Jacobian criterion goes horribly
+wrong here, as X looks like a doubled line which is everywhere singular
+if the gradings are not taken into account. In this case, the "bad"
+subscheme of X at which extra checks need to be performed is the whole
+of X!
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(Q,[1,2,2]);
+&gt; X := Scheme(P,x^2);
+&gt; IsNonsingular(X);
+true
+</PRE>
+<HR>
+<H5><A NAME = "14550">PrimeComponents(X) : Sch -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+A sequence containing the irredundant prime components of the scheme X.
+</BLOCKQUOTE>
+<H5><A NAME = "14551">PrimaryComponents(X) : Sch -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+A sequence containing the irredundant primary components of the scheme X.
+</BLOCKQUOTE>
+<H5><A NAME = "14552">ReducedSubscheme(X) : Sch -&gt; Sch, MapSch</A></H5>
+<BLOCKQUOTE>
+The subscheme of X with reduced scheme structure, followed by 
+the map of schemes to X.  This function uses a Gr&ouml;bner basis 
+to compute the radical of the defining ideal of X.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14553">IsIrreducible(X) : Sch -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the scheme X has a unique prime
+component. If X is not a hypersurface, a Gr&ouml;bner basis calculation
+is necessary and X is saturated before this occurs if it is projective.
+</BLOCKQUOTE>
+<H5><A NAME = "14554">IsReduced(X) : Sch -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the defining ideal of the scheme X 
+equals its radical.  If X is a hypersurface the evaluation of this 
+intrinsic uses only derivatives so works more generally than the 
+situations where a Gr&ouml;bner basis calculation is necessary. In the
+latter case, X is saturated before the calculation if it is projective.
+</BLOCKQUOTE>
+<H5><A NAME = "14555">IsCohenMacaulay(X) : Sch -&gt; BoolElt</A></H5>
+<H5>IsGorenstein(X) : Sch -&gt; BoolElt</H5>
+<H5>IsArithmeticallyCohenMacaulay(X) : Sch -&gt; BoolElt</H5>
+<H5>IsArithmeticallyGorenstein(X) : Sch -&gt; BoolElt</H5>
+
+<PRE>    CheckEqui: BoolElt                  Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+These intrinsics currently only apply to schemes in ordinary projective space.
+The first two intrinsics return whether X is (locally) Cohen-Macaulay/Gorenstein,
+meaning that the local ring of every the scheme-theoretic point on X
+satisfies the property. The second two intrinsics return whether the coordinate ring
+of X (the polynomial coordinate ring of the projective ambient quotiented by
+the maximal defining ideal of X) satisfies the corresponding property. The
+arithmetic version implies the local version. The results are stored internally
+with X for future reference. Also, if X is known to be non-singular, we can
+immediately deduce the local version of the properties is true and this check is
+also performed internally.
+<P>
+There is a further slight restriction in that X has to be equidimensional
+(each irreducible component having the same dimension and there being no
+other scheme-theoretic "associated points" beside the generic points of
+the irreducible components : true if X is also reduced). This is <I>not</I>
+checked by default in order to save some computation time. If the user is
+unsure whether X is equidimensional, the <TT>CheckEqui</TT> parameter should
+be set to <TT>true</TT> which forces a check.
+<P>
+The implementations use the minimal free polynomial resolution of the
+maximal defining ideal of X. The arithmetic versions are actually faster
+than the plain versions. <TT>IsGorenstein</TT> may be particularly heavy
+computationally as it has to check whether the canonical sheaf is locally
+free of rank 1 after the Cohen-Macaulay property has been verified.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14556">Example <TT>Scheme_schemes-prime-components (H118E21)</TT></A></H3>
+In this example we write down a rather unpleasant scheme and analyse the
+basic properties of its components.
+<P>
+<P>
+<PRE>
+&gt; A&lt;x,y,z&gt; := AffineSpace(Rationals(),3);
+&gt; X := Scheme(A,[x*y^3,x^3*z]);
+&gt; Dimension(X);
+2
+&gt; IsReduced(X);
+false
+&gt; PrimaryComponents(X);
+[
+    Scheme over Rational Field defined by
+    x,
+    Scheme over Rational Field defined by
+    x^3
+    y^3,
+    Scheme over Rational Field defined by
+    y^3
+    z
+]
+&gt; ReducedSubscheme(X);
+Scheme over Rational Field defined by
+x*y
+x*z
+</PRE>
+The reduced scheme of X is clearly the union of a line and a plane.
+The scheme X itself is more complicated, having another line embedded
+in the plane component.
+<HR>
+<PRE></PRE> <A  HREF = "text1333.htm">[Next]</A><A  HREF = "text1331.htm">[Prev]</A> <A  HREF = "text1333.htm">[Right]</A> <A  HREF = "text1331.htm">[Left]</A> <A  HREF = "text1321.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

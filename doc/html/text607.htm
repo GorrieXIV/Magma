@@ -1,0 +1,698 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Tensor Spaces</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text608.htm">[Next]</A><A  HREF = "text606.htm">[Prev]</A> <A  HREF = "text608.htm">[Right]</A> <A  HREF = "text606.htm">[Left]</A> <A  HREF = "text603.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "6502">Tensor Spaces</A></H3>
+
+<P>
+<P>
+In Magma a tensor space is a parent type for tensors.  It behaves
+as a module but also maintains an interpretation of its elements as
+a multilinear map.  Each tensor space further maintains a tensor category
+which is assigned to its tensors.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text607.htm#6503">Constructions of Tensor and Cotensor Spaces</A>
+<LI> <A  HREF = "text607.htm#6528">Operations on Tensor Spaces</A>
+</UL>
+<H4><A NAME = "6503">Constructions of Tensor and Cotensor Spaces</A></H4>
+
+
+
+<H5><A NAME = "6504">Universal Tensor Spaces</A></H5>
+
+<P>
+<P>
+<P>
+Construction of universal tensor spaces is modeled after construction of free 
+modules and matrix spaces. For efficiency reasons, the actual representation 
+may 
+vary based on the parameters, e.g. it may be a space of structure constants, 
+black-box functions, or systems of forms. So access to the tensors in these 
+tensor space should be made through the provided functions.
+
+
+<H5><A NAME = "6505">KTensorSpace(K, S) : Fld, [RngIntElt] -&gt; TenSpc</A></H5>
+<H5>KTensorSpace(K, S, C) : Fld, [RngIntElt], TenCat -&gt; TenSpc</H5>
+<BLOCKQUOTE>
+For a field K and sequence S=[d<sub>v</sub>, ..., d<sub>0</sub>], 
+returns the universal tensor space hom<sub>K</sub>(K<sup>d<sub>v</sub></sup>, ... , hom<sub>K</sub>(K<sup>d<sub>1</sub></sup>, K<sup>d<sub>0</sub></sup>) ... ) isomorphic to K<sup>d<sub>v</sub> ... d<sub>0</sub></sup>
+with covariant tensor category given by C.
+The default is Albert's homotopism category.
+</BLOCKQUOTE>
+<H5><A NAME = "6506">RTensorSpace(R, S) : Rng, [RngIntElt] -&gt; TenSpc</A></H5>
+<H5>RTensorSpace(R, S, C) : Rng, [RngIntElt], TenCat -&gt; TenSpc</H5>
+<BLOCKQUOTE>
+For a commutative and unital ring R and sequence S=[d<sub>v</sub>, ..., d<sub>0</sub>], 
+returns the universal tensor space hom<sub>R</sub>(R<sup>d<sub>v</sub></sup>, ... , hom<sub>R</sub>(R<sup>d<sub>1</sub></sup>, R<sup>d<sub>0</sub></sup>) ... ) isomorphic to R<sup>d<sub>v</sub> ... d<sub>0</sub></sup>
+with covariant tensor category given by C.
+The default is Albert's homotopism category.
+</BLOCKQUOTE>
+<H5><A NAME = "6507">TensorSpace(S) : [ModRng] -&gt; TenSpc</A></H5>
+<H5>TensorSpace(S) : [ModTupRng] -&gt; TenSpc</H5>
+<H5>TensorSpace(S) : [ModMatRng] -&gt; TenSpc</H5>
+<H5>TensorSpace(S) : List -&gt; TenSpc</H5>
+<H5>TensorSpace(S, C) : [ModRng], TenCat -&gt; TenSpc</H5>
+<H5>TensorSpace(S, C) : [ModTupRng], TenCat -&gt; TenSpc</H5>
+<H5>TensorSpace(S, C) : [ModMatRng], TenCat -&gt; TenSpc</H5>
+<H5>TensorSpace(S, C) : List, TenCat -&gt; TenSpc</H5>
+<BLOCKQUOTE>
+Given a sequence S=[U<sub>v</sub>, ..., U<sub>0</sub>] of K-modules returns a universal tensor 
+space equivalent to hom<sub>K</sub>(U<sub>v</sub> tensor <sub>K</sub> ... tensor <sub>K</sub> U<sub>1</sub>, U<sub>0</sub>) with covariant tensor 
+category given by C. The default is Albert's homotopism category. 
+</BLOCKQUOTE>
+<H5><A NAME = "6508">TensorSpace(V, p, q) : ModTupFld, RngIntElt, RngIntElt -&gt; TenSpc</A></H5>
+<H5>TensorSpace(K, d, p, q) : Fld, RngIntElt, RngIntElt, RngIntElt -&gt; TenSpc</H5>
+<BLOCKQUOTE>
+Returns the signatured (p, q)-tensor space over the vector space V=K<sup>d</sup>. 
+The first p indices are covariant and the last q indices are contravariant.  
+This is functionally equivalent
+to creating a universal tensor space from the sequence 
+[V, ..., <sub>p</sub> V, V<sup> * </sup>, ..., <sub>q</sub> V<sup> * </sup>]
+and the tensor category with arrows [1, ..., <sub>p</sub> 1, - 1, ..., <sub>q</sub> - 1] and 
+duplicates {{p + q, ..., 1 + q}, {q, ..., 1}, {0}}.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6509">Example <TT>Multilinear_TenSpc_Const (H61E20)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; TS := KTensorSpace(Rationals(),[ i : i in [3..7] ]);
+&gt; TS;
+Tensor space of dimension 2520 over Rational Field with 
+valence 4
+U4 : Full Vector space of degree 3 over Rational Field
+U3 : Full Vector space of degree 4 over Rational Field
+U2 : Full Vector space of degree 5 over Rational Field
+U1 : Full Vector space of degree 6 over Rational Field
+U0 : Full Vector space of degree 7 over Rational Field
+&gt; 
+&gt; TS.1;
+Tensor of valence 4, U4 x U3 x U2 x U1 &gt;-&gt; U0
+U4 : Full Vector space of degree 3 over Rational Field
+U3 : Full Vector space of degree 4 over Rational Field
+U2 : Full Vector space of degree 5 over Rational Field
+U1 : Full Vector space of degree 6 over Rational Field
+U0 : Full Vector space of degree 7 over Rational Field
+</PRE>
+Give a tensor space a frame.
+<P>
+<P>
+<PRE>
+&gt; R := pAdicRing(3,6);
+&gt; Fr := [RSpace(R,5), sub&lt;RSpace(R,3)|[0,1,0],[0,0,1]&gt;,
+&gt;   RSpace(R,2)];
+&gt; TS := TensorSpace(Fr);
+&gt; TS;
+Tensor space of dimension 20 over 3-adic ring mod 3^6 with 
+valence 2
+U2 : Full RSpace of degree 5 over pAdicRing(3, 6)
+U1 : RSpace of degree 3, dimension 2 over pAdicRing(3, 6)
+Generators:
+(0 1 0)
+(0 0 1)
+Echelonized basis:
+(0 1 0)
+(0 0 1)
+U0 : Full RSpace of degree 2 over pAdicRing(3, 6)
+&gt; 
+&gt; TS.10;
+Tensor of valence 2, U2 x U1 &gt;-&gt; U0
+U2 : Full RSpace of degree 5 over pAdicRing(3, 6)
+U1 : RSpace of degree 3, dimension 2 over pAdicRing(3, 6)
+Generators:
+(0 1 0)
+(0 0 1)
+Echelonized basis:
+(0 1 0)
+(0 0 1)
+U0 : Full RSpace of degree 2 over pAdicRing(3, 6)
+</PRE>
+With signatured tensor spaces, the tensor category is not immediately obvious at print out. 
+Instead, one can glean categorical information using <TT>TensorCategory</TT> on a tensor space.
+<P>
+<P>
+<PRE>
+&gt; TS := TensorSpace( VectorSpace(GF(3),3), 2, 4 );
+&gt; TS;
+Tensor space of dimension 729 over GF(3) with valence 6
+U6 : Full Vector space of degree 3 over GF(3)
+U5 : Full Vector space of degree 3 over GF(3)
+U4 : Full Vector space of degree 3 over GF(3)
+U3 : Full Vector space of degree 3 over GF(3)
+U2 : Full Vector space of degree 3 over GF(3)
+U1 : Full Vector space of degree 3 over GF(3)
+U0 : Full Vector space of degree 1 over GF(3)
+&gt; 
+&gt; TensorCategory(TS);
+Tensor category of Valence 6 (&lt;-,&lt;-,-&gt;,-&gt;,-&gt;,-&gt;,==)
+({ 0 },{ 5 .. 6 },{ 1 .. 4 })
+</PRE>
+We see that the indices 5 and 6 are contravariant and both are linked together as well. Furthermore the covariant indices are 1--4, which are also linked together.
+<HR>
+<H5><A NAME = "6510">Universal Cotensor Spaces</A></H5>
+
+<P>
+<P>
+<P>
+We only consider cotensor spaces over fields.
+
+
+<H5><A NAME = "6511">KCotensorSpace(K, S) : Fld, [RngIntElt] -&gt; TenSpc</A></H5>
+<H5>KCotensorSpace(K, S, C) : Fld, [RngIntElt], TenCat -&gt; TenSpc</H5>
+<BLOCKQUOTE>
+For a field K and sequence S=[d<sub>v</sub>, ..., d<sub>1</sub>] returns the universal cotensor
+space hom<sub>K</sub>(K<sup>d<sub>v</sub></sup> tensor ... tensor K<sup>d<sub>1</sub></sup>, K) isomorphic to K<sup>d<sub>v</sub> ... d<sub>1</sub></sup> with the given contravariant tensor category C.
+The default is Albert's homotopism category.
+</BLOCKQUOTE>
+<H5><A NAME = "6512">CotensorSpace(S) : [ModTupFld] -&gt; TenSpc</A></H5>
+<H5>CotensorSpace(S) : [ModMatFld] -&gt; TenSpc</H5>
+<H5>CotensorSpace(S) : List -&gt; TenSpc</H5>
+<H5>CotensorSpace(S, C) : [ModTupFld], TenCat -&gt; TenSpc</H5>
+<H5>CotensorSpace(S, C) : [ModMatFld], TenCat -&gt; TenSpc</H5>
+<H5>CotensorSpace(S, C) : List, TenCat -&gt; TenSpc</H5>
+<BLOCKQUOTE>
+Given a sequence S=[U<sub>v</sub>, ..., U<sub>1</sub>] of K-vector spaces returns the universal tensor 
+space equivalent to hom<sub>K</sub>(U<sub>v</sub> tensor <sub>K</sub> ... tensor <sub>K</sub> U<sub>1</sub>, K) with contravariant tensor 
+category given by C. The default is Albert's homotopism category.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6513">Example <TT>Multilinear_CoTenSpc_Const (H61E21)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; CT := KCotensorSpace(GF(2),[ i : i in [5..7] ]);
+&gt; CT;
+Cotensor space of dimension 210 over GF(2) with valence 2
+U3 : Full Vector space of degree 5 over GF(2)
+U2 : Full Vector space of degree 6 over GF(2)
+U1 : Full Vector space of degree 7 over GF(2)
+&gt; 
+&gt; CT.1;
+Cotensor of valence 2, U3 x U2 x U1 &gt;-&gt; K
+U3 : Full Vector space of degree 5 over GF(2)
+U2 : Full Vector space of degree 6 over GF(2)
+U1 : Full Vector space of degree 7 over GF(2)
+&gt; 
+&gt; 
+&gt; Cat := CotensorCategory([1,0,-1],{{1},{2},{3}});
+&gt; Fr := [ VectorSpace(GF(8),4) : i in [1..3] ];
+&gt; CT := CotensorSpace( Fr, Cat );
+&gt; CT;
+Cotensor space of dimension 64 over GF(2^3) with valence 2
+U3 : Full Vector space of degree 4 over GF(2^3)
+U2 : Full Vector space of degree 4 over GF(2^3)
+U1 : Full Vector space of degree 4 over GF(2^3)
+&gt; 
+&gt; TensorCategory(CT);
+Cotensor category of valence 2 (-&gt;,==,&lt;-) ({ 1 },{ 2 },{ 3 })
+</PRE>
+<HR>
+<H5><A NAME = "6514">Some Standard Constructions</A></H5>
+
+<P>
+<P>
+<P>
+We include some subspaces generated by well-known tensors.
+
+
+<H5><A NAME = "6515">AlternatingSpace(T) : TenSpc -&gt; TenSpc</A></H5>
+<BLOCKQUOTE>
+Returns the sub(co-)tensor space generated by all the alternating (co-)tensors contained in the given (co-)tensor space.
+</BLOCKQUOTE>
+<H5><A NAME = "6516">AntisymmetricSpace(T) : TenSpc -&gt; TenSpc</A></H5>
+<BLOCKQUOTE>
+Returns the sub(co-)tensor space generated by all the antisymmetric (co-)tensors contained in the given (co-)tensor space.
+</BLOCKQUOTE>
+<H5><A NAME = "6517">SymmetricSpace(T) : TenSpc -&gt; TenSpc</A></H5>
+<BLOCKQUOTE>
+Returns the sub(co-)tensor space generated by all the symmetric (co-)tensors contained in the given (co-)tensor space.
+</BLOCKQUOTE>
+<H5><A NAME = "6518">ExteriorCotensorSpace(V, n) : ModTupFld, RngIntElt -&gt; TenSpc</A></H5>
+<BLOCKQUOTE>
+Returns the cotensor space given by the nth exterior power of the vector space V.
+</BLOCKQUOTE>
+<H5><A NAME = "6519">SymmetricCotensorSpace(V, n) : ModTupFld, RngIntElt -&gt; TenSpc</A></H5>
+<BLOCKQUOTE>
+Returns the cotensor space given by the nth symmetric power of the vector space V.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6520">Example <TT>Multilinear_TenSpc_Const2 (H61E22)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; TS := KTensorSpace(GF(3), [3,3,3,2]);
+&gt; TS;
+Tensor space of dimension 54 over GF(3) with valence 3
+U3 : Full Vector space of degree 3 over GF(3)
+U2 : Full Vector space of degree 3 over GF(3)
+U1 : Full Vector space of degree 3 over GF(3)
+U0 : Full Vector space of degree 2 over GF(3)
+&gt; 
+&gt; SS := SymmetricSpace(TS);
+&gt; AsMatrices(Random(SS),3,2);
+[
+    [1 1 1]
+    [1 0 0]
+    [1 0 0],
+
+    [2 2 2]
+    [2 0 1]
+    [2 1 0],
+
+    [1 0 0]
+    [0 1 2]
+    [0 2 2],
+
+    [2 0 1]
+    [0 1 1]
+    [1 1 2],
+
+    [1 0 0]
+    [0 2 2]
+    [0 2 1],
+
+    [2 1 0]
+    [1 1 2]
+    [0 2 0]
+]
+</PRE>
+For V=F<sub>25</sub><sup>6</sup>, we construct the fourth exterior power of V, &Lambda;<sup>4</sup>(V) 
+as a sub cotensor space of dimension 6 choose (4)=15.
+<P>
+<P>
+<PRE>
+&gt; V := VectorSpace(GF(25),6);
+&gt; E := ExteriorCotensorSpace(V,4);
+&gt; E;
+Cotensor space of dimension 15 over GF(5^2) with valence 3
+U4 : Full Vector space of degree 6 over GF(5^2)
+U3 : Full Vector space of degree 6 over GF(5^2)
+U2 : Full Vector space of degree 6 over GF(5^2)
+U1 : Full Vector space of degree 6 over GF(5^2)
+&gt; T := Random(E);
+&gt; IsAlternating(T);
+true
+</PRE>
+<HR>
+<H5><A NAME = "6521">Subspaces as Closures</A></H5>
+
+
+
+<H5><A NAME = "6522">DerivationClosure(TS, O) : TenSpc, AlgMat -&gt; TenSpc</A></H5>
+<H5>DerivationClosure(TS, O) : TenSpc, ModMatFld -&gt; TenSpc</H5>
+<H5>DerivationClosure(TS, O) : TenSpc, AlgMatLie -&gt; TenSpc</H5>
+<H5>DerivationClosure(TS, O) : TenSpc, [Mtrx] -&gt; TenSpc</H5>
+<H5>DerivationClosure(TS, O) : TenSpc, [AlgMatLie] -&gt; TenSpc</H5>
+<BLOCKQUOTE>
+Returns the derivation closure of the given tensor space TS, with frame U<sub>2</sub> x U<sub>1</sub> &#8611; U<sub>0</sub>, with operators O&sube;(End)(U<sub>2</sub>) x (End)(U<sub>1</sub>) x (End)(U<sub>0</sub>).
+Currently, this only works for tensor spaces of valence 2.
+This is the subspace whose tensors' derivation algebra contains O.
+</BLOCKQUOTE>
+<H5><A NAME = "6523">DerivationClosure(TS, T) : TenSpc, TenSpcElt -&gt; TenSpc</A></H5>
+<BLOCKQUOTE>
+Returns the derivation closure of the given tensor space TS, with frame U<sub>2</sub> x U<sub>1</sub> &#8611; U<sub>0</sub>, with operators O&sube;(End)(U<sub>2</sub>) x (End)(U<sub>1</sub>) x (End)(U<sub>0</sub>).
+Currently, this only works for tensor spaces of valence 2.
+This is the subspace whose tensors' derivation algebra contains the derivation algebra of T.
+</BLOCKQUOTE>
+<H5><A NAME = "6524">NucleusClosure(TS, O, s, t) : TenSpc, AlgMat, RngIntElt, RngIntElt -&gt; TenSpc</A></H5>
+<H5>NucleusClosure(TS, O, s, t) : TenSpc, ModMatFld, RngIntElt, RngIntElt -&gt; TenSpc</H5>
+<H5>NucleusClosure(TS, O, s, t) : TenSpc, [Mtrx], RngIntElt, RngIntElt -&gt; TenSpc</H5>
+<BLOCKQUOTE>
+Returns the nucleus closure of the tensor space TS, with frame U<sub>2</sub> x U<sub>1</sub> &#8611; U<sub>0</sub>, with operators O&sube;(End)(U<sub>s</sub>) x (End)(U<sub>t</sub>).
+Currently, this only works for tensor spaces of valence 2.
+This returns the subspace whose tensors' st-nuclues contains O.
+</BLOCKQUOTE>
+<H5><A NAME = "6525">NucleusClosure(TS, T, s, t) : TenSpc, TenSpcElt, RngIntElt, RngIntElt -&gt; TenSpc</A></H5>
+<BLOCKQUOTE>
+Returns the nucleus closure of the tensor space TS, with frame U<sub>2</sub> x U<sub>1</sub> &#8611; U<sub>0</sub>, with operators O&sube;(End)(U<sub>s</sub>) x (End)(U<sub>t</sub>).
+Currently, this only works for tensor spaces of valence 2.
+This returns the subspace whose tensors' st-nuclues contains the st-nucleus of T.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6526">Example <TT>Multilinear_Der_Closure (H61E23)</TT></A></H3>
+The derivation closure of the tensor in the universal tensor space is 1-dimensional.
+<P>
+<P>
+<PRE>
+&gt; Fr := [ KMatrixSpace(GF(3),2,3),
+&gt;   KMatrixSpace(GF(3),3,2),KMatrixSpace(GF(3),2,2) ];
+&gt; F := func&lt; x | x[1]*x[2] &gt;;
+&gt; T := Tensor(Fr,F);
+&gt; T;
+Tensor of valence 2, U2 x U1 &gt;-&gt; U0
+U2 : Full KMatrixSpace of 2 by 3 matrices over GF(3)
+U1 : Full KMatrixSpace of 3 by 2 matrices over GF(3)
+U0 : Full KMatrixSpace of 2 by 2 matrices over GF(3)
+&gt; 
+&gt; TS := Parent(T);
+&gt; TS;
+Tensor space of dimension 144 over GF(3) with valence 2
+U2 : Full Vector space of degree 6 over GF(3)
+U1 : Full Vector space of degree 6 over GF(3)
+U0 : Full Vector space of degree 4 over GF(3)
+&gt; 
+&gt; D := DerivationClosure(TS,T);
+&gt; D;
+Tensor space of dimension 1 over GF(3) with valence 2
+U2 : Full Vector space of degree 6 over GF(3)
+U1 : Full Vector space of degree 6 over GF(3)
+U0 : Full Vector space of degree 4 over GF(3)
+</PRE>
+<HR>
+<H3><A NAME = "6527">Example <TT>Multilinear_Nuc_Closure (H61E24)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; H := ClassicalSylow( GL(3,125), 5 ); // Heisenberg group
+&gt; T := pCentralTensor(H,5,1,1);
+&gt; T;
+Tensor of valence 2, U2 x U1 &gt;-&gt; U0
+U2 : Full Vector space of degree 6 over GF(5)
+U1 : Full Vector space of degree 6 over GF(5)
+U0 : Full Vector space of degree 3 over GF(5)
+</PRE>
+The centroid of T will be 3-dimensional and is isomorphic to F<sub>125</sub>.
+<P>
+<P>
+<PRE>
+&gt; C := Centroid(T);
+&gt; C;
+Matrix Algebra of degree 15 with 3 generators over GF(5)
+&gt; 
+&gt; S := TensorOverCentroid(T);
+&gt; S;
+Tensor of valence 2, U2 x U1 &gt;-&gt; U0
+U2 : Full Vector space of degree 2 over GF(5^3)
+U1 : Full Vector space of degree 2 over GF(5^3)
+U0 : Full Vector space of degree 1 over GF(5^3)
+&gt; 
+&gt; TS := Parent(S);
+&gt; N := NucleusClosure(TS,S,2,1);
+&gt; N;
+Tensor space of dimension 1 over GF(5^3) with valence 2
+U2 : Full Vector space of degree 2 over GF(5^3)
+U1 : Full Vector space of degree 2 over GF(5^3)
+U0 : Full Vector space of degree 1 over GF(5^3)
+</PRE>
+Compare this closure with the closure of our original tensor over F<sub>5</sub>.
+<P>
+<P>
+<PRE>
+&gt; NT := NucleusClosure(Parent(T),T,2,1);
+&gt; NT;
+Tensor space of dimension 36 over GF(5) with valence 2
+U2 : Full Vector space of degree 6 over GF(5)
+U1 : Full Vector space of degree 6 over GF(5)
+U0 : Full Vector space of degree 3 over GF(5)
+</PRE>
+<HR>
+<H4><A NAME = "6528">Operations on Tensor Spaces</A></H4>
+
+
+
+<H5><A NAME = "6529">Membership and Comparison with Tensor Spaces</A></H5>
+
+<P>
+<P>
+<P>
+We define some intuitive functions for tensor spaces, similar to those found for modules.
+
+
+<H5><A NAME = "6530">T in TS : TenSpcElt, TenSpc -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Decides if T is contained in the tensor space TS.
+</BLOCKQUOTE>
+<H5><A NAME = "6531">IsCoercible(TS, T) : TenSpc, TenSpcElt -&gt; BoolElt, TenSpcElt</A></H5>
+<H5>TS ! T : TenSpc, TenSpcElt -&gt; BoolElt, TenSpcElt</H5>
+<BLOCKQUOTE>
+Decides if the tensor T can be coerced into the tensor space TS. If so, the tensor is returned as an element of TS.
+</BLOCKQUOTE>
+<H5><A NAME = "6532">IsCoercible(TS, S) : TenSpc, SeqEnum -&gt; BoolElt, TenSpcElt</A></H5>
+<H5>TS ! S : TenSpc, SeqEnum -&gt; BoolElt, TenSpcElt</H5>
+<BLOCKQUOTE>
+Decides if the sequence S can be coerced into the tensor space TS as a tensor. If so, the corresponding tensor is returned. 
+</BLOCKQUOTE>
+<H5><A NAME = "6533">S eq T : TenSpc, TenSpc -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Decides if the tensor spaces S and T are equal.
+</BLOCKQUOTE>
+<H5><A NAME = "6534">S subset T : TenSpc, TenSpc -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Decides if S is a subset of the tensor space T.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6535">Example <TT>Multilinear_TenCoerce (H61E25)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; TS := KTensorSpace( GF(2), [2,3,2] );
+&gt; TS;
+Tensor space of dimension 12 over GF(2) with valence 2
+U2 : Full Vector space of degree 2 over GF(2)
+U1 : Full Vector space of degree 3 over GF(2)
+U0 : Full Vector space of degree 2 over GF(2)
+&gt; 
+&gt; S := [ Random(GF(2)) : i in [1..12] ];
+&gt; T := TS!S;
+&gt; T;
+Tensor of valence 2, U2 x U1 &gt;-&gt; U0
+U2 : Full Vector space of degree 2 over GF(2)
+U1 : Full Vector space of degree 3 over GF(2)
+U0 : Full Vector space of degree 2 over GF(2)
+&gt; 
+&gt; T eq Tensor(GF(2),[2,3,2],S);
+true
+</PRE>
+We demonstrate how to coerce into the symmetric cube of V=Q<sup>10</sup> and construct a subcotensor space.
+<P>
+<P>
+<PRE>
+&gt; V := VectorSpace(Rationals(),10);
+&gt; SS := SymmetricCotensorSpace(V,3);
+&gt; SS;
+Cotensor space of dimension 220 over Rational Field with valence 2
+U3 : Full Vector space of degree 10 over Rational Field
+U2 : Full Vector space of degree 10 over Rational Field
+U1 : Full Vector space of degree 10 over Rational Field
+&gt;
+&gt; CT := SubtensorSpace(SS,SS![1..1000]);
+&gt; CT;
+Cotensor space of dimension 1 over Rational Field with valence 2
+U3 : Full Vector space of degree 10 over Rational Field
+U2 : Full Vector space of degree 10 over Rational Field
+U1 : Full Vector space of degree 10 over Rational Field
+&gt;
+&gt; CT subset SS;
+true
+&gt; CT.1 in SS;
+true
+&gt; SS.2 in CT;
+false
+</PRE>
+<HR>
+<H5><A NAME = "6536">Tensor Spaces as Modules</A></H5>
+
+<P>
+<P>
+<P>
+We view a tensor space as a K-module, so we have notions of generators, 
+dimension (if it is free), and cardinality.
+
+
+<H5><A NAME = "6537">Generators(T) : TenSpc -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Returns a sequence of generators for the tensor space. 
+</BLOCKQUOTE>
+<H5><A NAME = "6538">T . i : TenSpc, RngIntElt -&gt; TenSpcElt</A></H5>
+<BLOCKQUOTE>
+Returns the ith generator of the tensor space T.
+</BLOCKQUOTE>
+<H5><A NAME = "6539">NumberOfGenerators(T) : TenSpc -&gt; RngIntElt</A></H5>
+<H5>Ngens(T) : TenSpc -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Returns the number of generators of the tensor space T.
+</BLOCKQUOTE>
+<H5><A NAME = "6540">Dimension(T) : TenSpc -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the dimension of the tensor space T as a free K-module.
+</BLOCKQUOTE>
+<H5><A NAME = "6541"># T : TenSpc -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the size of the tensor space, provided it is finite.
+</BLOCKQUOTE>
+<H5><A NAME = "6542">Random(T) : TenSpc -&gt; TenSpcElt</A></H5>
+<BLOCKQUOTE>
+Provided the base ring has a random algorithm in Magma, it returns a random 
+element of the tensor space T.
+</BLOCKQUOTE>
+<H5><A NAME = "6543">RandomTensor(R, S) : Rng, [RngIntElt] -&gt; TenSpcElt</A></H5>
+<H5>RandomTensor(R, S, C) : Rng, [RngIntElt], TenCat -&gt; TenSpcElt</H5>
+<BLOCKQUOTE>
+Provided R has a random algorithm in Magma, it returns a random tensor from 
+the tensor space hom<sub>R</sub>(R<sup>d<sub>v</sub></sup>, ..., hom<sub>R</sub>(R<sup>d<sub>1</sub></sup>, R<sup>d<sub>0</sub></sup>) ... ) with category C.
+The default category is the homotopism category.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6544">Example <TT>Multilinear_TenSpc_Module (H61E26)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; TS := KTensorSpace( GF(9), [2,2,2,2] );
+&gt; TS;
+Tensor space of dimension 16 over GF(3^2) with valence 3
+U3 : Full Vector space of degree 2 over GF(3^2)
+U2 : Full Vector space of degree 2 over GF(3^2)
+U1 : Full Vector space of degree 2 over GF(3^2)
+U0 : Full Vector space of degree 2 over GF(3^2)
+&gt; 
+&gt; Ngens(TS);
+16
+&gt; #TS eq 9^Ngens(TS);
+true
+&gt; 
+&gt; Eltseq(TS.2);
+[ 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+</PRE>
+We can use <TT>RandomTensor</TT> to get a random tensor or cotensor from scratch.
+<P>
+<P>
+<PRE>
+&gt; T := RandomTensor(GF(3),[2,2,2]);
+&gt; T;
+Tensor of valence 2, U2 x U1 &gt;-&gt; U0
+U2 : Full Vector space of degree 2 over GF(3)
+U1 : Full Vector space of degree 2 over GF(3)
+U0 : Full Vector space of degree 2 over GF(3)
+&gt; 
+&gt; Cat := CotensorCategory([1,1,1],{{1,2,3}});
+&gt; T := RandomTensor(GF(3),[2,2,2],Cat);
+&gt; T;
+Cotensor of valence 2, U3 x U2 x U1 &gt;-&gt; K
+U3 : Full Vector space of degree 2 over GF(3)
+U2 : Full Vector space of degree 2 over GF(3)
+U1 : Full Vector space of degree 2 over GF(3)
+</PRE>
+<HR>
+<H5><A NAME = "6545">Properties of Tensor Spaces</A></H5>
+
+<P>
+<P>
+<P>
+We define some functions to access basic properties of tensor spaces.
+
+
+<H5><A NAME = "6546">Valence(T) : TenSpc -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the valence of the tensor space.
+</BLOCKQUOTE>
+<H5><A NAME = "6547">Frame(T) : TenSpc -&gt; List</A></H5>
+<BLOCKQUOTE>
+Returns the list of modules in the frame of the tensor space.
+</BLOCKQUOTE>
+<H5><A NAME = "6548">BaseRing(T) : TenSpc -&gt; Rng</A></H5>
+<H5>BaseField(T) : TenSpc -&gt; Fld</H5>
+<BLOCKQUOTE>
+Returns the base ring (or field) of the tensor space.
+</BLOCKQUOTE>
+<H5><A NAME = "6549">TensorCategory(T) : TenSpc -&gt; TenCat</A></H5>
+<BLOCKQUOTE>
+Returns the underlying tensor category of the tensor space.
+</BLOCKQUOTE>
+<H5><A NAME = "6550">IsCovariant(T) : TenSpc -&gt; BoolElt</A></H5>
+<H5>IsContravariant(T) : TenSpc -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Decides if the underlying tensor category is covariant or contravariant.
+</BLOCKQUOTE>
+<H5><A NAME = "6551">ChangeTensorCategory(T, C) : TenSpc, TenCat -&gt; TenSpc</A></H5>
+<H5>ChangeTensorCategory( T, C) : TenSpc, TenCat -&gt;</H5>
+<BLOCKQUOTE>
+Returns the tensor category with the given tensor category.
+</BLOCKQUOTE>
+<H5><A NAME = "6552">IsAlternating(T) : TenSpc -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Decides if every tensor in the tensor space is an alternating tensor.
+</BLOCKQUOTE>
+<H5><A NAME = "6553">IsAntisymmetric(T) : TenSpc -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Decides if every tensor in the tensor space is an antisymmetric tensor.
+</BLOCKQUOTE>
+<H5><A NAME = "6554">IsSymmetric(T) : TenSpc -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Decides if every tensor in the tensor space is a symmetric tensor.
+</BLOCKQUOTE>
+<H5><A NAME = "6555">UniversalTensorSpace(T) : TenSpc -&gt; TenSpc</A></H5>
+<H5>UniversalCotensorSpace(T) : TenSpc -&gt; TenSpc</H5>
+<H5>Generic(T) : TenSpc -&gt; TenSpc</H5>
+<BLOCKQUOTE>
+Returns the universal (co-)tensor space with the same frame and category as T.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6556">Example <TT>Multilinear_TenSpc_Prop (H61E27)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; TS := KTensorSpace( GF(23), [3,4,5,6] );
+&gt; TS;
+Tensor space of dimension 360 over GF(23) with valence 3
+U3 : Full Vector space of degree 3 over GF(23)
+U2 : Full Vector space of degree 4 over GF(23)
+U1 : Full Vector space of degree 5 over GF(23)
+U0 : Full Vector space of degree 6 over GF(23)
+&gt; 
+&gt; Valence(TS);
+3
+&gt; Frame(TS);
+[*
+    Full Vector space of degree 3 over GF(23),
+
+    Full Vector space of degree 4 over GF(23),
+
+    Full Vector space of degree 5 over GF(23),
+
+    Full Vector space of degree 6 over GF(23)
+*]
+&gt; TensorCategory(TS);
+Tensor category of Valence 3 (-&gt;,-&gt;,-&gt;,-&gt;) 
+({ 1 },{ 2 },{ 0 },{ 3 })
+&gt; 
+&gt; Cat := TensorCategory([1,1,-1,-1],{{0},{1},{2},{3}});
+&gt; ChangeTensorCategory(~TS,Cat);
+&gt; TensorCategory(TS);
+Tensor category of Valence 3 (-&gt;,-&gt;,&lt;-,&lt;-) 
+({ 1 },{ 2 },{ 0 },{ 3 })
+</PRE>
+We construct the universal cotensor space of the symmetric cube, S<sup>3</sup>(V), of a vector space V.
+<P>
+<P>
+<PRE>
+&gt; V := VectorSpace( GF(3), 5 );
+&gt; S := SymmetricCotensorSpace(V,3);
+&gt; S;
+Cotensor space of dimension 30 over GF(3) with valence 2
+U3 : Full Vector space of degree 5 over GF(3)
+U2 : Full Vector space of degree 5 over GF(3)
+U1 : Full Vector space of degree 5 over GF(3)
+&gt; UniversalCotensorSpace(S);
+Cotensor space of dimension 125 over GF(3) with valence 2
+U3 : Full Vector space of degree 5 over GF(3)
+U2 : Full Vector space of degree 5 over GF(3)
+U1 : Full Vector space of degree 5 over GF(3)
+&gt; 
+&gt; IsSymmetric(S);
+true
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text608.htm">[Next]</A><A  HREF = "text606.htm">[Prev]</A> <A  HREF = "text608.htm">[Right]</A> <A  HREF = "text606.htm">[Left]</A> <A  HREF = "text603.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

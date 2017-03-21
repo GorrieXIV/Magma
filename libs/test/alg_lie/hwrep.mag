@@ -1,0 +1,80 @@
+/*
+ * all isogenies of a given type
+ */ 
+allisogs := function(tp)
+	assert Type(tp) eq MonStgElt;
+	fg := FundamentalGroup(tp);
+	sg := Subgroups(fg);
+	Rs := [* *];
+	for s in sg do
+		_,phi := sub<fg | s`subgroup>;
+		Append(~Rs, RootDatum(tp : Isogeny := phi));
+	end for;
+	return Rs;
+end function;
+
+RD4 := allisogs("D4");
+FQ := Rationals();
+F5 := GF(5);
+F101 := GF(101);
+TODO := [*
+<RootSystem("A1"),                  [* FQ, F5, F101 *]>,
+<RootDatum("A1" : Isogeny := "SC"), [* FQ, F5, F101 *]>,
+<RootDatum("A2" : Isogeny := "Ad"), [* FQ, F5, F101 *]>,
+<"A3",                              [*     F5, F101 *]>,
+<RootDatum("A3" : Isogeny := 2)   , [*     F5, F101 *]>,
+<RootSystem("B2"),                  [* FQ, F5, F101 *]>,
+<RootDatum("B2" : Isogeny := "SC"), [* FQ, F5, F101 *]>,
+<RootDatum("B3" : Isogeny := "Ad"), [*     F5, F101 *]>,
+<RootDatum("C3" : Isogeny := "Ad"), [* FQ           *]>,
+<RD4[1]                           , [* FQ, F5, F101 *]>,
+<"E6",                              [*     F5       *]>,
+<RootSystem("G2"),                  [* FQ, F5, F101 *]>
+*];
+
+for p in TODO do
+	tp := p[1];
+	for F in p[2] do
+		t0 := Cputime();
+
+		sd1, sd2 := GetSeed();
+		printf "seed: (%o, %o); tp = %o, F = %o\n", sd1, sd2, tp, F;
+		
+		//Construct Lie algebra
+		L := LieAlgebra(tp, F);
+		R := RootDatum(L);
+		n := Rank(RootDatum(L));
+		
+		//Construct some representations
+		V := RSpace(Integers(), n);
+		BV := Basis(V);
+		reps := [ Random(BV) : i in [1..Ceiling(#BV/2)] ];
+		
+		//For (almost) each representation do a straightforward test
+		for v in reps do
+			predim := DimensionOfHighestWeightModule(R, v);
+			if predim gt 150 then continue; end if;
+			
+			//Construct representation
+			rho := HighestWeightRepresentation(L, v);
+			printf "  v = %o, dim(rep) = %o\n", v, Degree(Codomain(rho));
+			
+			//check vs DimensionOfHighestWeightModule
+			assert Degree(Codomain(rho)) eq predim;
+			
+			//check it's a representation
+			rhoinv := Inverse(rho);
+			assert forall{b : b in Basis(L) | rhoinv(rho(b)) eq b };
+			assert forall{<b,c> : b,c in Basis(L) | rho(b)*rho(c) eq rho(b*c) };
+			
+			//check positive roots generate a subalgebra of the right dimension
+			posrts, _, _ := ChevalleyBasis(L);
+			S := sub<Codomain(rho) | [ rho(x) : x in posrts ]>;
+			assert Dimension(S) eq NumPosRoots(R);
+		end for;
+		
+		printf "  -> that took %.1o seconds\n", Cputime()-t0;
+				
+	end for;
+end for;
+

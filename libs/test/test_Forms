@@ -1,0 +1,245 @@
+/*
+  Tests for the construction of standard bilinear and sesquilinear forms
+  and related isometries
+  
+  July 2012
+  
+  $Id: test_Forms 44007 2013-07-28 13:03:05Z don $
+
+*/
+
+
+prime_powers := [3,5,7,9,25,2,4,8,16];
+test_oplus := procedure()
+  for n := 2 to 8 by 2 do
+    for q in prime_powers do
+      Q := StandardQuadraticForm(n,q);
+      V := QuadraticSpace(Q);
+      G := GOPlus(n,q);
+      H := IsometryGroup(V);
+      for i := 1 to Ngens(H) do assert IsIsometry(V,H.i); end for;
+      for i := 1 to Ngens(G) do assert IsIsometry(V,G.i); end for;
+    end for;
+  end for;
+end procedure;
+
+test_ominus_orig := procedure()
+  for n := 2 to 8 by 2 do
+    for q in prime_powers do
+      Q := StandardQuadraticForm(n,q : Minus, Variant := "Original");
+      V := QuadraticSpace(Q);
+      G := OldGOMinus(n,q);
+      H := IsometryGroup(V);
+      for i := 1 to Ngens(H) do assert IsIsometry(V,H.i); end for;
+      for i := 1 to Ngens(G) do assert IsIsometry(V,G.i); end for;
+    end for;
+  end for;
+end procedure;
+
+test_ominus_rev := procedure()
+  for n := 2 to 8 by 2 do
+    for q in prime_powers do
+      Q := StandardQuadraticForm(n,q : Minus, Variant := "Revised");
+      V := QuadraticSpace(Q);
+      G := GOMinus(n,q);
+      for i := 1 to Ngens(G) do assert IsIsometry(V,G.i); end for;
+    end for;
+  end for;
+end procedure;
+
+test_ozero := procedure()
+  for n := 3 to 9 by 2 do
+    for q in prime_powers do
+      for ver in ["Original", "Revised"] do
+        Q := StandardQuadraticForm(n,q : Variant := ver);
+        V := QuadraticSpace(Q);
+        G := GO(n,q);
+        H := IsometryGroup(V);
+        for i := 1 to Ngens(H) do assert IsIsometry(V,H.i); end for;
+        for i := 1 to Ngens(G) do assert IsIsometry(V,G.i); end for;
+      end for;
+    end for;
+  end for;
+end procedure;
+
+test_unitary := procedure()
+  for n := 2 to 8 by 2 do
+    for q in prime_powers do
+      J,sigma := StandardHermitianForm(n,q);
+      V := UnitarySpace(J,sigma);
+      G := GU(n,q);
+      H := IsometryGroup(V);
+      for i := 1 to Ngens(H) do assert IsIsometry(V,H.i); end for;
+      for i := 1 to Ngens(G) do assert IsIsometry(V,G.i); end for;
+    end for;
+  end for;
+end procedure;
+
+testallforms := procedure()
+  for n := 0 to 6 do
+    for q in prime_powers do
+      F := GF(q);
+      assert StandardAlternatingForm(2*n,F) eq StandardAlternatingForm(2*n,q);
+    end for;
+  end for;
+
+  test_oplus();
+  test_ominus_orig();
+  test_ominus_rev();
+  test_ozero();
+  test_unitary();
+  "Form tests complete";
+end procedure;
+
+Q := StandardQuadraticForm(6,5);
+V := QuadraticSpace(Q);
+
+u1 := V![1,3,0,4,3,1];
+u2 := V![0,3,0,2,0,1];
+U := sub<V| u1,u2>;
+W := sub<V| V.1>;
+
+B := Basis(U);
+U1 := TotallySingularComplement(V,U,W);
+H := HyperbolicBasis(U,B,U1);
+
+F2 := GF(8);
+J := Matrix(F2,4,4, [1,1,0,0, 1,0,1,0, 0,1,0,1, 0,0,1,0]);
+V2 := VectorSpace(F2,4,J);
+
+U := sub< V2 | V2.1,V2.2 >;
+f := hom< U-> V2 | V2.1,V2.2+V2.4 >;
+print "f is an isometry:",IsIsometry(U,V2,f);
+try
+  g := ExtendIsometry(V2,U,f);
+  "Error in ExtendIsometry";
+catch e
+  "Expected failure - cannot extend f";
+end try;
+
+
+testallforms();
+
+
+test_invar := procedure(H)
+  sym, alt := InvariantBilinearForms(H);
+  for J in sym cat alt do
+    for g in Generators(H) do
+      assert g*J*Transpose(g) eq J;
+    end for;
+  end for;
+  quad := InvariantQuadraticForms(H);
+end procedure;
+
+test_semi_invar := procedure(H)
+  for t in SemiInvariantBilinearForms(H) do
+    lambda := t[1];
+    for J in t[2] cat t[3] do
+      for k := 1 to Ngens(H) do
+        g := H.k;
+        assert g*J*Transpose(g) eq lambda[k]*J;
+      end for;
+    end for;
+  end for;
+end procedure;
+
+test_sesqui_invar := procedure(H,mu)
+  herm := InvariantSesquilinearForms(H);
+  for J in herm do
+    for g in Generators(H) do
+      assert g*J*ConjugateTranspose(g,mu) eq J;
+    end for;
+  end for;
+end procedure;
+
+F<x> := GF(25);
+G := Sp(4,F);
+b := G![F| x^10, x^21, x^4, 4, x^16, 4, x^9, x^8, x^20, 4, 4, x^13, 0, x^2, x^11, x ];
+// Irreducible, order 626
+H := sub<G|b>;
+test_invar(H);
+mu := hom< F -> F | x :-> x^5 >;
+test_sesqui_invar(H,mu);
+
+F<x> := GF(25);
+U := GeneralUnitaryGroup(4,F);
+T := sub<U |
+    Matrix(F, 4, 4, [ 4, 0, 0, 0, x^23, 0, 1, 0, x^23, 1, 0, 0, 3, x^19, x^19, 4 ]),
+    Matrix(F, 4, 4, [ x, x^15, x^19, x^5, x^14, x^22, 1, x^4, x^9, x^2, x, x^15, 
+      x^14, x^15, x^7, x^21 ]) >; 
+test_invar(T);
+// Irreducible  order = 768 = 2^8 * 3
+mu := hom< F -> F | x :-> x^5 >;
+test_sesqui_invar(T,mu);
+
+F<x> := GF(81);
+U := GeneralUnitaryGroup(3,F);
+a := U![x^48, 0, 0, 0, x^48, 0, 0, 0, x^48];
+b := U![x^63, x^59, x^56, x^3, x^27, x^25, x^42, x^5, x^72 ];
+H := sub<U|a,b>;
+mu := hom< F -> F | x :-> x^9 >;
+test_sesqui_invar(H,mu);
+
+
+F<x> := GF(4);
+H := MatrixGroup<4, F |
+    Matrix(F, 4, 4, [ 1, x, x, 1, 1, x, 0, x, 1, 1, 0, x^2, x, 0, x^2, x ]) >;
+    // order 17
+test_invar(H);
+
+H := MatrixGroup<6, F |
+    Matrix(F, 6, 6, [ x, 0, x^2, x, x, 1, 1, x, 0, x, x, x, 0, x^2, x, 1,
+    x^2, x^2, x, 1, x, 1, 1, 0, 1, x^2, x, x, 0, 1, 1, 0, 1, 0, x^2, 1 ]) >; 
+    // order 13
+test_invar(H);
+
+
+F<x> := GF(81);
+G := GU(3,F);
+H := sub<G |
+    Matrix(F, 3, 3, [ x^5, x^34, x^74, x^16, x^51, x^43, x^37, x^3, x^23 ]),
+    Matrix(F, 3, 3, [ x^7, x^39, x^9, x^20, x^13, x^14, x^63, x^62, x^59 ]) >;
+    // order = 365 = 5 * 73 
+mu := hom< F -> F | x :-> x^9 >;
+test_sesqui_invar(H,mu);
+
+
+F<x> := GF(4);
+Q := Matrix(F, 6, 6, [ 1, 0, 0, 0, 0, x^2, 0, 1, 0, x, 0, x, 
+0, 0, 1, 0, x^2, x^2, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1 ] );
+V := QuadraticSpace(Q);
+H := IsometryGroup(V);
+test_invar(H);
+
+F<x> := GF(81);
+H := MatrixGroup<3, F | [ x^41, 0, x^36, x^16, x^8, x^11, x^42, x^63, x^45 ] >;
+test_semi_invar(H);
+
+F<x> := GF(4);
+H := MatrixGroup<5, F |
+    [ 1, x^2, 0, 1, x^2, 0, x, x^2, 1, 1, 0, 0, 1, 0, 0, 
+    x, x^2, x, 0, x, 0, x^2, 1, x, x^2 ] >;
+test_invar(H);
+mu := hom<F -> F | x :-> x^2 >;
+test_sesqui_invar(H,mu);
+test_semi_invar(H);
+_ := SemiInvariantSesquilinearForms(H);
+
+// Similarity tests
+
+test_similarity := procedure()
+  for n := 2 to 8 by 2 do
+    for q in prime_powers do
+      J,sigma := StandardHermitianForm(n,q);
+      F := GF(q^2);
+      a := F.1 - sigma(F.1);
+      V := UnitarySpace(J,sigma);
+      aV := UnitarySpace(a*J,sigma);
+      assert (Characteristic(F) eq 2) eq IsIsometric(V,aV);
+      assert IsSimilar(V,aV);
+    end for;
+  end for;
+end procedure;
+
+test_similarity();
+

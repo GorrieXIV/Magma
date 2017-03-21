@@ -1,0 +1,198 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Creation of Class Fields</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text465.htm">[Next]</A><A  HREF = "text463.htm">[Prev]</A> <A  HREF = "text465.htm">[Right]</A> <A  HREF = "text463.htm">[Left]</A> <A  HREF = "text462.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "5067">Creation of Class Fields</A></H3>
+
+<P>
+<P>
+<P>
+Since the beginning of class field theory one of the core problems
+has been to find defining equations for the fields. Although
+most of the original proofs are essentially constructive, they rely on 
+complicated and involved computations and thus were not suited for
+hand computations.
+<P>
+The method used here to compute defining equations is essentially 
+the same as the one
+used for number fields. The main differences are due to the problem
+of p-extensions in characteristic p where Artin-Schreier-Witt
+theory is used, and the fact that the divisor class group is infinite.
+
+
+<H5><A NAME = "5068"></A><A NAME = "FldFunAb:AbelianExtension">AbelianExtension</A>(D, U) : DivFunElt, GrpAb -&gt; FldFunAb</H5>
+<BLOCKQUOTE>
+Given an effective divisor D and a subgroup U of the ray class group,
+(see <A  HREF = "text463.htm#FldFunAb:RayClassGroup">RayClassGroup</A>),
+Cl<sub>D</sub> of D such that the quotient Cl<sub>D</sub>/U is finite, 
+create the extension defined by this data. Note that, at this point,
+no defining equations are computed.
+</BLOCKQUOTE>
+<H5><A NAME = "5069">MaximalAbelianSubfield(K) : FldFunG -&gt; FldFunAb</A></H5>
+<BLOCKQUOTE>
+For a relative extension K/k of global function fields, compute the
+maximal abelian subfield K/A/k of K/k as an abelian extension of
+k. In particular, this function compute the norm group of K/k
+as a subgroup of a suitable ray class group.
+</BLOCKQUOTE>
+<H5><A NAME = "5070">HilbertClassField(K, p) : FldFun, PlcFunElt -&gt; FldFunAb</A></H5>
+<BLOCKQUOTE>
+For a global function field K and a place p of K, compute the (a)
+Hilbert class field of K as an abelian extension of K. This field
+is characterised by being the maximal abelian unramified extension of K
+where p is totally split.
+</BLOCKQUOTE>
+<H5><A NAME = "5071">FunctionField(A) : FldFunAb -&gt; FldFun</A></H5>
+
+<PRE>    WithAut: BoolElt                    Default: <TT>false</TT></PRE>
+
+<PRE>    SetVerbose("ClassField", n):        Maximum: 3</PRE>
+<BLOCKQUOTE>
+Given an abelian extension of function fields as created by 
+<A  HREF = "text464.htm#FldFunAb:AbelianExtension">AbelianExtension</A>,
+compute
+defining equations for the corresponding (ray) class field.
+<P>
+More precisely: Let Cl/U = &prod;Cl/U<sub>i</sub> be a decomposition 
+of the norm group of A
+such
+that the Cl/U<sub>i</sub> are cyclic of prime power order. Then for each
+U<sub>i</sub> the function will compute a defining equation, thus A is
+represented by the compositum.
+<P>
+If <TT>WithAut</TT> is <TT>true</TT>, the second sequence returned contains a 
+generating automorphism for each of the fields returned as the first
+return value. If <TT>WithAut</TT> is <TT>false</TT>, the first (and only) return value is
+a function field in non-simple representation.
+</BLOCKQUOTE>
+<H5><A NAME = "5072">MaximalOrderFinite(A) : FldFunAb -&gt; RngFunOrd</A></H5>
+<H5>MaximalOrderInfinite(A) : FldFunAb -&gt; RngFunOrd</H5>
+<BLOCKQUOTE>
+Compute a finite or an infinite maximal order of the function field
+of the abelian extension A.
+<P>
+This computes the maximal orders of each function field defined by each
+of the defining polynomials of the function field of A then combines them
+and finishes off the computation by using the algorithm of <A  HREF = "text461.htm#bib_buchman-lenstra">[BL94]</A> on the
+result. As the cyclic components are essentially Kummer, Artin--Schreier or
+Artin--Schreier---Witt extensions the algorithms 
+in <A  HREF = "text461.htm#bib_suth-max-kummer">[Sut12]</A>, <A  HREF = "text461.htm#bib_suth-artin">[Sut13]</A> and <A  HREF = "text461.htm#bib_suth-ASW">[Sut16]</A> are used to compute 
+the maximal orders of the component function fields.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5073">Example <TT>FldFunAb_classfields (H45E2)</TT></A></H3>
+First we have to create a function field, a divisor and a ray class group:
+<P>
+<P>
+<PRE>
+&gt; k&lt;w&gt; := GF(4);
+&gt; kt&lt;t&gt; := PolynomialRing(k);
+&gt; ktx&lt;x&gt; := PolynomialRing(kt);
+&gt; K := FunctionField(x^3-w*t*x^2+x+t);
+&gt; lp := Places(K, 2);
+&gt; D := 4*lp[2]+2*lp[6];
+&gt; R, mR := RayClassGroup(D);
+</PRE>
+Let us compute the maximal extension of exponent 5 such that
+the infinite place is totally split. This means that we
+<DL COMPACT class='compact'>
+<DT>-</DT><DD>have to create a subgroup of R containing the image of the infinite
+  place
+<DT>-</DT><DD>compute the fifth power of R 
+<DT>-</DT><DD>combine the two groups
+<P>
+</DL>
+and use this as input to the class field computation:
+<P>
+<P>
+<PRE>
+&gt; inf := InfinitePlaces(K);
+&gt; U1 := sub&lt;R | [x@@ mR : x in inf]&gt;;
+&gt; U2 := sub&lt;R | [5*R.i : i in [1..Ngens(R)]]&gt;;
+&gt; U3 := sub&lt;R | U1, U2&gt;;
+&gt; A := AbelianExtension(D, U3);
+&gt; A;
+Abelian extension of type [ 5 ]
+Defined modulo 4*(t^2 + t + w, $.1 + w^2*t + 1) +
+2*(t^2 + w^2*t + w^2, $.1 + w*t + w)
+over Algebraic function field defined over
+Univariate rational function field over GF(2^2) by
+x^3 + w*t*x^2 + x + t
+&gt; FunctionField(A);
+Algebraic function field defined over K by
+$.1^5 + (w*K.1^2 + (w*t + w^2)*K.1 + (w^2*t^2 + t
+    + w^2))*$.1^3 + ((t^2 + 1)*K.1^2 + w*t*K.1 +
+    (w*t^4 + w))*$.1 + (t^3 + w*t^2 + w^2*t)*K.1^2
+    + (w*t^4 + w^2*t^2 + w^2)*K.1 + t^4 + w^2*t^3
+    + w^2*t + w
+&gt; E := $1;
+&gt; #InfinitePlaces(E); 
+10
+</PRE>
+Which shows that all the places in <TT>inf</TT> split completely.
+To finish we compute maximal orders of A.
+<P>
+<P>
+<PRE>
+&gt; MaximalOrderFinite(A);
+Maximal Order of Algebraic function field defined over K by
+$.1^5 + (t*K.1^2 + (w*t^2 + w^2)*K.1 + (w*t^2 + t + w))*$.1^3 + ((t^2 + w)*K.1^2
+    + w^2*t^3*K.1 + (t^4 + t^2 + w^2))*$.1 + (t^4 + w^2*t^2 + w*t + w)*K.1^2 +
+    (w*t^5 + w*t^4 + w*t^3)*K.1 + w^2*t^5 + t^4 + w*t^3 + w^2*t + 1 over Maximal
+    Equation Order of K over Univariate Polynomial Ring in t over GF(2^2)
+&gt; MaximalOrderInfinite(A);
+Maximal Order of Algebraic function field defined over K by
+$.1^5 + (w^2*K.1^2 + (w^2*t + 1)*K.1 + (t^2 + w*t + 1))*$.1^3 + ((w^2*t^2 +
+    w^2)*K.1^2 + t*K.1 + (t^4 + 1))*$.1 + (w*t^3 + w^2*t^2 + t)*K.1^2 + (w^2*t^4
+    + t^2 + 1)*K.1 + w*t^4 + t^3 + t + w^2 over Maximal Order of K over
+    Valuation ring of Univariate rational function field over GF(2^2) with 
+    generator 1/t
+&gt; DiscriminantDivisor(A);
+4*(t^2 + t + w, K.1 + w^2*t + 1) + 4*(t^2 + w^2*t + w^2, K.1 + w*t + w)
+&gt; $1 eq Divisor(Discriminant($3)) + Divisor(Discriminant($2));
+true
+</PRE>
+<HR>
+<H3><A NAME = "5074">Example <TT>FldFunAb_classfields2 (H45E3)</TT></A></H3>
+Now, suppose we still want the infinite places to split, but now we are
+looking for degree 4 extensions such that the quotient of genus by
+number of rational places is maximal:
+<P>
+<P>
+<PRE>
+&gt; q, mq := quo&lt;R | U1&gt;;
+&gt; l4 := [ x`subgroup : x in Subgroups(q : Quot := [4])];
+&gt; #l4;
+7168
+&gt; A := [AbelianExtension(D, x@@mq) : x in l4];
+&gt; s4 := [&lt;Genus(a), NumberOfPlacesOfDegreeOne(a), a&gt; : a in A];
+&gt; Maximum([x[2]/x[1] : x in s4]);
+16/5 15
+&gt; E := FunctionField(s4[15][3]);
+&gt; l22 := [ x`subgroup : x in Subgroups(q : Quot := [2,2])];
+&gt; #l22;
+43435
+</PRE>
+Since this is quite a lot, we won't investigate them here further. But we will
+compute the maximal orders.
+<P>
+<P>
+<PRE>
+&gt; MaximalOrderFinite(s4[15][3]);
+Maximal Order of E over Maximal Equation Order of K over Univariate Polynomial
+Ring in t over GF(2^2)
+&gt; MaximalOrderInfinite(s4[15][3]);
+Maximal Order of E over Maximal Order of K over Valuation ring of Univariate
+rational function field over GF(2^2) with generator 1/t
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text465.htm">[Next]</A><A  HREF = "text463.htm">[Prev]</A> <A  HREF = "text465.htm">[Right]</A> <A  HREF = "text463.htm">[Left]</A> <A  HREF = "text462.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

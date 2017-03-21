@@ -1,0 +1,183 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Stored Attributes of an Automorphism Group</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text770.htm">[Next]</A><A  HREF = "text768.htm">[Prev]</A> <A  HREF = "text770.htm">[Right]</A> <A  HREF = "text768.htm">[Left]</A> <A  HREF = "text762.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "8802">Stored Attributes of an Automorphism Group</A></H3>
+
+<P>
+<P>
+Groups of automorphisms have several attributes that may be stored as part 
+of their data structure.
+The function <TT>HasAttribute</TT> is used to test if an attribute is
+stored and to retrieve its value, while the function <TT>AssertAttribute</TT>
+is used to set attribute values. The user is warned that when using
+<TT>AssertAttribute</TT> the data given is <I>not</I> checked for validity,
+apart from some simple type checks. <I>Setting attributes incorrectly 
+will result in errors.</I>
+
+
+<H5><A NAME = "8803">HasAttribute(A, s) : GrpAuto, MonStgElt -&gt; BoolElt, .</A></H5>
+<H5>AssertAttribute(A, s, v) : GrpAuto, MonStgElt, . -&gt;</H5>
+<BLOCKQUOTE>
+The <TT>HasAttribute</TT> function returns whether the group of automorphisms 
+A has the attribute named by the string s defined and, if so, also returns 
+the value of the attribute.
+<P>
+The <TT>AssertAttribute</TT> procedure sets the attribute of the group of 
+automorphisms group named by string s to have value v. The possible 
+names are:
+<P>
+ <TT>Group</TT>: The base group of the automorphism group. This is always set.
+<P>
+ <TT>Order</TT>: The order of the automorphism group. It is an integer and
+may be set by giving either an integer or a factored integer. 
+<P>
+ <TT>OuterOrder</TT>: The order of the outer automorphism group associated
+with A. It is an integer and
+may be set by giving either an integer or a factored integer.
+<P>
+ <TT>Soluble</TT>: (also <TT>Solvable</TT>) A boolean value telling whether or
+not the automorphism group is soluble.
+<P>
+ <TT>InnerGenerators</TT>: A sequence of generators of A known to be
+inner automorphisms.
+<P>
+ <TT>InnerMap</TT>: A homomorphism from the base group to the automorphism group
+taking each base group element to its corresponding inner automorphism.
+<P>
+ <TT>ClassAction</TT>: Stores the result of the <TT>PermutationRepresentation</TT> 
+          function call.
+<P>
+ <TT>ClassImage</TT>: Stores the result of the <TT>PermutationGroup</TT> function call.
+<P>
+ <TT>ClassUnion</TT>: Stores the result of the <TT>ClassUnion</TT> function call.
+<P>
+ <TT>FpGroup</TT>: Stores the result of the <TT>FPGroup</TT> function call.
+The attribute is a pair &lt; F, m &gt; where F is an fp-group and m is an
+isomorphism m:F to A. F and m are the two return values of <TT>FPGroup(A)</TT>.
+<P>
+ <TT>OuterFpGroup</TT>: Stores the result of the <TT>OuterFPGroup</TT> function call.
+The attribute is a pair &lt; O, f &gt; where O is an fp-group and f is an
+epimorphism f:F to O, where F is the first component of the <TT>FpGroup</TT> attribute.
+The kernel of f is the inner automorphism group.
+O and f are the two return values of <TT>OuterFPGroup(A)</TT>.
+<P>
+ <TT>GenWeights</TT>: <TT>WeightSubgroupOrders</TT>: See the section on
+automorphism groups in the chapter on soluble groups for details.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8804">Example <TT>GrpAuto_characteristicsubgps (H72E7)</TT></A></H3>
+We select a group of order 904 from the small groups database
+and compute its group of automorphisms.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := SmallGroup(904, 4);
+&gt; FactoredOrder(G);
+[ &lt;2, 3&gt;, &lt;113, 1&gt; ]
+&gt; FactoredOrder(Centre(G));
+[ &lt;2, 1&gt; ]
+&gt; A := AutomorphismGroup(G);
+&gt; FactoredOrder(A);
+[ &lt;2, 7&gt;, &lt;7, 1&gt;, &lt;113, 1&gt; ]
+&gt; HasAttribute(A, "FpGroup");     
+false
+&gt; HasAttribute(A, "OuterFpGroup");
+false
+&gt; F,m := FPGroup(A);
+&gt; AssertAttribute(A, "FpGroup", &lt;F,m&gt;);
+</PRE>
+Note that values for some attributes, such as <TT>FpGroup</TT>, have not
+been calculated by the original <TT>AutomorphismGroup</TT> call,
+but they may be  calculated and set later if desired.
+The outer automorphism group has order 2<sup>5</sup> x 7.
+We find the characteristic subgroups of <TT>G</TT>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; n := NormalSubgroups(G);
+&gt; [x`order : x in n];
+[ 1, 2, 113, 4, 226, 452, 452, 452, 904 ]
+&gt; characteristics := [s : x in n |
+&gt;   forall{f: f in Generators(A) | s@f eq s}
+&gt;   where s is x`subgroup]; 
+&gt; [#s : s in characteristics];
+[ 1, 2, 113, 4, 226, 452, 904 ]
+</PRE>
+Note that two of the normal subgroups of order 452 are not characteristic.
+<HR>
+<H3><A NAME = "8805">Example <TT>GrpAuto_auto-maximals (H72E8)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; G := AlternatingGroup(6);
+&gt; A := AutomorphismGroup(G);
+&gt; HasAttribute(A, "OuterFpGroup");
+true
+&gt; F, f := FPGroup(A);
+&gt; O, g := OuterFPGroup(A);
+&gt; O;
+Finitely presented group O on 2 generators
+Relations
+  O.1^2 = Id(O)
+  O.2^2 = Id(O)
+  (O.1 * O.2)^2 = Id(O)
+&gt; A`OuterOrder;
+4
+</PRE>
+We find the outer automorphism group is elementary abelian of order 4. The direct 
+product of <TT>G</TT> with itself has maximal subgroups isomorphic to <TT>G</TT>, in the 
+form of diagonal subgroups.  We can construct four non-conjugate examples using
+the outer automorphism group. The first example can be constructed without using an 
+outer automorphism.
+<P>
+<P>
+<PRE>
+&gt; GG, ins := DirectProduct(G, G);
+&gt; M := sub&lt;GG|[(x@ins[1])*(x@ins[2]):x in Generators(G)]&gt;;
+&gt; IsMaximal(GG, M);
+true
+</PRE>
+The subgroup <TT>M</TT> is the first, the obvious diagonal, 
+constructed using just 
+the embeddings returned by the direct product function. 
+We get others by twisting the second factor using an 
+outer automorphism.
+First we get (representatives of) the outer automorphisms explicitly.
+<P>
+<P>
+<PRE>
+&gt; outers := {x @@ g @ f : x in [O.1, O.2, O.1*O.2]};
+&gt; Representative(outers);
+Automorphism of GrpPerm: G, Degree 6, Order 2^3 * 3^2 * 5 which maps:
+  (1, 2)(3, 4, 5, 6) |--&gt; (1, 3, 6, 2)(4, 5)
+  (1, 2, 3) |--&gt; (1, 4, 2)(3, 5, 6)
+</PRE>
+The set <TT>outers</TT> now contains three distinct outer automorphisms
+of <TT>G</TT>.
+We use them to get three more diagonal subgroups.
+<P>
+<P>
+<PRE>
+&gt; diags := [M] cat 
+&gt; [sub&lt;GG|[(x @ ins[1])*(x @ f @ ins[2]):x in Generators(G)]&gt;:
+&gt;   f in outers];
+&gt; [IsMaximal(GG, m) : m in diags];
+[ true, true, true, true ]
+&gt; IsConjugate(GG, diags[2], diags[4]);
+false
+</PRE>
+The other five tests for conjugacy will give similarly negative results.
+<HR>
+<PRE></PRE> <A  HREF = "text770.htm">[Next]</A><A  HREF = "text768.htm">[Prev]</A> <A  HREF = "text770.htm">[Right]</A> <A  HREF = "text768.htm">[Left]</A> <A  HREF = "text762.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

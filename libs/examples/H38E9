@@ -1,0 +1,47 @@
+"Source: Text/Ring/RngOrd.text";
+"Line: 1893";
+"Date: Wed Jun  8 17:39:03 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Ring/RngOrd.text, line: 1893
+// Example: H38E9 ()
+print "Example: H38E9";
+ei := GetEchoInput();
+SetEchoInput(true);
+R<x> := PolynomialRing(Integers());
+M := MaximalOrder(x^4-14*x^3+14*x^2-14*x+14);
+L, T := LLL(M);
+L;
+T;
+Basis(M);
+Basis(L, M);
+L eq M;
+assert $1;
+pMaximalOverOrder := function(ord, p)
+   ovr := MultiplicatorRing(pRadical(ord, p));
+   print "index is", Index(ovr, ord);
+   return (Index(ovr, ord) eq 1) select ovr else $$(ovr, p);
+end function;
+Round2 := function(E, K)
+   // E should be the equation order of a number field K
+   d := Discriminant(E);
+   fact := Factorization(Abs(d));
+   print fact;
+   M := E;
+   for x in fact do
+M := M+pMaximalOverOrder(E, x[1]);
+   end for;
+   print "index of equation order in maximal order is:", Index(M, E);
+   return M;
+end function;
+R<x> := PolynomialRing(Integers());
+K := NumberField(x^4-420*x^2+40000);
+E := EquationOrder(K);
+O := Round2(E, K);
+L := LLL(O);
+O;
+O:Maximal;
+L;
+L:Maximal;
+Simplify(L):Maximal;
+Simplify(L);
+SetEchoInput(ei);

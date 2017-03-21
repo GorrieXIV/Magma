@@ -1,0 +1,38 @@
+"Source: Text/Algebra/AlgLie.text";
+"Line: 2092";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Algebra/AlgLie.text, line: 2092
+// Example: H106E24 ()
+print "Example: H106E24";
+ei := GetEchoInput();
+SetEchoInput(true);
+M, phi := MelikianLieAlgebra(GF(5), 2, 1);     
+M;
+IsSimple(M);
+assert $1;
+P<x1, x2, d1, d2, dp1, dp2> := Domain(phi);
+V := VectorSpace(GF(5), Dimension(M));
+W := sub<V | [ V | phi(x1^i*x2^j*d) : i in [0..24], j in [0..4], 
+                                                    d in [d1,d2] ]>;
+O := sub<V | [ V | phi(x1^i*x2^j) : i in [0..24], j in [0..4] ]>;
+Wp := sub<V | [ V | phi(x1^i*x2^j*d) : i in [0..24], j in [0..4], 
+                                                     d in [dp1,dp2] ]>;
+Dimension(W), Dimension(O), Dimension(Wp);
+Dimension(W meet O), Dimension(W meet Wp), Dimension(O meet Wp);
+m := func< A, B | sub<V | [ V | M!a*M!b : a in Basis(A), b in Basis(B) ]> >;
+WxWp := m(W, Wp); [ WxWp subset VV : VV in [W, O, Wp] ]; 
+VV := [W, O, Wp]; VVnm := ["W", "O", "W'" ];
+mm := function(A, B)
+  AB := m(A, B);
+  for i in [1..#VV] do 
+    if AB eq VV[i] then return VVnm[i]; end if;
+  end for;
+  return "??";
+end function;
+mm(W, Wp);  
+for i,j in [1..#VV] do
+  printf "[ %2o, %2o ] = %2o%o", VVnm[i], VVnm[j], mm(VV[i], VV[j]), 
+    (j eq 3) select "\n" else ", ";
+end for;
+SetEchoInput(ei);

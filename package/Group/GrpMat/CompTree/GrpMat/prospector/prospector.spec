@@ -1,0 +1,4 @@
+magma
+{
+	prospect.m
+}

@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Lorentzian Lattices</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text322.htm">[Next]</A><A  HREF = "text327.htm">[Prev]</A> <A  HREF = "text322.htm">[Right]</A> <A  HREF = "text327.htm">[Left]</A> <A  HREF = "text323.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "3187">Lorentzian Lattices</A></H3>
+
+<P>
+<P>
+<P>
+Closely related to totally positive definite lattices are Lorentzian lattices.
+These are defined over totally real fields, and have exactly one embedding
+for which the lattice is not positive definite, at which it has a Lorentzian
+signature (d - 1, 1) in dimension d.
+<P>
+A vector that has negative norm at this distinguished embedding is said
+to be timelike, while a vector with totally positive norm is spacelike.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text328.htm#3188">Special Intrinsics</A>
+</UL>
+<H4><A NAME = "3188">Special Intrinsics</A></H4>
+
+
+
+<H5><A NAME = "3189">IsLorentzian(L) : LatNF -&gt; BoolElt, ModTupFldElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a number field lattice L over a totally real field, return 
+<TT>true</TT> f L is Lorentzian and if so, also a return a lattice 
+vector that has negative norm at the given embedding.
+</BLOCKQUOTE>
+<H5><A NAME = "3190">IsTimelike(v): LatNFElt -&gt; BoolElt</A></H5>
+<H5>IsSpacelike(v): LatNFElt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Given a lattice field vector v in a Lorentzian lattice L
+return true if v is timelike (respectively spacelike). If the lattice 
+is not Lorentzian, an error is signaled.
+</BLOCKQUOTE>
+<H5><A NAME = "3191">AutomorphismGroup(L, v) : LatNF, LatNFElt -&gt; GrpMat, GrpMat</A></H5>
+
+<PRE>    NaturalAction: BoolElt              Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a number field lattice L and a timelike vector v in it,
+determine the joint stabilizer. This is computed by determining
+the stabilizer (automorphism group) of the orthogonal complement
+of the vector and extending it to the lattice by requiring the
+vector also to be fixed. In other words, the group
+A=(Aut)(v direct-sum v<sup>perp</sup>) is computed.
+The subgroup of A that stabilizes the lattice is then returned,
+while A is returned as a second value.
+If the <TT>NaturalAction</TT> vararg is set, the transformations
+are rewritten on the ambient space.
+</BLOCKQUOTE>
+<H5><A NAME = "3192">IsIsometric(L, v, w) : LatNF, LatNFElt, LatNFElt -&gt; BoolElt, Mtrx</A></H5>
+
+<PRE>    NaturalAction: BoolElt              Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a number field lattice L and two timelike vectors v and w
+in it, determine whether there is an automorphism of L that sends 
+w to v, and if so return such an isometry as the second argument.
+If the <TT>NaturalAction</TT> vararg is set, transformations
+are rewritten on the ambient space.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3193">Example <TT>LatNF_simple-lorentz-lat-ex (H31E9)</TT></A></H3>
+<P>
+We construct an easy Lorentzian lattice and compute
+isometries and automorphism group with various timelike vectors.
+<P>
+<P>
+<P>
+<PRE>
+&gt; K&lt;u&gt; := QuadraticField(5);
+&gt; G := DiagonalMatrix([-(u+1)/2,1,1,1]);
+&gt; L := NumberFieldLattice(K,4 : Gram:=G);
+&gt; IsLorentzian(L);
+true (1 0 0 0) 1
+&gt; v := L![(u+1)/2,(u+1)/2,0,1];
+&gt; w := L![(u+1),(u+3)/2,(u+1)/2,(u+3)/2];
+&gt; assert IsTimelike(v) and IsTimelike(w);
+&gt; Norm(v), Norm(w);
+1/2*(-u + 1)  1/2*(-u + 1)
+&gt; b, T := IsIsometric(L,v,w); assert b; T;
+[       2*u + 5 1/2*(5*u + 11)          u + 2    1/2*(u + 1)]
+[1/2*(-3*u - 5) 1/2*(-3*u - 7)   1/2*(-u - 3)   1/2*(-u - 1)]
+[  1/2*(-u - 1)   1/2*(-u - 1)   1/2*(-u - 1)              0]
+[        -u - 2         -u - 3   1/2*(-u - 1)              0]
+&gt; assert T*w eq v;
+&gt; #AutomorphismGroup(L,L![1,0,1,(3-u)/2]);
+16
+&gt; #AutomorphismGroup(L,L![1,0,0,0]);
+48
+&gt; #AutomorphismGroup(L,L![1,1,0,0]);
+48
+&gt; #AutomorphismGroup(L,L![1,(u-1)/2,(u-1)/2,(u-1)/2]);
+120
+&gt; s := L![1,0,(u-1)/2,(u-1)/2];
+&gt; A, B := AutomorphismGroup(L,s);
+&gt; #A,#B; // the automorphism group of s+O is larger than L
+20 40
+&gt; O := OrthogonalComplement(L,s); // s+O has index 5 in L
+&gt; assert #AutomorphismGroup(O) eq #B;
+&gt; Norm(Determinant(sub&lt;L|[s]&gt;+O)/Determinant(L));
+25
+</PRE>
+<PRE></PRE> <A  HREF = "text322.htm">[Next]</A><A  HREF = "text327.htm">[Prev]</A> <A  HREF = "text322.htm">[Right]</A> <A  HREF = "text327.htm">[Left]</A> <A  HREF = "text323.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

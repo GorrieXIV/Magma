@@ -1,0 +1,169 @@
+/*
+SetMark(true);
+SetTrace(1314424, true);
+SetDelCheck(true);
+*/
+
+/*
+AKS, Sep 08.
+*/
+
+
+ClearVerbose();
+SetVerbose("Resolution", 0);
+SetVerbose("Groebner", 0);
+
+//
+
+////
+
+R<x,y> := PolynomialRing(Rationals(), 2, "grevlex");
+
+for A3 in <Module(R,3), RModule(R,3)> do
+    A3;
+    M := sub<A3 | [[x*y,y,x],[x^2+x,y+x^2,y],[-y,x,y],[x^2,x,y]]>;
+    N := sub<A3 | [[x^2-y+1,x,y],[x^3,y,-x]]>;
+    m := N meet M;
+    assert m subset N;
+    assert m subset M;
+    u := M!m.1;
+    v := m!u;
+    assert v eq m.1;
+    assert m!M!m.1 eq m.1;
+    assert m!N!m.1 eq m.1;
+
+end for;
+
+////
+
+procedure test_hom(A, B)
+    H, f := Hom(A, B);
+
+    "\n****";
+    /*
+    "Hom In A:", A;
+    "Hom In B:", B;
+    "Hom H:", H;
+    */
+
+    "Hom In A Degree:", Degree(A);
+    "Hom In B Degree:", Degree(B);
+    "Hom Degree:", Degree(H);
+
+    R := Relations(A);
+    HL := Basis(H);
+    Append(~HL, &+HL);
+
+    for g in HL do
+	h := f(g);
+	assert Degree(h) eq Degree(g);
+	assert IsHomogeneous(h) eq IsHomogeneous(g);
+	assert IsZero(h) eq IsZero(g);
+	for v in R do
+	    T := Terms(v);
+	    S := [h(t): t in T];
+	    assert IsZero(&+S);
+	    for i := 1 to #T do
+		if not IsZero(S[i]) and IsHomogeneous(h) then
+		    if Degree(T[i]) + Degree(h) ne Degree(S[i]) then
+			"i:", i;
+			"h:", h;
+			"T[i]:", T[i];
+			"S[i]:", S[i];
+			Degree(T[i]), Degree(h), Degree(S[i]);
+			error "bad";
+		    end if;
+		end if;
+	    end for;
+	end for;
+    end for;
+end procedure;
+
+////
+
+P<x,y,z> := PolynomialRing(RationalField(), 3);
+M := sub<RModule(P, 3) |
+    [x*y, x*z, y*z], [y, x, y],
+    [0, x^3 - x^2*z, x^2*y - x*y*z], [y*z, x^2, x*y]>;
+N := sub<RModule(P, 2) |
+    [x^2, y^2], [x^2, y*z], [x^2*z, x*y^2 + y*z^2]>;
+test_hom(M, N);
+test_hom(N, M);
+
+////
+
+R := InvariantRing(CyclicGroup(4), GF(2));
+M := Module(R);
+
+assert HilbertSeries(M) eq HilbertSeries(R);
+assert Rank(M) eq 5;
+
+test_hom(M, M);
+H := Hom(M, M);
+time test_hom(H, H);
+
+///////
+
+K := RationalField();
+P<x,y,z> := PolynomialRing(K, 3, "grevlex");
+M := quo<RModule(P, 2) |
+    [x^2, y^2], [x^2, y*z], [x^2*z, x*y^2 + y*z^2]>;
+N := quo<RModule(P, 3) |
+    [x*y, x*z, y*z], [y, x, y],
+    [0, x^3 - x^2*z, x^2*y - x*y*z], [y*z, x^2, x*y]>;
+C, cmp := MinimalFreeResolution(M);
+CH := Hom(C, N);
+// CH;
+B := BoundaryMaps(CH);
+assert IsZero(B[3]*B[2]);
+
+// clear; ShowActive(); error "stop";
+
+
+// ext die
+
+/*
+K := RationalField();
+P<x,y,z> := PolynomialRing(K, 3, "grevlex");
+M := quo<GradedModule(P, 2) | [x^2, y^2], [x^2, y*z], [x^2*z, x*y^2 + y*z^2]>;
+N := quo<GradedModule(P, 3) | [x*y, x*z, y*z], [y, x, y],
+[0, x^3 - x^2*z, x^2*y - x*y*z], [y*z, x^2, x*y]>;
+E1,f:=Ext1(M, N);
+E1;
+f;
+f(E1.1);
+*/
+
+
+R:=InvariantRing(CyclicGroup(4), GF(2));
+FreeResolution(R);
+R;
+FreeResolution(R);
+C:=FreeResolution(R);
+Terms(C);
+
+/*******************************************************************************
+			    Modules over euclidean rings
+*******************************************************************************/
+
+Z := IntegerRing();
+V := Localization(Z, ideal <Z | 3>) ;
+VX<X> := PolynomialRing(V, 1, "grevlex");
+A3 := Module(VX, 3);
+G1 := [A3|
+    [9*X^2 + 9*X - 36, 0, -4*X^2 - 4*X + 4],
+    [63*X^2 - 54, -108, -28*X^2],
+    [5*X^2 - 2*X + 2, -4*X^2 - 4*X + 4, 0]
+];
+G2 := [A3|
+    [7*X^2 + 35*X - 116, 7*X^2 + 7*X + 20, 7*(-X^2 - 2*X + 2)],
+    [0, 9*X^2 + 9*X - 36, -5*X^2 + 2*X - 2],
+    [63*X - 198, 108, 7*(-4*X + 4)],
+    [-1989, 378*X + 1566, 14*(-15*X + 22)]
+];
+S1 := sub<A3 |G1>;
+S2 := sub<A3 | G2> ;
+assert S1 eq S2;
+assert S1 subset S2;
+assert S2 subset S1;
+assert GroebnerBasis(S1) eq GroebnerBasis(S2);

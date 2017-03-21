@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Predicates</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1352.htm">[Next]</A><A  HREF = "text1350.htm">[Prev]</A> <A  HREF = "text1352.htm">[Right]</A> <A  HREF = "text1350.htm">[Left]</A> <A  HREF = "text1344.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "14890">Predicates</A></H3>
+
+<P>
+<P>
+<P>
+This subsection describes tests for several important properties of coherent
+sheaves. It contains an isomorphism test that, combined with <A  HREF = "text1350.htm#shf:div-to-shf">DivisorToSheaf</A>,
+can be used as a test for linear equivalence of Cartier divisors.
+
+
+<H5><A NAME = "14891"></A><A NAME = "shf:loc-free">IsLocallyFree</A>(S) : ShfCoh -&gt; BoolElt, RngIntElt</H5>
+
+<PRE>    UseFitting: BoolElt                 Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a sheaf S on ordinary projective scheme X, this function returns 
+<TT>true</TT> if and only if S is a locally free sheaf on X of constant rank
+and, if so, also returns its rank.
+<P>
+Our original implementation was very fast but unfortunately incorrect!
+We have modified it to the algorithm described below which uses an
+"{&eacute;tale stratification" of X.
+<P>
+The more straightforward method
+uses Fitting ideals of the module M (or M<sub>max</sub>) of S. If the
+possible rank is d (as determined from Hilbert polynomials),
+it is required to check that the saturation of the dth Fitting
+ideal is the full ring and that the (d - 1)th lies in the
+saturated ideal of X. This is now the default method, but can be
+extremely slow and use a large amount of memory. Our alternative
+method is much slower than it was but we still find that it can be much faster than
+the Fitting ideal method for a low dimensional X in a high dimensional ambient
+and a sheaf S whose (maximal) module has a presentation with a 
+reasonably large minimal number of both generators and relations.
+<P>
+To use the alternative method, the user can set the <TT>UseFitting</TT> parameter to <TT>false</TT>.
+For this method, it is assumed that X is equidimensional (all of its primary components have 
+the same dimension), (locally) Cohen-Macaulay and connected. Magma
+does not check these conditions. The alternative method is described below.
+<P>
+The equidimensional and locally Cohen-Macaulay assumptions imply that 
+X is faithfully flat over P<sub>0</sub> = Proj(R<sub>0</sub>) for a Noether normalisation
+R<sub>0</sub> of the coordinate ring of X. Standard flatness 
+properties mean that S being locally free over X implies that it is locally 
+free as a sheaf over P<sub>0</sub>, which is just a full projective space. 
+Serre's criterion (see <A  HREF = "text1343.htm#bib_serre_sheaves">[Ser55]</A>) states that the latter is true if 
+and only if all intermediate cohomology rings H<sup>i</sup>(P<sub>0</sub>, S(q)) vanish for 
+q ll 0. If M<sub>max</sub> is the maximal graded module of S, this translates 
+to all intermediate Ext(M<sub>max</sub>, R<sub>0</sub>) R<sub>0</sub>-modules being finite length, 
+which in turn translates to the dual complex to the minimal free resolution 
+of M<sub>max</sub> as an R<sub>0</sub>-module, having finite-length homology groups at all 
+intermediate places. Rather than actually computing homology modules,
+we can further translate this condition into a number of equality tests for Hilbert 
+polynomials of cokernels of the maps between free modules in the dual complex. This
+operation seems to be fairly fast and efficient in practice.
+<P>
+The above gives a necessary condition for local freeness over X (and gives the rank)
+but it is only sufficient over the Zariski open subset of X over which X -&gt; P<sub>0</sub> is unramified. We have adapted it to be applied inductively over a chain of 
+closed subschemes of X, which is what we refer to as the {&eacute;tale stratification
+of X. At each level, we have a subscheme Y of X and a possibly empty
+collection of polynomials {F<sub>i</sub>} which are non-zero divisors on Y and such that
+a chosen Noether normalisation of Y is unramified (equivalently, {&eacute;tale)
+outside of the subschemes Y<sub>i</sub> defined by F<sub>i</sub> adjoined to the equations of Y.
+These subschemes lie at the next level down. The conditions imply that all of the
+Y<sub>i</sub> are equidimensional and Cohen-Macaulay. For Y<sub>i</sub> of positive dimension,
+we apply the above test to the restriction of S to Y<sub>i</sub>, checking that the 
+rank is the same as the rank determined for X at the top level if the test is
+passed and also that F<sub>i</sub> is not a zero-divisor on the module of the restricted sheaf.
+For Y<sub>i</sub> of dimension 0, we perform a more direct test.
+<P>
+The overall algorithm generally takes much longer than just applying the main test
+to X. The {&eacute;tale stratification can take some time to compute when
+X lies in higher dimensional ambients. However, the main problem is that
+the degrees of the Y<sub>i</sub> increase as we go down the chain (the subscheme
+defined by F<sub>i</sub> has the degree of Y<sub>i</sub> multiplied by the degree of F<sub>i</sub>
+as its degree) and in practice (mainly working with surfaces X), the
+most time is taken in the bottom level checks on high degree zero-dimensional
+subschemes.
+Once computed, the {&eacute;tale stratification is stored with X, so does not 
+need to be recomputed for tests on other sheaves.
+However, it relies on finding Noether normalisations at each level that are
+generically unramified, i.e. separable. Currently we do not check the condition 
+and it can fail in small positive characteristic leading to a crash or wrong 
+results.
+</BLOCKQUOTE>
+<H5><A NAME = "14892">IsIsomorphic(S, T) : ShfCoh, ShfCoh -&gt; BoolElt, ShfHom</A></H5>
+<H5>IsIsomorphicWithTwist(S, T) : ShfCoh, ShfCoh -&gt; BoolElt, RngIntElt, ShfHom</H5>
+<BLOCKQUOTE>
+For S and T coherent sheaves on the same base scheme X, this function
+returns <TT>true</TT> if and only if S is isomorphic to T or (for the second 
+intrinsic) to a Serre twist T(d) of T. In either case, an isomorphism is
+returned, if one exists and for the second intrinsic, the twist d is also 
+returned as the second return value (so the isomorphism is between S and T(d)).
+<P>
+For the implementation, we first do a quick Hilbert polynomial check and then a
+Betti number check for the maximal modules M<sub>max</sub> and N<sub>max</sub> of S and T.
+This gives necessary conditions for an isomorphism and the possible d in the
+"with twist" case. Then we look for an isomorphism in the finite dimensional 
+space of homomorphisms between M<sub>max</sub> and N<sub>max</sub>. We could have chosen to 
+work with the homomorphisms between the truncated modules with gradings greater
+than or equal to N, for some N greater than or equal to the regularity of 
+any defining modules for the two sheaves, but these have much larger presentations 
+in general so the computation of homomorphisms is slower.
+<P>
+To look for isomorphisms, we look at the "zero degree" subblocks of the matrices
+giving a basis to the space of all homomorphisms. This reduces the problem to
+determining whether there is an invertible matrix in a space of n x n matrices
+over the base field. This is known to be a difficult problem in general and 
+currently our implementation is rather weak at this point. We hope to improve 
+it for future releases.
+</BLOCKQUOTE>
+<H5><A NAME = "14893"></A><A NAME = "shf:arith_CM">IsArithmeticallyCohenMacaulay</A>(S) : ShfCoh -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Given a sheaf S on an ordinary projective scheme X, this function returns 
+<TT>true</TT> if and only if the maximal graded module M<sub>max</sub> of S is a 
+Cohen-Macaulay module over the coordinate ring of X.
+<P>
+A scheme X is called arithmetically Cohen-Macaulay if and only if its 
+coordinate ring is a Cohen-Macaulay ring. This is then true if and only if 
+its coordinate ring is equal to the maximal module of OX and the 
+intrinsic returns <TT>true</TT> for OX.
+<P>
+This is a fairly straightforward computation once M<sub>max</sub> has been determined.
+If we already know the structure of M<sub>max</sub> as a module over a Noether
+normalisation of the coordinate ring of X, it is an immediate freeness
+check. Otherwise it is a straightforward depth calculation from a minimal
+free resolution of M<sub>max</sub> as a graded module over the coordinate ring of
+the ambient of X.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text1352.htm">[Next]</A><A  HREF = "text1350.htm">[Prev]</A> <A  HREF = "text1352.htm">[Right]</A> <A  HREF = "text1350.htm">[Left]</A> <A  HREF = "text1344.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,635 @@
+/*
+Testing Schemes
+Nicole Sutherland July 2001
+*/
+
+
+k := FiniteField(11);
+A<x,y> := AffineSpace(k,2);
+f := y^2 - x^3;
+S := Scheme(A,f);
+Z := Cluster(S,y-x^2);
+assert Equations(A!!Z) eq Equations(Z);
+Z := Cluster(A,[y-x^2,y^2 - x^3]);
+assert BaseField(Z) eq k;
+assert not IsCurve(Z);
+assert Union(A, Z) eq A;
+
+A<x,y> := AffineSpace(k,2);
+Z := Scheme(A,[x,y]);
+assert Basis(Ideal(Z)) eq [x, y];
+Z := Cluster(A,[x,y]);
+
+k := Rationals();
+P<a,b,c,d> := ProjectiveSpace(k,3);
+I := ideal< CoordinateRing(P) | a*b^2 + c^3 + d^3 + b*c*d >;
+U := Scheme(P,I);
+assert IsEmpty(EmptyScheme(U));
+
+S := Scheme(P,a^2-b*c);              // cone on conic
+assert Dimension(S) eq 2;
+assert CoefficientField(S) eq k;
+
+k := FiniteField(101);
+A<x,y,z> := AffineSpace(k,3);
+X := Scheme(A,[x,1]);
+assert IsEmpty(X);
+
+k := Rationals();
+A<x,y> := AffinePlane(k);
+Z := Scheme(A,[y^2 - x^3 - 5,x^3 + 2*x*y^2 + 3*y]);
+assert IsCluster(Z);
+
+P<a,b,c> := ProjectiveSpace(Rationals(),2);
+S := Scheme(P,[a*b^2 - c^3, c*a-b^2]);
+assert S.2 eq CoordinateRing(P).2;
+
+A<x,y> := AffinePlane(k);
+FA<X,Y> := FunctionField(A);
+assert (x/y) eq (X/Y);
+ 
+F<x,y> := ProjectiveSpace(k,[1,0]);
+X := Scheme(F,x + x*y);
+assert not IsCurve(X);
+assert Length(X) eq 2;
+assert NumberOfGradings(X) eq 1;
+ 
+/* F<x,y,r,s> := ProjectiveSpace(k, [ [1,1,0,0], [0,0,1,1] ]); */
+
+P<x,y> := ProjectiveSpace(Rationals(),1);
+S := Scheme(P,x-y);
+
+F<s,t,x,y> := RuledSurface(Rationals(),2);
+S := Scheme(F,t*y + s^3*x);
+assert Dimension(S) eq 1;           // should be 1 not 2
+
+k := AlgebraicClosure();
+A<x,y> := AffinePlane(k);
+C := Curve(A,y^2 - x^3 - 5);
+D := Curve(A, x^3 + 2*x*y^2 + 3*y);
+assert NumberOfGradings(D) eq 0;
+assert #Equations(Union(C, D)) eq 1;
+ 
+Z := Cluster(A, ideal<CoordinateRing(A) | [y^2 - x^3 - 5,x^3 + 2*x*y^2 + 3*y]>);
+/*
+SZ := Support(Z);
+SZ := SetToSequence(SZ);
+p := SZ[1];
+IntersectionNumber(C,D,p);
+ 
+ 
+ResIntDynCoeffs(C,D);
+ResIntersection(C,D);
+*/
+ 
+ZZ := Intersection(C,D);
+assert IsCluster(ZZ);
+
+A := AffineSpace(Rationals(),2);
+//AssignNames(~A,["a","x","y"]);  // correct error.
+AssignNames(~A,["x","y"]);
+x := Name(A,1);
+y := Name(A,2);
+//A;
+assert Sprint(A.1) eq "x"; assert Sprint(A.2) eq "y";
+//A.3;                    // correct error.
+AssignNames(~A,["again"]);
+//A;
+assert Sprint(x) eq "again";
+assert Sprint(y) eq "$.2";
+
+// Basic attributes
+ 
+A<x,y> := AffineSpace(Rationals(),2);
+ 
+assert BaseRing(A) eq Rationals();
+assert CoefficientRing(A) eq Rationals();
+assert Dimension(A) eq 2;
+assert A eq Ambient(A);
+
+k := Rationals();
+P<a,b,c,d> := ProjectiveSpace(k,3);
+S := Scheme(P,a^2-b*c);              // cone on conic
+T := Scheme(S,[a*d-b*c,b*d-c^2]);    // twisted cubic
+assert Equations(P!!T) eq Equations(T);
+I := ideal< CoordinateRing(P) | a*b^2 + c^3 + d^3 + a^2*d >;
+U := Scheme(P,I);                    // cubic surface
+assert IsNonSingular(U);
+V := Intersection(U,T);
+assert IsCluster(V);
+ 
+A<x,y,z> := AffinePatch(P,2);
+
+k := FiniteField(11);
+A<x,y> := AffineSpace(k,2);
+f := y^2 - x^3;
+S := Scheme(A,f);
+assert Type(S) eq Sch;
+assert Dimension(S) eq 1;
+assert CoordinateRing(S) eq CoordinateRing(Ambient(S))/Ideal(S);
+assert IsHypersurface(S);
+assert Equations(S)[1] eq f;
+assert Polynomial(S) eq f;
+Z := Cluster(S, CoordinateRing(A)/ideal<CoordinateRing(A) | y-x^2, 
+Polynomial(S)>);
+assert Type(Z) eq Clstr;
+assert Universe(Support(Z)) eq Z(k);         // this is a new package function.
+ 
+Z1 := Cluster(A,[y-x^2,y^2 - x^3]);
+assert Ideal(Z1) eq Ideal(Z);  // true
+ 
+Z2 := Scheme(A,CoordinateRing(A)/ideal< CoordinateRing(A) | 
+[y-x^2,y^2 - x^3]>);
+assert Ideal(Z2) eq Ideal(Z);  // true
+assert Type(Z2) eq Sch;
+b,Z3 := IsCluster(Z2);
+assert b;      // true
+assert Type(Z2) eq Sch;
+assert Type(Z3) eq Clstr;               // this one is now a cluster
+assert Ideal(Z1) eq Ideal(Z);  // true
+
+R := CoordinateRing(A);
+I := ideal< R | f >;
+A1,T := Spec(R/I);
+//T;
+assert not A1 eq A;        // false
+
+assert CoordinateRing(Proj(R)) eq R;
+
+k := Rationals();
+P<x,y,z,t> := ProjectiveSpace(k,3);
+A<a,b,c,d,e,f> := ProjectiveSpace(k,5);
+//G := Grassmannian(A,P,1);
+//G;
+X := Scheme(P, x^3 + y^3 + z^3 + t^3);
+//time Z := GrassmannianSubscheme(G,X); 
+//assert Z subset G;
+//assert Type(Z) eq Sch;
+//bool,Z := IsCluster(Z);
+//assert bool;
+//Z;
+//assert Z subset G;
+
+assert IsEmpty(Scheme(P,[x,y,z,t]));        
+
+k1 := Rationals();
+U<u> := PolynomialRing(k1);
+k<w> := ext< k1 | u^2 + u + 1 >;
+P<x,y,z,t> := ProjectiveSpace(k,3);
+A<a,b,c,d,e,f> := ProjectiveSpace(k,5);
+//X := DelPezzoSurface(P, x^3 + y^3 + z^3 + t^3);
+//G := Grassmannian(A,P,1);
+//time Z := TwentySevenLines(X,G);        // 25s !?
+//assert Z subset G;
+//bool,Z := IsCluster(Z);
+//assert bool;
+//time pts := Support(Z);         // 5s
+//lines := [ GrToPComparison(G,p) : p in pts];
+
+P<x,y,z> := ProjectiveSpace(GF(7), 2);
+X := Scheme(P,[3*x^2*z + y^3, 4*x*y^2 + 6*z^3,
+x^3 + 3*y*z^2, x^3*z + x*y^3 + y*z^3 ]);
+assert not IsEmpty(X);
+
+k := Rationals();
+P<a,b,c,d> := ProjectiveSpace(k,3);
+X := Scheme(P,[a^2 + b^2 + c*d, a*c + d^2]);
+Y<r,s,t> := Projection(X);
+
+R<a,b,c,d> := PolynomialRing(Rationals(),4);
+rest := hom< R -> R | [ R.i : i in [1..Rank(R)] ] >;
+I := ideal< R | a*d + b^2 + c^2, a*b + d^2>;
+//[ Proj(R) | rest(f) : f in Basis(EliminationIdeal(I,1))];
+
+k1 := FiniteField(11);
+A1<x,y> := AffineSpace(k1,2);
+X1 := Scheme(A1,x);
+k2 := ext<k1 | 2>;
+A2 := AffineSpace(k2,2);
+A2 := AffineSpace(k1,2);
+X2 := A2 !! X1; 
+assert Ambient(X2) eq A2;
+
+/*
+Testing Closure and Patches
+*/
+P<x,y,z> := ProjectiveSpace(Rationals(),2);
+A := AffineSpace(Rationals(),2);
+phi := ProjectiveClosureMap(A);
+p := A ! [5,7];
+assert phi(p) eq ProjectiveClosure(A)![5, 7, 1];
+assert Parent(p) eq A(Rationals());
+
+P := ProjectiveSpace(GF(3),5);
+assert ProjectiveClosure(AffinePatch(P,1)) eq P;
+
+k := FiniteField(11);
+A<x,y> := AffineSpace(k,2);
+f := y^2 - x^3;
+S := Scheme(A,f);
+PS<a,b> := ProjectiveClosure(S);
+
+k := FiniteField(11);
+A<x,y> := AffineSpace(k,2);
+f := y^2 - x^3;
+S := Scheme(A,f);
+assert CoordinateRing(S) eq quo<CoordinateRing(A) | f>;;
+PS<a,b,c> := ProjectiveClosure(S);
+assert ProjectiveClosure(AffinePatch(PS,1)) eq PS;
+
+k := FiniteField(11);
+A<x,y> := AffineSpace(k,2);
+P<a,b,c> := ProjectiveClosure(A);
+ZZ := Cluster(P,[a^5 + 3*b^2*c^3 + c^5,b^3*c + 4*a^4]);
+assert IsCluster(AffinePatch(ZZ,1));
+assert Ambient(AffinePatch(ZZ, 1)) eq A;
+
+k := FiniteField(101);
+A<x,y,z> := AffineSpace(k,3);
+P := ProjectiveClosure(A);
+phi := map<A->P|[3*x+4*y,2,y^3,3]>;
+
+P<a,b,c> := ProjectiveClosure(A);
+S := Scheme(P,[a*b^2 - c^3, c*a-b^2]);
+assert S.2 eq b;
+
+k := FiniteField(11^2);
+A<x,y,z> := AffineSpace(k,3);       
+P<a,b,c,d> := ProjectiveClosure(A);
+S := Scheme(P,a^2-b*c);
+S1 := AffinePatch(S,1);
+assert S eq ProjectiveClosure(S1);
+
+// Projective closure and patches
+ 
+A<x,y> := AffineSpace(Rationals(),2);
+P<a, b, c> := ProjectiveClosure(A);
+assert A eq AffinePatch(P,1);          // true
+phi := ProjectiveClosureMap(A);
+ 
+S := Scheme(P,[a*b^2 - c^3, c*a-b^2]);
+assert S.2 eq b;
+//S.5;            // correct error.
+assert AffinePatch(S,1) eq AffinePatch(S,1);   // true
+assert S@@phi eq AffinePatch(S,1);
+
+A<x,y> := AffineSpace(Rationals(),2);
+phi := ProjectiveClosureMap(A);
+
+k := FiniteField(101);
+A<x,y,z> := AffineSpace(k,3);
+ 
+k1<w> := ext< k | 2 >;
+P<a,b,c,d> := ProjectiveSpace(k1,3);
+//MakeProjectiveClosureMap(A,P,[3*x+4*y,2,y^3,3]);        // correct error
+ 
+P<a,b,c,d> := ProjectiveSpace(k,3);
+MakeProjectiveClosureMap(A,P,[3*x+4*y,2,y^3,3]);
+phi := ProjectiveClosureMap(A);
+p := A ! [ 1,2,3];
+assert phi(p) eq P![11, 2, 8, 3];     // the normalisation divides by 3, 
+					// hence the odd correct answer
+//[ 3*a : a in Coordinates(phi(p)) ];
+
+k := FiniteField(11);
+A<x,y> := AffineSpace(k,2);
+f := y^2 - x^3;
+S := Scheme(A,f);
+PS<a,b,c> := ProjectiveClosure(S);
+PS1 := ProjectiveClosure(S);
+assert PS eq PS1;              // true
+assert Type(PS) eq Sch;
+for i in [1..3] do
+    AS := AffinePatch(PS,i);
+    assert ISA(Type(AS), Sch);
+end for;
+//[ AffinePatch(PS,i) : i in [1..3] ];
+ 
+k := FiniteField(11^2);
+A<x,y,z> := AffineSpace(k,3);
+P<a,b,c,d> := ProjectiveClosure(A);
+S := Scheme(P,a^2-b*c);
+T := Scheme(P,[c,d]);
+p := P ! [0,1,0,0];
+someprojs := {S,T};
+assert &and [ p in X : X in someprojs ];
+someaffs := { X@@ProjectiveClosureMap(AffinePatch(P, 3)) : X in someprojs};
+ap := AffinePatch(P, 3)![0, 0, 0];
+assert &and[ap in X : X in someaffs];
+
+k := Rationals();
+A<x,y> := AffinePlane(k);
+C := Curve(A,y^3 - x^5 - x^3 - 1);
+assert AffinePatch(ProjectiveClosure(C), 1) eq C;
+
+k := Rationals();
+A<s,t,x,y> := RuledSurface(k,2);
+A1<S,X> := AffinePatch(A,1);
+//A1;
+//Gradings(A);
+//ProjectiveClosureMap(A1);
+A1<S,X> := AffinePatch(A,3);
+//ProjectiveClosureMap(A1);   
+A1<S,X> := AffinePatch(A,2);
+//ProjectiveClosureMap(A1);   
+A1<S,X> := AffinePatch(A,4);
+//ProjectiveClosureMap(A1);   
+
+/*
+// Length Zero schemes
+//
+// DRK (2002, export V2.9): These do not exist.
+// Remainder of this file concerns nonexistent 
+// dimension zero spaces, so are commented out.
+//
+A := AffineSpace(FiniteField(101),0);
+assert CoordinateRing(A) eq BaseRing(A);
+assert FunctionField(A) eq BaseRing(A);
+assert Length(ProjectiveClosure(A)) eq 1;
+assert A ! [] in A;
+assert Dimension(A) eq 0;
+assert #Equations(A) eq 0;
+assert #Gradings(A) eq 0;
+a, b := IsCluster(A);
+assert a;
+assert not IsEmpty(A);
+assert not IsCurve(A);
+ 
+P<y> := ProjectiveClosure(A);
+assert AffinePatch(P, 1) eq A;
+assert ProjectiveClosure(AffinePatch(P, 1)) eq P;
+assert Dimension(P) eq 0;
+assert #Equations(P) eq 0;
+assert #Gradings(P) eq 1;
+a, b := IsCluster(P);
+assert a;
+assert not IsEmpty(P);
+assert not IsCurve(P);
+assert IsHomogeneous(A, y);
+assert Multidegree(A, y) eq [Integers() |];
+
+P<x> := ProjectiveSpace(FiniteField(101), 0);
+assert Length(AffinePatch(P, 1)) eq 0;
+assert P ! [1] in P;
+assert P ! [3] eq P![1];
+assert Dimension(P) eq 0;
+assert #Equations(P) eq 0;
+assert #Gradings(P) eq 1;
+a, b := IsCluster(P);
+assert a;
+assert not IsEmpty(P);
+assert not IsCurve(P);
+ 
+S := EmptyScheme(A);
+assert Length(ProjectiveClosure(S)) eq 1;
+assert AffinePatch(ProjectiveClosure(S), 1) eq S;
+assert Dimension(S) eq -1;
+assert #Equations(S) eq 1;
+assert #Gradings(S) eq 0;
+assert not IsCluster(S);
+assert IsEmpty(S);
+assert not IsCurve(S);
+ 
+T := Scheme(P, x);
+assert Length(AffinePatch(T, 1)) eq 0;
+assert ProjectiveClosure(AffinePatch(T, 1)) eq T;
+assert Dimension(T) eq -1;
+assert #Equations(T) eq 1;
+assert #Gradings(T) eq 1;
+assert not IsCluster(T);
+assert IsEmpty(T);
+assert not IsCurve(T);
+ 
+pcp_map := ProjectiveClosureMap(A);
+assert pcp_map([]) in ProjectiveClosure(A);
+assert pcp_map([]) eq ProjectiveClosure(A)![1];
+assert pcp_map([]) in Image(pcp_map);
+assert y @@ pcp_map eq 1;
+assert (y^3 - y^2 + 2*y - 15) @@ pcp_map eq -13;
+
+assert not IsEmpty(Image(pcp_map));
+a := AlgebraMap(pcp_map);
+assert Domain(a) eq CoordinateRing(ProjectiveClosure(A));
+assert Codomain(a) eq CoordinateRing(A);
+
+assert IsEmpty(ProjectiveClosure(S) @@ pcp_map);
+assert Type((Codomain(pcp_map)![1]) @@ pcp_map) eq Aff;
+
+m := map<A -> ProjectiveClosure(A) | [4]>;
+assert m([]) eq ProjectiveClosure(A)![4];
+assert Type(m([]) @@ m) eq Aff;
+
+m := map<A -> A | []>;
+assert m([]) eq A![];
+assert (A![]) @@ m eq A;
+assert Image(m) eq A;
+assert Inverse(m) eq m;
+assert m*m eq m;
+assert m*pcp_map eq pcp_map;
+
+pcp_back := map<ProjectiveClosure(A) -> A | []>;
+assert map<Domain(pcp_map) -> Codomain(pcp_back) | DefiningEquations(pcp_map*pcp_back)> eq m;
+assert pcp_back([1]) eq A![];
+assert pcp_back([782546]) eq A![];
+assert IsRegular(pcp_map);
+assert IsRegular(pcp_back);
+
+A := AffineSpace(Integers(), 0);
+B := BaseChange(ProjectiveClosure(A), Rationals());
+g := map<Rationals() -> Integers() | x :-> Floor(x)>;
+f := map<A -> B | g, [2]>;
+assert f([]) eq B(g)![2];
+
+B := AffineSpace(Integers(), 1);
+S := Scheme(B, [B.1]);
+assert Dimension(S) eq 0;
+_, S := IsCluster(S);
+
+S := Cluster(B, B.1 - 4);
+f := map<A -> S | [4], []>;
+assert f([]) eq S![4];
+assert f([]) @@ f eq A![];
+f := map<A -> S | [4]>;
+assert f([]) @@ f eq A;
+
+*/
+
+C<i> := ComplexField(100);
+P<x> := PolynomialRing(C);
+f := -3*x^8 + -2*x^6 + x^5 + -2*x^4 + -4*x^3 + x^2 + 3*x + -3;
+crv := HyperellipticCurve(f);
+map := IdentityMap(crv);
+
+/* pushforward/pullback curve tests added by mch */
+P<x,y,z> := ProjectiveSpace(Rationals(), 2);
+D := Curve(P,z*x^3*y^4-(x^4+z^4)^2);
+C := Curve(P,y);
+FFD := FunctionField(D);
+FFC := FunctionField(C);
+phi := map<D->C | [x^4+z^4,0,x*y^2*z]>;
+pb := Pullback(phi, FFC!(x/z));
+print pb;
+assert pb eq FFD!((x^4+z^4)/(x*z*y^2));
+Dram := RamificationDivisor(phi);
+assert Degree(Dram) eq 10;
+Dinf := Pullback(phi,Divisor(C![1,0,0]));
+boo,Y := IsPrincipal(Dram-5*Dinf);
+assert boo;                             
+pf := Pushforward(phi,Y);
+print pf;
+assert pf eq -FFC!((x/z)^9 + (x/z)); // really should check that they agree
+                                     // up to a constant factor
+
+/* new function field coercion tests - added mch 04/05 */
+
+Q := RationalField();
+P<x,y,z> := ProjectiveSpace(Q,2);
+C := Curve(P,x^2+y^2-z^2);
+// affine patchs
+C1 := AffinePatch(C,1); // will be the patch used to build function fields!
+A1<a,b> := Ambient(C1); // a=x/z, b=y/z as "functions"
+C2 := AffinePatch(C,2);
+A2<c,d> := Ambient(C2); // c=x/y, d=z/y as "functions"
+C3 := AffinePatch(C,3);
+A3<e,f> := Ambient(C3); // e=y/x, f=z/x as "functions"
+
+F := FunctionField(C);
+
+CRP := CoordinateRing(P);
+CRP;
+CR1 := CoordinateRing(A1);
+CR1;
+CR2 := CoordinateRing(A2);
+CR2;
+CR3 := CoordinateRing(A3);
+CR3;
+
+//all the following should be true
+
+assert F eq FunctionField(C1);
+assert F eq FunctionField(C2);
+assert F eq FunctionField(C3);
+
+e1 := F!(x/y); // x/y in FieldOfFractions(CR)
+e2 := F!(a/b); // a/b in FieldOfFractions(CR1)
+e3 := F!(c);   // c   in CR2
+e4 := F!(1/e); // 1/e in FieldOfFractions(CR3)
+
+assert e1 eq e2;
+assert e1 eq e3;
+assert e1 eq e4;
+
+
+//Other conversions - rather than FOF of the CoordinateRings of the
+//  ambient spaces - which are PolyFr rings - can use FOF of the
+//  actual coordinate rings of C, C1,.. which are PolyFrq (??) rings
+//  or the coordinate rings of the affine C1,C2,C3 , Polyq rings
+CRPq := CoordinateRing(C);
+FCRPq<u,v,w> := FieldOfFractions(CRPq);
+assert F!(u/v) eq e1;
+
+CR1q<r,w> := CoordinateRing(C1);
+assert F!r eq F!(c/d);
+
+CR2q<r,w> := CoordinateRing(C2);
+assert F!w eq F!(z/y);
+
+CR3q<r,w> := CoordinateRing(C3);
+assert F!(r+w) eq F!((y+z)/x);
+
+/* Test for Place/Places function for curves.   */
+/*  particularly to avoid conjugate places that */
+/*  shouldn't appear! - add mch 10/05           */
+P<x,y,z> := ProjectiveSpace(Q,2);
+C := Curve(P,x^2+y^2+2*z^2);
+K<i> := QuadraticField(-1);
+pt := C(K)![i,i,1];
+pls := Places(pt); //should avoid the place over (i,-i,1)!
+assert #pls eq 1;
+C := Curve(P,(x^2+y^2+2*z^2)^2+(x^2-y^2)^2);
+pt := C(K)![i,i,1]; //singular point over Q(i)
+pls := Places(pt); //should avoid the 2 places over sing point (i,-i,1)!
+assert #pls eq 2;
+
+/* Some tests for map equality and inverse map checking when applied
+   to maps involving weighted and product projective space.         */
+
+P22<x,y,z,u,v,w> := ProductProjectiveSpace(Rationals(),[2,2]);
+A  := AffinePatch(P22,1);
+pc1 := iso<A->P22|[A.1,A.2,1,A.3^2,A.4*A.3,A.3],[x/z,y/z,u/w,v/w]>;
+// should be OK!
+pc2 := map<P22->P22| [x,y,z,u,v,w]>;
+pc3 := map<P22->P22| [x,y,z,u*w,v*w,w^2]>;
+assert pc2 eq pc3;
+
+// a weighted example
+P<x,y,s,t> :=  ProjectiveSpace(Rationals(),[1,1,2,2]);
+C := Curve(P,[x^2-2*x*y+2*s+t,y^2+2*x*y+s+2*t]);
+A := AffinePatch(P,3);
+Ca := AffinePatch(C,3);
+f := ProjectiveClosureMap(A);
+f1 := map<Ca->C|DefiningPolynomials(f),InverseDefiningPolynomials(f)>;
+// should be OK!
+
+//hyperelliptic case
+P<x> := PolynomialRing(Rationals());
+C := HyperellipticCurve(x^5-x);
+WP<x,y,z> := AmbientSpace(C);
+P3<r,s,t,u> := ProjectiveSpace(Rationals(),3);
+mp := map<C->P3|[z^3,x*z^2,x^2*z,y]>;
+CP := mp(C);
+mp := Restriction(mp,C,CP);
+boo,mpi := IsInvertible(mp);
+assert boo;
+//test on patch - ie wp -> aff
+mp := RestrictionToPatch(mp,1);
+boo,mpi := IsInvertible(mp);
+assert boo;
+
+// mch - 10/09 - some "graph map" tests
+P<x,y,z,t> := ProjectiveSpace(Rationals(),3);
+seq := [x*t -y*z, x^2+y^2-4*z^2+7*t^2];
+X := Scheme(P,seq[1]);
+X1 := Scheme(X,seq[2]);
+P2<a,b,c,d,e> := ProjectiveSpace(Rationals(),4);
+mp_seq := [x^3,y^3,z^3,t^3,y*z*t];
+R := PolynomialRing(Rationals(),9,"grevlex");
+//R<x1,x2,x3,x4,y1,y2,y3,y4,y5> := PolynomialRing(Q,9,"grevlex");
+mp1 := hom<CoordinateRing(P) -> R |[R.i : i in [1..4]]>;
+grI := ideal<R|[(R.(i+4))*mp1(mp_seq[j])-(R.(j+4))*mp1(mp_seq[i]):
+i in [j+1..5] , j in [1..5]] cat [mp1(b) : b in Basis(Ideal(X))]>;
+//grI := ColonIdeal(grI,R.1);
+gr_mp := SchemeGraphMap(X,P2,grI);
+mp := map<X->P2|mp_seq>;
+
+assert not IsInvertible(gr_mp);
+assert mp eq SchemeGraphMapToSchemeMap(gr_mp);
+assert Image(gr_mp) eq Image(mp);
+assert gr_mp(X) eq mp(X);
+
+Y1 := gr_mp(X1);
+assert Y1 eq mp(X1);
+
+gr_mp1 := Restriction(gr_mp,X1,Y1);
+mp1 := Restriction(mp,X1,Y1);
+assert mp1 eq SchemeGraphMapToSchemeMap(gr_mp1);
+assert IsInvertible(gr_mp1);
+pt1 := X1![2,0,1,0];
+ipt1 := gr_mp1(X1![2,0,1,0]);
+assert ipt1 eq mp1(X1![2,0,1,0]);
+
+iminv := ipt1 @@ gr_mp1;
+assert iminv eq ipt1 @@ mp1;
+assert Dimension(iminv) eq 0 and Degree(iminv) eq 2;
+supp := Support(iminv);
+assert #supp eq 1 and pt1 in supp;
+
+// A test for IsEmpty
+F:=Fan(Cone([[1,0,0],[1,1,0],[1,1,1],[1,0,1]]));
+X:=ToricVariety(Rationals(),F);
+assert Dimension(X) eq 3;
+assert IsAffine(X);
+S:=Scheme(X,[X.1,X.2,X.3,X.4]);
+assert not IsEmpty(S);
+assert Dimension(S) eq 0;
+

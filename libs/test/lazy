@@ -1,0 +1,292 @@
+/*
+Tests for lazy series rings
+*/
+
+/*
+Testing ChangeRing and coercion of series between such rings
+*/
+
+P<x> := PolynomialRing(Integers());
+L<y> := LazyPowerSeriesRing(Integers(), 1);
+L2<z> := ChangeRing(L, NumberField(x^2 + 2));
+y2 := L2!y;
+assert Coefficients(y2, 30) eq Coefficients(y, 30);
+assert y2 eq z;
+assert y eq z;
+assert L!z eq y;
+assert L2!L!0 eq Zero(L2);
+assert Coefficients(L2!((2*y + 4)^7), 30) eq Coefficients((2*y + 4)^7, 30);
+assert L2!((2*y + 4)^7) eq (2*y + 4)^7;
+assert Coefficients(L2!(y + (y + 1)^2), 25) eq Coefficients(y + (y + 1)^2, 25);
+assert L2!(y + (y + 1)^2) eq y + (y + 1)^2;
+assert Coefficients(L2!((1 + y)^-1), 50) eq Coefficients((1 + y)^-1, 50);
+assert L2!((1 + y)^-1) eq (1 + y)^-1;
+assert Coefficients(L2!((1 + y)*[4]), 15) eq Coefficients((1 + y)*[4], 15);
+assert L2!((1 + y)*[4]) eq (1 + y)*[4];
+assert Coefficients(L2!Derivative(y^7), 10) eq Coefficients(Derivative(y^7), 10)
+;
+assert L2!Derivative(y^7) eq Derivative(y^7);
+a := elt<L | map<Integers() -> Integers() | n :-> n> >;
+assert Coefficients(L2!a, 15) eq Coefficients(a, 15);
+/* assert L2!a eq a; */
+ 
+assert Coefficients(Evaluate(y, (1 + y)^-1 - 1), 20) eq Coefficients(L2!Evaluate
+(y, (1 + y)^-1 - 1), 20);
+assert Evaluate(y, (1 + y)^-1 - 1) eq L2!Evaluate(y, (1 + y)^-1 - 1);
+ 
+assert Coefficients(L![3, 6, 5, 8, 2, 4, 9], 20) eq Coefficients(L2!L![3, 6, 5, 
+8, 2, 4, 9], 20);
+assert L![3, 6, 5, 8, 2, 4, 9] eq L2!L![3, 6, 5, 8, 2, 4, 9];
+ 
+L<y> := LazyPowerSeriesRing(PolynomialRing(Integers()), 1);
+L2<z> := ChangeRing(L, PolynomialRing(NumberField(x^2 + 2)));
+s := PolynomialCoefficient((1 + y)^-1, 5);
+assert Coefficients(s, 20) eq Coefficients(L2!s, 20);
+assert s eq L2!s;
+ 
+L<w, y, z> := LazyPowerSeriesRing(Rationals(), 3);
+L2<a, b, c> := ChangeRing(L, MaximalOrder(x^2 + 2));
+assert IsCoercible(L2, w);
+assert IsCoercible(L, a);
+s := a + w;
+L3<w3, y3, z3> := Parent(s);
+assert Coefficients(s, 3) eq [c[i] + d[i] : i in [1 .. #c]]
+where c is Coefficients(a, 3) where d is Coefficients(w, 3);
+assert L3!a eq w3;
+assert L3!w eq a;
+
+/*
+Testing lazy series created by evaluation
+*/
+L<y> := LazyPowerSeriesRing(Integers(), 1);
+assert Evaluate(y, y) eq y;
+assert Evaluate(y, y^4) eq y^4;
+s := Evaluate(1 + y, y^4);
+assert s eq 1 + y^4;
+assert Coefficients(s, 20) eq Coefficients(1 + y^4, 20);
+s := Evaluate(1 + y, y^5 + y^3);
+assert Coefficients(s, 20) eq Coefficients(1 + y^3 + y^5, 20);
+s := Evaluate(1 + y^2, 2*y^5 + 3*y^3);
+assert Coefficients(s, 20) eq Coefficients(1 + (3*y^3 + 2*y^5)^2, 20);
+
+L<w, y, z> := LazyPowerSeriesRing(Rationals(), 3);
+assert Coefficients(Evaluate(w*y*z, [y, z, w]), 2) eq Coefficients(w*y*z, 2);
+assert Coefficients(Evaluate(w^5 - y^4*(1 + z)^-1, [w*y*z, w + y + z, w*y + y*z]), 4) eq Coefficients((w*y*z)^5 - (w + y + z)^4*(1 + (w*y + y*z))^-1, 4);
+
+R := LazyPowerSeriesRing(Rationals(), 2);
+AssignNames(~R, ["x","y"]);
+m := map<car<Integers(), Integers()> -> Rationals() | t :-> 1>;
+s := elt<R | m>;
+PrintToPrecision(s, 3);
+R1 := LazyPowerSeriesRing(Rationals(), 1);
+AssignNames(~R1, ["z"]);
+m1 := map<car<Integers()> -> Rationals() | t :-> t[1]>;
+s1 := elt<R1 | m1>;
+PrintToPrecision(s1, 3);
+e := Evaluate(s, [s1,s1]);
+PrintToPrecision(e, 10);
+f := Evaluate(s1, s - 1);
+Coefficients(f, 10);
+assert Parent(f) eq R;
+PrintToPrecision(f, 10);
+f := Evaluate(s1 + 1, s - 1);
+PrintToPrecision(f, 10);
+
+/*
+R := LazyPowerSeriesRing(Rationals(), 2);
+m := map<car<Integers(), Integers()> -> Rationals() | t :-> 1>;
+s := elt<R | m>;
+R1 := LazyPowerSeriesRing(Rationals(), 1);
+m1 := map<car<Integers()> -> Rationals() | t :-> t[1]>;
+s1 := elt<R1 | m1>;
+f := Evaluate(s1, s - 1);
+f := Evaluate(s1 + 1, s - 1);
+*/
+
+/*
+Testing lazy series created by inversion
+*/
+L<y> := LazyPowerSeriesRing(Integers(), 1);
+s := (y + 1)^5;
+t := s^-1;
+u := s*t;
+assert IsOne(u);
+P<x> := PolynomialRing(Integers());
+ps := P!Coefficients(s, 10);
+pt := P!Coefficients(t, 10);
+pu := ps*pt;
+assert &and[Coefficient(pu, i) eq 0 : i in [1 .. 10]] and Coefficient(pu, 0) eq
+1;
+
+L<y, z> := LazyPowerSeriesRing(Rationals(), 2);
+s := (1 + y + z)^5;
+s := s^-1;
+c := CoefficientsNonSpiral(s, [5, 5]);
+P<x1, x2> := PolynomialRing(Rationals(), 2);
+f := (1 + x1 + x2)^5;
+s := f * &+[c[Index(y, [i, j], [5, 5])]*x1^i*x2^j : i in [0 .. 5], j in [0 .. 5]
+];
+assert &and[MonomialCoefficient(s, x1^i*x2^j) eq 0 : i in [0 .. 5], j in [0 .. 5
+] | i ne 0 or j ne 0] and MonomialCoefficient(s, x1^0*x2^0) eq 1;
+
+/*
+Testing lazy series created by negation and subtraction
+*/
+L<y> := LazyPowerSeriesRing(FiniteField(5), 1);
+s := y^5 - y^4 + 1;
+assert Coefficients(s, 20) eq [five[i] + four[i] + one[i] : i in [1 .. #five]]
+where five is Coefficients(y^5, 20) where four is Coefficients(-y^4, 20)
+where one is Coefficients(L!1, 20);
+s := -(y^5 + 1)^10;
+assert Coefficients(s, 30) eq [-c : c in Coefficients((y^5 + 1)^10, 30)];
+assert IsUnit(s);
+
+L<y, z> := LazyPowerSeriesRing(FiniteField(17), 2);
+s := y^6 - z^7 + 2*y*z^3;
+assert not IsUnit(s);
+assert Coefficients(s, 10) eq [six[i] + seven[i] + two_three[i] : i in
+[1 .. #six]] where six is Coefficients(y^6, 10) where seven is
+Coefficients(-z^7, 10) where two_three is Coefficients(2*y*z^3, 10);
+assert Coefficients(-s, 7) eq [-c : c in Coefficients(s, 7)];
+
+
+/*
+Testing IsUnit
+*/
+L<y> := LazyPowerSeriesRing(Integers(), 1);
+assert not IsUnit(y);
+assert not IsUnit(2 + y);
+assert IsUnit(1 + y);
+
+L<y, z> := LazyPowerSeriesRing(Integers(), 2);
+assert not IsUnit(y + z);
+assert IsUnit(1 + y + z);
+assert not IsUnit(2 + y + z);
+
+/*
+Testing coercion of sequences
+*/
+//SetMark(true);
+L<y> := LazyPowerSeriesRing(Rationals(), 1);
+S := [4, 2, 5, 1, 7, 3, 6, 7/9, 1];
+s := L!S;
+assert Coefficients(s, 4) eq S[1 .. 5];
+assert Coefficients(s, 20) eq S cat [0 : i in [1 .. 20 - #S + 1]];
+R<b> := ext<pAdicRing(5, 20) | x^2 + x + 1>;
+R<a> := ext<R | x^3 + 5>;
+L<y> := LazyPowerSeriesRing(R, 1);
+S := [a, b, a + b, a^5 + b^7];
+assert Coefficients(L!S, 5) eq S cat [0, 0];
+
+N := NumberField(x^5 + 2);
+L<a, b, c, d> := LazyPowerSeriesRing(N, 4);
+S := [3, 2, 4, 56, 45, 34, 5, 3, 12, 3 + N.1, 4, 3, 5, 5, 4, 56, 34,
+63, 54, 6, 35, 7, 54, 7, 4, 5, 74, N.1^76];
+s := L!S;
+sum := &+[Binomial(4 + r - 1, r) : r in [0 .. 3]];
+if sum gt #S then
+    S := S cat [0 : i in [#S + 1 .. sum]];
+else
+    S := S[1 .. sum];
+end if;
+assert Coefficients(s, 3) eq S;
+
+/*
+Testing creation from Derivative and maps.
+*/
+L<y> := LazyPowerSeriesRing(Rationals(), 1);
+m := map<Integers() -> Rationals() | n :-> n>;
+s := elt<L | m>;
+d := Derivative(s);
+assert [c^2 : c in Coefficients(s, 20)[2 .. 21]] eq Coefficients(d, 19);
+m := map<car<Integers()> -> Rationals() | n :-> n[1]>;
+s := elt<L | m>;
+d := Derivative(s);
+assert [c^2 : c in Coefficients(s, 20)[2 .. 21]] eq Coefficients(d, 19);
+d := Derivative(s, 1, 4);
+assert [c[i - 3]*i*(i - 1)*(i - 2)*(i - 3) : i in [4 .. #c + 3]] 
+eq Coefficients(d, 16) where c is Coefficients(s, 20)[5 .. 21];
+
+L<w, y, z> := LazyPowerSeriesRing(Rationals(), 3);
+m := map<car<Integers(), Integers(), Integers()>  -> Rationals() | n :->
+n[1]*n[2] + n[3]>;
+s := elt<L | m>;
+d := Derivative(s, 2);
+assert Coefficient(d, [3, 2, 5]) eq 3*Coefficient(s, [3, 3, 5]);
+assert Coefficient(d, [1, 5, 4]) eq 6*Coefficient(s, [1, 6, 4]);
+d := Derivative(s, 3, 3);
+assert Coefficient(d, [3, 3, 2]) eq 5*4*3*Coefficient(s, [3, 3, 5]);
+assert Coefficient(d, [1, 6, 1]) eq 4*3*2*Coefficient(s, [1, 6, 4]);
+
+/*
+Testing creation as an integral
+*/
+L<y> := LazyPowerSeriesRing(Rationals(), 1);
+m := map<Integers() -> Rationals() | n :-> n>;
+s := elt<L | m>;
+d := Integral(s);
+assert [0, 0] cat [c/(c + 1) : c in Coefficients(s, 19)[2 .. 20]] 
+eq Coefficients(d, 20);
+
+L<w, y, z> := LazyPowerSeriesRing(Rationals(), 3);
+m := map<car<Integers(), Integers(), Integers()>  -> Rationals() | n :->
+n[1]*n[2] + n[3]>;
+s := elt<L | m>;
+d := Integral(s, 1);
+assert Coefficient(d, [3, 2, 5]) eq Coefficient(s, [2, 2, 5])/3;
+assert Coefficient(d, [1, 5, 4]) eq Coefficient(s, [0, 5, 4]);
+
+
+/*
+Testing creation as a convolution
+Convolution has wrong definition and has been removed!!!!!!!!!!!!!
+L<y> := LazyPowerSeriesRing(Rationals(), 1);
+s := (1 + 2*y + 3*y^3)^-2;
+t := (3 + 4*y^5)^-1;
+u := Convolution(s, t);
+assert Coefficients(u, 30) eq [S[i]*T[i] : i in [1 .. 31]] 
+where S is Coefficients(s, 30) where T is Coefficients(t, 30);
+
+L<a, b, c, d> := LazyPowerSeriesRing(Rationals(), 4);
+s := (1 + a^6 - b*c*d^3)^-2;
+t := (5 + a*b*c*d)^-3;
+u := Convolution(s, t);
+assert Coefficients(u, 5) eq [S[i]*T[i] : i in [1 .. #S]]
+where S is Coefficients(s, 5) where T is Coefficients(t, 5);
+*/
+
+/*
+Testing creation as a sqrt
+*/
+//SetMark(true);
+L<y> := LazyPowerSeriesRing(Rationals(), 1);
+t := LazySeries(L, (1 + x)^4);
+b, s := IsSquare(t);
+assert s^2 eq t;
+assert Coefficients(s, 2) eq Coefficients((1 + x)^2);
+t := LazySeries(L, (1 + 4*x + 5*x^4 - 10*x^7)^8);
+s := Sqrt(t);
+assert s^2 eq t;
+assert Coefficients(s, 28) eq Coefficients((1 + 4*x + 5*x^4 - 10*x^7)^4);
+u := Sqrt(Sqrt(t));
+assert u^2 eq s;
+assert Coefficients(u, 14) eq Coefficients((1 + 4*x + 5*x^4 - 10*x^7)^2);
+v := Sqrt(Sqrt(Sqrt(t)));
+assert v^2 eq u;
+assert Coefficients(v, 7) eq Coefficients((1 + 4*x + 5*x^4 - 10*x^7));
+w := Sqrt(Sqrt(Sqrt(Sqrt(t))));
+assert w^2 eq v;
+
+
+/*
+Testing valuation
+*/
+L<y> := LazyPowerSeriesRing(Integers(), 1);
+assert Coefficients(y, 5) eq [0, 1, 0, 0, 0, 0];
+z := (1 + y)^-1;
+assert Valuation(z) eq 0;
+L<a, b, c, d> := LazyPowerSeriesRing(Integers(), 4);
+assert Valuation(a) eq [1, 0, 0, 0];
+assert Valuation((a + b + c + d)^5) eq [5, 0, 0, 0];
+
+

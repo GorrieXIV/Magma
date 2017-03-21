@@ -1,0 +1,679 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Curves over Number Fields</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1451.htm">[Next]</A><A  HREF = "text1449.htm">[Prev]</A> <A  HREF = "text1451.htm">[Right]</A> <A  HREF = "text1449.htm">[Left]</A> <A  HREF = "text1447.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16454">Curves over Number Fields</A></H3>
+
+<P>
+<P>
+The functions in this section are for elliptic curves defined over
+number fields.  For the most part, the functionality is a subset of
+that available for curves over Q, with functions having similar
+names and arguments.
+<P>
+Note that functions related to Mordell-Weil groups and descent
+are in Section <A  HREF = "text1452.htm#16497">Mordell-Weil Groups and Descent Methods</A> rather than this section.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1450.htm#16455">Local Invariants</A>
+<LI> <A  HREF = "text1450.htm#16462">Complex Multiplication</A>
+<LI> <A  HREF = "text1450.htm#16464">Heights</A>
+<LI> <A  HREF = "text1450.htm#16472">Integral Points</A>
+<LI> <A  HREF = "text1450.htm#16474">Elliptic Curve Chabauty</A>
+<LI> <A  HREF = "text1450.htm#16478">Auxiliary Functions for Etale Algebras</A>
+<LI> <A  HREF = "text1450.htm#16484">Analytic Information</A>
+<LI> <A  HREF = "text1450.htm#16490">Elliptic Curves of Given Conductor</A>
+</UL>
+<H4><A NAME = "16455">Local Invariants</A></H4>
+
+<P>
+<P>
+The routines listed here, when nontrivial, are based on an implementation
+of Tate's algorithm.
+
+
+<H5><A NAME = "16456">Conductor(E) : CrvEll -&gt; RngOrdIdl</A></H5>
+<BLOCKQUOTE>
+The conductor is part of the data computed by <TT>LocalInformation</TT>
+(described below).
+</BLOCKQUOTE>
+<H5><A NAME = "16457">BadPlaces(E) : CrvEll -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E defined over a number field K, returns
+the places of K of bad reduction for E.  i.e., the places dividing
+the discriminant of E.
+</BLOCKQUOTE>
+<H5><A NAME = "16458">BadPlaces(E, L) : CrvEll, FldNum -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E defined over a number field K and a
+number field L, such that K is a subfield of L, returns the
+places of L of bad reduction for E.
+</BLOCKQUOTE>
+<H5><A NAME = "16459">LocalInformation(E, P) : CrvEll, RngOrdIdl -&gt; Tup, CrvEll</A></H5>
+
+<PRE>    UseGeneratorAsUniformiser: BoolElt  Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Implements Tate's algorithm for the elliptic curve E over a number field. 
+This intrinsic computes
+local reduction data at the prime ideal P, and a local minimal model.
+The model is not required to be integral on input. 
+Output is &lt; P, v<sub>p</sub>(d), f<sub>p</sub>, c<sub>p</sub>, K, s &gt; and E<sub>min</sub> 
+where P is the prime ideal, v<sub>p</sub>(d) is the valuation of the
+local minimal discriminant, f<sub>p</sub> is the valuation of the conductor,
+c<sub>p</sub> is the Tamagawa number, K is the Kodaira Symbol, and s is <TT>false</TT>
+if the curve has non-split multiplicative reduction at P and <TT>true</TT> otherwise.
+E<sub>min</sub> is a model of E (integral and) minimal at P.
+<P>
+When the optional parameter <TT>UseGeneratorAsUniformiser</TT> is set <TT>true</TT>, 
+the computation checks whether P is principal,
+and if so, uses generator of P as the uniformiser. 
+This means that at primes other that P,
+the returned model will still be integral or minimal
+if the given curve was.
+</BLOCKQUOTE>
+<H5><A NAME = "16460">LocalInformation(E) : CrvEll -&gt; [ Tup ]</A></H5>
+<BLOCKQUOTE>
+Return a sequence of the tuples returned by <TT>LocalInformation(E, P)</TT>
+for all prime ideals P in the decomposition of the discriminant of E
+in the maximal order of the number field the elliptic curve E is over.
+</BLOCKQUOTE>
+<H5><A NAME = "16461">Reduction(E, p) : CrvEll, RngOrdIdl -&gt; CrvEll, Map</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E over a number field given by a model which
+is integral
+at p and has good reduction at p, returns an elliptic curve over the
+residue field of p which represents the reduction of E at p. The
+reduction map is also returned.
+</BLOCKQUOTE>
+<H4><A NAME = "16462">Complex Multiplication</A></H4>
+
+
+
+<H5><A NAME = "16463">HasComplexMultiplication(E) : CrvEll -&gt; BoolElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E over a number field,
+the function determines whether the curve has complex multiplication and,
+if so, also returns the discriminant of the CM quadratic order. 
+The algorithm uses
+fairly straightforward analytic methods, which are not suited to very high
+degree j-invariants with CM by orders with discriminants more than
+a few thousand.
+</BLOCKQUOTE>
+<H4><A NAME = "16464">Heights</A></H4>
+
+
+
+<H5><A NAME = "16465">NaiveHeight(P) : PtEll -&gt; FldPrElt</A></H5>
+<BLOCKQUOTE>
+Given a point P on an elliptic curve over a number field K, the function
+returns the naive height of P; i.e., the absolute logarithmic height 
+of the x-coordinate.
+</BLOCKQUOTE>
+<H5><A NAME = "16466">Height(P : parameters) : PtEll -&gt; FldPrElt</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: 27</PRE>
+
+<PRE>    Extra: RngIntElt                    Default: 8</PRE>
+<BLOCKQUOTE>
+Given a point P on an elliptic curve defined over a number field K,
+returns the N{&eacute;ron-Tate height of P .
+(This is based on the absolute logarithmic height of the x-coordinate.)
+The parameter <TT>Precision</TT> may be used to specify the desired
+precision of the output.
+The parameter <TT>Extra</TT> is used in the cases when one of the points
+2<sup>n</sup> P gets too close to the point at infinity, in which case
+there is a huge loss in precision in the archimedean height and
+increasing <TT>Extra</TT> remedies that problem.
+</BLOCKQUOTE>
+<H5><A NAME = "16467">HeightPairingMatrix(P : parameters) : [PtEll] -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Compute the height pairing matrix for an array of points.
+Same parameters as above.
+</BLOCKQUOTE>
+<H5><A NAME = "16468">LocalHeight(P, Pl : parameters) : PtEll, PlcNumElt -&gt; FldPrElt</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: 0</PRE>
+
+<PRE>    Extra: RngIntElt                    Default: 8</PRE>
+<BLOCKQUOTE>
+Given a point P on an elliptic curve defined over a number
+field K, and a place Pl (finite or infinite) of K,
+returns the local height &lambda;<sub>Pl</sub>(P) of P
+at (Pl). The parameter <TT>Precision</TT> sets the precision of the
+output. A value of 0 takes the default precision.
+<P>
+When Pl is an infinite place, the parameter <TT>Extra</TT> can be used
+to remedy the huge loss in precision when one of the points 2<sup>n</sup> P
+gets too close to the point at infinity.
+</BLOCKQUOTE>
+<H5><A NAME = "16469">HeightDifferenceBounds(E) : CrvEll -&gt; FldReElt, FldReElt</A></H5>
+<H5>HeightDifferenceLowerBound(E) : CrvEll -&gt; FldReElt</H5>
+<H5>HeightDifferenceUpperBound(E) : CrvEll -&gt; FldReElt</H5>
+<BLOCKQUOTE>
+These functions return bounds for the difference between the
+naive and canonical heights on the elliptic curve E.  
+Here all heights are absolute logarithmic heights with respect to
+the x-coordinate on E.  
+The functions return real numbers l and u such that 
+l &le; <TT>NaiveHeight(P) - Height(P)</TT> &le;u
+for all points P &isin;E(K), where K is the base field of E.
+Note that the lower bound l is negative.
+<P>
+The bounds are the strongest available, choosing between the 
+Cremona-Prickett-Siksek bounds and the Silverman bounds.
+</BLOCKQUOTE>
+<H5><A NAME = "16470">CPSHeightBounds(E) : CrvEll -&gt; FldReElt, FldReElt</A></H5>
+<BLOCKQUOTE>
+The Cremona-Prickett-Siksek bounds for the height difference.
+</BLOCKQUOTE>
+<H5><A NAME = "16471">SilvermanHeightBounds(E) : CrvEll -&gt; FldReElt, FldReElt</A></H5>
+<BLOCKQUOTE>
+The Silverman bounds for the height difference.
+</BLOCKQUOTE>
+<H4><A NAME = "16472">Integral Points</A></H4>
+
+
+
+<H5><A NAME = "16473">IntegralPoints(E) : CrvEll -&gt; [ PtEll ]</A></H5>
+
+<PRE>    FBasis: [ PtEll ]                   Default: </PRE>
+
+<PRE>    SafetyFactor: RngIntElt             Default: 1</PRE>
+<BLOCKQUOTE>
+Given an elliptic curve E over a number field, this returns a sequence containing
+all integral points on the given model of E, up to sign (only one of P and -P
+is listed).
+<P>
+The parameters <TT>FBasis</TT> and <TT>SafetyFactor</TT> have exactly the same meaning
+as in the function <TT>IntegralPoints</TT> for curves over Q.
+<P>
+Currently, <TT>FBasis</TT> <I>must</I> be specified: it must be a (nonempty) sequence
+of points in the Mordell-Weil group of E.  The routine finds all integral points
+in the group generated by the given points.
+</BLOCKQUOTE>
+<H4><A NAME = "16474">Elliptic Curve Chabauty</A></H4>
+
+<P>
+<P>
+This refers to a method for finding the rational points on a curve, if the
+curve admits a suitable map to an elliptic curve over some extension field.
+The method was developed by Nils Bruin
+(see <A  HREF = "text1446.htm#bib_bruin-crelle">[Bru03]</A> or <A  HREF = "text1446.htm#bib_bruin-magmabook">[Bru04]</A>).
+The first intrinsic follows a Mordell-Weil sieve based strategy, similar to
+that used in <TT>Chabauty</TT> for genus 2 curves (see <A  HREF = "text1446.htm#bib_brusto-mws">[BS10]</A>).
+
+
+<H5><A NAME = "16475">Chabauty(MWmap, Ecov) : Map, MapSch -&gt; SetEnum, RngIntElt</A></H5>
+
+<PRE>    InertiaDegreeBound: RngIntElt       Default: 20</PRE>
+
+<PRE>    SmoothBound: RngIntElt              Default: 50</PRE>
+
+<PRE>    PrimeBound: RngIntElt               Default: 30</PRE>
+
+<PRE>    IndexBound: RngIntElt               Default: </PRE>
+
+<PRE>    InitialPrimes: RngIntElt            Default: 50</PRE>
+
+<PRE>    SetVerbose("EllChab", n):           Maximum: 3</PRE>
+<BLOCKQUOTE>
+Let E be an elliptic curve defined over a number field K.
+This function attempts to determine the subset of E(K) consisting
+of those points that have a Q-rational image under a given map E -&gt; (P)<sup>1</sup>.
+<P>
+The arguments are:
+<DL COMPACT class='compact'>
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>a map <TT>MWmap</TT>: A -&gt; E from an abstract abelian group into E(K),
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>a map <TT>Ecov</TT> : E -&gt; (P)<sup>1</sup> defined over K.
+<P>
+<P>
+</DL>
+The returned values are a finite subset V of A and an integer R. The set
+V consists of all the points in the image of A in E(K) that have a Q-rational
+image under the given map <TT>Ecov</TT>. If the index of A in E(K) is finite and coprime to R
+then V consists of all points in E(K) with Q-rational image. Changing the various optional
+parameters can change the performance of this routine considerably. In general, it is not
+proven that this routine will return at all.
+<P>
+The parameter <TT>InertiaDegreeBound</TT> determines the maximum inertia degree of primes at which
+local information is obtained.
+<P>
+Only places for which the group order of the rational points on the reduction of E is
+smooth relative to <TT>SmoothBound</TT> are used.
+<P>
+The Mordell-Weil sieving process only uses information from E(K)/ B E(K), where B is
+smooth relative to <TT>PrimeBound</TT>.
+<P>
+If <TT>IndexBound</TT> is specified, then the returned value R will only contain prime divisors
+from <TT>IndexBound</TT>. Setting this parameter may make it impossible for the routine to terminate.
+</BLOCKQUOTE>
+<H5><A NAME = "16476">Chabauty(MWmap, Ecov, p) : Map, MapSch, RngIntElt -&gt; RngIntElt, SetEnum, RngIntElt, Tup</A></H5>
+
+<PRE>    Cosets: Tup                         Default: </PRE>
+
+<PRE>    Aux: SetEnum                        Default: </PRE>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+
+<PRE>    Bound: RngIntElt                    Default: </PRE>
+
+<PRE>    SetVerbose("EllChab", n):           Maximum: 3</PRE>
+<BLOCKQUOTE>
+Let E be an elliptic curve defined over a number field K. 
+This function bounds the set of points in E(K) 
+whose images under a given map E -&gt; (P)<sup>1</sup> are Q-rational.
+<P>
+The arguments are as follows:
+<DL COMPACT class='compact'>
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>a map <TT>MWmap</TT> : A -&gt; E from an abstract group into E(K) 
+(as returned by <TT>MordellWeilGroup</TT>), 
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>a map of varieties <TT>Ecov</TT> : E -&gt; (P)<sup>1</sup> defined over K, and 
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>a rational prime p, such that E and the map <TT>Ecov</TT> have good reduction
+at primes above p.
+<P>
+<P>
+</DL>
+The returned values are N, V, R and L 
+as follows. Let G denote the image of A in E(K).
+<DL COMPACT class='compact'>
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>N is an upper bound for the number of points P &isin;G such that
+(Ecov)(P) &isin;(P)<sup>1</sup>(Q) (note that N can be &infin;).
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>V is a set of elements of A found by the program that have images in
+(P)<sup>1</sup>(Q),
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>R is a number with the following property: if
+[E(K) : G] is finite and coprime to R, then
+N is also an upper bound for the number of points P &isin;E(K) 
+such that (Ecov)(P) &isin;(P)<sup>1</sup>(Q), and
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>L is a collection of cosets in A such that (bigcup
+L)&cup;V contains all elements of A that have images in
+(P)<sup>1</sup>(Q).
+<P>
+</DL>
+If <TT>Cosets</TT> (&lt;C<sub>j</sub>&gt;) are supplied (a coset collection of A),
+then the bounds and results are computed for A &cap;(bigcup C<sub>j</sub>).
+<P>
+If <TT>Aux</TT> is supplied (a set of rational primes),
+then the information at p is
+combined with the information at the other primes supplied.
+<P>
+If <TT>Precision</TT> is supplied, this is the p-adic precision used in the
+computations. If not, a generally safe default is used.
+<P>
+If <TT>Bound</TT> is supplied, this determines a search bound for finding V.
+<P>
+The algorithm used is based on <A  HREF = "text1446.htm#bib_bruin-crelle">[Bru03]</A> and <A  HREF = "text1446.htm#bib_bruin-phdthesis">[Bru02]</A>.
+<P>
+Further examples and discussion can be found in <A  HREF = "text1446.htm#bib_bruin-magmabook">[Bru04]</A>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16477">Example <TT>CrvEllQNF_ECchabauty (H128E24)</TT></A></H3>
+<P>
+This example is motivated and explained in detail in <A  HREF = "text1446.htm#bib_bruin-magmabook">[Bru04]</A> (Section 7).
+Let E be the elliptic curve 
+ y<sup>2</sup> =  x<sup>3</sup> +  
+   ( - 3&zeta;<sup>3</sup> - &zeta; + 1)dx<sup>2</sup> 
+   + ( - &zeta;<sup>2</sup> - &zeta; - 1)d<sup>2</sup>x,   
+   d = 2&zeta;<sup>3</sup> - 2&zeta;<sup>2</sup> - 2
+over K := Q(&zeta;) where &zeta; is a primitive 10th root of unity.
+<P>
+<P>
+<P>
+<PRE>
+&gt; _&lt;z&gt; := PolynomialRing(Rationals());
+&gt; K&lt;zeta&gt; := NumberField(z^4-z^3+z^2-z+1);
+&gt; OK := IntegerRing(K);
+&gt; d := 2*zeta^3-2*zeta^2-2;
+&gt; E&lt;X,Y,Z&gt; := EllipticCurve(
+&gt;         [ 0, (-3*zeta^3-zeta+1)*d, 0, (-zeta^2-zeta-1)*d^2, 0 ]);
+</PRE>
+Next we determine as much as possible of E(K), 
+allowing Magma to choose the method.
+<P>
+<P>
+<PRE>
+&gt; success, G, GtoEK := PseudoMordellWeilGroup(E);
+&gt; G;
+Abelian Group isomorphic to Z/2 + Z/2 + Z + Z
+Defined on 4 generators
+Relations:
+    2*G.1 = 0
+    2*G.2 = 0
+&gt; success;
+true
+</PRE>
+Here G is an abstract group and <TT>GtoEK</TT> injects it into E(K).
+Since the flag is <TT>true</TT>, this is a subgroup of finite, odd index
+in E(K). Next, we determine the points (X:Y:Z) in this subgroup
+for which the function 
+ u : E -&gt; (P)<sup>1</sup> : (X:Y:Z) -&gt; d ( - X + (&zeta;<sup>3</sup> - 1) Z : X + d ( - &zeta;<sup>3</sup> - &zeta;) Z) 
+takes values in (P)<sup>1</sup>(Q).
+<P>
+<P>
+<PRE>
+&gt; P1 := ProjectiveSpace(Rationals(),1);
+&gt; u := map&lt; E-&gt;P1 | [-X + (zeta^3 - 1)*d*Z, X+(-zeta^3-zeta)*d*Z] &gt;;
+&gt; V, R := Chabauty( GtoEK, u);
+&gt; V;
+{
+    0,
+    G.3 - G.4,
+    -G.3 + G.4,
+    G.3 + G.4,
+    -G.3 - G.4
+}
+&gt; R;
+320
+</PRE>
+We see that the routine assumed that the image of <TT>GtoEK</TT> is
+2- and 5-saturated in E(K). We can ask it to not assume anything
+outside 2.
+<P>
+<P>
+<PRE>
+&gt; V2, R := Chabauty( GtoEK, u: IndexBound:= 2);
+&gt; V eq V2;
+true
+&gt; R;
+16
+</PRE>
+This means that we have found all points in E(K) that have a rational
+image under u. If one wants to find the images of these points then
+it is necessary in this example to first extend u 
+(by finding alternative defining equations for it)
+so that it is defined on all the points.
+<P>
+<P>
+<PRE>
+&gt; u := Extend(u);
+&gt; [ u( GtoEK(P) ) : P in V ];           
+[ (-1 : 1), (-1/3 : 1), (-1/3 : 1), (-3 : 1), (-3 : 1) ]
+</PRE>
+Alternatively, we can apply Chabauty's method without Mordell-Weil sieving.
+<P>
+<P>
+<PRE>
+&gt; N, V, R, C := Chabauty( GtoEK, u, 3);
+&gt; N;
+5
+&gt; V;
+{
+    0,
+    G.3 - G.4,
+    -G.3 + G.4,
+    G.3 + G.4,
+    -G.3 - G.4
+}
+&gt; R;
+4
+</PRE>
+The <TT>Chabauty</TT> calculations prove that there 
+are at most N elements in G whose image under u is Q-rational.
+Also, V is a set of elements with this property.
+Since here N = 5 = #V, these are the only such elements.
+Moreover, the calculations prove
+that <I>if</I>  [E(K) : G] is coprime to R, 
+then N is actually an upper bound on the number of elements in E(K) 
+whose image under u is Q-rational.
+We know from the <TT>PseudoMordellWeilGroup</TT> computation
+that [E(K) : G] is odd. Therefore we have solved our problem for E(K),
+not just for G.
+<HR>
+<H4><A NAME = "16478">Auxiliary Functions for Etale Algebras</A></H4>
+
+<P>
+<P>
+This section contains machinery for number fields (and more generally 
+"etale algebras", i.e. algebras of the form Q[x]/p(x)), intended to
+perform the number field calculations that are involved in computing
+Selmer groups of geometric objects.
+<P>
+It has become conventional to refer to "the p-Selmer group" of 
+a number field K (or, more generally, of an etale algebra) 
+relative to a finite set S 
+of K-primes. It means the finite subgroup K(S, p) of K<sup> * </sup>/(K<sup> * </sup>)<sup>p</sup>, 
+consisting of those elements whose valuation at every prime 
+outside S is a multiple of p.
+
+
+<H5><A NAME = "16479">AbsoluteAlgebra(A) : RngUPolRes -&gt; SetCart, Map</A></H5>
+
+<PRE>    Fields: SetEnum                     Default: { }</PRE>
+
+<PRE>    SetVerbose("EtaleAlg", n):          Maximum: 1</PRE>
+<BLOCKQUOTE>
+Given a separable commutative algebra over Q, an absolute number field 
+or a finite field,
+the function returns the isomorphic direct sum of absolute fields as a 
+cartesian product and the isomorphisms to and from this product. The  
+optional parameter <TT>Fields</TT> enables the user to suggest representations 
+of the absolute fields.  If this function finds it needs a field isomorphic  
+to one occurring in the supplied list, then it will use the given field. 
+Otherwise it will construct a field itself. The isomorphism is returned  
+as a second argument. If called twice on the same algebra, it will recompute 
+if the Fields argument is given.  Otherwise it will return the result 
+computed the first time.
+</BLOCKQUOTE>
+<H5><A NAME = "16480">pSelmerGroup(A, p, S) : RngUPolRes, RngIntElt, SetEnum[RngOrdIdl] -&gt; GrpAb, Map</A></H5>
+
+<PRE>    SetVerbose("EtaleAlg", n):          Maximum: 1</PRE>
+<BLOCKQUOTE>
+Returns the p-Selmer group of a semi-simple algebra A.
+The set S of ideals
+should be prime ideals of the underlying number field. The group
+returned is the direct sum of the p-Selmer groups of the irreducible
+summands of A and the map is the obvious embedding in the multiplicative
+group of A.
+An implied restriction is that <TT>BaseRing(A)</TT> be of type <TT>FldNum</TT>. 
+See also <A  HREF = "text407.htm#FldAb:pSelmerGroup">pSelmerGroup</A>.
+If an algebra over the rationals is required, create a degree 1
+extension by
+<P>
+<P>
+<P>
+<TT>RationalsAsNumberField();
+</TT>
+</BLOCKQUOTE>
+<H5><A NAME = "16481">LocalTwoSelmerMap(P) : RngOrdIdl -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Let K be the number field associated with the prime ideal P.
+The map returned is 
+K<sup> * </sup> -&gt; K<sub>P</sub><sup> * </sup> / K<sub>P</sub><sup> * 2</sup>, where K<sub>P</sub> is the completion of K at P. 
+The codomain is represented as a finite abelian group.
+</BLOCKQUOTE>
+<H5><A NAME = "16482">LocalTwoSelmerMap(A, P) : RngUPolRes, RngOrdIdl -&gt; Map, SeqEnum</A></H5>
+<BLOCKQUOTE>
+Let K be the base field of the commutative algebra A
+and let P be a prime ideal in K.
+Then this function returns a map A<sup> * </sup> -&gt; A<sup> * </sup>/A<sup> * 2</sup> tensor K<sub>P</sub>,
+where K<sub>P</sub> is the completion of K at P.
+The codomain is represented as a finite abelian group.
+<P>
+This map is computed by using <TT>LocalTwoSelmerMap(Q)</TT> for the various
+extensions Q of P to the fields making up <TT>AbsoluteAlgebra(A)</TT>.
+The map returned is essentially the direct sum of all these maps. 
+For technical purposes, one may also wish to use the components of the 
+map coming from each number field; these are given by the second return value, 
+which is a sequence of records (ordered in the same way as the results are 
+concatenated in the returned map).
+Each record contains items <TT>i, p, map and vmap</TT>.
+Here <TT>i</TT> is an index indicating which number field
+in <TT>AbsoluteAlgebra(A)</TT> the record corresponds to,
+<TT>p</TT> is an extension of P to a prime in that number field,
+<TT>map</TT> is <TT>LocalTwoSelmerMap(p)</TT>,
+and <TT>vmap</TT> is the valuation map at p on that number field.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16483">Example <TT>CrvEllQNF_selmer-etale (H128E25)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; P&lt;x&gt; := PolynomialRing(Rationals());
+&gt; A := quo&lt;P | x^3 - 1&gt;;
+&gt; AA := AbsoluteAlgebra(A);
+&gt; AA;
+Cartesian Product
+&lt;Number Field with defining polynomial x - 1 over the Rational Field,
+ Number Field with defining polynomial x^2 + x + 1 over the Rational Field&gt;
+</PRE>
+<HR>
+<H4><A NAME = "16484">Analytic Information</A></H4>
+
+
+
+<H5><A NAME = "16485">RootNumber(E, P) : CrvEll, RngOrdIdl -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The local root number of the elliptic curve E
+(defined over a number field) at the prime ideal P.
+The formulae are due to Rohrlich, Halberstadt, Kobayashi and
+the Dokchitser brothers.
+</BLOCKQUOTE>
+<H5><A NAME = "16486">RootNumber(E) : CrvEll -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Calculates the global root number of an elliptic curve E
+defined over a number field K.
+This is the product of local root numbers over all places of K
+(-1 from each infinite place), and is the (conjectural) sign
+in the functional equation relating L(E/K, s) to L(E/K, 2 - s).
+</BLOCKQUOTE>
+<H5><A NAME = "16487">AnalyticRank(E) : CrvEll -&gt; RngIntElt, FldReElt</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: 6</PRE>
+<BLOCKQUOTE>
+Determine the analytic rank of the elliptic curve E, which is
+defined over a number field K. The algorithm
+used is heuristic, computing derivatives of the L-function L(E/K, s) at
+s=1 until one appears to be nonzero; it also assumes the analytic
+continuation and the functional equation for the L-function.
+The function returns the first nonzero derivative L<sup>(r)</sup>(1)/r! as a
+second argument. The precision is optional, and is taken to be 6 digits
+if omitted.
+</BLOCKQUOTE>
+<H5><A NAME = "16488">ConjecturalRegulator(E) : CrvEll -&gt; FldReElt, RngIntElt</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: 10</PRE>
+<BLOCKQUOTE>
+Using the <TT>AnalyticRank</TT> function, this function calculates an
+approximation, assuming that the Birch--Swinnerton-Dyer conjecture holds,
+to the product of the regulator of the elliptic curve E and the order
+of the Tate--Shafarevich group.  The (assumed) analytic rank is returned
+as a second value.
+</BLOCKQUOTE>
+<H5><A NAME = "16489">ConjecturalSha(E, Pts) : CrvEll, SeqEnum[PtEll] -&gt; FldReElt</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: 6</PRE>
+<BLOCKQUOTE>
+For an elliptic curve E defined over a number field K
+and a sequence of points in E(K) which purportedly form its basis
+modulo torsion, computes the conjectural order of the Tate-Shafarevich
+group Sha(E/K). This function computes the product of the regulator and
+Sha from the Birch--Swinnerton-Dyer conjecture
+(using <TT>ConjecturalRegulator</TT>) and divides by the determinant of
+the height pairing matrix for the points supplied in <TT>Pts</TT>.
+It returns 0 if the points are linearly dependent or they generate a
+group of rank less than the analytic rank. If the points generated a
+subgroup of index n&gt;1, it returns n<sup>2</sup>.|Sha|.
+</BLOCKQUOTE>
+<H4><A NAME = "16490">Elliptic Curves of Given Conductor</A></H4>
+
+<P>
+<P>
+This section describes search routines for finding elliptic curves with 
+given conductor, or with good reduction outside a given set of primes.
+The aim is not to provably find all such curves; in most cases,
+this would be a very difficult task using current algorithms.
+Rather the aim is to efficiently search for these curves, using a 
+variety of techniques, taking advantage of all available information, 
+and taking advantage of all the tools available in Magma which 
+can be applied to the problem.
+<P>
+The routine is very much more effective when some traces of Frobenius
+are known for the desired curve.  The principal application of this is
+for finding elliptic curves that match known modular forms.
+<P>
+These functions are effective for finding elliptic curves over Q,
+as well as over number fields.  For this, one must create Q using
+<TT>RationalsAsNumberField()</TT>.  
+
+
+<H5><A NAME = "16491">EllipticCurveSearch(N, Effort) : RngOrdIdl, RngIntElt -&gt; SeqEnum</A></H5>
+<H5>EllipticCurveWithGoodReductionSearch(S, Effort) : Set, RngIntElt -&gt; SeqEnum</H5>
+<H5>EllipticCurveWithGoodReductionSearch(N, Effort) : RngOrdIdl, RngIntElt -&gt; SeqEnum</H5>
+
+<PRE>    Full: BoolElt                       Default: <TT>false</TT></PRE>
+
+<PRE>    Max: RngIntElt                      Default: </PRE>
+
+<PRE>    Primes: SeqEnum                     Default: </PRE>
+
+<PRE>    Traces: SeqEnum                     Default: </PRE>
+
+<PRE>    SetVerbose("ECSearch", n):          Maximum: 2</PRE>
+<BLOCKQUOTE>
+These functions perform a search for elliptic curves with specified conductor(s).
+The first function finds curves with conductor equal to the given ideal N.
+The "good reduction" functions find curves with conductors divisible only by 
+primes that belong to the given set S or that divide the given ideal N.
+The functions aim to find as many distinct isogeny classes as possible 
+(or <TT>Max</TT> classes, if <TT>Max</TT> is specified).   A sequence is returned
+containing all curves found that have the specified conductor(s).
+It will not return more than one curve in the same isomorphism class.
+It may return several curves in the same isogeny class, although no attempt 
+is made to find all isogenous curves.
+<P>
+The second argument, <TT>Effort</TT>, is an integer which controls how much
+effort is used before returning; the running time depends on this variable 
+in a roughly linear way, except with significant step-ups at values where 
+an additional technique begins to be used.  Currently, <TT>Effort := 400</TT> 
+is the smallest value where all available techniques are used.  (This may
+be changed in the future.)
+<P>
+There are two ways to specify an early stopping condition:  
+<P>
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>If the optional argument <TT>Max</TT> is set to some positive integer, the
+routine terminates as soon as <TT>Max</TT> non-isogenous curves are found.
+<P>
+<DT>(ii)</DT><DD>The optional arguments <TT>Primes</TT> and <TT>Traces</TT> may be used together
+to specify some traces of Frobenius of the desired curve(s).
+Here <TT>Primes</TT> is a sequence of prime ideals coprime to the conductor(s),
+and <TT>Traces</TT> is a sequence of integers of the form 
+[ a<sub>P</sub> : P &isin;(Primes) ].
+Alternatively, <TT>Traces</TT> may be a sequence of sequences of that form. 
+The routine aims to find curves whose traces match the specified sequences,
+and terminates as soon as one curve of each kind has been found.  The algorithm
+uses the trace information to cut down the search by a large factor.
+<P>
+</DL>
+<I>Warning:</I> <I>ALL</I> curves found during the search are returned
+(possibly including curves whose traces do not match the specified data).
+<P>
+If an early stopping condition has been specified, the routine initially 
+tries with lower effort, so that it will succeed quickly for easier input.
+The effort is incremented exponentially up to the specified <TT>Effort</TT>.
+(This is a breadth-first search strategy.  The algorithm involves doing a 
+large number of independent searches, and each elliptic curve can be found
+in only one of these searches, so it is necessary to alternate between them.
+There is no way to reliably predict how much effort will be needed, but the
+search usually takes far longer when the effort is larger than necessary.)
+To override this behaviour and begin with the full specified <TT>Effort</TT>,
+the option <TT>Full</TT> should be used.  (This is intended for the case
+where the same search has already been done with a lower <TT>Effort</TT>).
+<P>
+If <TT>SetVerbose("ECSearch", 1)</TT> is used, information about the search
+is printed during computation.  In particular, curves with the desired 
+conductor are printed when they are found, so that they can be obtained
+without waiting for the routine to finish.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text1451.htm">[Next]</A><A  HREF = "text1449.htm">[Prev]</A> <A  HREF = "text1451.htm">[Right]</A> <A  HREF = "text1449.htm">[Left]</A> <A  HREF = "text1447.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

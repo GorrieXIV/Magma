@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Hilbert Series</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1266.htm">[Next]</A><A  HREF = "text1264.htm">[Prev]</A> <A  HREF = "text1266.htm">[Right]</A> <A  HREF = "text1264.htm">[Left]</A> <A  HREF = "text1254.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "13906">Hilbert Series</A></H3>
+
+<P>
+<P>
+The following functions compute the Hilbert series information
+of graded or (homogeneous) modules.  This depends
+on the column weights, just as in graded polynomial rings.
+
+
+<H5><A NAME = "13907"></A><A NAME = "PMod:HilbertSeries">HilbertSeries</A>(M) : ModMPol -&gt; FldFunElt</H5>
+<BLOCKQUOTE>
+Given a graded R-module M, return the Hilbert series H<sub>M</sub>(t) of M (as a
+univariate function field over the ring of integers.  The i-th
+coefficient of the series gives the vector-space dimension of the 
+degree-i graded piece of M.
+The algorithm implemented is that given in <A  HREF = "text1253.htm#bib_BayerStillman">[BS92]</A>.
+<P>
+Note that if I is an ideal of the ring R, then the corresponding
+function for ideals <A  HREF = "text1227.htm#dpoly_ideal:HilbertSeries">HilbertSeries</A> applied to I gives the
+Hilbert series of the affine algebra (quotient) R/I, so this is equivalent
+to <TT>HilbertSeries(QuotientModule(I))</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "13908">HilbertSeries(M, p) : ModMPol, RngIntElt -&gt; RngSerLaurElt</A></H5>
+<BLOCKQUOTE>
+Given a graded R-module M, return the Hilbert series H<sub>M</sub>(t) of M
+as a Laurent series to precision p.  (A Laurent series is required in
+general, since negative powers may occur when there are negative values
+in the grading of M.)
+</BLOCKQUOTE>
+<H5><A NAME = "13909">HilbertDenominator(M) : ModMPol -&gt; RngUPol</A></H5>
+<BLOCKQUOTE>
+Given a graded R-module M, return the unreduced Hilbert
+denominator D of the Hilbert series H<sub>M</sub>(t) of M (as a univariate
+polynomial over the ring of integers).
+The denominator D equals
+<A  HREF = "text1227.htm#dpoly_ideal:HilbertDenominator">HilbertDenominator</A><TT>(R)</TT> which is simply &prod;<sub>i=1</sub><sup>n</sup>
+(1 - t<sup>w<sub>i</sub></sup>), where n is the rank of R and w<sub>i</sub> is the weight of
+the i-th variable (1 by default).
+</BLOCKQUOTE>
+<H5><A NAME = "13910">HilbertNumerator(M) : ModMPol -&gt; RngUPolElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a graded R-module M, return the unreduced Hilbert numerator N
+of the Hilbert series H<sub>M</sub>(t) of M (as a univariate polynomial over
+the ring of integers) and a valuation shift s.
+The numerator N equals D x t<sup>s</sup> x H<sub>M</sub>(t), where D is
+the unreduced Hilbert denominator above.
+Computing with the unreduced numerator is often more convenient.
+Note that s will only be non-zero
+when M has negative weights in its grading.
+</BLOCKQUOTE>
+<H5><A NAME = "13911">HilbertPolynomial(I) : ModMPol -&gt; RngUPolElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a graded R-module M, return the Hilbert polynomial H(d) of M
+as an element of the univariate polynomial ring Q[d], together with
+the index of regularity of M (the minimal integer k &ge;0 such that
+H(d) agrees with the Hilbert function of M at d for all d &ge;k).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13912">Example <TT>PMod_Hilbert (H115E6)</TT></A></H3>
+We apply the Hilbert series functions to a simple quotient module.
+<P>
+<P>
+<PRE>
+&gt; R&lt;x,y,z&gt; := PolynomialRing(RationalField(), 3);
+&gt; F := GradedModule(R, 3);
+&gt; M := quo&lt;F | [x,0,0], [0,y^2,0]&gt;;
+&gt; M;
+Graded Module R^3/&lt;relations&gt;
+Relations:
+[  x,   0,   0],
+[  0, y^2,   0]
+&gt; HilbertSeries(M);
+(t^2 + t - 3)/(t^3 - 3*t^2 + 3*t - 1)
+&gt; HilbertSeries(M, 10);
+3 + 8*s + 14*s^2 + 21*s^3 + 29*s^4 + 38*s^5 + 48*s^6 + 59*s^7 + 71*s^8 + 84*s^9 
+    + O(s^10)
+&gt; HilbertNumerator(M);
+-x^2 - x + 3
+0
+&gt; HilbertDenominator(M);
+-x^3 + 3*x^2 - 3*x + 1
+&gt; HilbertPolynomial(M);
+1/2*x^2 + 9/2*x + 3
+0
+&gt; [Evaluate(HilbertPolynomial(F), i): i in [0..10]]; 
+[ 3, 9, 18, 30, 45, 63, 84, 108, 135, 165, 198 ]
+</PRE>
+If the module has negative weights, then denominator may include
+extra powers of t, so the shift for the numerator will be non-zero.
+<P>
+<P>
+<PRE>
+&gt; F := GradedModule(R, [-1]);
+&gt; F;
+Free Graded Module R^1 with grading [-1]
+&gt; HilbertSeries(F);    
+-1/(t^4 - 3*t^3 + 3*t^2 - t)
+&gt; HilbertSeries(F, 10);
+s^-1 + 3 + 6*s + 10*s^2 + 15*s^3 + 21*s^4 + 28*s^5 + 36*s^6 + 45*s^7 + O(s^8)
+&gt; HilbertNumerator(F);
+1
+1
+&gt; HilbertDenominator(F);
+-x^3 + 3*x^2 - 3*x + 1
+&gt; HilbertPolynomial(F);
+1/2*x^2 + 5/2*x + 3
+-1
+&gt; [Evaluate(HilbertPolynomial(F), i): i in [-1..10]];
+[ 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66, 78 ]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1266.htm">[Next]</A><A  HREF = "text1264.htm">[Prev]</A> <A  HREF = "text1266.htm">[Right]</A> <A  HREF = "text1264.htm">[Left]</A> <A  HREF = "text1254.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

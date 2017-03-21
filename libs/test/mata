@@ -1,0 +1,253 @@
+/*
+Matrix Algebras test.
+AKS 14/2/94.
+*/
+
+
+test_mata := procedure(R, n, rand: Count := 10, ACount := Count)
+    A := MatrixAlgebra(R, n);
+    V := RSpace(R, n);
+
+    "Matrix Algebra test:", n, R: Minimal;
+    "Seed:", GetSeed();
+
+    is_field := IsField(R);
+    is_finite_field := Type(R) eq FldFin;
+    is_small := is_finite_field and n * Log(2, #R) le 70;
+    is_domain := IsDomain(R);
+    over_Z := R cmpeq IntegerRing();
+    has_canonical := Type(R) eq FldFin or Type(R) eq FldRat;
+
+    if over_Z then
+	ZK := GF(PreviousPrime(2^23));
+    end if;
+
+    assert IsZero(A ! 0);
+    assert IsOne(A ! 1);
+    assert IsMinusOne(A ! -1);
+    assert IsScalar(A ! 3);
+
+    for i in [1 .. Count] do
+	x := rand(A);
+	y := rand(A);
+
+	assert x + y eq y + x;
+	assert x * (x + y) eq x^2 + x*y;
+        assert x^2 - y^2 + x*y - y*x eq (x - y)*(x + y);
+	assert 2 * x eq x + x;
+	assert x + 0 eq x;
+	assert IsZero(x * 0);
+	assert IsZero(x - x);
+	assert x - y eq -(y - x);
+	assert x + 1 eq x + (A!1);
+	assert x - 3 eq x - (A!3);
+	assert 2 - x eq (A!2) - x;
+	assert 5 + x eq (A!5) + x;
+	assert IsOne(x^0);
+	assert Transpose(x + y) eq Transpose(x) + Transpose(y);
+
+	e, t := EchelonForm(x);
+/*
+"x:"; x;
+"t:"; t;
+"e:"; e;
+//"t*x:"; t*x;
+*/
+	assert t * x eq e;
+	r := Rank(x);
+
+	if r lt n and is_domain then
+	    assert IsZero(e[r + 1]);
+	end if;
+
+	w := y[1] * x;
+	s, k := Solution(x, w);
+	assert s * x eq w;
+	assert Dimension(k * x) eq 0;
+	assert s - y[1] in k;
+
+	dx := Determinant(x);
+
+/*
+x: Magma;
+Eltseq(x);
+"x:", x;
+"dx:", dx;
+"r:", r;
+"smith:", SmithForm(x);
+*/
+
+	assert (dx eq 0) eq (r lt n);
+	assert Determinant(x*y) eq dx*Determinant(y);
+
+	if over_Z then
+	    assert ZK!dx eq Determinant(Matrix(ZK, x));
+	end if;
+
+	if IsUnit(x) then
+	    assert not IsZero(x);
+	    assert IsUnit(dx);
+
+	    xi := x^-1;
+	    assert IsOne(x * xi);
+
+	    if is_small then
+		fo := FactoredOrder(x);
+		o := FactorizationToInteger(fo);
+		assert IsOne(x^o);
+		for t in fo do
+		    assert not IsOne(x^(o div t[1]));
+		end for;
+	    end if;
+	end if;
+
+	if is_field then
+	    cx := CharacteristicPolynomial(x);
+	    mx := MinimalPolynomial(x);
+	    assert IsZero(cx mod mx);
+	    assert Trace(x) eq -Coefficient(cx, n - 1);
+	    assert dx eq (-1)^n * Coefficient(cx, 0);
+	    if is_small then
+		assert IsZero(Evaluate(cx, x));
+	    end if;
+
+	    if is_finite_field and n le 100 then
+		cxf := Factorization(cx);
+		mxf := Factorization(mx);
+// cxf; mxf;
+		for ti := 1 to #mxf do
+		    t := mxf[ti];
+		    e := Evaluate(t[1]^t[2], x);
+		    k := Kernel(e);
+// ti; e; k;
+// Dimension(k), Degree(t[1]), cxf[ti, 2];
+		    assert Dimension(k) eq Degree(t[1]) * cxf[ti, 2];
+		end for;
+	    end if;
+
+	    if has_canonical then
+		p, pt, pf := PrimaryRationalForm(x);
+		assert pt * x * pt^-1 eq p;
+		j, jt, jf := JordanForm(x);
+		assert &*[t[1]^t[2]: t in jf] eq cx;
+		assert jt * x * jt^-1 eq j;
+		assert jf eq pf;
+		r, rt, rf := RationalForm(x);
+		assert &*rf eq cx;
+		assert rt * x * rt^-1 eq r;
+
+		assert PrimaryInvariantFactors(x) eq pf;
+		assert InvariantFactors(x) eq rf;
+
+		if is_finite_field then
+		    for t in Eigenvalues(x) do
+			e := t[1];
+			assert IsZero(Evaluate(mx, e));
+			es := Eigenspace(x, e);
+			assert es.1 * x eq e * es.1;
+		    end for;
+		end if;
+	    end if;
+	else
+	    s, p, q := SmithForm(x);
+	    assert p * x * q eq s;
+	end if;
+    end for;
+
+    for i in [1 .. ACount] do
+	if not is_domain or is_finite_field and #R gt 8 and n ge 20 then
+	    break;
+	end if;
+	x := rand(A);
+	y := rand(A);
+	S := sub<A | x, x*y>;
+	T := sub<A | y, x*(y - 1)>;
+	M := S meet T;
+	N := S + T;
+	assert S subset N;
+	assert T subset N;
+	assert M subset S;
+	assert M subset T;
+	if IsFinite(R) then
+	    C := Centre(S);
+	    assert C subset S;
+	    c := Random(C);
+	    assert &and{c*x eq x*c where x := Random(S): i in [1..3]};
+	end if;
+
+	if Degree(S) lt 20 then
+	    rad := JacobsonRadical(S);
+	    if ideal<S | rad> ne rad then
+	    //if rad notsubset S then
+		"S:", S;
+		"rad:", rad;
+		"id:", ideal<S | rad>;
+		error "BAD";
+	    end if;
+	    // assert ideal<S | rad> eq rad;
+	end if;
+    end for;
+end procedure;
+
+/*
+SetSeed(1, 74530);
+test_mata(
+    IntegerRing(), 5, func<A | A![Random(-1, 1): i in [1..Degree(A)^2]]>
+);
+*/
+
+/*
+Dies with tpoly mult:
+    test_mata(GF(2, 53), 5, Random);
+*/
+
+for q in [q: q in [3 .. 25] | IsPrimePower(q)] do
+    test_mata(GF(q), 273, Random: Count := 1, ACount := 0);
+    test_mata(GF(q), 571, Random: Count := 1, ACount := 0);
+    test_mata(GF(q), 29, Random);
+end for;
+
+
+test_mata(GF(3, 10), 10, Random);
+
+test_mata(GF(5^3), 10, Random);
+test_mata(GF(5^3), 100, Random);
+
+test_mata(GF(2), 50, Random);
+test_mata(GF(251), 10, Random);
+test_mata(GF(257), 5, Random);
+test_mata(GF(2, 10), 5, Random);
+test_mata(GF(2, 53), 5, Random);
+test_mata(GF(2, 503), 2, Random);
+test_mata(GF(3, 10), 10, Random);
+test_mata(GF(3, 20), 10, Random);
+test_mata(GF(23, 5), 10, Random);
+test_mata(GF(11863279, 1), 20, Random);
+test_mata(GF(PreviousPrime(2^16)), 5, Random);
+test_mata(GF(PreviousPrime(2^30)), 5, Random);
+test_mata(GF(PreviousPrime(2^32)), 3, Random);
+test_mata(GF(NextPrime(2^32), 1), 3, Random);
+test_mata(GF(PreviousPrime(10^100: Proof := false), 1), 2, Random);
+test_mata(
+    RationalField(), 5, func<A | A![Random(-1, 1): i in [1..Degree(A)^2]]>
+);
+test_mata(
+    IntegerRing(), 5, func<A | A![Random(-1, 1): i in [1..Degree(A)^2]]>
+);
+K<w> := CyclotomicField(4);
+test_mata(
+    K, 2, func<A | A![Random(-1, 1)+Random(-1,1)*w: i in [1..Degree(A)^2]]>
+);
+
+for q in [2, 3, 4, 32003, NextPrime(10^10)] do
+    K := GF(q);
+    P<x> := PolynomialRing(GF(q));
+    n := 3;
+    d := 3;
+    ran := func<A | A![P|[Random(K): i in [0 .. d]]: i in [1..n^2]]>;
+    test_mata(P, n, ran);
+    test_mata(FieldOfFractions(P), n, ran);
+
+    PQ<y> := quo<P | x^d + x + 1>;
+    test_mata(PQ,n, func<A | A![PQ|[Random(K): i in [1 .. d]]: i in [1..n^2]]>);
+end for;

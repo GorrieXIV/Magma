@@ -1,0 +1,348 @@
+/////////////////////////////////////////////////////////////
+//
+//  misc tests for generic abelian groups
+//
+//  Paulette Lieby    Dec 2000
+/////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+
+
+
+
+
+/////////////////////////////////////////////////////////////
+//   test with elliptic curves
+/////////////////////////////////////////////////////////////
+
+for i in [10..20] do 
+    p := NextPrime(2^i);
+    FF := GF(p^2);
+    E := EllipticCurve([ Random(FF), Random(FF) ]);
+    G1, m1 := AbelianGroup(E);
+    GA := GenericAbelianGroup(E);
+    G2, m2 := AbelianGroup(GA);
+    assert IsIsomorphic(G1, G2);
+end for;
+
+
+for k in [10..12] do
+   p := RandomPrime(k); 
+   fact := Factorization(p+1);
+   n := fact[#fact][1];
+   while n lt 2^(k-4) do
+      p := RandomPrime(k);
+      fact := Factorization(p+1);
+      n := fact[#fact][1];
+   end while;
+   E := BaseExtend(SupersingularEllipticCurve(GF(p)),GF(p^2));
+    G1, m1 := AbelianGroup(E);
+   GA := GenericAbelianGroup(E);
+    G2, m2 := AbelianGroup(GA);
+   assert IsIsomorphic(G1, G2);
+end for;
+
+
+/////////////////////////////////////////////////////////////
+// test homs and isos -- and p-Sylow subgroups
+/////////////////////////////////////////////////////////////
+
+m :=  34384;
+Zm := Integers(m);
+U := {@ x : x in Zm | GCD(x, m) eq 1 @};
+GA_Zm := GenericAbelianGroup(U : 
+       IdIntrinsic := "Id", 
+       AddIntrinsic := "*", 
+       InverseIntrinsic := "/");
+
+repeat
+    S := [];
+    for j in [1..2] do
+        P := Random(GA_Zm);
+        Include(~S, P);
+    end for;
+    GH1_Zm := sub< GA_Zm | S>;
+until Ngens(GH1_Zm) eq 2;  // otherwise error below in hom
+ 
+S := [];
+for j in [1..5] do
+    P := Random(U);
+    Include(~S, P);
+end for;
+GH2_Zm := sub< GA_Zm | S>;
+
+order_fact := Factorization(#U);
+for i in [1..#order_fact] do
+    p := order_fact[ i, 1 ];
+//    printf "%o-Sylow subgroup:\n", p;
+    GAp := Sylow(GA_Zm, p : ComputeStructure := true); 
+//    GAp;
+//    Generators(GAp);
+end for;
+ 
+ 
+G := AbelianGroup(GA_Zm); 
+G := AbelianGroup(GH1_Zm); 
+G := AbelianGroup(GH2_Zm);
+ 
+h := hom<GH1_Zm -> GH2_Zm | GH2_Zm.1, GH2_Zm.2 >;
+
+h := Homomorphism(GH1_Zm, GH2_Zm, Generators(GH1_Zm), [GH2_Zm.1, GH2_Zm.2]);
+ 
+// h := iso<GH1_Zm -> GH2_Zm | GH2_Zm.1, GH2_Zm.2 >;
+// Run error in map< ... >: Images do not generate the (whole) codomain
+ 
+
+/////////////////////////////////////////////////////////////
+//  test subgroups and group computation from a set of generators
+/////////////////////////////////////////////////////////////
+
+ 
+GT := sub< GA_Zm | [[1,0,0,0], [0,1,0,0], [0,0,1,0], [0,0,0,1]]>;
+T, m := AbelianGroup(GT);
+
+ 
+GTT := sub< GA_Zm | [[1,0,0,0], [0,1,0,0]]>;
+TT, mm := AbelianGroup(GTT);
+
+
+
+
+n := 6;
+Dk := -4*(10^n + 1);
+Q := QuadraticForms(Dk);   
+ 
+p := 2;
+S := {};
+while #S lt 10 do 
+   if KroneckerSymbol(Dk,p) eq 1 then
+      I := Reduction(PrimeForm(Q,p));
+      Include(~S, I);
+   end if; 
+   p := NextPrime(p);
+end while;
+ 
+GA_qf := GenericAbelianGroup(Q : UserGenerators := S,
+                                 ComputeStructure := true,
+                                 UseUserGenerators := true);  
+ 
+S := [];
+for j in [1..2] do
+    P := Random(GA_qf);
+    Include(~S, P);
+end for;
+GH1_qf := sub< GA_qf | S>;
+ 
+S := [];
+for j in [1..2] do
+    P := Random(Q);
+    Include(~S, P);
+end for;
+GH2_qf := sub< GA_qf | S>;
+ 
+ 
+ 
+/////////////////////////////////////////////////////////////
+// some tests with jacobians (and generator testing)
+/////////////////////////////////////////////////////////////
+
+
+ 
+P<x> := PolynomialRing(GF(11));
+C4 := HyperellipticCurve(x^3 + 1, x);
+J4 := Jacobian(C4);
+ G1, m1 := AbelianGroup(J4);
+GA4 := GenericAbelianGroup(J4);
+ G2, m2 := AbelianGroup(GA4);
+assert IsIsomorphic(G1, G2);
+ 
+S := [];
+for i in [1..Ngens(G1)] do
+    Include(~S, m1(G1.i));
+end for;
+assert S eq Generators(J4);
+ 
+ 
+S := {@ @};
+for a in G1 do
+  Include(~S, a@m1);
+end for;
+assert S eq Points(J4);
+ 
+ 
+for i in [1..#S] do
+  g := S[i];
+  g@@m1;
+end for;
+ 
+ 
+
+
+///////////////////////////////////////////////
+ 
+ 
+ 
+P<x> := PolynomialRing(GF(11));
+C5 := HyperellipticCurve(x^5 + 4, P!0);
+J5 := Jacobian(C5);
+ G1, m1 := AbelianGroup(J5);
+GA5 := GenericAbelianGroup(J5);
+ G2, m2 := AbelianGroup(GA5);
+assert IsIsomorphic(G1, G2);
+ 
+ 
+S := [];
+for i in [1..Ngens(G1)] do
+    Include(~S, m1(G1.i));
+end for;
+assert S eq Generators(J5);
+ 
+S := {@ @};
+for a in G1 do
+  Include(~S, a@m1);
+end for;
+assert S eq Points(J5);
+assert #S eq 305; 
+ 
+
+for i in [1..10] do  
+  g := S[i];
+  g@@m1;
+end for;
+
+
+/////////////////////////////////////////////////////////////
+// representation
+/////////////////////////////////////////////////////////////
+
+m :=  34384;
+Zm := Integers(m);
+U := {@ x : x in Zm | GCD(x, m) eq 1 @};
+S := { U | 12035, 29471, 31387, 30375 };
+Ss := Setseq(S);
+ 
+    GA_Zm := GenericAbelianGroup(U : 
+          ProperSubset := false,
+          UseRepresentation := false, 
+          IdIntrinsic := "Id", 
+          AddIntrinsic := "*", 
+          InverseIntrinsic := "/",
+          UserGenerators := S);
+ 
+GH1 := sub< GA_Zm | [ U | 24715, 13323] >;
+GH2 := sub< GH1 | [ U | 15667, 5435, 33849, 16753 ] >;
+GH3 := sub< GH2 | [ U | 2225, 12697 ] >;
+GH4 := sub< GH3 | [ U | 20145 ] >;
+
+H1 := AbelianGroup(GH1);
+H2 := AbelianGroup(GH2);
+H3 := AbelianGroup(GH3);
+H4 := AbelianGroup(GH4);
+ 
+ 
+GGS := [ GA_Zm, GH1, GH2, GH3, GH4 ];
+
+for k in [1..#GGS] do
+    GA := GGS[k];
+    for i in [1..10] do
+        Sss := UserGenerators(GA);
+	P := Random(GA);
+	 rep1 := UserRepresentation(GA!P);
+	 rep2 := Representation(Sss, GA!P);
+        // note UserRepresentation not unique
+	assert #rep1 eq #rep2;
+	for j in [1..#rep1] do
+	    assert IsId(&+[(rep1[j]-rep2[j])*Sss[j] : j in [1..#Sss]]);
+        end for;
+    end for;
+end for;
+
+ 
+
+/////////////////////////////////////////////////////////////
+// structure (sub?) test
+/////////////////////////////////////////////////////////////
+
+
+    for i in [1..#order_fact] do 
+        p := order_fact[i, 1];
+        GAp := Sylow(GA_Zm, p);
+        S := Generators(GAp);
+ 
+        GApp := sub< GA_Zm | S >;
+        IsIsomorphic(AbelianGroup(GAp), AbelianGroup(GApp));
+    end for;
+ 
+    for i in [1..5] do
+        S := [];
+        for j in [1..5] do
+            P := Random(GA_Zm);
+            Include(~S, P);
+        end for;
+        GH := sub<GA_Zm | S : ComputeStructure := true>;
+        G := AbelianGroup(GH); 
+    end for;
+
+
+/////////////////////////////////////////////////////////////
+// log
+/////////////////////////////////////////////////////////////
+
+
+
+n := 6;
+Dk := -4*(10^n + 1);
+Q := QuadraticForms(Dk);   
+ 
+p := 2;
+S := {};
+while #S lt 10 do 
+   if KroneckerSymbol(Dk,p) eq 1 then
+      I := Reduction(PrimeForm(Q,p));
+      Include(~S, I);
+   end if; 
+   p := NextPrime(p);
+end while;
+ 
+GA_qf := GenericAbelianGroup(Q : UserGenerators := S,
+                                 ComputeStructure := true,
+                                 UseUserGenerators := true);  
+
+
+
+ 
+S := [];
+for j in [1..2] do
+    P := Random(GA_qf);
+    Include(~S, P);
+end for;
+GH1_qf := sub< GA_qf | S>;
+
+S := [];
+for j in [1..2] do
+    P := Random(Q);
+    Include(~S, P);
+end for;
+GH2_qf := sub< GA_qf | S>;
+
+
+
+
+
+Ip := Reduction(PrimeForm(Q,11));
+g := GA_qf!Ip;
+d := n * g;
+ 
+ l1 := Log(g, d : 
+       BSGSStepWidth := Floor((-Dk)^(1/4)/2));
+ 
+ l2 := Log(g, d : 
+       AlInPohligHellmanLoop := "PollardRho");
+ 
+ l3 := Log(g, d : ComputeGroupOrder := false);
+ 
+ l4 := Log(g, d: ComputeGroupOrder := false, 
+       BSGSStepWidth := Floor((-Dk)^(1/4)/2));
+ 
+assert l1 eq l2 and l2 eq l3 and l3 eq l4;
+ 
+assert IsDivisibleBy(n - l1, Order(g));

@@ -1,0 +1,224 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Triangle Groups</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1562.htm">[Next]</A><A  HREF = "text1566.htm">[Prev]</A> <A  HREF = "text1562.htm">[Right]</A> <A  HREF = "text1566.htm">[Left]</A> <A  HREF = "text1563.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "17574">Triangle Groups</A></H3>
+
+<P>
+<P>
+We now look at a certain class of arithmetic Fuchsian groups of particular interest.  We assume that &Gamma;(1) is a <I>triangle group</I>, i.e. &Gamma; has signature (0;p, q, r) for p, q, r &isin;Z_&ge;2.  Hence there exists a presentation
+ &Gamma;(1) isomorphic to &lt; &gamma;<sub>p</sub>, &gamma;<sub>q</sub>, &gamma;<sub>r</sub> | &gamma;<sub>p</sub><sup>p</sup>=&gamma;<sub>q</sub><sup>q</sup>=&gamma;<sub>r</sub><sup>r</sup>=&gamma;<sub>p</sub> &gamma;<sub>q</sub> &gamma;<sub>r</sub>=1 &gt;. 
+Since g=0, there exists a map j from X(1)<sub>C</sub> to the projective line over C which is ramified only above the three <I>elliptic points</I>, the fixed points of &gamma;<sub>p</sub>, &gamma;<sub>q</sub>, &gamma;<sub>r</sub>, which we may take to be 0, 1, &infin;.  
+<P>
+There are only finitely many such triples (p, q, r), and we have implemented a constructor for these triples which yields the group &Gamma; as well as the arithmetic data including the maximal order O and the quaternion algebra A.  We also compute the analytic map j for each of these groups, which includes methods for evaluating the ()<sub>2</sub> F<sub>1</sub>-hypergeometric series to extremely high precision at complex arguments.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1567.htm#17575">Creation of Triangle Groups</A>
+<LI> <A  HREF = "text1567.htm#17579">Fundamental Domain</A>
+<LI> <A  HREF = "text1567.htm#17581">CM Points</A>
+</UL>
+<H4><A NAME = "17575">Creation of Triangle Groups</A></H4>
+
+<P>
+<P>
+We begin with the basic constructors.
+
+
+<H5><A NAME = "17576">ArithmeticTriangleGroup(p,q,r) : RngIntElt, RngIntElt, RngIntElt -&gt; GrpPSL2, Rng</A></H5>
+<BLOCKQUOTE>
+Returns the arithmetic triangle group of signature (p, q, r).
+</BLOCKQUOTE>
+<H5><A NAME = "17577">AdmissableTriangleGroups() : -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Returns the list of arithmetic triangle groups currently implemented.
+</BLOCKQUOTE>
+<H5><A NAME = "17578">IsTriangleGroup(G) : GrpPSL2 -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if G was created as an arithmetic triangle group.
+</BLOCKQUOTE>
+<H4><A NAME = "17579">Fundamental Domain</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+
+
+<H5><A NAME = "17580">ReduceToTriangleVertices(G,z) : GrpPSL2, SpcHypElt -&gt; SpcHypElt</A></H5>
+<BLOCKQUOTE>
+Returns points in the G-orbit of z which are nearest to the vertices
+of the fundamental domain for G a triangle group.
+<P>
+</BLOCKQUOTE>
+<H4><A NAME = "17581">CM Points</A></H4>
+
+<P>
+<P>
+For triangle groups, we can compute CM points analytically.  By work of Shimura, the curve X(1) has an interpretation as a moduli space for certain abelian varieties and has a canonical model defined over Q.  Let K be a totally imaginary quadratic extension of F, and let O<sub>D</sub> &sub;K be a quadratic order.  Suppose that K splits A, i.e. A tensor <sub>F</sub> K isomorphic to M<sub>2</sub>(K).  Then there exists an embedding &iota;<sub>K</sub>:K -&gt; A such that &iota;<sub>K</sub>(K) &cap;O= O<sub>D</sub>, given by an element &mu; &isin;O such that Z<sub>F</sub>[&mu;] is isomorphic to O<sub>D</sub>.  The unique fixed point of &iota;_&infin;(&mu;) in Hh yields a <I>CM point</I> on X(1) that is defined over an abelian extension H of F, and there is a reciprocity law which describes the action of Gal(H/K).  
+<P>
+We exhibit algorithms for computing with these objects.  Explicitly, given the data of a quadratic order O<sub>D</sub> contained in a imaginary quadratic extension K of F, we compute the set of Gal(H/K)-conjugates of a CM-point for O<sub>D</sub> on X(1).  Our algorithm first computes representatives for the ring class group in terms of the Artin map.  It then applies the Shimura reciprocity law for each of these representatives, which uses our architecture for principalization of ideals of quaternionic orders, to compute the conjugates.  Given these points to high enough precision, we can recognize the CM point as a putative algebraic number.
+
+
+<H5><A NAME = "17582">HypergeometricSeries2F1(A,B,C,z) : FldRatElt, FldRatElt, FldRatElt, FldComElt -&gt; FldComElt</A></H5>
+<BLOCKQUOTE>
+Returns the value of the 2F1-hypergeometric function with parameters
+(A, B; C) at the complex number z.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17583">Example <TT>GrpPSL2Shim_Hypergeometric2F1 (H137E8)</TT></A></H3>
+<P>
+Although programmed for use by the hypergeometric reversion procedure,
+involved in the calculation of CM points, the <TT>HypergeometricSeries2F1</TT>
+function can also be called independently to evaluate the series at
+any complex number at any precision.
+<P>
+<P>
+<P>
+<PRE>
+&gt; HypergeometricSeries2F1(1/2, 1/2, 1, 1);
+0.318309886183790671537767526745
+&gt; CC&lt;I&gt; := ComplexField(100);
+&gt; HypergeometricSeries2F1(1/2, 1/3, 1/4, 1+I);
+0.18914889986718938009890989889270323251621296927695426144398500333164293730405
+56591516921868997204819 + 1.351650001102608291803842169004281639952000005458282
+770553462137814965580416670112464388872621926752*I
+</PRE>
+<HR>
+<H5><A NAME = "17584">ShimuraConjugates(mu) : AlgAssVOrdElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Returns the set of conjugates of the quaternion order element &mu; under the Shimura reciprocity law.
+</BLOCKQUOTE>
+<H5><A NAME = "17585">jParameter(G,z) : GrpPSL2, SpcHypElt -&gt; FldComElt, SeqEnum</A></H5>
+
+<PRE>    Bound: RngIntElt                    Default: 200</PRE>
+
+<PRE>    Precision: RngIntElt                Default: 100</PRE>
+<BLOCKQUOTE>
+Returns the value of the map j:X(G) to P<sup>1</sup> at z, for G an 
+arithmetic triangle group.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17586">Example <TT>GrpPSL2Shim_Triangle239CMPoints1 (H137E9)</TT></A></H3>
+We begin by constructing the (2, 3, 9)-triangle group.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := ArithmeticTriangleGroup(2,3,9);
+&gt; O := BaseRing(G);
+&gt; Z_F := BaseRing(O);
+</PRE>
+<P>
+Next, we compute the CM point corresponding to the imaginary quadratic extension K/F of discriminant -7.  First, we define the extension.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Z_K := ext&lt;Z_F | Polynomial([2,-1,1])&gt;;
+&gt; Discriminant(Z_K);
+Principal Ideal of Z_F
+Generator:
+    [-7, 0, 0]
+&gt; IsMaximal(Z_K);
+true
+&gt; ClassNumber(AbsoluteOrder(Z_K));
+1
+</PRE>
+<P>
+Since Z<sub>K</sub> has class number 1, the corresponding CM point will be a rational number.  We now embed Z<sub>K</sub> into O.
+<P>
+<P>
+<P>
+<PRE>
+&gt; mu := Embed(Z_K, O);
+&gt; MinimalPolynomial(mu);
+$.1^2 - $.1 + 2/1*Z_F.1
+</PRE>
+<P>
+Finally, we compute the fixed point z of &mu; in the upper half-plane, and compute the value of the uniformizing parameter j(z).
+<P>
+<P>
+<P>
+<PRE>
+&gt; z := FixedPoints(G!mu, UpperHalfPlane())[1];
+&gt; j := jParameter(G, z);
+&gt; j;
+-9594.7031249999999999999999999999999999999999999999999999999999999999999999999
+99808271268634492545541 - 8.607499388211909042811249895070271789213361939086074
+091584429508486426059712018492327398804638684615E-77*I
+&gt; BestApproximation(Re(j), 10^50);
+-614061/64
+&gt; Factorization(Numerator($1)), Factorization(Denominator($1));
+[ &lt;3, 5&gt;, &lt;7, 1&gt;, &lt;19, 2&gt; ]
+[ &lt;2, 6&gt; ]
+</PRE>
+We recognize the value j(z)=(3<sup>5</sup> 7<sup>1</sup> 19<sup>2</sup> /2<sup>6</sup>)  as a smooth rational number.
+<HR>
+<H5><A NAME = "17587">CMPoints(G,mu) : GrpPSL2, AlgAssVOrdElt -&gt; RngUPolElt, SeqEnum</A></H5>
+<BLOCKQUOTE>
+Returns the minimal polynomial of the Galois conjugates of the CM points 
+corresponding to &mu; and their complex values for G a triangle group.
+The element &mu; must be Galois-stable, i.e. F(&mu;) must be Galois
+over F, where F is the defining base field of G.
+The polynomial returned is the "best guess" rational approximation to the 
+polynomial with the CM points as roots.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17588">Example <TT>GrpPSL2Shim_Triangle239CMPoints2 (H137E10)</TT></A></H3>
+We now compute the minimal polynomial for CM points which generate a nontrivial extension: we again take the (2, 3, 9)-triangle group and now consider K of discriminant -11.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := ArithmeticTriangleGroup(2,3,9);
+&gt; O := BaseRing(G);
+&gt; Z_F := BaseRing(O);
+&gt; Z_K := ext&lt;Z_F | Polynomial([3,-1,1])&gt;;
+&gt; Discriminant(Z_K);
+Principal Ideal of Z_F
+Generator:
+    [-11, 0, 0]
+&gt; IsMaximal(Z_K);
+true
+&gt; ClassNumber(AbsoluteOrder(Z_K));
+3
+&gt; mu := Embed(Z_K, O);
+&gt; time f, js := CMPoints(G, mu);
+Time: 18.120
+&gt; f;
+-127332762814175510528*x^3 + 297798194745682427904*x^2 - 545543748833233386651*x
+    + 443957770932571793051
+</PRE>
+<P>
+The number field H=K(&alpha;), where &alpha; is a root of f, is the
+Hilbert class field of K, which we have computed analytically!
+<P>
+<P>
+<P>
+<PRE>
+&gt; D := Discriminant(f);
+&gt; Denominator(D);        
+1
+&gt; Factorization(Numerator(D));
+[ &lt;2, 32&gt;, &lt;3, 18&gt;, &lt;11, 1&gt;, &lt;17, 6&gt;, &lt;19, 12&gt;, &lt;73, 2&gt;, &lt;107, 6&gt;, &lt;109, 2&gt;,
+&lt;197, 2&gt;, &lt;271, 2&gt;, &lt;431, 2&gt;, &lt;701, 2&gt; ]
+&gt; K := AbsoluteField(NumberField(Z_K));
+&gt; H := ext&lt;K | f&gt;;
+&gt; Factorization(Discriminant(MaximalOrder(H)));
+[]
+&gt; IsAbelian(GaloisGroup(H));
+true
+</PRE>
+<PRE></PRE> <A  HREF = "text1562.htm">[Next]</A><A  HREF = "text1566.htm">[Prev]</A> <A  HREF = "text1562.htm">[Right]</A> <A  HREF = "text1566.htm">[Left]</A> <A  HREF = "text1563.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

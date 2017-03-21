@@ -1,0 +1,17 @@
+{
+  automorphisms.m
+  bosma.m
+  fldfunrat.m
+  iLLL.m
+  invariants.m
+  lagrange.m
+  local.m
+  models.m
+  nice_qa.m
+  points.m
+  reduction.m
+  simon.m
+  solution.m
+  subfield.m
+  transform.m
+}

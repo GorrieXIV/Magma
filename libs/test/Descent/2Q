@@ -1,0 +1,68 @@
+
+SetVerbose("ClassGroup",0);
+SetVerbose("Conic",0);
+SetVerbose("Selmer",2);
+SetVerbose("TwoDescent",2);
+
+SetClassGroupBounds("GRH");
+
+CDB := CremonaDatabase();
+
+NUM := 100;
+N0  := 11;
+
+printf "\nTesting %o curves starting from conductor %o\n\n", NUM, N0;
+
+// ProStart();
+
+Q  := Rationals();
+QQ := RationalsAsNumberField();
+
+N := N0;
+n := 0;
+
+while n lt NUM and N le LargestConductor(CDB) do
+ 
+    if NumberOfIsogenyClasses(CDB, N) eq 0 then
+        N +:= 1;
+        continue;
+    end if;
+
+    printf "\n\n\nN = %o, SEED: ", N; GetSeed();
+
+    C := Coefficients(EllipticCurve(CDB, N, 1, 1));
+
+    EQ := EllipticCurve(C);
+    EQQ := EllipticCurve(ChangeUniverse(C, QQ));
+
+    time
+    TDQ := TwoDescent(EQ : RemoveTorsion);
+    time
+    TDQQ := TwoDescent(EQQ : RemoveTorsion);
+
+    print #TDQ;
+    assert #TDQ eq #TDQQ;
+
+    time
+    TDQ := TwoDescent(EQ);
+    time
+    TDQQ := TwoDescent(EQQ);
+
+    print #TDQ;
+    assert #TDQ eq #TDQQ;
+
+    G1Q := [GenusOneModel(C2) : C2 in TDQ]; 
+    G1QQ := [GenusOneModel(ChangeRing(C2,Q)) : C2 in TDQQ]; 
+    G1Q := [GenusOneModel(C2) : C2 in TDQ]; 
+    G1QQ := [GenusOneModel(ChangeRing(C2,Q)) : C2 in TDQQ]; 
+
+    for C2 in G1Q do
+        assert #{X : X in G1QQ | IsEquivalent(C2, X)} eq 1;
+    end for;
+    
+    N +:= 1;
+    n +:= 1;
+
+end while;
+
+// ProShow(40);

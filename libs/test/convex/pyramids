@@ -1,0 +1,60 @@
+/////////////////////////////////////////////////////////////////////////
+// pyramids
+// $Revision: 47235 $
+// $Date: 2014-05-26 11:51:59 +1000 (Mon, 26 May 2014) $
+// $LastChangedBy: donnelly $
+/////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////
+// Pyramids
+/////////////////////////////////////////////////////////////////////////
+"------\nPyramids\n";
+
+function random_basis(d,k)
+    success:=false;
+    while not success do
+        M:=Matrix(d,d,[Random(-k,k) : i in [1..d^2]]);
+        success:=Abs(Determinant(M)) eq 1;
+    end while;
+    return M;
+end function;
+
+function random_point(L,k)
+    return L ! [Random(-k,k) : i in [1..Dimension(L)]];
+end function;
+
+procedure test_pyramid(dim)
+repeat
+    P:=Pyramid(RandomPolytope(dim,dim + 2,6)) * random_basis(dim + 1,5);
+    P +:= random_point(Ambient(P),6);
+    bool,apex,base,phi,v:=IsPyramid(P);
+    assert bool;
+    Q:=Image(phi,P) + v;
+    assert IsEquivalent(Q,P);
+    assert phi(apex) + v eq Ambient(P).1;
+    base,_,vv:=PolyhedronInSublattice(Image(phi,base) + v);
+until Dimension(Pyramid(base)) eq Dimension(Ambient(Q));
+    QQ:=ChangeAmbient(Pyramid(base),Ambient(Q));
+    assert IsEquivalent(Q,QQ);
+    assert Q eq QQ - vv;
+    assert (Q - v) @@ phi eq P;
+end procedure;
+
+t:=Cputime();
+n:=5;
+maxdim:=5;
+for d in [2..maxdim] do
+    for i in [1..n] do
+        test_pyramid(d);
+    end for;
+end for;
+t:=Cputime(t);
+printf "Avrg Time: %os\n",t / (n * (maxdim - 1));
+
+/////////////////////////////////////////////////////////////////////////
+// Finally, clear the caches
+/////////////////////////////////////////////////////////////////////////
+"------\nClearing caches\n";
+
+CacheClearToricVariety();
+CacheClearToricLattice();

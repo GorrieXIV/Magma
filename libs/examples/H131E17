@@ -1,0 +1,32 @@
+"Source: Text/Geometry/CrvHyp.text";
+"Line: 2799";
+"Date: Wed Jun  8 17:42:16 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/CrvHyp.text, line: 2799
+// Example: H131E17 ()
+print "Example: H131E17";
+ei := GetEchoInput();
+SetEchoInput(true);
+R<x>:=PolynomialRing(Rationals());
+C:=HyperellipticCurve(x^5+x);
+J:=Jacobian(C);
+RichelotIsogenousSurfaces(J);
+codomains,kernels:=RichelotIsogenousSurfaces(J:Kernels);
+Q:=kernels[1];
+LX<X>:=Parent(Q);
+L<alpha>:=BaseRing(LX);
+Q;
+L;
+_,swp:=SwapExtension(LX);
+Norm(swp(Q));
+codomains[1] eq RichelotIsogenousSurface(J,Q);
+assert $1;
+LC:=LSeries(C : LocalData:="Ogg");
+myL:=func< A|  
+    case<Type(A) | SetCart : LSeries(A[1])*LSeries(A[2]),
+                   JacHyp  : LSeries(Curve(A) : LocalData:="Ogg"),
+                   CrvEll  : LSeries(A),
+                   default : false>>;
+cfs:=[c: c in LGetCoefficients(LC,1000)];
+[[c: c in LGetCoefficients(myL(A),1000)] eq cfs : A in codomains];
+SetEchoInput(ei);

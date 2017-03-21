@@ -1,0 +1,33 @@
+/* test rewriting for non-natural irreducible repns of OmegaPlus */
+
+import "../recognition/standard.m": SOChosenElements;
+SetEchoInput (true);
+
+fct := SymmetricPower;
+fct := ExteriorPower;
+power := 2;
+for d in [3..10 by 2] do
+for q in [2,3,4,5,7,8,9,11,13,16,25,27,32] do 
+G := Omega(d, q);
+MA := MatrixAlgebra (GF(q), d);
+QQ := SOChosenElements(G);
+Q := [fct(MA!QQ[i], power): i in [1..#QQ]];
+n := Nrows(Q[1]);
+if n eq 0 then continue; end if;
+Q := [GL(n, q) ! x : x in Q];
+if d eq 3 then Q[4] := Q[3]; end if;
+A := Random(GL(n, q));
+Q := Q^A;
+E := sub<GL(n, q)|Q>;
+qq := q;
+if IsIrreducible (E) then 
+   for i in [1..50] do
+      d, q, i;
+       g:=Random (E);
+      f,w:= int_OmegaCircleAltRepWordInGen (E, Q, g,d, qq);
+     x:=Evaluate (w, Q);
+    assert x eq g;
+   end for;
+end if;
+end for;
+end for;

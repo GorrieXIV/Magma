@@ -1,0 +1,51 @@
+"Source: Text/Geometry/HypGeomMot.text";
+"Line: 856";
+"Date: Wed Jun  8 14:02:19 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/HypGeomMot.text, line: 856
+// Example: H132E7 ()
+print "Example: H132E7";
+ei := GetEchoInput();
+SetEchoInput(true);
+f := CyclotomicPolynomial(5); g := CyclotomicPolynomial(1)^4;
+H := HypergeometricData(f,g : Print:="alpha_beta");
+H, Weight(H); // weight 3
+t := 11^5; // 11 is now good, as is raised to 5th power
+T := PolynomialRing(Rationals()).1;
+f2 := (1-T+8*T^2)*(1+2*T); // could have Magma compute these
+f3221 := (1-76362*T+3221^3*T^2)*(1-3221*T); // wt 4 lev 25
+// degree 4 factor at 11 comes from Grossencharacter
+// in fact, this is the t=0 deformation: sum_i x_i^5 = 0
+K<z5> := CyclotomicField(5);
+p5 := Factorization(5*Integers(K))[1][1]; // ramified
+G := HeckeCharacterGroup(p5^2);
+psi := Grossencharacter(G.0,[[3,0],[1,2]]);
+f11 := EulerFactor(LSeries(psi),11 : Integral); f11;
+BP := [<2,1,f2>,<5,4,1>,<11,0,f11>,<3221,1,f3221>];
+L := LSeries(H,t : BadPrimes:=BP);
+Conductor(L); // 2*5^4*3221, 5^4 is somewhat guessed
+assert $1 eq 4026250;
+LSetPrecision(L,5);
+LCfRequired(L); // approx with old CheckFunctionalEquation
+time CFENew(L); // actually needs much fewer now
+EulerFactor(H,t,11); // tame
+EulerFactor(H,t,2); // multiplicative
+EulerFactor(H,t,3221); // multiplicative
+MValue(H); // 5^5;
+t := 11^5/5^5;
+f5 := EulerFactor(H,t,5 : Fake); // v_5(Mt)=0
+f5;
+L := LSeries(H,t : BadPrimes:=[<5,0,f5>]);
+Conductor(L); // 2*3*26321, Magma computes Euler factors
+assert $1 eq 157926;
+LSetPrecision(L,9); // about 4000 terms
+CFENew(L);
+t := -11^5/5^5; // another choice with v_5(Mt)=0
+f5 := EulerFactor(H,t,5 : Fake); // v_5(Mt)=0
+f5; // four possible Euler factors, one for each Mt mod 5
+L := LSeries(H,t : BadPrimes:=[<5,0,f5>]);
+Conductor(L); // 2*31*331, Magma computes Euler factors
+assert $1 eq 20522;
+LSetPrecision(L,9); // about 1300 terms
+CFENew(L);
+SetEchoInput(ei);

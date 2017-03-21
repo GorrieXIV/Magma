@@ -1,0 +1,191 @@
+function RandomPrimeIdeal(R)
+    if Type(R) in {RngOrd, RngQuad, RngCyc, RngFunOrd} then
+        p := RandomPrimeIdeal(CoefficientRing(R));
+        ps := Decomposition(R, p);
+        if Type(R) in {RngOrd, RngQuad, RngCyc} then
+            return ps[i][1] where i is Random([1 .. #ps]);
+        else
+            return ps[i] where i is Random([1 .. #ps]);
+        end if;
+    elif Type(R) eq  RngInt then
+        return RandomPrime(10);
+    elif Type(R) eq RngUPol then
+        if Characteristic(R) eq 0 then
+            return R!ChangeUniverse(Eltseq(RandomPrimePolynomial(PolynomialRing(GF(NextPrime(100))), 3)), Integers());
+        else
+            return RandomPrimePolynomial(R, 3);
+        end if;
+    elif Type(R) eq RngVal then
+        return R!(1/FieldOfFractions(R).1);
+    end if;
+
+end function;
+
+function RandomIdeal(R)
+//{Returns an ideal which is a random product of some random prime ideals}
+
+    if Type(R) notin {RngOrd, RngQuad, RngCyc, RngFunOrd} then
+        error "Ring must be an order of a number field or a function field";
+    end if;
+
+    r := Random(1, 3);
+
+    I := 1*R;
+    for i in [1 .. r] do
+        I := I*RandomPrimeIdeal(R)^Random(1, 3);
+    end for;
+
+    return I;
+
+end function;
+
+P<x> := PolynomialRing(Integers());
+O := MaximalOrder(x^5 + 3);
+I := RandomIdeal(O);
+Q := quo<O | I>;
+Q;
+
+assert Modulus(Q) eq I;
+UnitGroup(Q);
+assert IsOne(Q!1);
+assert IsMinusOne(Q!-1);
+
+for i in [1 .. 1000] do
+    a := Random(Q);
+    b := Random(Q);
+
+    assert a + b eq b + a;
+    assert a*b  eq b*a;
+    assert -(-a) eq a;
+    assert b - a eq -(a-b);
+    assert a^3 eq a*a*a;
+    if not IsZero(a) and b ne 0 then
+	if IsUnit(a) and IsUnit(b) then
+	    assert a/b*O+I eq (b/a)^-1*O+I;
+	    assert (a div b) * b + a mod b eq a;
+	    q, r := Quotrem(a, b);
+	    assert a eq q*b + r;
+	end if;
+
+	/* This is boring if a and b are units */
+	assert a*b*O + I eq GCD(a, b) * LCM(a, b) * O + I;
+	//assert IsUnit(a*b/GCD(a, b) / LCM(a, b));
+	g, f, h := XGCD(a, b);
+	assert g eq f*a + h*b;
+
+	assert Q!(O!a mod I) eq a;
+	assert Q!(O!b mod I) eq b;
+    end if;
+
+    assert Q!Eltseq(a) eq a;
+    assert Q!Eltseq(b) eq b;
+
+    EuclideanNorm(a);
+    EuclideanNorm(b);
+    assert Annihilator(a)*a eq 0;
+    assert IsZero(Annihilator(b)*b);
+end for;
+
+co, m := IsCoercible(Integers(), TwoElement(I));
+if co then 
+    fact := Factorization(m);
+    if #fact eq 1 and fact[1][2] ne 1 then
+	nu := fact[1][1];
+    elif #fact gt 1 then
+	nu := &*[f[1] : f in fact[1 .. #fact-1]];
+    end if;
+    if assigned nu then
+	assert not IsUnit(nu);
+	for i in [1 .. 100] do
+	    repeat
+		a := Random(Q);
+		b := Random(Q);
+	    until not IsZero(nu*a*b);
+	assert nu*a*b*O + I eq GCD(nu*a, b) * LCM(nu*a, b) * O + I;
+	//assert IsUnit(nu*a*b/GCD(nu*a, b) / LCM(nu*a, b));
+	assert a*nu*b*O + I eq GCD(a, nu*b) * LCM(a, nu*b) * O + I;
+	//assert IsUnit(a*nu*b/GCD(a, nu*b) / LCM(a, nu*b));
+	assert nu*a*nu*b*O + I eq GCD(nu*a, nu*b) * LCM(nu*a, nu*b) * O + I;
+	//assert IsUnit(nu*a*nu*b/GCD(nu*a, nu*b) / LCM(nu*a, nu*b));
+	g, f, h := XGCD(nu*a, b);
+	assert g eq f*nu*a + h*b;
+	g, f, h := XGCD(a, nu*b);
+	assert g eq f*a + h*nu*b;
+	g, f, h := XGCD(nu*a, nu*b);
+	assert g eq f*nu*a + h*nu*b;
+	end for;
+    end if;
+end if;
+
+OO := MaximalOrder(ext<O | Polynomial([O.2, 5, O.3 , 1])>);
+I := RandomIdeal(OO);
+QQ := quo<OO | I>;
+
+assert Modulus(QQ) eq I;
+assert IsOne(QQ!1);
+assert IsMinusOne(QQ!-1);
+
+for i in [1 .. 250] do
+    a := Random(QQ);
+    b := Random(QQ);
+
+    assert a + b eq b + a;
+    assert a*b  eq b*a;
+    assert -(-a) eq a;
+    assert b - a eq -(a-b);
+    assert a^3 eq a*a*a;
+    if not IsZero(a) and b ne 0 then
+	if IsUnit(a) and IsUnit(b) then
+	    assert a/b*OO+I eq (b/a)^-1*OO+I;
+	    assert ((a div b) * b + a mod b)*OO+I eq a*OO+I;
+	    q, r := Quotrem(a, b);
+	    assert a*OO+I eq (q*b + r)*OO+I;
+	end if;
+
+	assert a*b*OO + I eq GCD(a, b) * LCM(a, b) * OO + I;
+	//assert IsUnit(a*b/GCD(a, b) / LCM(a, b));
+	g, f, h := XGCD(a, b);
+	assert f*a*OO + h*b*OO + I eq g*OO+I; 
+
+	assert QQ!(OO!a mod I) eq a;
+	assert QQ!(OO!b mod I) eq b;
+    end if;
+
+    assert QQ!Eltseq(a) eq a;
+    assert QQ!Eltseq(b) eq b;
+
+    EuclideanNorm(a);
+    EuclideanNorm(b);
+    assert Annihilator(a)*a eq 0;
+    assert IsZero(Annihilator(b)*b);
+end for;
+
+co, m := IsCoercible(Integers(), TwoElement(Modulus(QQ)));
+if co then 
+    fact := Factorization(m);
+    if #fact eq 1 and fact[1][2] ne 1 then
+	nu := fact[1][1];
+    elif #fact gt 1 then
+	nu := &*[f[1] : f in fact[1 .. #fact-1]];
+    end if;
+    if assigned nu then
+	assert not IsUnit(nu);
+	for i in [1 .. 100] do
+	a := Random(QQ);
+	b := Random(QQ);
+	assert nu*a*b*OO + I eq GCD(nu*a, b) * LCM(nu*a, b) * OO + I;
+	//IsUnit(nu*a*b/GCD(nu*a, b) / LCM(nu*a, b));
+	assert a*nu*b*OO + I eq GCD(a, nu*b) * LCM(a, nu*b) * OO + I;
+	//IsUnit(a*nu*b/GCD(a, nu*b) / LCM(a, nu*b));
+	assert nu*a*nu*b*OO + I eq GCD(nu*a, nu*b) * LCM(nu*a, nu*b) * OO + I;
+	//IsUnit(nu*a*nu*b/GCD(nu*a, nu*b) / LCM(nu*a, nu*b));
+	g, f, h := XGCD(nu*a, b);
+	assert f*nu*a*OO + h*b*OO+I eq g*OO+I; 
+	//Order(Modulus(Parent(g))), f, a, h, b;
+	g, f, h := XGCD(a, nu*b);
+	assert g*OO+I eq f*a*OO + h*nu*b*OO+I;
+	g, f, h := XGCD(nu*a, nu*b);
+	assert f*nu*a*OO + h*nu*b*OO+I eq g*OO+I; 
+    end for;
+    end if;
+end if;

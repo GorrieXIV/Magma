@@ -1,0 +1,58 @@
+"Source: Text/Incidence/MultiGraph.text";
+"Line: 3433";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Incidence/MultiGraph.text, line: 3433
+// Example: H156E11 ()
+print "Example: H156E11";
+ei := GetEchoInput();
+SetEchoInput(true);
+G := MultiGraph< 4 | {1, 2}, {1, 2}, {1, 3}, {2, 3}, {2, 4}, {3, 4}>;
+IsPlanar(G);
+assert $1;
+Faces(G);
+F := {@ SequenceToSet(f) : f in Faces(G) @};
+D := MultiGraph< #F | >;
+mapG2D := [ 0 : i in [1..Max(Indices(G))] ];
+mapD2G := [ 0 : i in [1..Max(Indices(G))] ];
+for u in VertexSet(D) do
+    for v in VertexSet(D) do
+       if Index(v) le Index(u) then
+          continue;
+       end if;
+       M := F[ Index(u) ] meet F[ Index(v) ];
+       for e in M do
+          D, edge :=
+          AddEdge(D, VertexSet(D)!u, VertexSet(D)!v);
+
+          mapG2D[Index(e)] := Index(edge);
+          mapD2G[Index(edge)] := Index(e);
+       end for;
+    end for;
+end for;
+
+e_star := map< EdgeSet(G) -> EdgeSet(D) |
+x :-> EdgeSet(D).mapG2D[Index(x)],
+y :-> EdgeSet(G).mapD2G[Index(y)] >;
+for e in EdgeSet(G) do
+    e, "   ", e @ e_star;
+end for;
+for e in EdgeSet(D) do
+    e, "   ", e @@ e_star;
+end for;
+IsBiconnected(G);
+assert $1;
+for f in F do
+    Cut := { e @ e_star : e in f };
+    H := D;
+    RemoveEdges(~H, Cut);
+    assert not IsConnected(H);
+
+    for e in Cut do
+       C := Exclude(Cut, e);
+       H := D;
+       RemoveEdges(~H, C);
+       assert IsConnected(H);
+    end for;
+end for;
+SetEchoInput(ei);

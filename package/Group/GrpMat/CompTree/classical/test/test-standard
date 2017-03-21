@@ -1,0 +1,192 @@
+/* test Elliot's rewriting code for natural copy of classical groups */
+import "../recognition/standard.m": 
+SLChosenElements, 
+SpChosenElements, 
+SUChosenElements, 
+PlusChosenElements,
+MinusChosenElements,
+SOChosenElements;
+
+SetVerbose ("STCS", 0);
+SetEchoInput (true);
+NmrElts := 50;
+
+for d in [2..10] do 
+    for q in [2,3,4,5,7,8,9, 16, 25, 27, 32] do 
+	d, q, "SL";
+	G:=SL (d, q);
+	for n in [1..NmrElts] do 
+	    g:=Random (G);
+	    flag, w := int_SLWordInGen (G, g);
+	    X := SLChosenElements (G);
+	    assert Evaluate (w, X) eq g;
+	end for;
+    end for;
+end for;
+
+import "../rewriting/symplectic.m": SymplecticCBM;
+
+for d in [4..12 by 2] do 
+    for q in [2, 3,4,5,7, 8, 9, 16, 25, 27, 32] do 
+	G:=Sp (d, q);
+	d, q, "SP";
+	for n in [1..NmrElts] do 
+	    g:=Random (G);
+	    flag, w := int_SymplecticWordInGen (G, g);
+	    CB := SymplecticCBM (G);
+	    X := SpChosenElements (G);
+	    assert CB * Evaluate (w, X) * CB^-1 eq g;
+	end for;
+    end for;
+end for;
+
+import "../rewriting/unitary.m": UnitaryCBM;
+
+NmrElts := 10;
+for d in [4..16 by 2] do
+    for q in [2,3, 4, 5,7, 8,9, 16, 25, 27, 32] do 
+	G:=SU (d, q);
+	d, q, "SU EVEN";
+	for n in [1..NmrElts] do 
+	    g:=Random (G);
+	    flag, w := int_UnitaryWordInGen (G, g);
+	    assert flag;
+	    CB := UnitaryCBM (G);
+	    X := SUChosenElements (G);
+	    assert CB * Evaluate (w, X) * CB^-1 eq g;
+	end for;
+    end for;
+end for;
+
+import "../rewriting/unitary_odd.m": UnitaryOddCBM;
+
+for d in [3..15 by 2] do
+    for q in [3,4,5,7, 8,9, 16,25, 27,32] do 
+	d, q, "SU ODD";
+	G:=SU (d, q);
+	for n in [1..NmrElts] do 
+	    g:=Random (G);
+	    flag, w := int_UnitaryWordInGen (G, g);
+	    assert flag;
+	    CB := UnitaryOddCBM (G);
+	    X := SUChosenElements (G);
+	    assert CB * Evaluate (w, X) * CB^-1 eq g;
+	end for;
+    end for;
+end for;
+
+import "../rewriting/orth_plus.m": OmegaCBM;
+
+NmrElts := 20;
+for d in [2..12 by 2] do
+    for q in [2,3,4, 5,7, 8, 9, 16, 25, 27, 32] do 
+	G:=OmegaPlus (d, q);
+	d, q, "OPLUS";
+	for n in [1..NmrElts] do 
+	    g:=Random (G);
+	    flag, w := int_OmegaPlusWordInGen (G, g);
+	    assert flag;
+	    CB := OmegaCBM (G);
+	    X := PlusChosenElements (G);
+	    assert CB * Evaluate (w, X) *CB^-1 eq g;
+	end for;
+    end for;
+end for;
+
+for d in [2..16 by 2] do 
+    for q in [2, 3, 4, 5,7, 8, 9, 16, 25, 27, 32] do 
+	G:=SOPlus (d, q);
+	d, q, "SOPLUS";
+	for n in [1..NmrElts] do 
+	    g:=Random (G);
+	    flag, w := int_SOPlusWordInGen (G, g);
+	    assert flag;
+	    CB := OmegaCBM (G);
+	    X := PlusChosenElements (G : SpecialGroup:=true);
+	    assert CB * Evaluate (w, X) *CB^-1 eq g;
+	end for;
+    end for;
+end for;
+
+for d in [3..15 by 2] do
+    for q in [3,5,7, 9, 25, 27] do 
+	G:= RandomConjugate(Omega (d, q));
+	X := SOChosenElements (G : SpecialGroup:=false);
+	d, q, "OCIRCLE";
+	G := sub <GL(d, q) | X>;
+	for n in [1..NmrElts] do 
+	    g:=Random (G);
+	    flag, w := int_OmegaCircleWordInGen (G, g);
+	    assert flag;
+	    X := SOChosenElements (G : SpecialGroup:=true);
+	    if d eq 3 then  X[5] := X[4]; X[4] := X[4]^0; end if;
+	    assert Evaluate (w, X) eq g;
+	end for;
+    end for;
+end for;
+
+for d in [3..15 by 2] do
+    for q in [3,5,7, 9, 25, 27] do 
+	G:= RandomConjugate(SO (d, q));
+	X := SOChosenElements (G : SpecialGroup:=true);
+	d, q, "SOCIRCLE";
+	G := sub <GL(d, q) | X>;
+	for n in [1..NmrElts] do 
+	    g:=Random (G);
+	    flag, w := int_SOCircleWordInGen (G, g);
+	    assert flag;
+	    X := SOChosenElements (G : SpecialGroup:=true);
+	    if d eq 3 then  X[5] := X[4]; X[4] := X[4]^0; end if;
+	    assert Evaluate (w, X) eq g;
+	end for;
+    end for;
+end for;
+
+for d in [2..12 by 2] do
+for q in [2,3,4, 5,7,8,9, 16,25, 27, 32] do 
+G:=(OmegaMinus (d, q));
+
+X := MinusChosenElements (G: SpecialGroup := false);
+G := sub < GL(d, q) | X>;
+d, q, "OMINUS";
+
+for i in [1..NmrElts] do 
+g := Random (G);
+flag, w := int_OmegaMinusWordInGen (G, g);
+if IsOdd (q) and d gt 2 then 
+    X := MinusChosenElements (G: SpecialGroup := false);
+    if d eq 6 then X[5] := X[4]; end if;
+    if d eq 4 then
+       X[4] := X[3]^0; X[5] := X[3]^0;
+    end if;
+end if;
+assert Evaluate (w, X) eq g;
+end for;
+
+end for;
+end for;
+
+for d in [2..12 by 2] do
+for q in [2, 3,4, 5,7,8,9, 16,25, 27, 32] do 
+G:=(SOMinus (d, q));
+d, q, "SOMINUS";
+
+X := MinusChosenElements (G: SpecialGroup := true);
+assert Type (Parent (X[1])) eq GrpMat;
+G := sub <GL(d, q) | X>;
+
+for i in [1..NmrElts] do 
+g := Random (G);
+flag, w := int_SOMinusWordInGen (G, g);
+if IsOdd (q) and d gt 2 then 
+    X := MinusChosenElements (G: SpecialGroup:=true);
+    if d eq 6 then X[6] := X[5]; X[5] := X[4]; end if;
+    if d eq 4 then
+       X[6] := X[4]; X[5] := X[3]^0; X[4] := X[5];
+    end if;
+end if;
+assert Evaluate (w, X) eq g;
+end for;
+
+end for;
+end for;

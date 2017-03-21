@@ -1,0 +1,587 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Conjugacy Classes of  Subgroups</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text624.htm">[Next]</A><A  HREF = "text622.htm">[Prev]</A> <A  HREF = "text624.htm">[Right]</A> <A  HREF = "text622.htm">[Left]</A> <A  HREF = "text612.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "6803">Conjugacy Classes of  Subgroups</A></H3>
+
+<P>
+<P>
+Magma contains a new algorithm for computing representatives of the
+conjugacy classes of subgroups. Let R denote the maximal normal 
+soluble subgroup of the finite group G. The algorithm first constructs 
+representatives for the conjugacy classes of subgroups of Q = G/R, and 
+then successively extends these to larger and larger quotients of G 
+until G itself is reached. If G is soluble, then Q is trivial and 
+so its subgroups are known. If G is non-soluble, 
+we attempt to locate the quotient in a 
+database of groups with trivial Fitting subgroup. This database contains
+all such groups of order up to 216 000, and all such which are 
+perfect of order
+up to 1 000 000. If Q is found then either all its subgroups,
+or its maximal subgroups are read from the database. (In some cases only 
+the maximal subgroups are stored.) If Q is not found then we attempt to
+find the maximal subgroups of Q using a method of Derek Holt. For this to
+succeed all simple factors of the socle of Q must be found in a second 
+database which currently contains all simple groups of order less than 
+1.6 x 10<sup>7</sup>, as well as M<sub>24</sub>, HS, J<sub>3</sub>,
+McL, Sz(32) and L<sub>6</sub>(2). There are also special routines to handle 
+numerous other groups. These include: A<sub>n</sub> for n &le;999, 
+L<sub>2</sub>(q), L<sub>3</sub>(q), L<sub>4</sub>(q) and L<sub>5</sub>(q) for all q,
+S<sub>4</sub>(q), U<sub>3</sub>(q) and U<sub>4</sub>(q) for all q, 
+L<sub>d</sub>(2) for d &le;14, and the following groups:
+L<sub>6</sub>(3), L<sub>7</sub>(3), U<sub>6</sub>(2), S<sub>8</sub>(2), S<sub>10</sub>(2),
+O<sup>&#8723;</sup><sub>8</sub>(2), O<sup>&#8723;</sup><sub>10</sub>(2), S<sub>6</sub>(3), O<sub>7</sub>(3), 
+O^ - <sub>8</sub>(3), G<sub>2</sub>(4), G<sub>2</sub>(5), ()<sup>3</sup>D<sub>4</sub>(2), ()<sup>2</sup>F<sub>4</sub>(2)',
+Co<sub>2</sub>, Co<sub>3</sub>, He, Fi<sub>22</sub>.
+<P>
+If we have only maximal subgroups of Q, and more are required, we apply
+the algorithm recursively to the maximal subgroups to determine all subgroups
+of Q. This may take some time.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text623.htm#6804">Conjugacy Classes of Subgroups</A>
+<LI> <A  HREF = "text623.htm#6818">The Poset of Subgroup Classes</A>
+</UL>
+<H4><A NAME = "6804">Conjugacy Classes of Subgroups</A></H4>
+
+<P>
+<P>
+In this section we describe the functions that allow a user to create
+representatives of the conjugacy classes of subgroups, possibly subject
+to conditions. The main function, <TT>Subgroups</TT>, finds representatives
+for conjugacy classes of subgroups subject to certain user-supplied 
+conditions on the order. The alternative functions 
+<TT>ElementaryAbelianSubgroups</TT> and <TT>AbelianSubgroups</TT>,
+<TT>CyclicSubgroups</TT>, <TT>NilpotentSubgroups</TT>, <TT>SolubleSubgroups</TT>,
+<TT>PerfectSubgroups</TT>, <TT>NonsolvableSubgroups</TT>, <TT>SimpleSubgroups</TT>
+and <TT>RegularSubgroups</TT> allow the user to construct particular
+classes of subgroups.
+<P>
+<P>
+Most of the features described in this section are currently only available
+for groups in the category <A  HREF = "text630.htm#GrpPerm"> <TT>GrpPerm</TT></A>, <A  HREF = "text654.htm#GrpMat"> <TT>GrpMat</TT></A> or <A  HREF = "text707.htm#GrpPC"> <TT>GrpPC</TT></A>.
+
+
+<H5><A NAME = "6805">SubgroupClasses(G: parameters) : GrpFin -&gt; [ rec&lt; Grp, RngIntElt, RngIntElt, GrpFP&gt; ]</A></H5>
+<H5>Subgroups(G: parameters) : GrpFin -&gt; [ rec&lt; Grp, RngIntElt, RngIntElt, GrpFP&gt; ]</H5>
+<H5>Subgroups(G, N: parameters) : GrpFin, GrpFin -&gt; [ rec&lt; Grp, RngIntElt, RngIntElt, GrpFP&gt; ]</H5>
+<BLOCKQUOTE>
+Representatives for the conjugacy classes of subgroups for the
+group G.
+If N is given, it must be a normal subgroup of G.
+The subgroups returned are subgroups of G containing N.
+The subgroups are returned as a sequence of records
+where the i-th record contains:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>A representative subgroup H for the i-th conjugacy 
+class (field name <TT>subgroup</TT>).
+<DT>(b)</DT><DD>The order of the subgroup (field name <TT>order</TT>).
+<DT>(c)</DT><DD>The number of subgroups in the class (field name <TT>length</TT>).
+<DT>(d)</DT><DD>[Optionally] A presentation for H (field name <TT>presentation</TT>).
+<P>
+<P>
+</DL>
+<PRE>
+     Presentation: BoolElt               Default: <TT>false</TT>
+</PRE>
+<TT>Presentation := true</TT>: In the case in which G is a permutation
+group, construct a presentation for each subgroup.
+<P>
+<P>
+<PRE>
+     OrderEqual: RngIntElt               Default: 
+</PRE>
+<TT>OrderEqual := n</TT>: Only construct subgroups having order equal to n.
+<P>
+<P>
+<PRE>
+     OrderDividing: RngIntElt            Default: 
+</PRE>
+<TT>OrderDividing := n</TT>: Only construct subgroups having order dividing n.
+<P>
+<P>
+<PRE>
+     IsNormal: BoolElt                   Default: <TT>false</TT>
+</PRE>
+<TT>IsNormal := true</TT>: Only construct normal subgroups.
+<P>
+<P>
+<PRE>
+     IsRegular: BoolElt                  Default: <TT>false</TT>
+</PRE>
+<TT>IsRegular := true</TT>: In the case in which G is a permutation
+group, only construct regular subgroups.
+<P>
+<P>
+<PRE>
+     LayerSizes: SeqEnum                 Default: see below
+</PRE>
+<TT>LayerSizes := [ 2, 5, 3, 4, 7, 3, 11, 2, 17, 1]</TT> is equivalent to
+the default. When constructing an Elementary Abelian series for the group,
+attempt to split 2-layers of size gt 2<sup>5</sup>, 3-layers of size gt 3<sup>4</sup>,
+etc. The implied exponent for 13 is 2 and for all primes greater than 17
+the exponent is 1.
+</BLOCKQUOTE>
+<H5><A NAME = "6806">ElementaryAbelianSubgroups(G: parameters) : GrpFin -&gt; [ rec&lt; Grp, RngIntElt, RngIntElt, GrpFP&gt; ]</A></H5>
+<BLOCKQUOTE>
+Representatives for the conjugacy classes of elementary abelian subgroups 
+for the group G. The subgroups are returned as a sequence of records
+having the same format as <TT>Subgroups</TT>. The optional parameters are
+also the same as for <TT>Subgroups</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "6807">AbelianSubgroups(G: parameters) : GrpFin -&gt; [ rec&lt; Grp, RngIntElt, RngIntElt, GrpFP&gt; ]</A></H5>
+<BLOCKQUOTE>
+Representatives for the conjugacy classes of abelian subgroups for the 
+group G. The subgroups are returned as a sequence of records having 
+the same format as <TT>Subgroups</TT>. The optional parameters are also
+the same as for <TT>Subgroups</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "6808">CyclicSubgroups(G: parameters) : GrpFin -&gt; [ rec&lt; Grp, RngIntElt, RngIntElt, GrpFP&gt; ]</A></H5>
+<BLOCKQUOTE>
+Representatives for the conjugacy classes of cyclic subgroups for the 
+group G. The subgroups are returned as a sequence of records having 
+the same format as <TT>Subgroups</TT>. The optional parameters are also
+the same as for <TT>Subgroups</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "6809">NilpotentSubgroups(G: parameters) : GrpFin -&gt; [ rec&lt; Grp, RngIntElt, RngIntElt, GrpFP&gt; ]</A></H5>
+<BLOCKQUOTE>
+Representatives for the conjugacy classes of nilpotent subgroups for the 
+group G. The subgroups are returned as a sequence of records having 
+the same format as <TT>Subgroups</TT>.  The optional parameters are also
+the same as for <TT>Subgroups</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "6810">SolubleSubgroups(G: parameters) : GrpFin -&gt; [ rec&lt; Grp, RngIntElt, RngIntElt, GrpFP&gt; ]</A></H5>
+<H5>SolvableSubgroups(G: parameters) : GrpFin -&gt; [ rec&lt; Grp, RngIntElt, RngIntElt, GrpFP&gt; ]</H5>
+<BLOCKQUOTE>
+Representatives for the conjugacy classes of solvable subgroups for the 
+group G. The subgroups are returned as a sequence of records having 
+the same format as <TT>Subgroups</TT>. The optional parameters are also
+the same as for <TT>Subgroups</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "6811">NonsolvableSubgroups(G: parameters) : GrpFin -&gt; [ rec&lt; Grp, RngIntElt, RngIntElt, GrpFP&gt; ]</A></H5>
+<BLOCKQUOTE>
+Representatives for the conjugacy classes of nonsolvable subgroups for the 
+group G. The subgroups are returned as a sequence of records having 
+the same format as <TT>Subgroups</TT>. The optional parameters are also
+the same as for <TT>Subgroups</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "6812">PerfectSubgroups(G: parameters) : GrpFin -&gt; [ rec&lt; Grp, RngIntElt, RngIntElt, GrpFP&gt; ]</A></H5>
+<BLOCKQUOTE>
+Representatives for the conjugacy classes of perfect subgroups for the 
+group G. The subgroups are returned as a sequence of records having 
+the same format as <TT>Subgroups</TT>. The optional parameters are also
+the same as for <TT>Subgroups</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "6813">SimpleSubgroups(G: parameters) : GrpFin -&gt; [ rec&lt; Grp, RngIntElt, RngIntElt, GrpFP&gt; ]</A></H5>
+<BLOCKQUOTE>
+Representatives for the conjugacy classes of non-abelian simple subgroups
+for the group G. The subgroups are returned as a sequence of records having 
+the same format as <TT>Subgroups</TT>. The optional parameters are also
+the same as for <TT>Subgroups</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "6814">RegularSubgroups(G: parameters) : GrpFin -&gt; [ rec&lt; Grp, RngIntElt, RngIntElt, GrpFP&gt; ]</A></H5>
+<BLOCKQUOTE>
+Representatives for the conjugacy classes of regular subgroups for the 
+permutation group G. The subgroups are returned as a sequence of records 
+having the same format as <TT>Subgroups</TT>. The optional parameters are also
+the same as for <TT>Subgroups</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "6815">SetVerbose("SubgroupLattice", i) : MonStgElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Turn on verbose printing for the subgroup algorithm.  The level
+i can be 2 for maximal printing or 1 for moderate printing.  The
+algorithm works down an elementary abelian series of the group and 
+at each level, the possible extensions of each subgroup are listed.
+</BLOCKQUOTE>
+<H5><A NAME = "6816">Class(G, H) : GrpFin, GrpFin -&gt; { GrpFin }</A></H5>
+<H5>Conjugates(G, H) : GrpFin, GrpElt -&gt; { GrpElt }</H5>
+<BLOCKQUOTE>
+The G-conjugacy class of subgroups containing the group H.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6817">Example <TT>Grp_Subgroups (H62E23)</TT></A></H3>
+We construct the conjugacy classes of subgroups for
+the dihedral group of order 12.
+<P>
+<P>
+<PRE>
+&gt; G := DihedralGroup(6);
+&gt; S := Subgroups(G);
+&gt; S;
+Conjugacy classes of subgroups
+------------------------------
+
+[ 1]    Order 1            Length 1
+        Permutation group acting on a set of cardinality 6
+        Order = 1
+          Id($)
+[ 2]    Order 2            Length 3
+        Permutation group acting on a set of cardinality 6
+          (2, 6)(3, 5)
+[ 3]    Order 2            Length 3
+        Permutation group acting on a set of cardinality 6
+          (1, 4)(2, 3)(5, 6)
+[ 4]    Order 2            Length 1
+        Permutation group acting on a set of cardinality 6
+          (1, 4)(2, 5)(3, 6)
+[ 5]    Order 3            Length 1
+        Permutation group acting on a set of cardinality 6
+          (1, 5, 3)(2, 6, 4)
+[ 6]    Order 4            Length 3
+        Permutation group acting on a set of cardinality 6
+          (2, 6)(3, 5)
+          (1, 4)(2, 5)(3, 6)
+[ 7]    Order 6            Length 1
+        Permutation group acting on a set of cardinality 6
+          (1, 5, 3)(2, 6, 4)
+          (1, 4)(2, 5)(3, 6)
+[ 8]    Order 6            Length 1
+        Permutation group acting on a set of cardinality 6
+          (2, 6)(3, 5)
+          (1, 5, 3)(2, 6, 4)
+[ 9]    Order 6            Length 1
+        Permutation group acting on a set of cardinality 6
+          (1, 4)(2, 3)(5, 6)
+          (1, 5, 3)(2, 6, 4)
+[10]    Order 12           Length 1
+        Permutation group acting on a set of cardinality 6
+          (2, 6)(3, 5)
+          (1, 5, 3)(2, 6, 4)
+          (1, 4)(2, 5)(3, 6)
+
+&gt; // We extract the representative subgroup for class 7
+&gt; h := S[7]`subgroup;
+&gt; h;
+Permutation group h acting on a set of cardinality 6
+    (1, 3, 5)(2, 4, 6)
+    (1, 4)(2, 5)(3, 6)
+</PRE>
+<HR>
+<H4><A NAME = "6818">The Poset of Subgroup Classes</A></H4>
+
+<P>
+<P>
+<P>
+In addition to finding representatives for conjugacy classes of
+subgroups, Magma allows the user to create the poset L of subgroup
+classes. The elements of the poset correspond to the conjugacy classes
+of subgroups. Two lattice elements a and b are joined by an edge if  
+either some subgroup of the conjugacy class a is a maximal subgroup
+of some subgroup of conjugacy class b or vice-versa. The elements 
+of L are called <I>subgroup-poset elements</I> and are numbered from 
+1 to n, where n is the cardinality of L. Various functions 
+allow the user to identify maximal subgroups, normalizers, centralizers 
+and other relatives in the lattice.
+Given an element e of L, one can easily create 
+the subgroup H of G corresponding to e and one can also create 
+the element of L corresponding to a subgroup of G.
+<P>
+<P>
+The features described in this section are currently only available
+for groups in the category <A  HREF = "text630.htm#GrpPerm"> <TT>GrpPerm</TT></A> or <A  HREF = "text707.htm#GrpPC"> <TT>GrpPC</TT></A>.
+
+
+<H5><A NAME = "6819">Creating the Poset of Subgroup Classes</A></H5>
+
+
+
+<H5><A NAME = "6820">SubgroupLattice(G) : GrpFin -&gt; SubGrpLat</A></H5>
+<BLOCKQUOTE>
+Create the poset L of subgroup classes of G.  
+<P>
+<P>
+<PRE>
+     Properties: BoolElt                 Default: <TT>false</TT>
+</PRE>
+<TT>Properties := true</TT>: As the subgroup classes are put into the poset,
+record their abstract type, i.e., elementary abelian, abelian, nilpotent,
+soluble, simple or perfect.
+<P>
+<P>
+<PRE>
+     Centralizers: BoolElt               Default: <TT>false</TT>
+</PRE>
+<TT>Centralizers := true</TT>: As each subgroup class e is put into the 
+poset, record the class in which the centralizers of the subgroups 
+of e lie.
+<P>
+<P>
+<PRE>
+     Normalizers: BoolElt                Default: <TT>false</TT>
+</PRE>
+<TT>Normalizers := true</TT>: As each subgroup class e is put into the 
+poset, record the class in which the normalizers of the subgroups 
+of e lie.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6821">Example <TT>Grp_CreateSubgroupPoset (H62E24)</TT></A></H3>
+We create the subgroup poset for the group ASL(2, 3).
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := ASL(2, 3);
+&gt; L := SubgroupLattice(G : Properties := true, Normalizers:= true,
+&gt;                           Centralizers:= true);
+&gt; L;
+Partially ordered set of subgroup classes
+-----------------------------------------
+
+
+[ 1]  Order 1 Length 1 C = [20] N = [20] 
+      Maximal Subgroups:
+---
+[ 2]  Order 2 Length 9 Cyclic. C = [16] N = [16] 
+      Maximal Subgroups: 1
+[ 3]  Order 3 Length 12 Cyclic. C = [14] N = [14] 
+      Maximal Subgroups: 1
+[ 4]  Order 3 Length 24 Cyclic. C = [10] N = [10] 
+      Maximal Subgroups: 1
+[ 5]  Order 3 Length 4 Cyclic. C = [15] N = [18] 
+      Maximal Subgroups: 1
+---
+[ 6]  Order 4 Length 27 Cyclic. C = [6] N = [12] 
+      Maximal Subgroups: 2
+[ 7]  Order 6 Length 12 Soluble. C = [3] N = [14] 
+      Maximal Subgroups: 2 5
+[ 8]  Order 6 Length 36 Cyclic. C = [8] N = [8] 
+      Maximal Subgroups: 2 3
+[ 9]  Order 9 Length 4 Elementary Abelian. C = [9] N = [18] 
+      Maximal Subgroups: 3 5
+[10]  Order 9 Length 8 Elementary Abelian. C = [10] N = [15] 
+      Maximal Subgroups: 4 5
+[11]  Order 9 Length 1 Elementary Abelian. C = [11] N = [20] 
+      Maximal Subgroups: 5
+---
+[12]  Order 8 Length 9 Nilpotent. C = [2] N = [16] 
+      Maximal Subgroups: 6
+[13]  Order 18 Length 1 Soluble. C = [1] N = [20] 
+      Maximal Subgroups: 7 11
+[14]  Order 18 Length 12 Soluble. C = [3] N = [14] 
+      Maximal Subgroups: 7 8 9
+[15]  Order 27 Length 4 Nilpotent. C = [5] N = [18] 
+      Maximal Subgroups: 9 10 11
+---
+[16]  Order 24 Length 9 Soluble. C = [2] N = [16] 
+      Maximal Subgroups: 8 12
+[17]  Order 36 Length 3 Soluble. C = [1] N = [19] 
+      Maximal Subgroups: 6 13
+[18]  Order 54 Length 4 Soluble. C = [1] N = [18] 
+      Maximal Subgroups: 13 14 15
+---
+[19]  Order 72 Length 1 Soluble. C = [1] N = [20] 
+      Maximal Subgroups: 12 17
+---
+[20]  Order 216 Length 1 Soluble. C = [1] N = [20] 
+      Maximal Subgroups: 16 18 19
+</PRE>
+<HR>
+<H5><A NAME = "6822">Operations on Subgroup Class Posets</A></H5>
+
+<P>
+<P>
+In the following, L is the poset of subgroup classes for a group G.
+
+
+<H5><A NAME = "6823"># L : SubGrpLat -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The cardinality of L, i.e., the number of conjugacy classes
+of subgroups of G.
+</BLOCKQUOTE>
+<H5><A NAME = "6824">L ! i: SubGrpLat, RngIntElt -&gt; SubGrpLatElt</A></H5>
+<BLOCKQUOTE>
+Create the i-th element of the poset L.  The elements of L are
+sorted so that classes i and j of groups whose orders o<sub>i</sub> and o<sub>j</sub> are the products of e<sub>i</sub> and e<sub>j</sub> prime numbers respectively will be ordered
+so that i comes before j is e<sub>i</sub>&lt;e<sub>j</sub> or e<sub>i</sub>=e<sub>j</sub> and o<sub>i</sub>&lt;o<sub>j</sub>.
+</BLOCKQUOTE>
+<H5><A NAME = "6825">L ! H: SubGrpLat, GrpFin -&gt; SubGrpLatElt</A></H5>
+<BLOCKQUOTE>
+Create the element of the poset L corresponding to the subgroup 
+H of the group G.
+</BLOCKQUOTE>
+<H5><A NAME = "6826">Bottom(L): SubGrpLat -&gt; SubGrpLatElt</A></H5>
+<BLOCKQUOTE>
+Create the bottom of the poset L, i.e., the element of L corresponding
+to the trivial subgroup of G.  If the poset was created with restrictions
+on the type of subgroups constructed, the bottom of the poset may not be 
+the trivial subgroup.
+</BLOCKQUOTE>
+<H5><A NAME = "6827">Top(L): SubGrpLat -&gt; SubGrpLatElt</A></H5>
+<BLOCKQUOTE>
+Create the top of the poset L, i.e., the element of L corresponding
+to G.
+</BLOCKQUOTE>
+<H5><A NAME = "6828">Random(L): SubGrpLat -&gt; SubGrpLatElt</A></H5>
+<BLOCKQUOTE>
+Create a random element of L.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6829">Example <TT>Grp_LatticeOperations (H62E25)</TT></A></H3>
+We create the subgroup lattice of AGammaL(1, 8) and locate the Fitting
+subgroup in the lattice.
+<P>
+<P>
+<PRE>
+&gt; G := AGammaL(1, 8);
+&gt; L := SubgroupLattice(G);
+&gt; L;
+
+
+Subgroup Lattice
+----------------
+
+
+[ 1]  Order 1 Length 1 
+      Maximal Subgroups:
+---
+[ 2]  Order 2 Length 7 
+      Maximal Subgroups: 1
+[ 3]  Order 3 Length 28 
+      Maximal Subgroups: 1
+[ 4]  Order 7 Length 8 
+      Maximal Subgroups: 1
+---
+[ 5]  Order 4 Length 7 
+      Maximal Subgroups: 2
+[ 6]  Order 6 Length 28 
+      Maximal Subgroups: 2 3
+[ 7]  Order 21 Length 8 
+      Maximal Subgroups: 3 4
+---
+[ 8]  Order 8 Length 1 
+      Maximal Subgroups: 5
+[ 9]  Order 12 Length 7 
+      Maximal Subgroups: 3 5
+---
+[10]  Order 24 Length 7 
+      Maximal Subgroups: 6 8 9
+[11]  Order 56 Length 1 
+      Maximal Subgroups: 4 8
+---
+[12]  Order 168 Length 1
+      Maximal Subgroups: 7 10 11
+
+
+&gt; F := FittingSubgroup(G);
+&gt; F;
+Permutation group F acting on a set of cardinality 8
+Order = 8 = 2^3
+    (1, 2)(3, 6)(4, 8)(5, 7)
+    (1, 6)(2, 3)(4, 7)(5, 8)
+    (1, 5)(2, 7)(3, 4)(6, 8)
+&gt; L!F;
+8
+</PRE>
+We now construct a chain from the bottom to the top of the lattice.
+<P>
+<P>
+<PRE>
+&gt; H := Bottom(L);
+&gt; Chain := [H];
+&gt; while H ne Top(L) do
+&gt;     H := Representative(MinimalOvergroups(H));
+&gt;     Chain := Append(Chain, H);
+&gt; end while;
+&gt; Chain;
+[ 1, 2, 5, 8, 10, 12 ]
+</PRE>
+<HR>
+<H5><A NAME = "6830">Operations on Poset Elements</A></H5>
+
+<P>
+<P>
+<P>
+In the following, L is the poset of subgroups for a group G.
+Elements of L are identified with the integers [1..#L].
+
+
+<H5><A NAME = "6831">IntegerRing() ! e : SubGrpLatElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The integer corresponding to poset element e.
+</BLOCKQUOTE>
+<H5><A NAME = "6832">e eq f : SubGrpLatElt, SubGrpLatElt -&gt; SubGrpLatElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if poset elements e and f are equal.
+</BLOCKQUOTE>
+<H5><A NAME = "6833">e ge f : SubGrpLatElt, SubGrpLatElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if poset element e contains poset element f.
+</BLOCKQUOTE>
+<H5><A NAME = "6834">e ge f : SubGrpLatElt, SubGrpLatElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if poset element e strictly contains poset element f.
+</BLOCKQUOTE>
+<H5><A NAME = "6835">e le f : SubGrpLatElt, SubGrpLatElt -&gt; BoolElt</A></H5>
+<H5>e subset f : SubGrpLatElt, SubGrpLatElt -&gt; SubGrpLatElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if poset element e is contained in poset element f.
+</BLOCKQUOTE>
+<H5><A NAME = "6836">e lt f : SubGrpLatElt, SubGrpLatElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if poset element e is strictly contained in poset 
+element f.
+</BLOCKQUOTE>
+<H5><A NAME = "6837">Class Information from a Conjugacy Class Poset</A></H5>
+
+<P>
+<P>
+<P>
+In the following, L is the poset of subgroups for a group G.
+Elements of L are identified with the integers [1..#L].
+
+
+<H5><A NAME = "6838">Group(e) : SubGrpLatElt -&gt; GrpFin</A></H5>
+<BLOCKQUOTE>
+The subgroup of G that is the chosen class representative 
+corresponding to the element e of the poset L.
+</BLOCKQUOTE>
+<H5><A NAME = "6839">Centraliser(e, f) : SubGrpLatElt, SubGrpLatElt -&gt; SubGrpLatElt</A></H5>
+<H5>Centralizer(e, f) : SubGrpLatElt, SubGrpLatElt -&gt; SubGrpLatElt</H5>
+<BLOCKQUOTE>
+Given poset elements e and f, return the poset element that
+corresponds to the class of subgroups that contains the centralizers
+of the subgroups of class f (taken in a subgroup of class e). If
+no subgroup of class f lies in class e, the construction fails.
+</BLOCKQUOTE>
+<H5><A NAME = "6840">Normaliser(e, f) : SubGrpLatElt, SubGrpLatElt -&gt; SubGrpLatElt</A></H5>
+<H5>Normalizer(e, f) : SubGrpLatElt, SubGrpLatElt -&gt; SubGrpLatElt</H5>
+<BLOCKQUOTE>
+Given poset elements e and f, return the poset element that
+corresponds to the class of subgroups that contain the normalizers
+of the subgroups of class f (taken in a subgroup of class e). If
+no subgroup of class f lies in class e, the construction fails.
+</BLOCKQUOTE>
+<H5><A NAME = "6841">Length(e) : SubGrpLatElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The number of subgroups in the class corresponding to e.
+</BLOCKQUOTE>
+<H5><A NAME = "6842">Order(e) : SubGrpLatElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The order of the subgroup of G corresponding to e.
+</BLOCKQUOTE>
+<H5><A NAME = "6843">MaximalSubgroups(e) : SubGrpLatElt -&gt; { SubGrpLatElt }</A></H5>
+<BLOCKQUOTE>
+The maximal subgroups of e, returned as a set of poset elements.
+</BLOCKQUOTE>
+<H5><A NAME = "6844">MinimalOvergroups(e) : SubGrpLatElt -&gt; { SubGrpLatElt }</A></H5>
+<BLOCKQUOTE>
+The minimal overgroups of e, returned as a set of poset elements.
+</BLOCKQUOTE>
+<H5><A NAME = "6845">NumberOfInclusions(e, f) : SubGrpLatElt, SubGrpLatElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The number of elements of the conjugacy class of subgroups e that 
+lie in a fixed representative of the conjugacy class of subgroups f.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text624.htm">[Next]</A><A  HREF = "text622.htm">[Prev]</A> <A  HREF = "text624.htm">[Right]</A> <A  HREF = "text622.htm">[Left]</A> <A  HREF = "text612.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

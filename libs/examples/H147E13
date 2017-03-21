@@ -1,0 +1,35 @@
+"Source: Text/Incidence/Plane.text";
+"Line: 2452";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Incidence/Plane.text, line: 2452
+// Example: H147E13 ()
+print "Example: H147E13";
+ei := GetEchoInput();
+SetEchoInput(true);
+Bundle := function(q)
+    K<w> := GF(q^3);
+    P, V, L := FiniteProjectivePlane(q^3);
+    G, Y := CollineationGroup(P);
+    S := Support(P);  // normalized vectors
+    sig := sub< G |
+              [Index(P, V ! [S[i][1], S[i][2]^q, S[i][3]^q]) : i in [1..#V]]>;
+                      // group of planar collineations of order 3
+    p := V ! [1, w^2, w];
+    T := Orbit(sig, Y, p);
+    e2 := V![0, 1, 0];
+    e3 := V![0, 0, 1];
+    S := Points(SubfieldSubplane(P, GF(q)));
+    c23 := Conic(P, T join {e2, e3}) meet S;
+    e1 := Rep(S diff c23);
+    c12 := (Conic(P, T join {e1, e2}) meet S) diff { e1 };
+    c13 := (Conic(P, T join {e1, e3}) meet S) diff { e1 };
+    bundle := [ Conic(P, T join {e1, e}) meet S : e in c23 ] cat
+              [ Conic(P, T join {v1, v2}) meet S : v2 in c13, v1 in c12 ];
+    return FiniteProjectivePlane< S | bundle >;
+
+end function;
+                
+PB := Bundle(3);
+PB;
+SetEchoInput(ei);

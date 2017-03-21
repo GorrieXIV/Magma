@@ -1,0 +1,74 @@
+// Group Operators.
+inform("Testing Group Operations.", 2);
+
+// Multiplication.
+inform("Multiplication.", 3);
+inform("Group-Group.", 3);
+
+w( sub<ra4 | ra4.1> * sub<ra4 | ra4.2> ne {ra4 | ra4.1^i * ra4.2^j : i in [1 .. Order(ra4.1)], j in [1 .. Order(ra4.2)]},
+	"multn: gp*gp: ra4.");
+s10 := Sym(10);
+w( sub<a10 | a10x> * sub<s10 | (5,6)> ne
+    {s10 | Id(a10), (5,6), (1,8,2,4,7,9)(3,10), 
+      (1,8,2,4,7,9)(3,10)(5,6), (1,2,7)(4,9,8), 
+      (1,2,7)(4,9,8)(5,6), (1,4)(2,9)(3,10)(7,8), 
+      (1,4)(2,9)(3,10)(5,6)(7,8), (1,7,2)(4,8,9), 
+      (1,7,2)(4,8,9)(5,6), (1,9,7,4,2,8)(3,10), 
+      (1,9,7,4,2,8)(3,10)(5,6) },
+	"multn: gp*gp: a10.");
+w( #(sub<s16 | s16a * s16b> * sub<s16 | s16c * s16d>) ne 64,
+    "multn: gp*gp: s16.");
+w( sub<p11n6 | p11n6b> * sub<p11n6 | p11n6c ^ p11n6a> ne
+    {p11n6 | Id(p11n6), (1,6,3,7)(4,8,9,5), (1,3)(4,9)(5,8)(6,7), 
+      (1,7,3,6)(4,5,9,8), (2,4,3,7)(5,6,9,8), 
+      (1,6,5,3)(2,8,4,7), (1,3,6,4)(2,9,5,7), 
+      (1,7,2,5)(4,6,8,9), (2,3)(4,7)(5,9)(6,8), 
+      (1,6,9,4)(2,7,8,3), (1,3,2)(4,6,5)(7,9,8), 
+      (1,7,5,8)(2,6,4,3), (2,7,3,4)(5,8,9,6), 
+      (1,6,4,2)(3,8,5,9), (1,3,9,7)(2,6,8,4), 
+      (1,7,6,9)(2,3,5,4) }, "multn: gp*gp: p11n6.");
+w( ir12*ir12 ne {x : x in ir12}, "multn: gp*gp: ir12.");
+
+// Meet.
+inform("Meet.", 3);
+
+w( Order(sub<t12 | (1,2,3),(4,5)> meet sub<t12 | (3,7)(8,9,10),(1,5,6)>)
+    ne 1,"meet: t12.");
+w( ir12 meet int12 ne sub<t12 | (4,6,5)(10,11,12),(1,2,3)(10,12,11),
+	(7,9,8)(10,11,12)>, "meet: t12.");
+w( Order(sub<p16 | p16a * p16b> meet sub<p16 | p16a * p16c>) ne 1,
+	"meet: p16.");
+w( sub<p12n4 | p12n4a * p12n4c, p12n4f>
+	    meet sub<p12n4 | p12n4c * p12n4f, p12n4a, p12n4b ^ p12n4e>
+	    ne sub<p12n4 | (2,3)(5,6)(8,9)(11,12), (2,4)(3,7)(6,8)(11,12),
+		(2,8,3,6)(4,9,7,5), (1,4)(2,5)(3,6)(11,12)>, "meet: p12n4.");
+
+// Quotient.
+inform("Quotient.", 3);
+
+r := p16 / NormalClosure(p16, sub<p16 | p16c>);
+w( Order(r) ne 720, "qtnt: p16.");
+
+r, f := quo<p16 | g16>;
+w( Order(r) ne 2, "qtnt: g16.");
+w( f(p16b) ne r.2,"qtnt: g16.");
+
+r, f := quo<t12 | g12>;
+w( Order(r) ne 2, "qtnt: g12.");
+w( f(t12.3)*f(t12.1) ne r.3*r.1,"qtnt: g12.");
+
+// in/subset
+inform("in/subset.", 3);
+
+w( t12.1 in ir12, "in: elt: ir12.");
+w( not(t12.2 in int12), "in: elt: int12.");
+w( not(g16 subset p16), "in: sgp: g16.");
+w( sub<s12 | s12a^s12b> subset sub<s12 | s12b*s12a>, "in: sgp: s12.");
+w( not(ElementSet(ir12, sub<ir12 | ir12.1>) subset t12),
+    "in: set: ir12.");
+
+// Equality.
+inform("Equality.", 3);
+
+w( t12 ne Sym(12), "ne: t12.");
+w( p16 eq g16, "eq: p16.");

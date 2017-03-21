@@ -1,0 +1,7 @@
+174,1
+S,InternalHMFRawDataDefinite,"For a space M of Hilbert modular forms computed using the definite algorithm, this provides access to the underlying space of quaternionic forms. WARNING: this may change completely in later versions of Magma!!!",0,1,0,0,0,0,0,0,0,ModFrmHil,,270,-38,-38,-38,-38,-38
+S,InternalHMFRawHeckeDefinite,The Hecke operator T_p on the raw space containing M,0,2,0,0,0,0,0,0,0,217,,0,0,ModFrmHil,,-34,-38,-38,-38,-38,-38
+S,HeckeMatrixRaw,The Hecke operator T_p on the raw space containing M,0,2,0,0,0,0,0,0,0,217,,0,0,ModFrmHil,,-34,-38,-38,-38,-38,-38
+A,AlgAssVOrd,1,ResidueMatrixRings
+S,ResidueMatrixRing,"Given a maximal order OH in a quaternion algebra H over a number field F, and an integral ideal d of the ring of integers O of F that is coprime to the discriminant of OH, this returns a residue map OH -> Mat_2(O/d). This map can be applied to any element of H that is integral locally at primes dividing d",0,2,0,0,0,0,0,0,0,217,,0,0,435,,176,175,-38,-38,-38,-38
+S,IsArithmeticWeight,"Given a totally real number field F and a sequence k of integers, this determines whether k is an arithmetic weight for F. If so, integer sequences m and n are returned, and also an integer C. The representation on the ith infinite place of F is det^(m[i]) tensor Sym^(n[i]). This has central character t :-> Norm(t)^C",1,1,1,82,0,148,2,0,0,0,0,0,0,0,82,,0,0,-24,,36,82,82,-38,-38,-38

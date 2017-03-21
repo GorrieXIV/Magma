@@ -1,0 +1,195 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Weil Polynomials</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1396.htm">[Next]</A><A  HREF = "text1394.htm">[Prev]</A> <A  HREF = "text1396.htm">[Right]</A> <A  HREF = "text1394.htm">[Left]</A> <A  HREF = "text1388.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "15659">Weil Polynomials</A></H3>
+
+<P>
+<P>
+<P>
+The characteristic polynomial of the Frobenius on the etale cohomology
+is called a Weil polynomial.
+This section contains some auxiliary routines for simpler handling of
+these polynomials.
+All routines make frequently use of
+<TT>PowerSumToCoefficients, CoefficientsToElementarySymmetric</TT> and
+<TT>ElementarySymmetricToPowerSums</TT>.
+They were used in <A  HREF = "text1387.htm#bib_elsenhans_jahnel_weil_polynomials_K3">[EJ10]</A>
+to study K3 surfaces.
+
+
+<H5><A NAME = "15660">SetVerbose("WeilPolynomials", v) : MonStgElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Set the verbose printing level for the analysis of weil polynomials.
+Maximal value 2.
+</BLOCKQUOTE>
+<H5><A NAME = "15661">HasAllRootsOnUnitCircle(f) : RngUPolElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a polynomial f with rational coefficients this routine checks
+that the complex roots of the polynomial are all of absolute value 1.
+The algorithm does not use floating point approximations.
+</BLOCKQUOTE>
+<H5><A NAME = "15662">FrobeniusTracesToWeilPolynomials(tr, q, i, deg) : SeqEnum, RngIntElt, RngIntElt, RngIntElt -&gt; SeqEnum</A></H5>
+
+<PRE>    KnownFactor: RngUPolElt             Default: 1</PRE>
+
+<PRE>    SetVerbose("WeilPolynomials", n):   Maximum: 2</PRE>
+<BLOCKQUOTE>
+Given the sequence of Frobenius traces on the i-th etale cohomology this
+function returns a list of possible characteristic polynomials. Here q
+is the order of the basefield and deg is the degree of the characteristic
+polynomial. In the case of even i the sign in the functional equation has
+to be determined. This is done by checking the absolute values of the roots
+of the hypothetical polynomials. In the case that this does not work both
+candidates are returned. In the case of contradictory data an empty sequence
+is returned.
+<P>
+If a factor of the characteristic polynomial is known it can be given as
+optional argument.
+</BLOCKQUOTE>
+<H5><A NAME = "15663">WeilPolynomialToRankBound(f, q) : RngUPolElt, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a polynomial f this routine counts the zeros (with multiplicity)
+of f that are q times a root of unity.  This is an upper bound for
+the Picard rank of the corresponding algebraic surface; according to the
+Tate conjecture, it is precisely the Picard rank.
+</BLOCKQUOTE>
+<H5><A NAME = "15664">ArtinTateFormula(f, q, h20) : RngUPolElt, RngIntElt, RngIntElt -&gt; RngIntElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a Weil polynomial corresponding to H<sup>2</sup> of an algebraic surface with
+Hoge number h<sup>2, 0</sup> this routine evaluates the Artin-Tate formula.
+If the Tate conjecture holds, the two values returned are the arithmetic
+Picard rank, and the absolute value of the discriminant of the Picard group
+times the order of the Brauer group of the surface.
+</BLOCKQUOTE>
+<H5><A NAME = "15665">WeilPolynomialOverFieldExtension(f, deg) : RngUPolElt, RngIntElt -&gt; RngUPolElt</A></H5>
+<BLOCKQUOTE>
+Given the characteristic polynomial f of the Frobenius on an etale cohomology
+group. This routine returns the characteristic polynomial of the deg times
+iterated Frobenius.
+</BLOCKQUOTE>
+<H5><A NAME = "15666">CheckWeilPolynomial(f, q, h20) : RngUPolElt, RngIntElt, RngIntElt -&gt; BoolElt</A></H5>
+
+<PRE>    SurfDeg: RngIntElt                  Default: -1</PRE>
+<BLOCKQUOTE>
+Given a polynomial f this routine checks several conditions that must be
+satisfied by the characteristic polynomial of the Frobenius on H<sup>2</sup> of an
+algebraic surface. Here q is the size of the basefield, h20 is the Hodge
+number h<sup>2, 0</sup> and <TT>SurfDeg</TT> is the degree of the surface (-1 means
+degree unknown). For example, this routine can be used to determine the sign
+in the functional equation.
+<P>
+The routine checks the valuation of the roots at all places (including p
+and &infin;). It also checks the functional equation and the Artin-Tate
+conditions (see <A  HREF = "text1387.htm#bib_elsenhans_jahnel_weil_polynomials_K3">[EJ10]</A> for details).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15667">Example <TT>GrdRng_weilpoly (H123E5)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; q1&lt;t&gt; := PolynomialRing(RationalField());
+&gt; z4&lt;x,y,z,w&gt; := PolynomialRing(IntegerRing(),4);
+&gt; f := x^4 + x^3*z + x^2*y^2 + x^2*y*w + x^2*z^2 + x^2*z*w +
+&gt;      x*y^3 + x*y*z*w + x*y*w^2 + x*z^2*w + y^3*w + y^2*z^2 +
+&gt;      y^2*z*w + y^2*w^2 + y*z^2*w + z^4 + z*w^3;
+&gt; Tr := [];
+&gt; for i := 1 to 10 do
+&gt;    P3 := ProjectiveSpace(GF(2^i),3);
+&gt;    S := Scheme(P3,f);
+&gt;    time
+&gt;    Tr[i] := #Points(S) - 1 - 2^(2*i);
+&gt; end for;
+&gt; cpl := FrobeniusTracesToWeilPolynomials(Tr, 2, 2, 22: KnownFactor := t-2);
+&gt; cpl;
+[
+    t^22 - t^21 - 2*t^20 - 4*t^19 + 16*t^17 + 32*t^16 - 64*t^15
+         + 16384*t^7 - 32768*t^6 - 65536*t^5 + 262144*t^3
+         + 524288*t^2 + 1048576*t - 4194304,
+    t^22 - t^21 - 2*t^20 - 4*t^19 + 16*t^17 + 32*t^16 - 64*t^15
+         - 16384*t^7 + 32768*t^6 + 65536*t^5 - 262144*t^3
+         - 524288*t^2 - 1048576*t + 4194304
+]
+</PRE>
+<P>
+Here the sign in the functional equation can not be determined by the
+absolute values of roots test.
+Further point counting would be very slow, as the coefficients of
+t<sup>11</sup>, t<sup>10</sup>, t<sup>9</sup>, t<sup>8</sup> are zero,
+thus point counting over (F)_(2<sup>15</sup>)
+would be necessary to determine the sign in this way.
+Instead, we can try to use more invariants of the surface.
+<P>
+<P>
+<PRE>
+&gt; cpl_2 := [wp : wp in cpl | CheckWeilPolynomial(wp,2,1: SurfDeg := 4)];
+&gt; cpl_2;
+[
+    t^22 - t^21 - 2*t^20 - 4*t^19 + 16*t^17 + 32*t^16 - 64*t^15
+         + 16384*t^7 - 32768*t^6 - 65536*t^5 + 262144*t^3
+         + 524288*t^2 + 1048576*t - 4194304
+]
+&gt; WeilPolynomialToRankBound(cpl_2[1],2);
+2
+&gt; ArtinTateFormula(cpl_2[1],2,1);
+1 4
+&gt; ArtinTateFormula(WeilPolynomialOverFieldExtension(cpl_2[1],2),2^2,1);
+2 68
+</PRE>
+<P>
+Thus the minus sign in the functional equation is correct.
+The surface has arithmetic Picard rank 1 and relative to the Tate
+conjecture the geometric Picard group has rank 2
+and discriminant either -17 or -68
+(depending on the order of the Brauer group).
+<HR>
+<H3><A NAME = "15668">Example <TT>GrdRng_weilpoly2 (H123E6)</TT></A></H3>
+Advanced example: Bounding Picard rank with less point counting.
+<P>
+The computation is based on the same equation as the example above.
+Now we do not use the most costly Frobenius trace, but we assume additional
+cyclotomic factors.
+<P>
+<P>
+<PRE>
+&gt; q1&lt;t&gt; := PolynomialRing(RationalField());
+&gt; Tr := [ 1, 5, 19, 33, 11, -55, 435, -31, -197]; /* First 9 Frob traces */
+&gt; cycl := [ Evaluate(CyclotomicPolynomial(i),t/2)*2^EulerPhi(i)
+&gt; : i in [1..100] | EulerPhi(i) lt 23];
+&gt; cycl[1] := cycl[1]^2;
+&gt; cycl[2] := cycl[2]^2; /* linear factors need multiplicity two */
+&gt; hyp := &amp;cat [FrobeniusTracesToWeilPolynomials(Tr, 2, 2, 22 :
+&gt;                       KnownFactor := (t-2)*add) : add in cycl];
+&gt; hyp := SetToSequence(Set(hyp));
+&gt; hyp;
+[
+    t^22 - t^21 - 2*t^20 - 4*t^19 + 16*t^17 + 32*t^16 - 64*t^15
+         - 16384*t^7 + 32768*t^6 + 65536*t^5 - 262144*t^3
+         - 524288*t^2 - 1048576*t + 4194304
+]
+</PRE>
+<P>
+Using only the number of point over F<sub>2</sub>, ..., F<sub>2<sup>9</sup></sub>
+we can prove that either the Picard rank is bounded by 2 or the correct Weil
+polynomial is in the list.
+<P>
+<P>
+<P>
+<PRE>
+&gt; CheckWeilPolynomial(hyp[1],2,1:SurfDeg := 4);
+false
+</PRE>
+The invariants of the surface and the hypothetical Weil polynomial are
+contradictory.
+Thus the Picard rank is at most 2.
+<HR>
+<PRE></PRE> <A  HREF = "text1396.htm">[Next]</A><A  HREF = "text1394.htm">[Prev]</A> <A  HREF = "text1396.htm">[Right]</A> <A  HREF = "text1394.htm">[Left]</A> <A  HREF = "text1388.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

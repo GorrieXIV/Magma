@@ -1,0 +1,61 @@
+"Source: Text/Lat/Lat.text";
+"Line: 5078";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Lat/Lat.text, line: 5078
+// Example: H30E21 ()
+print "Example: H30E21";
+ei := GetEchoInput();
+SetEchoInput(true);
+L := CoordinateLattice(Lattice("Kappa", 12));
+G := AutomorphismGroup(L);
+G2 := ChangeRing(G, GF(2));
+O := LineOrbits(G2);
+[ Norm(L!Rep(o).1) : o in O ];
+v1 := L ! Rep(O[1]).1;
+v1 +:= 2 * Rep({ u : u in Basis(L) | (v1,u) mod 2 eq 1 });
+v2 := L ! Rep(O[2]).1;
+Norm(v1), Norm(v2);
+L1 := Neighbour(L, v1, 2);
+L2 := Neighbour(L, v2, 2);
+bool := IsIsometric(L, L1); bool;
+bool := IsIsometric(L, L2); bool;
+function EvenGenus(L)
+     // Start with the lattice L
+     Lambda := [ CoordinateLattice(LLL(L)) ];
+     cand := 1;
+     while cand le #Lambda do
+         L := Lambda[cand];
+         G := ChangeRing( AutomorphismGroup(L), GF(2) );
+         // Get the projective orbits on L/2L
+         O := LineOrbits(G);
+         for o in O do
+             v := L ! Rep(o).1;
+             if Norm(v) mod 4 eq 0 then
+                 // Adjust the vector such that its norm is divisible by 8
+                 if not Norm(v) mod 8 eq 0 then
+                     v +:= 2 * Rep({ u : u in Basis(L) | (v,u) mod 2 eq 1 });
+                 end if;
+                 N := LLL(Neighbour(L, v, 2));
+                 new := true;
+                 for i in [1..#Lambda] do
+                     if IsIsometric(Lambda[i], N) then
+                         new := false;
+                         break i;
+                     end if;
+                 end for;
+                 if new then
+                     Append(~Lambda, CoordinateLattice(N));
+                 end if;
+             end if;
+         end for;
+         cand +:= 1;
+     end while;
+     return Lambda;
+end function;
+time Lambda := EvenGenus(L);
+#Lambda;
+assert $1 eq 10;
+[ Minimum(L) : L in Lambda ];
+&+[ 1/#AutomorphismGroup(L) : L in Lambda ];
+SetEchoInput(ei);

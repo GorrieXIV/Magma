@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>GALOIS GROUPS AND AUTOMORPHISMS</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text399.htm">[Next]</A><A  HREF = "text382.htm">[Prev]</A> <A  HREF = "text405.htm">[Right]</A> <A  HREF = "text383.htm">[Left]</A> <A  HREF = "part6.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H2><A NAME = "4101">GALOIS GROUPS AND AUTOMORPHISMS</A></H2>
+
+<P>
+<P>
+<P>
+<P>
+This chapter deals with Galois groups and automorphism of number fields and
+several kinds of function fields.  It also deals with computing the subfields 
+of these kinds of fields.
+While these problems are closely related from a theoretical point of view
+(basically, everything is determined by the Galois group), as algorithmic 
+problems they are quite different.
+<P>
+The first task, that of computing automorphisms of normal extensions
+of Q (and of abelian extensions of number fields) can be thought of
+a special case of factorisation of polynomials over number fields: the
+automorphisms of a number field are in one-to-one correspondence with the 
+roots of the defining equation in the field. However, the computation
+follows a different approach and is based on some combinatorial
+properties.
+It should be noted, though, that the algorithms only apply to normal
+fields; i.e., they cannot be used to find non-trivial automorphisms
+of non-normal fields!
+<P>
+The second task, namely that of computing the Galois group of the 
+normal closure of a number field, is of course closely related to the 
+problem of computing the Galois group of a polynomial. The method
+implemented in Magma allows the computation of Galois groups of
+polynomials (and number fields) of arbitrarily high degrees and is independent
+of the classification of transitive permutation groups. 
+The result of the computation of a Galois group will be a permutation
+group acting on the roots of the (defining) polynomial, where the
+roots (or approximations of them) are explicitly computed in some suitable
+p-adic field; thus the splitting field is not (directly) part of the
+computation. The explicit action on the roots allows one,
+for example, to compute algebraic representations of arbitrary subfields
+of the splitting field, even the splitting field itself, provided the
+degree is not too large.
+<P>
+The last main task dealt with in this chapter is the computation of
+subfields of a number field.  While of course this can be done using the
+main theorem of Galois theory (the correspondence between subgroups and
+subfields), the computation is completely independent; in fact, the
+computation of subfields is usually the first step in the computation
+of the Galois group. The algorithm used here is mainly combinatorical.
+<P>
+Finally, this chapter also deals with applications of the Galois theory:
+<DL COMPACT class='compact'>
+<DT>-</DT><DD>the computation of subfields and subfield towers of the splitting
+  field
+<DT>-</DT><DD>solvability by radicals: if the Galois group of a polynomial
+  is solvable, the roots of the polynomial can be represented by
+  (iterated) radicals.
+<DT>-</DT><DD>basic Galois-cohomology; i.e., the action of the automorphisms
+  on the ideal class group, the multiplicative group of the field
+  and derived objects.</DL>
+
+
+&nbsp; <BR><FONT SIZE="+1"><I><A  HREF = "ackn.htm#RngOrdGal">Acknowledgements</A></I></FONT><BR>&nbsp; <BR><FONT SIZE="+1"><B><A  HREF = "#-1">Automorphism Groups</A></B></FONT><BR>
+&nbsp; <BR><FONT SIZE="+1"><B><A  HREF = "#-2">Galois Groups</A></B></FONT><BR>
+&nbsp; &nbsp; &nbsp; <B><A  HREF = "#-3">Straight-line Polynomials</A></B><BR>
+&nbsp; &nbsp; &nbsp; <B><A  HREF = "#-4">Invariants</A></B><BR>
+&nbsp; &nbsp; &nbsp; <B><A  HREF = "#-5">Subfields and Subfield Towers</A></B><BR>
+&nbsp; &nbsp; &nbsp; <B><A  HREF = "#-6">Solvability by Radicals</A></B><BR>
+&nbsp; &nbsp; &nbsp; <B><A  HREF = "#-7">Linear Relations</A></B><BR>
+&nbsp; &nbsp; &nbsp; <B><A  HREF = "#-8">Other</A></B><BR>
+&nbsp; <BR><FONT SIZE="+1"><B><A  HREF = "#-9">Subfields</A></B></FONT><BR>
+&nbsp; &nbsp; &nbsp; <B><A  HREF = "#-10">The Subfield Lattice</A></B><BR>
+&nbsp; <BR><FONT SIZE="+1"><B><A  HREF = "#-11">Galois Cohomology</A></B></FONT><BR>
+&nbsp; <BR><FONT SIZE="+1"><B><A  HREF = "text397.htm">Bibliography</A></B></FONT><BR>
+<BR><BR><BR><BR><BR><BR><BR><H2>DETAILS</H2><P>&nbsp; <A NAME = "-1"></A><BR><FONT SIZE="+1"><B><A  HREF = "text399.htm">Automorphism Groups</A></B></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text399.htm#4103"><B>Automorphisms(F) :</B> FldAlg -&gt; [ Map ]</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text399.htm#4104"><B>AutomorphismGroup(F) :</B> FldAlg -&gt; GrpPerm, PowMap, Map</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text399.htm#4105">Example <B>RngOrdGal_Automorphisms</B> (H39E1)</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text399.htm#4106"><B>AutomorphismGroup(K, F) :</B> FldAlg, FldAlg -&gt; GrpPerm, PowMap, Map</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text399.htm#4107"><B>DecompositionGroup(p) :</B> RngIntElt -&gt;  GrpPerm</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text399.htm#4108"><B>RamificationGroup(p, i) :</B> RngOrdIdl, RngIntElt -&gt;  GrpPerm</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text399.htm#4109"><B>RamificationGroup(p) :</B> RngOrdIdl -&gt; GrpPerm</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text399.htm#4110"><B>InertiaGroup(p) :</B> RngOrdIdl -&gt; GrpPerm</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text399.htm#4111"><B>FixedField(K, U) :</B> FldAlg, GrpPerm -&gt; FldNum, Map</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text399.htm#4112"><B>FixedField(K, S) :</B> FldAlg, [Map] -&gt; FldAlg, Map</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text399.htm#4113"><B>FixedGroup(K, L) :</B> FldAlg, FldAlg -&gt; GrpPerm</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text399.htm#4114"><B>FixedGroup(K, L) :</B> FldAlg, [FldAlgElt] -&gt; GrpPerm</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text399.htm#4115"><B>FixedGroup(K, a) :</B> FldAlg, FldAlgElt -&gt; GrpPerm</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text399.htm#4116"><B>DecompositionField(p) :</B> RngOrdIdl -&gt; FldNum, Map</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text399.htm#4117"><B>RamificationField(p, i) :</B> RngOrdIdl, RngIntElt -&gt; FldNum, Map</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text399.htm#4118"><B>RamificationField(p) :</B> RngOrdIdl -&gt; FldNum, Map</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text399.htm#4119"><B>InertiaField(p) :</B> RngOrdIdl -&gt; FldNum, Map</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text399.htm#4120">Example <B>RngOrdGal_Ramification</B> (H39E2)</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text399.htm#4121"><B>FrobeniusElement(K, p) :</B> FldNum, RngIntElt -&gt; GrpPermElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text399.htm#4122">Example <B>RngOrdGal_nf-sig-FrobeniusElement</B> (H39E3)</A></FONT><BR>
+<P>&nbsp; <A NAME = "-2"></A><BR><FONT SIZE="+1"><B><A  HREF = "text400.htm">Galois Groups</A></B></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4124"><B>GaloisGroup(f) :</B> RngUPolElt[RngInt] -&gt; GrpPerm, SeqEnum, GaloisData</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4125"><B>GaloisGroup(K) :</B> FldNum -&gt; GrpPerm, SeqEnum, GaloisData</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4126"><B>GaloisProof(f, S) :</B> RngUPolElt, GaloisData -&gt; BoolElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4127"><B>GaloisRoot(f, i, S) :</B> RngUPolElt, RngIntElt, GaloisData -&gt; RngElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4128"><B>Stauduhar(G, H, S, B) :</B> GrpPerm, GrpPerm, GaloisData, RngIntElt -&gt; RngIntElt, GrpPermElt, BoolElt, RngSLPolElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4129"><B>IsInt(x, B, S) :</B> RngElt, RngIntElt, GaloisData -&gt; BoolElt, RngElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4130">Example <B>RngOrdGal_GaloisGroups</B> (H39E4)</A></FONT><BR>
+<P>&nbsp; &nbsp; &nbsp; <A NAME = "-3"></A><B><A  HREF = "text400.htm#4131">Straight-line Polynomials</A></B><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4132"><B>SLPolynomialRing(R, n) :</B> Rng, RngIntElt -&gt; RngSLPol</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4133"><B>Name(R, i) :</B> RngSLPol, RngIntElt -&gt; RngSLPolElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4134"><B>BaseRing(R) :</B> RngSLPol -&gt; Rng</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4135"><B>Rank(R) :</B> RngSLPol -&gt; RngIntElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4136"><B>SetEvaluationComparison(R, F, n) :</B> RngSLPol, FldFin, RngIntElt -&gt;</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4137"><B>GetEvaluationComparison(R) :</B> RngSLPol -&gt; FldFin, RngIntElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4138"><B>InitializeEvaluation(R, S) :</B> RngSLPol, [RngElt] -&gt;</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4139"><B>Derivative(x, i) :</B> RngSLPolElt, RngIntElt -&gt; RngSLPolElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4140"><B>Evaluate(f) :</B> RngSLPolElt -&gt; RngElt</A></FONT><BR>
+<P>&nbsp; &nbsp; &nbsp; <A NAME = "-4"></A><B><A  HREF = "text400.htm#4141">Invariants</A></B><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4142"><B>GaloisGroupInvariant(G, H) :</B> GrpPerm, GrpPerm -&gt; RngSLPolElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4143"><B>RelativeInvariant(G, H) :</B> GrpPerm, GrpPerm -&gt; RngSLPolElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4144"><B>CombineInvariants(R, G, H1, H2, H3) :</B> Rng, GrpPerm, Tup&lt;GrpPerm, RngSLPolElt&gt;, Tup&lt;GrpPerm, RngSLPolElt&gt;, GrpPerm -&gt; RngSLPolElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4145"><B>IsInvariant(F, p) :</B> RngSLPolElt, GrpPermElt -&gt; BoolElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4146"><B>Bound(I, B) :</B> RngSLPolElt, RngIntElt -&gt; RngIntElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4147"><B>Bound(I, B) :</B> RngSLPolElt, RngElt -&gt; RngElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4148"><B>PrettyPrintInvariant(I) :</B> RngSLPolElt -&gt; MonStgElt</A></FONT><BR>
+<P>&nbsp; &nbsp; &nbsp; <A NAME = "-5"></A><B><A  HREF = "text400.htm#4149">Subfields and Subfield Towers</A></B><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4150"><B>GaloisSubgroup(K, U) :</B> FldNum, GrpPerm -&gt; FldNum, UserProgram</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4151"><B>GaloisQuotient(K, Q) :</B> FldNum, GrpPerm -&gt; SeqEnum[FldNum]</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4152"><B>GaloisSubfieldTower(S, L) :</B> GaloisData, [GrpPerm] -&gt; FldNum, [Tup&lt;RngSLPolElt, RngUPolElt, [GrpPermElt]&gt;], UserProgram, UserProgram</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4153"><B>GaloisSplittingField(f) :</B> RngUPolElt -&gt; FldNum, [FldNumElt], GrpPerm, [[FldNumElt]]</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4154">Example <B>RngOrdGal_galois-subfield</B> (H39E5)</A></FONT><BR>
+<P>&nbsp; &nbsp; &nbsp; <A NAME = "-6"></A><B><A  HREF = "text400.htm#4155">Solvability by Radicals</A></B><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4156"><B>SolveByRadicals(f) :</B> RngUPolElt -&gt; FldNum, [FldNumElt], [FldNumElt]</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4157"><B>CyclicToRadical(K, a, z) :</B> FldNum, FldNumElt, RngElt -&gt; FldNum, [FldNumElt], [FldNumElt]</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4158">Example <B>RngOrdGal_solve-radical</B> (H39E6)</A></FONT><BR>
+<P>&nbsp; &nbsp; &nbsp; <A NAME = "-7"></A><B><A  HREF = "text400.htm#4159">Linear Relations</A></B><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4160"><B>LinearRelations(f) :</B> RngUPolElt -&gt; Mtrx, GaloisData</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4161"><B>LinearRelations(f, I) :</B> RngUPolElt, [RngSLPolElt] -&gt; Mtrx, GaloisData</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4162"><B>VerifyRelation(f, F) :</B> RngUPolElt, RngSLPolElt -&gt; BoolElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4163">Example <B>RngOrdGal_linear-relations</B> (H39E7)</A></FONT><BR>
+<P>&nbsp; &nbsp; &nbsp; <A NAME = "-8"></A><B><A  HREF = "text400.htm#4164">Other</A></B><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4165"><B>ConjugatesToPowerSums(I) :</B> [] -&gt; []</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text400.htm#4166"><B>PowerSumToElementarySymmetric(I) :</B> [] -&gt; []</A></FONT><BR>
+<P>&nbsp; <A NAME = "-9"></A><BR><FONT SIZE="+1"><B><A  HREF = "text401.htm">Subfields</A></B></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text401.htm#4168"><B>Subfields(K, n) :</B> FldAlg, RngIntElt -&gt; [ &lt; FldAlg, Hom &gt; ]</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text401.htm#4169"><B>Subfields(K) :</B> FldAlg -&gt; [ &lt; FldAlg, Hom &gt; ]</A></FONT><BR>
+<P>&nbsp; &nbsp; &nbsp; <A NAME = "-10"></A><B><A  HREF = "text401.htm#4170">The Subfield Lattice</A></B><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text401.htm#4171"><B>SubfieldLattice(K) :</B> FldNum -&gt; SubFldLat</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text401.htm#4172"><B># L :</B> SubFldLat -&gt; RngIntElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text401.htm#4173"><B>Bottom(L) :</B> SubFldLat -&gt; SubFldLatElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text401.htm#4174"><B>Top(L) :</B> SubFldLat -&gt; SubFldLatElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text401.htm#4175"><B>Random(L) :</B> SubFldLat -&gt; SubFldLatElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text401.htm#4176"><B>L ! n :</B> SubFldLat, RngIntElt -&gt; SubFldLatElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text401.htm#4177"><B>NumberField(e) :</B> SubFldLatElt -&gt; FldNum</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text401.htm#4178"><B>EmbeddingMap(e) :</B> SubFldLatElt -&gt; Map</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text401.htm#4179"><B>Degree(e) :</B> SubFldLatElt -&gt; RngIntElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text401.htm#4180"><B>e eq f :</B> SubFldLatElt, SubFldLatElt -&gt; BoolElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text401.htm#4181"><B>e subset f :</B> SubFldLatElt, SubFldLatElt -&gt; BoolElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text401.htm#4182"><B>e * f :</B> SubFldLatElt, SubFldLatElt -&gt; SubFldLatElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text401.htm#4183"><B>e meet f :</B> SubFldLatElt, SubFldLatElt -&gt; SubFldLatElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text401.htm#4184"><B>&amp;meet S :</B> [ SubFldLatElt ] -&gt; SubFldLatElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text401.htm#4185"><B>MaximalSubfields(e) :</B> SubFldLatElt -&gt; [ SubFldLatElt ]</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text401.htm#4186"><B>MinimalOverfields(e) :</B> SubFldLatElt -&gt; [ SubFldLatElt ]</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text401.htm#4187">Example <B>RngOrdGal_SubfieldLattice</B> (H39E8)</A></FONT><BR>
+<P>&nbsp; <A NAME = "-11"></A><BR><FONT SIZE="+1"><B><A  HREF = "text402.htm">Galois Cohomology</A></B></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text402.htm#4189"><B>Hilbert90(a, M) :</B> FldNumElt, Map[FldNum, FldNum] -&gt; FldNumElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text402.htm#4190"><B>SUnitCohomologyProcess(S, U) :</B> {RngOrdIdl}, GrpPerm -&gt; {1}</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text402.htm#4191"><B>IsGloballySplit(C, l) :</B> , UserProgram -&gt; BoolElt, UserProgram</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text402.htm#4192"><B>IsSplitAsIdealAt(I, l) :</B> RngOrdFracIdl, UserProgram -&gt; BoolElt, UserProgram, [RngOrdIdl]</A></FONT><BR>
+<P>&nbsp; <BR><FONT SIZE="+1"><B><A  HREF = "text397.htm">Bibliography</A></B></FONT><BR>
+<br> <A  HREF = "text400.htm">[Next]</A><A  HREF = "text398.htm">[Prev]</A> <A  HREF = "text400.htm">[Right]</A> [____] <A  HREF = "text398.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

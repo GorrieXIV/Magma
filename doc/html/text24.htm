@@ -1,0 +1,620 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Packages</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text25.htm">[Next]</A><A  HREF = "text23.htm">[Prev]</A> <A  HREF = "text25.htm">[Right]</A> <A  HREF = "text23.htm">[Left]</A> <A  HREF = "text21.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "154">Packages</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text24.htm#155">Introduction</A>
+<LI> <A  HREF = "text24.htm#156">Intrinsics</A>
+<LI> <A  HREF = "text24.htm#158">Resolving Calls to Intrinsics</A>
+<LI> <A  HREF = "text24.htm#160">Attaching and Detaching Package Files</A>
+<LI> <A  HREF = "text24.htm#164">Related Files</A>
+<LI> <A  HREF = "text24.htm#165">Importing Constants</A>
+<LI> <A  HREF = "text24.htm#168">Argument Checking</A>
+<LI> <A  HREF = "text24.htm#173">Package Specification Files</A>
+<LI> <A  HREF = "text24.htm#177">User Startup Specification Files</A>
+</UL>
+<H4><A NAME = "155">Introduction</A></H4>
+
+<P>
+<P>
+For brevity, in this section we shall use the term <I>function</I> to include
+both functions and procedures.
+<P>
+The term <I>intrinsic function</I> or <I>intrinsic</I> refers to
+a function whose signature is stored in the system table of signatures.
+In terms of their origin, there are two kinds of intrinsics,
+<I>system intrinsics</I> (or <I>standard functions</I>) and
+<I>user intrinsics</I>, but they are indistinguishable in their use.
+A <I>system intrinsic</I> is an intrinsic that is part of the definition
+of the Magma system, whereas a user intrinsic is an informal
+addition to Magma, created by a user of the system. 
+While most of the standard functions in Magma are implemented in C,
+a growing number are implemented in the Magma language.
+User intrinsics are defined in the Magma language using a <I>package</I>
+mechanism (the same syntax, in fact, as that used by developers
+to write standard functions in the Magma language).
+<P>
+This section explains the construction of user intrinsics
+by means of packages. From now on, <I>intrinsic</I> will be used
+as an abbreviation for <I>user intrinsic</I>.
+<P>
+It is useful to summarize the properties possessed by an intrinsic
+function that are not possessed by an ordinary user-defined function.
+Firstly, the signature of every intrinsic function is stored in the
+system's table of signatures. In particular, such functions will
+appear when signatures are listed and printing the function's name 
+will produce a summary of the behaviour of the function. Secondly, intrinsic
+functions are compiled into the Magma internal pseudo-code. Thus, once
+an intrinsic function has been debugged, it does not have to be compiled
+every time it is needed. If the definition of the function involves a
+large body of code, this can save a significant amount of time when
+the function definition has to be loaded.
+<P>
+An intrinsic function is defined in a special type of file known as a
+<I>package</I>. In general terms a package is a Magma source file 
+that defines constants, one or more intrinsic functions, and
+optionally, some ordinary functions. The definition of an intrinsic 
+function may involve Magma standard functions, functions imported 
+from other packages and functions whose definition is part of the 
+package. It should be noted that constants and functions (other than 
+intrinsic functions) defined in a package will not be visible outside 
+the package, unless they are explicitly imported.
+<P>
+The syntax for the definition of an intrinsic function is similar to 
+that of an ordinary function except that the function header must
+define the function's signature together with text summarizing the 
+semantics of the function. As noted above, an intrinsic function
+definition must reside in a package file. It is necessary for
+Magma to know the location of all necessary package files. A package 
+may be attached or detached through use of the <TT>Attach</TT> or <TT>Detach</TT>
+procedures. More generally, a family of packages residing in a directory
+tree may be specified through provision of a <B>spec</B> file which
+specifies the locations of a collection of packages relative to the 
+position of the spec file.  Automatic attaching of the packages in a
+spec file may be set by means of an environment variable
+(<TT>MAGMA_SYSTEM_SPEC</TT> for the Magma system packages and
+<TT>MAGMA_USER_SPEC</TT> for a users personal packages).
+<P>
+So that the user does not have to worry about explicitly compiling
+packages, Magma has an auto-compile facility that will automatically
+recompile and reload any package that has been modified since the 
+last compilation.  It does this by comparing the time stamp on the 
+source file (as specified in an <TT>Attach</TT> procedure call or spec 
+file) with the time stamp on the compiled code. 
+To avoid the possible inefficiency caused by Magma 
+checking whether the file is up to date every time an 
+intrinsic function is referenced, the user can indicate that the 
+package is stable by including the <TT>freeze;</TT> directive at the 
+top of the package containing the function definition.
+<P>
+A constant value or function defined in the body of a package may be 
+accessed in a context outside of its package through use of the 
+<TT>import</TT> statement. The arguments for an intrinsic function 
+may be checked through use of the <TT>require</TT> statement and its
+variants. These statements have the effect of generating an error
+message at the level of the caller rather than in the called intrinsic
+function.
+<P>
+See also the section on user-defined attributes for the <TT>declare
+attributes</TT> directive to declare user-defined attributes used by
+the package and related packages.
+
+
+<H4><A NAME = "156">Intrinsics</A></H4>
+
+<P>
+<P>
+Besides the definition of <I>constants</I>
+at the top, a package file just consists
+of <I>intrinsics</I>.  There is only one way a intrinsic can be referred to
+(whether from within or without the package).  When a package is <I>attached</I>,
+its intrinsics are incorporated into Magma.  Thus intrinsics are `global' ---
+they affect the global Magma state and there is only one set of Magma 
+intrinsics at any time.  There are no `local' intrinsics.
+<P>
+A package may contain undefined references to identifiers. These are
+presumed to be intrinsics from other packages which will be attached 
+subsequent to the loading of this package.
+<P>
+<P>
+<PRE>
+intrinsic NAME(ARG-LIST) [ -&gt; RET-LIST ]
+{ COMMENT-TEXT }
+statements
+end intrinsic;
+</PRE>
+The syntax of a intrinsic declaration is as above,
+where <I>name</I> is the name of the intrinsic (any identifier; use single quotes
+for non-alphanumeric names like '+'); <I>arg-list</I> is the argument list
+(optionally including parameters preceded by a colon);
+optionally there is an arrow and return type list <I>ret-list</I>;
+the comment text is any text within the braces (precede <TT> }</TT> by a backslash
+to get a right brace within the text, and use <TT>"</TT> to repeat the
+comment from the immediately preceding intrinsic);
+and statements is a list of statements making up the body.
+<I>arg-list</I> is a list of comma-separated arguments of the form
+<P>
+<I>name</I>::<I>type</I>
+<P>
+  ~<I>name</I>::<I>type</I>
+<P>
+  ~<I>name</I>
+where <I>name</I> is the name of the argument (any identifier), and <I>type</I>
+designates the type, which can be either a simple category name, an extended
+type, or one of the following:
+<P>
+<P>
+<PRE>
+.                  Any type
+&lt;category-name&gt;    Simple type name
+[]                 Sequence type
+{}                 Set type
+{[]}               Set or sequence type
+{@@}               Iset type
+{**}               Multiset type
+&lt;&gt;                 Tuple type
+</PRE>
+<P>
+or a <I>composite type</I>:
+<P>
+<P>
+<PRE>
+[&lt;type&gt;]    Sequences over &lt;type&gt;
+{&lt;type&gt;}    Sets over &lt;type&gt;
+{[&lt;type&gt;]}  Sets or sequences over &lt;type&gt;
+{@&lt;type&gt;@}  Indexed sets over &lt;type&gt;
+{*&lt;type&gt;*}  Multisets over &lt;type&gt;
+</PRE>
+<P>
+where <I>type</I> is either a simple or extended type.  The reference form
+<I>type</I> <TT>~</TT><I>name</I> requires that the input argument must be
+initialized to an object of that type.  The
+reference form <TT>~</TT><I>name</I> is a plain reference argument --- it need not
+be initialized.  Parameters may also be specified---these are just as in
+functions and procedures (preceded by a colon).
+If <I>arg-list</I> is followed by " ... " then the intrinsic is <TT>variadic</TT>, with semantics similar to that of a variadic function, described
+previously.
+<P>
+ <I>ret-list</I> is a list of comma-separated simple types.  If there is an
+arrow and the return list, the intrinsic is assumed to be functional;
+otherwise it is assumed to be procedural.
+<P>
+The body of statements should return the correct number and types of
+arguments if the intrinsic is functional, while the body should
+return nothing if the intrinsic is procedural.
+
+
+<HR>
+<H3><A NAME = "157">Example <TT>Func_intrinsic (H2E7)</TT></A></H3>
+A functional intrinsic for greatest common divisors
+taking two integers and returning another:
+<P>
+<P>
+<PRE>
+   intrinsic myGCD(x::RngIntElt, y::RngIntElt) -&gt; RngIntElt
+   { Return the GCD of x and y }
+      return ...;
+   end intrinsic;
+</PRE>
+A procedural intrinsic for Append taking a reference to a sequence Q and any
+object then modifying Q:
+<P>
+<P>
+<PRE>
+   intrinsic Append(~Q::SeqEnum, . x)
+   { Append x to Q }
+       ...;
+   end intrinsic;
+</PRE>
+A functional intrinsic taking a sequence of sets as arguments 2 and 3:
+<P>
+<P>
+<PRE>
+   intrinsic IsConjugate(G::GrpPerm, R::[ { } ], S::[ { } ]) -&gt; BoolElt
+   { True iff partitions R and S of the support of G are conjugate in G } 
+       return ...;
+   end intrinsic;
+</PRE>
+<HR>
+<H4><A NAME = "158">Resolving Calls to Intrinsics</A></H4>
+
+<P>
+<P>
+<P>
+It is often the case that many intrinsics share the same name.  For instance,
+the intrinsic <TT>Factorization</TT> has many implementations for various object
+types.  We will call such intrinsics <I>overloaded intrinsics</I>, or refer to
+each of the participating intrinsics as an <I>overload</I>.  When the user calls
+such an overloaded intrinsic, Magma must choose the "best possible"
+overload.
+<P>
+Magma's overload resolution process is quite simple.  Suppose the user is
+calling an intrinsic of arity r, with a list of parameters &lt; p<sub>1</sub>, ..., p<sub>r</sub> &gt;.  Let the tuple of the types of these parameters be
+&lt; t<sub>1</sub>, ..., t<sub>r</sub> &gt;, and let S be the set of all relevant
+overloads (that is, overloads with the appropriate name and of arity r).  We
+will represent overloads as r-tuples of types.
+<P>
+To pick the "best possible" overload, for each parameter p &isin;{ p<sub>1</sub>, ..., p<sub>r</sub> }, Magma finds the set S<sub>i</sub> &sube;S of participating
+intrinsics which are the best matches for that parameter.  More specifically,
+an intrinsic s = &lt; u<sub>1</sub>, ..., u<sub>r</sub> &gt; is included in S<sub>i</sub> if and
+only if t<sub>i</sub> is a u<sub>i</sub>, and no participating intrinsic s' = &lt; v<sub>1</sub>, ..., v<sub>r</sub> &gt; exists such that t<sub>i</sub> is a v<sub>i</sub> and v<sub>i</sub> is a u<sub>i</sub>.
+Once the sets S<sub>i</sub> are computed, Magma finds their intersection.  If this
+intersection is empty, then there is no match.  If this intersection has
+cardinality greater than one, then the match is ambiguous.  Otherwise, Magma
+calls the overload thus obtained.
+<P>
+An example at this point will make the above process clearer:
+
+
+<HR>
+<H3><A NAME = "159">Example <TT>Func_intrinsic-lookup (H2E8)</TT></A></H3>
+We demonstrate Magma's lookup mechanism with the following example.  Suppose
+we have the following overloaded intrinsics:
+<P>
+<P>
+<P>
+<PRE>
+   intrinsic overloaded(x::RngUPolElt, y::RngUPolElt) -&gt; RngIntElt
+   { Overload 1 }
+      return 1;
+   end intrinsic;
+</PRE>
+<P>
+<P>
+<P>
+<PRE>
+   intrinsic overloaded(x::RngUPolElt[RngInt], y::RngUPolElt) -&gt; RngIntElt
+   { Overload 2 }
+      return 2;
+   end intrinsic;
+</PRE>
+<P>
+<P>
+<P>
+<PRE>
+   intrinsic overloaded(x::RngUPolElt, y::RngUPolElt[RngInt]) -&gt; RngIntElt
+   { Overload 3 }
+      return 3;
+   end intrinsic;
+</PRE>
+<P>
+<P>
+<P>
+<PRE>
+   intrinsic overloaded(x::RngUPolElt[RngInt], y::RngUPolElt[RngInt]) -&gt; RngIntElt
+   { Overload 4 }
+      return 4;
+   end intrinsic;
+</PRE>
+<P>
+The following Magma session illustrates how the lookup mechanism operates
+for the intrinsic <TT>overloaded</TT>:
+<P>
+<P>
+<P>
+<PRE>
+&gt; R1&lt;x&gt; := PolynomialRing(Integers());
+&gt; R2&lt;y&gt; := PolynomialRing(Rationals());
+&gt; f1 := x + 1;
+&gt; f2 := y + 1;
+&gt; overloaded(f2, f2);
+1
+&gt; overloaded(f1, f2);
+2
+&gt; overloaded(f2, f1);
+3
+&gt; overloaded(f1, f1);
+4
+</PRE>
+<HR>
+<H4><A NAME = "160">Attaching and Detaching Package Files</A></H4>
+
+<P>
+<P>
+<P>
+The procedures <TT>Attach</TT> and <TT>Detach</TT> are provided to attach or
+detach package files.
+Once a file is attached, all intrinsics within it are included in Magma.
+If the file is modified, it is automatically recompiled just after the
+user hits return and just before the next statement is executed.  So there
+is no need to re-attach the file (or `re-load' it).  If the recompilation
+of a package file fails (syntax errors, etc.), all of the intrinsics
+of the package file are removed from the Magma session and none of the
+intrinsics of the package file are included again until the package file is
+successfully recompiled.  When errors occur during compilation of a package,
+the appropriate messages are printed with the string `[PC]' at the beginning
+of the line, indicating that the errors are detected by the Magma package
+compiler.
+<P>
+If a package file contains the single directive <TT>freeze;</TT>
+at the top then the package file becomes <TT>frozen</TT> --- it will not be
+automatically recompiled after each statement is entered into Magma.
+A frozen package is recompiled if need be, however, when it is attached
+(thus allowing fixes to be updated) --- the main point of freezing a package
+which is `stable' is to stop Magma looking at it between every statement
+entered into Magma interactively.
+<P>
+When a package file is complete and tested, it is usually installed in
+a spec file so it is automatically attached when the spec file is attached.
+Thus <TT>Attach</TT> and <TT>Detach</TT> are generally only used when one is developing a
+single package file containing new intrinsics.
+
+
+<H5><A NAME = "161">Attach(F) : MonStgElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Procedure to attach the package file F.
+</BLOCKQUOTE>
+<H5><A NAME = "162">Detach(F) : MonStgElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Procedure to detach the package file F.
+</BLOCKQUOTE>
+<H5><A NAME = "163">freeze;</A></H5>
+<BLOCKQUOTE>
+Freeze the package file in which this appears at the top.
+</BLOCKQUOTE>
+<H4><A NAME = "164">Related Files</A></H4>
+
+<P>
+<P>
+There are two files related to any package source file <TT>file.m</TT>:
+<P>
+<PRE>
+file.sig     sig file containing signature information;
+
+file.lck     lock file.
+</PRE>
+<P>
+<P>
+<P>
+The lock file exists while a package file is being compiled.  If someone
+else tries to compile the file, it will just sit there till the lock
+file disappears.
+In various circumstances (system down, Magma crash)
+<TT>.lck</TT> files may be left around; this will mean that the next time
+Magma attempts to compile the
+associated source file it will just sit there indefinitely waiting
+for the <TT>.lck</TT> file to disappear.
+In this case the user should search for <TT>.lck</TT> files that should be 
+removed.
+
+
+<H4><A NAME = "165">Importing Constants</A></H4>
+
+<P>
+
+
+<H5><A NAME = "166">import "filename": ident_list;</A></H5>
+<BLOCKQUOTE>
+This is the general form of the import statement,
+where <TT>"</TT><I>filename</I><TT>"</TT> is a string and <I>ident_list</I> is a list of identifiers.
+<P>
+The import statement is a normal statement and can in fact be used anywhere
+in Magma, but it is recommended that it only be used to import common constants
+and functions/procedures shared between a collection of package files.
+It has the following semantics: for each identifier I in the list 
+<I>ident_list</I>,
+that identifier is declared just like a normal identifier within Magma.
+Within the package file referenced by filename, there should be an assignment
+of the same identifier I to some object O.  When the identifier 
+I is then used
+as an expression after the import statement,
+the value yielded is the object O.
+<P>
+The file that is named in the import statement must already have
+been attached by the time the identifiers are needed.
+The best way to achieve this in practice is to place this file
+in the spec file, along with the package files,
+so that all the files can be attached together.
+<P>
+Thus the only way objects (whether they be normal objects, procedures or
+functions) assigned within packages can be referenced from outside the
+package is by an explicit import with the `import' statement.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "167">Example <TT>Func_import (H2E9)</TT></A></H3>
+Suppose we have a spec file that lists several package files.
+Included in the spec file is the file <TT>defs.m</TT> containing:
+<P>
+<P>
+<PRE>
+       MY_LIMIT := 10000;
+
+       function fred(x)
+   	    return 1/x;
+       end function;
+</PRE>
+Then other package files (in the same directory) listed in the spec file
+which wish to use these definitions would have the line
+<P>
+<P>
+<PRE>
+	import "defs.m": MY_LIMIT, fred;
+</PRE>
+at the top.  These could then be used inside any intrinsics of such
+package files.
+(If the package files are not in the same directory,
+the pathname of <TT>defs.m</TT> will have to be given appropriately
+in the import statement.)
+<HR>
+<H4><A NAME = "168">Argument Checking</A></H4>
+
+<P>
+<P>
+Using `require' etc. one can do argument checking easily within intrinsics.
+If a necessary condition on the argument fails to hold, then the relevant
+error message is printed and the error pointer refers to the caller of the
+intrinsic.  This feature allows user-defined intrinsics to treat errors
+in actual arguments in exactly the same way as they are treated by the
+Magma standard functions.
+
+
+<H5><A NAME = "169">require condition: <I>print_args</I>;</A></H5>
+<BLOCKQUOTE>
+The expression <I>condition</I> may be any yielding a Boolean value.  If
+the value is false, then <I>print_args</I> is printed and execution
+aborts with the error pointer pointing to the caller.  The print
+arguments <I>print_args</I> can consist of any expressions (depending
+on arguments or variables already defined in the intrinsic).
+</BLOCKQUOTE>
+<H5><A NAME = "170">requirerange v, L, U;</A></H5>
+<BLOCKQUOTE>
+The argument variable v must be the name of one of the argument
+variables (including parameters) and must be of integer type.
+The bounds L and U may be any expressions each yielding an
+integer value.  If v is not in the range
+[L, ..., U], then an appropriate error message is
+printed and execution aborts with the error pointer pointing
+to the caller.
+</BLOCKQUOTE>
+<H5><A NAME = "171">requirege v, L;</A></H5>
+<BLOCKQUOTE>
+The argument variable v must be the name of one of the argument
+variables (including parameters) and must be of integer type.
+The bound L must yield an integer value.  If v 
+is not greater than or equal to L, then an appropriate
+error message is printed and execution aborts with the error
+pointer pointing to the caller.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "172">Example <TT>Func_require (H2E10)</TT></A></H3>
+<P>
+A trivial version of <TT>Binomial(n, k)</TT> which checks that n&ge;0 and
+0 &le;k &le;n.
+<P>
+<P>
+<PRE>
+   intrinsic Binomial(n::RngIntElt, k::RngIntElt) -&gt; RngIntElt
+   { Return n choose k }
+       requirege n, 0;
+       requirerange k, 0, n;
+       return Factorial(n) div Factorial(n - k) div Factorial(k);
+   end intrinsic;
+</PRE>
+A simple function to find a random p-element of a group G.
+<P>
+<P>
+<PRE>
+   intrinsic pElement(G::Grp, p::RngIntElt) -&gt; GrpElt
+   { Return p-element of group G }
+      require IsPrime(p): "Argument 2 is not prime";
+      x := random{x: x in G | Order(x) mod p eq 0};
+      return x^(Order(x) div p);
+   end intrinsic;
+</PRE>
+<HR>
+<H4><A NAME = "173">Package Specification Files</A></H4>
+
+<P>
+<P>
+<P>
+A <I>spec file</I> (short for `specification file') lists a complete tree of
+Magma package files.  This makes it easy to collect many package files
+together and attach them simultaneously. 
+<P>
+The specification file consists of a list of tokens which are just
+space-separated words.  The tokens describe a list of package files and
+directories containing other packages.  The list is described as follows.
+The files that are to be attached in the directory indicated by S
+are listed enclosed in <TT>{ </TT> and <TT> }</TT> characters. A directory
+may be listed there as well, if it is followed by a list of files
+from that directory (enclosed in braces again); arbitrary nesting
+is allowed this way.  A filename of the form <TT>+</TT><I>spec</I> is
+interpreted as another specification file whose contents will be recursively
+attached when <TT>AttachSpec</TT> (below) is called.
+The files are taken relative to the directory that contains the specification
+file.
+See also the example below.
+
+
+<H5><A NAME = "174">AttachSpec(S) : MonStgElt -&gt;</A></H5>
+<BLOCKQUOTE>
+If S is a string indicating the name of a spec file, this command
+attaches all the files listed in S. The format of the spec file is
+given above.
+</BLOCKQUOTE>
+<H5><A NAME = "175">DetachSpec(S) : MonStgElt -&gt;</A></H5>
+<BLOCKQUOTE>
+If S is a string indicating the name of a spec file, this command
+detaches all the files listed in S. The format of the spec file
+is given above.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "176">Example <TT>Func_spec (H2E11)</TT></A></H3>
+Suppose we have a spec file /home/user/spec consisting of the following lines:
+<P>
+<P>
+<PRE>
+{
+   Group
+   {
+      chiefseries.m
+      socle.m
+   }
+   Ring
+   {
+      funcs.m
+      Field
+      {
+            galois.m
+      }
+   }
+}
+</PRE>
+Then there should be the files
+<P>
+<P>
+<PRE>
+      /home/user/spec/Group/chiefseries.m
+      /home/user/spec/Group/socle.m
+      /home/user/spec/Ring/funcs.m
+      /home/user/spec/Ring/Field/galois.m
+</PRE>
+and if one typed within Magma
+<P>
+<P>
+<PRE>
+      AttachSpec("/home/user/spec");
+</PRE>
+then each of the above files would be attached.  If instead of
+the filename <TT>galois.m</TT> we have <TT>+galspec</TT>, then the
+file <TT>/home/user/spec/Ring/Field/galspec</TT> would be a specification
+file itself whose contents would be recursively attached.
+<HR>
+<H4><A NAME = "177">User Startup Specification Files</A></H4>
+
+<P>
+<P>
+<P>
+The user may specify a list of spec files to be attached automatically
+when Magma starts up.  This is done by setting the environment variable
+<TT>MAGMA_USER_SPEC</TT> to a colon separated list of spec files.
+
+
+<HR>
+<H3><A NAME = "178">Example <TT>Func_startup-spec (H2E12)</TT></A></H3>
+One could have
+<P>
+<P>
+<PRE>
+      setenv MAGMA_USER_SPEC "$HOME/Magma/spec:/home/friend/Magma/spec"
+</PRE>
+in one's <TT>.cshrc</TT> .  Then when Magma starts up, it will attach all 
+packages listed in the spec files <TT>$HOME/Magma/spec</TT> and 
+<TT>/home/friend/Magma/spec</TT>.
+<HR>
+<PRE></PRE> <A  HREF = "text25.htm">[Next]</A><A  HREF = "text23.htm">[Prev]</A> <A  HREF = "text25.htm">[Right]</A> <A  HREF = "text23.htm">[Left]</A> <A  HREF = "text21.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,62 @@
+/////////////////////////////////////////////////////////////////////////
+// divisors
+// $Revision: 31078 $
+// $Date: 2010-11-30 23:38:30 +1100 (Tue, 30 Nov 2010) $
+// $LastChangedBy: kasprzyk $
+/////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////
+// Divisors and torision Picard group
+/////////////////////////////////////////////////////////////////////////
+"------\nDivisors and torision Picard group\n";
+
+L:=ToricLattice(2 : name:="silly");
+F:=Fan([L|[0,1],[2,1]],[[1],[2]]);
+X<x1,x2>:=ToricVariety(Rationals(),F);
+D:=Divisor(X,x1);
+assert not IsPrincipal(D);
+assert IsCartier(D);
+assert IsQPrincipal(D);
+assert Dimension(PicardLattice(X)) eq 0;
+
+X<x0,x1,x2,x3,x4>:=FakeProjectiveSpace(Rationals(),[1,1,2,3,4],[[0,1/5,1/5,1/5,1/5],[1/5,0,2/5,2/5,0]]);
+DX:=Divisor(X,x4);
+assert IsQCartier(DX);
+assert not IsCartier(DX);
+assert not IsCartier(5*DX);
+assert not IsPrincipal(DX);
+assert not IsLinearlyEquivalentToCartier(DX);
+assert not IsLinearlyEquivalentToCartier(5*DX);
+
+F:=Fan(X);
+F3:=Skeleton(F,3);
+Y<y0,y1,y2,y3,y4>:=ToricVariety(Rationals(), F3);
+psi:=ToricVarietyMap(Y,X);
+DY:=Pullback(psi,DX);
+assert not IsCartier(DY);
+assert IsCartier(5*DY);
+assert not IsPrincipal(DY);
+assert not IsLinearlyEquivalentToCartier(DY);
+assert IsLinearlyEquivalentToCartier(5*DY);
+DY2:=Divisor(Y,y0^5*y3^5);
+assert AreLinearlyEquivalent(5*DY,DY2);
+
+F1:=Skeleton(F,1);
+Z<z0,z1,z2,z3,z4>:=ToricVariety(Rationals(), F1);
+psi:=ToricVarietyMap(Z,Y);
+DZ:=Pullback(psi,DY);
+assert IsCartier(DZ);
+assert IsCartier(5*DZ);
+assert not IsPrincipal(DZ);
+assert IsLinearlyEquivalentToCartier(DZ);
+assert IsLinearlyEquivalentToCartier(5*DZ);
+DZ2:=Divisor(Z,z0^5*z3^5);
+assert AreLinearlyEquivalent(5*DZ,DZ2);
+
+/////////////////////////////////////////////////////////////////////////
+// Finally, clear the caches
+/////////////////////////////////////////////////////////////////////////
+"------\nClearing caches\n";
+
+CacheClearToricVariety();
+CacheClearToricLattice();

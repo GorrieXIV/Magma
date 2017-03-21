@@ -1,0 +1,110 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Overconvergent Modular  Forms</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1587.htm">[Next]</A><A  HREF = "text1585.htm">[Prev]</A> <A  HREF = "text1587.htm">[Right]</A> <A  HREF = "text1585.htm">[Left]</A> <A  HREF = "text1570.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "17713">Overconvergent Modular  Forms</A></H3>
+
+<P>
+<P>
+These routines compute characteristic series of operators on overconvergent modular forms.
+While these are p-adic modular forms, the result also gives information about classical 
+spaces: it determines the characteristic series up to a congruence (details are given below).
+The big advantage of this approach is that extremely large weights can be handled
+(the method works by indirectly computing a small part of the large space).
+<P>
+The algorithm has a running time which is linear in log(k), where k is the weight.
+The implementation for level 1 is well optimized.
+<P>
+The algorithm is given in Algorithms 1 and 2 of <A  HREF = "text1569.htm#bib_Lauder">[Lau11]</A>.  Suggestions of 
+David Loeffler and John Voight are used in generating certain spaces of classical 
+modular forms for level N &ge;2.
+
+
+<H5><A NAME = "17714">OverconvergentHeckeSeriesDegreeBound(p, N, k, m) : RngIntElt, RngIntElt, RngIntElt, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+This returns a bound on the degree of the characteristic series modulo p<sup>m</sup> of the Atkin U<sub>p</sub> operator
+on the space of overconvergent p-adic modular forms of (even) weight k and level &Gamma;<sub>0</sub>(N).
+This bound is due to Daqing Wan and depends only on k modulo p - 1 rather than k itself.
+</BLOCKQUOTE>
+<H5><A NAME = "17715">OverconvergentHeckeSeries(p, N, k, m) : RngIntElt, RngIntElt, RngIntElt, RngIntElt -&gt; RngUPolElt</A></H5>
+<H5>OverconvergentHeckeSeries(p, N, k, m) : RngIntElt, RngIntElt, [ RngIntElt ], RngIntElt -&gt; [ RngUPolElt ]</H5>
+<H5>OverconvergentHeckeSeries(p, chi, k, m) : RngIntElt, GrpDrchElt, RngIntElt, RngIntElt -&gt; RngUPolElt, RngPadElt</H5>
+<H5>OverconvergentHeckeSeries(p, chi, k, m) : RngIntElt, GrpDrchElt, [ RngIntElt ], RngIntElt -&gt; [ RngUPolElt ], RngPadElt</H5>
+
+<PRE>    WeightBound: RngIntElt              Default: </PRE>
+<BLOCKQUOTE>
+This returns the characteristic series P(t) modulo p<sup>m</sup> of the Atkin U<sub>p</sub> operator acting
+on the space of overconvergent p-adic modular forms of weight k and level &Gamma;<sub>0</sub>(N),
+or with character <TT>chi</TT> on &Gamma;<sub>1</sub>(N) when <TT>chi</TT> is the second argument.
+<P>
+The first argument must be a prime p &ge;5 not dividing N.
+<P>
+The third argument may be either a single weight or a sequence of weights, in which case 
+the function returns a sequence containing the characteristic series for each weight.
+The given weights must be congruent to each other modulo p - 1.
+Note that it is more efficient to compute several weights together rather than separately.
+(In particular, the part of the algorithm which builds up spaces from classical spaces of
+low weight can be done for all the weights together.)
+<P>
+When the second argument is a character <TT>chi</TT>, it must take values in a cyclotomic field.
+In this case the function returns a second value: a p-adic integer that defines the embedding
+of the cyclotomic field in the p-adic field.
+<P>
+When m &le;k - 1, by Coleman's theorem, P(t) is also the reverse characteristic polynomial modulo p<sup>m</sup> 
+of the Atkin U<sub>p</sub> operator on the space of classical modular forms of level &Gamma;<sub>0</sub>(Np) and weight k,
+In addition, when m &le;(k - 2)/2, P(t) is the reverse characteristic polynomial modulo p<sup>m</sup> of the 
+Hecke T<sub>p</sub> operator on the space of classical modular forms of level &Gamma;<sub>0</sub>(N) and weight k.
+<P>
+The optional parameter <TT>WeightBound</TT> is a bound on the weight of the forms used to generate certain
+spaces of classical modular forms that are used at one point in the algorithm (for level N &ge;2).
+The default value is 6 for the case of &Gamma;<sub>0</sub>(N) and for the case of even character <TT>chi</TT>,
+and 3 for odd <TT>chi</TT>. 
+For most levels, the algorithm terminates more quickly with <TT>WeightBound</TT> 4 rather than 6.
+For some small levels, the algorithm may fail to terminate with these settings,
+however it will terminate when <TT>WeightBound</TT> is set to a sufficiently large value.  
+There is some randomization in the algorithm, which may also cause variation in running time.
+The output is proven correct in all instances where the algorithm terminates.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17716">Example <TT>ModFrm_overconvergent (H138E19)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; _&lt;t&gt; := PolynomialRing(Integers()); // use t for printing
+&gt; time OverconvergentHeckeSeries(5,11,10000,5);
+625*t^8 + 375*t^7 + 1275*t^6 - 875*t^5 - 661*t^4 + 335*t^3 + 1189*t^2 + 861*t + 1
+Time: 0.300
+&gt; time OverconvergentHeckeSeries(5,11,10000,5 : WeightBound := 4);
+625*t^8 + 375*t^7 + 1275*t^6 - 875*t^5 - 661*t^4 + 335*t^3 + 1189*t^2 + 861*t + 1
+Time: 0.130
+</PRE>
+Note that the same result was obtained each time, 
+but the weight bound reduced the computational work involved.
+<P>
+<P>
+<PRE>
+&gt; OverconvergentHeckeSeries(7,3,[1000,1006],5);
+[
+    7203*t^6 - 4116*t^5 + 6713*t^4 - 700*t^3 - 4675*t^2 - 4426*t + 1,
+    2401*t^6 + 8134*t^4 - 3976*t^3 + 5160*t^2 + 5087*t + 1
+]
+&gt; Pseq := OverconvergentHeckeSeries(7,3,[1000,1006],5: WeightBound := 4);
+&gt; assert Pseq eq $1; // check that it is the same as the previous result
+&gt; OverconvergentHeckeSeriesDegreeBound(7,3,1000,5);
+9
+&gt; OverconvergentHeckeSeries(29,1,10000,10);
+    134393786323419*t^8 - 174295724342741*t^7 - 174857545225000*t^6 
+    - 153412311426730*t^5 + 41820892464727*t^4 - 148803482429283*t^3 
+    - 111232323996568*t^2 + 165679475331974*t + 1
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1587.htm">[Next]</A><A  HREF = "text1585.htm">[Prev]</A> <A  HREF = "text1587.htm">[Right]</A> <A  HREF = "text1585.htm">[Left]</A> <A  HREF = "text1570.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

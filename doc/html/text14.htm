@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Runtime Evaluation: the eval Expression</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text15.htm">[Next]</A><A  HREF = "text13.htm">[Prev]</A> <A  HREF = "text15.htm">[Right]</A> <A  HREF = "text13.htm">[Left]</A> <A  HREF = "text3.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "93">Runtime Evaluation: the eval Expression</A></H3>
+
+<P>
+<P>
+<P>
+Sometimes it is convenient to able to evaluate expressions that are dynamically
+constructed at runtime.  For instance, consider the problem of implementing a
+database of mathematical objects in Magma.  Suppose that these mathematical
+objects are very large, but can be constructed in only a few lines of Magma
+code (a good example of this would be Magma's database of best known linear
+codes).  It would be very inefficient to store these objects in a file for
+later retrieval; a better solution would be to instead store a string giving
+the code necessary to construct each object.  Magma's <TT>eval</TT> feature
+can then be used to dynamically parse and execute this code on demand.
+
+
+<H5><A NAME = "94">eval expression</A></H5>
+<BLOCKQUOTE>
+The <TT>eval</TT> expression works as follows:  first, it evaluates the given <I>expression</I>, which must evaluate to a string.  This string is then treated as a
+piece of Magma code which yields a result (that is, the code must be an
+expression, not a statement), and this result becomes the result of the <TT>eval</TT> expression.
+<P>
+The string that is evaluated can be of two forms:  it can be a Magma
+expression, e.g., "<TT>1+2</TT>", "<TT>Random(x)</TT>", or it can be a sequence
+of Magma statements.  In the first case, the string does not have to be
+terminated with a semicolon, and the result of the expression given in the
+string will be the result of the <TT>eval</TT> expression.  In the second case,
+the last statement given in the string should be a <TT>return</TT> statement; it
+is easiest to think of this case as defining the body of a function.
+<P>
+The string that is used in the <TT>eval</TT> expression can refer to any variable
+that is in scope during the evaluation of the <TT>eval</TT> expression.  However,
+it is not possible for the expression to <I>modify</I> any of these variables.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "95">Example <TT>State_eval1 (H1E17)</TT></A></H3>
+In this example we demonstrate the basic usage of the <TT>eval</TT> keyword.
+<P>
+<P>
+<PRE>
+&gt; x := eval "1+1";  // OK
+&gt; x;
+2
+&gt; eval "1+1;"; // not OK
+2
+
+&gt;&gt; eval "1+1;"; // not OK
+   ^
+Runtime error: eval must return a value
+
+&gt; eval "return 1+1;"; // OK
+2
+&gt; eval "x + 1"; // OK
+3
+&gt; eval "x := x + 1; return x"; 
+&gt;&gt; eval "x := x + 1; return x"; 
+   ^
+
+In eval expression, line 1, column 1:
+&gt;&gt; x := x + 1; return x;
+   ^
+    Located in:
+    &gt;&gt; eval "x := x + 1; return x"; 
+       ^
+User error: Imported environment value 'x' cannot be used as a local
+</PRE>
+<HR>
+<H3><A NAME = "96">Example <TT>State_eval2 (H1E18)</TT></A></H3>
+In this example we demonstrate how <TT>eval</TT> can be used to construct Magma
+objects specified with code only available at runtime.
+<P>
+<P>
+<PRE>
+&gt; M := Random(MatrixRing(GF(2), 5));
+&gt; M;
+[1 1 1 1 1]
+[0 0 1 0 1]
+[0 0 1 0 1]
+[1 0 1 1 1]
+[1 1 0 1 1]
+&gt; Write("/tmp/test", M, "Magma");
+&gt; s := Read("/tmp/test");
+&gt; s;
+MatrixAlgebra(GF(2), 5) ! [ GF(2) | 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1,
+1, 0, 1, 1, 1, 1, 1, 0, 1, 1 ]
+
+&gt; M2 := eval s;
+&gt; assert M eq M2;
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text15.htm">[Next]</A><A  HREF = "text13.htm">[Prev]</A> <A  HREF = "text15.htm">[Right]</A> <A  HREF = "text13.htm">[Left]</A> <A  HREF = "text3.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

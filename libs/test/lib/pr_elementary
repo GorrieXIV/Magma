@@ -1,0 +1,139 @@
+pi := Pi(R, 100);
+root2 := Sqrt(R!2);
+for x in Q do
+    if Norm((Sqrt(x)^2) - x) gt epsilon then
+	print "ERROR: Sqrt: ", x, Norm((Sqrt(x)^2) - x) gt epsilon;
+    end if;
+end for;
+
+// Test some special values
+
+assert(Sin(zero) - zero lt epsilon);
+assert(Sin(pi) - zero lt epsilon);
+assert(Sin(pi/2) - one lt epsilon);
+assert(Sin(pi/4) - root2/2 lt epsilon);
+
+assert(Cos(zero) - one lt epsilon);
+assert(Cos(pi) - one lt epsilon);
+assert(Cos(pi/2) - zero lt epsilon);
+assert(Cos(pi/4) - root2/2 lt epsilon);
+
+assert(Tan(zero) - zero lt epsilon);
+assert(Tan(pi/4) - one lt epsilon);
+
+// Test ordinary/hyperbolic consistency
+
+values := [i * pi / 12: i in [-12 .. 12]];
+for x, y in values do
+    z := x + i * y;
+    print z;
+    sx, cx := Sincos(x);
+    if sx^2 + cx^2 - one gt epsilon then
+	print "ERROR: c^2 + s^2", x, sx^2 + cx^2 - one;
+    end if;
+    /*
+    shy := Sinh(y);
+    chy := Cosh(y);
+    if chy^2 - shy^2 - one gt epsilon then
+	print "ERROR: ch^2 - sh^2", y, chy^2 + shy^2 - one;
+    end if;
+    ez := Exp(i * z);
+    emz := Exp(i * (-z));
+    sz := Sin(z);
+    if Re(sz) - sx * chy gt epsilon then
+	print "ERROR: Real(Sin): ", z, Re(sz) - sx * chy;
+    end if;
+    if Im(sz) - shy * cx gt epsilon then
+	print "ERROR: Imag(Sin): ", z, Im(sz) - shy * cx;
+    end if;
+    if Norm(sz - (ez - emz)/(2*i)) gt epsilon then
+	print "ERROR: Sin vs Exp: ", z, Norm(sz - (ez - emz)/(2*i));
+    end if;
+    if Norm(sz - Sinh(i * z) / i) gt epsilon then
+	print "ERROR: Sin vs Sinh: ", z, Norm(sz - Sinh(i * z) / i);
+    end if;
+    cz := Cos(z);
+    if Re(cz) - cx * chy gt epsilon then
+	print "ERROR: Real(Cos): ", z, Re(cz) - cx * chy;
+    end if;
+    if Im(cz) + shy * sx gt epsilon then
+	print "ERROR: Imag(Cos): ", z, Im(cz) - shy * sx;
+    end if;
+    if Norm(cz - (ez + emz)/2) gt epsilon then
+	print "ERROR: Cos vs Exp: ", z, Norm(cz - (ez + emz)/2);
+    end if;
+    if Norm(cz - Cosh(i * z)) gt epsilon then
+	print "ERROR: Cos vs Cosh: ", z, Norm(cz - Cosh(i * z));
+    end if;
+    if Norm(cz) gt epsilon then
+	tz := Tan(z);
+	if Norm(tz - sz / cz) gt epsilon then
+	    print "ERROR: Tan != Sin/Cos", z, Norm(tz - sz/cz);
+	end if;
+	den := cx^2 * chy^2 + sx^2 * shy^2;
+	if Re(tz) - (sx * cx / den) gt epsilon then
+	    print "ERROR: Real(Tan): ", z, Re(tz) - (sx * cx / den);
+	end if;
+	if Im(tz) - (shy * chy / den) gt epsilon then
+	    print "ERROR: Imag(Tan): ", z, Im(tz) - (shy * chy / den);
+	end if;
+	if Norm(tz - (ez - emz)/(i * (ez + emz))) gt epsilon then
+	    print "ERROR: Tan vs. Exp: ", z, Norm(tz - (ez-emz)/(i * (ez+emz)));
+	end if;
+	if Norm(tz - Tanh(i * z) / i) gt epsilon then
+	    print "ERROR: Tan vs. Tanh: ", z, Norm(tz - Tanh(i * z) / i);
+	end if;
+    end if;
+    */
+    if not IsZero(x) then
+	if IsZero(y) then
+	    a := zero;
+	else
+	    a := Arctan(y/x);
+	end if;
+	if x lt zero then
+	    if a le zero then
+		a := a + pi;
+	    else
+		a := a - pi;
+	    end if;
+	end if;
+	if Abs(Arg(z) - a) gt epsilon then
+	    print "ERROR: Arg vs. Tan: ", z, Abs(Arg(z) - a), Arg(z), a;
+	end if;
+    end if;
+end for;
+
+// Test inverse function consistency
+values := [R!i / 10: i in [-20 .. 20]];
+for x, y in values do
+    z := x + i * y;
+    print z;
+    if Norm(Sin(Arcsin(z)) - z) gt epsilon then
+	print "ERROR: Arcsin vs Sin", z, Norm(Sin(Arcsin(z)) - z);
+    end if;
+    if Norm(Cos(Arccos(z)) - z) gt epsilon then
+	print "ERROR: Arccos vs Cos", z, Norm(Cos(Arccos(z)) - z);
+    end if;
+    if not IsZero(x) or (not IsOne(y) and not IsMinusOne(y)) then
+	if Norm(Tan(Arctan(z)) - z) gt epsilon then
+	    print "ERROR: Arctan vs Tan", z, Norm(Tan(Arctan(z)) - z);
+	end if;
+    end if;
+    if Norm(Sinh(Argsinh(z)) - z) gt epsilon then
+	print "ERROR: Argsinh vs Sinh", z, Norm(Sinh(Argsinh(z)) - z);
+    end if;
+    if Norm(Cosh(Argcosh(z)) - z) gt epsilon then
+	print "ERROR: Argcosh vs Cosh", z, Norm(Cosh(Argcosh(z)) - z);
+    end if;
+    if (not IsOne(x) and not IsMinusOne(x)) or not IsZero(y) then
+	if Norm(Tanh(Argtanh(z)) - z) gt epsilon then
+	    print "ERROR: Argtanh vs Tanh", z, Norm(Tanh(Argtanh(z)) - z);
+	end if;
+    end if;
+    if not IsZero(x) or not IsZero(y) then
+	if Norm(Exp(Log(z)) - z) gt epsilon then
+	    print "ERROR: Log vs Exp", z, Norm(Exp(Log(z)) - z);
+	end if;
+    end if;
+end for;

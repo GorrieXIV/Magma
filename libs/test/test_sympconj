@@ -1,0 +1,129 @@
+testsp0 := procedure(n,q)
+  printf "Conjugacy test in Sp(%o,%o)\n", n, q;
+  G := SymplecticGroup(n,q);
+  reps := ClassRepresentativesSp(n,q);
+  cc := Classes(G : Al := "Random");
+  ndx := {};
+  for X in reps do
+    assert exists(i){ i : i in [1..#cc] | IsConjugate(G,X,cc[i][3]) };
+    Include(~ndx, i);
+  end for;
+  assert #reps eq #ndx;
+  print "Passed\n";
+end procedure;
+
+testsp0(4,3);
+
+testcsp1:= procedure(n,q)
+  printf "Conjugacy class sizes in CSp(%o,%o)\n", n, q;
+  G := ConformalSymplecticGroup(n,q);
+  cc := Classes(G);
+  assert #G eq &+ [ c[2] : c in cc ];
+  print "Passed\n";
+end procedure;
+
+testcsp1(4,3);
+
+testsp1 := procedure(n,q)
+  printf "Number of class invariants for Sp(%o,%o)\n", n,q;
+  f := Nclasses("symplecticOdd",n);
+  assert #ClassInvariantsSp(n,q) eq Evaluate(f,q);
+  print "Passed\n";
+end procedure;
+
+testsp1(6,5);
+testsp1(6,9);
+
+testsp2 := procedure(n,r)
+  printf "Conjugacy invariants and representatives for Sp(%o,%o)\n", n,r;
+  for mu in ClassInvariantsSp(n,r) do
+    g := RepresentativeMatrixSp(mu);
+    c := ConjugacyInvariantSp(g);
+    assert mu eq c;
+  end for;
+  print "Passed\n";
+end procedure;
+
+testsp2(4,3);
+testsp2(8,5);
+
+testcsp2 := procedure(n,r)
+  printf "Conjugacy invariants for CSp(%o,%o)\n", n,r;
+  for mu in ClassInvariantsCSp(n,r) do
+    g := RepresentativeMatrixCSp(mu);
+    c := ConjugacyInvariantCSp(g);
+    assert mu eq c;
+  end for;
+  print "Passed\n";
+end procedure;
+
+testcsp2(4,5);
+
+testsp3 := procedure(n,r)
+  printf "Centraliser orders for Sp(%o,%o)\n", n,r;
+  S := Sp(n,r);
+  for mu in ClassInvariantsSp(n,r) do
+    g := RepresentativeMatrixSp(mu);
+    assert #Centraliser(S,g) eq CentraliserOrderSp(mu);
+  end for;
+  print "Passed\n";
+end procedure;
+
+testsp3(4,3);
+testsp3(6,3);
+
+testsp4 := procedure(n,r)
+  printf "Number of conjugacy classes for Sp(%o,%o)\n", n,r;
+  cc := ClassesSp(n,r);
+  assert #cc eq Evaluate(Nclasses("symplecticOdd",n),r);
+  print "Passed\n";
+end procedure;
+
+testsp4(6,3);
+
+testcsp5 := procedure(n,q)
+  printf "Conjugacy coverage test for CSp(%o,%o)\n", n, q;
+  C := CSp(n,q);
+  ci := ClassInvariantsCSp(n,q);
+  X := [C!RepresentativeMatrixCSp(mu) : mu in ci];
+  if exists(i,j){ <i,j> : i in [1..j-1], j in [2..#ci] |
+    IsConjugate(C,X[i],X[j]) } then
+    print "Error at", i,j;
+  else
+    print "Distinct conjugates";
+  end if;
+  assert #C eq &+[ #C div CentraliserOrderCSp(inv) : inv in ci ];
+  print "Passed\n";
+end procedure;
+
+testcsp5(4,3);
+
+testcsp6 := procedure(n,q,m)
+  printf "Conjugacy classes for ExtendedSp(%o,%o,%o)\n", n,q,m;
+  G := ExtendedSp(n,q,m);
+  time cc := Classes(G);
+  reps := { c[3] : c in cc };
+  time cr := ClassRepresentativesExtSp(n,q,m);
+  forall{ g : g in reps | exists{ h : h in cr | IsConjugate(G,g,h) } };
+  forall{ h : h in cr | exists{ g : g in reps | IsConjugate(G,g,h) } };
+  print "Passed\n";
+end procedure;
+
+testcsp6(4,7,2);
+testcsp6(4,7,3);
+
+
+testcsp7 := procedure(n,q,m)
+  printf "Class sizes in ExtendedSp(%o,%o,%o)\n", n,q,m;
+  time cc := ClassesExtSp(n,q,m);
+  assert #ExtendedSp(n,q,m) eq &+[ c[2] : c in cc ];
+  print "Passed\n";
+end procedure;
+
+testcsp7(4,7,2);
+testcsp7(4,7,3);
+testcsp7(6,7,2);
+testcsp7(6,7,3);
+testcsp7(4,13,4);
+testcsp7(4,13,6);
+

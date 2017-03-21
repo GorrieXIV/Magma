@@ -1,0 +1,576 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Toric Lattices</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1728.htm">[Next]</A><A  HREF = "text1734.htm">[Prev]</A> <A  HREF = "text1728.htm">[Right]</A> <A  HREF = "text1734.htm">[Left]</A> <A  HREF = "text1729.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "19142">Toric Lattices</A></H3>
+
+<P>
+<P>
+One often begins to study toric geometry by considering
+a `lattice' L=(Z)<sup>n</sup> and discussing polygons or cones in its
+overlying rational (or real) vector space L<sub>Q</sub> = L tensor (Q)
+whose vertices lie on L; these are examples of so-called
+`lattice polytopes'.
+Anybody who has given a seminar on toric geometry will know
+the constant frustration of distinguishing between L and
+L<sub>Q</sub> (or worse, a bit later in the story, the duals of these).
+In Magma, we bind these two spaces together in a single object,
+a <I>toric lattice</I>.
+These spaces lie underneath all the combinatorics.
+It is not often necessary to be explicit about them,
+since the package handles them invisibly in the background,
+but they are useful for the usual parent and data typing purposes:
+when one creates an empty sequence intended to house
+elements of a toric lattice, it should be properly typed
+from the outset, for instance.
+Toric lattices created as duals record that relationship.
+<P>
+Toric lattices are of type <TT>TorLat</TT> and their elements
+are of type <TT>TorLatElt</TT>.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1735.htm#19143">Toric Lattices</A>
+<LI> <A  HREF = "text1735.htm#19152">Points of Toric Lattices</A>
+<LI> <A  HREF = "text1735.htm#19171">Operations on Toric Lattices</A>
+<LI> <A  HREF = "text1735.htm#19186">Maps of Toric Lattices</A>
+</UL>
+<H4><A NAME = "19143">Toric Lattices</A></H4>
+
+<P>
+<P>
+A toric lattice is a finite-dimensional rational vector space
+with a distinguished free Z-module L that spans it:
+it is the pair L tensor Q &sup;L where L isomorphic to Z<sup>n</sup>.
+We usually refer to the toric lattice as L, and
+although the feeling of using L is that it is simply
+the given Z-module, the covering vector space allows fluent
+working with non-integral points of L.
+
+
+<H5><A NAME = "19144">ToricLattice(n) : RngIntElt -&gt; TorLat</A></H5>
+<BLOCKQUOTE>
+Create an n-dimensional toric lattice Q<sup>n</sup> &sup;Z<sup>n</sup>.
+The integer n must be non-negative.
+</BLOCKQUOTE>
+<H5><A NAME = "19145">ScalarLattice() : -&gt; TorLat</A></H5>
+<BLOCKQUOTE>
+The unique one-dimensional toric lattice of scalars Q&sup;Z.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19146">Example <TT>Polyhedra_empty-toric-lattice-sequence (H149E16)</TT></A></H3>
+A properly typed sequence of points of a toric lattice
+can be summed with the usual convention.
+<P>
+<P>
+<PRE>
+&gt; L := ToricLattice(3);
+&gt; nopoints := [ L | ];
+&gt; &amp;+ nopoints;
+(0, 0, 0)
+</PRE>
+A toric lattice is really a vector space marked with a
+finitely-generated <B>Z</B>-module that spans it.
+In particular, its points may well have rational coefficients,
+although those with integral coefficients are distinguished.
+<P>
+<P>
+<PRE>
+&gt; somepoints := [ L | [1/2,2/3,3/4], [1,2,3] ];
+&gt; [ IsIntegral(v) : v in somepoints ];
+[ false, true ]
+</PRE>
+<HR>
+<H5><A NAME = "19147">Dual(L) : TorLat -&gt; TorLat</A></H5>
+<BLOCKQUOTE>
+The dual lattice of the toric lattice L.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19148">Example <TT>Polyhedra_dual-toric-lattice (H149E17)</TT></A></H3>
+The dual of a toric lattice is also a toric lattice: integrality
+of dual points is clear.
+<P>
+<P>
+<PRE>
+&gt; L := ToricLattice(2);
+&gt; L;
+2-dimensional toric lattice L = Z^2
+&gt; M := Dual(L);
+&gt; M;
+2-dimensional toric lattice M = (Z^2)^*
+</PRE>
+Magma's default printing for toric lattices tries to help
+keep track of which lattice is which---this becomes more
+useful when working with toric varieties.
+The relationship between L and M is preserved, and double-dual
+returns L.
+<P>
+<P>
+<PRE>
+&gt; M eq L;
+false
+&gt; L eq Dual(M);
+true
+</PRE>
+<HR>
+<H5><A NAME = "19149">L + M : TorLat,TorLat -&gt; TorLat,TorLatMap,TorLatMap,TorLatMap,TorLatMap</A></H5>
+<H5>DirectSum(L,M) : TorLat,TorLat -&gt; TorLat,TorLatMap,TorLatMap,TorLatMap,TorLatMap</H5>
+<H5>DirectSum(Q) : SeqEnum -&gt; TorLat,TorLatMap,TorLatMap,TorLatMap,TorLatMap</H5>
+<BLOCKQUOTE>
+The direct sum of the two toric lattices L and M.
+The following natural maps are also returned:
+the embedding of L into the sum, the embedding of M,
+the projection of the sum onto L, and the projection onto M.
+<P>
+The argument can also be a sequence Q of toric lattices.
+In this case, there are three return values: the direct sum of
+all lattices in Q, a sequence of inclusion maps of
+lattices in Q into the sum, and a sequence of projection maps
+from the sum onto each of the elements of Q in turn.
+</BLOCKQUOTE>
+<H5><A NAME = "19150">L ^ n : TorLat,RngIntElt -&gt; TorLat,SeqEnum,SeqEnum</A></H5>
+<BLOCKQUOTE>
+The direct sum of the toric lattice L with itself n times.
+Also return are a sequence of injections of L as factors into
+the sum and a sequence of projections of the sum onto its factors.
+This is identical to <TT>DirectSum([L,L,...,L])</TT> where the
+sequence has length n.
+</BLOCKQUOTE>
+<H5><A NAME = "19151">Dimension(L) : TorLat -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The dimension of the toric lattice L.
+</BLOCKQUOTE>
+<H4><A NAME = "19152">Points of Toric Lattices</A></H4>
+
+<P>
+<P>
+Points of L are interpreted to mean points of L tensor Q.
+If the coefficients of a point are in fact integral, then this is
+recognised: so it is possible to tell whether a point is in fact
+a point of L, not just the rational span.
+<P>
+The usual rational vector space arithmetic operates on these
+lattice points.
+
+
+<H5><A NAME = "19153">L ! [a,b,...] : TorLat,[RngIntElt] -&gt; TorLatElt</A></H5>
+<H5>LatticeVector(L,Q) : TorLat,[RngIntElt] -&gt; TorLatElt</H5>
+<H5>LatticeVector(Q) : [RngIntElt] -&gt; TorLatElt</H5>
+<BLOCKQUOTE>
+The point (a, b, ... ) as an element of the toric lattice L,
+where Q=[a, b, ... ] is a sequence of rational numbers or integers.
+(If the toric lattice L is omitted, then it will be created.)
+</BLOCKQUOTE>
+<H5><A NAME = "19154">L . i : TorLat,RngIntElt -&gt; TorLatElt</A></H5>
+<H5>Basis(L,i) : TorLat,RngIntElt -&gt; TorLatElt</H5>
+<BLOCKQUOTE>
+The ith standard basis element of the toric lattice L.
+</BLOCKQUOTE>
+<H5><A NAME = "19155">Basis(L) : TorLat -&gt; TorLatElt</A></H5>
+<BLOCKQUOTE>
+The standard basis element of the toric lattice L as
+a sequence of points of L.
+</BLOCKQUOTE>
+<H5><A NAME = "19156">Form(L,Q) : TorLat,[RngIntElt] -&gt; TorLatElt</A></H5>
+<BLOCKQUOTE>
+The point (a, b, ... ) as an element of the dual of the toric lattice L,
+where Q=[a, b, ... ] is a sequence of rational numbers or integers.
+</BLOCKQUOTE>
+<H5><A NAME = "19157">Zero(L) : TorLat -&gt; TorLatElt</A></H5>
+<BLOCKQUOTE>
+The zero vector in the toric lattice L.
+</BLOCKQUOTE>
+<H5><A NAME = "19158">P + Q : TorLatElt,TorLatElt -&gt; TorLatElt</A></H5>
+<H5>P - Q : TorLatElt,TorLatElt -&gt; TorLatElt</H5>
+<H5>n * P : FldRatElt,TorLatElt -&gt; TorLatElt</H5>
+<H5>P / n : TorLatElt,FldRatElt -&gt; TorLatElt</H5>
+<BLOCKQUOTE>
+The sum and difference of toric lattice points P and Q
+(or points of the dual),
+the rational multiple nP and quotient P/n, where n&isin;Q.
+</BLOCKQUOTE>
+<H5><A NAME = "19159">P eq Q : TorLatElt,TorLatElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the toric lattice points P and Q
+are the same point of the same lattice.
+</BLOCKQUOTE>
+<H5><A NAME = "19160">AreProportional(P,Q) : TorLatElt,TorLatElt -&gt; BoolElt, FldRatElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the toric lattice points P and Q
+are rational multiples of one another; the factor Q/P is
+returned in that case.
+</BLOCKQUOTE>
+<H5><A NAME = "19161">P / Q : TorLatElt,TorLatElt -&gt; FldRatElt</A></H5>
+<BLOCKQUOTE>
+The rational factor P/Q in the case that the toric lattice
+points P and Q are rational multiples of one another.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19162">Example <TT>Polyhedra_toric-example-pt (H149E18)</TT></A></H3>
+This simple example builds some points in a toric lattice
+and performs arithmetic on them.
+<P>
+<P>
+<PRE>
+&gt; L := ToricLattice(3);
+&gt; a := L ! [1,2,3];
+&gt; a;
+(1, 2, 3)
+&gt; L eq Parent(a);
+true
+&gt; b := L ! [1/2,1,3/2];
+&gt; a + b;
+(3/2, 3, 9/2)
+&gt; a eq b;
+false
+&gt; a eq 2*b;
+true
+&gt; b/a;
+1/2
+</PRE>
+<HR>
+<H5><A NAME = "19163">v in L : TorLatElt,TorLat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the toric lattice point v lies in the
+toric lattice L.
+</BLOCKQUOTE>
+<H5><A NAME = "19164">Matrix(R,S) : Rng, [TorLatElt] -&gt; ModMatRngElt</A></H5>
+<H5>Matrix(S) : [TorLatElt] -&gt; ModMatRngElt</H5>
+<BLOCKQUOTE>
+The matrix whose rows are given by the lattice points in the sequence S.
+</BLOCKQUOTE>
+<H5><A NAME = "19165">Vector(v) : TorLatElt -&gt; ModTupFldElt</A></H5>
+<BLOCKQUOTE>
+The toric lattice point v realised as a vector.
+</BLOCKQUOTE>
+<H5><A NAME = "19166">IsZero(v) : TorLatElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the toric lattice point v is the zero vector.
+</BLOCKQUOTE>
+<H5><A NAME = "19167">IsIntegral(v) : TorLatElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the coefficients of the toric lattice point v
+are integral.
+</BLOCKQUOTE>
+<H5><A NAME = "19168">IsPrimitive(v) : TorLatElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the toric lattice point v is a primitive
+integral vector; that is, v is not divisible as an integral
+vector in its ambient toric lattice.
+</BLOCKQUOTE>
+<H5><A NAME = "19169">PrimitiveLatticeVector(v) : TorLatElt -&gt; TorLatElt</A></H5>
+<BLOCKQUOTE>
+The first toric lattice point on the ray spanned by v.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19170">Example <TT>Polyhedra_toric-primitive-pt (H149E19)</TT></A></H3>
+A point of a sublattice may be primitive in the sublattice
+even though it is not primitive in the bigger lattice: treating
+sublattices as the images of embeddings makes this point transparent.
+First build a sublattice K of L together with the embedding map.
+<P>
+<P>
+<PRE>
+&gt; L := ToricLattice(2);
+&gt; K,emb := Sublattice([L | [2,0],[0,2]]);
+</PRE>
+Construct a point in L that is clearly not primitive.
+<P>
+<P>
+<PRE>
+&gt; vL := L ! [2,2];
+&gt; IsPrimitive(vL);
+false
+</PRE>
+Pulling this point back to K shows that it is obviously
+primitive in K.
+<P>
+<P>
+<PRE>
+&gt; vK := vL @@ emb;
+&gt; vK;
+(1, 1)
+&gt; IsPrimitive(vK);
+true
+</PRE>
+But notice that coercion of the point of L into K
+is not the same thing: it simply works with the coefficients
+of the point and gives an answer that is not what
+is wanted in this case.
+<P>
+<P>
+<PRE>
+&gt; K ! vL;
+(2, 2)
+&gt; IsPrimitive(K ! vL);
+false
+</PRE>
+<HR>
+<H4><A NAME = "19171">Operations on Toric Lattices</A></H4>
+
+
+
+<H5><A NAME = "19172">L eq K : TorLat,TorLat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the toric lattices L and K are
+the same object in Magma (and not merely isomorphic).
+</BLOCKQUOTE>
+<H5><A NAME = "19173">Sublattice(Q) : [TorLatElt] -&gt; TorLat,TorLatMap</A></H5>
+<BLOCKQUOTE>
+A toric lattice L<sub>1</sub> isomorphic to the sublattice of a toric lattice L
+generated by the sequence Q of elements of L together with an
+embedding map of L<sub>1</sub> in L.
+The Magma subobject constructor <TT>sub&lt; L | Q &gt;</TT> can also
+be used, although the sequence Q must be a sequence of elements
+of L and cannot be interpreted more broadly.
+</BLOCKQUOTE>
+<H5><A NAME = "19174">ToricLattice(Q) : [[RngIntElt]] -&gt; TorLat,TorLatMap</A></H5>
+<BLOCKQUOTE>
+The toric sublattice of Q<sup>n</sup>&sup;Z<sup>n</sup> (regarded as a toric lattice)
+generated by the sequences of integers of length n of which
+the sequence Q comprises.
+</BLOCKQUOTE>
+<H5><A NAME = "19175">Quotient(C) : TorCon -&gt; TorLat,TorLatMap</A></H5>
+<H5>Quotient(Q) : [TorLatElt] -&gt; TorLat,TorLatMap</H5>
+<H5>Quotient(v) : TorLatElt -&gt; TorLat,TorLatMap</H5>
+<BLOCKQUOTE>
+A toric lattice isomorphic to the toric lattice that is the
+quotient of a toric lattice L by the linear span of the
+cone C, or the elements v&isin;L that comprise the sequence Q
+or the single primitive vector v&isin;L.
+The projection map of L to the quotient is also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "19176">AddVectorToLattice(v) : TorLatElt -&gt; TorLat,TorLatMap</A></H5>
+<H5>AddVectorToLattice(Q) : [TorLatElt] -&gt; TorLat,TorLatMap</H5>
+<BLOCKQUOTE>
+A toric lattice L<sub>1</sub> isomorphic to the
+toric lattice generated by a toric lattice L together
+with the vector v&isin;L (or by a sequence of vectors of L).
+The inclusion map of L in L<sub>1</sub> is also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "19177">AreGenerators(S) : SetEnum -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> iff the set of toric lattice points S&sub;L generate the lattice L.
+</BLOCKQUOTE>
+<H5><A NAME = "19178">IsSublattice(L) : TorLat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the toric lattice L was constructed
+as a sublattice of another toric lattice.
+</BLOCKQUOTE>
+<H5><A NAME = "19179">IsSuperlattice(L) : TorLat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the toric lattice L was constructed
+as a superlattice of another toric lattice (by the addition
+of a rational vector).
+</BLOCKQUOTE>
+<H5><A NAME = "19180">IsDirectSum(L) : TorLat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the toric lattice L was constructed
+as the direct sum of other toric lattices.
+</BLOCKQUOTE>
+<H5><A NAME = "19181">IsQuotient(L) : TorLat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the toric lattice L was constructed
+as the quotient of another toric lattice.
+</BLOCKQUOTE>
+<H5><A NAME = "19182">Sublattice(L) : TorLat -&gt; TorLat,TorLatMap</A></H5>
+<BLOCKQUOTE>
+If the toric lattice L was constructed as the extension of
+a toric lattice K by the addition of a vector, then return K.
+</BLOCKQUOTE>
+<H5><A NAME = "19183">Superlattice(L) : TorLat -&gt; TorLat,TorLatMap</A></H5>
+<BLOCKQUOTE>
+If the toric lattice L was constructed as a sublattice of
+a toric lattice K, then return K.
+</BLOCKQUOTE>
+<H5><A NAME = "19184">Summands(L) : TorLat -&gt; SeqEnum,SeqEnum,SeqEnum</A></H5>
+<BLOCKQUOTE>
+If the toric lattice L was constructed as a direct sum,
+return a sequence of the toric lattice summands used
+(and parallel sequences of their embedding maps in L and
+the projections from L to them).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19185">Example <TT>Polyhedra_toric-example-pt (H149E20)</TT></A></H3>
+Construct a sublattice of a toric lattice L and compute
+its natural basis in the original coordinates of L; the user
+does not have control over the choice of coordinates and
+inclusion map.
+<P>
+<P>
+<PRE>
+&gt; L := ToricLattice(2);
+&gt; L1,phi1 := Sublattice([L| [1,2],[2,1]]);
+&gt; L1;
+2-dimensional toric lattice L1 = sub(Z^2)
+&gt; phi1(L1.1), phi1(L1.2);
+(1, 2)
+(0, 3)
+</PRE>
+A similar calculation for a quotient map.
+<P>
+<P>
+<PRE>
+&gt; L2,phi2 := Quotient(L ! [3/2,2]);
+&gt; L2;
+1-dimensional toric lattice L2 = (Z^2) / &lt;3, 4&gt;
+&gt; phi2(L.1), phi2(L.2);
+(-4)
+(3)
+</PRE>
+And again for an extension of L.
+<P>
+<P>
+<PRE>
+&gt; L3,phi3 := AddVectorToLattice(L ! [1/5,2/5]);
+&gt; L3;
+2-dimensional toric lattice L3 = (Z^2) + &lt;1/5, 2/5&gt;
+&gt; phi3(L1.1), phi3(L1.2);
+(1, 0)
+(2, 5)
+</PRE>
+<HR>
+<H4><A NAME = "19186">Maps of Toric Lattices</A></H4>
+
+<P>
+<P>
+Maps between toric lattices are of type <TT>TorLatMap</TT>.
+They can be constructed using the <TT>hom&lt; L -&gt; K | M &gt;</TT>
+constructor, where M is the matrix of the desired linear
+map with respect to the standard bases of L and K.
+The usual evaluation operations <TT>@</TT> and <TT>@@</TT> can be applied,
+although there are image and preimage intrinsics too.
+Basic arithmetic of maps (sum, difference and scalar multiple,
+each taken pointwise) is available.
+
+
+<H5><A NAME = "19187">ZeroMap(L,K) : TorLat,TorLat -&gt; TorLatMap</A></H5>
+<BLOCKQUOTE>
+The zero map between toric lattices L and K.
+</BLOCKQUOTE>
+<H5><A NAME = "19188">IdentityMap(L) : TorLat -&gt; TorLatMap</A></H5>
+<BLOCKQUOTE>
+The identity map on the toric lattice L.
+</BLOCKQUOTE>
+<H5><A NAME = "19189">hom&lt; L -&gt; K | M &gt; : TorLat,TorLat,Mtrx -&gt; TorLatMap</A></H5>
+<H5>LatticeMap(L,K,M) : TorLat,TorLat,Mtrx -&gt; TorLatMap</H5>
+<BLOCKQUOTE>
+The map between toric lattices L and K determined
+by the matrix M (with respect to the standard bases of
+L and M).
+</BLOCKQUOTE>
+<H5><A NAME = "19190">LatticeMap(L,Q) : TorLat,[TorLatElt] -&gt; TorLatMap</A></H5>
+<BLOCKQUOTE>
+The toric lattice map from toric lattice L to the toric
+lattice M determined by the sequence Q of toric lattice
+points, where M is the toric lattice containing the points of Q.
+</BLOCKQUOTE>
+<H5><A NAME = "19191">DefiningMatrix(f) : TorLatMap -&gt; ModMatRngElt</A></H5>
+<BLOCKQUOTE>
+The defining matrix of the lattice map f.
+</BLOCKQUOTE>
+<H5><A NAME = "19192">Image(f,C) : TorLatMap,TorCon -&gt; TorCon</A></H5>
+<H5>Image(f,P) : TorLatMap,TorPol -&gt; TorPol</H5>
+<H5>Image(f,v) : TorLatMap,TorLatElt -&gt; TorLatElt</H5>
+<BLOCKQUOTE>
+The image of the cone C or polyhedron P or lattice element v
+under the toric lattice map f; the type of the object is preserved
+under the map.
+</BLOCKQUOTE>
+<H5><A NAME = "19193">Preimage(f,C) : TorLatMap,TorCon -&gt; TorCon</A></H5>
+<H5>Preimage(f,P) : TorLatMap,TorPol -&gt; TorPol</H5>
+<H5>Preimage(f,v) : TorLatMap,TorLatElt -&gt; TorLatElt</H5>
+<BLOCKQUOTE>
+The preimage of the cone C or polyhedron P or lattice element v
+by the toric lattice map f; the type of the object is preserved.
+</BLOCKQUOTE>
+<H5><A NAME = "19194">KernelEmbedding(f) : TorLatMap -&gt; Map</A></H5>
+<H5>KernelEmbedding(v) : TorLatElt -&gt; Map</H5>
+<BLOCKQUOTE>
+The inclusion of the kernel of the toric lattice map f,
+regarded as a distinct toric lattice, into the domain of f;
+or the same for the dual subspace annihilated by lattice element v.
+</BLOCKQUOTE>
+<H5><A NAME = "19195">KernelBasis(f) : TorLatMap -&gt; SeqEnum</A></H5>
+<H5>KernelBasis(v) : TorLatElt -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+A basis for the kernel of the toric lattice map f
+or the dual of the sublattice annihilated by the lattice element v.
+</BLOCKQUOTE>
+<H5><A NAME = "19196">ImageBasis(f) : TorLatMap -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+A basis for the image of the toric lattice map f.
+</BLOCKQUOTE>
+<H5><A NAME = "19197">IsCokernelTorsionFree(f) : TorLatMap -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the cokernel of the toric lattice map
+f is torsion free.
+</BLOCKQUOTE>
+<H5><A NAME = "19198">ChangeBasis(v) : TorLatElt -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Given a primitive form v&isin;L<sup>v</sup> in the lattice dual to L, returns a  change of basis of L such that (ker)(v) maps to the standard codimension 1 lattice.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19199">Example <TT>Polyhedra_toric-change-basis-example (H149E21)</TT></A></H3>
+We start by constructing a polytope P of lattice width two:
+<P>
+<P>
+<PRE>
+&gt; P:=Polytope([
+&gt;     [ 1, 0, -1 ],
+&gt;     [ 0, 0, 1 ],
+&gt;     [ 0, -1, 3 ],
+&gt;     [ -1, 1, 0 ],
+&gt;     [ 0, 0, -1 ]
+&gt; ]);
+&gt; width,ws:=Width(P);
+&gt; width;
+2
+</PRE>
+We wish to construct a change of basis to make this explicit: we want to construct Q isomorphic to P such that Q is of width two with respect to (0, 0, 1).
+<P>
+<P>
+<PRE>
+&gt; phi:=ChangeBasis(Representative(ws));
+&gt; Q:=Image(phi,P);
+&gt; Q;
+3-dimensional polytope Q with 5 vertices:
+    ( 1,  0,  1),
+    ( 0,  0,  1),
+    ( 0, -1,  1),
+    (-1,  1,  0),
+    ( 0,  0, -1)
+&gt; w:=Dual(Ambient(Q)).3;
+&gt; [w * v : v in Vertices(Q)];
+[ 1, 1, 1, 0, -1 ]
+</PRE>
+We conclude by taking slices through Q at each height:
+<P>
+<P>
+<PRE>
+&gt; Polyhedron(Q,w,-1);
+0-dimensional polytope with one vertex:
+    (0,  0, -1)
+&gt; Polyhedron(Q,w,0);
+2-dimensional polytope with 3 vertices:
+    ( -1,    1,   0),
+    (  0, -1/2,   0),
+    (1/2,    0,   0)
+&gt; Polyhedron(Q,w,1);
+2-dimensional polytope with 3 vertices:
+    (0, -1,  1),
+    (0,  0,  1),
+    (1,  0,  1)
+</PRE>
+<PRE></PRE> <A  HREF = "text1728.htm">[Next]</A><A  HREF = "text1734.htm">[Prev]</A> <A  HREF = "text1728.htm">[Right]</A> <A  HREF = "text1734.htm">[Left]</A> <A  HREF = "text1729.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

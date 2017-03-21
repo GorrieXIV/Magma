@@ -1,0 +1,476 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Introduction</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text558.htm">[Next]</A><A  HREF = "text556.htm">[Prev]</A> <A  HREF = "text558.htm">[Right]</A> [____] <A  HREF = "text556.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "5878">Introduction</A></H3>
+
+<P>
+<P>
+Thanks to Xavier Caruso and David Lubicz,
+Magma now contains an implementation of linear algebra
+over (Z)<sub>p</sub>[[u]] and related rings <A  HREF = "text555.htm#bib_CL2012">[CL12]</A>.
+This is a first step in various calculations with p-adic
+Hodge theory, to be able to compute with modules over suitable
+approximations in these rings.
+<P>
+The package deliberately builds a wrapper level through user-defined
+types in Magma. While one could alternatively just do everything
+in terms of power (and Laurent) series rings over the p-adics
+directly, this extra layer is hoped to make it easier to use the
+functionality in a coherent way. Some of the common functions applicable
+to power series, matrices, and modules have been copied over, but not
+all of them. The underlying attributes can be accessed directly in
+the cases where there is no equivalent on the types described here.
+Most notably, vectors and matrices that are user-defined types do
+not seem yet to be accesible via v[i] or M[i, j].
+<P>
+The package has seen limited testing,
+with not every possibility of precision bounds (in both the p-adic
+and power series aspects) being considered in all cases, nor has much
+work been done for base rings that are extensions of (Z)<sub>p</sub>.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text557.htm#5879">Background</A>
+<LI> <A  HREF = "text557.htm#5880">Basic Operations</A>
+<LI> <A  HREF = "text557.htm#5891">Element Operations</A>
+<LI> <A  HREF = "text557.htm#5901">Euclidean Algorithm</A>
+</UL>
+<H4><A NAME = "5879">Background</A></H4>
+
+<P>
+<P>
+Let R be a discrete valuation ring with residue field
+of characteristic p, and let &nu; be real.
+Recall that f(u)=&sum;<sub>i</sub> a<sub>i</sub>u<sup>i</sup> where a<sub>i</sub>&isin;(Frac)(R)
+converges for |u|&lt;1/p<sup>&nu;</sup> if and only if inf<sub>i</sub> v<sub>R</sub>(i) + i&nu; is bounded.
+<P>
+When &nu; is rational, this infinimum is attained.
+It is called the Gauss valuation, denoted by v<sub>&nu;</sub>(f),
+and the Weierstrass degree d<sub>&nu;</sub>(f) is the minimal i that realises this
+(by convention, the Weierstrass degree of the zero element is -&infin;).
+An element is <I>distinguished</I> if its Gauss valuation is 0.
+We have that v<sub>&nu;</sub>(fg)=v<sub>&nu;</sub>(f) + v<sub>&nu;</sub>(g)
+and v<sub>&nu;</sub>(f + g)&ge;min bigl(v<sub>&nu;</sub>(f), v<sub>&nu;</sub>(g)bigr),
+while d<sub>&nu;</sub>(fg)=d<sub>&nu;</sub>(f)d<sub>&nu;</sub>(g).
+<P>
+As it is not particularly clear how to represent elements
+of a convergent series ring in finite form,
+so we instead work with the "slope" ring of elements of
+nonnegative Gauss valuation for which v<sub>&nu;</sub>(f)&ge;0, namely
+S<sup>&nu;</sup>(R)=biggl{&sum;<sub>i=0</sub>^&infin;a<sub>i</sub> u<sup>i</sup>|
+v<sub>R</sub>(a<sub>i</sub>) + i.&nu;&ge;0, a<sub>i</sub>&isin;(Frac)(R)biggr}.
+For instance, when &nu;=0, this ring is just the power series ring over R.
+<P>
+There are two related rings of interest.
+The first extends the coefficients to allow them to have negative valuation
+in (Frac)(R), namely S<sub>p</sub><sup>&nu;</sup>(R)=S<sup>&nu;</sup>[1/&pi;] where &pi;
+uniformises R. The second is a type of Laurent extension, namely
+writing &nu;=a/b in lowest terms, we have S<sub>u</sub><sup>&nu;</sup>(R)=S<sup>&nu;</sup>[&pi;<sup>a</sup>/u<sup>b</sup>].
+<P>
+For instance, the polynomial u<sup>2</sup>/p is in S<sup>1/2</sup>((Q)<sub>p</sub>)
+and S<sup>&nu;</sup>((Q)<sub>p</sub>) for all &nu;, and inverting it gives
+us p/u<sup>2</sup>&isin;S<sup>1/2</sup><sub>u</sub>((Q)<sub>p</sub>). Note that as a power series u<sup>2</sup>/p
+clearly has infinite radius of convergence, even though it is in not
+in the slope ring S<sup>0</sup>((Q)<sub>p</sub>).
+<P>
+Another example, p + u has Gauss valuation min(1, &nu;),
+and thus the Weierstrass degree is 0 for &nu;&ge;1
+but degree 1 for &nu;&lt;1.
+<P>
+Both of these "completion" rings are Euclidean, which allows us to
+construct a module theory over them. While internally Magma
+has generic code for handling modules over Euclidean rings,
+with these user-defined types the component parts are all taken
+from boilerplate package-level implementations.
+
+
+<H4><A NAME = "5880">Basic Operations</A></H4>
+
+<P>
+<P>
+Here are the basic creations and operations for S<sup>&nu;</sup> rings and elements.
+All of these have a direct analogue for S<sub>p</sub><sup>&nu;</sup> and S<sub>u</sub><sup>&nu;</sup> rings.
+
+
+<H5><A NAME = "5881">Creation Intrinsics</A></H5>
+
+
+
+<H5><A NAME = "5882">SnuRing (F, nu) : FldPad, FldRatElt -&gt; SnuRng</A></H5>
+<H5>SpRing (F, nu) : FldPad, FldRatElt -&gt; SpRng</H5>
+<H5>SuRing (F, nu) : FldPad, FldRatElt -&gt; SpRng</H5>
+
+<PRE>    Precision: RngIntElt                Default: &infin;</PRE>
+<BLOCKQUOTE>
+Given a p-adic field (or ring) F and a slope &nu; (which can be rational
+or integral), create the slope ring (or the S<sub>p</sub><sup>&nu;</sup> or S<sub>u</sub><sup>&nu;</sup> ring).
+The precision refers to that of the power series ring.
+</BLOCKQUOTE>
+<H5><A NAME = "5883">SnuRing (F) : FldPad -&gt; SnuRng</A></H5>
+<H5>SpRing (F) : FldPad -&gt; SpRng</H5>
+<H5>SuRing (F) : FldPad -&gt; SuRng</H5>
+<H5>SnuRing (p, e) : RngIntElt, RngIntElt -&gt; SnuRng</H5>
+<H5>SnuRing (p) : RngIntElt -&gt; SnuRn</H5>
+<H5>SpRing (p, e) : RngIntElt, RngIntElt -&gt; SpRng</H5>
+<H5>SpRing (p) : RngIntElt -&gt; SpRng</H5>
+<H5>SuRing (p, e) : RngIntElt, RngIntElt -&gt; SuRng</H5>
+<H5>SuRing (p) : RngIntElt -&gt; SuRng</H5>
+
+<PRE>    nu: FldRatElt                       Default: 0</PRE>
+
+<PRE>    Precision: RngIntElt                Default: &infin;</PRE>
+<BLOCKQUOTE>
+The first three are the same as above, but with &nu; as a parameter.
+The others create the slope ring over (Q)<sub>p</sub>, with e being
+the precision of the p-adic ring in this case.
+</BLOCKQUOTE>
+<H5><A NAME = "5884">SnuRing (S, nu) : RngSerPow, FldRatElt -&gt; SnuRng</A></H5>
+<H5>SpRing (S, nu) : RngSerPow, FldRatElt -&gt; SpRng</H5>
+<H5>SuRing (S, nu) : RngSerLaur, FldRatElt -&gt; SuRng</H5>
+<BLOCKQUOTE>
+Given a power-series ring over a p-adic ring or field and a rational
+number (or integer), create the slope ring.
+For the S<sup>&nu;</sup><sub>u</sub> ring, one gives a Laurent series ring.
+</BLOCKQUOTE>
+<H5><A NAME = "5885">SnuRing (S) : SpRng -&gt; SnuRng</A></H5>
+<H5>SpRing (S) : SnuRng -&gt; SpRng</H5>
+<H5>SnuRing (S) : SuRng -&gt; SnuRng</H5>
+<H5>SuRing (S) : SnuRng -&gt; SuRng</H5>
+<BLOCKQUOTE>
+Given an S<sup>&nu;</sup><sub>p</sub>-ring, create the associated S<sup>&nu;</sup>-ring,
+and vice-versa. Similarly with an S<sup>&nu;</sup><sub>u</sub>-ring.
+</BLOCKQUOTE>
+<H5><A NAME = "5886">Access Functions</A></H5>
+
+
+
+<H5><A NAME = "5887">R eq S : SnuRng, SnuRng -&gt; BoolElt</A></H5>
+<H5>R ne S : SnuRng, SnuRng -&gt; BoolElt</H5>
+<H5>R eq S : SpRng, SpRng -&gt; BoolElt</H5>
+<H5>R ne S : SpRng, SpRng -&gt; BoolElt</H5>
+<H5>R eq S : SuRng, SuRng -&gt; BoolElt</H5>
+<H5>R ne S : SuRng, SuRng -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Two slope rings are equal if their underlying p-adic power series
+rings are the same (including precisions), and the slopes &nu; are the same.
+</BLOCKQUOTE>
+<H5><A NAME = "5888">Slope (S) : SnuRng -&gt; RngIntElt</A></H5>
+<H5>Slope (S) : SpRng -&gt; RngIntElt</H5>
+<H5>Slope (S) : SuRng -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The slope of the S<sup>&nu;</sup> ring.
+</BLOCKQUOTE>
+<H5><A NAME = "5889">Precision (S) : SnuRng -&gt; RngIntElt</A></H5>
+<H5>Precision (S) : SpRng -&gt; RngIntElt</H5>
+<H5>Precision (S) : SuRng -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The precision of the underlying power-series ring.
+</BLOCKQUOTE>
+<H5><A NAME = "5890">CoefficientRing (S) : SnuRng -&gt; RngIntElt</A></H5>
+<H5>CoefficientRing (S) : SpRng -&gt; RngIntElt</H5>
+<H5>CoefficientRing (S) : SuRng -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The underlying p-adic ring of the S<sup>&nu;</sup> ring.
+</BLOCKQUOTE>
+<H4><A NAME = "5891">Element Operations</A></H4>
+
+<P>
+<P>
+The full range of addition, subtraction, multiplication, division
+(where applicable) and powering are available, similarly with equality.
+
+
+<H5><A NAME = "5892">Parent (f) : SnuElement -&gt; SnuRng</A></H5>
+<H5>Parent (f) : SpElement -&gt; SpRng</H5>
+<H5>Parent (f) : SuElement -&gt; SuRng</H5>
+<BLOCKQUOTE>
+Return the S<sup>&nu;</sup> ring to which the element belongs.
+</BLOCKQUOTE>
+<H5><A NAME = "5893">IsWeaklyZero (f) : SnuElement -&gt; BoolElt</A></H5>
+<H5>IsWeaklyZero (f) : SpElement -&gt; BoolElt</H5>
+<H5>IsWeaklyZero (f) : SuElement -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+This is the proper way to test equality with elements of S<sup>&nu;</sup>.
+It checks whether every (known) coefficient is zero to within the
+p-adic precision.
+</BLOCKQUOTE>
+<H5><A NAME = "5894">Valuation and Degree</A></H5>
+
+
+
+<H5><A NAME = "5895">GaussValuation (f) : SnuElement -&gt; FldRatElt</A></H5>
+<H5>GaussValuation (f) : SpElement -&gt; FldRatElt</H5>
+<H5>GaussValuation (f) : SuElement -&gt; FldRatElt</H5>
+<H5>WeierstrassDegree (f) : SnuElement -&gt; FldRatElt</H5>
+<H5>WeierstrassDegree (f) : SpElement -&gt; FldRatElt</H5>
+<H5>WeierstrassDegree (f) : SuElement -&gt; FldRatElt</H5>
+<BLOCKQUOTE>
+The Gauss valuation and Weierstrass degree respectively return these
+values. 
+</BLOCKQUOTE>
+<H5><A NAME = "5896">IsDistinguished (f) : SnuElement -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+The <TT>IsDistinguished</TT> intrinsic returns whether the Gauss
+valuation is zero (this intrinsic is only for S<sup>&nu;</sup> elements).
+</BLOCKQUOTE>
+<H5><A NAME = "5897">LeadingTerm (f) : SnuElement -&gt; RngSerPowElt</A></H5>
+<H5>LeadingTerm (f) : SpElement -&gt; RngSerPowElt</H5>
+<H5>LeadingTerm (f) : SuElement -&gt; RngSerLaurElt</H5>
+<BLOCKQUOTE>
+Gives the first non(weakly)zero term in the S<sup>&nu;</sup><sub>p</sub>-element,
+as a power series (or Laurent series).
+Useful in particular when examining vectors or matrices of such.
+</BLOCKQUOTE>
+<H5><A NAME = "5898">WeierstrassTerm (f) : SnuElement -&gt; RngSerPowElt</A></H5>
+<H5>WeierstrassTerm (f) : SpElement -&gt; RngSerPowElt</H5>
+<H5>WeierstrassTerm (f) : SuElement -&gt; RngSerLaurElt</H5>
+<BLOCKQUOTE>
+Gives the term corresponding to the Weierstrass degree
+of the S<sup>&nu;</sup><sub>p</sub>-element, as a power series (or Laurent series).
+Useful in particular when examining vectors or matrices of such.
+</BLOCKQUOTE>
+<H5><A NAME = "5899">O (x) : SnuElement -&gt; SnuElement</A></H5>
+<H5>O (x) : SpElement -&gt; SpElement</H5>
+<H5>O (x) : SuElement -&gt; SuElement</H5>
+<BLOCKQUOTE>
+Gives the big-Oh value of the argument.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5900">Example <TT>RngSlope_basic_snu_ring (H55E1)</TT></A></H3>
+<P>
+Here are some basic operations with a ring of slope 1.
+<P>
+<P>
+<P>
+<PRE>
+&gt; S&lt;u&gt; := SnuRing (pAdicField (5, 15), 1); // slope 1 over 5-adics
+&gt; assert Slope(S) eq 1;
+&gt; f := 5*u + u^2 + 2*u^3 + u^5 + O(u^10);
+&gt; g := u^4/25 + u^6 + u^8 + O(u^10);
+&gt; GaussValuation (f); // both have Gauss valuation 2
+2
+&gt; GaussValuation (g); // both have Gauss valuation 2
+2
+&gt; q := g/f; q; // g has degree 4, so this division works
+(5^-3 + O(5^12))*u^3 + (-5^-4 + O(5^11))*u^4 +
+  (616*5^-5 + O(5^10))*u^5 + (-606*5^-6 + O(5^9))*u^6 +
+  (9946*5^-7 + O(5^8))*u^7 + (-3761*5^-8 + O(5^7))*u^8 + O(u^9)
+&gt; LeadingTerm (q); // returned as a power series ring element
+(5^-3 + O(5^12))*$.1^3
+</PRE>
+<P>
+All the same functionality copies over to the S<sup>&nu;</sup><sub>p</sub> rings,
+the main difference is that one can invert p directly there.
+There is automatic coercion from S<sup>&nu;</sup> to S<sup>&nu;</sup><sub>p</sub> rings in some cases,
+even when the slopes are not equal. The criterion is whether the result
+in the S<sup>&nu;</sup><sub>p</sub> ring is valid.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Sp&lt;uu&gt; := SpRing (pAdicField (5, 15), 1/2); // slope 1/2 over 5-adics
+&gt; assert Slope(Sp) eq 1/2;
+&gt; ff := 1/5 + uu + 5*uu^2 + O(uu^10);
+&gt; GaussValuation (ff);
+-1
+&gt; gg := uu + 5^2*uu^2 + uu^3 - uu^6 + uu^9 + O(uu^10);
+&gt; h := S ! (ff * S!gg); // coerced back to the Snu-ring
+&gt; assert IsDistinguished (h);
+&gt; LeadingTerm (ff) * LeadingTerm (gg) eq LeadingTerm (h);
+true
+</PRE>
+<P>
+Similarly with S<sup>&nu;</sup><sub>u</sub> rings, where Laurent series are now also allowed.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Su&lt;z&gt; := SuRing (pAdicField (7, 25), 2/3); // slope 2/3 over 7-adics
+&gt; F := 7/z + 3*7 + z^2/7 + 7^2*z^3 + O(z^10);
+&gt; GaussValuation (F);
+1/3
+&gt; WeierstrassTerm (F);
+(7 + O(7^26))*$.1^-1
+&gt; SR&lt;t&gt; := SnuRing (Su);
+&gt; t*z/7; // automatic coercion into Su
+(7^-1 + O(7^24))*z^2 + O(z^20)
+</PRE>
+<HR>
+<H4><A NAME = "5901">Euclidean Algorithm</A></H4>
+
+<P>
+<P>
+Given A, B&isin;S<sup>&nu;</sup> with v<sub>&nu;</sub>(A)&ge;v<sub>&nu;</sub>(B)
+(so in particular B is nonzero) the quotient-remainder algorithm
+returns Q, R such that A=BQ + R with R a polynomial of degree
+less that d<sub>&nu;</sub>(B).
+In general the precision loss in this operation becomes more acute
+with larger &nu;. This precision loss percolates throughout all computations.
+Note that the result in general depends on &nu;.
+<P>
+The Weierstrass preparation theorem takes a distinguished
+element f&isin;S<sup>&nu;</sup> and writes f=UP where U is invertible
+in S<sup>&nu;</sup>(R) and P is a polynomial of degree d<sub>&nu;</sub>(f).
+The units of S<sup>&nu;</sup> are precisely those elements with
+Gauss valuation and Weierstrass degree both 0.
+<P>
+The ring S<sup>&nu;</sup> is not itself Euclidean,
+as we can only properly quotient elements as A/B when v<sub>&nu;</sub>(B)&ge;v<sub>&nu;</sub>(A),
+and this property need not be preserved in the Euclidean steps.
+For instance with &nu;=1, starting with A=pu<sup>2</sup> + p<sup>4</sup> and B=p<sup>2</sup>u
+we get Q=u/p and R=p<sup>4</sup>, but then v<sub>&nu;</sub>(R)=4&gt;3=v<sub>&nu;</sub>(B),
+so that we cannot divide B by R.
+<P>
+However, the ability to scale by arbitrary powers of the uniformiser implies
+that the ring S<sub>p</sub><sup>&nu;</sup> is Euclidean with respect to the Weierstrass
+degree, and similarly the ring S<sub>u</sub><sup>&nu;</sup> is a discrete valuation ring
+(hence Euclidean) for the valuation v<sub>&nu;</sub>.
+<P>
+The extended gcd in S<sup>&nu;</sup> or S<sup>&nu;</sup><sub>p</sub>  takes A, B with v(A)&ge;v(B)
+and returns (G, H, w, x, y, z) has Aw + Bx=G where v(B)=v(G) and Ay + Bz=H
+with v(H)&gt;v(A) with wz - xy=1 (consecutive Euclidean steps).
+The gcd is G in the case where H is the zero polynomial
+(this will always be true over S<sup>&nu;</sup><sub>p</sub>).
+<P>
+Since S<sup>&nu;</sup><sub>u</sub> is a discrete valuation ring, the quotient-remainder
+A=qB + r always has r=0 when v(B)&lt;v(A), and else q=0.
+The <I>canonical</I> element of valuation v in S<sup>&nu;</sup><sub>u</sub> is u<sup>y</sup> p<sup>z</sup>
+where 0&le;y&lt;(denom)(&nu;) is as small as possible and y&nu; + z=v.
+The gcd of two elements A and B can always be taken to
+be a canonical element of valuation equal to the smaller
+of the valuations of A and B.
+
+
+<H5><A NAME = "5902">Intrinsics</A></H5>
+
+
+
+<H5><A NAME = "5903">WeierstrassPreparation (f) : SnuElement -&gt; SnuElement, SnuElement</A></H5>
+<BLOCKQUOTE>
+Given a distinguished element f of S<sup>&nu;</sup> (one of Gauss valuation 0),
+write f=UP where U is invertible in S<sup>&nu;</sup> and P is a polynomial
+(whose degree equals the Weierstrass degree of f).
+</BLOCKQUOTE>
+<H5><A NAME = "5904">Quotrem (A, B) : SnuElement, SnuElement -&gt; SnuElement, SnuElement</A></H5>
+<BLOCKQUOTE>
+Given S<sup>&nu;</sup> elements A and B with v(A)&ge;v(B), determine Q, R
+with A=BQ + R where B is a polynomial whose degree is less than
+the Weierstrass degree of B.
+</BLOCKQUOTE>
+<H5><A NAME = "5905">Quotrem (A, B) : SpElement, SpElement -&gt; SpElement, SpElement</A></H5>
+<BLOCKQUOTE>
+Given A and (nonzero) B which are S<sub>p</sub><sup>&nu;</sup> elements, determine Q, R
+with A=BQ + R where B is a polynomial whose degree is less than
+the Weierstrass degree of B.
+</BLOCKQUOTE>
+<H5><A NAME = "5906">Quotrem (A, B) : SuElement, SuElement -&gt; SuElement, SuElement</A></H5>
+<BLOCKQUOTE>
+Given A and (nonzero) B which are S<sub>u</sub><sup>&nu;</sup> elements, determine Q, R
+with A=BQ + R. Here when v(A)&ge;v(B) we have Q=A/B and R=0,
+and when v(A)&lt;v(B) we have Q=0 and R=A.
+</BLOCKQUOTE>
+<H5><A NAME = "5907">ExtendedGcd (A, B) : SnuElement, SnuElement -&gt; SnuElement, SnuElement, SnuElement, SnuElement, SnuElement, SnuElement</A></H5>
+<BLOCKQUOTE>
+Given S<sup>&nu;</sup> elements A and B with v(A)&ge;v(B),
+try to compute the gcd. This returns a 6-tuple (G, H, w, x, y, z)
+with Aw + Bx=G, Cw + Dy=H, and wz - xy=1. When H=0 then G is the gcd.
+Alternatively, v(H) will be some element with v(H)&gt;v(A), which precludes
+the Euclidean algorithm from progressing.
+</BLOCKQUOTE>
+<H5><A NAME = "5908">ExtendedGcd (A, B) : SpElement, SpElement -&gt; SpElement, SpElement, SpElement, SpElement, SpElement, SpElement</A></H5>
+<BLOCKQUOTE>
+Given S<sub>p</sub><sup>&nu;</sup> elements A and B compute the extended gcd.
+This returns a 6-tuple (G, H, w, x, y, z) with Aw + Bx=G, Cw + Dy=H=0,
+and wz - xy=1, where G is the gcd.
+</BLOCKQUOTE>
+<H5><A NAME = "5909">ExtendedGcd (A, B) : SuElement, SuElement -&gt; SuElement, SuElement, SuElement, SuElement, SuElement, SuElement</A></H5>
+<BLOCKQUOTE>
+Given S<sub>u</sub><sup>&nu;</sup> elements A and B compute the extended gcd.
+Since S<sub>u</sub><sup>&nu;</sup> is a DVR, the gcd can be taken to be the
+<TT>CanonicalElement</TT> of the smaller valuation of A and B.
+</BLOCKQUOTE>
+<H5><A NAME = "5910">CanonicalElement (S, v) : SuRng, FldRatElt -&gt; SuElement</A></H5>
+<BLOCKQUOTE>
+The <I>canonical</I> element of valuation v in S<sup>&nu;</sup><sub>u</sub> is u<sup>y</sup> p<sup>z</sup>
+where 0&le;y&lt;(denom)(&nu;) is as small as possible and y&nu; + z=v.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5911">Example <TT>RngSlope_euclidean-basics (H55E2)</TT></A></H3>
+<P>
+Here are some basic examples of Euclidean operations.
+<P>
+<P>
+<P>
+<PRE>
+&gt; S&lt;u&gt; := SnuRing (pAdicField (5, 15), 1); // slope 1 over 5-adics
+&gt; f := 5*u + u^2 + 2*u^3 + u^5 + O(u^10);
+&gt; g := u^4/25 + u^6 + u^8 + O(u^10);
+&gt; q := g/f;
+&gt; assert IsDistinguished (q);
+&gt; U, P := WeierstrassPreparation (q); // loses a lot of precision
+&gt; U;
+1 + O(5^15) + (-5^-1 + O(5^14))*u + (616*5^-2 + O(5^13))*u^2 +
+ (-606*5^-3 + O(5^12))*u^3 + (9946*5^-4 + O(5^11))*u^4 +
+ (-3761*5^-5 + O(5^10))*u^5 + O(u^6)
+&gt; P;
+(5^-3 + O(5^12))*u^3 + O(u^6)
+&gt; q, r := Quotrem (g, f); assert r eq 0; assert q eq g/f;
+&gt; q; // same as above, though is O(u^10) not O(u^9)
+(5^-3 + O(5^12))*u^3 + (-5^-4 + O(5^11))*u^4 +
+  (616*5^-5 + O(5^10))*u^5 + (-606*5^-6 + O(5^9))*u^6 +
+  (9946*5^-7 + O(5^8))*u^7 + (-3761*5^-8 + O(5^7))*u^8 +
+  (-172699*5^-9 + O(5^6))*u^9 + O(u^10)
+&gt; q, r := Quotrem (f, g); // this is valid, as the valuations are equal
+&gt; q, r; assert f eq g*q + r;
+(5^2 + O(5^17))*u + (-5^4 + O(5^17))*u^3 + (24*5^4 + O(5^17))*u^5 +
+  (-23*5^6 + O(5^17))*u^7 + (551*5^6 + O(5^17))*u^9 + O(u^10)
+(5 + O(5^16))*u + (1 + O(5^15))*u^2 + (2 + O(5^15))*u^3 + O(u^10)
+&gt; G, H, A, B := ExtendedGcd (f, g); assert H eq 0;
+&gt; G;
+(-5 + O(5^16))*u + (-1 + O(5^15))*u^2 + (-2 + O(5^15))*u^3 + O(u^10)
+&gt; assert A*f + B*g eq G; 
+</PRE>
+<P>
+<P>
+<P>
+<PRE>
+&gt; f1 := 5*u^2 + 5^4;     // example from the text
+&gt; g1 := 5^2*u;           // where ExtendedGcd fails
+&gt; G, H := ExtendedGcd (f1, g1); assert H ne 0;
+&gt; H;
+-5^4 + O(5^24) + O(u^20)
+&gt; GaussValuation (H); GaussValuation (g1);
+4 3
+</PRE>
+<P>
+The above will also work in S<sup>&nu;</sup><sub>p</sub>. As noted above,
+the corresponding commands for S<sup>&nu;</sup><sub>u</sub> rings are particularly simplified.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Su&lt;z&gt; := SuRing (S);
+&gt; F := Su!f; assert GaussValuation(F) eq 2;
+&gt; G := Su!g; assert GaussValuation(G) eq 2;
+&gt; Q, R := Quotrem (F, G); assert R eq 0;
+&gt; g, _, A, B, C, D := ExtendedGcd (F, G);
+&gt; g; assert g eq CanonicalElement (Su, 2);
+5^2 + O(5^17) + O(z^20)
+&gt; assert A*F + B*G eq g;
+&gt; assert C*F + D*G eq 0;
+&gt; assert A*D - B*C eq 1;
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text558.htm">[Next]</A><A  HREF = "text556.htm">[Prev]</A> <A  HREF = "text558.htm">[Right]</A> [____] <A  HREF = "text556.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

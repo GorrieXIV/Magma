@@ -1,0 +1,2 @@
+174,1
+S,K3Baskets,"The first return sequence contains baskets of singularities for virtual K3 surfaces polarised by a divisor with a g-dimensional linear system (or bigger) and at most n curves in the resolution of its singularities where g is the corresponding entry of the second sequence. The third sequence is the corresponding degree, while (if Proof is true) the fourth contains elements which had positive degree but negative coefficients for the indicated value of g",0,1,0,0,0,0,0,0,0,148,,82,82,82,82,-38,-38

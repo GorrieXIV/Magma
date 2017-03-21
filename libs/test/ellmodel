@@ -1,0 +1,52 @@
+
+//SetVerbose("EllModel",3);
+//We'll just run some commands and hope no errors ensue
+//The fact that the appropriate maps can be created
+//should be enough evidence that the things work.
+
+_<x>:=PolynomialRing(Rationals());
+P2<X,Y,Z>:=ProjectivePlane(Rationals());
+C1:=Curve(P2,X^3+Y^3-2*Z^3);
+E1:=EllipticCurve(C1);
+E2:=EllipticCurve(C1,C1![1,1,1]);
+E3:=EllipticCurve(C1,Rep(Support(Flexes(C1))));
+
+C2:=Curve(P2,3*Y^2*Z^2-7*(X-Z)*(X^3-5*X^2*Z+Z^3));
+_:=EllipticCurve(C2);
+C3:=Automorphism(P2,Matrix([[1,2,3],[4,5,6],[7,9,8]]))(C2);
+_:=EllipticCurve(C3);
+C4:=Curve(P2,Y^2*Z^2-(X^4+X^3*Z+13*Z^4));
+P:=C4![3,11,1];
+_:=EllipticCurve(C4,P);
+mp:=Automorphism(P2,Matrix([[1,2,3],[4,5,6],[7,9,8]]));
+_:=EllipticCurve(mp(C4),mp(P));
+C5:=Curve(P2,X^5 - X^2*Z^3 - Y^2*Z^3);
+_:=EllipticCurve(C5,C5![1,0,1]);
+
+plc:=Places(C4![0,1,0]);
+_:=EllipticCurve(C4,plc[1]);
+
+C6:=HyperellipticCurve(x^4+x+2);
+_:=EllipticCurve(C6);
+_:=EllipticCurve(C6,C6![1,2,1]);
+_:=EllipticCurve(C6,C6![1,1,0]);
+C7:=HyperellipticCurve(3*(x-2)*(x^3+3));
+_:=EllipticCurve(C7);
+C8:=HyperellipticCurve(7*x^3+3);
+_:=EllipticCurve(C8);
+
+for n := 2 to 5 do 
+  for p in {2,3,101} do 
+    F := GF(p);
+    found := false;
+    while not found do 
+      try
+        C := Curve(RandomModel(4 : CoeffRing:=F));
+        found := true;
+      catch ERR found := false; end try;
+      found := found and IsNonsingular(C);
+    end while;
+    _ := EllipticCurve(C);
+  end for;
+end for;
+

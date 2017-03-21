@@ -1,0 +1,106 @@
+/*
+Quadratic Fields test.
+AKS 1/1/97
+SRD 12/2013
+*/
+
+NUM := 10^2;
+
+procedure test_quad(d)
+    print "test_quad:", d;
+
+    euclidean := d in {-1, -2, -3, -7, -11, 2, 3, 5, 13};
+
+    K<w> := QuadraticField(d);
+    ZK   := MaximalOrder(K);
+
+    assert IsZero(K ! 0);
+    assert IsOne(K ! 1);
+    assert IsMinusOne(K ! -1);
+
+    r := 10;
+    r := 10^5;
+    r := 10^20;
+    r := 10^40;
+    ran1 := func<|Random(-r,r)>;
+    ran := func<|Random(-r,r)/Random(1,r)>;
+    for i := 0 to NUM do
+	case i mod 3:
+	when 0:
+	    x := ran1() + ran1()*w;
+	    y := ran1() + ran1()*w;
+	    c := K!ran1();
+	when 1:
+	    x := ran1() + ran1()*w;
+	    y := ran() + ran()*w;
+	    c := K!ran();
+	when 2:
+	    x := ran() + ran()*w;
+	    y := ran() + ran()*w;
+	    c := K!ran();
+	end case;
+
+	assert x + y eq y + x;
+	assert x * y eq y * x;
+	assert x * (x + y) eq x^2 + y*x;
+	assert x + 0 eq x;
+	assert x * 0 eq 0;
+	assert x - x eq 0;
+	assert x - y eq -(y - x);
+	assert x^2 - y^2 eq (x - y)*(x + y);
+	assert (x + y)^2 eq x^2 + y^2 + 2*x*y;
+
+	assert Norm(x) eq x * Conjugate(x);
+	assert x^0 eq 1;
+
+	if not IsZero(x) then
+	    assert IsUnit(x);
+	    assert (c*x)/x eq c;
+	    xi := x^-1;
+	    assert x * xi eq 1;
+	    assert x/x eq 1;
+	    assert (y/x) * x eq y;
+	end if;
+
+        if i mod 3 eq 0 then
+            xx := ZK! x;
+            yy := ZK! y;
+            assert x eq K! xx;
+            assert y eq K! yy;
+            if euclidean then
+                q := xx div yy;
+                r := xx mod yy;
+                assert xx eq q*yy + r;
+                assert r eq r mod yy;
+            end if;
+        end if;
+    end for;
+end procedure;
+
+// ALL the "Euclidean" ones
+test_quad(2);
+test_quad(3);
+test_quad(5);
+test_quad(13);
+test_quad(-1);
+test_quad(-2);
+test_quad(-3);
+test_quad(-7);
+test_quad(-11);
+
+// non Euclidean (in Magma)
+test_quad(-5);
+test_quad(-163);
+test_quad(101);
+test_quad(-101);
+test_quad(10^9+1);
+test_quad(-(10^9+1));
+test_quad(10^10+1);
+test_quad(-(10^10+1));
+test_quad(10^11+1);
+test_quad(-(10^11+1));
+test_quad(10^20+1);
+test_quad(-(10^20+1));
+test_quad(10^50+1);
+test_quad(-(10^50+1));
+

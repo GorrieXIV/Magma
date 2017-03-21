@@ -1,0 +1,139 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Common Divisors and Common Multiples</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text215.htm">[Next]</A><A  HREF = "text213.htm">[Prev]</A> <A  HREF = "text215.htm">[Right]</A> <A  HREF = "text213.htm">[Left]</A> <A  HREF = "text209.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "1835">Common Divisors and Common Multiples</A></H3>
+
+<P>
+<P>
+The functions in this section are restricted to
+univariate polynomials over a field, over the integers, or over
+a residue class ring of integers with prime modulus, or any
+polynomial ring over these.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text214.htm#1836">Common Divisors and Common Multiples</A>
+<LI> <A  HREF = "text214.htm#1841">Content and Primitive Part</A>
+</UL>
+<H4><A NAME = "1836">Common Divisors and Common Multiples</A></H4>
+
+
+
+<H5><A NAME = "1837"></A><A NAME = "vpoly_GCD">GreatestCommonDivisor</A>(f, g) : RngUPolElt, RngUPolElt -&gt; RngUPolElt</H5>
+<H5>Gcd(f, g) : RngUPolElt, RngUPolElt -&gt; RngUPolElt</H5>
+<H5>GCD(f, g) : RngUPolElt, RngUPolElt -&gt; RngUPolElt</H5>
+<BLOCKQUOTE>
+Given univariate polynomials f and g over the ring R, this
+function returns the greatest common divisor (GCD) of f and g.
+The valid coefficient rings are those which themselves have
+a GCD algorithm for their elements (which includes most commutative
+rings in Magma).
+<P>
+If either of the inputs is zero, then the result is the other input
+(and if the inputs are both zero then the result is zero).  The result is
+normalized (see the function <A  HREF = "text214.htm#vpoly_Normalize">Normalize</A>), so the result is
+always unique.
+<P>
+For polynomials over finite fields, the simple Euclidean algorithm
+is used, since this is efficient (there is no intermediate coefficient
+blowup).  
+<P>
+For polynomials over the integers or rationals, a combination
+of two algorithms is used: (1) the heuristic evaluation
+`GCDHEU' algorithm of Char et al. (<A  HREF = "text208.htm#bib_GCDHEU">[CGG89]</A> and <A  HREF = "text208.htm#bib_GCL">[GCL92, section 7.7]</A>),
+suitable for small to moderate-degree dense polynomials;
+(2) a modular algorithm similar to that presented in
+<A  HREF = "text208.htm#bib_GathenGerhard">[vzGG99, Algorithm 6.38]</A> or <A  HREF = "text208.htm#bib_GCL">[GCL92, section 7.4]</A>
+(although lifting all the way up to a bound is not used since it is
+completely unnecessary for correctness in this algorithm!).
+<P>
+For polynomials over an algebraic number field, quadratic field, or
+cyclotomic field, a fast modular algorithm is used, which maps the
+field to a residue class polynomial ring modulo a small prime.
+<P>
+Since V2.10, for polynomials over an algebraic function field or
+polynomial quotient ring over a function field, a new fast modular
+algorithm of Allan Steel (to be published) is used, which evaluates and
+interpolates for each base transcendental variable.
+<P>
+For polynomials over another polynomial ring or function field, the
+polynomials are first "flattened" to be inside a multivariate polynomial
+ring over the base coefficient ring, then the appropriate (multivariate)
+algorithm is used for that base coefficient ring.
+<P>
+For polynomials over any other ring, the generic subresultant algorithm
+<A  HREF = "text208.htm#bib_cohen1">[Coh93, section 3.3]</A> is used.
+</BLOCKQUOTE>
+<H5><A NAME = "1838">ExtendedGreatestCommonDivisor(f, g) : RngUPolElt, RngUPolElt -&gt; RngUPolElt, RngUPolElt, RngUPolElt</A></H5>
+<H5>Xgcd(f, g) : RngUPolElt, RngUPolElt -&gt; RngUPolElt, RngUPolElt, RngUPolElt</H5>
+<H5>XGCD(f, g) : RngUPolElt, RngUPolElt -&gt; RngUPolElt, RngUPolElt, RngUPolElt</H5>
+<BLOCKQUOTE>
+The extended greatest common divisor of polynomials f and g in a
+univariate polynomial ring P: the function returns polynomials c,
+a and b in P with deg(a) &lt; deg(g) and deg(b) &lt; deg(f)
+such that c is the monic GCD of f and g, and c = a.f + b.g.
+The multipliers a and b are unique if f and g are both non-zero.
+The coefficient ring must be a field.
+<P>
+For polynomials over the rational field, a modular algorithm due
+to Allan Steel (unpublished) is used; over other fields the basic
+Euclidean algorithm is used.
+</BLOCKQUOTE>
+<H5><A NAME = "1839">LeastCommonMultiple(f, g) : RngUPolElt, RngUPolElt -&gt; RngUPolElt</A></H5>
+<H5>Lcm(f, g) : RngUPolElt, RngUPolElt -&gt; RngUPolElt</H5>
+<H5>LCM(f, g) : RngUPolElt, RngUPolElt -&gt; RngUPolElt</H5>
+<BLOCKQUOTE>
+The least common multiple of polynomials f and g in a
+univariate polynomial ring P. 
+The LCM of zero and anything else is zero.
+The result is normalized (see the function <A  HREF = "text214.htm#vpoly_Normalize">Normalize</A>),
+so the result is always unique.
+The valid coefficient rings are as for the function <TT>GCD</TT>, above.
+<P>
+The LCM is effectively computed as <TT>Normalize((F div GCD(F, G)) * G)</TT>,
+for non-zero inputs.
+</BLOCKQUOTE>
+<H5><A NAME = "1840"></A><A NAME = "vpoly_Normalize">Normalize</A>(f) : RngUPolElt -&gt; RngUPolElt</H5>
+<BLOCKQUOTE>
+Given a univariate polynomial f over the ring R, this function returns
+the unique normalized polynomial g which is associate to f (so
+g=uf for some unit in R).  This is chosen so that if R is a field
+then g is monic, if R is Z then the leading coefficient of
+g is positive, if R is a polynomial ring itself, then the
+leading coefficient of g is recursively normalized, 
+and so on for other rings.
+</BLOCKQUOTE>
+<H4><A NAME = "1841">Content and Primitive Part</A></H4>
+
+
+
+<H5><A NAME = "1842">Content(p) : RngUPolElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The content of p, that is, the greatest common
+divisor of the coefficients of p as an element of the coefficient ring.
+</BLOCKQUOTE>
+<H5><A NAME = "1843">PrimitivePart(p) : RngUPolElt -&gt; RngUPolElt</A></H5>
+<BLOCKQUOTE>
+The primitive part of p, being p divided by the content
+of p.
+</BLOCKQUOTE>
+<H5><A NAME = "1844">ContentAndPrimitivePart(p) : RngUPolElt -&gt; RngIntElt, RngUPolElt</A></H5>
+<H5>Contpp(p) : RngUPolElt -&gt; RngIntElt, RngUPolElt</H5>
+<BLOCKQUOTE>
+The content (the greatest common divisor of the coefficients) of p, as an
+element of the coefficient ring, as well as
+the primitive part (p divided by the content) of p.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text215.htm">[Next]</A><A  HREF = "text213.htm">[Prev]</A> <A  HREF = "text215.htm">[Right]</A> <A  HREF = "text213.htm">[Left]</A> <A  HREF = "text209.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

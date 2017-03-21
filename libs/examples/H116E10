@@ -1,0 +1,35 @@
+"Source: Text/Commut/RngInvar.text";
+"Line: 1148";
+"Date: Tue Jun  7 22:27:15 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Commut/RngInvar.text, line: 1148
+// Example: H116E10 ()
+print "Example: H116E10";
+ei := GetEchoInput();
+SetEchoInput(true);
+G := PermutationGroup<10 | (2,5)(3,6)(4,7),(1,5,8,10,4)(2,6,9,3,7)>;
+#G;
+assert $1 eq 120;
+R := InvariantRing(G, GF(7));
+time F := FundamentalInvariants(R);
+{* Degree(f): f in F *};
+Q := RationalField();
+R0 := InvariantRing(G, Q);
+P0 := PolynomialRing(R0);
+M := GModule(G, Q);
+Gl := MatrixGroup(M);
+C := CharacterTable(Gl);
+Pi := [&+[Q!Integers()!c(g)*MatrixAlgebra(Q, 10)!g: g in Gl]/#G: c in C];
+Pi := [p: p in Pi | p ne 0];
+L := [sub<M | Image(p)>: p in Pi];
+G := MatrixGroup(DirectSum(DirectSum(L[1],L[2]),L[3]));
+G;
+Gp := ChangeRing(G, GF(7));
+#Gp;
+assert $1 eq 120;
+Rp := InvariantRing(Gp);
+time Fp := FundamentalInvariants(Rp); 
+{* Degree(f): f in Fp *};
+[Degree(f): f in F] eq [Degree(f): f in Fp];
+assert $1;
+SetEchoInput(ei);

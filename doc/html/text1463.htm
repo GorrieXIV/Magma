@@ -1,0 +1,152 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>The L-function and Counting Points</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1464.htm">[Next]</A><A  HREF = "text1462.htm">[Prev]</A> <A  HREF = "text1464.htm">[Right]</A> <A  HREF = "text1462.htm">[Left]</A> <A  HREF = "text1455.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16630">The L-function and Counting Points</A></H3>
+
+<P>
+<P>
+To compute the L-function one can use
+the intrinsic <TT>LFunction</TT> or alternatively one can do it "by hand",
+using the tools in this section and the next
+(as illustrated in Example <A  HREF = "text1465.htm#16650">H129E6</A>).
+
+
+<H5><A NAME = "16631">LFunction(E) : CrvEll[FldFunRat] -&gt; RngUPolElt</A></H5>
+<H5>LFunction(E, S) : CrvEll[FldFunRat], &lt;SeqEnum&gt;  -&gt; RngUPolElt</H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+The L-function of the elliptic curve E, which should be
+defined over a rational function field over a finite field.
+<P>
+To speed up the computation, the points in S are used to
+reduce the unknown part of H<sup>2</sup>;
+S should be a sequence of points on E or on some base change of E
+by an extension of the constant field.
+If the parameter <TT>Check</TT> is set to <TT>false</TT> then
+the points in S must form a basis for a subgroup of the geometric
+Mordell--Weil group modulo torsion that is mapped to itself by the
+Galois group of the extension of the fields of constants.
+</BLOCKQUOTE>
+<H5><A NAME = "16632">LFunction(E, e) : CrvEll[FldFunRat], RngIntElt -&gt; RngUPolElt</A></H5>
+<BLOCKQUOTE>
+The L-function for the base change of the elliptic curve E by a
+constant field extension of degree e.
+</BLOCKQUOTE>
+<H5><A NAME = "16633">AnalyticRank(E) : CrvEll[FldFunG] -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The Mordell--Weil rank of E as predicted by Tate's version of the
+Birch--Swinnerton-Dyer conjecture (or equivalently, the Artin--Tate
+conjecture). This is an unconditional upper bound and
+is proved to be the actual rank for several classes of curves, such as
+those arising from rational elliptic surfaces and K3 elliptic
+surfaces. It is required that E is defined over a function field
+over a finite field.
+</BLOCKQUOTE>
+<H5><A NAME = "16634">AnalyticInformation(E) : CrvEll[FldFunG] -&gt; Tup</A></H5>
+<H5>AnalyticInformation(E, L) : CrvEll[FldFunG], RngUPolElt -&gt; Tup</H5>
+<H5>AnalyticInformation(E, e) : CrvEll[FldFunG], RngIntElt -&gt; Tup</H5>
+<BLOCKQUOTE>
+This function computes what is predicted by the Birch--Swinnerton-Dyer
+(or Artin--Tate) conjecture
+about E, which should be an elliptic curve defined over a function
+field over a finite field.
+The data is given as a tuple consisting of the rank, geometric rank,
+and the product of the order of Tate--Shafarevich group and the regulator.
+<P>
+When a polynomial L is given as a second argument then function will
+assume that L is the L-function of E.
+<P>
+When an integer e is given as a second argument then the function will
+return analytic data for the base change of E by the constant field
+extension of degree e. This is more efficient than simply calling
+<TT>AnalyticInformation</TT> on the base change.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16635">Example <TT>CrvEllFldFun_sha3 (H129E2)</TT></A></H3>
+The curve y<sup>2</sup> = x<sup>3</sup> + 2t<sup>2</sup>x + (t<sup>3</sup> + 2t<sup>2</sup> + 2t) over F<sub>3</sub>(t)
+has rank 0 and its Tate--Shafarevich group contains Z/3 direct-sum Z/3.
+We may conclude this (unconditionally) from the analytic information,
+since the Tate conjecture is proved for rational elliptic surfaces.
+<P>
+<P>
+<PRE>
+&gt; F&lt;t&gt; := FunctionField(GF(3));
+&gt; E := EllipticCurve([ 2*t^2, t^3 + 2*t^2 + 2*t ]);
+&gt; AnalyticInformation(E);
+&lt;0, 4, 9&gt;
+</PRE>
+Furthermore, the rank of E(/line(F<sub>3</sub>)(t)) is 4.
+<HR>
+<H3><A NAME = "16636">Example <TT>CrvEllFldFun_rank2-continued (H129E3)</TT></A></H3>
+We consider again the curve y<sup>2</sup> = x<sup>3</sup> + (t<sup>4</sup> + 2t<sup>2</sup>)x + t<sup>3</sup> + 2t over F<sub>3</sub>(t),
+which was found to have rank 2 and regulator 12 in Example <A  HREF = "text1461.htm#16622">H129E1</A>.
+<P>
+<P>
+<PRE>
+&gt; F&lt;t&gt; := FunctionField(GF(3));
+&gt; E := EllipticCurve([ t^4 + 2*t^2, t^3 + 2*t ]);
+&gt; AnalyticInformation(E);
+&lt;2, 8, 12&gt;
+</PRE>
+This confirms that the rank is 2 and tells us that the regulator multiplied by
+the order of Sha is 12; hence the Tate--Shafarevich group is trivial.
+Again this is unconditional.
+<HR>
+<H5><A NAME = "16637">NumberOfPointsOnSurface(E, e) : CrvEll, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the number of points on the Kodaira--N&eacute;ron model of the elliptic
+curve E over an extension of the constant field of degree e.
+</BLOCKQUOTE>
+<H5><A NAME = "16638">NumbersOfPointsOnSurface(E, e) : CrvEll, RngIntElt -&gt; [ RngIntElt ], [ RngIntElt ]</A></H5>
+<BLOCKQUOTE>
+If an elliptic curve E is defined over a function field over a finite field
+of q elements then this intrinsic computes a sequence containing the number
+of points on the corresponding Kodaira--N&eacute;ron model of E over extensions
+of F<sub>q</sub> of degree up to e, together with the number of points on the
+base curve over these extensions.
+</BLOCKQUOTE>
+<H5><A NAME = "16639">BettiNumber(E, i) : CrvEll, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the i-th Betti number of the Kodaira--N&eacute;ron model of the elliptic
+surface corresponding to the elliptic curve E.
+</BLOCKQUOTE>
+<H5><A NAME = "16640">CharacteristicPolynomialFromTraces(traces) : [ Fld ] -&gt; RngUPolElt</A></H5>
+<BLOCKQUOTE>
+Given a sequence traces=[t<sub>1</sub>, t<sub>2</sub>, ..., t<sub>d</sub>], this function computes a
+polynomial of degree d with constant coefficient equal to 1 such that the
+j-th powersum of the reciprocal zeroes of this polynomial is equal to t<sub>j</sub>.
+This is typically used when one wants to compute the characteristic polynomial
+of Frobenius acting on some piece of cohomology from traces of various
+powers of Frobenius.
+</BLOCKQUOTE>
+<H5><A NAME = "16641">CharacteristicPolynomialFromTraces(traces, d, q, i) : [ Fld ], RngIntElt, RngIntElt, RngIntElt -&gt; RngUPolElt, RngUPolElt</A></H5>
+<BLOCKQUOTE>
+Given a sequence of field elements [t<sub>1</sub>, t<sub>2</sub>, ..., t<sub>k</sub>]
+and integers d,
+q, and i, this function computes a polynomial of degree d with constant
+coefficient 1 such that the reciprocals of the zeroes of this polynomial
+have absolute value q<sup>i/2</sup> and the j-th powersum of the reciprocals of
+these zeroes equals t<sub>j</sub>. For this function one must have k at least
+equal to Floor(d/2). A priori the leading coefficient of the polynomials is
+not determined from the list of traces; in this case two polynomials are returned,
+one for each choice of sign.
+One usually needs to provide Ceiling(d/2)
+traces in order to determine the sign, but in certain cases more
+traces are required.
+This function is typically used when one wants
+to compute the characteristic polynomial of Frobenius acting on a
+piece of the i-th cohomology group from traces of various powers of
+Frobenius.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text1464.htm">[Next]</A><A  HREF = "text1462.htm">[Prev]</A> <A  HREF = "text1464.htm">[Right]</A> <A  HREF = "text1462.htm">[Left]</A> <A  HREF = "text1455.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

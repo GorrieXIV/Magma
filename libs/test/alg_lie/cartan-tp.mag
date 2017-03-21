@@ -1,0 +1,61 @@
+/* Testing dimensions of some Witt Lie Algebras */
+TYPES1 := [ <GF(7), 1,[1]>, <GF(7), 2,[1,1]>, <GF(9), 1,[1]>, <GF(9), 3,[1,2,1]>, <GF(9), 2,[2,3]>];
+for t in TYPES1 do
+	F := t[1]; p := Characteristic(F);
+	m := t[2]; n := t[3];
+	assert m eq #n;
+
+	time W := WittLieAlgebra(F, m, n);
+	assert Dimension(W) eq m*p^(&+n);
+end for;
+
+/* Testing some properties */
+FIELDS := [ GF(2), GF(5), GF(9) ];
+for F in FIELDS do
+	p := Characteristic(F);
+
+	printf "F = %o\n", F;
+
+	printf "Witt...\n";
+	m := 2; n := [2,1];
+	time W := WittLieAlgebra( F, m, n );
+	assert Dimension(W) eq m*p^(&+n);
+	time assert not IsAbelian(W);
+	time assert not IsSolvable(W);
+	time assert not IsNilpotent(W);
+	time assert IsSimple(W);
+
+	printf "ConformalSpecialLieAlgebra...\n";
+	m := 2; n := [2,1];
+	time CS,S,W := ConformalSpecialLieAlgebra( F, m, n );
+	assert Dimension(S)+1 eq Dimension(CS);
+	time assert not IsSimple(S);
+	time assert not IsSimple(S*S);
+
+	m := 2; n := [1,1];	
+	time CS,S,W := ConformalSpecialLieAlgebra( F, m, n );
+	assert Dimension(S)+1 eq Dimension(CS);
+	time assert not IsSimple(S);
+	time assert not IsSimple(S*S);
+
+	if p ge 3 then
+		printf "ConformalHamiltonianLieAlgebra...\n";
+		m := 2; n := [1,1];
+		time CH,H,W := ConformalHamiltonianLieAlgebra( F, m, n );
+		time assert not IsSimple(H);
+		time assert IsSimple(H*H);
+
+		m := 2; n := [1,2];
+		time CH,H,W := ConformalHamiltonianLieAlgebra( F, m, n );
+		time assert not IsSimple(H);
+		time assert IsSimple(H*H);
+
+		printf "ContactLieAlgebra...\n";
+		m := 3; n := [1,1,1];
+		time K,W := ContactLieAlgebra( F, m, n );
+		if (((m+3) mod 6) ne 0) then assert Dimension(K*K) eq Dimension(K); end if;
+		time assert IsSimple(K*K); 
+
+	end if;
+
+end for;

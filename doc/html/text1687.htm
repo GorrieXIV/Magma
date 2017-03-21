@@ -1,0 +1,622 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Simplicial Complexes</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1688.htm">[Next]</A><A  HREF = "text1686.htm">[Prev]</A> <A  HREF = "text1688.htm">[Right]</A> <A  HREF = "text1686.htm">[Left]</A> <A  HREF = "text1685.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "18663">Simplicial Complexes</A></H3>
+
+<P>
+<P>
+<P>
+The module supports creation of simplicial complexes from lists of
+faces, as well as a few preprogrammed complex types. Furthermore,
+several standard techniques for modifying and recombining simplicial
+complexes are available.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1687.htm#18697">Standard Topological Objects</A>
+</UL>
+<H5><A NAME = "18664">SimplicialComplex(f) : SeqEnum[SetEnum] -&gt; SmpCpx</A></H5>
+<BLOCKQUOTE>
+Constructs an abstract simplicial complex with the faces in the list
+f. The argument should be a sequence of sets. There is no
+requirement on the type of the elements in the face sets, however
+several of the constructions require the sets to have integer
+entries. See <A  HREF = "text1687.htm#SmpCpx:Normalization">Normalization</A> for automated
+renumbering of the face set elements.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "18665">Example <TT>SmpCpx_construct (H146E1)</TT></A></H3>
+We give a simplicial complex by listing the facets, or also redundant
+faces if we want to.
+<P>
+<P>
+<PRE>
+&gt; sc := SimplicialComplex([{1,2,3},{1,2,4},{1,3,4},{2,3,4},{1,5},{2,5}]);
+</PRE>
+We can view the facets (faces not included in any other faces) of the
+complex, or by giving the <TT>:Maximal</TT> output flag, we can view all
+faces.
+<P>
+<P>
+<PRE>
+&gt; sc;
+Simplicial complex
+[
+    { 2, 3, 4 },
+    { 1, 2, 3 },
+    { 1, 2, 4 },
+    { 2, 5 },
+    { 1, 5 },
+    { 1, 3, 4 }
+]
+
+&gt; sc:Maximal;
+Simplicial complex
+{
+    ,
+    { 4 },
+    { 2, 3, 4 },
+    { 2, 3 },
+    { 3, 4 },
+    { 1, 3 },
+    { 3 },
+    { 1 },
+    { 1, 4 },
+    { 1, 2, 3 },
+    { 2 },
+    { 1, 2 },
+    { 1, 2, 4 },
+    { 2, 5 },
+    { 1, 5 },
+    { 5 },
+    { 2, 4 },
+    { 1, 3, 4 }
+}
+</PRE>
+<HR>
+<H5><A NAME = "18666">SimplicialComplex(G) : Grph -&gt; SmpCpx</A></H5>
+<BLOCKQUOTE>
+Constructs a 1-dimensional simplicial complex isomorphic to the graph G.
+</BLOCKQUOTE>
+<H5><A NAME = "18667">FlagComplex(G) : Grph -&gt; SmpCpx</A></H5>
+<H5>CliqueComplex(G) : Grph -&gt; SmpCpx</H5>
+<BLOCKQUOTE>
+Constructs a simplicial complex with an n-simplex for each
+n-clique in the graph G. 
+</BLOCKQUOTE>
+<H5><A NAME = "18668">Dimension(X) : SmpCpx -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the dimension of the highest dimensional face of the
+simplicial complex X. Note that there is a difference between
+degrees and dimensions of faces. A face is said to have degree n if
+there are n elements in the face as a set, and it is said to have
+dimension n if there are n + 1 elements in the face as a set.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "18669">Example <TT>SmpCpx_dimension (H146E2)</TT></A></H3>
+The recently defined simplicial complex has top dimension 2.
+<P>
+<P>
+<PRE>
+&gt; Dimension(sc);
+2
+</PRE>
+<HR>
+<H5><A NAME = "18670">Faces(X, d) : SmpCpx, RngIntElt -&gt; SeqEnum[SetEnum]</A></H5>
+<BLOCKQUOTE>
+Returns the faces of one degree d of the simplicial complex 
+X. Recall that the degree of a face is the number of elements in
+the face as a set, and one more than the dimension of the face.
+<P>
+The order of faces returned for each degree is also the correspondence
+between faces and the basis of the corresponding module in a chain
+complex constructed from the simplicial complex.
+<P>
+If the complex does not possess any faces of the requested degree, an
+empty sequence is returned.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "18671">Example <TT>SmpCpx_faces (H146E3)</TT></A></H3>
+We can list faces of any degree in the defined simplicial complex.
+<P>
+<P>
+<PRE>
+&gt; Faces(sc,2);
+[
+    { 2, 3 },
+    { 3, 4 },
+    { 1, 3 },
+    { 1, 4 },
+    { 1, 2 },
+    { 2, 5 },
+    { 1, 5 },
+    { 2, 4 }
+]
+&gt; Faces(sc,5);
+[]
+</PRE>
+<HR>
+<H5><A NAME = "18672">Facets(X) : SmpCpx -&gt; SeqEnum[SetEnum]</A></H5>
+<BLOCKQUOTE>
+Returns the facets of the simplicial complex X. The facets of a
+simplicial complex are the faces that are not themselves subsets of
+another face. This is what the normal printing mode for a simplicial
+complex outputs.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "18673">Example <TT>SmpCpx_facets (H146E4)</TT></A></H3>
+We can read the facets both by fetching the sequence of facets and by
+printing the complex as such.
+<P>
+<P>
+<PRE>
+&gt; Facets(sc);
+[
+    { 2, 3, 4 },
+    { 1, 2, 3 },
+    { 1, 2, 4 },
+    { 2, 5 },
+    { 1, 5 },
+    { 1, 3, 4 }
+]
+&gt; sc;
+Simplicial complex
+[
+    { 2, 3, 4 },
+    { 1, 2, 3 },
+    { 1, 2, 4 },
+    { 2, 5 },
+    { 1, 5 },
+    { 1, 3, 4 }
+]
+</PRE>
+<HR>
+<H5><A NAME = "18674"></A><A NAME = "SmpCpx:Normalization">Normalization</A>(X) : SmpCpx -&gt; SmpCpx</H5>
+<H5>Normalization(~X) : SmpCpx -&gt;</H5>
+<BLOCKQUOTE>
+Relabels the points (elements of the face sets) of the simplicial
+complex X using 1, 2, 3, ... . This ensures that the simplicial
+complex is built on subsets of the integers, which is a prerequisite
+for several functions handling simplicial complexes. We call a
+simplicial complex on subsets of the integers <I>normalized</I> in this
+handbook.
+<P>
+Note the two calling signatures of this function. The first signature
+copies the simplicial complex and returns a new complex with the
+desired modification, whereas the second signature modifies the
+complex in place.
+</BLOCKQUOTE>
+<H5><A NAME = "18675">Shift(X, n) : SmpCpx, RngIntElt -&gt; SmpCpx</A></H5>
+<H5>Shift(~X, n) : SmpCpx, RngIntElt -&gt;</H5>
+<BLOCKQUOTE>
+<P>
+Shifts all integer points in the normalized simplicial complex X
+by an offset given by n.
+<P>
+Note the two calling signatures of this function. The first signature
+copies the simplicial complex and returns a new complex with the
+desired modification, whereas the second signature modifies the
+complex in place.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "18676">Example <TT>SmpCpx_normalize-shift (H146E5)</TT></A></H3>
+We define a simplicial complex using string labels, normalize it and
+then shift the labels.
+<P>
+<P>
+<PRE>
+&gt; cpx := Boundary(SimplicialComplex([{"a","b","c"}]));
+&gt; cpx;
+Simplicial complex
+[
+    { c, a },
+    { c, b },
+    { b, a }
+]
+
+&gt; Normalization(~cpx);
+&gt; cpx;
+Simplicial complex
+[
+    { 1, 3 },
+    { 2, 3 },
+    { 1, 2 }
+]
+
+&gt; Shift(~cpx,-2);
+&gt; cpx;
+Simplicial complex
+[
+    { -1, 1 },
+    { 0, 1 },
+    { -1, 0 }
+]
+</PRE>
+<HR>
+<H5><A NAME = "18677">Boundary(X) : SmpCpx -&gt; SmpCpx</A></H5>
+<BLOCKQUOTE>
+Returns the simplicial complex generated by all simplexes that lie in
+the boundary of the simplicial complex X. This can be used to
+easily acquire a simplicial complex representing the n-sphere.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "18678">Example <TT>SmpCpx_boundary (H146E6)</TT></A></H3>
+We can determine the boundary of our previously defined simplicial
+complex, or construct a 4-sphere.
+<P>
+<P>
+<PRE>
+&gt; Boundary(sc);
+Simplicial complex
+[
+    { 2, 3 },
+    { 3, 4 },
+    { 1, 3 },
+    { 1, 4 },
+    { 1, 2 },
+    { 5 },
+    { 2, 4 }
+]
+&gt; sph4 := Boundary(SimplicialComplex([{1,2,3,4,5,6}]));
+&gt; sph4;
+Simplicial complex
+[
+    { 1, 2, 3, 5, 6 },
+    { 2, 3, 4, 5, 6 },
+    { 1, 3, 4, 5, 6 },
+    { 1, 2, 3, 4, 5 },
+    { 1, 2, 4, 5, 6 },
+    { 1, 2, 3, 4, 6 }
+]
+</PRE>
+<HR>
+<H5><A NAME = "18679">S + T : SmpCpx, SmpCpx -&gt; SmpCpx</A></H5>
+<BLOCKQUOTE>
+Returns the topological sum, or disjoint union, of two simplicial
+complexes. Requires both complexes to be normalized using
+<A  HREF = "text1687.htm#SmpCpx:Normalization">Normalization</A>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "18680">Example <TT>SmpCpx_sum (H146E7)</TT></A></H3>
+We can construct a disjoint union of two circles.
+<P>
+<P>
+<PRE>
+&gt; sph2 := Boundary(SimplicialComplex([{1,2,3}]));
+&gt; sph2 + sph2;
+Simplicial complex
+[
+    { 4, 6 },
+    { 2, 3 },
+    { 4, 5 },
+    { 5, 6 },
+    { 1, 3 },
+    { 1, 2 }
+]
+</PRE>
+<HR>
+<H5><A NAME = "18681">S eq T : SmpCpx, SmpCpx -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Compares two simplicial complexes. Will not try to find an
+isomorphism, rather does the comparison by ensuring that the points
+are in the same universe and then doing a set comparison on the set of
+faces.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "18682">Example <TT>SmpCpx_eq (H146E8)</TT></A></H3>
+Shifting a complex, for instance, will break equality, since the
+labels differ.
+<P>
+<P>
+<PRE>
+&gt; sc eq Shift(sc,2);
+false
+&gt; sc eq Shift(Shift(sc,2),-2);
+true
+</PRE>
+Furthermore, isomorphic complexes with different labels will not be equal.
+<P>
+<P>
+<PRE>
+&gt; circ1 := Boundary(SimplicialComplex([{1,2,3}]));
+&gt; circ2 := Boundary(SimplicialComplex([{"a","b","c"}]));
+&gt; circ1 eq circ2;
+false
+</PRE>
+<HR>
+<H5><A NAME = "18683">Product(S,T) : SmpCpx, SmpCpx -&gt; SmpCpx</A></H5>
+<BLOCKQUOTE>
+Returns the cartesian product of two simplicial complexes. This will
+work on any complexes, since the new points will be pairs of points
+from the component complexes.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "18684">Example <TT>SmpCpx_product (H146E9)</TT></A></H3>
+Using the two different circles from the last example, we can now
+construct a torus.
+<P>
+<P>
+<PRE>
+&gt; Product(circ1,circ2);
+Simplicial complex
+[
+    { &lt;3, b&gt;, &lt;1, b&gt;, &lt;3, c&gt; },
+    { &lt;1, c&gt;, &lt;3, c&gt;, &lt;1, a&gt; },
+    { &lt;2, a&gt;, &lt;3, b&gt;, &lt;3, a&gt; },
+    { &lt;3, b&gt;, &lt;1, b&gt;, &lt;1, a&gt; },
+    { &lt;1, b&gt;, &lt;2, b&gt;, &lt;2, c&gt; },
+    { &lt;2, a&gt;, &lt;3, c&gt;, &lt;3, a&gt; },
+    { &lt;1, c&gt;, &lt;1, b&gt;, &lt;3, c&gt; },
+    { &lt;3, c&gt;, &lt;2, b&gt;, &lt;2, c&gt; },
+    { &lt;1, c&gt;, &lt;1, b&gt;, &lt;2, c&gt; },
+    { &lt;3, c&gt;, &lt;3, a&gt;, &lt;1, a&gt; },
+    { &lt;2, a&gt;, &lt;3, c&gt;, &lt;2, c&gt; },
+    { &lt;3, b&gt;, &lt;3, a&gt;, &lt;1, a&gt; },
+    { &lt;2, a&gt;, &lt;1, a&gt;, &lt;2, b&gt; },
+    { &lt;2, a&gt;, &lt;1, a&gt;, &lt;2, c&gt; },
+    { &lt;1, c&gt;, &lt;1, a&gt;, &lt;2, c&gt; },
+    { &lt;3, b&gt;, &lt;3, c&gt;, &lt;2, b&gt; },
+    { &lt;1, b&gt;, &lt;1, a&gt;, &lt;2, b&gt; },
+    { &lt;2, a&gt;, &lt;3, b&gt;, &lt;2, b&gt; }
+]
+</PRE>
+If we want something less unwieldy -- especially after repeated
+cartesian products -- we can always normalize the resulting complexes.
+<P>
+<P>
+<PRE>
+&gt; line := SimplicialComplex([{1,2}]);
+&gt; square := Product(line,line); 
+&gt; cube1 := Product(square,line);
+&gt; cube2 := Product(line,square);
+&gt; cube1 eq cube2;
+false
+&gt; Normalization(cube1) eq Normalization(cube2);
+false
+&gt; cube1;
+Simplicial complex
+[
+    { &lt;&lt;1, 2&gt;, 1&gt;, &lt;&lt;1, 2&gt;, 2&gt;, &lt;&lt;1, 1&gt;, 1&gt;, &lt;&lt;2, 2&gt;, 2&gt; },
+    { &lt;&lt;2, 1&gt;, 1&gt;, &lt;&lt;2, 2&gt;, 1&gt;, &lt;&lt;1, 1&gt;, 1&gt;, &lt;&lt;2, 2&gt;, 2&gt; },
+    { &lt;&lt;1, 2&gt;, 2&gt;, &lt;&lt;1, 1&gt;, 1&gt;, &lt;&lt;1, 1&gt;, 2&gt;, &lt;&lt;2, 2&gt;, 2&gt; },
+    { &lt;&lt;1, 2&gt;, 1&gt;, &lt;&lt;2, 2&gt;, 1&gt;, &lt;&lt;1, 1&gt;, 1&gt;, &lt;&lt;2, 2&gt;, 2&gt; },
+    { &lt;&lt;1, 1&gt;, 1&gt;, &lt;&lt;1, 1&gt;, 2&gt;, &lt;&lt;2, 1&gt;, 2&gt;, &lt;&lt;2, 2&gt;, 2&gt; },
+    { &lt;&lt;2, 1&gt;, 1&gt;, &lt;&lt;1, 1&gt;, 1&gt;, &lt;&lt;2, 1&gt;, 2&gt;, &lt;&lt;2, 2&gt;, 2&gt; }
+]
+&gt; Normalization(cube1);
+Simplicial complex
+[
+    { 3, 4, 5, 8 },
+    { 4, 5, 6, 8 },
+    { 1, 3, 4, 5 },
+    { 2, 4, 5, 7 },
+    { 1, 2, 4, 5 },
+    { 4, 5, 6, 7 }
+]
+</PRE>
+<HR>
+<H5><A NAME = "18685">Join(S,T) : SmpCpx, SmpCpx -&gt; SmpCpx</A></H5>
+<H5>S * T : SmpCpx, SmpCpx -&gt; SmpCpx</H5>
+<BLOCKQUOTE>
+Constructs the join of two simplicial complexes. The join of two
+simplicial complexes is defined as the complex generated by faces on
+the form {x<sub>1</sub>, ..., x<sub>r</sub>, y<sub>1</sub>, ..., y<sub>s</sub>} for
+{x<sub>1</sub>, ..., x<sub>r</sub>}&isin;S and {y<sub>1</sub>, ..., y<sub>s</sub>}&isin;T.
+Requires both simplicial complexes to be normalized.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "18686">Example <TT>SmpCpx_join (H146E10)</TT></A></H3>
+The join of two edges is a 3-simplex.
+<P>
+<P>
+<PRE>
+&gt; SimplicialComplex([{1,2}]) * SimplicialComplex([{1,2}]);
+Simplicial complex
+[
+    { 1, 2, 3, 4 }
+]
+</PRE>
+<HR>
+<H5><A NAME = "18687">AddSimplex(X, s) : SmpCpx, SetEnum -&gt; SmpCpx</A></H5>
+<H5>AddSimplex(~X, s) : SmpCpx, SetEnum -&gt;</H5>
+<H5>AddSimplex(X, s) : SmpCpx, SeqEnum -&gt; SmpCpx</H5>
+<H5>Addsimplex(~X, s) : SmpCpx, SeqEnum -&gt;</H5>
+<BLOCKQUOTE>
+Adds either a single simplex s expressed as a set 
+or a sequence of simplexes to a simplicial complex. The functional
+versions of the function call return a new complex with the added
+simplices included, and the procedural change the complex in place.
+</BLOCKQUOTE>
+<H5><A NAME = "18688">Prune(X, f) : SmpCpx, SetEnum -&gt; SmpCpx</A></H5>
+<H5>Prune(~X, f) : SmpCpx, SetEnum -&gt;</H5>
+<BLOCKQUOTE>
+Removes a face f and all faces containing f from a simplicial
+complex X. If f is not a face of X, then X is
+returned unchanged.
+<P>
+Note the two calling signatures of this function. The first signature
+copies the simplicial complex and returns a new complex with the
+desired modification, whereas the second signature modifies the
+complex in place.
+</BLOCKQUOTE>
+<H5><A NAME = "18689">Glue(X, e) : SmpCpx, SeqEnum -&gt; SmpCpx</A></H5>
+<H5>Glue(~X, e) : SmpCpx, SeqEnum -&gt;</H5>
+<BLOCKQUOTE>
+In the simplicial complex X, identify all points identified by
+pairs in the sequence e.
+<P>
+The sequence e should be a sequence of pairs of elements of the
+face sets of X. The identification will eliminate the first
+component of each pair, replacing it with the second component
+wherever it occurs in X.
+<P>
+Note the two calling signatures of this function. The first signature
+copies the simplicial complex and returns a new complex with the
+desired modification, whereas the second signature modifies the
+complex in place.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "18690">Example <TT>SmpCpx_prune-glue (H146E11)</TT></A></H3>
+We can, for instance, construct the connected sum of two tori using
+<TT>Product</TT>, <TT>Prune</TT>, the topological sum and <TT>Glue</TT>. 
+<P>
+<P>
+<PRE>
+&gt; circ := SimplicialComplex([{1,2},{2,3},{3,1}]);
+&gt; torus := Product(circ,circ);
+&gt; Normalization(~torus);
+&gt; torus;
+Simplicial complex
+[
+    { 2, 3, 6 },
+    { 1, 2, 9 },
+    { 2, 6, 8 },
+    { 4, 7, 8 },
+    { 3, 5, 9 },
+    { 4, 6, 7 },
+    { 1, 8, 9 },
+    { 1, 4, 8 },
+    { 6, 8, 9 },
+    { 2, 7, 8 },
+    { 2, 3, 9 },
+    { 5, 6, 9 },
+    { 1, 3, 5 },
+    { 1, 4, 6 },
+    { 3, 6, 7 },
+    { 1, 5, 6 },
+    { 1, 2, 7 },
+    { 1, 3, 7 }
+]
+
+&gt; oneholetorus := Prune(torus,{1,2,7});
+&gt; twoholetorus := Prune(Prune(torus,{1,2,7}),{6,8,9});
+&gt; threetori := oneholetorus + twoholetorus + oneholetorus;
+&gt; threetorus := Glue(threetori,[&lt;1,10&gt;,&lt;2,11&gt;,&lt;7,16&gt;,&lt;15,19&gt;,&lt;17,20&gt;,&lt;18,25&gt;]);
+</PRE>
+<P>
+Note that we find the glue data by considering that the maximal point
+in the original torus had number 9, so for the second added torus,
+all points will be shifted by 9 and in the third all points will
+be shifted by 18. Thus, the excised facets {1, 2, 7} and
+{6, 8, 9} turn into {10, 11, 16} and {15, 17, 18}, and the
+excised facet {1, 2, 7} in the third torus turns into {19, 20, 25}.
+<HR>
+<H5><A NAME = "18691">BarycentricSubdivision(X) : SmpCpx -&gt; SmpCpx</A></H5>
+<BLOCKQUOTE>
+Constructs the barycentric subdivision of the simplicial complex 
+X. Abstractly, this is a simplicial complex whose faces are
+chains X<sub>1</sub> &sub; ... &sub;X<sub>n</sub> of faces from X. The new
+complex has more faces but the same homotopy type as the old complex.
+</BLOCKQUOTE>
+<H5><A NAME = "18692">Skeleton(X, q) : SmpCpx, RngIntElt -&gt; SmpCpx</A></H5>
+<BLOCKQUOTE>
+Returns the q-skeleton of the simplicial complex X. This is
+the complex consisting of all faces of X of dimension at most
+q.
+</BLOCKQUOTE>
+<H5><A NAME = "18693">UnderlyingGraph(X) : SmpCpx -&gt; GrphUnd, GrphVertSet, GrphEdgeSet</A></H5>
+<BLOCKQUOTE>
+Constructs a graph isomorphic, as a graph, to the 1-skeleton of the
+simplicial complex X.
+</BLOCKQUOTE>
+<H5><A NAME = "18694">Cone(X) : SmpCpx -&gt; SmpCpx</A></H5>
+<BLOCKQUOTE>
+Constructs a cone over the simplicial complex X. The cone
+is generated by all faces of the complex, with an additional vertex
+included into each face. Any cone is acyclic, in other words all
+homology groups vanish. Requires a normalized simplicial complex.
+</BLOCKQUOTE>
+<H5><A NAME = "18695">Suspension(X) : SmpCpx -&gt; SmpCpx</A></H5>
+<BLOCKQUOTE>
+Constructs the suspension, or double cone, over the normalized
+simplicial complex X. The suspension has the added property that
+all the homology groups occur in it, shifted up by one dimension.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "18696">Example <TT>SmpCpx_cone-suspension (H146E12)</TT></A></H3>
+For computation of the relevant homology, and a demonstration of the
+stated facts about the cone and suspension operations, please refer to
+examples in the Section on homology computation.
+<P>
+<P>
+<P>
+<PRE>
+&gt; circ := Boundary(SimplicialComplex([{1,2,3}]));
+&gt; Cone(circ);
+Simplicial complex
+[
+    { 1, 3, 4 },
+    { 2, 3, 4 },
+    { 1, 2, 4 }
+]
+
+&gt; Suspension(circ); 
+Simplicial complex
+[
+    { 1, 3, 5 },
+    { 1, 3, 4 },
+    { 1, 2, 5 },
+    { 2, 3, 4 },
+    { 1, 2, 4 },
+    { 2, 3, 5 }
+]
+</PRE>
+<HR>
+<H4><A NAME = "18697">Standard Topological Objects</A></H4>
+
+
+
+<H5><A NAME = "18698">Simplex(n) : RngIntElt -&gt; SmpCpx</A></H5>
+<BLOCKQUOTE>
+Returns the n-dimensional simplex as a simplicial complex.
+</BLOCKQUOTE>
+<H5><A NAME = "18699">Sphere(n) : RngIntElt -&gt; SmpCpx</A></H5>
+<BLOCKQUOTE>
+Returns a simplicial complex triangulating the n-sphere.
+</BLOCKQUOTE>
+<H5><A NAME = "18700">KleinBottle() : -&gt; SmpCpx</A></H5>
+<BLOCKQUOTE>
+Returns a triangulation of the Klein bottle as an abstract simplicial
+complex.
+</BLOCKQUOTE>
+<H5><A NAME = "18701">Torus() : -&gt; SmpCpx</A></H5>
+<BLOCKQUOTE>
+Returns a triangulation of a torus as an abstract simplicial complex.
+</BLOCKQUOTE>
+<H5><A NAME = "18702">Cylinder() : -&gt; SmpCpx</A></H5>
+<BLOCKQUOTE>
+Returns a triangulation of a cylinder as an abstract simplicial
+complex.
+</BLOCKQUOTE>
+<H5><A NAME = "18703">MoebiusStrip() : -&gt; SmpCpx</A></H5>
+<BLOCKQUOTE>
+Returns a triangulation of the Moebius strip as an abstract simplicial
+complex.
+</BLOCKQUOTE>
+<H5><A NAME = "18704">LensSpace(p) : RngIntElt -&gt; SmpCpx</A></H5>
+<BLOCKQUOTE>
+Constructs the lens space L(p, 1). This has a 1-dimensional homology
+generator of order p.
+</BLOCKQUOTE>
+<H5><A NAME = "18705">SimplicialProjectivePlane() : -&gt; SmpCpx</A></H5>
+<BLOCKQUOTE>
+Constructs a triangulation of the projective plane. 
+</BLOCKQUOTE>
+<P>
+<P>
+<P>
+Examples for the usage of <TT>LensSpace</TT> and <TT>SimplicialProjectivePlane</TT> will be given in Section <A  HREF = "text1688.htm#18706">Homology Computation</A> on homology
+computation. 
+<PRE></PRE> <A  HREF = "text1688.htm">[Next]</A><A  HREF = "text1686.htm">[Prev]</A> <A  HREF = "text1688.htm">[Right]</A> <A  HREF = "text1686.htm">[Left]</A> <A  HREF = "text1685.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

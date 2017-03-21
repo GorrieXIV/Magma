@@ -1,0 +1,16 @@
+magma
+{
+	stdgens.m
+}
+suzuki
+{
+	+suzuki.spec
+}
+ree
+{
+	+ree.spec
+}
+large_ree
+{
+	+large_ree.spec
+}

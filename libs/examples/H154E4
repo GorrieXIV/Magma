@@ -1,0 +1,55 @@
+"Source: Text/Incidence/Hadamard.text";
+"Line: 456";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Incidence/Hadamard.text, line: 456
+// Example: H154E4 ()
+print "Example: H154E4";
+ei := GetEchoInput();
+SetEchoInput(true);
+//no-test
+D := HadamardDatabase();
+#D;
+data := HadamardDatabaseInformation(D);
+SetVerboseLevel("HadamardDB", 1);
+SetEchoInput(false);
+load "matrixfile";
+SetEchoInput(true);
+UpdateHadamardDatabase(~data, S);
+WriteHadamardDatabase("~/data/hadamard", ~data);
+SetLibraryRoot("~");
+D := HadamardDatabase();
+#D;
+assert $1 eq 2007;
+function MyHadamardDatabase()
+    oldlibroot := GetLibraryRoot();
+    SetLibraryRoot("~");
+    D := HadamardDatabase();
+    SetLibraryRoot(oldlibroot);
+    return D;
+end function;
+D := MyHadamardDatabase();
+#D;
+assert $1 eq 2007;
+D := SkewHadamardDatabase();
+#D;
+assert $1 eq 638;
+data := HadamardDatabaseInformationEmpty(: Canonical := false);
+for n in Degrees(D) do
+    UpdateHadamardDatabase(~data, Matrices(D, n));
+end for;
+WriteRawHadamardData("skewraw.m", data);
+SetEchoInput(false);
+load "skewraw.m";
+SetEchoInput(true);
+SetEchoInput(false);
+load "matrixfile";
+SetEchoInput(true);
+UpdateHadamardDatabase(~data, S);
+WriteHadamardDatabase("~/data/hadamard_skew", ~data);
+WriteRawHadamardData("skewraw.m", data);
+SetLibraryRoot("~");
+D := SkewHadamardDatabase();
+#D;
+assert $1 eq 641;
+SetEchoInput(ei);

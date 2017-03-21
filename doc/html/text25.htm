@@ -1,0 +1,190 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Attributes</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text26.htm">[Next]</A><A  HREF = "text24.htm">[Prev]</A> <A  HREF = "text26.htm">[Right]</A> <A  HREF = "text24.htm">[Left]</A> <A  HREF = "text21.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "179">Attributes</A></H3>
+
+<P>
+<P>
+This section is placed beside the section on packages because the use
+of attributes is most common within packages.
+<P>
+For any structure within Magma, it is possible to have <I>attributes</I>
+associated with it.  These are simply values stored within the structure
+and are referred to by named fields in exactly the same manner as
+Magma records.
+<P>
+There are two kinds of structure attributes: predefined system attributes
+and user-defined attributes.  Both kinds are discussed in the following
+subsections.  A description of how attributes are accessed and assigned
+then follows.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text25.htm#180">Predefined System Attributes</A>
+<LI> <A  HREF = "text25.htm#181">User-defined Attributes</A>
+<LI> <A  HREF = "text25.htm#184">Accessing Attributes</A>
+</UL>
+<H4><A NAME = "180">Predefined System Attributes</A></H4>
+
+<P>
+<P>
+The valid fields of predefined system attributes are automatically
+defined at the startup of Magma.  These fields now replace the
+old method of using the procedure <TT>AssertAttribute</TT> and the function
+<TT>HasAttribute</TT> (which will still work for some time to preserve
+backwards compatibility).  For each name which is a valid first argument
+for <TT>AssertAttribute</TT> and <TT>HasAttribute</TT>, that name is a
+valid attribute field for structures of the appropriate category.
+Thus the backquote method for accessing attributes described in
+detail below should now be used instead of the old method.
+For such attributes, the code:
+<P>
+<P>
+<PRE>
+&gt; S`Name := x;
+</PRE>
+is completely equivalent to the code:
+<P>
+<P>
+<PRE>
+&gt; AssertAttribute(S, "Name", x);
+</PRE>
+(note that
+the function <TT>AssertAttribute</TT> takes a string for its second argument
+so the name must be enclosed in double quotes).
+Similarly, the code:
+<P>
+<P>
+<PRE>
+&gt; if assigned S`Name then
+&gt; x := S`Name;
+&gt; // do something with x...
+&gt; end if;
+</PRE>
+is completely equivalent to the code:
+<P>
+<P>
+<PRE>
+&gt; l, x := HasAttribute(S, "Name");
+&gt; if l then
+&gt; // do something with x...
+&gt; end if;
+</PRE>
+(note again that
+the function <TT>HasAttribute</TT> takes a string for its second argument
+so the name must be enclosed in double quotes).
+<P>
+Note also that if a system attribute is not set, referring to it in an
+expression (using the backquote operator)
+will <I>not</I> trigger the calculation of it (while the corresponding
+intrinsic function will if it exists); rather an error will ensue.
+Use the <TT>assigned</TT> operator to test whether an attribute is actually
+set.
+
+
+<H4><A NAME = "181">User-defined Attributes</A></H4>
+
+<P>
+<P>
+For any category C, the user can stipulate valid attribute fields for
+structures of C.  After this is done, any structure of category C
+may have attributes assigned to it and accessed from it.
+<P>
+There are two ways of adding new valid attributes to a category C:
+by the procedure <TT>AddAttribute</TT> or by the <TT>declare attributes</TT>
+package declaration.  The former should be used outside of packages
+(e.g. in interactive usage), while the latter must be used within
+packages to declare attribute fields used by the package and related
+packages.
+
+
+<H5><A NAME = "182">AddAttribute(C, F) : Cat, MonStgElt -&gt; ;</A></H5>
+<BLOCKQUOTE>
+(Procedure.)  Given a category C, and a string F, append the field name
+F to the list of valid attribute field names for structures belonging
+to category C.  This procedure should not be used within packages but
+during interactive use.  Previous fields for C are still valid -- this
+just adds another valid one.
+</BLOCKQUOTE>
+<H5><A NAME = "183">declare attributes C: F<sub>1</sub>, ..., F<sub>n</sub>;</A></H5>
+<BLOCKQUOTE>
+Given a category C, and a comma-separated list of identifiers
+F<sub>1</sub>, ..., F<sub>n</sub> append the field names specified by the identifiers
+to the list of valid attribute field names for structures belonging
+to category C.  This declaration directive must be used within
+(and only within) packages to declare attribute fields used by the
+package and packages related to it which use the same fields.
+It is <I>not</I> a statement but a directive which is stored with
+the other information of the package when it is compiled and
+subsequently attached -- <I>not</I> when any code is actually
+executed.
+</BLOCKQUOTE>
+<H4><A NAME = "184">Accessing Attributes</A></H4>
+
+<P>
+<P>
+Attributes of structures are accessed in the same way that records
+are: using the backquote (<TT>`</TT>) operator.  The double backquote
+operator (<TT>"</TT>) can also be used if the field name is a string.
+
+
+<H5><A NAME = "185">S`fieldname : Str, Fieldname -&gt; Elt</A></H5>
+<H5>S"N : Str, Str -&gt; Elt</H5>
+<BLOCKQUOTE>
+Given a structure S and a field name,
+return the current value for the given field in S.
+If the value is not assigned, an error results.
+The field name must be valid for the category of S.
+In the <TT>S"N</TT> form, N is a string giving the field name.
+</BLOCKQUOTE>
+<H5><A NAME = "186">assigned  S`fieldname : Str, Fieldname -&gt; BoolElt</A></H5>
+<H5>assigned  S"N : Str, Str -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Given a structure S and a field name,
+return whether the given field
+in S currently has a value.
+The field name must be valid for the category of S.
+In the <TT>S"N</TT> form, N is a string giving the field name.
+</BLOCKQUOTE>
+<H5><A NAME = "187">S`fieldname := expression;</A></H5>
+<H5>S"N := expression;</H5>
+<BLOCKQUOTE>
+Given a structure S and a field name,
+assign the given field of S to be the value of the expression (any
+old value is first discarded).  
+The field name must be valid for the category of S.
+In the <TT>S"N</TT> form, N is a string giving the field name.
+</BLOCKQUOTE>
+<H5><A NAME = "188">delete  S`fieldname;</A></H5>
+<H5>delete  S"N;</H5>
+<BLOCKQUOTE>
+Given a structure S and a field name,
+delete the given field of S.  The field then becomes unassigned in S.
+The field name must be valid for the category of S
+and the field must be currently assigned in S.  This
+statement is not allowed for predefined system attributes.
+In the <TT>S"N</TT> form, N is a string giving the field name.
+</BLOCKQUOTE>
+<H5><A NAME = "189">GetAttributes(C) : Cat -&gt; [ MonStgElt ]</A></H5>
+<BLOCKQUOTE>
+Given a category C, return the valid attribute field names for
+structures belonging to category C as a sorted sequence of strings.
+</BLOCKQUOTE>
+<H5><A NAME = "190">ListAttributes(C) : Cat -&gt;</A></H5>
+<BLOCKQUOTE>
+(Procedure.)  Given a category C, list the valid attribute field names for
+structures belonging to category C.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text26.htm">[Next]</A><A  HREF = "text24.htm">[Prev]</A> <A  HREF = "text26.htm">[Right]</A> <A  HREF = "text24.htm">[Left]</A> <A  HREF = "text21.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

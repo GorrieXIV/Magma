@@ -1,0 +1,28 @@
+"Source: Text/Code/CodeLDPC.text";
+"Line: 318";
+"Date: Tue Jun  7 22:27:15 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Code/CodeLDPC.text, line: 318
+// Example: H160E4 ()
+print "Example: H160E4";
+ei := GetEchoInput();
+SetEchoInput(true);
+sigma := 0.5;
+MaxE := 3.0;
+N := 100;
+V := [ MaxE*(i/N)     : i in [-N div 2..N div 2]];
+E := [ 0.5*(1+Erf(x/(sigma*Sqrt(2)))) : x in V ];
+Dist := {* V[i]^^Round(1000*(E[i]-E[i-1])) : i in [2..#V]*};
+n := 500;
+C := RegularLDPCEnsemble(n, 4, 8);
+v := Random(C);
+R := RealField();
+RS := RSpace(R, n);
+vR := RS ! [ IsOne(v[i]) select 1 else -1 : i in [1..n]];
+for i in [1..n] do
+   vR[i] +:= Random(Dist);
+end for;
+time res := LDPCDecode(C, vR : Channel:="Gaussian", StdDev:=sigma);
+res eq v;
+assert $1;
+SetEchoInput(ei);

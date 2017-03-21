@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Decimation</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "part23.htm">[Next]</A><A  HREF = "text1912.htm">[Prev]</A> [_____] <A  HREF = "text1912.htm">[Left]</A> <A  HREF = "text1908.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "21268">Decimation</A></H3>
+
+
+
+<H5><A NAME = "21269">Decimation(S, f, d) : SeqEnum, RngIntElt, RngIntElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a binary sequence S, and integers f and d, return the 
+decimation of S. This is the sequence containing 
+elements S[f], S[f + d], S[f + 2d], ... where the indices in S
+are interpreted with wrap-around as integers between 1 and #S.
+</BLOCKQUOTE>
+<H5><A NAME = "21270">Decimation(S, f, d, t) : SeqEnum, RngIntElt, RngIntElt, RngIntElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Decimation of the sequence S. Returns a new sequence containing the 
+first t elements of S[f], S[f + d], S[f + 2d], ... where the indices in
+S are interpreted with wrap-around as integers between 1 and #S.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "21271">Example <TT>PseudoRandom_decimate (H165E4)</TT></A></H3>
+Given a primitive polynomial over GF(q), one can obtain another
+primitive polynomial by decimating an LFSR sequence obtained from
+the initial polynomial.  This is demonstrated in the code below.
+<P>
+<P>
+<P>
+<PRE>
+&gt; K := GF(7);
+&gt; C&lt;D&gt; := PrimitivePolynomial(K, 2);
+&gt; C;
+D^2 + 6*D + 3
+</PRE>
+In order to generate an LFSR sequence, we must first multiply this
+polynomial by a suitable constant so that the trailing coefficient
+becomes 1.
+<P>
+<P>
+<PRE>
+&gt; C := C * Coefficient(C,0)^-1;
+&gt; C;
+5*D^2 + 2*D + 1
+</PRE>
+We are now able to generate an LFSR sequence of length 7<sup>2</sup> - 1.
+The  initial state can  be anything other than [0, 0].
+<P>
+<P>
+<PRE>
+&gt; t := LFSRSequence (C, [K| 1,1], 48);
+&gt; t; 
+[ 1, 1, 0, 2, 3, 5, 3, 4, 5, 5, 0, 3, 1, 4, 1, 6, 4, 4, 0, 1, 5, 6, 5, 2, 6, 6, 
+0, 5, 4, 2, 4, 3, 2, 2, 0, 4, 6, 3, 6, 1, 3, 3, 0, 6, 2, 1, 2, 5 ]
+</PRE>
+We decimate the sequence by a value d having the property gcd(d, 48)=1.
+<P>
+<P>
+<PRE>
+&gt; t := Decimation(t, 1, 5);
+&gt; t;
+[ 1, 5, 0, 6, 5, 6, 4, 4, 3, 1, 0, 4, 1, 4, 5, 5, 2, 3, 0, 5, 3, 5, 1, 1, 6, 2, 
+0, 1, 2, 1, 3, 3, 4, 6, 0, 3, 6, 3, 2, 2, 5, 4, 0, 2, 4, 2, 6, 6 ]
+&gt; B := BerlekampMassey(t);
+&gt; B;
+3*D^2 + 5*D + 1
+</PRE>
+To get the corresponding primitive polynomial, we multiply by a constant
+to make it monic.
+<P>
+<P>
+<PRE>
+&gt; B := B * Coefficient(B, 2)^-1;
+&gt; B;
+D^2 + 4*D + 5
+&gt; IsPrimitive(B);
+true
+</PRE>
+<PRE></PRE> <A  HREF = "part23.htm">[Next]</A><A  HREF = "text1912.htm">[Prev]</A> [_____] <A  HREF = "text1912.htm">[Left]</A> <A  HREF = "text1908.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

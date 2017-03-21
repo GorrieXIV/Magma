@@ -1,0 +1,361 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Construction of a Generic  Abelian Group</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text790.htm">[Next]</A><A  HREF = "text788.htm">[Prev]</A> <A  HREF = "text790.htm">[Right]</A> <A  HREF = "text788.htm">[Left]</A> <A  HREF = "text786.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "8922">Construction of a Generic  Abelian Group</A></H3>
+
+<P>
+<P>
+The term generic abelian group refers to the situation in which a group A
+is described by giving a set X together with functions acting on X that
+perform the fundamental group operations for A.  Specifically, the user 
+must provide functions which compute the product, the inverse and the identity.  
+For efficiency, the user may also optionally specify the order and a generating 
+set for the group.  This is made explicit below.
+<P>
+Going from such a definition of an abelian group A to a presentation for
+A will often be extremely expensive and so a small number of operations
+are implemented so as to not require this information. The two key operations
+are computing the order of an element and computing the discrete logarithm of 
+an element to a given base. For many abelian group operations, knowledge of a 
+presentation is required and if such an operation is invoked, the structure
+of A (and hence a presentation) will be automatically constructed.
+<P>
+There are two possible ways of computing the structure of the group.
+If the order of the group is known (or can be computed) then it is relatively
+easy to construct each of the p-Sylow subgroups. If the order is not
+available, the structure is computed from a set of generators supplied by the 
+user. 
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text789.htm#8923">Specification of a Generic  Abelian Group</A>
+<LI> <A  HREF = "text789.htm#8926">Accessing Generators</A>
+<LI> <A  HREF = "text789.htm#8932">Computing Abelian Group Structure</A>
+</UL>
+<H4><A NAME = "8923">Specification of a Generic  Abelian Group</A></H4>
+
+
+
+<H5><A NAME = "8924">GenericAbelianGroup(U: parameters) : . -&gt; GrpAbGen</A></H5>
+
+<PRE>    IdIntrinsic: MonStg                 Default: </PRE>
+
+<PRE>    AddIntrinsic: MonStg                Default: </PRE>
+
+<PRE>    InverseIntrinsic: MonStg            Default: </PRE>
+
+<PRE>    UseRepresentation: Bool             Default: <TT>false</TT></PRE>
+
+<PRE>    Order: RngIntElt                    Default: </PRE>
+
+<PRE>    UserGenerators: SetEnum             Default: </PRE>
+
+<PRE>    ProperSubset: Bool                  Default: <TT>false</TT></PRE>
+
+<PRE>    RandomIntrinsic: MonStg             Default: </PRE>
+
+<PRE>    ComputeStructure: Bool              Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Construct the generic abelian group A over the domain U.
+The domain U can be an aggregate (set, indexed set or sequence) of 
+  elements or it can be any structure, for example, an elliptic curve,
+  a jacobian, a magma of quadratic forms.
+<P>
+If the parameters <TT>IdIntrinsic</TT>, <TT>AddIntrinsic</TT> 
+  and <TT>InverseIntrinsic</TT> are not set,
+  then the identity, the composition and the inverse function of A
+  are taken to be the identity,  the composition and the inverse function
+  of U or of <TT>Universe(U)</TT> if U is an aggregate.
+If the parameters <TT>IdIntrinsic</TT>, <TT>AddIntrinsic</TT>
+  and <TT>InverseIntrinsic</TT> are set,
+  they define the identity, the composition and the inverse function
+  of A. 
+<P>
+The parameter
+  <TT>IdIntrinsic</TT> must be a function name whose sole argument is U or 
+  <TT>Universe(U)</TT> if U is an aggregate.
+<TT>AddIntrinsic</TT> must be a function name whose only two arguments are 
+  elements of  U or of  <TT>Universe(U)</TT> if U is an aggregate.
+<TT>InverseIntrinsic</TT> must be a function name whose only two arguments are 
+  elements of  U or of  <TT>Universe(U)</TT> if U is an aggregate.
+That is, it is required that <TT>InverseIntrinsic</TT> be a binary
+  operation (see the example below where <TT>InverseIntrinsic := "/"</TT>
+  is indeed binary).
+Defining any of the three above parameters implies that the other
+  two must be defined as well.
+<P>
+Setting the parameter  <TT>UseRepresentation</TT> to true implies
+  that all elements of A will be internally represented
+  as linear combinations of the generators of A
+  obtained while computing the structure of A.
+This can be a costly procedure, since
+  such a representation is akin to solving the discrete logarithm
+  problem.
+The advantage of such a representation is that arithmetic for 
+  elements of A as well as computing the order of elements
+  of A are then essentially trivial operations.
+<P>
+The parameter <TT>Order</TT> can be set to the order of the group, if
+known. Knowledge of the order may save a considerable amount of time
+for operations such as computing a Sylow subgroup, determining
+the group structure or solve a discrete logarithm problem.
+More importantly, if A is a proper subset of U, or of 
+<TT>Universe(U)</TT> if U is an aggregate, then one of <TT>Order</TT> 
+or <TT>UserGenerators</TT> must be set.
+<P>
+One can set <TT>UserGenerators</TT> to some set of elements of U,
+  or of <TT>Universe(U)</TT> if U is an aggregate, which 
+  generate the group A.
+This can be useful when A is a subset of U (<TT>Universe(U)</TT>),
+  or more generally when the computation of the group structure of A
+  is made from a set of generators.
+Finally, setting <TT>UserGenerators</TT> may be an alternative to 
+  setting <TT>RandomIntrinsic</TT>.
+<P>
+<P>
+The parameter <TT>ProperSubset</TT> must be set when 
+  A is a proper subset of U (<TT>Universe(U)</TT>).
+<P>
+The parameter <TT>RandomIntrinsic</TT> indicates the random function to 
+use.  If it is not set, the random function (if it is required) is 
+taken to be the random function applying to U (<TT>Universe(U)</TT>).
+<P>
+The parameter <TT>RandomIntrinsic</TT> must be the name of a function taking 
+  as its sole argument U (<TT>Universe(U)</TT>) and returning
+  an element of U (<TT>Universe(U)</TT>) which is also 
+  an element of the group A, which is important when
+  A is a proper subset of U (<TT>Universe(U)</TT>.
+Therefore, if  A is a proper subset of U (<TT>Universe(U)</TT>), then
+  <TT>RandomIntrinsic</TT> must be set, 
+  unless the parameter <TT>UserGenerators</TT> is set.
+<P>
+The parameter <TT>Structure</TT> indicates that the group structure 
+should be determined at the time of creation.  If this parameter 
+is set then the user may also want to set the following parameters:
+<P>
+<P>
+<PRE>
+     UseUserGenerators: Bool             Default: <TT>false</TT>
+</PRE>
+<P>
+<PRE>
+     PollardRhoRParam: RngInt            Default: 20
+</PRE>
+<P>
+<PRE>
+     PollardRhoTParam: RngInt            Default: 8
+</PRE>
+<P>
+<PRE>
+     PollardRhoVParam: RngInt            Default: 3
+</PRE>
+<P>
+<P>
+Their meaning is detailed in Section <A  HREF = "text789.htm#8932">Computing Abelian Group Structure</A>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8925">Example <TT>GrpAb_Creation (H74E5)</TT></A></H3>
+In our first example we create the subset U of Z/34384Z corresponding
+to its unit group as a generic abelian group G.  Note that U is an indexed 
+set.
+<P>
+<P>
+<P>
+<PRE>
+&gt; m :=  34384;
+&gt; Zm := Integers(m);
+&gt; U := {@ x : x in Zm | GCD(x, m) eq 1 @};
+&gt; G := GenericAbelianGroup(U :
+&gt;        IdIntrinsic := "Id",
+&gt;        AddIntrinsic := "*",
+&gt;        InverseIntrinsic := "/");
+&gt; G;
+Generic Abelian Group over
+Residue class ring of integers modulo 34384
+</PRE>
+<P>
+In our next example we construct unique representatives for the
+classes of binary quadratic forms corresponding to elements of
+a subgroup of the class group of the imaginary quadratic field of 
+discriminant -4000004.
+<P>
+<P>
+<P>
+<PRE>
+&gt; n := 6;
+&gt; Dk := -4*(10^n + 1);
+&gt; Q := QuadraticForms(Dk);   
+&gt; 
+&gt; p := 2;
+&gt; S := { };
+&gt; while #S lt 10 do 
+&gt;    if KroneckerSymbol(Dk,p) eq 1 then
+&gt;       I := Reduction(PrimeForm(Q,p));
+&gt;       Include(~S, I);
+&gt;    end if; 
+&gt;    p := NextPrime(p);
+&gt; end while;
+&gt; 
+&gt; QF := GenericAbelianGroup(Q : UserGenerators := S,
+&gt;                               ComputeStructure := true,
+&gt;                               UseUserGenerators := true);  
+&gt; QF;
+Generic Abelian Group over
+Binary quadratic forms of discriminant -4000004
+Abelian Group isomorphic to Z/2 + Z/516
+Defined on 2 generators
+Relations:
+  2*$.1 = 0
+  516*$.2 = 0
+</PRE>
+So the structure of the subgroup is Z<sub>2</sub> x Z<sub>516</sub>
+<HR>
+<H4><A NAME = "8926">Accessing Generators</A></H4>
+
+<P>
+<P>
+These functions give access to generating sets for a generic group
+A. If a generating set is requested and none has been supplied by
+the user then this will require the determination of the group
+structure which could be very expensive.  Note the distinction 
+between <TT>Generators</TT> and <TT>UserGenerators</TT>.  From now on, 
+unless otherwise specified, whenever mention is made of the 
+generators of A, we refer to the generators as given by the 
+<TT>Generators</TT> function.
+
+
+<H5><A NAME = "8927">Universe(A) : GrpAbGen -&gt;</A></H5>
+<BLOCKQUOTE>
+The universe over which the generic abelian group A is defined.
+</BLOCKQUOTE>
+<H5><A NAME = "8928">A . i : GrpAbGen, RngIntElt -&gt; GrpAbGenElt</A></H5>
+<BLOCKQUOTE>
+The i-th generator for the generic abelian group A.
+</BLOCKQUOTE>
+<H5><A NAME = "8929">Generators(A) : GrpAbGen -&gt; [ GrpAbGenElt ]</A></H5>
+<BLOCKQUOTE>
+A sequence containing a generating set for the generic abelian group A
+as elements of A.  The set of generators returned for A is a reduced 
+set of generators as constructed during the structure computation.  
+Therefore, if the group structure of A has been computed from a 
+user-supplied set of generators, it is unlikely that <TT>Generators(A)</TT> 
+and <TT>UserGenerators(A)</TT> will be the same.
+</BLOCKQUOTE>
+<H5><A NAME = "8930">UserGenerators(A) : GrpAbGen -&gt; [ GrpAbGenElt ]</A></H5>
+<BLOCKQUOTE>
+A sequence containing the user-supplied generators for the generic abelian 
+group A as elements of A.
+</BLOCKQUOTE>
+<H5><A NAME = "8931">NumberOfGenerators(A) : GrpAbGen -&gt; RngIntElt</A></H5>
+<H5>Ngens(A) : GrpAbGen -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The number of generators for the generic abelian group A.
+</BLOCKQUOTE>
+<H4><A NAME = "8932">Computing Abelian Group Structure</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+If the order of a generic abelian group A can be obtained then the
+structure of A is found by constructing each p-Sylow subgroup of
+A. The p-Sylow subgroups are built from random elements of the
+underlying set X of A.  Recall that U (<TT>Universe(U)</TT>) is
+the domain of A. Random elements are obtained using either a random
+function attached to X or using a user-supplied function (the <TT>RandomIntrinsic</TT> parameter), or using ser-supplied generators (the <TT>UserGenerators</TT> parameter).  It is therefore vital that user-supplied
+generators truly generate the group one wishes to construct.
+A drawback of this method of obtaining the structure of A is the 
+memory needed to store all the elements of a specific p-Sylow 
+subgroup while under construction.  This algorithm is mostly based on 
+work by Michael Stoll.
+<P>
+<P>
+<P>
+The second approach computes the group structure from a set of
+generators as supplied by the user, removing the need to compute the
+order of A.  This can be particularly useful when computing this
+order is expensive.  Note that computing the structure of a group
+from a set of generators is akin to solving a number of the discrete 
+logarithm problems.  This second algorithm uses a variant of the 
+Pollard--Rho algorithm and is due to Edlyn Teske <A  HREF = "text785.htm#bib_teske_prho">[Tes98a]</A>.
+<P>
+<P>
+<P>
+If A is a subgroup of a generic abelian group, G say, then
+the structure of G is computed first. The rationale is that 
+once the structure of G is known, computing the structure of A 
+is almost always cheap.
+
+
+<H5><A NAME = "8933">AbelianGroup(A: parameters) : GrpAbGen -&gt; GrpAb, Map</A></H5>
+
+<PRE>    UseUserGenerators: Bool             Default: <TT>false</TT></PRE>
+
+<PRE>    PollardRhoRParam: RngInt            Default: 20</PRE>
+
+<PRE>    PollardRhoTParam: RngInt            Default: 8</PRE>
+
+<PRE>    PollardRhoVParam: RngInt            Default: 3</PRE>
+<BLOCKQUOTE>
+Compute the group structure of the generic abelian group A,
+  which may be a subgroup as created by the subgroup constructor
+  or the Sylow function.
+The two values returned are the abstract abelian group and the 
+  invertible map from the latter into A.
+<P>
+<P>
+<P>
+If  <TT>UseUserGenerators</TT> is false, then the group structure computation 
+  is made via the construction of each p-Sylow 
+  subgroup, using the factorization of the order of A.
+<P>
+<P>
+<P>
+If <TT>UseUserGenerators</TT> is set to <TT>true</TT>, the group structure
+computation uses the user-supplied set of generators for A.
+In this case, the additional parameters <TT>PollardRhoRParam</TT>, 
+  <TT>PollardRhoTParam</TT>,
+  and <TT>PollardRhoVParam</TT> can be supplied.
+Their values will be passed to the Pollard--Rho algorithm used in the 
+  group structure computation: <TT>PollardRhoRParam</TT> sets the size
+  of the r-adding walks, <TT>PollardRhoTParam</TT> sets the size
+  of the internal storage of elements, and <TT>PollardRhoVParam</TT>
+  is used for an efficient finding of the periodic segment.
+It is conjectured that the default values as given above 
+  are `best' (see <A  HREF = "text785.htm#bib_teske_walks">[Tes98b]</A>), therefore there 
+  should be no need to set these
+  parameters in general.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8934">Example <TT>GrpAb_GroupComputation (H74E6)</TT></A></H3>
+The following statement computes the structure of the unit group of
+Z<sub>34384</sub>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := AbelianGroup(G); G;
+Generic Abelian Group over
+Residue class ring of integers modulo 34384
+Abelian Group isomorphic to Z/2 + Z/2 + Z/6 + Z/612
+Defined on 4 generators
+Relations:
+  2*G.1 = 0
+  2*G.2 = 0
+  6*G.3 = 0
+  612*G.4 = 0
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text790.htm">[Next]</A><A  HREF = "text788.htm">[Prev]</A> <A  HREF = "text790.htm">[Right]</A> <A  HREF = "text788.htm">[Left]</A> <A  HREF = "text786.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

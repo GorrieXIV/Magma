@@ -1,0 +1,490 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Maximum Flow and Minimum Cut</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1823.htm">[Next]</A><A  HREF = "text1827.htm">[Prev]</A> <A  HREF = "text1823.htm">[Right]</A> <A  HREF = "text1827.htm">[Left]</A> <A  HREF = "text1824.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "20291">Maximum Flow and Minimum Cut</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+All the functions described in this section apply to general graphs
+  whose edges are given a capacity, that is, networks.
+If the graph under consideration is not capacitated, then
+  all its edges are assumed to have capacity one.
+To assign capacities to the edges of a graph, see 
+  Subsection <A  HREF = "text1813.htm#20081">Edge Decorations</A>.
+To create a Magma network object (with type <TT>GrphNet</TT>) see
+  Section <A  HREF = "text1826.htm#20273">Construction of Networks</A>.
+<P>
+The fundamental network flow problem is the minimum cost flow problem,
+  that is, determining a maximum flow at minimum cost from 
+  a specified source to a specified sink.
+Specializations of this problem are the shortest path problem 
+(where there is no capacity constraint) which is covered
+  in Section <A  HREF = "text1821.htm#20253">Distances, Shortest Paths and Minimum Weight Trees</A>, and the maximum flow problem
+  (where there is no cost constraint).
+Some of the related problems are the minimum spanning tree problem,
+the matching problem (a pairing of the edges of the graph
+according to some criteria), and the multicommodity flow problem
+ (where arcs may carry several flows of different nature).
+For a comprehensive monograph on network problems, their 
+implementation and applications, see <A  HREF = "text1823.htm#bib_amo">[RAO93]</A>.
+<P>
+<P>
+<P>
+<P>
+Let G be a general graph or multigraph whose edges are capacitated.
+If G is undirected then consider any edge {u, v} with
+  capacity c as being equivalent to two directed edges
+  [u, v] and [v, u], both with capacity c.
+We may thus assume without loss of generality that G is directed,
+  and from now on G is called a network.
+Let V and E be G's vertex-set and edge-set respectively,
+  and for every edge [u, v] in G,  denote its capacity
+  by c(u, v).
+If there is no edge [u, v] in E we assume that c(u, v) = 0.
+By convention the capacity of an edge is a non-negative integer.
+<P>
+Distinguish two vertices of G, the <I>source</I>
+  s and the <I>sink</I> t.
+A <I>flow</I> in G is an integer-valued function
+ f : V x V -&gt; Z that satisfies the following
+  properties:
+<P>
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>Capacity constraint: forall u, v &isin;V,
+      f(u, v) &le;c(u, v).
+<P>
+<DT>(ii)</DT><DD>Skew symmetry: forall u, v &isin;V, f(u, v) = - f(v, u).
+<P>
+<DT>(iii)</DT><DD>Flow conservation:  forall u &isin;V - {s, t},
+         &sum;<sub>v&isin;V</sub> f(u, v) = 0.
+<P>
+</DL>
+Note that the flow could have been defined as a real-valued function 
+if the edge capacity had been defined as real-valued.
+<P>
+The quantity f(u, v), which can be positive or negative, is called
+  the <I>net flow</I> from vertex u to vertex v.
+The <I>value</I> of a flow f is defined as 
+   F = &sum;<sub>v&isin;V</sub> f(s, v),
+    that is, the total net flow out of the source.
+<P>
+<P>
+In the <I>maximum flow problem</I> we wish to find a flow of maximum 
+  value from s to t.
+A <I>cut</I> of the network G with source s and sink t 
+  is a partition of V into S and T 
+  such that s &isin;S and t&isin;T.
+The <I>capacity</I> of the cut c(S) determined by S
+  is the sum of the capacity c(u, v)
+  of the edges [u, v] such that u &isin;S and v &isin;T.
+It is easy to see that F &le;c(S), that is, the value of the
+  flow from s into t cannot be larger than the capacity
+  of any cut defined by s and t.
+In fact, F = c(S) if and only if F is a maximum flow 
+  and S is a cut of minimum capacity.
+<P>
+<P>
+<P>
+We have implemented two algorithms for finding the maximum 
+  flow in a network G from a source s to a sink t.
+One is the Dinic algorithm, the other is an instance
+  of the generic push-relabel algorithm.
+We have already 
+  encountered both algorithms in Subsections <A  HREF = "text1795.htm#19897">Maximum Matching in Bipartite Graphs</A> 
+        and <A  HREF = "text1795.htm#19900">General Vertex and Edge Connectivity in Graphs and Digraphs</A>.
+<P>
+<P>
+<P>
+<B>The Dinic algorithm</B>
+<P>
+<P>
+<P>
+<P>
+The Dinic algorithm consists of two phases.
+In the first phase, one constructs a layered network which 
+  consists of all the "useful" edges of G: A  useful edge [u, v]
+  has the property that f(u, v) &lt; c(u, v).
+The first and the last layer of this layered network always contain s
+  and t respectively.
+If such a layered network cannot be constructed then the flow 
+  in G is maximum and the algorithm ends.
+<P>
+In the second phase of the Dinic algorithm, one finds a maximal 
+  flow by constructing paths from s to t (using a depth-first search)
+  in the layered network.
+Note that a maximal flow may not be maximum: A maximal flow 
+  satisfies the condition that for every path P from s to t 
+  in the layered network, there is at least a <I>saturated</I>
+  edge in P.
+A saturated edge is one for which its flow equals its capacity.
+For more details on the Dinic algorithm, see <A  HREF = "text1823.htm#bib_even">[Eve79]</A>.
+<P>
+<P>
+The Dinic algorithm has a theoretical complexity of O(|V|<sup>2</sup>  |E|),
+   which can be improved 
+  to O(|E|<sup>3/2</sup>) if G is a zero-one network (the capacities
+  of the edges are either 0 or 1), or O(|V|<sup>2/3</sup>  |E|)
+  if G is a zero-one network with no parallel edges.
+Prior to the advent of the 
+  push-relabel method (which we describe below), the Dinic algorithm was
+  shown to be superior in practice to other methods.
+The magma implementation of the Dinic algorithm only outperforms 
+  the push-relabel method for very sparse networks (a small
+  number of edges relative to the number of vertices)
+  whose edges have a small capacity and where the maximum 
+  flow is small.
+In other words, the Dinic method performs best on zero-one and 
+very sparse networks.
+<P>
+<P>
+<P>
+<B>The push-relabel method</B>
+<P>
+<P>
+<P>
+The generic push-relabel algorithm does not construct a flow 
+  by constructing paths from s to v.
+Rather, it starts by pushing the maximum possible flow out from the 
+  source s into the neighbours of s, then pushing the excess
+  flow at those vertices into their own neighbours.
+This is repeated until all vertices of G except s and t 
+  have an excess flow of zero (that is, the flow conservation 
+  property is satisfied).
+Of course this might mean that some flow is pushed back into s.
+<P>
+At initialisation all vertices are given a height of 0 except s
+  which will have height  |V|, and flow is pushed out of s.
+The maximum flow that can be pushed out of s is 
+  &sum;<sub>v &isin;V</sub> c(s, v).
+The idea is to push flow into vertices only in a "downward" manner, 
+  that is, from 
+  a vertex with height h + 1 into a  vertex with height  h.
+If a vertex in V - {s, t} 
+  has height h, it will be relabelled
+  if it has an excess flow and none 
+  of its neighbours to which some flow could be pushed  has height h - 1.
+Its new label (height) will be l + 1 where l is the  height of the lowest
+  labelled neighbour towards which flow can be pushed.
+Flow may only be pushed along an edge [u, v]
+  while the capacity constraint f(u, v) &le;c(u, v) is satisfied.
+<P>
+So the general notion is of pushing flow "downward" and "discharging" 
+the vertices in V - {s, t} from all non-zero excess flow they 
+may have accumulated, a process which may require "lifting" some vertices 
+so that discharging can proceed.  It is easy to show that the height of 
+any vertex in V - {s, t} is bounded by 2|V| - 1, so the algorithm
+must terminate.  When this happens, the flow is at a maximum.
+<P>
+The theoretical complexity of the generic push-relabel
+  algorithm is O(|V|<sup>2</sup> |E|) which can be improved 
+ to at least O(|V||E| log(|V|<sup>2</sup>/|E|) thanks to some heuristics.
+<P>
+One commonly used heuristic is the <I>global relabelling</I> procedure 
+whereby the vertices in V - {s, t} are pre-labelled according 
+to their distance from the sink.
+Global relabelling may occur at specified  intervals during execution.
+Another very useful heuristic is  <I>gap relabelling</I> which
+  involves recognising those vertices that have become
+  unreachable from the sink and labelling them accordingly
+  so that they won't be chosen during later execution.
+Finally, another heuristic involves the order in which the 
+  vertices to be discharged are processed.
+<P>
+When G is a one-zero network, choosing the vertex with smallest height
+  works best, while choosing the vertex with largest height
+  is recommended for general networks.
+These heuristics are fully described and analysed by B.V. Cherkassky
+  and A.V. Goldberg <I>et al.</I> in <A  HREF = "text1823.htm#bib_goldberg_unit">[CGM+98]</A> and 
+  <A  HREF = "text1823.htm#bib_goldberg_flow">[CG97]</A>.
+The magma implementation incorporates all the above heuristics together
+with some new ones.
+<P>
+As a rule, whenever the push-relabel algorithm is applied to a zero-one 
+network (such as occurs when computing the connectivity of a graph in 
+<A  HREF = "text1795.htm#19900">General Vertex and Edge Connectivity in Graphs and Digraphs</A> or finding a maximum matching in a 
+bipartite network in  <A  HREF = "text1795.htm#19897">Maximum Matching in Bipartite Graphs</A>) the vertex with 
+smallest height is chosen as the next vertex to be processed.
+When the algorithm is used to compute a maximum flow in a network
+(as below) the vertex with largest height is chosen.
+<P>
+<P>
+<P>
+For the two functions <TT>MinimumCut</TT> and <TT>MaximumFlow</TT> described 
+below, the <TT>PushRelabel</TT> algorithm is used.  It is only in the case 
+of a very sparse zero-one network that <TT>Dinic</TT> may outperform 
+<TT>PushRelabel</TT>.
+
+
+<H5><A NAME = "20292">MinimumCut(s, t : parameters) : GrphVert, GrphVert -&gt; SeqEnum, RngIntElt</A></H5>
+
+<PRE>    Al: MonStgElt                       Default: "PushRelabel"</PRE>
+<BLOCKQUOTE>
+Given vertices s and t of a network G, this function returns the 
+subset S defining a minimum cut { S, T} of V, where s &isin;S, t &isin;T, 
+corresponding to the maximum flow F from s to t. The subset S is 
+returned as a sequence of vertices of G.  The maximum flow F is returned 
+as a second value.  The parameter <TT>Al</TT> enables the user to select the 
+algorithm to be used: <TT>Al := "PushRelabel"</TT> or <TT>Al := "Dinic"</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "20293">MinimumCut(Ss, Ts : parameters) : [ GrphVert ], [ GrphVert ] -&gt; SeqEnum, RngIntElt</A></H5>
+
+<PRE>    Al: MonStgElt                       Default: "PushRelabel"</PRE>
+<BLOCKQUOTE>
+Given two sequences S<sub>s</sub> and T<sub>s</sub> of vertices of a network G,
+this function returns the subset S defining a minimum cut { S, T} of V,
+such that S<sub>s</sub> &sube;S and T<sub>s</sub> &sube;T, and which corresponds to the 
+maximum flow F from the vertices in S<sub>s</sub> to the vertices in T<sub>s</sub>.
+The subset S is returned as a sequence of vertices of G. The maximum 
+flow F is returned as a second value.  The parameter <TT>Al</TT> enables 
+the user to select the algorithm to be used: <TT>Al := "PushRelabel"</TT> 
+or <TT>Al := "Dinic"</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "20294"></A><A NAME = "MultiGraph:MaximumFlow">MaximumFlow</A>(s, t : parameters) : GrphVert, GrphVert -&gt; RngIntElt, SeqEnum</H5>
+
+<PRE>    Al: MonStgElt                       Default: "PushRelabel"</PRE>
+<BLOCKQUOTE>
+Given vertices s and t of a network G, this function returns the 
+maximum flow F from s to t. The subset S defining a minimum cut 
+{ S, T} of <TT>VertexSet(N)</TT>, s &isin;S, t &isin;T, corresponding
+to F is returned as the second value. The subset S is returned as 
+a sequence of vertices of G.  The parameter <TT>Al</TT> enables the user 
+to select the algorithm to be used: <TT>Al := "PushRelabel"</TT> or 
+<TT>Al := "Dinic"</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "20295">MaximumFlow(Ss, Ts : parameters) : [ GrphVert ], [ GrphVert ] -&gt; RngIntElt, SeqEnum</A></H5>
+
+<PRE>    Al: MonStgElt                       Default: "PushRelabel"</PRE>
+<BLOCKQUOTE>
+Given two sequences S<sub>s</sub> and T<sub>s</sub> of vertices of a network G, this 
+function returns the maximum flow F from the vertices in S<sub>s</sub> to the 
+vertices in T<sub>s</sub>.  The subset S defining a minimum cut { S, T} 
+of <TT>VertexSet(N)</TT>, S<sub>s</sub> &sube;S and T<sub>s</sub> &sube;T, 
+corresponding to F is returned as the second value. The subset
+S is returned as a sequence of vertices of G.  The parameter 
+<TT>Al</TT> enables the user to select the algorithm to be used:
+<TT>Al := "PushRelabel"</TT> or <TT>Al := "Dinic"</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "20296">Flow(e) : GrphEdge -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given an edge e in a network G, this function
+  returns the flow of the edge e as an integer.
+In this instance we require that the edges of G be explicitly 
+  assigned capacities (see
+  Subsection <A  HREF = "text1813.htm#20081">Edge Decorations</A>
+  or Section <A  HREF = "text1826.htm#20273">Construction of Networks</A>).
+Edges of G will carry a flow only if a flow has been constructed 
+  from a source to a sink in G.
+If no such flow has yet been constructed, all edges will
+  have zero flow.
+</BLOCKQUOTE>
+<H5><A NAME = "20297">Flow(u, v) : GrphVert, GrphVert -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Let u and v be adjacent vertices of a network G whose edges 
+  have been explicitly 
+  assigned capacities (see
+  Subsection <A  HREF = "text1813.htm#20081">Edge Decorations</A>
+  or Section <A  HREF = "text1826.htm#20273">Construction of Networks</A>).
+<TT>Flow(u, v)</TT> returns the total net flow 
+   from  u to v as an integer.
+The total net flow from  u to v is defined as the total
+  outgoing flow from u into v  minus the total ingoing flow
+  into u from v.
+Thus the flow satisfies the skew symmetry 
+   <TT>Flow(u, v)</TT> = - <TT>Flow(v, u)</TT>.
+<P>
+Edges of G will carry a flow only if a flow has been constructed 
+  from a source to a sink in G.
+If no such flow has yet been constructed, all edges will
+  have zero flow.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20298">Example <TT>Network_Flow (H157E4)</TT></A></H3>
+We illustrate the maximum flow algorithm by applying it to 
+<P>
+  find a maximum matching in a bipartite graph.
+This example exactly replicates the implementation of 
+  the maximum matching algorithm 
+   <A  HREF = "text1795.htm#Graph:MaximumMatching">MaximumMatching</A>).
+<P>
+We construct a bipartite graph.
+<P>
+<P>
+<PRE>
+&gt; G := Graph&lt; 7 | [ {5, 7}, {6, 7}, {4, 5, 6},
+&gt; {3}, {1, 3}, {2, 3}, {1, 2} ] : SparseRep := true &gt;;
+&gt; assert IsBipartite(G);
+&gt; P := Bipartition(G);
+&gt; P;
+[
+  { 1, 2, 3 },
+  { 4, 5, 6, 7 }
+]
+</PRE>
+We add two extra vertices to G, the source s and the sink t
+  and we construct three sets of pairs of vertices.
+The first contains all the pairs [s, u] where u&isin;P[1],
+  the second contains all the pairs [u, t] where u&isin;P[2],
+  and the third contains all the pairs [u, v] where u&isin;P[1]
+  and v&isin;P[2].
+From these sets we construct a multidigraph with capacitated edges.
+<P>
+<P>
+<PRE>
+&gt; G +:= 2;
+&gt; G;
+Graph
+Vertex  Neighbours
+
+1       7 5 ;
+2       7 6 ;
+3       6 5 4 ;
+4       3 ;
+5       3 1 ;
+6       3 2 ;
+7       2 1 ;
+8       ;
+9       ;
+
+&gt; s := Order(G)-1;
+&gt; t := Order(G);
+&gt; 
+&gt; E1 := { [s, Index(u)] : u in P[1] };
+&gt; E2 := { [Index(u), t] : u in P[2] };
+&gt; E3 := { [Index(u), Index(v)] : u in P[1], v in P[2] };
+&gt; 
+&gt; N := MultiDigraph&lt; Order(G) | E1, E2, E3 &gt;;
+&gt; N;
+Multidigraph
+Vertex  Neighbours
+
+1       7 6 5 4 ;
+2       5 4 7 6 ;
+3       7 6 5 4 ;
+4       9 ;
+5       9 ;
+6       9 ;
+7       9 ;
+8       1 3 2 ;
+9       ;
+
+&gt; E := EdgeSet(N);
+&gt; for e in E do
+&gt;     AssignCapacity(~N, e, 1);
+&gt; end for;
+</PRE>
+First note that all the edges of N have been assigned capacity 1.
+Also, the edges of N are those connecting s 
+  to all the vertices in P[1], those connecting all the 
+  vertices of P[2] to t, and those connecting all 
+  the vertices of P[1] to all the vertices of P[2].
+<P>
+We construct a maximum flow F from  s to t and we check that 
+  the capacity of the cut is indeed F.
+<P>
+<P>
+<PRE>
+&gt; V := VertexSet(N);
+&gt; F := MaximumFlow(V!s, V!t);
+&gt; S := MinimumCut(V!s, V!t);
+&gt; F;
+3
+&gt; S;
+[ 8 ]
+&gt;
+&gt; c := 0;
+&gt; for u in S do
+&gt;     for v in OutNeighbours(u) do
+&gt;        if not v in S then
+&gt;           c +:= Capacity(u, v);
+&gt;           assert Capacity(u, v) eq Flow(u, v);
+&gt;        end if;
+&gt;     end for;
+&gt; end for;
+&gt; assert c eq F;
+</PRE>
+We now exhibit a matching in G.
+It will be given by the edges in E<sub>3</sub> which are saturated,
+  that is, whose flow is 1.
+<P>
+<P>
+<PRE>
+&gt; M := [];
+&gt; for e in E3 do
+&gt;     u := V!e[1];
+&gt;     v := V!e[2];
+
+&gt;     if Flow(u, v) eq 1 then
+&gt;         E := Edges(u, v);
+&gt;         assert #E eq 1;
+&gt;         Append(~M, EndVertices(E[1]));
+&gt;     end if;
+&gt; end for;
+&gt; assert #M eq F;
+&gt; M;
+[
+  [ 1, 7 ],
+  [ 3, 5 ],
+  [ 2, 4 ]
+]
+</PRE>
+Note that the statement 
+<P>
+<P>
+<PRE>
+&gt; assert #E eq 1;
+</PRE>
+makes sense as the network N has no parallel edges.
+<P>
+We end the example by showing that the capacity constraint 
+  and the skew symmetry is satisfied by all edges in the network.
+<P>
+<P>
+<PRE>
+&gt; for e in EdgeSet(N) do
+&gt;     u := EndVertices(e)[1];
+&gt;     v := EndVertices(e)[2];
+&gt; 
+&gt;     assert Flow(u, v) le Capacity(u, v);
+&gt;     assert Flow(u, v) eq  -Flow(v, u);
+&gt; end for;
+</PRE>
+Also, flow conservation holds for all vertices 
+  in V - {s, t}.
+<P>
+<P>
+<PRE>
+&gt; s := V!s;
+&gt; t := V!t;
+&gt; for u in V do
+&gt;     if not u eq s and not u eq t then
+&gt;         f := 0;
+&gt;         for v in OutNeighbours(u) do
+&gt;             E := Edges(u, v);
+&gt;             f +:= Flow(E[1]);
+&gt;         end for;
+&gt;         for v in InNeighbours(u) do
+&gt;             E := Edges(v, u);
+&gt;             f -:= Flow(E[1]);
+&gt;         end for;
+&gt; 
+&gt;         assert f eq 0;
+&gt;     end if;
+&gt; end for;
+</PRE>
+<PRE></PRE> <A  HREF = "text1823.htm">[Next]</A><A  HREF = "text1827.htm">[Prev]</A> <A  HREF = "text1823.htm">[Right]</A> <A  HREF = "text1827.htm">[Left]</A> <A  HREF = "text1824.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

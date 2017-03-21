@@ -1,0 +1,177 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Automorphisms</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text412.htm">[Next]</A><A  HREF = "text410.htm">[Prev]</A> <A  HREF = "text412.htm">[Right]</A> <A  HREF = "text410.htm">[Left]</A> <A  HREF = "text405.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "4270">Automorphisms</A></H3>
+
+<P>
+<P>
+The group of relative automorphisms of the abelian extension is isomorphic
+via the Artin map to the ideal group used to define the field.
+After defining equations are computed, the user can explicitly map ideals
+that are coprime to the defining modulus to automorphisms of the field.
+
+
+<H5><A NAME = "4271">ArtinMap(A) : FldAb -&gt; Map</A></H5>
+<BLOCKQUOTE>
+For an abelian extension A of F,
+this returns the Artin map as a map from the set of ideals of F to the
+group of automorphisms of A over F.  (This induces an isomorphism
+from the defining group of A to the group of automorphisms).
+<P>
+Since this function constructs the number field defined by A, this may 
+involve a lengthy calculation.
+</BLOCKQUOTE>
+<H5><A NAME = "4272">FrobeniusAutomorphism(A, p) : FldAb, RngOrdIdl -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Computes the relative automorphism of the abelian extension A that is the
+Frobenius automorphism of p.
+Since this function constructs the number field defined by A, this may 
+involve a lengthy calculation.
+</BLOCKQUOTE>
+<H5><A NAME = "4273"></A><A NAME = "FldAb:AutomorphismGroup">AutomorphismGroup</A>(A) : FldAb -&gt; GrpFP, [Map], Map</H5>
+
+<PRE>    All: BoolElt                        Default: <TT>false</TT></PRE>
+
+<PRE>    Over: [Map]                         Default: [ ]</PRE>
+<BLOCKQUOTE>
+If <TT>IsNormal</TT> is true for the abelian extension A with the given
+parameters, then the 
+automorphism group of A over k<sub>0</sub> is computed.
+Since this function constructs the number field defined by A, this may 
+involve a lengthy calculation.
+</BLOCKQUOTE>
+<H5><A NAME = "4274">ProbableAutomorphismGroup(A) : FldAb -&gt; GrpFP, SeqEnum</A></H5>
+
+<PRE>    Factor: RingIntElt                  Default: 1</PRE>
+<BLOCKQUOTE>
+In case of A and it's base field k both begin normal over Q,
+the automorphism group G of A/Q is a group extension of the 
+abelian group coming from the definition of A and the automorphism
+group of k/Q. This functions sets up the corresponding group
+extension problem and uses <A  HREF = "text782.htm#GrpCoh:DistinctExtensions">DistinctExtensions</A> to compute
+all group theoretical possibilities for G. In case of several
+possible groups, a further selection based on cycle types and their
+frequencies is attempted. The optional parameter <TT>Factor</TT> is
+passed on to <A  HREF = "text411.htm#FldAb:ImproveAutomorphismGroup">ImproveAutomorphismGroup</A> to control
+the amount of time spent on improving the guess.
+<P>
+While this function can be much faster than the direct computation of
+the automorphism group, the result of this computation is in general
+not guaranteed. Furthermore, as there are groups that cannot be 
+distinguished by cycle types and their frequencies alone, correctness
+cannot be achieved by increasing the value of <TT>Factor</TT>.
+The intended use of this function is to have a (reasonable fast)
+method of checking is the field under consideration has an interesting
+group before an unnecessary long call to <A  HREF = "text411.htm#FldAb:AutomorphismGroup">AutomorphismGroup</A> is
+attempted.
+</BLOCKQUOTE>
+<H5><A NAME = "4275"></A><A NAME = "FldAb:ImproveAutomorphismGroup">ImproveAutomorphismGroup</A>(F, E) : FldAb, SeqEnum -&gt; GrpFP, SeqEnum</H5>
+
+<PRE>    Factor: RngIntElt                   Default: 1</PRE>
+<BLOCKQUOTE>
+Given the output of <TT>ProbableAutomorphismGroup</TT> or 
+<TT>ImproveAutomorphismGroup</TT> try to improve the quality of the guess
+by splitting more primes to get more data for a cycle-type frequency
+analysis.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "4276">Example <TT>FldAb_ProbableAutomorphismGroup (H40E8)</TT></A></H3>
+We will demonstrate the use of <TT>ProbableAutomorphismGroup</TT>
+by investigating extensions of Q(&#8730;(10)):
+<P>
+<P>
+<PRE>
+&gt; k := NumberField(Polynomial([-10, 0, 1]));
+&gt; R, mR := RayClassGroup(4*3*5*MaximalOrder(k));
+&gt; s := [x`subgroup : x in Subgroups(R:Quot := [2,2])];
+&gt; a := [ AbelianExtension(Inverse(mq)*mR) where 
+&gt;                             _, mq := quo&lt;R|x&gt; : x in s ];
+&gt; n := [ x : x in a | IsNormal(x:All)];
+&gt; ProbableAutomorphismGroup(n[2]);
+Finitely presented group on 3 generators
+Relations
+    $.2^2 = Id($)
+    $.3^2 = Id($)
+    ($.2, $.3) = Id($)
+    ($.1, $.2^-1) = Id($)
+    $.1^-1 * $.3 * $.1 * $.3^-1 * $.2^-1 = Id($)
+    $.1^2 = Id($)
+</PRE>
+This shows that since there is only one group extension of a V<sub>4</sub>
+by C<sub>2</sub> with the action induced from the action of the Galois group
+of k on R, the Automorphism group is already determined.
+On the other hand, for the first subgroup there are more possibilities:
+<P>
+<P>
+<PRE>
+&gt; g, c := ProbableAutomorphismGroup(n[1]);
+&gt; #c;
+2
+</PRE>
+We will try to find the "correct" guess by looking at the orders
+of elements which correspond to decomposition types and their frequencies:
+<P>
+<P>
+<PRE>
+&gt; {* Order(x) : x in CosetImage(c[1], sub&lt;c[1]|&gt;) *};
+{* 1, 2^^7 *}
+&gt; {* Order(x) : x in CosetImage(c[2], sub&lt;c[2]|&gt;) *};
+{* 1, 2^^3, 4^^4 *}
+</PRE>
+So, if we find a prime of degree 4 we know it's the second group.
+Looking at the frequencies, we can be pretty confident that we should 
+be able to find a suitable prime - if it exists. Since among the 
+first 100 primes there is not a single prime with a factor of degree
+4 we are pretty confident that the first group is the correct one.
+By setting the verbose level, we can see how the decision is made:
+<P>
+<P>
+<PRE>
+&gt; SetVerbose("ClassField", 2);
+&gt; _ := ImproveAutomorphismGroup(n[1], c:Factor := 2);
+Orders and multiplicities are  [
+    {* 1, 2^^7 *},
+    {* 1, 2^^3, 4^^4 *}
+]
+Probable orders and multiplicities are  {* 1^^3, 2^^34 *}
+Error terms are  [ 0.00699329636679632541587354133907,
+0.993006703633203674584126458661 ]
+</PRE>
+This indicates that out of 37 primes considered, non had a degree 4
+factor, thus we are confident that the first group is the correct one.
+<HR>
+<H5><A NAME = "4277">AbsoluteGaloisGroup(A) : FldAb -&gt; GrpPerm, SeqEnum, GaloisData</A></H5>
+<BLOCKQUOTE>
+Given an abelian extension, compute its Galois group over Q, 
+ie. the abstract automorphism group of a Q-normal closure of A.
+This function requires the defining equations for A as a number field
+to be known, but is considerably faster than calling <A  HREF = "text400.htm#RngOrd:GaloisGroup-fld">GaloisGroup</A>
+for the number field directly.
+The group is returned as a permutation group. All roots of the 
+defining polynomial of the coefficient field of A as well as of the
+defining polynomials of A itself are returned in some local field.
+The zeros as well as data required for further computations
+are contained in the 3rd return value.
+</BLOCKQUOTE>
+<H5><A NAME = "4278">TwoCocycle(A) : FldAb -&gt; UserProgram</A></H5>
+<BLOCKQUOTE>
+For an abelian extension that is normal over Q and defined over a 
+normal base field k/Q, the automorphism group of A/Q is a
+group extension of the Galois group of k by A. As a group extension
+it corresponds to an element in the second cohomology group and can be
+represented by an explicit 2-cocyle with values in the norm group.
+This function computes such a cocycle. It can be used as an element
+of the second cohomology group of the cohomology module of A, see
+<A  HREF = "text408.htm#FldAb:CohomologyModule">CohomologyModule</A>.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text412.htm">[Next]</A><A  HREF = "text410.htm">[Prev]</A> <A  HREF = "text412.htm">[Right]</A> <A  HREF = "text410.htm">[Left]</A> <A  HREF = "text405.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

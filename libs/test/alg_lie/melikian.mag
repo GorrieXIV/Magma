@@ -1,0 +1,32 @@
+F := GF(25); m := 2; n := 1; 
+
+p := Characteristic(F);
+time M, phi := MelikianLieAlgebra(F, m, n);
+P<x1,x2,d1,d2,dp1,dp2> := Domain(phi);
+
+/* Construct subspaces */
+V := VectorSpace(F, Dimension(M));
+W := sub<V | [ V | phi(x1^i*x2^j*d) : i in [0..p^m-1], j in [0..p^n-1], d in [d1,d2] ]>;
+O := sub<V | [ V | phi(x1^i*x2^j) : i in [0..p^m-1], j in [0..p^n-1] ]>;
+Wp := sub<V | [ V | phi(x1^i*x2^j*d) : i in [0..p^m-1], j in [0..p^n-1], d in [dp1,dp2] ]>;
+
+/* Check dimensions */
+assert Dimension(W) eq 2*p^(m+n);
+assert Dimension(Wp) eq 2*p^(m+n);
+assert Dimension(O) eq p^(m+n);
+assert Dimension(W meet O) eq 0;
+assert Dimension(W meet Wp) eq 0; 
+assert Dimension(O meet Wp) eq 0;
+
+/* Check whether the spaces multiply as they should */
+mp := func< A, B | sub<V | [ V | M!a*M!b : a in Basis(A), b in Basis(B) ]> >;
+assert mp(W , W ) eq W ;
+assert mp(W , O ) eq O ;
+assert mp(W , Wp) eq Wp;
+assert mp(O , W ) eq O ;
+assert mp(O , O ) eq Wp;
+assert mp(O , Wp) eq W ;
+assert mp(Wp, W ) eq Wp;
+assert mp(Wp, O ) eq W ;
+assert mp(Wp, Wp) eq O ;
+

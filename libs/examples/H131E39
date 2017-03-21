@@ -1,0 +1,27 @@
+"Source: Text/Geometry/CrvHyp.text";
+"Line: 5557";
+"Date: Wed Jun  8 17:42:16 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/CrvHyp.text, line: 5557
+// Example: H131E39 ()
+print "Example: H131E39";
+ei := GetEchoInput();
+SetEchoInput(true);
+_<x> := PolynomialRing(Rationals());
+C := HyperellipticCurve(x^6+8);
+ptsC := Points(C : Bound:= 1000); ptsC;
+J := Jacobian(C);                
+PJ := J! [ ptsC[5], ptsC[1]];
+Order(PJ); 
+assert $1 eq 0;
+RankBound(J);
+assert $1 eq 1;
+heightconst := HeightConstant(J : Effort:=2, Factor); 
+LogarithmicBound := Height(PJ) + heightconst;  // Bound on h(Q)
+AbsoluteBound := Ceiling(Exp(LogarithmicBound));
+PtsUpToAbsBound := Points(J : Bound:=AbsoluteBound );  
+ReducedBasis([ pt : pt in PtsUpToAbsBound ]);
+Height(PJ);
+all_pts := Chabauty(PJ : ptC:=ptsC[1]); all_pts;
+assert all_pts eq Chabauty(2*PJ : ptC:=ptsC[1]);
+SetEchoInput(ei);

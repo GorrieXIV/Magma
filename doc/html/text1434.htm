@@ -1,0 +1,584 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Operations on Points</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1424.htm">[Next]</A><A  HREF = "text1433.htm">[Prev]</A> <A  HREF = "text1424.htm">[Right]</A> <A  HREF = "text1433.htm">[Left]</A> <A  HREF = "text1425.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16226">Operations on Points</A></H3>
+
+<P>
+<P>
+Points on an elliptic curve over a field
+are given in terms of projective coordinates:
+A point (a, b, c) is equivalent to (x, y, z) if and only if there
+exists an element u (in the field of definition) such that
+ua=x, ub=y, and uc=z. The equivalence class of (x, y, z) is
+denoted by the projective point
+(x:y:z). At least one of the projective coordinates
+must be nonzero. We call the coefficients normalised if either
+z=1, or z=0 and y=1.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1434.htm#16227">Creation of Points</A>
+<LI> <A  HREF = "text1434.htm#16230">Creation Predicates</A>
+<LI> <A  HREF = "text1434.htm#16233">Access Operations</A>
+<LI> <A  HREF = "text1434.htm#16236">Associated Structures</A>
+<LI> <A  HREF = "text1434.htm#16240">Arithmetic</A>
+<LI> <A  HREF = "text1434.htm#16248">Division Points</A>
+<LI> <A  HREF = "text1434.htm#16256">Point Order</A>
+<LI> <A  HREF = "text1434.htm#16260">Predicates on Points</A>
+<LI> <A  HREF = "text1434.htm#16270">Weil Pairing</A>
+</UL>
+<H4><A NAME = "16227">Creation of Points</A></H4>
+
+<P>
+<P>
+In this section the descriptions will refer to a point
+set H, which is either the H in the signature or the base
+point set of the elliptic curve E in the signature.
+
+
+<H5>H ! [x, y, z] : SetPtEll, [ RngElt ] -&gt; PtEll</H5>
+
+<H5>elt&lt; H | x, y, z &gt; : SetPtEll, RngElt, RngElt, RngElt -&gt; PtEll</H5><P>
+
+<H5>E ! [x, y, z] : CrvEll, [ RngElt ] -&gt; PtEll</H5>
+
+<H5>elt&lt; E | x, y, z &gt; : CrvEll, RngElt, RngElt, RngElt -&gt; PtEll</H5><P>
+
+
+Given a point set H=E(R) and coefficients x, y, z in R
+satisfying the equation for E, return the normalised point
+P=(x:y:z) in H.  If z is not specified it is assumed to be 1.
+
+
+
+
+
+
+<H5>H ! 0 : SetPtEll, RngIntElt -&gt; PtEll</H5>
+
+<H5>Id(H) : SetPtEll -&gt; PtEll</H5>
+
+<H5>Identity(H) : SetPtEll -&gt; PtEll</H5><P>
+
+<H5>E ! 0 : CrvEll, RngIntElt -&gt; PtEll</H5>
+
+<H5>Id(E) : CrvEll -&gt; PtEll</H5>
+
+<H5>Identity(E) : CrvEll -&gt; PtEll</H5><P>
+
+
+Returns the normalised identity point (0:1:0) of the point set H on the
+elliptic curve E.
+
+
+<H5>Points(H) : SetPtEll -&gt; {@ PtEll @}</H5>
+
+<H5>RationalPoints(H) : SetPtEll -&gt; {@ PtEll @}</H5>
+<P>
+
+<H5>Points(E) : CrvEll -&gt; {@ PtEll @}</H5>
+
+<H5>RationalPoints(E) : CrvEll -&gt; {@ PtEll @}</H5><P>
+
+
+
+var Bound: RngIntElt                    Default: 0
+var DenominatorBound: RngIntElt         Default: Bound
+var Denominators: Setq                  Default: 
+var Max: RngIntElt                      Default: 
+var NPrimes: RngIntElt                  Default: 30
+Given an elliptic curve E (or associated point set) over the rationals,
+a number field, or a finite field, this function returns an indexed set
+of points on the curve (or in the point set).
+When over a finite field this will contain all the rational points.
+
+When over Q or a number field, a positive value for the parameter
+<TT>Bound</TT> must be given.  Over Q this refers to the height of the
+x-coordinate of the points.  Over number fields the algorithm searches
+x-coordinates in some chosen box and with some chosen denominators
+depending on the <TT>Bound</TT> (so here, too, there is loosely a linear
+relationship between the <TT>Bound</TT> and the heights of the x-coordinates
+searched).
+
+The other optional parameters are only for the number field case.
+The denominators of x-coordinates to be searched can be specified
+as <TT>Denominators</TT> (a set of integral elements in the field)
+or by setting <TT>DenominatorBound</TT> (an integer).
+If an integer <TT>Max</TT> is specified then the routine returns as soon as
+this many points are found.
+The parameter <TT>NPrimes</TT> is an internal parameter that controls
+the number of primes used in the sieving.
+
+The algorithm uses a sieve method; the number field case is
+described in Appendix A of <A  HREF = "text1424.htm#bib_bruin-phdthesis">[Bru02]</A>.
+In both cases the implementation of the sieving is reasonably fast.
+
+
+<H5><A NAME = "16228">Points(H, x) : SetPtEll, RngElt -&gt; [ PtEll ]</A></H5>
+<H5>Points(E, x) : CrvEll, RngElt -&gt; [ PtEll ]</H5>
+<BLOCKQUOTE>
+Returns the sequence of points in the pointset H on the elliptic curve E
+whose x-coordinate is x.
+</BLOCKQUOTE>
+<H5><A NAME = "16229">PointsAtInfinity(H) : SetPtEll -&gt; @ PtEll @</A></H5>
+<H5>PointsAtInfinity(E) : CrvEll -&gt; @ PtEll @</H5>
+<BLOCKQUOTE>
+Returns the indexed set containing the identity point of the pointset
+H or on the elliptic curve E.
+</BLOCKQUOTE>
+<H4><A NAME = "16230">Creation Predicates</A></H4>
+
+
+
+<H5><A NAME = "16231">IsPoint(H, S) : SetPtEll, [ RngElt ] -&gt; BoolElt, PtEll</A></H5>
+<H5>IsPoint(E, S) : CrvEll, [ RngElt ] -&gt; BoolElt, PtEll</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the sequence of values in S are the coordinates of a point in the pointset H or on the elliptic curve E,
+<TT>false</TT> otherwise.  If this is <TT>true</TT> then the corresponding point is
+returned as the second value.
+</BLOCKQUOTE>
+<H5><A NAME = "16232">IsPoint(H, x) : SetPtEll, RngElt -&gt; BoolElt, PtEll</A></H5>
+<H5>IsPoint(E, x) : CrvEll, RngElt -&gt; BoolElt, PtEll</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if x is the x-coordinate of a point in the pointset
+H or on the elliptic curve E,
+<TT>false</TT> otherwise.  If this is <TT>true</TT> then a corresponding
+point is returned as the second value.
+Note that the point at infinity of H will never be returned.
+</BLOCKQUOTE>
+<H4><A NAME = "16233">Access Operations</A></H4>
+
+
+
+<H5><A NAME = "16234">P[i] : PtEll, RngIntElt -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+Returns the i-th coefficient for an elliptic curve point P, for
+1&le;i&le;3.
+</BLOCKQUOTE>
+<H5><A NAME = "16235">ElementToSequence(P): PtEll -&gt; [ RngElt ]</A></H5>
+<H5>Eltseq(P): PtEll -&gt; [ RngElt ]</H5>
+<BLOCKQUOTE>
+Given a point P on an elliptic curve, this function returns
+a sequence of length 3 consisting of its coefficients (normalised).
+</BLOCKQUOTE>
+<H4><A NAME = "16236">Associated Structures</A></H4>
+
+
+
+<H5><A NAME = "16237">Category(P) : PtEll -&gt; Cat</A></H5>
+<H5>Type(P) : PtEll -&gt; Cat</H5>
+<BLOCKQUOTE>
+Given a point P on an elliptic curve, this function
+returns <TT>PtEll</TT>, the category of elliptic curve points.
+</BLOCKQUOTE>
+<H5><A NAME = "16238">Parent(P) : PtEll -&gt; SetPtEll</A></H5>
+<BLOCKQUOTE>
+Given a point P on an elliptic curve, this function
+returns the parent point set for P.
+</BLOCKQUOTE>
+<H5><A NAME = "16239">Scheme(P) : SetPtEll -&gt; CrvEll</A></H5>
+<H5>Curve(P) : SetPtEll -&gt; CrvEll</H5>
+<BLOCKQUOTE>
+Given a point P on an elliptic curve, this function
+returns the corresponding scheme or elliptic curve for the parent
+point set of P.
+</BLOCKQUOTE>
+<H4><A NAME = "16240">Arithmetic</A></H4>
+
+<P>
+<P>
+The points on an elliptic curve over a field form an abelian group,
+for which we use the additive notation. The identity element is the
+point O = (0:1:0).
+
+
+<H5><A NAME = "16241">- P : PtEll -&gt; PtEll</A></H5>
+<BLOCKQUOTE>
+Returns the additive inverse of the point P on an elliptic curve E.
+</BLOCKQUOTE>
+<H5><A NAME = "16242">P + Q : PtEll, PtEll -&gt; PtEll</A></H5>
+<BLOCKQUOTE>
+Returns the sum P + Q of
+two points P and Q on the same elliptic curve.
+</BLOCKQUOTE>
+<H5><A NAME = "16243">P +:= Q : PtEll, PtEll -&gt;</A></H5>
+<BLOCKQUOTE>
+Given two points P and Q on the same elliptic curve, sets P
+equal to their sum.
+</BLOCKQUOTE>
+<H5><A NAME = "16244">P - Q : PtEll, PtEll -&gt; PtEll</A></H5>
+<BLOCKQUOTE>
+Returns the difference P - Q of two points P and Q on the same
+elliptic curve.
+</BLOCKQUOTE>
+<H5><A NAME = "16245">P -:= Q : PtEll, PtEll -&gt;</A></H5>
+<BLOCKQUOTE>
+Given two points P and Q on the same elliptic curve, sets P
+equal to
+their difference.
+</BLOCKQUOTE>
+<H5><A NAME = "16246">n * P : RngIntElt, PtEll -&gt; PtEll</A></H5>
+<H5>P * n : PtEll, RngIntElt -&gt; PtEll</H5>
+<BLOCKQUOTE>
+Returns the n-th multiple of the point P on an elliptic curve.
+</BLOCKQUOTE>
+<H5><A NAME = "16247">P *:= n : PtEll, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Sets the point P equal to the n-th multiple of itself.
+</BLOCKQUOTE>
+<H4><A NAME = "16248">Division Points</A></H4>
+
+
+
+<H5><A NAME = "16249">P / n : PtEll, RngIntElt -&gt; PtEll</A></H5>
+<BLOCKQUOTE>
+Given a point P on an elliptic curve E and an integer n,
+this function returns a point Q on E such that P = nQ,
+if such a point exists. If no such point exists then a runtime error
+results.
+</BLOCKQUOTE>
+<H5><A NAME = "16250">P /:= n : PtEll, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Given a point P on an elliptic curve E and an integer n,
+this function sets P equal to a point Q on E such that
+P = nQ, if such a point exists. If no such point exists then a
+runtime error results.
+</BLOCKQUOTE>
+<H5><A NAME = "16251">DivisionPoints(P, n) : PtEll, RngIntElt -&gt; [ PtEll ]</A></H5>
+<BLOCKQUOTE>
+Given a point P on an elliptic curve E and an integer n,
+this function returns the sequence of all points Q on E
+such that P = nQ holds. If there are no such points then an
+empty sequence is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "16252">IsDivisibleBy(P, n) : PtEll, RngIntElt -&gt; BoolElt, PtEll</A></H5>
+<BLOCKQUOTE>
+Given a point P on an elliptic curve E and an integer n,
+this function returns <TT>true</TT> if P is n-divisible, and
+if so, an n-division point. Otherwise <TT>false</TT> is returned.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16253">Example <TT>CrvEll_PointArithmetic1 (H126E22)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([1, 0, 0, 12948, 421776]);
+&gt; P := E![ -65498304*1567, -872115836268, 1567^3 ];
+&gt; DivisionPoints(P, 3);
+[ (312 : -6060 : 1), (-30 : -66 : 1), (216 : 3540 : 1) ]
+</PRE>
+Note that P has three three-division points --- this tells us that
+there are three 3-torsion points in E.
+In fact, there are 9 points in the torsion subgroup.
+<P>
+<P>
+<PRE>
+&gt; DivisionPoints(E!0, 9);
+[ (0 : 1 : 0), (24 : 852 : 1), (24 : -876 : 1), (-24 : -300 : 1), (-24 : 324 : 1),
+(600 : 14676 : 1), (600 : -15276 : 1), (132 : 2040 : 1), (132 : -2172 : 1) ]
+</PRE>
+<HR>
+<H3><A NAME = "16254">Example <TT>CrvEll_PointArithmetic2 (H126E23)</TT></A></H3>
+We construct some points in a certain elliptic curve over Q and try
+by hand to find a "smaller" set of points that generate the same group.
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([0, 0, 1, -7, 6]);
+&gt; P1 := E![ 175912024457 * 278846, -41450244419357361, 278846^3 ];
+&gt; P2 := E![ -151 * 8, -1845, 8^3 ];
+&gt; P3 := E![ 36773 * 41, -7036512, 41^3 ];
+&gt; P1; P2; P3;
+(175912024457/77755091716 : -41450244419357361/21681696304639736 : 1)
+(-151/64 : -1845/512 : 1)
+(36773/1681 : -7036512/68921 : 1)
+</PRE>
+Now we try small linear combinations in the hope of finding nicer looking
+points.  We shall omit the bad guesses and just show the good ones.
+<P>
+<P>
+<PRE>
+&gt; P1 + P2;
+(777/3364 : 322977/195112 : 1)
+</PRE>
+Success!  We replace P1 with this new point and keep going.
+<P>
+<P>
+<PRE>
+&gt; P1 +:= P2;
+&gt; P2 + P3;
+(-3 : 0 : 1)
+&gt; P2 +:= P3;
+&gt; P3 - P1;
+(-1 : -4 : 1)
+&gt; P3 -:= P1;
+&gt; P1 - 2*P2;
+(0 : 2 : 1)
+&gt; P1 -:= 2*P2;
+&gt; [ P1, P2, P3 ];
+[ (0 : 2 : 1), (-3 : 0 : 1), (-1 : -4 : 1) ]
+</PRE>
+The pairwise reductions no longer help, but there is a smaller point
+with x-coordinate 1:
+<P>
+<P>
+<PRE>
+&gt; IsPoint(E, 1);
+true (1 : 0 : 1)
+</PRE>
+After a small search we find:
+<P>
+<P>
+<PRE>
+&gt; P1 - P2 - P3;
+(1 : 0 : 1)
+&gt; P2 := P1 - P2 - P3;
+&gt; [ P1, P2, P3 ];
+[ (0 : 2 : 1), (1 : 0 : 1), (-1 : -4 : 1) ]
+</PRE>
+Using a naive definition of "small" these are the smallest possible
+points.  (Note that there are points of smaller canonical height.)
+These points are in fact the generators of the Mordell--Weil group for this
+particular elliptic curve.  Since none of the transformations changed
+the size of the space spanned by the points it follows that the original
+set of points are also generators of E.  However, the reduced points
+form a much more convenient basis.
+<HR>
+<H3><A NAME = "16255">Example <TT>CrvEll_GenericPoint (H126E24)</TT></A></H3>
+We construct an elliptic curve over a function field (hence an elliptic
+surface) and form a "generic" point on it.
+First, we construct the function field.
+<P>
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([GF(97) | 1, 2]);
+&gt; K&lt;x, y&gt; := FunctionField(E);
+</PRE>
+Now we lift the curve to be over its own function field and
+form a generic point on E.
+<P>
+<P>
+<PRE>
+&gt; EK := BaseChange(E, K);
+&gt; P := EK![x, y, 1];
+&gt; P;
+(x : y : 1)
+&gt; 2*P;
+((73*x^4 + 48*x^2 + 93*x + 73)/(x^3 + x + 2) : (85*x^6 + 37*x^4 + 5*x^3
+    + 60*x^2 + 96*x + 8)/(x^6 + 2*x^4 + 4*x^3 + x^2 + 4*x + 4)*y : 1)
+</PRE>
+Finally, we verify that addition of the generic point defines the addition
+law on the curve.
+<P>
+<P>
+<PRE>
+&gt; m2 := MultiplicationByMMap(E, 2);
+&gt; P := E![ 32, 93, 1 ];
+&gt; m2(P);
+(95 : 63 : 1)
+&gt; 2*P;
+(95 : 63 : 1)
+</PRE>
+<HR>
+<H4><A NAME = "16256">Point Order</A></H4>
+
+
+
+<H5><A NAME = "16257">Order(P) : PtEll -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a point on an elliptic curve defined over Q or a finite
+field, this function computes the order of P; that is, the smallest
+positive integer n such that n.P=O on the curve.
+If no such positive n exists then 0 is returned to indicate
+infinite order.
+If the curve is defined over a finite field then the order of the curve
+will first be computed.
+</BLOCKQUOTE>
+<H5><A NAME = "16258">FactoredOrder(P) : PtEll -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a point on an elliptic curve defined over Q or over a finite
+field, this function returns the factorisation of the order of P.
+If the curve is over a finite field then on repeated applications
+this is generally much faster than factorising <TT>Order(P)</TT> because
+the factorisation of the order of the curve will be computed and
+stored.  An error ensues if the curve is defined over Q and P
+has infinite order.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16259">Example <TT>CrvEll_PlayWithPoints (H126E25)</TT></A></H3>
+We show a few simple operations with points on an elliptic curve over
+a large finite field.
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([GF(NextPrime(10^12)) | 1, 1]);
+&gt; Order(E);
+1000001795702
+&gt; FactoredOrder(E);
+[ &lt;2, 1&gt;, &lt;7, 1&gt;, &lt;13, 1&gt;, &lt;19, 1&gt;, &lt;31, 1&gt;, &lt;43, 1&gt;, &lt;59, 1&gt;, &lt;3677, 1&gt; ]
+&gt; P := E ! [652834414164, 320964687531, 1];
+&gt; P;
+(652834414164 : 320964687531 : 1)
+&gt; IsOrder(P, Order(E));
+true
+&gt; FactoredOrder(P);
+[ &lt;2, 1&gt;, &lt;7, 1&gt;, &lt;13, 1&gt;, &lt;19, 1&gt;, &lt;31, 1&gt;, &lt;43, 1&gt;, &lt;59, 1&gt;, &lt;3677, 1&gt; ]
+&gt; FactoredOrder(3677 * 59 * P);
+[ &lt;2, 1&gt;, &lt;7, 1&gt;, &lt;13, 1&gt;, &lt;19, 1&gt;, &lt;31, 1&gt;, &lt;43, 1&gt; ]
+</PRE>
+<HR>
+<H4><A NAME = "16260">Predicates on Points</A></H4>
+
+
+
+<H5><A NAME = "16261">IsId(P) : PtEll -&gt; BoolElt</A></H5>
+<H5>IsIdentity(P) : PtEll -&gt; BoolElt</H5>
+<H5>IsZero(P) : PtEll -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the point P is the identity point of its
+point set, <TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "16262">P eq Q : PtEll, PtEll -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if P and Q are points on the same elliptic curve
+and have the same normalised coordinates.
+</BLOCKQUOTE>
+<H5><A NAME = "16263">P ne Q : PtEll, PtEll -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+The logical negation of <TT>eq</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "16264">P in H : PtEll, SetPtEll -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a point P, return <TT>true</TT> if and only if P is in the point set H.
+That is, it satisfies the equation of E and its coordinates lie in R,
+where H = E(R).
+</BLOCKQUOTE>
+<H5><A NAME = "16265">P in E : PtEll, CrvEll -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a point P, return <TT>true</TT> if and only if P is
+on the elliptic curve E (i.e., satisfies its defining equation).
+Note that this is an exception to the general rule, in that P does not
+have to lie in the base point set of E for this to be true.
+</BLOCKQUOTE>
+<H5><A NAME = "16266">IsOrder(P, m) : PtEll, RngIntElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the point
+P has order m.  If you believe that you
+know the order of the point then this intrinsic is likely to be much
+faster than just calling <TT>Order</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "16267">IsIntegral(P) : PtEll -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a point P on an elliptic curve defined over Q, this function
+returns <TT>true</TT> if and only if the coordinates of the (normalisation of) P
+are integers.
+</BLOCKQUOTE>
+<H5><A NAME = "16268">IsSIntegral(P, S) : PtEll, SeqEnum -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a point P on an elliptic curve defined over Q and a sequence
+S of primes, this function
+returns <TT>true</TT> if and only if the coordinates of the (normalisation of) P
+are S-integers.  That is, the denominators of x(P) and y(P) are only
+supported by primes of S.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16269">Example <TT>CrvEll_PointPredicates (H126E26)</TT></A></H3>
+We find some integral and S-integral points on a well-known elliptic
+curve.
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([0, 17]);
+&gt; P1 := E![ -2, 3 ];
+&gt; P2 := E![ -1, 4 ];
+&gt; S := [ a*P1 + b*P2 : a,b in [-3..3] ];
+&gt; #S;
+49
+&gt; [ P : P in S | IsIntegral(P) ];
+[ (43 : -282 : 1), (5234 : -378661 : 1), (2 : -5 : 1), (8 : 23 : 1),
+(4 : 9 : 1), (-2 : -3 : 1), (52 : -375 : 1), (-1 : -4 : 1), (-1 : 4 : 1),
+(52 : 375 : 1), (-2 : 3 : 1), (4 : -9 : 1), (8 : -23 : 1), (2 : 5 : 1),
+(5234 : 378661 : 1), (43 : 282 : 1) ]
+&gt; [ P : P in S | IsSIntegral(P, [2, 3]) and not IsIntegral(P) ];
+[ (1/4 : 33/8 : 1), (-8/9 : 109/27 : 1), (-206/81 : -541/729 : 1),
+(137/64 : 2651/512 : 1), (137/64 : -2651/512 : 1), (-206/81 : 541/729 : 1),
+(-8/9 : -109/27 : 1), (1/4 : -33/8 : 1) ]
+</PRE>
+<HR>
+<H4><A NAME = "16270">Weil Pairing</A></H4>
+
+<P>
+<P>
+Magma contains an optimised implementation of the Weil pairing on
+an elliptic curve.  This function is used in the computation of
+the group structure of elliptic curves over finite fields, making
+the determination of the group structure efficient.
+
+
+<H5><A NAME = "16271">WeilPairing(P, Q, n) : PtEll, PtEll, RngIntElt -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+Given n-torsion points P and Q of an elliptic curve E,
+this function computes the Weil pairing of P and Q.
+</BLOCKQUOTE>
+<H5><A NAME = "16272">IsLinearlyIndependent(S, n) : [ PtEll ], RngIntElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a sequence S of points of an elliptic curve E such that each
+point has order dividing n, this function returns <TT>true</TT> if and
+only if the points in S are linearly independent over Z/nZ.
+</BLOCKQUOTE>
+<H5><A NAME = "16273">IsLinearlyIndependent(P, Q, n) : PtEll, PtEll, RngIntElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given points P and Q of an elliptic curve E, this function
+returns <TT>true</TT> if and only if P and Q form a basis of the
+n-torsion points of E.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16274">Example <TT>CrvEll_WeilPairing (H126E27)</TT></A></H3>
+We compute the Weil pairing of two 3-torsion points on the curve
+y<sup>2</sup> = x<sup>3</sup> - 3 over Q.
+<P>
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([0, -3]);
+&gt; E;
+&gt; P1, P2, P3 := Explode(ThreeTorsionPoints(E));
+&gt; P1;
+(0 : 2*zeta_3 + 1 : 1)
+&gt; Parent(P1);
+Set of points of E with coordinates in Cyclotomic Field
+  of order 3 and degree 2
+&gt; Parent(P2);
+Set of points of E with coordinates in Number Field with
+  defining polynomial X^3 - 18*X - 30 over the Rational Field
+</PRE>
+<P>
+In order to take the Weil pairing of two points we need to coerce
+them into the same point set. This turns out to be a point set over
+a number field K of degree 6.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Qmu3 := Ring(Parent(P1));
+&gt; K&lt;w&gt; := CompositeFields(Ring(Parent(P1)), Ring(Parent(P2)))[1];
+&gt; wp := WeilPairing( E(K)!P1, E(K)!P2, 3 );
+&gt; wp;
+1/975*(14*w^5 + 5*w^4 - 410*w^3 - 620*w^2 + 3964*w + 8744)
+&gt; Qmu3!wp;
+zeta_3
+</PRE>
+<PRE></PRE> <A  HREF = "text1424.htm">[Next]</A><A  HREF = "text1433.htm">[Prev]</A> <A  HREF = "text1424.htm">[Right]</A> <A  HREF = "text1433.htm">[Left]</A> <A  HREF = "text1425.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

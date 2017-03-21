@@ -1,0 +1,173 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Nullspaces and Solutions of Systems</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text256.htm">[Next]</A><A  HREF = "text254.htm">[Prev]</A> <A  HREF = "text256.htm">[Right]</A> <A  HREF = "text254.htm">[Left]</A> <A  HREF = "text247.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "2366">Nullspaces and Solutions of Systems</A></H3>
+
+<P>
+<P>
+The following functions compute nullspaces of matrices (solving
+equations of the form V.A=0), or solve systems of the form
+V.A=W, for given A and W.
+<P>
+Magma possesses a very rich suite of internal algorithms for computing
+nullspaces of
+matrices efficiently, including a fast p-adic algorithm for matrices
+over Z and Q, and also
+algorithms which take advantage of sparsity if it is present.
+
+
+<H5><A NAME = "2367">Nullspace(A) : Mtrx -&gt; ModTupRng</A></H5>
+<H5>Kernel(A) : Mtrx -&gt; ModTupRng, Map</H5>
+<BLOCKQUOTE>
+Given an m x n matrix A over a ring R, return the nullspace
+of A (or the kernel of A, considered as a linear transformation or
+map), which is the R-space consisting of all vectors v of length
+m such that v.A = 0.  If the parent of A is an R-matrix
+space, then the result will be the appropriate submodule of the domain
+of A.  The function <TT>Kernel(A)</TT> also returns the inclusion map
+from the kernel into the domain of A, to be consistent with other
+forms of the <TT>Kernel</TT> function.
+</BLOCKQUOTE>
+<H5><A NAME = "2368">NullspaceMatrix(A) : Mtrx -&gt; ModTupRng</A></H5>
+<H5>KernelMatrix(A) : Mtrx -&gt; ModTupRng</H5>
+<BLOCKQUOTE>
+Given an m x n matrix A over a ring R, return a basis matrix
+of the nullspace of A.  This is a matrix N having m columns
+and the maximal number of independent rows subject to the condition
+that N.A = 0.
+This function has the advantage that the nullspace is not returned as a
+R-space, so echelonization of the resulting nullspace may be avoided.
+</BLOCKQUOTE>
+<H5><A NAME = "2369">NullspaceOfTranspose(A) : Mtrx -&gt; ModTupRng</A></H5>
+<BLOCKQUOTE>
+This function is equivalent to <TT>Nullspace(Transpose(A))</TT>, but
+may be more efficient in space for large matrices, since the
+transpose may not have to be explicitly constructed to compute
+the nullspace.
+</BLOCKQUOTE>
+<H5><A NAME = "2370">IsConsistent(A, W) : Mtrx, Mtrx -&gt; BoolElt, Mtrx, ModTupRng</A></H5>
+<BLOCKQUOTE>
+Given an m x n matrix A over a ring R, and a
+vector W of length n over R or a r x n matrix W over R,
+return <TT>true</TT> iff and only if the system of linear equations 
+V.A = W is consistent.
+If the system is consistent, 
+then the function will also return:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>A particular solution V so that V.A = W;
+<DT>(b)</DT><DD>The nullspace N of A so that adding any elements of N to
+any rows of V will yield other solutions to the system.</DL>
+</BLOCKQUOTE>
+<H5><A NAME = "2371">IsConsistent(A, Q) : Mtrx, [ ModTupRng ] -&gt; BoolElt, [ ModTupRngElt ], ModTupRng</A></H5>
+<BLOCKQUOTE>
+Given an m x n matrix A over a ring R, and a
+sequence Q of vectors of length n over R, return <TT>true</TT>
+if and only if the system of linear equations V[i] * A = Q[i] for all i is consistent.
+If the system is consistent, then the function will also return:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>A particular solution sequence V;
+<DT>(b)</DT><DD>The nullspace N of A so that (V[i] + u) * A = Q[i] for
+u&isin;N for all i.
+ </DL>
+</BLOCKQUOTE>
+<H5><A NAME = "2372">Solution(A, W) : ModMatRngElt, ModTupRng -&gt; ModTupRngElt, ModTupRng</A></H5>
+<BLOCKQUOTE>
+Given an m x n matrix A over a ring R, and a
+vector W of length n over R or a r x n matrix W over R,
+solve the system of linear equations V.A = W and return:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>A particular solution V so that V.A = W;
+<DT>(b)</DT><DD>The nullspace N of A so that adding any elements of N to
+any rows of V will yield other solutions to the system.
+<P>
+</DL>
+If there is no solution, an error results.
+</BLOCKQUOTE>
+<H5><A NAME = "2373">Solution(A, Q) : ModMatRngElt, [ ModTupRng ] -&gt; [ ModTupRngElt ], ModTupRng</A></H5>
+<BLOCKQUOTE>
+Given an m x n matrix A over a ring R, and a
+sequence Q of vectors of length n over R,
+solve the system of linear equations V[i] * A = Q[i] for each i and
+return:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>A particular solution sequence V;
+<DT>(b)</DT><DD>The nullspace N of A so that (V[i] + u) * A = Q[i] for
+u&isin;N for all i.
+<P>
+</DL>
+If there is no solution, an error results.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2374">Example <TT>Mat_Nullspace (H26E7)</TT></A></H3>
+We compute the nullspace of a 301 x 300 matrix over Z
+with random entries in the range [0 .. 10].  The nullity
+is 1 and the entries of the non-zero null vector are integers,
+each having about 455 decimal digits.
+<P>
+<P>
+<PRE>
+&gt; m := 301; n := 300; 
+&gt; X := Matrix(n, [Random(0, 10): i in [1 .. m*n]]);
+&gt; time N := NullspaceMatrix(X);
+Time: 9.519
+&gt; Nrows(N), Ncols(N);
+1 301
+&gt; time IsZero(N*X);
+true
+Time: 0.429
+&gt; {#Sprint(N[1,i]): i in [1..301]}; 
+{ 452, 455, 456, 457, 458 }
+</PRE>
+<HR>
+<H3><A NAME = "2375">Example <TT>Mat_Solution (H26E8)</TT></A></H3>
+We show how one can enumerate all solutions to the system V.X=W
+for a given matrix X and vector W over a finite field.
+The <TT>Solution</TT> function gives a particular solution for V,
+and then adding this to every element in the nullspace N of X,
+we obtain all solutions.
+<P>
+<P>
+<PRE>
+&gt; K := GF(3);
+&gt; X := Matrix(K, 4, 3, [1,2,1, 2,2,2, 1,1,1, 1,0,1]);
+&gt; X;
+[1 2 1]
+[2 2 2]
+[1 1 1]
+[1 0 1]
+&gt; W := Vector(K, [0,1,0]);
+&gt; V, N := Solution(X, W);
+&gt; V;
+(1 1 0 0)
+&gt; N;
+Vector space of degree 4, dimension 2 over GF(3)
+Echelonized basis:
+(1 0 1 1)
+(0 1 1 0)
+&gt; [V + U: U in N];
+[
+    (1 1 0 0),
+    (2 1 1 1),
+    (0 1 2 2),
+    (0 2 0 2),
+    (1 2 1 0),
+    (2 2 2 1),
+    (2 0 0 1),
+    (0 0 1 2),
+    (1 0 2 0)
+]
+&gt; [(V + U)*X eq W: U in N];
+[ true, true, true, true, true, true, true, true, true ]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text256.htm">[Next]</A><A  HREF = "text254.htm">[Prev]</A> <A  HREF = "text256.htm">[Right]</A> <A  HREF = "text254.htm">[Left]</A> <A  HREF = "text247.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

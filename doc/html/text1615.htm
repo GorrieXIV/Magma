@@ -1,0 +1,371 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Brandt Module Creation</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1616.htm">[Next]</A><A  HREF = "text1614.htm">[Prev]</A> <A  HREF = "text1616.htm">[Right]</A> <A  HREF = "text1614.htm">[Left]</A> <A  HREF = "text1613.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "17889">Brandt Module Creation</A></H3>
+
+<P>
+<P>
+We first describe the various constructors for Brandt modules and their 
+elements.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1615.htm#17895">Creation of Elements</A>
+<LI> <A  HREF = "text1615.htm#17898">Operations on Elements</A>
+<LI> <A  HREF = "text1615.htm#17907">Categories and Parent</A>
+<LI> <A  HREF = "text1615.htm#17910">Elementary Invariants</A>
+<LI> <A  HREF = "text1615.htm#17916">Associated Structures</A>
+<LI> <A  HREF = "text1615.htm#17925">Verbose Output</A>
+</UL>
+<H5><A NAME = "17890">BrandtModule(D) : RngIntElt -&gt; ModBrdt</A></H5>
+<H5>BrandtModule(D, m) : RngIntElt, RngIntElt -&gt; ModBrdt</H5>
+
+<PRE>    ComputeGrams: BoolElt               Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a product D of an odd number of primes, and a integer m which 
+has valuation at most one at each prime divisor p of D, return a 
+Brandt module of level (D, m) over the integers.  If not specified, then 
+the conductor m is taken to be 1.
+<P>
+The parameter <TT>ComputeGrams</TT> can be set to <TT>false</TT> in order to 
+not compute the h x h array, where h is the left class number of 
+level (D, m), of reduced Gram matrices of the quaternion ideal norm 
+forms.  Instead the basis of quaternion ideals is stored and the 
+collection of degree p ideal homomorphisms is then computed in order 
+to find the Hecke operator T<sub>p</sub> for each prime p.  
+<P>
+For very large levels, setting <TT>ComputeGrams</TT> to <TT>false</TT> is 
+more space efficient.  For moderate sized levels for which one wants 
+to compute many Hecke operators, it is preferable to compute the Gram 
+matrices and determine the Hecke operators using theta series.
+</BLOCKQUOTE>
+<H5><A NAME = "17891">BrandtModule(A) : AlgQuatOrd -&gt; ModBrdt</A></H5>
+<H5>BrandtModule(A, R) : AlgQuatOrd, Rng -&gt; ModBrdt</H5>
+
+<PRE>    ComputeGrams: BoolElt               Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a definite order A in a quaternion algebra over Q, returns 
+the Brandt module on the left ideals classes for A, as a module over 
+R.  If not specified, the ring R is taken to be the integers.
+The parameter <TT>ComputeGrams</TT> is as previously described.
+</BLOCKQUOTE>
+<H5><A NAME = "17892">BaseExtend(M, R) : ModBrdt, Rng -&gt; ModBrdt</A></H5>
+<BLOCKQUOTE>
+Forms the Brandt module with coefficient ring base extended to R.
+</BLOCKQUOTE>
+<H5><A NAME = "17893">BrandtModule(M, N) : AlgQuatOrd, RngElt -&gt; ModBrdt</A></H5>
+<BLOCKQUOTE>
+This constructor is an alternative to <TT>BrandtModule(D, N)</TT> above,
+and <I>uses a different algorithm</I> which is preferable in the case
+where N is not very small.  
+<P>
+It constructs the Brandt module attached to an Eichler order of level N
+inside the maximal order M.  The algorithm avoids explicitly working
+with the Eichler order.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17894">Example <TT>ModBrdt_ModBrdt:Constructors (H140E1)</TT></A></H3>
+In the following example we create the Brandt module of level 101 
+over the field of 7 elements and decompose it into its invariant 
+subspaces.
+<P>
+<P>
+<PRE>
+&gt; A := QuaternionOrder(101);
+&gt; FF := FiniteField(7);
+&gt; M := BrandtModule(A,FF);
+&gt; Decomposition(M,13);
+[
+    Brandt module of level (101,1), dimension 1, and degree 9 over Finite 
+    field of size 7,
+    Brandt module of level (101,1), dimension 1, and degree 9 over Finite 
+    field of size 7,
+    Brandt module of level (101,1), dimension 1, and degree 9 over Finite 
+    field of size 7,
+    Brandt module of level (101,1), dimension 6, and degree 9 over Finite 
+    field of size 7
+]
+</PRE>
+We note that Brandt modules of non-prime discriminant can be useful 
+for studying isogeny factors of modular curves, since it is possible 
+to describe exactly the piece of cohomology of interest, without 
+first computing a much larger space.  In this example we see that the 
+space of weight 2 cusp forms for &Gamma;<sub>0</sub>(1491), where 1491 = 
+3.7.71, is of dimension 189 (plus an Eisenstein space 
+of dimension 7), while the newspace has dimension 71.  
+The Jacobian of the Shimura curve X<sup>1491</sup><sub>0</sub>(1) is isogenous to 
+the new factor of J<sub>0</sub>(1491), so that we can study the newspace 
+directly via the Brandt module.
+<P>
+<P>
+<PRE>
+&gt; DimensionCuspFormsGamma0(3*7*71,2);
+189
+&gt; DimensionNewCuspFormsGamma0(3*7*71,2);
+71
+&gt; BrandtModuleDimension(3*7*71,1);
+72
+&gt; M := BrandtModule(3*7*71 : ComputeGrams := false);
+&gt; S := CuspidalSubspace(M);
+&gt; Dimension(S);
+71
+&gt; [ Dimension(N) : N in Decomposition(S,13 : Sort := true) ];
+[ 6, 6, 6, 6, 11, 12, 12, 12 ]
+</PRE>
+In this example by setting <TT>ComputeGrams</TT> equal to <TT>false</TT> 
+we obtain the Brandt module much faster, but the decomposition is 
+much more expensive.  For most applications the default computation 
+of Gram matrices is preferable. 
+<HR>
+<H4><A NAME = "17895">Creation of Elements</A></H4>
+
+
+
+<H5><A NAME = "17896">M ! x : ModBrdt, . -&gt; ModBrdtElt</A></H5>
+<BLOCKQUOTE>
+Given a sequence or module element x compatible with the Brandt module M, forms the 
+corresponding element in M.
+</BLOCKQUOTE>
+<H5><A NAME = "17897">M . i : ModBrdt, RngIntElt -&gt; ModBrdtElt</A></H5>
+<BLOCKQUOTE>
+For a Brandt module M and integer i, returns the i-th basis element. 
+</BLOCKQUOTE>
+<H4><A NAME = "17898">Operations on Elements</A></H4>
+
+<P>
+<P>
+Brandt module elements support standard operations.
+
+
+<H5><A NAME = "17899">a * x : RngElt, ModBrdtElt -&gt; ModBrdtElt</A></H5>
+<H5>x * a : ModBrdtElt, RngElt -&gt; ModBrdtElt</H5>
+<BLOCKQUOTE>
+The scalar multiplication of a Brandt module element x by an element 
+a in the base ring.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "17900">x * T : ModBrdtElt, AlgMatElt -&gt; ModBrdtElt</A></H5>
+<BLOCKQUOTE>
+Given a Brandt module element x and an element T of the algebra of 
+Hecke operators of degree compatible with the parent of x or of its 
+ambient module, returns the image of x under T. 
+</BLOCKQUOTE>
+<H5><A NAME = "17901">x + y : ModBrdtElt, ModBrdtElt -&gt; ModBrdtElt</A></H5>
+<BLOCKQUOTE>
+Returns the sum of two Brandt module elements.
+</BLOCKQUOTE>
+<H5><A NAME = "17902">x - y : ModBrdtElt, ModBrdtElt -&gt; ModBrdtElt</A></H5>
+<BLOCKQUOTE>
+Returns the difference of two Brandt module elements.
+</BLOCKQUOTE>
+<H5><A NAME = "17903">x eq y : ModBrdtElt, ModBrdtElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if x and y are equal elements of the same Brandt module. 
+</BLOCKQUOTE>
+<H5><A NAME = "17904">Eltseq(x) : ModBrdtElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Returns the sequence of coefficients of the Brandt module element x. 
+</BLOCKQUOTE>
+<H5><A NAME = "17905">InnerProduct(x, y) : ModBrdtElt, ModBrdtElt -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+Returns the inner product of the Brandt module elements 
+x and y with respect to the canonical 
+pairing on their common parent.
+</BLOCKQUOTE>
+<H5><A NAME = "17906">Norm(x) : ModBrdtElt  -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+Returns the inner product of the Brandt module element
+x with itself.
+</BLOCKQUOTE>
+<H4><A NAME = "17907">Categories and Parent</A></H4>
+
+<P>
+<P>
+Brandt modules belong to the category <TT>ModBrdt</TT>, with elements of 
+type <TT>ModBrdtElt</TT>, involved in the type checking of arguments in 
+Magma programming.  The <TT>Parent</TT> of an element is the space to 
+which it belongs. 
+
+
+<H5>Category(M) : ModBrdt -&gt; Cat</H5>
+
+<H5>Type(M) : ModBrdt -&gt; Cat</H5><P>
+
+
+<H5>Category(x) : ModBrdtElt -&gt; Cat</H5>
+
+<H5>Type(x) : ModBrdtElt -&gt; Cat</H5><P>
+
+
+The category, <TT>ModBrdt</TT> or <TT>ModBrdtElt</TT>, of the  
+Brandt module M or of the Brandt module element x. 
+
+
+<H5><A NAME = "17908">Parent(x) : ModBrdtElt -&gt; ModBrdt</A></H5>
+<BLOCKQUOTE>
+The parent module M of a Brandt module element x.
+</BLOCKQUOTE>
+<H5><A NAME = "17909">x in M : ModBrdtElt, ModBrdt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if M is the parent of x.
+</BLOCKQUOTE>
+<H4><A NAME = "17910">Elementary Invariants</A></H4>
+
+<P>
+<P>
+Here we describe the elementary invariants of the Brandt module, defined 
+with respect to a definite quaternion order A in a quaternion algebra 
+Hh over Q.  The <I>level</I> of M is defined to be the reduced 
+discriminant of A, the <I>discriminant</I> is defined to be the 
+discriminant of the algebra Hh, and the <I>conductor</I> to be the index 
+of A in any maximal order of Hh which contains it.  We note that the 
+discriminant of M is just the product of the ramified primes of Hh, 
+and the product of the conductor and discriminant of M is the reduced 
+discriminant of A.
+
+
+<H5><A NAME = "17911">Level(M) : ModBrdt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the level of the Brandt module, which is the product of the 
+discriminant and the conductor, and equal to the reduced discriminant 
+of its defining quaternion order.
+</BLOCKQUOTE>
+<H5><A NAME = "17912">Discriminant(M) : ModBrdt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the discriminant of the quaternion algebra Hh with respect to 
+which the Brandt module M is defined (equal to the product of the primes which ramify 
+in Hh). 
+</BLOCKQUOTE>
+<H5><A NAME = "17913">Conductor(M) : ModBrdt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the conductor or index of the defining quaternion order of the Brandt module M 
+in a maximal order of its quaternion algebra.
+</BLOCKQUOTE>
+<H5><A NAME = "17914">BaseRing(M) : ModBrdt -&gt; Rng</A></H5>
+<BLOCKQUOTE>
+The ring over which the Brandt module M is defined.
+</BLOCKQUOTE>
+<H5><A NAME = "17915">Basis(M) : ModBrdt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Returns the basis of the Brandt module M.
+</BLOCKQUOTE>
+<H4><A NAME = "17916">Associated Structures</A></H4>
+
+<P>
+<P>
+The following give structures associated to Brandt modules.  In particular 
+we note the definition of the <TT>AmbientModule</TT>, which is the full module 
+containing a given Brandt module whose basis corresponds to the left 
+quaternion ideals.  Elements of every submodule of the ambient module are 
+displayed with respect to the basis of the ambient module.
+
+
+<H5><A NAME = "17917">AmbientModule(M) : ModBrdt -&gt; ModBrdt</A></H5>
+<BLOCKQUOTE>
+The full module of level (D, m) containing a given module of this level. 
+</BLOCKQUOTE>
+<H5><A NAME = "17918">IsAmbient(M) : ModBrdt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the Brandt module M is its own ambient module.
+</BLOCKQUOTE>
+<H5><A NAME = "17919">Dimension(M) : ModBrdt -&gt; RngIntElt</A></H5>
+<H5>Rank(M) : ModBrdt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Returns the rank of the Brandt module M over its base ring.
+</BLOCKQUOTE>
+<H5><A NAME = "17920">Degree(M) : ModBrdt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the degree of the Brandt module M, defined to be the dimension 
+of its ambient module.
+</BLOCKQUOTE>
+<H5><A NAME = "17921">GramMatrix(M) : ModBrdt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+The matrix (&lt; (u<sub>i</sub>, u<sub>j</sub>) &gt;) defined with respect to the basis 
+{ u<sub>i</sub> } of the Brandt module M.
+</BLOCKQUOTE>
+<H5><A NAME = "17922">InnerProductMatrix(M) : ModBrdt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Returns the Gram matrix of the ambient module of the Brandt module M.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17923">Example <TT>ModBrdt_ModBrdt:Module-Creation (H140E2)</TT></A></H3>
+The following example demonstrates the use of <TT>AmbientModule</TT> to get 
+back to the original Brandt module.
+<P>
+<P>
+<PRE>
+&gt; M := BrandtModule(3,17);
+&gt; S := CuspidalSubspace(M);
+&gt; M eq AmbientModule(M);
+true
+</PRE>
+<HR>
+<H5><A NAME = "17924">Ideals(M) : ModBrdt -&gt; []</A></H5>
+<BLOCKQUOTE>
+This constructs the quaternionic ideals which correspond to the basis
+of the Brandt module M.  It is only implemented when M was constructed
+using <TT>BrandtModule(M, N)</TT> -- the case where the new algorithm is used,
+which avoids constructing these ideals explicitly.
+</BLOCKQUOTE>
+<H4><A NAME = "17925">Verbose Output</A></H4>
+
+<P>
+<P>
+The verbose level for Brandt modules is set with the command 
+<TT>SetVerbose("Brandt",n)</TT>. Since the construction of a Brandt 
+module requires intensive quaternion algebra machinery for ideal 
+enumeration, the <TT>Quaternion</TT> verbose flag is also relevant.
+In both cases, the value of n can be 0 (silent), 1 (verbose), 
+or 2 (very verbose).  
+
+
+<HR>
+<H3><A NAME = "17926">Example <TT>ModBrdt_ModBrdt:Verbose-Output (H140E3)</TT></A></H3>
+In the following example we show the verbose output from the quaternion 
+ideal enumeration in the creation of the Brandt module of level (37, 1).
+<P>
+<P>
+<PRE>
+&gt; SetVerbose("Quaternion",2);
+&gt; BrandtModule(37);     
+Ideal number 1, right order module
+Full RSpace of degree 4 over Integer Ring
+Inner Product Matrix:
+[ 2  0  1  1]
+[ 0  4 -1  2]
+[ 1 -1 10  0]
+[ 1  2  0 20]
+Frontier at 2-depth 1 has 3 elements.
+Number of ideals = 1
+Ideal number 2, new right order module
+Full RSpace of degree 4 over Integer Ring
+Inner Product Matrix:
+[ 2 -1  0  1]
+[-1  8 -1 -4]
+[ 0 -1 10 -2]
+[ 1 -4 -2 12]
+Ideal number 3, new right order module
+Full RSpace of degree 4 over Integer Ring
+Inner Product Matrix:
+[ 2  1  0 -1]
+[ 1  8  1  3]
+[ 0  1 10 -2]
+[-1  3 -2 12]
+Frontier at 2-depth 2 has 4 elements.
+Number of ideals = 3
+Brandt module of level (37,1), dimension 3, and degree 3 over Integer Ring
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1616.htm">[Next]</A><A  HREF = "text1614.htm">[Prev]</A> <A  HREF = "text1616.htm">[Right]</A> <A  HREF = "text1614.htm">[Left]</A> <A  HREF = "text1613.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

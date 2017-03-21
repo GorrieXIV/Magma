@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Greatest Common Divisors</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text228.htm">[Next]</A><A  HREF = "text226.htm">[Prev]</A> <A  HREF = "text228.htm">[Right]</A> <A  HREF = "text226.htm">[Left]</A> <A  HREF = "text222.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "1998">Greatest Common Divisors</A></H3>
+
+<P>
+<P>
+The functions in this section can be applied to
+multivariate polynomials over any ring which has a GCD algorithm.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text227.htm#1999">Common Divisors and Common Multiples</A>
+<LI> <A  HREF = "text227.htm#2006">Content and Primitive Part</A>
+</UL>
+<H4><A NAME = "1999">Common Divisors and Common Multiples</A></H4>
+
+
+
+<H5><A NAME = "2000">GreatestCommonDivisor(f, g) : RngMPolElt, RngMPolElt -&gt; RngMPolElt</A></H5>
+<H5>Gcd(f, g) : RngMPolElt, RngMPolElt -&gt; RngMPolElt</H5>
+<H5>GCD(f, g) : RngMPolElt, RngMPolElt -&gt; RngMPolElt</H5>
+<BLOCKQUOTE>
+The greatest common divisor of f and g in
+a multivariate polynomial ring P.
+If either of the inputs is zero, then the result is the other input
+(and if the inputs are both zero then the result is zero).  The result is
+normalized (see the function <A  HREF = "text227.htm#dpoly_Normalize">Normalize</A>), so the result is
+always unique.
+<P>
+The valid coefficient rings are those which themselves have
+a GCD algorithm for their elements (which includes most commutative
+rings in Magma).
+<P>
+For polynomials over the integers or rationals, a combination
+of three algorithms is used: (1) the heuristic evaluation
+`GCDHEU' algorithm of Char et al. (<A  HREF = "text221.htm#bib_GCDHEU">[CGG89]</A> and <A  HREF = "text221.htm#bib_GCL">[GCL92, section 7.7]</A>),
+suitable for moderate-degree dense polynomials with several variables;
+(2) the EEZ-GCD algorithm of Wang (<A  HREF = "text221.htm#bib_Wang_EEZ">[Wan80]</A>, <A  HREF = "text221.htm#bib_MosesYun_EZGCD">[MY73]</A>
+and <A  HREF = "text221.htm#bib_GCL">[GCL92, section 7.6]</A>), based on evaluation and sparse ideal-adic
+multivariate Hensel lifting (<A  HREF = "text221.htm#bib_Wang_Fact">[Wan78]</A> and <A  HREF = "text221.htm#bib_GCL">[GCL92, section 6.8]</A>),
+suitable for sparse polynomials;
+(3) a recursive multivariate evaluation-interpolation algorithm
+(similar to that in <A  HREF = "text221.htm#bib_GCL">[GCL92, section 7.4]</A>), which in fact
+works generically over {Z} or most fields.
+<P>
+For polynomials over any finite field or any field of characteristic
+zero besides {Q}, the generic recursive multivariate
+evaluation-interpolation algorithm (3) above is used, which effectively
+takes advantage of any fast modular algorithm for the base univariate
+polynomials (e.g., for number fields).  See the function
+<A  HREF = "text214.htm#vpoly_GCD">GreatestCommonDivisor</A> in the univariate polynomials chapter for details of
+univariate GCD algorithms.
+<P>
+For polynomials over another polynomial ring or rational function field, the
+polynomials are first "flattened" to be inside a multivariate polynomial
+ring over the base coefficient ring, then the appropriate algorithm is
+used for that base coefficient ring.
+<P>
+For polynomials over any other ring, the generic subresultant algorithm
+<A  HREF = "text221.htm#bib_cohen1">[Coh93, section 3.3]</A> is called recursively on a subring with
+one less variable.
+</BLOCKQUOTE>
+<H5><A NAME = "2001">GCD(Q) : [ RngMPolElt ] -&gt; RngMPolElt</A></H5>
+<BLOCKQUOTE>
+Given a sequence Q of polynomials, return the GCD of the elements
+of Q.  If Q has length 0 and universe P, then the zero element
+of P is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "2002">LeastCommonMultiple(f, g) : RngMPolElt, RngMPolElt -&gt; RngMPolElt</A></H5>
+<H5>Lcm(f, g) : RngMPolElt, RngMPolElt -&gt; RngMPolElt</H5>
+<H5>LCM(f, g) : RngMPolElt, RngMPolElt -&gt; RngMPolElt</H5>
+<BLOCKQUOTE>
+The least common multiple of f and g in
+a multivariate polynomial ring P.
+The LCM of zero and anything else is zero.
+The result is normalized (see the function <A  HREF = "text227.htm#dpoly_Normalize">Normalize</A>),
+so the result is always unique.
+The valid coefficient rings are as for the function <TT>GCD</TT>, above.
+<P>
+The LCM is effectively computed as <TT>Normalize((F div GCD(F, G)) * G)</TT>,
+for non-zero inputs.
+</BLOCKQUOTE>
+<H5><A NAME = "2003">LCM(Q) : [ RngMPolElt ] -&gt; RngMPolElt</A></H5>
+<BLOCKQUOTE>
+Given a sequence Q of polynomials, return the LCM of the elements
+of Q.  If Q has length 0 and universe P, then the one element
+of P is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "2004"></A><A NAME = "dpoly_Normalize">Normalize</A>(f) : RngMPolElt -&gt; RngMPolElt</H5>
+<BLOCKQUOTE>
+Given a polynomial f over the base ring R, this function returns
+the unique normalized polynomial g which is associate to f (so
+g=uf for some unit in R).  This is chosen so that if R is a field
+then g is monic, if R is Z then the leading coefficient of
+g is positive, if R is a polynomial ring itself, then the
+leading coefficient of g is recursively normalized,
+and so on for other rings.
+</BLOCKQUOTE>
+<H5><A NAME = "2005">ClearDenominators(f) : RngMPolElt -&gt; RngMPolElt</A></H5>
+<H5>ClearDenominators(Q) : [ RngMPolElt ] -&gt; [ RngMPolElt ]</H5>
+<BLOCKQUOTE>
+Given a polynomial f over a field K such that K is the field of
+fractions of a domain D, the first function computes the lowest common
+denominator L of the coefficients of f and returns the polynomial
+g=L.f over D with cleared denominators, and L.  The second
+function returns the sequence of polynomials derived from independently
+clearing the denominators in each polynomial in the given sequence Q.
+</BLOCKQUOTE>
+<H4><A NAME = "2006">Content and Primitive Part</A></H4>
+
+
+
+<H5><A NAME = "2007">Content(f) : RngMPolElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The content of f, that is, the greatest common
+divisor of the coefficients of f as an element of the coefficient ring.
+</BLOCKQUOTE>
+<H5><A NAME = "2008">PrimitivePart(f) : RngMPolElt -&gt; RngMPolElt</A></H5>
+<BLOCKQUOTE>
+The primitive part of f, being f divided by the content of f.
+</BLOCKQUOTE>
+<H5><A NAME = "2009">ContentAndPrimitivePart(f) : RngMPolElt -&gt; RngIntElt, RngMPolElt</A></H5>
+<H5>Contpp(f) : RngMPolElt -&gt; RngIntElt, RngMPolElt</H5>
+<BLOCKQUOTE>
+The content (the greatest common divisor of the coefficients) of f,
+as an element of the coefficient ring, as well as
+the primitive part (f divided by the content) of f.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text228.htm">[Next]</A><A  HREF = "text226.htm">[Prev]</A> <A  HREF = "text228.htm">[Right]</A> <A  HREF = "text226.htm">[Left]</A> <A  HREF = "text222.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

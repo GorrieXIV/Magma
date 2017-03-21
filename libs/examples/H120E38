@@ -1,0 +1,43 @@
+"Source: Text/Geometry/Crv.text";
+"Line: 6259";
+"Date: Wed Jun  8 14:01:03 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/Crv.text, line: 6259
+// Example: H120E38 ()
+print "Example: H120E38";
+ei := GetEchoInput();
+SetEchoInput(true);
+k := Rationals();
+P<X,Y,Z> := ProjectiveSpace(k,2);
+C := Curve(P,X^8 + X^4*Y^3*Z + Z^8);
+Genus(C);
+assert $1 eq 8;
+phi := CanonicalMap(C);
+P7<a,b,c,d,e,f,g,h> := Codomain(phi);
+CC := phi(C);
+CC;
+SC := Image(phi,C,2);
+SC;
+Dimension(SC);
+assert $1 eq 2;
+F<r,s,u,v> := RuledSurface(k,2,4);
+psi := map< F -> P7 | 
+[r^2*u, r*s*u, s^2*u, r^4*v, r^3*s*v, r^2*s^2*v, r*s^3*v, s^4*v] >;
+SF := psi(F);
+DefiningIdeal(SF) eq DefiningIdeal(SC);
+assert $1;
+fib := psi(Scheme(F,r));
+Dimension(fib);
+assert $1 eq 1;
+D := Divisor(CC,fib);
+Degree(D);
+assert $1 eq 3;
+#Basis(D);
+assert $1 eq 2;
+phiD := DivisorMap(D);
+mpD := Expand(Restriction(phi,C,CC)*phiD);
+FC := FunctionField(C);
+rat := FC!(p1/p2) where p1,p2 := Explode(DefiningPolynomials(mpD));
+P1 := Curve(Codomain(mpD));  // get P1 as a curve
+mpD := map<C->P1|[rat,1]>; mpD;
+SetEchoInput(ei);

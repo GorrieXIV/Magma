@@ -1,0 +1,1840 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Homomorphisms</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text813.htm">[Next]</A><A  HREF = "text811.htm">[Prev]</A> <A  HREF = "text813.htm">[Right]</A> <A  HREF = "text811.htm">[Left]</A> <A  HREF = "text808.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "9179">Homomorphisms</A></H3>
+
+<P>
+<P>
+For a general description of homomorphisms, we refer to Chapter <A  HREF = "text138.htm#949">MAPPINGS</A>.
+This section describes some special aspects of homomorphisms the
+domain of which is a finitely presented group.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text812.htm#9180">General Remarks</A>
+<LI> <A  HREF = "text812.htm#9181">Construction of Homomorphisms</A>
+<LI> <A  HREF = "text812.htm#9184">Accessing Homomorphisms</A>
+<LI> <A  HREF = "text812.htm#9194">Computing Homomorphisms to Finite Groups</A>
+<LI> <A  HREF = "text812.htm#9215">The (L)<sub>2</sub>-Quotient Algorithm</A>
+<LI> <A  HREF = "text812.htm#9236">Infinite L2 Quotients</A>
+<LI> <A  HREF = "text812.htm#9239">The (L)<sub>3</sub>(U)<sub>3</sub>-Quotient Algorithm</A>
+<LI> <A  HREF = "text812.htm#9246">Searching for Isomorphisms</A>
+</UL>
+<H4><A NAME = "9180">General Remarks</A></H4>
+
+<P>
+<P>
+The kernel of a homomorphism with a domain of type <TT>GrpFP</TT> can be
+computed using the function <A  HREF = "text812.htm#GrpFP_1:Kernel">Kernel</A>,
+if the codomain is of one of the types <TT>GrpGPC</TT>, <TT>GrpPC</TT>
+(cf. Chapter <A  HREF = "text706.htm#7978">FINITE SOLUBLE GROUPS</A>), <TT>GrpAb</TT> (cf. Chapter <A  HREF = "text786.htm#8898">ABELIAN GROUPS</A>),
+<TT>GrpPerm</TT> (cf. Chapter <A  HREF = "text629.htm#6871">PERMUTATION GROUPS</A>),
+<TT>GrpMat</TT> (cf. Chapter <A  HREF = "text653.htm#7392">MATRIX GROUPS OVER GENERAL RINGS</A>),
+<TT>ModAlg</TT> or <TT>ModGrp</TT> (cf. Chapter <A  HREF = "text1023.htm#11419">MODULES OVER AN ALGEBRA</A>), if the image
+is finite and its order sufficiently small. In this case, a regular permutation
+representation of the image is constructed and the kernel is created as a
+subgroup of the domain, defined by a coset table. 
+<P>
+<P>
+The kernel may also be computable, if the codomain is of the type <TT>GrpFP</TT>,
+the image is sufficiently small and a presentation for the image is known.
+<P>
+<P>
+If the kernel of a map can be computed successfully, forming preimages of
+substructures is possible. An attempt to compute the kernel of a map will
+be made automatically, if the preimage of a substructure of the codomain
+is to be computed.
+<P>
+<P>
+Note, that trying to compute the kernel may be very time and memory
+consuming; use this feature with care.
+
+
+<H4><A NAME = "9181">Construction of Homomorphisms</A></H4>
+
+
+
+<H5><A NAME = "9182">hom&lt; P -&gt; G | S &gt; : Struct , Struct -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Returns the homomorphism from the fp-group P to the group G defined by the assignment S. S can be the one of the following:
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>A list, sequence or indexed set containing the images of the n generators P.1, ..., P.n of P. Here, the i-th element of S is interpreted as the image of P.i, i.e. the order of the elements in S is important.
+<DT>(ii)</DT><DD>A list, sequence, enumerated set or indexed set, containing n tuples &lt;x<sub>i</sub>, y<sub>i</sub>&gt; or arrow pairs x<sub>i</sub>  - &gt; y<sub>i</sub>, where x<sub>i</sub> is a generator of P and y<sub>i</sub>&isin;G (i=1, ..., n) and the set {x<sub>1</sub>, ..., x<sub>n</sub>} is the full set of generators of P. In this case, y<sub>i</sub> is assigned as the image of x<sub>i</sub>, hence the order of the elements in S is not important.
+<P>
+<P>
+</DL>
+Note, that it is currently not possible to define a homomorphism by assigning
+images to the elements of an arbitrary generating set of P.  It is the user's
+responsibility to ensure that the arguments passed to the <TT>hom</TT>-constructor
+actually yield a well-defined homomorphism. For certain codomain categories,
+this may be checked using the function <A  HREF = "text812.htm#GrpFP_1:IsSatisfied">IsSatisfied</A> described
+below.
+</BLOCKQUOTE>
+<H5><A NAME = "9183">IsSatisfied(U, E) : { RelElt }, [ GrpElt ] -&gt; BoolElt</A></H5>
+<H5>IsSatisfied(U, E) : { GrpFPElt }, [ GrpElt ] -&gt; BoolElt</H5>
+<H5>IsSatisfied(U, E) : [ RelElt ], [ GrpElt ] -&gt; BoolElt</H5>
+<H5><A NAME = "GrpFP_1:IsSatisfied">IsSatisfied</A>(U, E) : [ GrpFPElt ], [ GrpElt ] -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+The argument U is a set or sequence of either words belonging to an n-generator
+fp-group H or relations over H.  The second argument
+E is a sequence of n elements
+[e<sub>1</sub>, ..., e<sub>n</sub>] belonging to a group G for which both, multiplication
+and comparison of elements are possible.
+Using the mapping H.i -&gt; e<sub>i</sub> (i = 1, ..., n), we evaluate
+the relations given by U.  If U is a set
+or sequence of relations, the left and right hand sides of each
+relation are evaluated and compared for equality.  Otherwise, each word
+in U is evaluated and compared to the identity.  If all relations are
+satisfied, <TT>IsSatisfied</TT> returns the Boolean value <TT>true</TT>.  On the
+other hand, if any relation is not satisfied, <TT>IsSatisfied</TT> returns the
+value <TT>false</TT>.
+<P>
+<P>
+This function may be used to verify the correctness of the definition of 
+a homomorphism from an fp-group to a group in a category for which both,
+multiplication and comparison of elements are possible.
+</BLOCKQUOTE>
+<H4><A NAME = "9184">Accessing Homomorphisms</A></H4>
+
+
+
+<H5><A NAME = "9185">w @ f : GrpFPElt, Map -&gt; GrpElt</A></H5>
+<H5>f(w) : Map, GrpFPElt -&gt; GrpElt</H5>
+<BLOCKQUOTE>
+Given a homomorphism whose domain is an fp-group G and an element w
+of G, return the image of w under f as an element of the codomain
+of f.
+</BLOCKQUOTE>
+<H5><A NAME = "9186">H @ f : GrpFP, Map -&gt; Grp</A></H5>
+<H5>f(H) : Map, GrpFP -&gt; Grp</H5>
+<BLOCKQUOTE>
+Given a homomorphism whose domain is an fp-group G and a subgroup H
+of G, return the image of H under f as a subgroup of the codomain
+of f.
+<P>
+<P>
+Some maps do not support images of subgroups.
+</BLOCKQUOTE>
+<H5><A NAME = "9187">g @@ f : GrpElt, Map -&gt; GrpFPElt</A></H5>
+<BLOCKQUOTE>
+Given a homomorphism whose domain is an fp-group G and an element g
+of the image of f, return the preimage of g under f as an element
+of G.
+<P>
+<P>
+Some maps do not support inverse images.
+</BLOCKQUOTE>
+<H5><A NAME = "9188">H @@ f : Grp, Map -&gt; GrpFP</A></H5>
+<BLOCKQUOTE>
+Given a homomorphism whose domain is an fp-group G and a subgroup H
+of the image of f, return the preimage of H under f as a subgroup
+of G.
+<P>
+<P>
+Some maps do not support inverse images. The inverse image of a subgroup of
+the codomain can only be computed if the kernel of the homomorphism can be
+computed, i.e. if the kernel has moderate index in the domain.
+</BLOCKQUOTE>
+<H5><A NAME = "9189">Domain(f) : Map -&gt; Grp</A></H5>
+<BLOCKQUOTE>
+The domain of the homomorphism f.
+</BLOCKQUOTE>
+<H5><A NAME = "9190">Codomain(f) : Map -&gt; Grp</A></H5>
+<BLOCKQUOTE>
+The codomain of the homomorphism f.
+</BLOCKQUOTE>
+<H5><A NAME = "9191">Image(f) : Map -&gt; Grp</A></H5>
+<BLOCKQUOTE>
+The image or range of the homomorphism f as a subgroup of the codomain of
+ f.
+<P>
+<P>
+Some maps do not support this function.
+</BLOCKQUOTE>
+<H5><A NAME = "9192"></A><A NAME = "GrpFP_1:Kernel">Kernel</A>(f) : Map -&gt; Grp</H5>
+<BLOCKQUOTE>
+The kernel of the homomorphism f as a (normal) subgroup of the domain of
+f, represented by a coset table.
+<P>
+<P>
+Some maps do not support this function. The kernel of a homomorphism can
+only be computed, if it has moderate index in the domain.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9193">Example <TT>GrpFP_1_Homomorphism (H75E17)</TT></A></H3>
+For arbitrary n&gt;0, the symmetric group of degree n + 1 is an epimorphic image
+<P>
+of the braid group on n generators. In this example, we exhibit this
+relationship for n=4.
+<P>
+<P>
+We start with creating the braid group B on 5 strings, i.e. 4 Artin
+generators.
+<P>
+<P>
+<PRE>
+&gt; B := BraidGroup(GrpFP, 5);
+&gt; B;
+Finitely presented group B on 4 generators
+Relations
+    B.1 * B.2 * B.1 = B.2 * B.1 * B.2
+    B.1 * B.3 = B.3 * B.1
+    B.1 * B.4 = B.4 * B.1
+    B.2 * B.3 * B.2 = B.3 * B.2 * B.3
+    B.2 * B.4 = B.4 * B.2
+    B.3 * B.4 * B.3 = B.4 * B.3 * B.4
+</PRE>
+In the symmetric group of degree 5, we define 4 transpositions which will be
+the images of the generators of B.
+<P>
+<P>
+<PRE>
+&gt; S := SymmetricGroup(5);
+&gt; imgs := [ S!(1,2), S!(2,3), S!(3,4), S!(4,5) ];
+</PRE>
+In order to verify that this assignment actually gives rise to a well defined
+homomorphism, we check whether the potential images satisfy the defining
+relations of B.
+<P>
+<P>
+<PRE>
+&gt; rels := Relations(B);
+&gt; rels;
+[ B.1 * B.2 * B.1 = B.2 * B.1 * B.2, B.1 * B.3 = B.3 * B.1,
+  B.1 * B.4 = B.4 * B.1, B.2 * B.3 * B.2 = B.3 * B.2 * B.3,
+  B.2 * B.4 = B.4 * B.2, B.3 * B.4 * B.3 = B.4 * B.3 * B.4 ]
+&gt; IsSatisfied(rels, imgs);
+true
+</PRE>
+They do. So we can define the homomorphism from B to S.
+<P>
+<P>
+<PRE>
+&gt; f := hom&lt; B-&gt;S | imgs &gt;;
+</PRE>
+We see that f is surjective, i.e. S is an epimorphic image of B as
+claimed above.
+<P>
+<P>
+<PRE>
+&gt; f(B) eq S;
+true
+</PRE>
+We now check the kernel of f.
+<P>
+<P>
+<PRE>
+&gt; Kernel(f);
+Finitely presented group
+Index in group B is 120 = 2^3 * 3 * 5
+Subgroup of group B defined by coset table
+</PRE>
+Using the function <A  HREF = "text815.htm#GrpFP_1:GeneratingWords">GeneratingWords</A> described later, we can
+obtain a set of generators of ker(f) as a subgroup of B.
+<P>
+<P>
+<PRE>
+&gt; GeneratingWords(B, Kernel(f));
+{ B.2^-2, (B.1 * B.2 * B.3^-1 * B.2^-1 * B.1^-1)^2, B.1^-2,
+  (B.3 * B.4^-1 * B.3^-1)^2, (B.2 * B.3^-1 * B.2^-1)^2,
+  (B.2 * B.3 * B.4^-1 * B.3^-1 * B.2^-1)^2, B.4^-2,
+  (B.1 * B.2^-1 * B.1^-1)^2, B.3^-2,
+  (B.1 * B.2 * B.3 * B.4^-1 * B.3^-1 * B.2^-1 * B.1^-1)^2 }
+</PRE>
+It is easy to see that all generators of ker(f) are conjugates of words of
+the form g<sup>pm2</sup>, where g is a generator of B. We check this, using the
+normal closure constructor <A  HREF = "text814.htm#GrpFP_1:ncl">ncl</A> described later.
+<P>
+<P>
+<PRE>
+&gt; Kernel(f) eq ncl&lt; B | B.1^2, B.2^2, B.3^2, B.4^2 &gt;;
+true
+</PRE>
+Thus, the braid relations together with the relations
+B.1<sup>2</sup>, B.2<sup>2</sup>, B.3<sup>2</sup>, B.4<sup>2</sup> are a set of defining relations for S.
+<HR>
+<H4><A NAME = "9194">Computing Homomorphisms to Finite Groups</A></H4>
+
+<P>
+<P>
+This section describes functions for computing representatives of the
+classes of homomorphisms from a finitely presented group F to a
+finite group G modulo a group A of automorphisms of G.
+
+
+<H5><A NAME = "9195"></A><A NAME = "GrpFP_1:Homomorphisms">Homomorphisms</A>(F, G, A : parameters) : GrpFP, GrpPerm, GrpPerm -&gt; [ HomGrp ]</H5>
+<H5>Homomorphisms(F, G : parameters) : GrpFP, GrpPerm -&gt; [ HomGrp ]</H5>
+<BLOCKQUOTE>
+Given a finitely presented group F and two permutation groups G and A
+with G triangleleft A, return a sequence containing representatives of the
+classes of homomorphisms from F to G modulo automorphisms of G induced by
+elements of A. (That is, two homomorphisms f<sub>1</sub>, f<sub>2</sub> : F -&gt; G
+are considered equivalent if there exists an element a&isin;A such that
+f<sub>1</sub>(x) = f<sub>2</sub>(x)<sup>a</sup> for all x&isin;F.)  The call <TT>Homomorphisms(F, G)</TT>
+is equivalent to <TT>Homomorphisms(F, G, G)</TT>.
+<P>
+The function uses a backtrack algorithm testing certain conjugates of
+representatives of the A-classes in G as possible images of the generators
+of F.
+<P>
+<P>
+The following parameters are available for this function.
+<P>
+<P>
+<PRE>
+     Surjective: BoolElt                 Default: <TT>true</TT>
+</PRE>
+If this parameter is set to <TT>true</TT> (default), only epimorphisms are considered.
+<P>
+<P>
+<PRE>
+     Limit: RngIntElt                    Default: 0  (no limit)
+</PRE>
+If this parameter is set to n, the function terminates after n classes
+of homomorphisms satisfying the specified conditions have been found.  A value
+of 0 (default) means no limit.
+<P>
+<P>
+<PRE>
+     TimeLimit: RngIntElt                Default: 0  (no limit)
+</PRE>
+A limit in seconds for the amount of time spent in the backtrack search
+for homomorphisms.  The time spent in initial coset enumerations
+is <I>not</I> counted towards this limit.  A value of 0 (default) means
+no limit.
+<P>
+<P>
+<PRE>
+     CosetEnumeration: BoolElt           Default: <TT>true</TT>
+</PRE>
+If this parameter is set to <TT>true</TT> (default), a number of short coset
+enumerations are performed for each generator of F in order to check
+whether some A-classes in G can be ruled out as possible images for
+this generator. If a class can be ruled out, the complexity of the
+backtrack search may be reduced significantly.
+<P>
+In situations where it seems unlikely that classes can be ruled out as
+possible generator images, experienced users may wish to turn this feature
+off in order to save the time spent on the coset enumerations.
+<P>
+<P>
+<PRE>
+     CacheCosetAction: BoolElt           Default: <TT>true</TT>
+</PRE>
+The value of this parameter indicates whether the actions of A on the cosets
+of the centralisers of representatives of the A-classes in G are cached
+during the backtrack search.
+<P>
+Setting this parameter to <TT>true</TT> (default) results in faster computations
+and is recommended for normal applications.  When computing homomorphisms
+to large groups with many conjugate classes, this parameter can be set to
+<TT>false</TT> in order to reduce memory requirements at the expense of increased
+computing time.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9196">Example <TT>GrpFP_1_Homomorphisms1 (H75E18)</TT></A></H3>
+Consider the finitely presented group
+F  :=  &lt; a, b, c  |  ac<sup> - 1</sup>bc<sup> - 1</sup>aba<sup> - 1</sup>b, 
+                     abab<sup> - 1</sup>c<sup>2</sup>b<sup> - 1</sup>,
+                     a<sup>2</sup>b<sup> - 1</sup>(ca)<sup>4</sup>cb<sup> - 1</sup>&gt;.
+<P>
+<P>
+<P>
+<PRE>
+&gt; F := Group&lt; a,b,c | a*c^-1*b*c^-1*a*b*a^-1*b,
+&gt;                     a*b*a*b^-1*c^2*b^-1,
+&gt;                     a^2*b^-1*c*a*c*a*c*a*c*a*c*b^-1 &gt;;
+</PRE>
+We use the function <A  HREF = "text812.htm#GrpFP_1:Homomorphisms">Homomorphisms</A> to prove that F maps onto
+A<sub>5</sub>.
+<P>
+<P>
+<PRE>
+&gt; G := Alt(5);
+&gt; homs := Homomorphisms(F, G : Limit := 1);
+&gt; #homs gt 0;
+true
+</PRE>
+<HR>
+<H5><A NAME = "9197">Homomorphisms(F, G, A : parameters) : GrpFP, GrpPC, GrpPC -&gt; [ HomGrp ]</A></H5>
+<H5>Homomorphisms(F, G : parameters) : GrpFP, GrpPC -&gt; [ HomGrp ]</H5>
+<BLOCKQUOTE>
+Given a finitely presented group F and two finite polycyclic groups G and A
+with G triangleleft A, return a sequence containing representatives of the
+classes of homomorphisms from F to G modulo automorphisms of G induced by
+elements of A. (That is, two homomorphisms f<sub>1</sub>, f<sub>2</sub> : F -&gt; G
+are considered equivalent if there exists an element a&isin;A such that
+f<sub>1</sub>(x) = f<sub>2</sub>(x)<sup>a</sup> for all x&isin;F.)  The call <TT>Homomorphisms(F, G)</TT>
+is equivalent to <TT>Homomorphisms(F, G, G)</TT>.
+<P>
+<P>
+The following parameters are available for this function.
+<P>
+<P>
+<PRE>
+     Surjective: BoolElt                 Default: <TT>true</TT>
+</PRE>
+If this parameter is set to <TT>true</TT> (default), only epimorphisms are considered.
+<P>
+<P>
+<PRE>
+     Limit: RngIntElt                    Default: 0  (no limit)
+</PRE>
+If this parameter is set to n, the function terminates after n classes
+of homomorphisms satisfying the specified conditions have been found.  A value
+of 0 (default) means no limit.
+</BLOCKQUOTE>
+<H5><A NAME = "9198">Computing Homomorphisms to Permutation Groups Interactively</A></H5>
+
+<P>
+<P>
+A process version of the algorithm used by <A  HREF = "text812.htm#GrpFP_1:Homomorphisms">Homomorphisms</A> is
+available for computing homomorphisms one at a time. The functions relevant
+for this interactive version are described in this section.
+
+
+<H5><A NAME = "9199"></A><A NAME = "GrpFP_1:HomomorphismsProcess">HomomorphismsProcess</A>(F, G, A : parameters) : GrpFP, GrpPerm, GrpPerm -&gt; GrpFPHomsProc</H5>
+<H5>HomomorphismsProcess(F, G : parameters) : GrpFP, GrpPerm -&gt; GrpFPHomsProc</H5>
+<BLOCKQUOTE>
+Given a finitely presented group F and two permutation groups G and A
+with G triangleleft A, return a process P for computing representatives
+of the classes of homomorphisms from F to G modulo automorphisms of G
+induced by elements of A. (That is, two homomorphisms
+f<sub>1</sub>, f<sub>2</sub> : F -&gt; G are considered equivalent if there exists
+an element a&isin;A such that f<sub>1</sub>(x) = f<sub>2</sub>(x)<sup>a</sup> for all x&isin;F.)
+<TT>HomomorphismsProcess(F, G)</TT> is equivalent to
+<TT>HomomorphismsProcess(F, G, G)</TT>.
+<P>
+After constructing the process, the search for homomorphisms is started
+and runs until
+the first homomorphism is found, the time limit is reached (in which case P
+is marked as <I>invalid</I>) or the search is completed without finding a
+homomorphism (in which case P is marked as <I>empty</I>).
+<P>
+<P>
+The parameters have the same meaning as for the function
+<A  HREF = "text812.htm#GrpFP_1:Homomorphisms">Homomorphisms</A>.
+<P>
+<P>
+<PRE>
+     Surjective: BoolElt                 Default: <TT>true</TT>
+</PRE>
+<P>
+<PRE>
+     Limit: RngIntElt                    Default: 0  (no limit)
+</PRE>
+<P>
+<PRE>
+     TimeLimit: RngIntElt                Default: 0  (no limit)
+</PRE>
+<P>
+<PRE>
+     CosetEnumeration: BoolElt           Default: <TT>true</TT>
+</PRE>
+<P>
+<PRE>
+     CacheCosetAction: BoolElt           Default: <TT>true</TT>
+</PRE>
+Setting a time limit for a process P limits the total amount of time
+spent in the backtrack search for homomorphisms during the construction
+of P and in subsequent calls to <A  HREF = "text812.htm#GrpFP_1:NextElement">NextElement</A>.
+The time spent in initial coset enumerations
+is <I>not</I> counted towards this limit.
+<P>
+If the time limit or the limit on the number of homomorphisms set for a process
+P is reached, P becomes <I>invalid</I>.  Calling
+<A  HREF = "text812.htm#GrpFP_1:NextElement">NextElement</A> 
+for an invalid process or for a process which is
+<I>empty</I>, that is, which has found all possible classes of homomorphisms,
+will cause a runtime error.  The functions <A  HREF = "text812.htm#GrpFP_1:IsValid_HOM">IsValid</A> and
+<A  HREF = "text812.htm#GrpFP_1:IsEmpty_HOM">IsEmpty</A> can be used to check whether a process is valid
+or empty, respectively.  The use of these functions is recommended to avoid
+runtime errors in loops or user written functions.
+</BLOCKQUOTE>
+<H5><A NAME = "9200"></A><A NAME = "GrpFP_1:NextElement">NextElement</A>(~P) : GrpFPHomsProc -&gt;</H5>
+<BLOCKQUOTE>
+Given a valid and non-empty process P, continue the backtrack search
+until a new class of homomorphisms is found.  If the search completes
+without a new representative being found, P is marked as empty.  If a
+limit set for P is reached, P is marked as invalid.
+</BLOCKQUOTE>
+<H5><A NAME = "9201"></A><A NAME = "GrpFP_1:IsEmpty_HOM">IsEmpty</A>(P) : GrpFPHomsProc -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns whether P is empty, that is, whether all possible classes of
+homomorphisms have been found.
+</BLOCKQUOTE>
+<H5><A NAME = "9202"></A><A NAME = "GrpFP_1:IsValid_HOM">IsValid</A>(P) : GrpFPHomsProc -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>false</TT> if a limit set for P has been reached and <TT>true</TT> otherwise.
+Note that the return value of <TT>IsValid</TT> is not related to whether or not
+P currently defines a homomorphism.
+</BLOCKQUOTE>
+<H5><A NAME = "9203"></A><A NAME = "GrpFP_1:DefinesHomomorphism">DefinesHomomorphism</A>(P) : GrpFPHomsProc -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns whether P currently defines a homomorphism which can be extracted
+using the function <A  HREF = "text812.htm#GrpFP_1:Homomorphism">Homomorphism</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "9204"></A><A NAME = "GrpFP_1:Homomorphism">Homomorphism</A>(P) : GrpFPHomsProc -&gt; HomGrp</H5>
+<BLOCKQUOTE>
+Given a process P which defines a homomorphism, return this homomorphism,
+that is, the homomorphism most recently found by P.
+If P does not define a homomorphism, a runtime error will result.  The
+function <A  HREF = "text812.htm#GrpFP_1:DefinesHomomorphism">DefinesHomomorphism</A> can be used to test whether a
+call to <TT>Homomorphism</TT> is legal for a process.
+</BLOCKQUOTE>
+<H5><A NAME = "9205"># P : GrpFPHomsProc -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Return the number of homomorphisms that have been found by the process P.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9206">Example <TT>GrpFP_1_Homomorphisms2 (H75E19)</TT></A></H3>
+Consider the braid group B on 4 strings.
+<P>
+We show how the interactive computation of homomorphisms can be used to
+determine a homomorphism f: B -&gt; PSL(2, 16) whose image
+is a maximal subgroup of PSL(2, 16).
+<P>
+<P>
+Note how the functions <A  HREF = "text812.htm#GrpFP_1:IsValid_HOM">IsValid</A>,
+<A  HREF = "text812.htm#GrpFP_1:IsEmpty_HOM">IsEmpty</A> and <A  HREF = "text812.htm#GrpFP_1:DefinesHomomorphism">DefinesHomomorphism</A>
+are used to avoid runtime errors in the <TT>while</TT> loop.
+<P>
+<P>
+<PRE>
+&gt; B := BraidGroup(GrpFP, 4);
+&gt; G := PSL(2,16);
+&gt; P := HomomorphismsProcess(B, G : Surjective := false,
+&gt;                                  TimeLimit := 10);
+&gt; while not IsEmpty(P) do
+&gt;    if DefinesHomomorphism(P) then
+&gt;       f := Homomorphism(P);
+&gt;       img := Image(f);
+&gt;       if IsMaximal(G,img) then
+&gt;          print "found image which is maximal subgroup";
+&gt;          break;
+&gt;       end if;
+&gt;    end if;
+&gt;    if IsValid(P) then
+&gt;       NextElement(~P);
+&gt;     else
+&gt;       print "Limit has been reached";
+&gt;       break;
+&gt;    end if;
+&gt; end while;
+found image which is maximal subgroup
+&gt; 
+&gt; f;
+Homomorphism of GrpFP: B into GrpPerm: G, induced by
+  B.1 |--&gt; (1, 4, 3, 6, 12)(2, 11, 9, 16, 7)(5, 17, 8, 15, 13)
+  B.2 |--&gt; (1, 4, 2, 10, 16)(3, 11, 9, 12, 14)(5, 15, 8, 13, 17)
+  B.3 |--&gt; (1, 4, 3, 6, 12)(2, 11, 9, 16, 7)(5, 17, 8, 15, 13)
+</PRE>
+<HR>
+<H3><A NAME = "9207">Example <TT>GrpFP_1_Homomorphisms2-2 (H75E20)</TT></A></H3>
+This example sketches how the interactive version of the homomorphism
+algorithm could be used as part of a function trying to prove that a group is
+infinite.
+<P>
+<P>
+Note again how the functions <A  HREF = "text812.htm#GrpFP_1:IsValid_HOM">IsValid</A>,
+<A  HREF = "text812.htm#GrpFP_1:IsEmpty_HOM">IsEmpty</A> and <A  HREF = "text812.htm#GrpFP_1:DefinesHomomorphism">DefinesHomomorphism</A>
+are used to avoid runtime errors.
+<P>
+<P>
+<PRE>
+&gt; function MyIsInfinite(F)
+&gt; 
+&gt;  // ...
+&gt; 
+&gt;  // quotient approach: check whether an obviously infinite
+&gt;  //    normal subgroup can be found in reasonable time.
+&gt;  S := [ Alt(5), PSL(2,7), PSL(2,9), PSL(2,11) ];
+&gt;  for G in S do
+&gt;     P := HomomorphismsProcess(F, G : Surjective := false,
+&gt;                                      TimeLimit := 5);
+&gt;     while IsValid(P) and not IsEmpty(P) do
+&gt;       if DefinesHomomorphism(P) then
+&gt;          f := Homomorphism(P);
+&gt;          if 0 in AQInvariants(Kernel(f)) then
+&gt;             print "found infinite normal subgroup";
+&gt;             print "Hence group is infinite";
+&gt;             return true;
+&gt;          end if;
+&gt;       end if;
+&gt;       if IsValid(P) then
+&gt;          NextElement(~P);
+&gt;       end if;
+&gt;    end while;
+&gt;  end for;
+&gt;  print "quotient approach failed; trying other strategies";
+&gt; 
+&gt;  // ...
+&gt; 
+&gt; end function;
+</PRE>
+We try the code fragment on the group
+&lt; a, b | ab<sup> - 1</sup>a<sup> - 1</sup>ba<sup> - 1</sup>b<sup> - 1</sup>abb,
+             ab<sup> - 1</sup>a<sup> - 1</sup>baaba<sup> - 1</sup>b<sup> - 1</sup>ab<sup> - 1</sup>a<sup> - 1</sup>baba<sup> - 1</sup>b<sup> - 1</sup> &gt;.
+<P>
+<P>
+<PRE>
+&gt; F := Group&lt; a,b |
+&gt;    a*b^-1*a^-1*b*a^-1*b^-1*a*b*b,
+&gt;    a*b^-1*a^-1*b*a*a*b*a^-1*b^-1*a*b^-1*a^-1*b*a*b*a^-1*b^-1 &gt;;
+&gt; MyIsInfinite(F);
+found infinite normal subgroup
+Hence group is infinite
+true
+</PRE>
+<HR>
+<H5><A NAME = "9208">Finding Homomorphisms onto Simple Groups</A></H5>
+
+<P>
+<P>
+We describe utilities for finding homomorphisms onto simple groups.
+As in the previous example, this may be useful when the presentation defines
+a perfect group. The methods used are similar to the example, with a list of
+simple groups to try, and using the function <A  HREF = "text812.htm#GrpFP_1:Homomorphisms">Homomorphisms</A>.
+<P>
+The list of simple groups supplied in V2.10 contains all non-abelian 
+simple groups with order &le;10<sup>9</sup>. 
+Such a list is dominated by PSL(2, q)'s with q odd. In this
+implementation these PSL(2, q)'s are treated
+as an infinite family rather than stored individually,
+and so continue beyond the above limit.
+
+
+<H5><A NAME = "9209"></A><A NAME = "GrpFP_1:SimpleQuotients">SimpleQuotients</A>(F, deg1, deg2, ord1, ord2: parameters) : GrpFP, RngIntElt, RngIntElt, RngIntElt, RngIntElt -&gt; List</H5>
+<H5>SimpleQuotients(F, ord1, ord2: parameters) : GrpFP, RngIntElt, RngIntElt -&gt; List</H5>
+<H5>SimpleQuotients(F, ord2: parameters) : GrpFP, RngIntElt -&gt; List</H5>
+
+<PRE>    Family: Any                         Default: "All"</PRE>
+
+<PRE>    Limit: RngIntElt                    Default: 1</PRE>
+
+<PRE>    HomLimit: RngIntElt                 Default: 0</PRE>
+<BLOCKQUOTE>
+Uses <A  HREF = "text812.htm#GrpFP_1:Homomorphisms">Homomorphisms</A> to find epimorphisms from F onto 
+simple groups in a fixed list.
+The arguments deg1 and deg2 are respectively
+lower and upper bounds for the degree of the image group.
+If the degree arguments are not present then bounds of 5 and 10<sup>7</sup>
+are used.
+The arguments ord1 and ord2 are respectively
+lower and upper bounds for the orders of the image group.
+(Setting ord2 low enough is particularly important if a quick search
+is wanted.)
+If ord1 is not given then it defaults to 1.
+<P>
+The return value is a list of sequences of epimorphisms found.
+Each sequence contains epimorphisms onto one simple group.
+The parameter <TT>Limit</TT> limits the number of successful searches
+to be carried out by <A  HREF = "text812.htm#GrpFP_1:Homomorphisms">Homomorphisms</A>. The default value is
+1, so by default the search terminates with the first simple group found
+to be a homomorphic image of F.
+<P>
+The parameter <TT>HomLimit</TT> limits the number of homomorphisms that
+will be searched for by any particular call to <A  HREF = "text812.htm#GrpFP_1:Homomorphisms">Homomorphisms</A>.
+It defaults to zero, so that all homomorphisms for any group found will
+be returned.
+<P>
+The parameter <TT>Family</TT> selects sublists of the main list to search.
+Possible values of this parameter are
+<TT>"All"</TT>, <TT>"PSL"</TT>, <TT>"PSL2"</TT>, <TT>"Mathieu"</TT>,
+<TT>"Alt"</TT>, <TT>"PSp"</TT>, <TT>"PSU"</TT>, <TT>"Other"</TT>, and <TT>"notPSL2"</TT>;
+sets of these strings are also allowed, which searches on the union
+of the appropriate sublists.
+</BLOCKQUOTE>
+<H5><A NAME = "9210"></A><A NAME = "GrpFP_1:SimpleQuotientProcess">SimpleQuotientProcess</A>(F, deg1, deg2, ord1, ord2: parameters) : GrpFP, RngIntElt, RngIntElt, RngIntElt, RngIntElt -&gt; Rec</H5>
+
+<PRE>    Family: Any                         Default: "All"</PRE>
+<BLOCKQUOTE>
+Produce a record that defines a process for searching for simple
+quotients of F as <A  HREF = "text812.htm#GrpFP_1:SimpleQuotients">SimpleQuotients</A> does. Calling this function
+sets up the record and conducts the initial search until a quotient is found.
+Continuing the search for another quotient is done by calling
+<A  HREF = "text812.htm#GrpFP_1:NextSimpleQuotient">NextSimpleQuotient</A>. Extracting the epimorphisms found
+is achieved using <A  HREF = "text812.htm#GrpFP_1:SimpleEpimorphisms">SimpleEpimorphisms</A>, and testing
+if the process has expired is the task of
+<A  HREF = "text812.htm#GrpFP_1:IsEmptySimpleQuotientProcess">IsEmptySimpleQuotientProcess</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "9211"></A><A NAME = "GrpFP_1:NextSimpleQuotient">NextSimpleQuotient</A>(~P) : Rec -&gt;</H5>
+<BLOCKQUOTE>
+When P is a record returned by <A  HREF = "text812.htm#GrpFP_1:SimpleQuotientProcess">SimpleQuotientProcess</A>,
+advance the search to the next simple group which is a homomorphic
+image of the finitely presented group. Does nothing if the process
+has expired.
+</BLOCKQUOTE>
+<H5><A NAME = "9212"></A><A NAME = "GrpFP_1:IsEmptySimpleQuotientProcess">IsEmptySimpleQuotientProcess</A>(P) : Rec -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+When P is a record returned by <A  HREF = "text812.htm#GrpFP_1:SimpleQuotientProcess">SimpleQuotientProcess</A>,
+test whether or not P has expired.
+</BLOCKQUOTE>
+<H5><A NAME = "9213"></A><A NAME = "GrpFP_1:SimpleEpimorphisms">SimpleEpimorphisms</A>(P) : Rec -&gt; SeqEnum, Tup</H5>
+<BLOCKQUOTE>
+When P is a record returned by <A  HREF = "text812.htm#GrpFP_1:SimpleQuotientProcess">SimpleQuotientProcess</A>,
+extract the most recently found epimorphisms onto a simple group, plus
+a tuple describing the image group. This is a valid operation when 
+<A  HREF = "text812.htm#GrpFP_1:IsEmptySimpleQuotientProcess">IsEmptySimpleQuotientProcess</A> returns <TT>false</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9214">Example <TT>GrpFP_1_SimpleQuotients (H75E21)</TT></A></H3>
+We take a perfect finitely presented group and search for simple quotients.
+<P>
+<P>
+<PRE>
+&gt; F := Group&lt;a,b,c|a^13,b^3,c^2,a = b*c&gt;;
+&gt; IsPerfect(F);
+true
+&gt; L := SimpleQuotients(F,1, 100, 2, 10^5:Limit := 2);
+&gt; #L;
+2
+&gt; for x in L do CompositionFactors(Image(x[1])); end for;
+    G
+    |  A(1, 13)               = L(2, 13)
+    1
+    G
+    |  A(2, 3)                = L(3, 3)
+    1
+&gt; L[2,1];
+Homomorphism of GrpFP: F into GrpPerm: $, Degree 13, Order 
+2^4 * 3^3 * 13 induced by
+F.1 |--&gt; (1, 10, 4, 5, 11, 8, 3, 6, 7, 12, 9, 13, 2)
+F.2 |--&gt; (2, 10, 4)(3, 6, 7)(5, 11, 13)(8, 12, 9)
+F.3 |--&gt; (1, 10)(2, 5)(3, 12)(8, 13)
+&gt; #L[2];
+2
+</PRE>
+We've found L(2,13) and L(3,3) as images, with 2 inequivalent homomorphisms
+onto the second. We'll try a process looking through a smaller family.
+<P>
+<P>
+<PRE>
+&gt; P := SimpleQuotientProcess(F,1, 100, 2, 10^6:Family:="PSU");  
+&gt; IsEmptySimpleQuotientProcess(P);
+false
+&gt; eps, info := SimpleEpimorphisms(P);
+&gt; info;
+&lt;65, 62400, PSU(3, 4)&gt;
+</PRE>
+We've found PSU(3,4) of order 62400 and degree 65 as an image.
+We continue with this process.
+<P>
+<P>
+<PRE>
+&gt; NextSimpleQuotient(~P);
+&gt; IsEmptySimpleQuotientProcess(P);
+true
+</PRE>
+No, there are no more within the limits given.
+<HR>
+<H4><A NAME = "9215">The (L)<sub>2</sub>-Quotient Algorithm</A></H4>
+
+<P>
+<P>
+The (L)<sub>2</sub>-quotient algorithm computes, for a finitely presented group, all
+quotients isomorphic to (PSL)(2, q) or (PGL)(2, q), simultaneously
+for all prime powers q.
+It can handle the case of infinitely many quotients, and also works for
+very large prime powers. 
+<P>
+Note that the algorithm does <B>not</B> return images onto the 
+groups (PSL)(2, 2), (PSL)(2, 3), and 
+(PSL)(2, 4) = (PSL)(2, 5).
+
+
+<H5><A NAME = "9216">Basic Usage</A></H5>
+
+
+
+<H5><A NAME = "9217">L2Quotients(G) : GrpFP  -&gt; [ L2Quotient ]</A></H5>
+<BLOCKQUOTE>
+This is the main method. It takes as parameter a finitely presented group
+and returns a sequence of (L)<sub>2</sub>-quotients, which have type <TT>L2Quotient</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9218">Example <TT>GrpFP_1_L2Quotient (H75E22)</TT></A></H3>
+We first compute L<sub>2</sub>-quotients of a certain finitely-presented group.
+<P>
+<P>
+<PRE>
+&gt; G := Group&lt; a,b | a^2, b^3, (a*b)^7, (a,b)^11 &gt;;
+&gt; L2Quotients(G);
+[
+    L_2(43)
+]
+&gt; H := Group&lt; a,b,c | a^3, b^7, c^19, (a*b)^2, (a*c)^2, (b*c)^2, (a*b*c)^2 &gt;;
+&gt; L2Quotients(H);
+[
+    L_2(113)
+]
+</PRE>
+This means that G has PSL(2, 43) as quotient, but no other PSL(2, q)
+or PGL(2, q) is a quotient of G. Similarly, the only L<sub>2</sub>-quotient
+of H is PSL(2, 113).
+<P>
+The next example has more quotients:
+<P>
+<P>
+<PRE>
+&gt; G := Group&lt; a,b | a^2, b^3, (a*b)^16, (a,b)^11 &gt;;
+&gt; L2Quotients(G);
+[
+    PGL(2,23),
+    PGL(2,23),
+    PGL(2,463)
+]
+</PRE>
+Here PGL(2, 23) occurs twice. This means that there are two epimorphisms
+of G onto PGL(2, 23) which do not differ by an automorphism of
+PGL(2, 23).  In other words, the kernels of the epimorphisms are distinct.
+<P>
+Some groups have infinitely many L<sub>2</sub>-quotients. This is indicated
+by one of the L<sub>2</sub>-quotients <TT>L_2(infty^k), L_2(p^(infty^d))</TT>, or
+<TT>L_2(infty^(infty^d))</TT>, as the follow examples illustrate.
+<P>
+<P>
+<PRE>
+&gt; G := Group&lt; a,b,c | a^3, b^7, (a*b)^2, (a*c)^2, (b*c)^2, (a*b*c)^2 &gt;;      
+&gt; L2Quotients(G);                      
+[
+    L_2(infty^6)
+]
+&gt; H := Group&lt;a,b,c | a^3, (a,c) = (c,a^-1), a*b*a = b*a*b, a*b*a*c^-1 = c*a*b*a&gt;;
+&gt; L2Quotients(H);
+[
+    L_2(3^infty)
+]
+&gt; K := Group&lt; a,b | a^3*b^3 &gt;;
+&gt; L2Quotients(K);
+[
+    L_2(infty^infty)
+]
+</PRE>
+See below for an interpretation of this output,
+and how to use Magma to get more information about the quotients.
+<HR>
+<H5><A NAME = "9219">GetMatrices(Q) : L2Quotient -&gt; GrpMat, SeqEnum</A></H5>
+<BLOCKQUOTE>
+For a finite L<sub>2</sub>-quotient Q of G, that is, a quotient L<sub>2</sub>(p<sup>k</sup>) or
+PGL(2, p<sup>k</sup>), this function returns a matrix group H and a sequence A
+of 2 x 2 matrices in H, where A[i] corresponds to the i-th
+generator of G. 
+<P>
+Note that G -&gt; H, G.i -&gt; A[i] does not in general
+define a homomorphism, but the induced map G -&gt; H/Z(H) does.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9220">Example <TT>GrpFP_1_L2QuotientGetMatrices (H75E23)</TT></A></H3>
+The following example illustrates how the quotient matrix groups can
+be accessed.
+<P>
+<P>
+<PRE>
+&gt; H := Group&lt; a,b,c | a^3, b^7, c^19, (a*b)^2, (a*c)^2, (b*c)^2, (a*b*c)^2 &gt;;
+&gt; quot := L2Quotients(H); quot;
+[
+    L_2(113)
+]
+&gt; H, A := GetMatrices(quot[1]);
+&gt; H;
+MatrixGroup(2, GF(113))
+Generators:
+    [  0   1]
+    [112 112]
+
+    [  0  85]
+    [109  24]
+
+    [102 104]
+    [ 63  72]
+&gt; A;
+[
+    [  0   1]
+    [112 112],
+
+    [  0  85]
+    [109  24],
+
+    [102 104]
+    [ 63  72]
+]
+</PRE>
+<HR>
+<H3><A NAME = "9221">Example <TT>GrpFP_1_ModularFinite (H75E24)</TT></A></H3>
+The next few examples are taken from Conder, Havas and Newman <A  HREF = "text807.htm#bib_CHN2011">[CHN11]</A>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Gamma&lt; x, y &gt; := Group&lt; x, y | x^2, y^3 &gt;;
+&gt; u := x*y; v := x*y^-1;
+&gt; G := quo&lt; Gamma | u^10*v^2*u*v*u*v^2 &gt;;
+&gt; quot := L2Quotients(G); quot;
+[
+    L_2(5^2)
+]
+&gt; H, A := GetMatrices(quot[1]);
+&gt; H;
+MatrixGroup(2, GF(5^2))
+Generators:
+    [        2 4*$.1 + 2]
+    [        0         3]
+
+    [0 4]
+    [1 4]
+</PRE>
+There are other quotients of the modular group with only finitely many (L)<sub>2</sub> quotients:
+<P>
+<P>
+<PRE>
+&gt; G := quo&lt; Gamma | u^3*v*u^3*v*u^3*v^2*u*v^2 &gt;;
+&gt; quot := L2Quotients(G);
+&gt; quot;
+[
+    PGL(2,13)
+]
+&gt; G := quo&lt; Gamma | u^3*v*u^3*v^2*u*v^3*u*v^2 &gt;;
+&gt; quot := L2Quotients(G);
+&gt; quot;  
+[]
+</PRE>
+This tells us that the first group has only one (L)<sub>2</sub> quotient,
+isomorphic to (PGL)(2, 13), and the second
+group has no (L)<sub>2</sub> quotients at all.
+<HR>
+<H3><A NAME = "9222">Example <TT>GrpFP_1_CoxeterFinite (H75E25)</TT></A></H3>
+Next, we look at Coxeter presentations of the form
+<P>
+(l, m | n, k) = &lt; x, y | x<sup>l</sup>, y<sup>m</sup>, (xy)<sup>n</sup>, (x<sup> - 1</sup>y)<sup>k</sup> &gt;
+<P>
+and
+<P>
+(l, m, n; q) = &lt; x, y | x<sup>l</sup>, y<sup>m</sup>, (xy)<sup>n</sup>, [x, y]<sup>k</sup> &gt;
+<P>
+for various values of l, m, n, k, q.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := Group&lt; x,y | x^8, y^9, (x*y)^5, (x^-1*y)^7 &gt;;                            
+&gt; quot := L2Quotients(G);
+&gt; quot;  
+[
+    L_2(71),
+    L_2(71),
+    L_2(71),
+    L_2(2521),
+    L_2(41),
+    L_2(3056201),
+    L_2(239),
+    L_2(449),
+    L_2(3876207679),
+    L_2(1009),
+    L_2(29113631)
+]
+</PRE>
+<P>
+The group (PSL)(2, 71) occurs three times.
+This means that there are three essentially different epimorphisms of G
+onto (PSL)(2, 71), i.e., there is no automorphism of (PSL)(2, 71)
+which transforms one epimorphism into another.
+<P>
+Here is another example, this time for the other family.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := Group&lt; x, y | x^4, y^3, (x*y)^5, (x,y)^6 &gt;;
+&gt; L2Quotients(G);
+[
+    L_2(79),
+    L_2(3^2),
+    L_2(5^2)
+]
+</PRE>
+<P>
+There are three groups in the second family for which it is not known
+whether they are finite or infinite
+(Havas &amp; Holt (2010) <A  HREF = "text807.htm#bib_HavHol2010">[HH10]</A>).
+They are (3, 4, 9; 2), (3, 4, 11; 2), and (3, 5, 6; 2).
+Each of them has only one (L)<sub>2</sub> image.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := Group&lt; x, y | x^3, y^4, (x*y)^9, (x,y)^2 &gt;;
+&gt; L2Quotients(G);                                   
+[
+    L_2(89)
+]
+&gt; G := Group&lt; x, y | x^3, y^4, (x*y)^11, (x,y)^2 &gt;;
+&gt; L2Quotients(G);                                   
+[
+    L_2(769)
+]
+&gt; G := Group&lt; x, y | x^3, y^5, (x*y)^6, (x,y)^2 &gt;; 
+&gt; L2Quotients(G);                                   
+[
+    L_2(61)
+]
+</PRE>
+<HR>
+<H5><A NAME = "9223">Intermediate Usage</A></H5>
+
+
+
+<P>
+<P>
+var exactOrders: SeqEnum                Default: []
+Even if the finitely presented group in question is not a Coxeter group, we
+often are only interested in quotients where certain orders are satisfied (for
+instance, we might know that the generator must have a certain order). Usually
+this yields a great speed-up in the computation, or even allows the computation
+to finish in the first place.
+The orders can be specified using the optional parameter <TT>exactOrders</TT>. This is a
+list of pairs, where the first entry is a word in the group, and the second
+entry is the order.
+<H5><A NAME = "9224">L2Quotients(M) : AlgMatElt  -&gt; [ L2Quotient ]</A></H5>
+<BLOCKQUOTE>
+A Coxeter group is a finitely presented group on m generators, such that the
+only other relations are (g<sub>i</sub>g<sub>j</sub>)<sup>M<sub>ij</sub></sup>, where M is a symmetric matrix with
+non-negative integer entries and 1's along the diagonal. The matrix M is also
+called a Coxeter matrix. Often when dealing with Coxeter groups we are only
+interested in smooth quotients, that is, those which preserve the orders. The
+method <TT>L2Quotients</TT> accepts a Coxeter matrix as input, and computes the
+smooth quotients of the associated Coxeter group. However, it omits the
+quotients in characteristic p if M<sub>12</sub> = p. Furthermore, if a quotient has
+characteristic p and p divides some entry of M, then the quotient is not
+guaranteed to be smooth.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9225">Example <TT>GrpFP_1_L2QuotientCoxeter (H75E26)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; M := Matrix([[1,2,3,3],[2,1,4,5],[3,4,1,6],[3,5,6,1]]);
+&gt; L2Quotients(M);
+[
+    L_2(4391),
+    L_2(71)
+]
+</PRE>
+<HR>
+<H3><A NAME = "9226">Example <TT>GrpFP_1_L2QuotientexactOrders (H75E27)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; G&lt; a,b,c &gt; := Group&lt; a,b,c | a^16, b^4, c^2, (a*b)^8, (a,b)^4 &gt;;
+&gt; time quot := L2Quotients(G : exactOrders := [&lt; a, 16 &gt;, &lt; b, 4 &gt;,
+&gt;    &lt; c, 2 &gt;, &lt; a*b ,8 &gt;, &lt; (a,b), 4 &gt;]);
+Time: 1.530
+</PRE>
+<HR>
+<H5><A NAME = "9227">Advanced Usage</A></H5>
+
+<P>
+<P>
+var saturate: Boolean                   Default: <TT>false</TT>
+The algorithm discards prime ideals containing &rho; = x<sub>1</sub><sup>2</sup> + x<sub>2</sub><sup>2</sup> +
+x<sub>12</sub><sup>2</sup> - x<sub>1</sub>x<sub>2</sub>x<sub>12</sub> - 4. If the optional boolean parameter <TT>saturate</TT> is <TT>true</TT>, then prior to the primary decomposition the
+ideal is saturated at &rho;, which can be faster in some cases.
+<P>
+var addMoreRelations: Boolean           Default: <TT>false</TT>
+If the optional boolean parameter <TT>addMoreRelations</TT> is <TT>true</TT>, then the
+algorithm adds further relations to the ideal, which speeds up the computation
+in some cases.
+<P>
+var exclude: SeqEnum                    Default: []
+The optional boolean parameter <TT>exclude</TT> is a list of primes.
+The algorithm does not compute (L)<sub>2</sub>-quotients in characteristic p
+if p is in <TT>exclude</TT>.
+<P>
+var useRandomTechniques: Boolean        Default: 
+var factorizationBound: RngIntElt       Default: 
+var trialDivisionBound: RngIntElt       Default: 
+var groebnerBasisBound: RngIntElt       Default: 
+These parameters are passed to the method <TT>MinimalAssociatedPrimes</TT> (see
+documentation there).
+
+
+<H5><A NAME = "9228">Handling Infinite (L)<sub>2</sub>-quotients</A></H5>
+
+<P>
+<P>
+<P>
+<P>
+<B>Quotients of type (L)<sub>2</sub>(&infin;<sup>k</sup>)</B>
+<P>
+If G has a quotient (L)<sub>2</sub>(&infin;<sup>k</sup>), then for almost all (all but
+finitely many) primes p, G has finitely many quotients of type 
+(PSL)(2, p<sup>r</sup>) or (PGL)(2, p<sup>r/2</sup>) with r &le;k. So (L)<sub>2</sub>(&infin;<sup>k</sup>)
+is a mnemonic, where &infin; in the base stands for infinitely many primes, and
+k stands for the highest possible exponent. 
+<P>
+<P>
+There are two basic methods to further investigate such quotients.
+
+
+<P>
+<P>
+<P>
+<B>Quotients of type (L)<sub>2</sub>(p<sup>&infin;<sup>d</sup></sup>)</B>
+<P>
+If G has a quotient (L)<sub>2</sub>(p<sup>&infin;<sup>d</sup></sup>), then there are infinitely many positive
+integers k such that G has a quotient of type (PSL)(2, p<sup>k</sup>) or (PGL)(2, p<sup>k</sup>). So
+(L)<sub>2</sub>(p<sup>&infin;<sup>d</sup></sup>) is a mnemonic, where &infin; in the exponent stands for
+infinitely many possible exponents. The parameter d describes the degree of
+infinity, and is ommited if d = 1.
+<P>
+Again, we can use <TT>AddGroupRelations</TT> to sudy this quotient further.
+<P>
+<P>
+<B>Quotients of type (L)<sub>2</sub>(&infin;<sup>&infin;<sup>d</sup></sup>)</B>
+<P>
+<P>
+If G has a quotient (L)<sub>2</sub>(&infin;<sup>&infin;<sup>d</sup></sup>), then for almost all primes
+p and
+infinitely many positive integers k, G has a quotient of type (PSL)(2, p<sup>k</sup>) or
+(PGL)(2, p<sup>k</sup>). So (L)<sub>2</sub>(&infin;<sup>&infin;<sup>d</sup></sup>) is a mnemonic, where
+&infin; in the base
+stands for infinitely many primes, and &infin; in the exponent stands for
+infinitely many possible exponents. The parameter d describes the degree of
+infinity, and is ommited if d = 1. These quotients can be further investigated
+using the methods <TT>AddGroupRelations</TT>, <TT>AddRingRelations</TT>, and
+<TT>SpecifyCharacteristic</TT>.
+<H5><A NAME = "9229">SpecifyCharacteristic(Q, n) : L2Quotient, RngIntElt -&gt; [ L2Quotient ]</A></H5>
+<BLOCKQUOTE>
+Compute the (L)<sub>2</sub>-quotients in characteristic p | n.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9230">Example <TT>GrpFP_1_L2QuotientSpecifyCharacteristic (H75E28)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; G := Group&lt; a,b | a^2, b^3, (a*b)^7 &gt;;
+&gt; quot := L2Quotients(G); quot;
+[
+    L_2(infty^3)
+]
+&gt; Q := quot[1];
+&gt; SpecifyCharacteristic(Q, 7);  
+[
+    L_2(7)
+]
+&gt; SpecifyCharacteristic(Q, 11);
+[
+    L_2(11^3)
+]
+&gt; SpecifyCharacteristic(Q, 13);
+[
+    L_2(13),
+    L_2(13),
+    L_2(13)
+]
+</PRE>
+<HR>
+<H5><A NAME = "9231">AddGroupRelations(Q, R) : L2Quotient, [ GrpFPElt ] -&gt; [ L2Quotient ]</A></H5>
+<BLOCKQUOTE>
+Compute the (L)<sub>2</sub>-quotients which satisfy the additional relations
+R.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9232">Example <TT>GrpFP_1_L2QuotientAddGroupRelations (H75E29)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; G&lt;a,b&gt; := Group&lt; a,b | a^2, b^3, (a*b)^7 &gt;;
+&gt; quot := L2Quotients(G); quot;
+[
+    L_2(infty^3)
+]
+&gt; Q := quot[1];
+&gt; AddGroupRelations(Q, [(a*b*a*b^-1*a*b)^12]);
+[
+    L_2(13),
+    L_2(7)
+]
+</PRE>
+<HR>
+<H3><A NAME = "9233">Example <TT>GrpFP_1_L2QuotientSpecifyAddGroupRelations2 (H75E30)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; H&lt; a,b,c &gt; := Group&lt; a,b,c | a^3, (a,c) = (c,a^-1), a*b*a = b*a*b, 
+&gt;    a*b*a*c^-1 = c*a*b*a &gt;;
+&gt; quot := L2Quotients(H); quot;
+[
+    L_2(3^infty)
+]
+&gt; Q := quot[1];
+&gt; AddGroupRelations(Q, [((b^2*c^3)^2*a)^5]);
+[
+    L_2(3^2),
+    L_2(3^4)
+]
+</PRE>
+<HR>
+<H5><A NAME = "9234">AddRingRelations(Q, R) : L2Quotient, [ RngMPolElt ] -&gt; [ L2Quotient ]</A></H5>
+<BLOCKQUOTE>
+Compute the (L)<sub>2</sub>-quotients whose traces satisfy the polynomial relations
+given in R.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9235">Example <TT>GrpFP_1_L2QuotientSpecifyAddRingRelations (H75E31)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; H&lt; a,b,c &gt; := Group&lt; a,b,c | a^3, (a,c) = (c,a^-1), a*b*a = b*a*b, 
+&gt;   a*b*a*c^-1 = c*a*b*a &gt;;
+&gt; quot := L2Quotients(H); quot;
+[
+    L_2(3^infty)
+]
+&gt; Q := quot[1];
+&gt; Q`Ideal;
+Ideal of Graded Polynomial ring of rank 7 over Integer Ring
+Order: Grevlex with weights [3, 2, 2, 2, 1, 1, 1]
+Variables: x123, x23, x13, x12, x3, x2, x1
+Variable weights: [3, 2, 2, 2, 1, 1, 1]
+Inhomogeneous, Dimension &gt;0
+Groebner basis:
+[
+    x123^2 + 2*x123*x3 + 1,
+    x23 + 2*x3,
+    x13 + 2*x3,
+    x12 + 2,
+    x2 + 1,
+    x1 + 1,
+    3
+]
+&gt; R&lt; x123, x23, x13, x12, x3, x2, x1 &gt; := Generic(Q`Ideal);
+&gt; AddRingRelations(Q, [x3^(3^4) - x3]);
+[
+    L_2(3^2),
+    L_2(3^4),
+    L_2(3^4),
+    L_2(3^4),
+    L_2(3^4),
+    L_2(3^4),
+    L_2(3^4),
+    PGL(2,3^2),
+    PGL(2,3^2),
+    L_2(3^4),
+    L_2(3^8),
+    L_2(3^8),
+    L_2(3^8),
+    L_2(3^8),
+    L_2(3^8),
+    L_2(3^4)
+]
+</PRE>
+<HR>
+<H4><A NAME = "9236">Infinite L2 Quotients</A></H4>
+
+<P>
+<P>
+<P>
+This section contains functions that use the L2-quotient algorithm of Plesken
+and Fabianska (<A  HREF = "text807.htm#bib_PF_09">[PF09]</A>) to establish the existence or not of an
+infinite quotient of
+a finitely-presented group in PSL<sub>2</sub>(K) for K a field of characteristic
+zero. The algorithm is often used to find surjective quotients over finite
+fields but as a test for non-finiteness it is easier to work directly in
+characteristic zero. We make some comments on the relation to finite fields
+below.
+<P>
+The algorithm first constructs an affine scheme X over Q from
+the "trace ideal" of the group G, for which the algebraic points
+over a field K are in 1-1 correspondence with equivalence classes of
+representations of G into SL<sub>2</sub>(K).
+If g<sub>1</sub>, ..., g<sub>n</sub> are the generators of G, then the affine coordinates
+of X correspond to the trace under the representation of various products
+of the G<sub>i</sub>. For example, when n=2, X lies in 3-dimensional affine
+space and the coordinates correspond to the traces of g<sub>1</sub>, g<sub>2</sub> and  
+g<sub>1</sub>g<sub>2</sub>. The ideal is actually generated by polynomials with coefficients
+in Z so X is naturally defined as a scheme over Spec(Z), whose
+reduction mod p just gives the scheme corresponding to characteristic
+p representations of G for p &gt; 2.
+<P>
+Homomorphisms into PSL<sub>2</sub> rather than SL<sub>2</sub> are dealt with by considering
+a number of X schemes for a particular G. Each one represents the 
+homomorphisms from the free cover of G to SL<sub>2</sub> that takes each word in the
+set of relations defining G to either I or -I. Each of the 2<sup>r</sup> choices
+of sign for the r defining relations gives an X (by the same procedure) and
+the totality cover all possibilities for maps to PSL<sub>2</sub>.
+<P>
+The set of points of X corresponding to geometrically reducible, dihedral
+A<sub>4</sub>, S<sub>4</sub> or A<sub>5</sub> images in PSL<sub>2</sub> is a closed subscheme Y. In fact
+the first two possibilities give closed subschemes with equations defined
+over Z and the last three give a dimension zero scheme over Q. The
+overall equations defining Y reduce mod p to those defining the
+corresponding subscheme in characteristic p for almost all primes p.
+The explicit equations defining Y are determined by the algorithm as
+explained for n = 2 or 3 in the above reference or in more detail in
+Fabianska's MSc thesis (<A  HREF = "text807.htm#bib_AF_thesis_09">[Fab09]</A>). Let U be the open complement
+of Y in X.
+<P>
+There are two possibilities.
+<P>
+<DL COMPACT class='compact'>
+<DT>1</DT><DD>A U is non-empty, so an algebraic point gives
+    &phi;: G -&gt; PSL<sub>2</sub>(K), K a number field, with
+    infinite image, so G is infinite.
+    Further, for all but finitely many primes p, &phi; can be reduced mod v for
+    any place v of characteristic p AND the reduction &phi;<sub>v</sub> corresponds to
+    a point in the analogue of U over the finite field. Thus the reductions
+    give surjections of G onto a PSL<sub>2</sub>(k) [or maybe a PGL<sub>2</sub>(k)]
+    for finite fields of any characteristic outside of a finite set.
+<P>
+<DT>2</DT><DD>All Us are empty. Here, all the homomorphisms of G into PSL<sub>2</sub>(K)
+    in characteristic zero have geometrically reducible, dihedral, A<sub>4</sub>, S<sub>4</sub> 
+    or A<sub>5</sub> images and the same holds for K a field of characteristic p
+    for all p outside of a finite set of primes.
+    G may or may not be infinite.
+<P>
+<P>
+<P>
+</DL>
+<B>NB:</B> In case 2), there may still be images of G which ARE infinite, but
+lie in a Cartan or Borel subgroup, so are geometrically reducible, or lie in the
+normaliser of a Cartan and have an infinite dihedral image. These infinite
+reducible/dihedral possibilities are not currently checked for.
+
+
+<H5><A NAME = "9237">HasInfinitePSL2Quotient(G) :: GrpFP  -&gt; BoolElt, SeqEnum</A></H5>
+
+<PRE>    signs: SeqEnum                      Default: 0</PRE>
+
+<PRE>    full: BoolElt                       Default: <TT>false</TT></PRE>
+
+<PRE>    SetVerbose("IsInfGrp", n):          Maximum: 1</PRE>
+<BLOCKQUOTE>
+Function to return whether the two-generator finitely-presented
+group G has an infinite quotient lying in a PSL<sub>2</sub>(K) with K
+a field of characteristic 0 as described above.
+<P>
+For the convenience of the user, we have provided some parameters to
+output more detailed information coming from the analysis of the
+X representation schemes as well as to control which sign variations
+are considered.
+<P>
+<P>
+<P>
+Let ws be the sequence of words giving the defining relations of G
+(if a defining relation is of the form w = v where v is not
+ the identity word, then the corresponding word is w * v<sup> - 1</sup>). Let
+ws = [w<sub>1</sub>, .., w<sub>r</sub>]. 
+<P>
+As described in the introduction, for each of the 2<sup>r</sup> combinations of
+signs attached to the w<sub>i</sub> - let s be one - the program will consider
+the scheme X of homomorphisms of G into PSL<sub>2</sub> such that, when lifted
+to a homomorphism of the two-generator free cover F of G into SL<sub>2</sub>,
+w<sub>i</sub> maps to s<sub>i</sub> * I.
+<P>
+In some cases, the user may realise that there is no point in considering
+certain choices of signs. For example, if g<sub>1</sub><sup>2</sup> is a relation in ws, 
+g<sub>1</sub><sup>2</sup> |-&gt; I in SL<sub>2</sub>(K) means that g<sub>1</sub> |-&gt; 1 in PSL<sub>2</sub>(K),
+so the PSL<sub>2</sub>(K) image would be (maybe infinitely) cyclic, and it is a
+waste of time to consider this possibility. Similarly, if g<sub>1</sub><sup>r</sup>, r odd,
+is a relation then ,without loss of generality, in a PSL<sub>2</sub> to SL<sub>2</sub>
+lift, g<sub>1</sub><sup>r</sup> |-&gt; I, which could be specified.
+<P>
+The parameter <TT>signs</TT> allows the user to specify a restricted set of
+sign options to analyse. <TT>signs</TT> should be an 0, 1, - 1 or a sequence
+of length #ws of such integers. A single value is converted into the
+sequence containing that value #ws times. An entry e of 1 or -1 in
+position i means that the function will only consider sign sequences
+s with s[i] = e, ie homomorphisms where w<sub>i</sub> map to eI in the lift
+to SL<sub>2</sub>. If e = 0, then there is no condition at place i of the
+sign sequences considered. The default value for <TT>signs</TT> is the single
+value 0.
+<P>
+<P>
+<P>
+For each representation space X (corresponding to an allowable choice
+of signs s), after removing positive dimensional components of Y
+corresponding to geometrically reducible or dihedral type representations,
+there is often a zero-dimensional subscheme left. The existence of an
+infinite (non-cyclic or dihedral) image homomorphism to PSL<sub>2</sub> then comes down
+to examining the finite set of closed points remaining and finding one that
+is not geometrically reducible, dihedral, A<sub>4</sub>, S<sub>4</sub> or A<sub>5</sub> type.
+Clearly, once one such is found the procedure can stop. However, it might be
+of interest for the user to see the types of ALL of the representations 
+corresponding to closed points if the zero-dimensional analysis stage is performed.
+<P>
+If parameter <TT>full</TT> is set to <TT>true</TT> (the default is <TT>false</TT>), the program
+will continue analysing all of the representations in the 0-dimensional locus, even
+after one corresponding to an infinite image is found. Furthermore a sequence
+of (signs,types) pairs is also returned which gives, for each sign combination s
+of maps considered, the sequence of types corresponding to the 0-dimensional locus
+(or empty if we don't reduce to dimension 0). These types are given as strings:
+"infinite", "reducible", "dihedral", "A4", "S4", and "A5".
+<P>
+<P>
+<P>
+Setting the verbose flag <TT>IsInfGrp</TT> to <TT>true</TT> or 1 gives output of information
+on the various stages as the function progresses, including the analysis of
+dimension zero loci.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9238">Example <TT>GrpFP_1_fp-gps:inf-psl2-quot (H75E32)</TT></A></H3>
+We look at two examples of quotients of the two-generator free group with
+relations g<sub>1</sub><sup>2</sup>, g<sub>2</sub><sup>3</sup> and one further word. The first is infinite,
+the second is not. As noted above, we may as well specify that g<sub>1</sub><sup>2</sup> maps
+to -I and g<sub>2</sub><sup>3</sup> to I in SL<sub>2</sub> and this can be done with the <TT>signs</TT>
+parameter.
+<P>
+<P>
+<P>
+<PRE>
+&gt; F := FreeGroup(2);
+&gt; rel := (F.1 * F.2 * F.1 * F.2 * F.1 * F.2 * F.1 * F.2 * F.1 * F.2 *
+&gt;   F.1 * F.2 * F.1 * F.2 * F.1 * F.2^-1 * F.1 * F.2 * F.1 * F.2^-1)^2;
+&gt; G := quo&lt;F | [F.1^2 ,F.2^3, rel]&gt;;
+&gt; HasInfinitePSL2Quotient(G : full := true);
+true
+[ [*
+    [ 1, 1, 1 ],
+    []
+*], [*
+    [ 1, 1, -1 ],
+    []
+*], [*
+    [ 1, -1, 1 ],
+    []
+*], [*
+    [ 1, -1, -1 ],
+    []
+*], [*
+    [ -1, 1, 1 ],
+    [ A4, A4 ]
+*], [*
+    [ -1, 1, -1 ],
+    [ A5, A5, infinite ]
+*], [*
+    [ -1, -1, 1 ],
+    [ A4, A4 ]
+*], [*
+    [ -1, -1, -1 ],
+    [ A5, A5, infinite ]
+*] ]
+</PRE>
+<P>
+Now try it with the sign restriction.
+<P>
+<P>
+<P>
+<PRE>
+&gt; HasInfinitePSL2Quotient(G : full := true, signs := [-1,1,0]);
+true
+[ [*
+    [ -1, 1, 1 ],
+    [ A4, A4 ]
+*], [*
+    [ -1, 1, -1 ],
+    [ A5, A5, infinite ]
+*] ]
+</PRE>
+<P>
+The second example is just A<sub>5</sub>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := quo&lt;F | [F.1^2 ,F.2^3, (F.1*F.2)^5]&gt;;
+&gt; HasInfinitePSL2Quotient(G);
+false
+&gt; HasInfinitePSL2Quotient(G : full := true, signs := [-1,1,0]);
+false
+[ [*
+    [ -1, 1, 1 ],
+    [ A5 ]
+*], [*
+    [ -1, 1, -1 ],
+    [ A5 ]
+*] ]
+</PRE>
+<HR>
+<H4><A NAME = "9239">The (L)<sub>3</sub>(U)<sub>3</sub>-Quotient Algorithm</A></H4>
+
+<P>
+<P>
+Given a finitely presented group G on two generators,
+the (L)<sub>3</sub>(U)<sub>3</sub>-quotient algorithm of Jambor <A  HREF = "text807.htm#bib_JamborPhD">[Jam12]</A>
+computes all quotients of G which are isomorphic to some 
+(PSL)(3, q), (PGL)(3, q), (PSU)(3, q), or (PGU)(3, q),
+simultaneously for all prime powers q.
+It can handle the case of infinitely many quotients, and also works for
+very large prime powers. 
+<P>
+Note that the algorithm does not return images onto 
+groups (PSL)(3, 2) = (PSL)(2, 7).
+
+
+<H5><A NAME = "9240">L3Quotients(G: parameters) : GrpFP  -&gt; [ L3Quotient ]</A></H5>
+<BLOCKQUOTE>
+The group G must have 2 generators.
+Returns a sequence of (L)<sub>3</sub>-quotients, which have type <TT>L3Quotient</TT>.
+<P>
+<P>
+<PRE>
+     exactOrders: SeqEnum                Default: []
+</PRE>
+A sequence of pairs &lt; w, n &gt; where W is a word in the generators
+of G and n is a positive integer. Only quotients where the order of
+the image of w equals n will be computed.
+<P>
+<P>
+<PRE>
+     exclude: SeqEnum                    Default: []
+</PRE>
+A sequence of primes. Quotients in characteristic p with p in the sequence
+will not be computed.
+</BLOCKQUOTE>
+<H5><A NAME = "9241">SpecifyCharacteristic(Q, p) : L2Quotient, RngIntElt -&gt; [ L2Quotient ]</A></H5>
+<H5>SpecifyCharacteristic(Q, p) : L3Quotient, RngIntElt -&gt; [ L3Quotient ]</H5>
+<BLOCKQUOTE>
+Compute the restrictions of the given quotient object Q to the prime
+characteristic p.
+</BLOCKQUOTE>
+<H5><A NAME = "9242">AddGroupRelations(Q, r) : L2Quotient, [ GrpFPElt ] -&gt; [ L2Quotient ]</A></H5>
+<H5>AddGroupRelations(Q, r) : L3Quotient, [ GrpFPElt ] -&gt; [ L3Quotient ]</H5>
+<BLOCKQUOTE>
+Compute quotient objects from Q for the group of Q with relators
+r added.
+</BLOCKQUOTE>
+<H5><A NAME = "9243">GetMatrices(Q) : L2Quotient -&gt; GrpMat</A></H5>
+<H5>GetMatrices(Q) : L3Quotient -&gt; GrpMat</H5>
+<BLOCKQUOTE>
+Compute the matrix images of the generators of the group of the quotient
+object Q as a matrix group. Requires Q to be a finite object.
+Note that <TT>G.i</TT> to <TT>M.i</TT>, where M is the matrix group returned, does
+not always define a homomorphism, but the induced map into M/Z(M)
+is a homomorphism.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9244">Example <TT>GrpFP_1_L3Quotient (H75E33)</TT></A></H3>
+We first compute (L)<sub>3</sub>(U)<sub>3</sub>-quotients of a some finitely-presented
+groups.
+<P>
+<P>
+<PRE>
+&gt; G := Group&lt; a,b | a^2, b^3, (a*b)^11, (a,b)^11 &gt;;
+&gt; L3Quotients(G);
+[
+    U_3(43)
+]
+&gt; H := Group&lt; a,b | a^2, b^3, (a*b)^11, (a,b)^28  &gt;;
+&gt; Q := L3Quotients(H); Q;
+[
+    U_3(43),
+    U_3(14057)
+] 
+</PRE>
+This means that G has PSU(3, 43) as quotient, but no other PSL(3, q),
+PGL(3, q), PSU(3, q) or PGU(3, q) is a quotient of G.
+Similarly, the only (L)<sub>3</sub>(U)<sub>3</sub>-quotients of H are
+PSU(3, 43) and PSU(3, 14057).
+<P>
+We can further investigate finite quotients using <TT>GetMatrices</TT>.
+<P>
+<P>
+<PRE>
+&gt; M := GetMatrices(Q[1]); M;
+MatrixGroup(3, GF(43^2))
+Generators:
+  [ $.1^756  $.1^202       38]
+  [ $.1^960 $.1^1243  $.1^934]
+  [ $.1^192  $.1^192 $.1^1529]
+
+  [ $.1^379 $.1^1759  $.1^503]
+  [$.1^1326  $.1^804  $.1^374]
+  [$.1^1214  $.1^524  $.1^612]
+</PRE>
+The next example has more quotients:
+<P>
+<P>
+<PRE>
+&gt; G := Group&lt; a,b | a^2, b^3, (a*b)^18, (a,b)^16  &gt;;
+&gt; L3Quotients(G); 
+[
+    PGU(3, 71),
+    U_3(1889),
+    PGU(3, 17),
+    PGU(3, 17),
+    PGU(3, 17),
+    PGL(3, 19)
+]
+</PRE>
+In this example, PGU(3, 17) occurs three times.
+This means that there are three epimorphisms of G onto PGU(3, 17) which
+do not differ by an automorphism of PGU(3, 17).
+In other words, the kernels of the epimorphisms are distinct.
+<HR>
+<H3><A NAME = "9245">Example <TT>GrpFP_1_L3infinite (H75E34)</TT></A></H3>
+Some groups have infinitely many L3-quotients.
+This is indicated by one of the L3-quotients <TT>L_3(infty^k)</TT>,
+<TT>L_3(p^(infty^d))</TT>, or <TT>L_3(infty^(infty^d))</TT>.
+See below for an interpretation of this output, and how to get more
+information about the quotients.
+<P>
+<P>
+<PRE>
+&gt; G := Group&lt; a, b | a^2, b^3, (a*b)^9 &gt;;
+&gt; QG := L3Quotients(G); QG;
+[
+    L_3(infty^18)
+]
+&gt; H := Group&lt; a, b | a^2, b^3, (a,b)^5, (a, b*a*b*a*b)^3 &gt;;
+&gt; L3Quotients(H);
+[
+    L_3(2^infty)
+]
+&gt; K := Group&lt; a, b | a^2, b^3 &gt;;
+&gt; L3Quotients(K);
+[
+    L_3(infty^(inft ^2))
+]
+</PRE>
+Even without further interpretation of the output, this tells us that these
+groups are all infinite.
+<P>
+The object <TT>L_3(infty^18)</TT> means that for almost all primes p there
+are quotients of G of the form L<sub>3</sub>(p<sup>r</sup>) or U<sub>3</sub>(p<sup>r</sup>), with r&le;18.
+We can specify the characteristic to get explicit examples.
+<P>
+<P>
+<PRE>
+&gt; SpecifyCharacteristic(QG[1], 37);
+[
+  PGL(3, 37),
+  PGL(3, 37),
+  PGL(3, 37)
+]
+&gt; X := SpecifyCharacteristic(QG[1], 2); X;
+[
+  PGU(3, 2^3)
+]
+&gt; M := GetMatrices(X[1]);
+&gt; M:Minimal;
+MatrixGroup(3, GF(2^18))
+&gt; LMGChiefFactors(M);
+  G
+  |  Cyclic(3)
+  *
+  |  2A(2, 8)                   = U(3, 8)
+  *
+  |  Cyclic(3)
+  1
+</PRE>
+If G has a quotient <TT>L_3(p^(infty^d))</TT>, then there are infinitely many
+positive integers k such that G has a quotient of type PSL(3, p<sup>k</sup>),
+PGL(3, p<sup>k</sup>), (PSU)(3, p<sup>k</sup>), or (PGU)(3, p<sup>k</sup>). So <TT>L_3(p^(infty^d))</TT>
+is a mnemonic, where infty in the exponent stands for
+infinitely many possible exponents.
+The parameter d describes the degree of infinity, and is omitted if d = 1.
+We can use <TT>AddGroupRelations</TT> to study this quotient further.
+<P>
+<P>
+<PRE>
+&gt; H&lt; a, b &gt; := Group&lt; a, b | a^2, b^3, (a,b)^5, (a, b*a*b*a*b)^3 &gt;;
+&gt; quot := L3Quotients(H); quot;
+[
+    L_3(2^infty)
+]
+&gt; Q := quot[1];
+&gt; AddGroupRelations(Q, [(a*b)^(2*3*5*7)]);      
+[
+    PGL(3, 2^2),
+    U_3(2^2)
+]
+</PRE>
+Another possibility is to add further ring relations to the ideal describing 
+the L3-quotient, using the intrinsic <TT>AddRingRelations</TT>.
+It takes an L3-quotient and a list of polynomials, and computes the L3-quotients
+whose traces satisfy these polynomial relations.
+<P>
+<P>
+<PRE>
+&gt; Q := quot[1];
+&gt; Q`Ideal;
+Ideal of Graded Polynomial ring of rank 10 over Integer Ring
+Order: Grevlex with weights [8, 2, 2, 2, 2, 4, 4, 4, 4, 1]
+Variables: xcom, x1, xm1, x2, xm2, x12, xm12, xm21, xm2m1, zeta
+Variable weights: [8, 2, 2, 2, 2, 4, 4, 4, 4, 1]
+Inhomogeneous, Dimension &gt;0
+Groebner basis:
+[
+    xcom + zeta + 1,
+    xm12*xm2m1 + zeta,
+    x12 + xm12,
+    xm21 + xm2m1,
+    x1 + 1,
+    xm1 + 1,
+    x2,
+    xm2,
+    zeta^2 + zeta + 1,
+    2
+]
+&gt; R&lt; xcom, x1, xm1, x2, xm2, x12, xm12, xm21, xm2m1, zeta &gt; := Generic(Q`Ideal);
+&gt; AddRingRelations(Q, [x12^5 + xm21^2 + 1]);
+[
+    L_3(2^8),
+    L_3(2^6)
+]
+</PRE>
+<HR>
+<H4><A NAME = "9246">Searching for Isomorphisms</A></H4>
+
+<P>
+<P>
+This section describes a function for searching for isomorphisms
+between two finitely presented groups.
+
+
+<H5><A NAME = "9247"></A><A NAME = "GrpFP_1:SearchForIsomorphism">SearchForIsomorphism</A>(F, G, m : parameters) : GrpFP, GrpFP, RngIntElt -&gt; BoolElt, HomGrp, HomGrp</H5>
+<BLOCKQUOTE>
+Attempt to find an isomorphism from the finitely presented group F to the 
+finitely presented group G. The search will be restricted to those 
+homomorphisms for which the sum of the word-lengths of the images of the 
+generators of F in G is at most m.
+<P>
+If an isomorphism &phi; is found, then the values <TT>true</TT>, &phi;, &phi;<sup> - 1</sup> 
+are returned.  Otherwise, the values <TT>false</TT>, _, _ are returned; of course, 
+that does not necessarily mean that the groups are not isomorphic.
+<P>
+An error will result if any of the generators of F turn out to be trivial.
+<P>
+By setting the verbose flag <TT>"IsoSearch"</TT> to 1, information about  
+the progress of the search will be printed.
+<P>
+The parameters available for the function <A  HREF = "text812.htm#GrpFP_1:SearchForIsomorphism">SearchForIsomorphism</A>
+are:
+<P>
+<P>
+<PRE>
+     All: BoolElt                        Default: <TT>false</TT>
+</PRE>
+If <TT>All</TT> is <TT>false</TT> (default), then the function halts and returns as soon as
+a single isomorphism is found. If <TT>All</TT> is <TT>true</TT>, then the search continues
+through all possible images that satisfy the image length condition, and
+a list of pairs &lt; &phi;, &phi;<sup> - 1</sup> &gt; for all isomorphisms
+&phi;:F to G found is returned as the second return value.
+<P>
+<P>
+<PRE>
+     IsomsOnly: BoolElt                  Default: <TT>true</TT>
+</PRE>
+If <TT>IsomsOnly</TT> is set to <TT>false</TT>, then all homomorphisms F to G will be
+returned if <TT>All</TT> is <TT>true</TT>, and the first nontrivial homomorphism found
+will be returned if <TT>All</TT> is <TT>false</TT>.
+<P>
+<P>
+<PRE>
+     MaxRels: RngIntElt                  Default: 250*m
+</PRE>
+The value of the <TT>MaxRelations</TT> parameter used in runs of
+<A  HREF = "text857.htm#GrpRWS:RWSGroup">RWSGroup</A>.
+It is
+hard to find a sensible default, because if the value is unnecessarily
+large then time can be wasted unnecessarily. This may need to be increased if
+the function is used with finite groups, for example (although it is usually
+much more efficient to use permutation or matrix representations when testing
+isomorphism of finite groups).
+<P>
+<P>
+<PRE>
+     CycConjTest: BoolElt                Default: <TT>true</TT>
+</PRE>
+When <TT>CycConjTest</TT> is <TT>true</TT> and <TT>All</TT> is <TT>false</TT>, then images of the
+first generator
+which have a cyclic conjugate that comes earlier in the lexicographical order
+are rejected, because there would be a conjugate isomorphism in which the
+image was the cyclic conjugate. This nearly always results in faster
+run-times, but occasionally it can happen that the conjugate isomorphism
+has a larger sum of lengths of generator images, which is clearly bad.
+So the user has the option of not rejecting such images.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9248">Example <TT>GrpFP_1_SearchForIso1 (H75E35)</TT></A></H3>
+John Hillman asked whether the following two groups are isomorphic.
+<P>
+<P>
+<PRE>
+&gt; G1&lt;s,t,u&gt; := Group &lt;s,t,u | s*u*s^-1=u^-1, t^2=u^2, t*s^2*t^-1=s^-2,
+&gt;                             u*(s*t)^2=(s*t)^2*u &gt;;
+&gt; G2&lt;x,y,z&gt; := Group&lt;x,y,z | x*y^2*x^-1=y^-2, y*x^2*y^-1=x^-2, x^2=z^2*(x*y)^2,
+&gt;                            y^2=(z^-1*x)^2, z*(x*y)^2=(x*y)^2*z &gt;;
+&gt; isiso, f1, f2 := SearchForIsomorphism(G1,G2,7);
+&gt; isiso;
+true
+&gt; f1;
+Homomorphism of GrpFP: G1 into GrpFP: G2 induced by
+    s |--&gt; x * z^-1
+    t |--&gt; y * z
+    u |--&gt; x * y^-1 * z
+&gt; f2;
+Homomorphism of GrpFP: G2 into GrpFP: G1 induced by
+    x |--&gt; s^2 * u * t^-1
+    y |--&gt; s^-1 * u^-1
+    z |--&gt; s * u * t^-1
+</PRE>
+The search for an isomorphism succeeded and returned the isomorphisms
+explicitly.
+<HR>
+<H3><A NAME = "9249">Example <TT>GrpFP_1_SearchForIso2 (H75E36)</TT></A></H3>
+Walter Neumann asked whether the next two groups are isomorphic.
+<P>
+<P>
+<PRE>
+&gt; G1&lt;x,y,z&gt; := Group&lt; x,y,z | x^2*y^5, x^14*z^23, (x^2,y), (x^2,z), x*y*z&gt;;
+&gt; G2&lt;a,b&gt; := Group&lt;a,b | a*b^16*a*b^-7, a^4*b^7*a^-1*b^7&gt;;
+</PRE>
+It is a good idea to minimize the number of generators of <TT>G1</TT> - since there
+is clearly a redundant generator here.
+<P>
+<P>
+<PRE>
+&gt; G1s := Simplify(G1);
+&gt; Ngens(G1s);
+2
+&gt; G1!G1s.1, G1!G1s.2;
+x z
+</PRE>
+Now a direct call <TT>SearchForIsomorphism(G1, G2, 15)</TT> will succeed,
+but will take many hours, and also use a lot of memory.
+<P>
+In contrast to <TT>G1</TT>, it can sometimes help to introduce a new generator
+in <TT>G2</TT> if there are common substrings in relators.
+<P>
+<P>
+<PRE>
+&gt; G2b&lt;a,b,c&gt; := Group&lt; a,b,c | a*b^16*a*b^-7, a^4*b^7*a^-1*b^7, c=b^7&gt;;
+&gt; isiso, f1, f2 := SearchForIsomorphism(G1s,G2b,4);
+&gt; isiso;
+true
+&gt; f1;
+Homomorphism of GrpFP: G1s into GrpFP: G2b induced by
+    G1s.1 |--&gt; a * c^-1
+    G1s.2 |--&gt; c
+&gt; f2;
+Homomorphism of GrpFP: G2b into GrpFP: G1s induced by
+    a |--&gt; G1s.1 * G1s.2
+    b |--&gt; G1s.1^6 * G1s.2^10
+    c |--&gt; G1s.2
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text813.htm">[Next]</A><A  HREF = "text811.htm">[Prev]</A> <A  HREF = "text813.htm">[Right]</A> <A  HREF = "text811.htm">[Left]</A> <A  HREF = "text808.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,4 @@
+174,1
+S,Elements,"Given a quotient ring R of an order O of some number field, returns a sequence containing representatives in O of the elements of R (sorted in a standard order)",0,1,0,0,0,0,0,0,0,218,,82,-38,-38,-38,-38,-38
+S,ProjectiveLine,"Given a quotient ring R of an order O of some number field, returns an indexed set containing standard representatives [u,v] for P1(R), where u and v belong to O. Also returns a function which identifies the standard representative of any given element [u',v'] in P1(R)",0,1,0,0,0,0,0,0,0,218,,151,41,-38,-38,-38,-38
+S,ProjectiveLine,"Given a quotient ring R of an order O of some number field, returns an indexed set containing standard representatives [u,v] for P1(R), where u and v belong to O. Also returns a function which identifies the standard representative of any given element [u',v'] in P1(R)",0,1,0,0,0,0,0,0,0,320,,151,41,-38,-38,-38,-38

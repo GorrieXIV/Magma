@@ -1,0 +1,713 @@
+
+function RandomPrimeIdeal(R)
+
+    if Type(R) in {RngOrd, RngFunOrd} then
+        p := RandomPrimeIdeal(CoefficientRing(R));
+        ps := Decomposition(R, p);
+        if Type(R) eq RngOrd then
+            return ps[i][1] where i is Random([1 .. #ps]);
+        else
+            return ps[i] where i is Random([1 .. #ps]);
+        end if;
+    elif Type(R) eq  RngInt then
+        return RandomPrime(10);
+    elif Type(R) eq RngUPol then
+        if Characteristic(R) eq 0 then
+            return R!ChangeUniverse(Eltseq(RandomPrimePolynomial(PolynomialRing(GF(NextPrime(100))), 3)), Integers());
+        else
+            return RandomPrimePolynomial(R, 3);
+        end if;
+    elif Type(R) eq RngVal then
+        return R!(1/FieldOfFractions(R).1);
+    else
+	error "Wrong type of ring";
+    end if;
+
+end function;
+
+function RandomIdeal(R)
+//Returns an ideal which is a random product of some random prime ideals
+
+    if Type(R) notin {RngOrd, RngFunOrd} then
+	error "Ring must be an order of a number field or a function field";
+    end if;
+
+    r := Random(1, 3);
+
+    I := 1*R;
+    for i in [1 .. r] do
+        I := I*RandomPrimeIdeal(R)^Random(1, 3);
+    end for;
+
+    return I;
+
+end function;
+
+/*
+k := GF(NextPrime(2^30));
+E := EllipticCurve([Random(k), Random(k)]);
+D := Random(E) - Random(E);
+D := Divisor(D);
+tm := Cputime();
+Reduction(#E * D);
+assert Cputime(tm) lt 15;
+*/
+
+
+/* 
+Rational extension alffs
+*/
+G := FiniteField(2);
+P<T, y> := PolynomialRing(G, 2);
+F<x, y> := FunctionField(T*y^3 + y + T^3);
+assert ClassGroupPRank(F) eq 1;
+assert HasseWittInvariant(F) eq 3;
+
+PR<x> := PolynomialRing(Rationals());
+P<y> := PolynomialRing(PR);
+FR1<a> := FunctionField(y^3 + 2);
+F<z> := GF(13, 3);
+PF<x> := PolynomialRing(F);
+P<y> := PolynomialRing(PF);
+FF1<b> := ext<FieldOfFractions(PF) | y^2 - 7>;
+MFR1F := MaximalOrderFinite(FR1);
+MFR1I := MaximalOrderInfinite(FR1);
+MFF1F := MaximalOrderFinite(FF1);
+MFF1I := MaximalOrderInfinite(FF1);
+
+p := Place(RandomPrimeIdeal(MFR1F));
+print "Degree(p) = ", Degree(p);
+Fp<f>, fm := ConstantFieldExtension(FR1, ResidueClassField(p));
+assert fm(a) @@ fm eq a;
+
+p := Place(RandomPrimeIdeal(MFR1I));
+print "Degree(p) = ", Degree(p);
+Fp<f>, fm := ConstantFieldExtension(FR1, ResidueClassField(p));
+assert fm(a) @@ fm eq a;
+
+p := Place(RandomPrimeIdeal(MFF1F));
+print "Degree(p) = ", Degree(p);
+Fp<f>, fm := ConstantFieldExtension(FF1, ResidueClassField(p));
+assert fm(b) @@ fm eq b;
+
+p := Place(RandomPrimeIdeal(MFF1I));
+print "Degree(p) = ", Degree(p);
+Fp<f>, fm := ConstantFieldExtension(FF1, ResidueClassField(p));
+assert fm(b) @@ fm eq b;
+
+P<x> := PolynomialRing(Rationals());
+P<y> := PolynomialRing(P);
+F<c> := FunctionField(y^5 - x^7);
+
+p := Place(RandomPrimeIdeal(MaximalOrderInfinite(F)));
+print "Degree(p) = ", Degree(p);
+Fp<f>, fm := ConstantFieldExtension(F, ResidueClassField(p));
+assert fm(c) @@ fm eq c;
+
+p := Place(RandomPrimeIdeal(MaximalOrderFinite(F)));
+print "Degree(p) = ", Degree(p);
+Fp<f>, fm := ConstantFieldExtension(F, ResidueClassField(p));
+assert fm(c) @@ fm eq c;
+
+P<x> := PolynomialRing(GF(7, 5));
+P<y> := PolynomialRing(P);
+F<c> := FunctionField(y^4 - x^10*y^3 + 1);
+
+p := Place(RandomPrimeIdeal(MaximalOrderInfinite(F)));
+print "Degree(p) = ", Degree(p);
+Fp<f>, fm := ConstantFieldExtension(F, ResidueClassField(p));
+assert fm(c) @@ fm eq c;
+
+p := Place(RandomPrimeIdeal(MaximalOrderFinite(F)));
+print "Degree(p) = ", Degree(p);
+Fp<f>, fm := ConstantFieldExtension(F, ResidueClassField(p));
+assert fm(c) @@ fm eq c;
+
+PR<x> := PolynomialRing(Rationals());
+P<y> := PolynomialRing(PR);
+FR1<a> := FunctionField(y^3 + 2);
+N := NumberField(x^2 + 1);
+F<f>, fm := ConstantFieldExtension(FR1, N);
+assert fm(a) @@ fm eq a;
+
+N := NumberField([x^2 + 1, x^3 + 2] : Abs);
+F<f>, fm := ConstantFieldExtension(FR1, N);
+assert fm(a) @@ fm eq a;
+
+N := NumberField([x^2 + 1, x^3 + 5] : Abs);
+F<f>, fm := ConstantFieldExtension(FR1, N);
+assert fm(a) @@ fm eq a;
+
+PR<x> := PolynomialRing(RationalFunctionField(GF(NextPrime(200))));
+P<y> := PolynomialRing(PR);
+F<a> := FunctionField(y^3 + 2*x);
+E := ext<ConstantField(F) | Polynomial(ConstantField(F), y^2 + 1)>;
+// function field extension
+C<f>, fm := ConstantFieldExtension(F, E);
+assert fm(a) @@ fm eq a;
+
+_<r> := ConstantField(F);
+CF := Parent(r);
+P<y> := PolynomialRing(CF);
+E := FunctionField([y^2 + r, y^3 + r^2]);
+E;
+// non--simple function field extension
+C<f>, fm := ConstantFieldExtension(F, E);
+assert fm(a) @@ fm eq a;
+
+P<x> := PolynomialRing(Rationals());
+P<y> := PolynomialRing(P);
+F<c> := FunctionField(y^5 - x^7);
+
+p := Place(RandomPrimeIdeal(MaximalOrderInfinite(F)));
+print "Degree(p) = ", Degree(p);
+C<t>, m := Completion(F, p);
+assert RelativePrecision(m(m(c) @@ m) - m(c)) le 0;
+r := Random(F, 3);
+assert Valuation(m(m(r) @@ m) - m(r)) ge AbsolutePrecision(m(r));
+
+p := Place(RandomPrimeIdeal(MaximalOrderInfinite(F)));
+print "Degree(p) = ", Degree(p);
+C<t>, m := Completion(MaximalOrderInfinite(F), p : Precision := 5);
+assert RelativePrecision(m(m(c/x^2) @@ m) - m(c/x^2)) le 0;
+r := Random(MaximalOrderInfinite(F), 3);
+assert RelativePrecision(m(m(r) @@ m) - m(r)) le 0;
+
+P<x> := PolynomialRing(GF(7, 5));
+P<y> := PolynomialRing(P);
+F<c> := FunctionField(y^4 - x^10*y^3 + 1);
+
+p := Place(RandomPrimeIdeal(MaximalOrderInfinite(F)));
+print "Degree(p) = ", Degree(p);
+C<t>, m := Completion(F, p);
+R<u> := CoefficientRing(C);
+assert Valuation(m(m(c) @@ m) - m(c)) ge AbsolutePrecision(m(c));
+r := Random(F, 3);
+assert Valuation(m(m(r) @@ m) - m(r)) ge AbsolutePrecision(m(r));
+
+p := Place(RandomPrimeIdeal(MaximalOrderInfinite(F)));
+print "Degree(p) = ", Degree(p);
+C<t>, m := Completion(MaximalOrderInfinite(F), p : Precision := 5);
+R<u> := CoefficientRing(C);
+assert RelativePrecision(m(m(c/x^12) @@ m) - m(c/x^12)) le 0;
+r := Random(MaximalOrderInfinite(F), 3);
+assert RelativePrecision(m(m(r) @@ m) - m(r)) le 0;
+
+D := Decomposition(MaximalOrderFinite(F), x + 4);
+p := D[1];
+p := Place(p);
+C<t>, m := Completion(F, p : Precision := 5);
+R<u> := CoefficientRing(C);
+assert Valuation(m(m(c/x^12) @@ m) - m(c/x^12)) ge 5 + Valuation(m(c/x^12));
+r := Random(MaximalOrderInfinite(F), 3);
+assert Valuation(m(m(r) @@ m) - m(r)) ge 5 + Valuation(m(r));
+
+C<t>, m := Completion(MaximalOrderFinite(F), p : Precision := 5);
+R<u> := CoefficientRing(C);
+assert RelativePrecision(m(m(c) @@ m) - m(c)) le 0;
+r := Random(MaximalOrderFinite(F), 3);
+assert RelativePrecision(m(m(r) @@ m) - m(r)) le 0;
+
+P<x> := PolynomialRing(Rationals());
+P<y> := PolynomialRing(P);
+F<c> := FunctionField(y^4 - x^10*y^3 + 1);
+p := Place(RandomPrimeIdeal(MaximalOrderInfinite(F)));
+print "Degree(p) = ", Degree(p);
+C<t>, m := Completion(F, p);
+assert Valuation(m(m(c) @@ m) - m(c)) ge AbsolutePrecision(m(c));
+UniformizingElement(p) in MaximalOrderInfinite(F);
+C<t>, m := Completion(MaximalOrderInfinite(F), p);
+assert Valuation(m(m(c/x^10) @@ m) - m(c/x^10)) ge AbsolutePrecision(m(c/x^10));
+r := Random(MaximalOrderInfinite(F), 3);
+assert RelativePrecision(m(m(r) @@ m) - m(r)) le 0;
+
+
+/*
+Relative extension alffs
+*/
+
+PR<x> := PolynomialRing(Rationals());
+P<y> := PolynomialRing(PR);
+FR1<a> := FunctionField(y^3 - x);
+P<y> := PolynomialRing(FR1);
+FR2<c> := FunctionField(y^2 - a);
+
+PF<x> := PolynomialRing(GF(31, 3));
+P<y> := PolynomialRing(PF);
+FF1<b> := ext<FieldOfFractions(PF) | y^2 - x>;
+P<y> := PolynomialRing(FF1);
+FF2<d> := ext<FF1 | y^3 - b : Check := false>;
+
+EFR1F := EquationOrderFinite(FR1);
+MFR1F := MaximalOrderFinite(FR1);
+EFR1I := EquationOrderInfinite(FR1);
+MFR1I := MaximalOrderInfinite(FR1);
+
+EFR2F := EquationOrderFinite(FR2);
+MFR2F := MaximalOrderFinite(FR2);
+EFR2I := EquationOrderInfinite(FR2);
+MFR2I := MaximalOrderInfinite(FR2);
+
+EFF1F := EquationOrderFinite(FF1);
+MFF1F := MaximalOrderFinite(FF1);
+EFF1I := EquationOrderInfinite(FF1);
+MFF1I := MaximalOrderInfinite(FF1);
+
+EFF2F := EquationOrderFinite(FF2);
+MFF2F := MaximalOrderFinite(FF2);
+EFF2I := EquationOrderInfinite(FF2);
+MFF2I := MaximalOrderInfinite(FF2);
+
+assert MaximalOrder(EFR1F) eq MFR1F;
+assert MaximalOrder(EFR1I) eq MFR1I;
+
+assert MaximalOrder(EFR2F) eq MFR2F;
+assert BasisMatrix(MaximalOrder(ext<MFR1F | Polynomial(FR1, [a, 0, 1])>)) eq 
+							    BasisMatrix(MFR2F);
+assert MaximalOrder(EFF1F) eq MFF1F;
+assert MaximalOrder(EFF1I) eq MFF1I;
+
+assert MaximalOrder(EFF2F) eq MFF2F;
+assert MaximalOrder(EFF2I) eq MFF2I;
+assert BasisMatrix(MaximalOrder(ext<MFF1F | y^3 - b>)) eq BasisMatrix(MFF2F);
+assert IntegralClosure(PR, FR2) eq MFR2F;
+assert IntegralClosure(CoefficientRing(EFR1I), FR2) eq MFR2I;
+
+assert IntegralClosure(EFR1F, FR2) eq MFR2F;
+assert IntegralClosure(MFR1F, FR2) eq MFR2F;
+assert IntegralClosure(EFR1I, FR2) eq MFR2I;
+assert IntegralClosure(MFR1I, FR2) eq MFR2I;
+
+assert IntegralClosure(EFR2F, FR2) eq MFR2F;
+assert IntegralClosure(MFR2F, FR2) eq MFR2F;
+assert IntegralClosure(EFR2I, FR2) eq MFR2I;
+assert IntegralClosure(MFR2I, FR2) eq MFR2I;
+
+assert IntegralClosure(PF, FF2) eq MFF2F;
+assert IntegralClosure(CoefficientRing(EFF1I), FF2) eq MFF2I;
+
+assert IntegralClosure(EFF1F, FF2) eq MFF2F;
+assert IntegralClosure(MFF1F, FF2) eq MFF2F;
+assert IntegralClosure(EFF1I, FF2) eq MFF2I;
+assert IntegralClosure(MFF1I, FF2) eq MFF2I;
+
+assert IntegralClosure(EFF2F, FF2) eq MFF2F;
+assert IntegralClosure(MFF2F, FF2) eq MFF2F;
+assert IntegralClosure(EFF2I, FF2) eq MFF2I;
+assert IntegralClosure(MFF2I, FF2) eq MFF2I;
+
+/*
+Non simple alffs
+*/
+P<t> := RationalFunctionField(GF(101));
+P<y> := PolynomialRing(P);
+F<a, b/*, c*/> := FunctionField([y^2 - t/*, y^3 - t*/, y^5 - 2]);
+E, m := ExactConstantField(F);
+assert m(Root(E!2, 5))^5 eq 2;
+assert m(E.1) @@ m eq E.1;
+assert IsConstant(m(E.1));
+_, r := IsConstant(m(E.1));
+assert r eq E.1;
+
+P<t> := RationalFunctionField(GF(101));
+P<y> := PolynomialRing(P);
+F<a, b> := FunctionField([y^2 - t, y^3 - t]);
+
+R := RationalExtensionRepresentation(F);
+
+Ef := EquationOrderFinite(F);
+Ei := EquationOrderInfinite(F);
+Mf := MaximalOrderFinite(F);
+Mi := MaximalOrderInfinite(F);
+
+assert NumberOfPlacesOfDegreeOneECF(F) eq NumberOfPlacesOfDegreeOneECF(R);
+assert NumberOfPlacesOfDegreeOneECF(F, 2) eq NumberOfPlacesOfDegreeOneECF(R, 2);
+assert NumberOfPlacesDegECF(F, 1) eq NumberOfPlacesDegECF(R, 1);
+
+assert SerreBound(F) eq SerreBound(R);
+assert SerreBound(F, 3) eq SerreBound(R, 3);
+assert IharaBound(F) eq IharaBound(R);
+assert IharaBound(F, 2) eq IharaBound(R, 2);
+
+assert NumberOfPlacesOfDegreeOneECFBound(F) eq NumberOfPlacesOfDegreeOneECFBound(R);
+assert NumberOfPlacesOfDegreeOneECFBound(F, 3) eq NumberOfPlacesOfDegreeOneECFBound(R,
+3);
+
+assert LPolynomial(F) eq LPolynomial(R);
+assert LPolynomial(F, 2) eq LPolynomial(R, 2);
+assert ZetaFunction(F) eq ZetaFunction(R);
+assert ZetaFunction(F, 1) eq ZetaFunction(R, 1);
+
+assert UnitRank(Mf) eq UnitRank(MaximalOrderFinite(R));
+Regulator(Mf) eq Regulator(MaximalOrderFinite(R));
+assert ClassNumber(F) eq ClassNumber(R);
+assert ClassNumber(Mf) eq ClassNumber(MaximalOrderFinite(R));
+assert ClassGroupPRank(F) eq ClassGroupPRank(R);
+assert HasseWittInvariant(F) eq HasseWittInvariant(R);
+FS := {Place(RandomPrimeIdeal(Mf)) : i in [1 .. 3]} join
+      {Place(RandomPrimeIdeal(Mi))};
+f := SPrincipalDivisorMap(FS);
+assert IsSPrincipal(f(a), FS);
+assert IsSPrincipal(f(b), FS);
+
+P<x> := PolynomialRing(Rationals());
+_<y> := PolynomialRing(P);
+F<a, b> := FunctionField([y^2 - x*y + x^4, y^3 + y^2 - x^2*y + x]);
+
+h := hom<F -> CoefficientField(F) | 3, 5>;
+assert h(a) + h(b) eq h(a + b);
+h := hom<F -> GF(97, 3) | hom<CoefficientField(F) -> GF(97, 3) | 50>, 5, 7>;
+assert h(a) + h(b) eq h(a + b);
+h := hom<EquationOrderFinite(F) -> P | 2, 6>;
+assert h(a) + h(b) eq h(a + b);
+h := hom<EquationOrderFinite(F) -> GF(7, 4) | hom<P -> GF(7, 4) | 3>, 4, 2>;
+assert h(a) + h(b) eq h(a + b);
+
+h := hom<EquationOrderInfinite(F) -> CoefficientRing(EquationOrderInfinite(F)) | 4, 7>;
+assert h(a/x^4) + h(b/x^2) eq h(a/x^4 + b/x^2);
+h := hom<EquationOrderInfinite(F) -> GF(5, 9) |
+	Coercion(CoefficientRing(EquationOrderInfinite(F)), CoefficientField(F))
+	*hom<CoefficientField(F) -> GF(5, 9) | 6>, 3, 9>;
+assert h(a/x^4) + h(b/x^2) eq h(a/x^4 + b/x^2);
+h := hom<MaximalOrderFinite(F) -> P | x - 1, x^2, 2, x^6 + 1, x^2 - 2, x^3 + x>;assert h(a) + h(b) eq h(a + b);
+h := hom<MaximalOrderFinite(F) -> P | hom<P -> P | x^2>, x - 2, 3, 3*x^2, x^7 -
+1, 5, x^2 + 2>;
+assert h(a) + h(b) eq h(a + b);
+h := hom<MaximalOrderInfinite(F) -> CoefficientRing(MaximalOrderInfinite(F)) |
+		1/(x - 1), 1/x^2, 2, 1/(x^6 + 1), 1/(x^2 - 2), 1/(x^3 + x)>;
+assert h(a/x^5) + h(b/x^3) eq h(a/x^5 + b/x^3);
+h := hom<MaximalOrderInfinite(F) -> Integers() |
+	Coercion(CoefficientRing(MaximalOrderInfinite(F)), CoefficientField(F))*
+	hom<CoefficientField(F) -> Integers() | -1>, 4, 76, 2, 5, 8, 109>;
+assert h(a/x^7) + h(b/x^2) eq h(a/x^7 + b/x^2);
+
+P<t> := RationalFunctionField(GF(97, 2));
+P<y> := PolynomialRing(P);
+F<a, b> := FunctionField([y^2 - t, y^3 + 5*t^2]);
+
+Ef := EquationOrderFinite(F);
+Ei := EquationOrderInfinite(F);
+Mf := MaximalOrderFinite(F);
+Mi := MaximalOrderInfinite(F);
+
+R<c> := RationalExtensionRepresentation(F);
+
+assert IsOne(One(F));
+assert IsOne(One(Ef));
+assert not IsZero(One(Ei));
+assert IsOne(One(Mf));
+assert not IsMinusOne(One(Mi));
+
+assert IsOne(Identity(F));
+assert IsOne(Identity(Ef));
+assert IsOne(Identity(Ei));
+assert IsOne(Identity(Mf));
+assert IsOne(Identity(Mi));
+
+assert IsZero(Zero(F));
+assert not IsOne(Zero(Ef));
+assert IsZero(Zero(Ei));
+assert not IsMinusOne(Zero(Mf));
+assert IsZero(Zero(Mi));
+
+r := Random(F, 2);
+assert F!Eltseq(r) eq r;
+r := Random(Ef, 2);
+assert Ef!Eltseq(r) eq r;
+r := Random(Ei, 2);
+assert Ei!Eltseq(r) eq r;
+r := Random(Mf, 2);
+assert Mf!Eltseq(r) eq r;
+r := Random(Mi, 2);
+assert Mi!Eltseq(r) eq r;
+
+for i in [1 .. 5] do
+
+    r := Random(F, 4);
+    s := Random(F, 3);
+
+    assert r + s eq s + r;
+    assert r - s eq -(s - r);
+    assert r*s eq s*r;
+    assert r div s eq 1/(s div r);
+    assert (r/s)*(s/r) eq 1;
+    assert r^4 eq r*r*r*r;
+
+    r in F;
+    s notin Ef;
+    r in Ei;
+    s notin Mf;
+    r in Mi;
+
+    r := Random(Ef, 4);
+    s := Random(Ef, 3);
+
+    assert r + s eq s + r;
+    assert r - s eq -(s - r);
+    assert r*s eq s*r;
+    assert r*s div s eq r;
+    assert (r/s)*(s/r) eq 1;
+    assert r^4 eq r*r*r*r;
+
+    s notin F;
+    r in Ef;
+    s notin Ei;
+    r in Mf;
+    s notin Mi;
+
+    r := Random(Ei, 4);
+    s := Random(Ei, 3);
+
+    assert r + s eq s + r;
+    assert r - s eq -(s - r);
+    assert r*s eq s*r;
+    assert r*s div r eq s;
+    assert (r/s)*(s/r) eq 1;
+    assert r^4 eq r*r*r*r;
+
+    r in F;
+    s notin Ef;
+    r in Ei;
+    s notin Mf;
+    s in Mi;
+
+    r := Random(Mf, 4);
+    s := Random(Mf, 3);
+
+    assert r + s eq s + r;
+    assert r - s eq -(s - r);
+    assert r*s eq s*r;
+    assert r*s div s eq r;
+    assert (r/s)*(s/r) eq 1;
+    assert r^4 eq r*r*r*r;
+
+    s notin F;
+    r in Ef;
+    s notin Ei;
+    r in Mf;
+    s notin Mi;
+
+    r := Random(Mi, 4);
+    s := Random(Mi, 3);
+
+    assert r + s eq s + r;
+    assert r - s eq -(s - r);
+    assert r*s eq s*r;
+    assert r*s div r eq s;
+    assert (r/s)*(s/r) eq 1;
+    assert r^4 eq r*r*r*r;
+
+    r in F;
+    s notin Ef;
+    r in Ei;
+    s notin Mf;
+    r in Mi;
+
+end for;
+
+r := Random(F, 2);
+assert Evaluate(RationalFunction(r), [F.i : i in [1 .. Ngens(F)]]) eq r;
+assert Evaluate(RationalFunction(r, CoefficientRing(F)), [F.i : i in [1 .. Ngens(F)]]) eq r;
+
+M, m := Module([a, b, a*b + 2], CoefficientField(F));
+assert m(M.1) @@ m eq M.1;
+assert m(M.2) @@ m eq M.2;
+assert m(M.3) @@ m eq M.3;
+M, m := Module([a - 1, b^2, a*b + 2], ConstantField(F));
+assert m(M.1) @@ m eq M.1;
+assert m(M.2) @@ m eq M.2;
+assert m(M.3) @@ m eq M.3;
+
+P<t> := RationalFunctionField(GF(97, 2));
+P<y> := PolynomialRing(P);
+f<u> := FunctionField(y^2 - 3 + t);
+P<y> := PolynomialRing(f);
+F<a, b> := FunctionField([y^2 - t, y^3 + 5*t^2]);
+
+Ef := EquationOrderFinite(F);
+Ei := EquationOrderInfinite(F);
+Mf := MaximalOrderFinite(F);
+Mi := MaximalOrderInfinite(F);
+
+R<c> := RationalExtensionRepresentation(F);
+
+assert IsOne(One(F));
+assert IsOne(One(Ef));
+assert not IsZero(One(Ei));
+assert IsOne(One(Mf));
+assert not IsMinusOne(One(Mi));
+
+assert IsOne(Identity(F));
+assert IsOne(Identity(Ef));
+assert IsOne(Identity(Ei));
+assert IsOne(Identity(Mf));
+assert IsOne(Identity(Mi));
+
+assert IsZero(Zero(F));
+assert not IsOne(Zero(Ef));
+assert IsZero(Zero(Ei));
+assert not IsMinusOne(Zero(Mf));
+assert IsZero(Zero(Mi));
+
+r := Random(F, 2);
+assert F!Eltseq(r) eq r;
+r := Random(Ef, 2);
+assert Ef!Eltseq(r) eq r;
+r := Random(Ei, 2);
+assert Ei!Eltseq(r) eq r;
+r := Random(Mf, 2);
+assert Mf!Eltseq(r) eq r;
+r := Random(Mi, 2);
+assert Mi!Eltseq(r) eq r;
+
+for i in [1 .. 5] do
+
+    r := Random(F, 4);
+    s := Random(F, 3);
+
+    assert r + s eq s + r;
+    assert r - s eq -(s - r);
+    assert r*s eq s*r;
+    assert r div s eq 1/(s div r);
+    assert (r/s)*(s/r) eq 1;
+    assert r^4 eq r*r*r*r;
+
+    r in F;
+    s notin Ef;
+    r in Ei;
+    s notin Mf;
+    r in Mi;
+
+    r := Random(Ef, 4);
+    s := Random(Ef, 3);
+
+    assert r + s eq s + r;
+    assert r - s eq -(s - r);
+    assert r*s eq s*r;
+    assert r*s div s eq r;
+    assert (r/s)*(s/r) eq 1;
+    assert r^4 eq r*r*r*r;
+
+    s notin F;
+    r in Ef;
+    s notin Ei;
+    r in Mf;
+    s notin Mi;
+
+    r := Random(Ei, 4);
+    s := Random(Ei, 3);
+
+    assert r + s eq s + r;
+    assert r - s eq -(s - r);
+    assert r*s eq s*r;
+    assert r*s div r eq s;
+    assert (r/s)*(s/r) eq 1;
+    assert r^4 eq r*r*r*r;
+
+    r in F;
+    s notin Ef;
+    r in Ei;
+    s notin Mf;
+    s in Mi;
+
+    r := Random(Mf, 4);
+    s := Random(Mf, 3);
+
+    assert r + s eq s + r;
+    assert r - s eq -(s - r);
+    assert r*s eq s*r;
+    assert r*s div s eq r;
+    assert (r/s)*(s/r) eq 1;
+    assert r^4 eq r*r*r*r;
+
+    s notin F;
+    r in Ef;
+    s notin Ei;
+    r in Mf;
+    s notin Mi;
+
+    r := Random(Mi, 4);
+    s := Random(Mi, 3);
+
+    assert r + s eq s + r;
+    assert r - s eq -(s - r);
+    assert r*s eq s*r;
+    assert r*s div r eq s;
+    assert (r/s)*(s/r) eq 1;
+    assert r^4 eq r*r*r*r;
+
+    r in F;
+    s notin Ef;
+    r in Ei;
+    s notin Mf;
+    r in Mi;
+
+end for;
+
+r := Random(F, 2);
+assert Evaluate(RationalFunction(r), [F.i : i in [1 .. Ngens(F)]]) eq r;
+assert Evaluate(RationalFunction(r, CoefficientRing(CoefficientRing(F))), 
+		 [F.i : i in [1 .. Ngens(F)]] cat [CoefficientRing(F).1]) eq r;
+
+M, m := Module([a, b, a*b + 2], CoefficientField(F));
+assert m(M.1) @@ m eq M.1;
+assert m(M.2) @@ m eq M.2;
+assert m(M.3) @@ m eq M.3;
+M, m := Module([a - 1, b^2, a*b + 2], ConstantField(F));
+assert m(M.1) @@ m eq M.1;
+assert m(M.2) @@ m eq M.2;
+assert m(M.3) @@ m eq M.3;
+
+//////////////////////////
+// old bug
+
+k2:=FiniteField(2);
+R1<x> := FunctionField(k2);
+P1<y> := PolynomialRing(R1);
+L1 := ext< R1 | (y^2+y)*(x^3+x+1)-x> ;
+k4<a>:=FiniteField(4);
+L,mL:= ConstantFieldExtension(L1,k4);
+
+assert L.1 eq L.1 @@ mL @ mL;
+assert L1.1 eq L1.1 @ mL @@ mL;
+//////////////////////////
+
+P<t> := PolynomialRing(GF(101));
+P<y> := PolynomialRing(P);
+K := FunctionField(y^5 + t);
+E:= ext< K | Polynomial([t+1,0,1]) >;
+M:= MaximalOrderFinite(E);
+MI := MaximalOrderInfinite(E);
+P := [RandomPrimeIdeal(M)];
+w := WeakApproximation( P , [-1] );
+assert Valuation(w, P[1]) eq -1;
+
+repeat
+P := [RandomPrimeIdeal(M), RandomPrimeIdeal(M)];
+until IsOne(GCD(P[1], P[2]));
+w := WeakApproximation(P, [1, 2]);
+assert Valuation(w, P[1]) eq 1;
+assert Valuation(w, P[2]) eq 2;
+w := WeakApproximation(P, [-1, -2]);
+assert Valuation(w, P[1]) eq -1;
+assert Valuation(w, P[2]) eq -2;
+repeat
+P := [RandomPrimeIdeal(M) : i in [1 .. 3]];
+until IsOne(GCD(P[1], P[2])) and IsOne(GCD(P[1], P[3])) and IsOne(GCD(P[2], P[3]));
+w := WeakApproximation(P, [1, 2, -1]);
+assert Valuation(w, P[1]) eq 1;
+assert Valuation(w, P[2]) eq 2;
+assert Valuation(w, P[3]) eq -1;
+
+i := 0;
+repeat
+P := [RandomPrimeIdeal(MI) : i in [1 .. 3]];
+i+:=1;
+until (IsOne(GCD(P[1], P[2])) and IsOne(GCD(P[1], P[3])) and IsOne(GCD(P[2], P[3]))) or i gt 5;
+if i le 5 then
+w := WeakApproximation(P, [1, 2, -1]);
+assert Valuation(w, P[1]) eq 1;
+assert Valuation(w, P[2]) eq 2;
+assert Valuation(w, P[3]) eq -1;
+end if;
+

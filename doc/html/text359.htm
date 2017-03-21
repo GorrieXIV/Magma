@@ -1,0 +1,607 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Creation Functions</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text360.htm">[Next]</A><A  HREF = "text358.htm">[Prev]</A> <A  HREF = "text360.htm">[Right]</A> <A  HREF = "text358.htm">[Left]</A> <A  HREF = "text356.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "3371">Creation Functions</A></H3>
+
+<P>
+<P>
+<P>
+The following describes how number fields
+may be created. It also shows some ways of creating elements of these rings
+and homomorphisms from these rings into an arbitrary ring.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text359.htm#3372">Creation of Number Fields</A>
+<LI> <A  HREF = "text359.htm#3389">Maximal Orders</A>
+<LI> <A  HREF = "text359.htm#3391">Creation of Elements</A>
+<LI> <A  HREF = "text359.htm#3396">Creation of Homomorphisms</A>
+</UL>
+<H4><A NAME = "3372">Creation of Number Fields</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+Algebraic Number Fields can be created in a various ways, 
+most of which involve polynomials.
+The fields can be created as absolute extensions, i.e. an extension of <B>Q</B>
+by one or more irreducible polynomial(s), or as a relative extension which is 
+an extension
+of an algebraic field by one or more polynomial(s) irreducible over that field.
+
+
+<H5><A NAME = "3373"></A><A NAME = "FldNum:NumberField">NumberField</A>(f) : RngUPolElt -&gt; FldNum</H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    DoLinearExtension: BoolElt          Default: <TT>false</TT></PRE>
+
+<PRE>    Global: BoolElt                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given an irreducible polynomial f of degree n&ge;1 
+over K = Q or some number field K, create the number field
+L=K(&alpha;) obtained by adjoining a root &alpha; of f to K.
+<P>
+The polynomial f is allowed to have either integer coefficients,
+coefficients in an order of K,
+coefficients from the rational field or some algebraic field K.
+The field K will be referred to as <A  HREF = "text360.htm#FldNum:CoefficientField">CoefficientField</A>.
+If the polynomial is defined over a field and  the coefficients have
+denominators greater than 1, an equivalent polynomial
+df(x)
+is used to define L, where d is the least common multiple of
+the denominators of the coefficients of f.
+<P>
+If the optional parameter <TT>Check</TT> is set to <TT>false</TT> then the polynomial
+is not checked for irreducibility.  This is useful when building relative
+extensions where factoring can be time consuming.
+<P>
+If <TT>DoLinearExtension</TT> is <TT>true</TT> and the degree of f is 1 a
+trivial extension is returned. This is an object of type <TT>FldNum</TT>
+but of degree 1. Otherwise (or by default), the
+coefficient field of f is returned. (This is important in situations where
+the number of extensions matters.) 
+Furthermore, a degree 1 extension of Q is a field isomorphic to Q, 
+but regarded by Magma as a number field (while Q itself is not, since 
+<TT>FldRat</TT> is not a subtype of <TT>FldNum</TT>). This then
+supports all of the number field functions (including for instance
+fractional ideals) while the <TT>Rationals()</TT> do not.
+On the other hand, arithmetic will be slower.
+<P>
+If <TT>Global</TT> is <TT>true</TT>, then Magma checks if this polynomial is the
+defining polynomial of some other field created using <TT>Global := true</TT>.
+In this case, the old field will be returned.
+<P>
+The angle bracket notation may be used to assign the root &alpha; to
+an identifier e.g. <TT>L&lt;y&gt; := NumberField(f)</TT> where y will be a root of f.
+</BLOCKQUOTE>
+<H5><A NAME = "3374">RationalsAsNumberField() : -&gt; FldNum</A></H5>
+<H5>QNF() : -&gt; FldNum</H5>
+<BLOCKQUOTE>
+This creates a number field isomorphic to Q. It is equivalent to
+<TT>NumberField(x-1 : DoLinearExtension)</TT>, 
+where x is <TT>PolynomialRing(Rationals()).1</TT>.
+<P>
+The result is a field isomorphic to Q, but regarded by Magma as a number field 
+(while Q itself is not, since
+<TT>FldRat</TT> is not a subtype of <TT>FldNum</TT>). It therefore
+supports all of the number field functions, while the <TT>Rationals()</TT> do not.
+On the other hand, arithmetic will be slower.
+<P>
+Coercion can be used to convert to and from the <TT>Rationals()</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "3375"></A><A NAME = "FldNum:NumberField:seq">NumberField</A>(s) : [ RngUPolElt ] -&gt; FldNum</H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    DoLinearExtension: BoolElt          Default: <TT>false</TT></PRE>
+
+<PRE>    Abs: BoolElt                        Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Let K be a possibly trivial algebraic extension of Q.
+K will be referred to as the <A  HREF = "text360.htm#FldNum:CoefficientField">CoefficientField</A>.
+<P>
+Given a sequence s of nonconstant polynomials s<sub>1</sub>, ..., s<sub>m</sub>,
+that are irreducible over K,
+create the number field L=K(&alpha;<sub>1</sub>, ..., &alpha;<sub>m</sub>)
+obtained by adjoining a root &alpha;<sub>i</sub> of each s<sub>i</sub> to K.
+The polynomials s<sub>i</sub> are allowed to have coefficients in an
+order of K (or Z)
+or in K or a suitable field of fractions, but if in the latter cases
+denominators occur in
+the coefficients of s<sub>i</sub>, an integral polynomial is used instead
+of s<sub>i</sub>, as in the case of the definition of a number field
+by a single polynomial.
+<P>
+If m&gt;1 and <TT>Abs</TT> is <TT>false</TT>, a tower of extension fields
+L<sub>0</sub>=K&sub;L<sub>1</sub>=K(&alpha;<sub>m</sub>) &sub;L<sub>2</sub>=K(&alpha;<sub>m - 1</sub>, &alpha;<sub>m</sub>)&sub; ... &sub;L<sub>m</sub> = K(&alpha;<sub>1</sub>, ..., &alpha;<sub>m</sub>)=L
+is created, and L is a relative extension by s<sub>1</sub> over its ground field
+L<sub>m - 1</sub>=K(&alpha;<sub>2</sub>, ..., &alpha;<sub>m</sub>). Thus, this construction
+has the same effect as m applications of the <A  HREF = "text359.htm#FldNum:ext">ext</A> constructor.
+The angle bracket notation may be used to assign the m
+generators &alpha;<sub>i</sub> to identifiers: <TT>L&lt;a<sub>1</sub>, ..., a<sub>m</sub>&gt; :=
+NumberField([ s<sub>1</sub>, ..., s<sub>m</sub> ])</TT>; thus the first generator
+a<sub>1</sub>, which corresponds to <TT>L.1</TT>, generates L over
+its ground field.
+<P>
+Note that it is important to ensure that in each of the above steps
+the polynomial s<sub>i</sub> is irreducible over L<sub>i - 1</sub>; by default Magma will
+check that this is the case.  If the optional parameter <TT>Check</TT> is set
+to <TT>false</TT> then this checking will not be done. 
+<P>
+If the optional parameter <TT>Abs</TT> is changed to <TT>true</TT>, then a 
+non-simple extension will be returned. This is a extension of 
+the coefficient field of the f<sub>i</sub> but such that the base field of 
+L will be K. The ith generator will be a root of the ith
+polynomial in this case, but all of the generators will have L
+as parent. In this case, a sparse representation of number
+field elements will be used (based on multivariate polynomial
+rings). As a consequence, costs for arithmetic operations
+will (mainly) depend on the number of non-zero coefficients of the 
+elements involved rather than the field degree. This allows to define and work
+in fields of degree &lt;10<sup>6</sup>. However, for general elements this representation
+is slower than the dense (default) representation.
+<P>
+If the optional parameter <TT>DoLinearExtension</TT> is set to <TT>true</TT>,
+linear polynomials will not be removed from the list.
+</BLOCKQUOTE>
+<H5><A NAME = "3376"></A><A NAME = "FldNum:ext">ext</A>&lt; F | s1, ..., sn &gt; : FldNum, RngUPolElt, ..., RngUPolElt -&gt; FldNum</H5>
+<H5>ext&lt;F | s&gt; : FldNum, [RngUPolElt] -&gt; FldNum</H5>
+<H5>ext&lt; Q | s1, ..., sn &gt; : FldRat, RngUPolElt, ..., RngUPolElt -&gt; FldNum</H5>
+<H5>ext&lt; Q | s &gt; : FldRat, [RngUPolElt] -&gt; FldNum</H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Global: BoolElt                     Default: <TT>false</TT></PRE>
+
+<PRE>    Abs: BoolElt                        Default: <TT>false</TT></PRE>
+
+<PRE>    DoLinearExtension: BoolElt          Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Construct the number field defined by extending the number field 
+F by the polynomials 
+s<sub>i</sub> or the polynomials in the sequence s. Similar as  for
+<A  HREF = "text359.htm#FldNum:NumberField">NumberField</A><TT>(S)</TT> 
+described above, F may be Q.
+A tower of fields similar to that of
+<A  HREF = "text359.htm#FldNum:NumberField:seq">NumberField</A> is created and the same restrictions 
+as for that function
+apply to the polynomials that can be used in the constructor.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3377">Example <TT>FldNum_Creation (H35E1)</TT></A></H3>
+To create the number field Q(&alpha;), where &alpha; is a zero of
+the integer polynomial x<sup>4</sup> - 420x<sup>2</sup> + 40000, one may proceed as follows:
+<P>
+<P>
+<PRE>
+&gt; R&lt;x&gt; := PolynomialRing(Integers());
+&gt; f := x^4 - 420*x^2 + 40000;
+&gt; K&lt;y&gt; := NumberField(f);
+&gt; Degree(K);
+&gt; K;
+Number Field with defining polynomial x^4 - 420*x^2 + 40000 over the Rational 
+Field
+&gt; y^4 - 420*y^2;
+-40000
+</PRE>
+By assigning the generating element to y, we can from here on specify
+elements in the field as polynomials in y. The elements will always be printed
+as polynomials in Q[y]/f:
+<P>
+<P>
+<PRE>
+&gt; z := y^5/11;
+&gt; z;
+1/11*(420*y^3 - 40000*y)
+</PRE>
+<P>
+K can be further extended by the use of either <A  HREF = "text359.htm#FldNum:ext">ext</A> or <A  HREF = "text359.htm#FldNum:NumberField">NumberField</A>.
+<P>
+<P>
+<PRE>
+&gt; R&lt;y&gt; := PolynomialRing(K);
+&gt; f := y^2 + y + 1;
+&gt; L := ext&lt;K | f&gt;;
+&gt; L;
+Number Field with defining polynomial y^2 + y + 1 over K
+</PRE>
+This is equivalent to 
+<P>
+<P>
+<PRE>
+&gt; KL := NumberField([x^2 + x + 1, x^4 - 420*x^2 + 40000]);
+&gt; KL;
+Number Field with defining polynomial $.1^2 + $.1 + 1 over its ground field
+</PRE>
+but different to 
+<P>
+<P>
+<PRE>
+&gt; LK := NumberField([x^4 - 420*x^2 + 40000, x^2 + x + 1]);
+&gt; LK;
+Number Field with defining polynomial $.1^4 - 420*$.1^2 + 40000 over its ground 
+field
+</PRE>
+To illustrate the use of <TT>Global</TT>:
+<P>
+<P>
+<PRE>
+&gt; K1 := NumberField(x^3-2 : Global);
+&gt; K2 := NumberField(x^3-2 : Global);
+&gt; L1 := NumberField(x^3-2);
+&gt; L2 := NumberField(x^3-2);
+&gt; K1 eq K2;
+true
+&gt; K1 eq L1;
+false
+&gt; L1 eq L2;
+false;
+&gt; K1!K2.1;
+K1.1;
+&gt; K2!K1.1;
+K1.1
+&gt;&gt; L1!L2.1;
+     ^
+Runtime error in '!': Arguments are not compatible
+LHS: FldNum
+RHS: FldNumElt
+</PRE>
+A typical application of <TT>DoLinearExtension</TT> is as follows.
+To construct a Kummer extension of degree p,
+one has to start with a field containing the p-th roots of unity.
+In most situation this will be a field extension of degree p - 1, but 
+what happens if &zeta;<sub>p</sub> is already in the base field?
+<P>
+<P>
+<PRE>
+&gt; AdjoinRoot := function(K, p: DoLinearExtension := false)
+&gt;   f := CyclotomicPolynomial(p);
+&gt;   f := Polynomial(K, f);
+&gt;   f := Factorisation(f)[1][1];
+&gt;   return ext&lt;K|f : DoLinearExtension := DoLinearExtension&gt;;
+&gt; end function;
+&gt; K := NumberField(x^2+x+1);
+&gt; E1 := AdjoinRoot(K, 3);
+&gt; E1;       
+Number Field with defining polynomial x^2 + x + 1 over the
+Rational Field
+&gt; E2 := AdjoinRoot(K, 3 : DoLinearExtension);
+&gt; E2;
+Number Field with defining polynomial ext&lt;K|&gt;.1 - K.1 over 
+K
+&gt; Norm(E1.1);
+1
+&gt; Norm(E2.1);
+K.1
+&gt; Norm($1);
+1
+</PRE>
+<HR>
+<H5><A NAME = "3378">RadicalExtension(F, d, a) : Rng, RngIntElt, RngElt -&gt; FldNum</A></H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Let F be a number field. Let a be an integral element of F chosen 
+such that a is not an n-th power for any n dividing d. Returns
+the number field obtained by adjoining the d-th root of a to F.
+</BLOCKQUOTE>
+<H5><A NAME = "3379">SplittingField(F) : FldNum -&gt; FldNum, SeqEnum</A></H5>
+<H5>NormalClosure(F) : FldNum -&gt; FldNum, SeqEnum</H5>
+
+<PRE>    Abs: BoolElt                        Default: <TT>true</TT></PRE>
+
+<PRE>    Opt: BoolElt                        Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a number field F, this computes the splitting field of its defining
+polynomial.  The roots of the defining polynomial in the splitting field
+are also returned.
+<P>
+If <TT>Abs</TT> is <TT>true</TT>, the resulting field will be an absolute extension,
+otherwise a tower is returned.
+<P>
+If <TT>Opt</TT> is <TT>true</TT>, an attempt of using 
+<A  HREF = "text386.htm#RngOrd:OptimizedRepresentation">OptimizedRepresentation</A> is done. If successful, 
+the resulting field will have a much nicer representation. On the other
+hand, computing the intermediate maximal orders can be extremely time
+consuming.
+</BLOCKQUOTE>
+<H5><A NAME = "3380">SplittingField(f) : RngUPolElt -&gt; FldNum</A></H5>
+<BLOCKQUOTE>
+Given an irreducible polynomial f over Z, return its splitting field.
+</BLOCKQUOTE>
+<H5><A NAME = "3381">SplittingField(L) : [RngUPolElt] -&gt; FldNum, [FldNumElt]</A></H5>
+
+<PRE>    Abs: BoolElt                        Default: <TT>false</TT></PRE>
+
+<PRE>    Opt: BoolElt                        Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a sequence L of polynomials over a number field or the rational
+numbers, compute a common splitting field, ie. a field K such
+that every polynomial in L splits into linear factors over K.
+The roots of the polynomials are returned as the second return value.
+<P>
+If the optional parameter <TT>Abs</TT> is <TT>true</TT>, then a primitive element
+for the splitting field is computed and the field returned will be generated 
+by this primitive element over Q. If in addition <TT>Opt</TT> is also <TT>true</TT>, 
+then an optimized representation of K is computed as well.
+</BLOCKQUOTE>
+<H5><A NAME = "3382">sub&lt; F | e<sub>1</sub>, ..., e<sub>n</sub> &gt; : FldAlg, FldAlgElt, ..., FldAlgElt -&gt; FldAlg, Map</A></H5>
+<H5>sub&lt; F | S &gt; : FldAlg, SeqEnum -&gt; FldAlg, Map</H5>
+<BLOCKQUOTE>
+Given a number field F with coefficient field G and n elements e<sub>i</sub>&isin;F,
+return the number field H=G(e<sub>1</sub>, ..., e<sub>n</sub>) generated by the e<sub>i</sub>
+(over G), as well as
+the embedding homomorphism from H to F. 
+</BLOCKQUOTE>
+<H5><A NAME = "3383">MergeFields(F, L) : FldNum, FldNum -&gt; SeqEnum</A></H5>
+<H5><A NAME = "FldNum:CompositeFields">CompositeFields</A>(F, L) : FldNum, FldNum -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Let F and L be absolute number fields.  Returns a sequence of fields 
+[M<sub>1</sub>, ..., M<sub>r</sub>] such that each field M<sub>i</sub> contains both
+a root of the generating polynomial of F and a root of the 
+generating polynomial of L.
+<P>
+In detail: Suppose that F is the smaller field (wrt. the degree).
+As a first step we factorise the defining polynomial of L over F.
+For each factor obtained, an extension of F is constructed and then 
+transformed into an absolute extension. The sequence of
+extension fields is returned to the user.
+</BLOCKQUOTE>
+<H5><A NAME = "3384">Compositum(K, L) : FldNum, FldNum -&gt; FldNum</A></H5>
+<BLOCKQUOTE>
+For absolute number fields K and L, at least one of which must
+be normal, find a smallest common over field. Note that in contrast to
+<A  HREF = "text359.htm#FldNum:CompositeFields">CompositeFields</A> above the result here is essentially
+unique since one field was normal.
+</BLOCKQUOTE>
+<H5><A NAME = "3385">quo&lt; FldNum : R | f &gt; : RngUPol, RngUPolElt -&gt; FldNum</A></H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a ring of polynomials R in one variable over a number field K,
+create the number field
+K(&alpha;) obtained by adjoining a root &alpha; of f to K.
+Here the coefficient ring K of R is allowed to be the rational field Q.
+The polynomial f is allowed to have coefficients in K,
+but if coefficients occur in f which require
+denominator greater than 1 when expressed on the basis of 
+K, the polynomial will be replaced by an
+equivalent one requiring no such denominators: tilde f(x)=df(x),
+where d is a common denominator.
+The parameter <TT>Check</TT> determines whether the polynomial
+is checked for irreducibility.
+<P>
+The angle bracket notation may be used to assign the root &alpha; to
+an identifier: <TT>K&lt;y&gt; := quo&lt; FldNum : R | f &gt;</TT>.
+<P>
+If the category <TT>FldNum</TT> is not specified, <TT>quo&lt; R | f &gt;</TT>
+creates the quotient ring R/f as a generic ring (not as a number field),
+in which only elementary arithmetic is possible.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3386">Example <TT>FldNum_CompositeFields (H35E2)</TT></A></H3>
+To illustrate the use of <TT>CompositeFields</TT> we will use
+this function to compute the normal closure of Q(&alpha;) where 
+ &alpha; is a zero of
+the integer polynomial x<sup>3</sup> - 2:
+<P>
+<P>
+<P>
+<PRE>
+&gt; K := RadicalExtension(Rationals(), 3, 2);
+&gt; l := CompositeFields(K, K);
+&gt; l;
+[
+    Number Field with defining polynomial $.1^3 - 2 over the Rational 
+    Field,
+    Number Field with defining polynomial $.1^6 + 108 over the Rational 
+    Field
+]
+</PRE>
+The second element of l corresponds to the smallest field L<sub>2</sub>
+containing two distinct roots of x<sup>3</sup> - 2. Since the degree of K is
+3, L<sub>2</sub> is the splitting field of f and therefore the normal closure
+of K.
+<HR>
+<H5><A NAME = "3387"></A><A NAME = "FldNum:OptimizedRepresentation">OptimizedRepresentation</A>(F) : FldNum -&gt; FldNum, map</H5>
+<H5>OptimisedRepresentation(F) : FldNum -&gt; FldNum, map</H5>
+<BLOCKQUOTE>
+Given a number field F with ground field Q, this function will attempt
+to find an isomorphic field L with a better defining polynomial 
+than the one used to define F.  If such a polynomial
+is found then L is returned; otherwise F will be returned.
+For more details, please refer to <A  HREF = "text386.htm#RngOrd:OptimizedRepresentation">OptimizedRepresentation</A>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3388">Example <TT>FldNum_opt-rep (H35E3)</TT></A></H3>
+Some results of <TT>OptimizedRepresentation</TT> are shown.
+<P>
+<P>
+<PRE>
+&gt; R&lt;x&gt; := PolynomialRing(Rationals());
+&gt; K := NumberField(x^4-420*x^2+40000);
+&gt; L := OptimizedRepresentation(K);
+&gt; L ne K;
+true
+&gt; L;
+Number Field with defining polynomial x^4 - 4*x^3 - 
+    17*x^2 + 42*x + 59 over the Rational Field
+&gt; L eq OptimizedRepresentation(L);
+</PRE>
+<HR>
+<H4><A NAME = "3389">Maximal Orders</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+The maximal order (O)<sub>K</sub> is the ring of integers of an algebraic field
+consisting of all integral elements of the field; that is, elements which 
+are roots of monic integer polynomials. It may also be called the number ring
+of a number field. It is arguably the single most
+important invariant of a number field, in fact in number theory when one
+talks about units, ideals, etc. of number fields, it is typically
+implied that the maximal order is the underlying ring.
+<P>
+Maximal orders and orders in general are explained in detail in
+Chapter <A  HREF = "text383.htm#3640">NUMBER FIELDS AND ORDERS</A>, here we only give a very brief
+overview.
+<P>
+There are a number of algorithms which Magma uses whilst computing 
+maximal orders. The main ones are the Round--2 and
+the Round--4 methods
+(<A  HREF = "text355.htm#bib_cohen1">[Coh93]</A>, <A  HREF = "text355.htm#bib_Bai1">[Bai96]</A>, <A  HREF = "text355.htm#bib_pohst2">[Poh93]</A>, <A  HREF = "text355.htm#bib_pohst1">[PZ89]</A> for absolute extensions and
+<A  HREF = "text355.htm#bib_cohen2">[Coh00]</A>, <A  HREF = "text355.htm#bib_Fr1">[Fri97]</A>, <A  HREF = "text355.htm#bib_Pauli_R4">[Pau01]</A> for relative extensions).
+
+
+<H5><A NAME = "3390"></A><A NAME = "FldNum:MaximalOrder">MaximalOrder</A>(F) : FldNum -&gt; RngOrd</H5>
+<H5>IntegerRing(F) : FldNum -&gt; RngOrd</H5>
+<H5>Integers(F) : FldNum -&gt; RngOrd</H5>
+<H5>RingOfIntegers(F) : FldNum -&gt; RngOrd</H5>
+
+<PRE>    Al: MonStgElt                       Default: "Auto"</PRE>
+
+<PRE>    SetVerbose("MaximalOrder", n):      Maximum: 5</PRE>
+<BLOCKQUOTE>
+Create the ring of integers of the algebraic number field F. An integral basis 
+for F can be found as the basis of the maximal order.
+<P>
+For information on the parameters, see Section <A  HREF = "text386.htm#3683">Maximal Orders</A>.
+</BLOCKQUOTE>
+<H4><A NAME = "3391">Creation of Elements</A></H4>
+
+<P>
+<P>
+<P>
+Since number fields are though of as quotients of (multivariate) polynomial 
+rings, elements in those fields are represented as (multivariate) polynomials
+in the generator(s) of the field.
+
+
+<H5>One(K) : FldNum -&gt; FldNumElt</H5>
+
+<H5>Identity(K) : FldNum -&gt; FldNumElt</H5>
+<P>
+
+<H5>Zero(K) : FldNum -&gt; FldNumElt</H5>
+
+<H5>Representative(K) : FldNum -&gt; FldNumElt</H5>
+<P>
+
+
+<H5><A NAME = "3392">F ! a : FldNum, RngElt -&gt; FldNumElt</A></H5>
+<H5>elt&lt; F | a &gt; : FldNum, RngElt -&gt; FldNumElt</H5>
+<BLOCKQUOTE>
+Coerce a into the number field F. Here a may be an integer or a rational
+field element, or an element from a subfield of F, or from an
+order in such or any other field related to F through chains
+of subfields, optimised representation, absolute fields, etc.
+</BLOCKQUOTE>
+<H5><A NAME = "3393">F ! [a<sub>0</sub>, a<sub>1</sub>, ..., a<sub>m - 1</sub>] : FldNum, [RngElt] -&gt; FldNumElt</A></H5>
+<H5>elt&lt; F | [ a<sub>0</sub>, a<sub>1</sub>, ..., a<sub>m - 1</sub> ] &gt; : FldNum, SeqEnum[RngElt] -&gt; FldNumElt</H5>
+<H5>elt&lt; F | a<sub>0</sub>, a<sub>1</sub>, ..., a<sub>m - 1</sub>&gt; : FldNum, RngElt , ..., RngElt -&gt; FldNumElt</H5>
+<BLOCKQUOTE>
+Given the number field, F of degree m over its ground field G and 
+a sequence 
+[a<sub>0</sub>, ..., a<sub>m - 1</sub>] of elements of G, construct the 
+element a<sub>0</sub>&alpha;<sub>0</sub> + a<sub>1</sub>&alpha;<sub>1</sub> + ... a<sub>m - 1</sub>&alpha;<sub>m - 1</sub> of F
+where the &alpha;<sub>i</sub> are the basis elements of F.
+In case F was generated by a root of a single polynomial, we will always have
+&alpha;<sub>i</sub> = (F.1)<sup>i</sup>. If F was defined using multiple polynomials
+and the <TT>Abs</TT> parameter, the basis will consist of products of powers
+of the generators.
+</BLOCKQUOTE>
+<H5><A NAME = "3394">Random(F, m) : FldNum, RngIntElt -&gt; FldNumElt</A></H5>
+<BLOCKQUOTE>
+A random element of the number field F. The maximal size of 
+the coefficients is determined by the integer m.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3395">Example <TT>FldNum_Elements (H35E4)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; R&lt;x&gt; := PolynomialRing(Integers());
+&gt; K&lt;y&gt; := NumberField(x^4-420*x^2+40000);
+&gt; y^6;
+136400*y^2 - 16800000
+&gt; K![-16800000, 0, 136400, 0];
+136400*y^2 - 16800000
+&gt; K := NumberField([x^3-2, x^2-5]:Abs);
+&gt; Basis(K);
+[
+    1,
+    K.1,
+    K.1^2,
+    K.2,
+    K.1*K.2,
+    K.1^2*K.2
+]
+&gt; K![1,2,3,4,5,6];
+6*K.1^2*K.2 + 3*K.1^2 + 5*K.1*K.2 + 2*K.1 + 4*K.2 + 1
+</PRE>
+<HR>
+<H4><A NAME = "3396">Creation of Homomorphisms</A></H4>
+
+<P>
+<P>
+To specify homomorphisms from number fields,
+it is necessary to specify the image of the generating elements,
+and possible to specify a map on the coefficient field.
+
+
+<H5><A NAME = "3397">hom&lt; F -&gt; R | r &gt; : FldNum, Rng, RngElt -&gt; Map</A></H5>
+<H5>hom&lt; F -&gt; R | h, r &gt; : FldNum, Rng, Map, RngElt -&gt; Map</H5>
+<H5>hom&lt; F -&gt; R | r &gt; : FldNum, Rng, [RngElt] -&gt; Map</H5>
+<H5>hom&lt; F -&gt; R | h, r &gt; : FldNum, Rng, Map, [RngElt] -&gt; Map</H5>
+<BLOCKQUOTE>
+Given an algebraic number field F, defined as an extension of the coefficient
+field G, as well as some ring R, build the homomorphism &phi;
+obtained by sending the defining primitive element &alpha; of 
+F to the element r&isin;R. 
+<P>
+In case the field F was defined using multiple polynomials,
+instead of an image for the primitive element, one has to give
+images for each of the generators.
+<P>
+It is possible (if G=Q) and sometimes necessary (if G != Q)
+to specify a homomorphism &phi; on F
+by specifying its action on G by providing a homomorphism
+h with G as its domain and R its codomain together with the 
+image of &alpha;. If R does not cover G then the homomorphism h
+from G into R is necessary to ensure that the ground field can be 
+mapped into R.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3398">Example <TT>FldNum_Homomorphisms (H35E5)</TT></A></H3>
+We show a way to embed the field Q(Sqrt(2)) in Q(Sqrt(2) + Sqrt(3)).
+The application of the homomorphism suggests how the image could have 
+been chosen.
+<P>
+<P>
+<PRE>
+&gt; R&lt;x&gt; := PolynomialRing(Integers());
+&gt; K&lt;y&gt; := NumberField(x^2-2);
+&gt; KL&lt;w&gt; := NumberField(x^4-10*x^2+1);
+&gt; H := hom&lt; K -&gt; KL | (9*w-w^3)/2 &gt;;
+&gt; H(y);
+1/2*(-w^3 + 9*w)
+&gt; H(y)^2;
+2
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text360.htm">[Next]</A><A  HREF = "text358.htm">[Prev]</A> <A  HREF = "text360.htm">[Right]</A> <A  HREF = "text358.htm">[Left]</A> <A  HREF = "text356.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

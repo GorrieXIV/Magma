@@ -1,0 +1,43 @@
+"Source: Text/Group/GrpFP_1.text";
+"Line: 2179";
+"Date: Wed Jun  8 13:59:10 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Group/GrpFP_1.text, line: 2179
+// Example: H75E20 ()
+print "Example: H75E20";
+ei := GetEchoInput();
+SetEchoInput(true);
+function MyIsInfinite(F)
+
+ // ...
+
+ // quotient approach: check whether an obviously infinite
+ //    normal subgroup can be found in reasonable time.
+ S := [ Alt(5), PSL(2,7), PSL(2,9), PSL(2,11) ];
+ for G in S do
+    P := HomomorphismsProcess(F, G : Surjective := false,
+                                     TimeLimit := 5);
+    while IsValid(P) and not IsEmpty(P) do
+      if DefinesHomomorphism(P) then
+         f := Homomorphism(P);
+         if 0 in AQInvariants(Kernel(f)) then
+            print "found infinite normal subgroup";
+            print "Hence group is infinite";
+            return true;
+         end if;
+      end if;
+      if IsValid(P) then
+         NextElement(~P);
+      end if;
+   end while;
+ end for;
+ print "quotient approach failed; trying other strategies";
+
+ // ...
+
+end function;
+F := Group< a,b |
+   a*b^-1*a^-1*b*a^-1*b^-1*a*b*b,
+   a*b^-1*a^-1*b*a*a*b*a^-1*b^-1*a*b^-1*a^-1*b*a*b*a^-1*b^-1 >;
+MyIsInfinite(F);
+SetEchoInput(ei);

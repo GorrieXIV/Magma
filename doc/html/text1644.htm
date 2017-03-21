@@ -1,0 +1,554 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Orthogonal Complements</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1645.htm">[Next]</A><A  HREF = "text1643.htm">[Prev]</A> <A  HREF = "text1645.htm">[Right]</A> <A  HREF = "text1643.htm">[Left]</A> <A  HREF = "text1635.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "18366">Orthogonal Complements</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1644.htm#18367">Complements</A>
+<LI> <A  HREF = "text1644.htm#18371">Dual Abelian Variety</A>
+<LI> <A  HREF = "text1644.htm#18376">Intersection Pairing</A>
+<LI> <A  HREF = "text1644.htm#18381">Projections</A>
+<LI> <A  HREF = "text1644.htm#18385">Left and Right Inverses</A>
+<LI> <A  HREF = "text1644.htm#18391">Congruence Computations</A>
+</UL>
+<H4><A NAME = "18367">Complements</A></H4>
+
+<P>
+<P>
+<P>
+The following two commands find a complement of an abelian subvariety
+of an abelian variety.  Existence of a complement is guaranteed by the
+Poincare reducibility theorem (if we were just working with
+n-dimensional complex tori, then there need not be complements of
+subtori).  Magma computes a complement using the module-theoretic
+structure of the ambient variety.
+
+
+<H5><A NAME = "18368">Complement(A : parameters) : ModAbVar -&gt;  ModAbVar, MapModAbVar</A></H5>
+
+<PRE>    IntPairing: BoolElt                 Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The complement of the image of the abelian variety 
+A under the first embedding of A 
+(the first map in the sequence returned by <A  HREF = "text1637.htm#ModAbVar:embed">Embeddings</A>).
+If the parameter <TT>IntPairing</TT> is set to <TT>true</TT>, the intersection
+pairing is used to compute the homology complement.
+</BLOCKQUOTE>
+<H5><A NAME = "18369">ComplementOfImage(phi : parameters) : MapModAbVar -&gt;  ModAbVar, MapModAbVar</A></H5>
+
+<PRE>    IntPairing: BoolElt                 Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Suppose &phi; :A to B is a morphism of abelian varieties. By the 
+Poincare reducibility theorem, there is an abelian variety C such that 
+&phi; (A) + C = B and the intersection of &phi; (A) with C is 
+finite. This intrinsic returns a choice of C and an embedding of C into 
+B.  
+If the parameter <TT>IntPairing</TT> is set to <TT>true</TT>, the intersection
+pairing is used to compute the homology complement.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "18370">Example <TT>ModAbVar_Complements-Complements (H142E88)</TT></A></H3>
+<P>
+We compute a decomposition of J<sub>0</sub>(33) as a product of simples,
+then find a decomposition of the complement of one of the factors.
+<P>
+<P>
+<PRE>
+&gt; J := JZero(33);
+&gt; D := Decomposition(J); D;
+[
+    Modular abelian variety 33A of dimension 1, level 3*11 and 
+    conductor 3*11 over Q,
+    Modular abelian variety N(11,33,1)(11A) of dimension 1, level
+    3*11 and conductor 11 over Q,
+    Modular abelian variety N(11,33,3)(11A) of dimension 1, level
+    3*11 and conductor 11 over Q
+]
+&gt; A := D[3];
+&gt; B := Complement(A);
+&gt; B;
+Modular abelian variety of dimension 2 and level 3*11 over Q
+&gt; Decomposition(B);
+[
+    Modular abelian variety image(33A) of dimension 1, level 3*11
+    and conductor 3*11 over Q,
+    Modular abelian variety image(11A) of dimension 1, level 3*11
+    and conductor 11 over Q
+]
+</PRE>
+<P>
+Here we compute a somewhat random map from J<sub>0</sub>(11) to J<sub>0</sub>(33),
+and compute the complement of the image. 
+<P>
+<P>
+<PRE>
+&gt; phi := 2*NaturalMap(JZero(11),JZero(33),1) - 3*NaturalMap(JZero(11),
+&gt;                        JZero(33),3);
+&gt; phi;
+Homomorphism from JZero(11) to JZero(33) given on integral homology by:
+[ 2  6 -7 -2 -6  3]
+[ 5 -2 -3 -1 -1  5]
+&gt; C,pi := ComplementOfImage(phi);
+&gt; C;
+Modular abelian variety of dimension 2 and level 3*11 over Q
+&gt; Decomposition(C);
+[
+    Modular abelian variety image(33A) of dimension 1, level 3*11
+    and conductor 3*11 over Q,
+    Modular abelian variety image(11A) of dimension 1, level 3*11
+    and conductor 11 over Q
+]
+</PRE>
+<HR>
+<H4><A NAME = "18371">Dual Abelian Variety</A></H4>
+
+<P>
+<P>
+<P>
+It is possible to compute an abelian variety which is dual to a given variety
+in many of the cases that are of interest. Let A be an abelian variety
+and
+suppose the modular map A to J is injective, where J is
+attached to a space of modular symbols and J is isomorphic to its
+dual (e.g., J=J<sub>0</sub>(N)).  To compute the dual of A, we find a
+complement B of A in J whose homology is orthogonal to the
+homology of A with respect to the intersection pairing.  This can
+frequently be accomplished (e.g., when A is attached to a newform)
+without using the intersection pairing by finding a complement B such
+that the rational homology of B as a module over the Hecke algebra
+has no simple factors in common with that of A.  Then J/B is
+isomorphic to the dual of A.
+
+
+<H5><A NAME = "18372">IsDualComputable(A) : ModAbVar -&gt;  BoolElt, ModAbVar</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if the dual of the abelian variety A can be computed, 
+and the dual. Otherwise, 
+return <TT>false</TT> and a message.  
+</BLOCKQUOTE>
+<H5><A NAME = "18373">Dual(A) : ModAbVar -&gt;  ModAbVar</A></H5>
+<BLOCKQUOTE>
+The dual abelian variety of the abelian variety A. 
+The
+modular map to a modular symbols abelian variety must be injective.  
+</BLOCKQUOTE>
+<H5><A NAME = "18374">ModularPolarization(A) : ModAbVar -&gt;  MapModAbVar</A></H5>
+<BLOCKQUOTE>
+The polarization on the abelian variety A induced by pullback of the 
+theta divisor.  
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "18375">Example <TT>ModAbVar_Complements-Dual_Abelian_Variety (H142E89)</TT></A></H3>
+We compute the dual of a 2-dimensional newform abelian variety of
+level 43, and note that it is isomorphic to itself.
+<P>
+<P>
+<PRE>
+&gt; J := JZero(43);
+&gt; A := Decomposition(J)[2]; A;
+Modular abelian variety 43B of dimension 2, level 43 and 
+conductor 43^2 over Q
+&gt; Adual := Dual(A); Adual;
+Modular abelian variety of dimension 2 and level 43 over Q
+&gt; IsIsomorphic(A,Adual);
+true Homomorphism from 43B to modular abelian variety of 
+dimension 2 given on integral homology by:
+[-1  1 -1  1]
+[-1  0  1  0]
+[-1  0  0  0]
+[ 0  0 -1  1]
+</PRE>
+<P>
+Next we compute the dual of a 2-dimensional newform abelian variety of level
+69, and find that it is not isomorphic to itself.   
+<P>
+<P>
+<PRE>
+&gt; A := Decomposition(JZero(69))[2]; A;
+Modular abelian variety 69B of dimension 2, level 3*23 and 
+conductor 3^2*23^2 over Q
+&gt; Adual := Dual(A); Adual;
+Modular abelian variety of dimension 2 and level 3*23 over Q
+&gt; IsIsomorphic(A,Adual);
+false
+</PRE>
+<P>
+One can show that the natural map from A to its dual is a
+polarization of degree 484.
+<P>
+<P>
+<PRE>
+&gt; phi := NaturalMap(A,Adual);
+&gt; phi;
+Homomorphism N(1) from 69B to modular abelian variety of 
+dimension 2 given on integral homology by:
+[  3   1   5  -7]
+[ -1   5  -1   1]
+[ -6   4  -1   7]
+[ 11  -7   6 -12]
+&gt; Degree(phi);
+484
+&gt; Factorization(484);
+[ &lt;2, 2&gt;, &lt;11, 2&gt; ]
+1
+</PRE>
+<HR>
+<H4><A NAME = "18376">Intersection Pairing</A></H4>
+
+<P>
+<P>
+<P>
+These commands compute the matrix of the intersection pairing on
+homology with respect to the fixed basis for rational or integral
+homology.  If A is not a modular symbols abelian variety (such as
+J<sub>0</sub>(N)), then the intersection pairing on homology computed below
+<I>is the one obtained by pulling back from the pairing on the codomain of
+the modular embedding</I> of A.  This may not be what you expect, but
+is easy to compute in great generality.
+<P>
+Computation of intersection pairings is currently only implemented
+for weight 2.
+
+
+<H5><A NAME = "18377">IntersectionPairing(H) : ModAbVarHomol -&gt;  AlgMatElt</A></H5>
+<BLOCKQUOTE>
+The intersection pairing matrix on the basis of the homology H
+of an abelian variety.  
+</BLOCKQUOTE>
+<H5><A NAME = "18378">IntersectionPairing(A) : ModAbVar -&gt;  AlgMatElt</A></H5>
+<BLOCKQUOTE>
+The intersection pairing matrix on the basis for the rational 
+homology of the abelian variety A, pulled back using the modular embedding.  
+</BLOCKQUOTE>
+<H5><A NAME = "18379">IntersectionPairingIntegral(A) : ModAbVar -&gt;  AlgMatElt</A></H5>
+<BLOCKQUOTE>
+The intersection pairing matrix on the basis for the integral 
+homology of the abelian variety A, pulled back using the modular embedding.  
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "18380">Example <TT>ModAbVar_Complements-Intersection_Pairing (H142E90)</TT></A></H3>
+The intersection pairing on J<sub>0</sub>(11) is very simple.
+<P>
+<P>
+<PRE>
+&gt; J := JZero(11);
+&gt; IntersectionPairing(J);
+[ 0 -1]
+[ 1  0]
+&gt; IntersectionPairingIntegral(J);
+[ 0 -1]
+[ 1  0]
+</PRE>
+<P>
+The intersection pairing associated to J<sub>0</sub>(33) is more interesting.
+Note that the representing matrix is skew symmetric and has
+determinant 1.
+<P>
+<P>
+<PRE>
+&gt; I := IntersectionPairingIntegral(JZero(33)); I;
+[ 0  1  0  1  0  1]
+[-1  0  0  1  0  1]
+[ 0  0  0  1  0  1]
+[-1 -1 -1  0  0  1]
+[ 0  0  0  0  0  1]
+[-1 -1 -1 -1 -1  0]
+&gt; Determinant(I);
+1
+</PRE>
+<P>
+The intersection pairing on <B>33A</B> is surprising, because it is
+pulled back from the intersection pairing on J<sub>0</sub>(33).  Thus instead
+of having determinant 1, it has determinant 9.  
+<P>
+<P>
+<PRE>
+&gt; A := ModularAbelianVariety("33A");  A;
+Modular abelian variety 33A of dimension 1 and level 3*11 over Q
+&gt; I := IntersectionPairingIntegral(A); I;
+[ 0  3]
+[-3  0]
+&gt; Determinant(I);
+9
+</PRE>
+<HR>
+<H4><A NAME = "18381">Projections</A></H4>
+
+<P>
+<P>
+<P>
+Suppose &phi; is a homomorphism from A to B.  Then the image 
+&phi;(A) is an abelian subvariety of B.  The commands below compute
+a map &pi; in the endomorphism algebra of B whose image is
+&phi;(A) and such that &pi;<sup>2</sup> = &pi;, i.e., &pi;
+is projection onto &phi;(A).  A projection map is not canonical,
+unless it is required to respect the intersection pairing.
+
+
+<H5><A NAME = "18382">ProjectionOnto(A : parameters) : ModAbVar -&gt;  MapModAbVar</A></H5>
+<H5>ProjectionOntoImage(phi : parameters) : MapModAbVar -&gt;  MapModAbVar</H5>
+
+<PRE>    IntPairing: BoolElt                 Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a morphism &phi;: A to B return a projection onto &phi;(A) as an element
+of E tensor Q, where E is the endomorphism ring of B.
+If the optional parameter <TT>IntPairing</TT> is set to <TT>true</TT>,
+then the projection is also required to respect the intersection
+pairing, which uniquely determines &pi;.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "18383">Example <TT>ModAbVar_Complements-Projections (H142E91)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; pi := ProjectionOnto(ModularAbelianVariety("33A"));  pi;
+Homomorphism pi from JZero(33) to JZero(33) (up to isogeny) on 
+integral homology by:
+ (not printing 6x6 matrix)
+&gt; Matrix(pi);
+[ 2/3  1/3 -1/3  1/3    0 -2/3]
+[ 1/3  2/3 -2/3  2/3    0 -1/3]
+[ 1/3  1/3 -1/3  1/3    0 -1/3]
+[   0  2/3 -2/3  2/3    0    0]
+[   0  1/3 -1/3  1/3    0    0]
+[-1/3  1/3 -1/3  1/3    0  1/3]
+&gt; pi^2 eq pi;
+true
+&gt; Rank(pi);
+1
+</PRE>
+<HR>
+<H3><A NAME = "18384">Example <TT>ModAbVar_Complements-Projections2 (H142E92)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; phi := NaturalMap(JZero(11),JZero(44));
+&gt; pi := ProjectionOntoImage(phi); pi;
+Homomorphism pi from JZero(44) to JZero(44) (up to isogeny) on 
+integral homology by:
+ (not printing 8x8 matrix)
+&gt; A := Image(5*pi); A;
+Modular abelian variety of dimension 1 and level 2^2*11 over Q
+&gt; IsIsomorphic(JZero(11),A);
+true Homomorphism from JZero(11) to modular abelian variety of 
+dimension 1 given on integral homology by:
+[ 0 -1]
+[-1  1]
+</PRE>
+<HR>
+<H4><A NAME = "18385">Left and Right Inverses</A></H4>
+
+<P>
+<P>
+<P>
+Left and right inverses of homomorphisms in the category of abelian varieties up
+to isogeny can be computed.  A left or right inverse times a minimal integer
+can be computed instead so that the result is a homomorphism.
+<P>
+Magma computes a right inverse of a finite-degree homomorphism &phi;
+by finding the projection map onto the complement of the image of
+&phi;, and composing with a inverse from the image.  To find a left
+inverse of a surjective homomorphism &phi;:A to B, Magma computes
+the complement C of the kernel of &phi; and inverts &phi; restricted to C.
+This complement C is an
+abelian subvariety of A that maps isomorphically onto B.
+
+
+<H5><A NAME = "18386">LeftInverse(phi : parameters) : MapModAbVar -&gt;  MapModAbVar, RngIntElt</A></H5>
+
+<PRE>    IntPairing: BoolElt                 Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a surjective homomorphism &phi; : A to B of abelian varieties
+return a homomorphism &psi; :B to A of minimal degree in the 
+category of abelian varieties up to isogeny such that &psi; * &phi;  is the 
+identity map on B and an integer d such that d * &psi; is a homomorphism. 
+<P>
+If the parameter <TT>IntPairing</TT> is <TT>true</TT> then the intersection pairing
+is used to compute the homology complement.
+</BLOCKQUOTE>
+<H5><A NAME = "18387">LeftInverseMorphism(phi : parameters) : MapModAbVar -&gt;  MapModAbVar</A></H5>
+
+<PRE>    IntPairing: BoolElt                 Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a surjective homomorphism &phi; : A to B of abelian varieties,
+return a homomorphism &psi; :B to A of minimal degree such that 
+&psi; * &phi; is multiplication by an integer.
+<P>
+If the parameter <TT>IntPairing</TT> is <TT>true</TT> then the intersection pairing
+is used to compute the homology complement.
+</BLOCKQUOTE>
+<H5><A NAME = "18388">RightInverse(phi : parameters) : MapModAbVar -&gt;     MapModAbVar, RngIntElt</A></H5>
+
+<PRE>    IntPairing: BoolElt                 Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a homomorphism &phi; : A to B of abelian varieties with finite kernel,
+return a map &psi; :B to  A in the category of abelian varieties up 
+to isogeny such that &phi; * &psi; :A to  A is the identity map. 
+<P>
+If the parameter <TT>IntPairing</TT> is <TT>true</TT> then the intersection pairing
+is used to compute the homology complement.
+</BLOCKQUOTE>
+<H5><A NAME = "18389">RightInverseMorphism(phi : parameters) : MapModAbVar -&gt;  MapModAbVar</A></H5>
+
+<PRE>    IntPairing: BoolElt                 Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a homomorphism &phi; : A to B of abelian varieties with finite kernel
+return a minimal-degree homomorphism &psi; :B to A such that 
+&phi; * &psi; :A to A is multiplication by an integer. 
+<P>
+If the parameter <TT>IntPairing</TT> is <TT>true</TT> then the intersection pairing
+is used to compute the homology complement.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "18390">Example <TT>ModAbVar_Complements-Left_and_Right_Inverses (H142E93)</TT></A></H3>
+First we compute the difference &phi; of the two natural degeneracy
+maps J<sub>0</sub>(11)to J<sub>0</sub>(33), which has as kernel a group of
+order 5 (called the Shimura subgroup in this case). 
+<P>
+<P>
+<PRE>
+&gt; J11 := JZero(11);  J33 := JZero(33);  
+&gt; d1 := NaturalMap(J11,J33,1);
+&gt; d3 := NaturalMap(J11,J33,3);
+&gt; phi := d1-d3;
+&gt; Degree(phi);
+5
+</PRE>
+A right inverse of &phi; is a homomorphism up to isogeny
+from J<sub>0</sub>(33) to J<sub>0</sub>(11).
+<P>
+<P>
+<PRE>
+&gt; RightInverse(phi);
+Homomorphism from JZero(33) to JZero(11) (up to isogeny) on integral 
+homology by:
+ (not printing 6x2 matrix)
+15
+&gt; RightInverseMorphism(phi);
+Homomorphism from JZero(33) to JZero(11) (not printing 6x2 matrix)
+&gt; phi*RightInverseMorphism(phi);
+Homomorphism from JZero(11) to JZero(11) given on integral homology by:
+[15  0]
+[ 0 15]
+</PRE>
+<P>
+Finally we find a left inverse of a map from J<sub>0</sub>(33) to J<sub>0</sub>(11).
+<P>
+<P>
+<PRE>
+&gt; psi := NaturalMap(J33,J11,1) - NaturalMap(J33,J11,3);
+&gt; IsSurjective(psi);
+true
+&gt; LeftInverse(psi);
+Homomorphism from JZero(11) to JZero(33) (up to isogeny) on integral 
+homology by:
+[ 1/5    0 -2/5  2/5 -3/5    0]
+[ 1/5 -1/5    0  1/5 -2/5  1/5]
+5
+&gt; LeftInverseMorphism(psi);
+Homomorphism from JZero(11) to JZero(33) given on integral homology by:
+[ 1  0 -2  2 -3  0]
+[ 1 -1  0  1 -2  1]
+&gt; LeftInverseMorphism(psi)*psi;
+Homomorphism from JZero(11) to JZero(11) given on integral homology by:
+[5 0]
+[0 5]
+</PRE>
+<HR>
+<H4><A NAME = "18391">Congruence Computations</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+  The congruence modulus and the modular degree are each an integer which 
+  measures "congruences"
+  between an abelian variety and other abelian varieties.    These two
+  quantities are related because if a prime divides the modular degree, then
+  it divides the congruence modulus, though the converse need not be true
+  (see the example below).
+
+
+<H5><A NAME = "18392">CongruenceModulus(A) : ModAbVar -&gt;  RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given A=A<sub>f</sub>, an abelian variety attached to a newform f, return the
+congruence modulus 
+of the newform f, taken in the space S<sub>2</sub>(N, &epsilon; ), where &epsilon;  
+is the character of the newform,  
+which is an integer that measures congruences
+between f and nonconjugate forms in the Peterson complement of
+f.  More precisely, if f&isin;S<sub>k</sub>(N, eps), which is the direct sum
+of the spaces of modulus forms with character a Galois conjugate of
+eps, then we define the congruence modulus of f to be the order
+of the group S<sub>k</sub>(N, eps;Z)/(W + W<sup>perp</sup>), where W is the
+intersection of S<sub>k</sub>(N, eps;Z) with 
+the span of the Galois conjugates of f.
+</BLOCKQUOTE>
+<H5><A NAME = "18393">ModularDegree(A) : ModAbVar -&gt;  RngIntElt</A></H5>
+<BLOCKQUOTE>
+The modular degree of the abelian variety A.
+This is the square root of the degree of
+the map from A to its dual A' induced by virtue of A being
+modular. In some cases where no algorithm is implemented for computing
+A', a message is printed and the square of the degree of the
+composition of the modular embedding with the modular parameterization
+is computed. When any weight of a factor of A is bigger than 2 the
+square root is not taken.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "18394">Example <TT>ModAbVar_Complements-Congruence_Computations (H142E94)</TT></A></H3>
+<P>
+The modular degree and congruence modulus of one of the two elliptic
+curves of conductor 54 are interesting because they are not equal.
+This is the smallest level of an elliptic curve where these two 
+invariants differ.  (For more details, see <A  HREF = "text1634.htm#bib_agashe-stein-manin">[AS04]</A>.)
+<P>
+<P>
+<PRE>
+&gt; J := JZero(54);
+&gt; A,B := Explode(Decomposition(NewSubvariety(J)));
+&gt; ModularDegree(A);
+6
+&gt; CongruenceModulus(A);
+6
+&gt; ModularDegree(B);
+2
+&gt; CongruenceModulus(B);
+6
+</PRE>
+The modular degree and congruence modulus are 4 for a certain abelian surface
+A of level 65.  We also compute the kernel of the modular map and see that it
+is A[2].
+<P>
+<P>
+<P>
+<PRE>
+&gt; J := JZero(65);
+&gt; A := J(2); A;
+Modular abelian variety 65B of dimension 2, level 5*13 and 
+conductor 5^2*13^2 over Q
+&gt; CongruenceModulus(A);
+4
+&gt; ModularDegree(A);
+4
+&gt; phi := NaturalMap(A,Dual(A));
+&gt; Invariants(Kernel(phi));
+[ 2, 2, 2, 2 ]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1645.htm">[Next]</A><A  HREF = "text1643.htm">[Prev]</A> <A  HREF = "text1645.htm">[Right]</A> <A  HREF = "text1643.htm">[Left]</A> <A  HREF = "text1635.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

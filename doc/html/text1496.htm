@@ -1,0 +1,195 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Two-Selmer Set of a Curve</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1497.htm">[Next]</A><A  HREF = "text1495.htm">[Prev]</A> <A  HREF = "text1497.htm">[Right]</A> <A  HREF = "text1495.htm">[Left]</A> <A  HREF = "text1483.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16996">Two-Selmer Set of a Curve</A></H3>
+
+<P>
+<P>
+<P>
+Let C: y<sup>2</sup>=f(x) be a hyperelliptic curve of genus g over a number field k.
+We say &pi;<sub>&delta;</sub>: D<sub>&delta;</sub> -&gt; C is a <I>two-cover</I> of C if, over an
+algebraic closure, &pi;<sub>&delta;</sub> is isomorphic as a cover to the pull-back of an
+embedding of C into its Jacobian along multiplication by 2. The two-Selmer
+set classifies the k-isomorphism classes of two-covers of C that have points
+everywhere locally.
+<P>
+The hyperelliptic involution acts on such covers by pull-back:
+&iota;<sup> * </sup>(&pi;<sub>&delta;</sub>)=&pi;<sub>&delta;</sub><IMG SRC="open.gif" ALT="" WIDTH=7 HEIGHT=7>&iota; (apply &iota; after &pi;<sub>&delta;</sub>).
+The <I>fake</I> two-Selmer set is the set
+{&delta;: D<sub>&delta;</sub>(k<sub>v</sub>) != emptyset  for all places v of k}/&iota;<sup> * </sup>
+If this set is empty, then C has no k-rational points. This can happen even
+if C itself does have points everywhere locally. If the set is non-empty,
+it gives information about rational points on C. 
+See <A  HREF = "text1482.htm#bib_brusto-twocovdesc">[BS09]</A> for the underlying theory as well as a description
+of an algorithm to compute the set.
+
+
+<H5><A NAME = "16997">TwoCoverDescent(C) : CrvHyp -&gt; SetEnum, Map, [Map, SeqEnum]</A></H5>
+
+<PRE>    Bound: RngIntElt                    Default: -1</PRE>
+
+<PRE>    Fields: SetEnum                     Default: </PRE>
+
+<PRE>    Raw: BoolElt                        Default: <TT>false</TT></PRE>
+
+<PRE>    PrimeBound: RngIntElt               Default: 0</PRE>
+
+<PRE>    PrimeCutoff: RngIntElt              Default: 0</PRE>
+<BLOCKQUOTE>
+Computes the fake 2-Selmer set as an abstract set. The map returned as second
+value can be used to obtain a representation of these abstract elements as
+elements in an algebra, which allows explicit construction of the corresponding
+cover.
+<P>
+<P>
+The optional parameters <TT>Bound</TT>, <TT>Fields</TT> and <TT>Raw</TT> perform the same function as for
+<A  HREF = "text1495.htm#TwoSelmerGroup">TwoSelmerGroup</A> and we refer to it for their description. The remaining optional parameters are
+specific to this routine and we describe them here.
+<P>
+<P>
+<TT>PrimeBound</TT>: Two covers are of very high genus. Hence, according to the Weil bounds, they can have
+local obstructions at very large good primes. For instance, for genus 2 one should check all primes up to
+norm 1153 and for genus 3 one should check all primes up to norm 66553. This is very time consuming. One
+can use <TT>PrimeBound</TT> to restrict the good primes to be considered to only those whose norm do not exceed
+the given bound. In principle, this can result in a larger set being returned than the proper two-selmer set.
+<P>
+<TT>PrimeCutoff</TT>: If the curve has bad reduction at some large prime, it can be prohibitively expensive to
+check the local conditions at this prime. This bound allows a restriction on the norm of bad primes where local
+conditions are considered. Setting this bound can result in a larger set being returned than the proper
+two-selmer set.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16998">Example <TT>CrvHyp_Two-cover descent (H131E37)</TT></A></H3>
+<P>
+As an illustration of <TT>TwoCoverDescent</TT>, we give the Magma-code to perform the computations
+related to the examples in <A  HREF = "text1482.htm#bib_brusto-twocovdesc">[BS09]</A>.
+First we give some examples of genus 2 curves that have points everywhere locally, but
+have an empty 2-Selmer set and hence have no rational points.
+<P>
+<P>
+<PRE>
+&gt; Q:=Rationals();
+&gt; Qx&lt;x&gt;:=PolynomialRing( Q );
+&gt; C:=HyperellipticCurve(2*x^6+x+2);
+&gt; Hk,AtoHk:=TwoCoverDescent(C);
+&gt; #Hk;
+0
+&gt; C:=HyperellipticCurve(-x^6+2*x^5+3*x^4-x^3+x^2+x-3);
+&gt; Hk,AtoHk:=TwoCoverDescent(C);
+&gt; #Hk;
+0
+</PRE>
+<P>
+In the following we consider a curve of genus 2 that does have rational points. In fact, its Jacobian has Mordell-Weil
+rank 2. We compute its two-covers with points everywhere locally. There are two. They both cover an elliptic curve over
+a quadratic extension. We use <TT>Chabauty</TT> following <A  HREF = "text1482.htm#bib_bruin-phdthesis">[Bru02]</A> to determine the rational
+points on C. First we check that we can represent the fake two-Selmer set of the curve with some nice elements.
+<P>
+<P>
+<PRE>
+&gt; f:=2*x^6+x^4+3*x^2-2;
+&gt; C:=HyperellipticCurve(f);
+&gt; Hk,AtoHk:=TwoCoverDescent(C:PrimeBound:=30);
+&gt; A&lt;theta&gt;:=Domain(AtoHk);
+&gt; deltas:={-1-theta,1-theta};
+&gt; {AtoHk(d): d in deltas} eq Hk;
+true
+</PRE>
+Next, we determine a factorisation of f into a quartic and a quadratic polynomial.
+<P>
+<P>
+<PRE>
+&gt; L&lt;alpha&gt;:=NumberField(x^2+x+2);
+&gt; LX&lt;X&gt;:=PolynomialRing(L);
+&gt; g:=(X^2-1/2)*(X^2-alpha);
+&gt; h:=2*(X^2+alpha+1);
+&gt; g*h eq Evaluate(f,X);
+true
+</PRE>
+For some &gamma;=&gamma;(&delta;), we have that a 2-cover D<sub>&delta;</sub> covers the elliptic curve
+E:y<sup>2</sup>=&gamma; g(x).
+This allows us to translate the question about rational points
+on D<sub>&delta;</sub> into a question about L-rational points on E with the additional
+property that x is rational. We verify that the two values of &delta; we found above,
+correspond to &gamma;=(1 - &alpha;)/2.
+<P>
+<P>
+<PRE>
+&gt; LTHETA&lt;THETA&gt;:=quo&lt;LX|g&gt;;
+&gt; j:=hom&lt;A-&gt;LTHETA|THETA&gt;;
+&gt; gamma:=1/2*(-alpha + 1);
+&gt; {Norm(j(delta)):delta in deltas} eq {gamma};
+true
+&gt; E:=HyperellipticCurve( gamma * g );
+&gt; P1:=ProjectiveSpace(Rationals(),1);
+&gt; EtoP1:=map&lt;E-&gt;P1|[E.1,E.3]&gt;;
+</PRE>
+We present E explicitly as an elliptic curve to magma
+<P>
+<P>
+<PRE>
+&gt; P0:=E![1,(1-alpha)/2];
+&gt; Eprime,EtoEprime:=EllipticCurve(E,P0);
+&gt; Etilde:=EllipticCurve(X^3+(1-alpha)*X^2+(2-9*alpha)*X+(16-2*alpha));
+&gt; EprimeToEtilde:=Isomorphism(Eprime,Etilde);
+&gt; EtoEtilde:=EtoEprime*EprimeToEtilde;
+&gt; EtildeToP1:=Expand(Inverse(EtoEtilde)*EtoP1);
+</PRE>
+We determine a group of finite odd index in E(L).
+<P>
+<P>
+<PRE>
+&gt; success,MWgrp,MWmap:=PseudoMordellWeilGroup(Etilde);
+&gt; success;
+true
+&gt; MWgrp;
+Abelian Group isomorphic to Z/2 + Z
+Defined on 2 generators
+Relations:
+    2*MWgrp.1 = 0
+</PRE>
+We determine the set of L-rational points on E that have
+a Q-rational image under <TT>EtildeToP1</TT>.
+<P>
+<P>
+<PRE>
+&gt; V,R:=Chabauty(MWmap,EtildeToP1:IndexBound:=2);
+&gt; V;
+{
+    0,
+    MWgrp.1 - MWgrp.2,
+    MWgrp.1,
+    -MWgrp.2
+}
+&gt; R;
+4
+</PRE>
+Since we found earlier that in this case, there is only one value of &gamma; to consider,
+we know that any rational point on C must correspond to one of these points on E. The correspondence
+is given by the fact that E and C both cover the x-line. We determine these points
+explicitly.
+<P>
+<P>
+<PRE>
+&gt; CtoP1 := map&lt; C -&gt; P1 | [C.1,C.3] &gt;;
+&gt; pi := Extend( EtildeToP1 );
+&gt; { pi( MWmap( v ) ) : v in V };
+{ (1 : 1), (-1 : 1) }
+&gt; [ RationalPoints( p@@CtoP1 ): p in { P1(Q)| pi( MWmap( v ) ) : v in V } ];
+[
+    {@ (1 : -2 : 1), (1 : 2 : 1) @},
+    {@ (-1 : -2 : 1), (-1 : 2 : 1) @}
+]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1497.htm">[Next]</A><A  HREF = "text1495.htm">[Prev]</A> <A  HREF = "text1497.htm">[Right]</A> <A  HREF = "text1495.htm">[Left]</A> <A  HREF = "text1483.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

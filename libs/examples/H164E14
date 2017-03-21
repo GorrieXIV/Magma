@@ -1,0 +1,41 @@
+"Source: Text/Code/QECC.text";
+"Line: 877";
+"Date: Tue Jun  7 22:27:15 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Code/QECC.text, line: 877
+// Example: H164E14 ()
+print "Example: H164E14";
+ei := GetEchoInput();
+SetEchoInput(true);
+//no-test
+n := 5;
+VSn  := VectorSpace(GF(2), n);
+VS2n := VectorSpace(GF(2), 2*n);
+E := QuantumBinaryErrorGroup(n);
+BitFlips   := [E.i : i in [1..2*n] | IsOdd(i)  ];
+PhaseFlips := [E.i : i in [1..2*n] | IsEven(i) ];
+v1a := VSn ! [0,1,1,0,1]; v1b := VSn ! [0,1,1,0,1];
+v1  := VS2n ! HorizontalJoin(v1a, v1b);
+v2a := VSn ! [1,0,1,1,0]; v2b := VSn ! [0,1,0,1,1];
+v2  := VS2n ! HorizontalJoin(v2a, v2b);
+SymplecticInnerProduct(v1,v2 : ExtendedFormat := true);
+assert $1 eq 1;
+e1 := &*[ BitFlips[i]   : i in Support(v1a) ] *
+      &*[ PhaseFlips[i] : i in Support(v1b) ];
+e2 := &*[ BitFlips[i]   : i in Support(v2a) ] *
+      &*[ PhaseFlips[i] : i in Support(v2b) ];
+e1*e2 eq e2*e1;
+assert not $1;
+v1a := VSn ! [1,1,0,1,0]; v1b := VSn ! [0,0,1,1,0];
+v1  := VS2n ! HorizontalJoin(v1a, v1b);
+v2a := VSn ! [0,1,1,1,0]; v2b := VSn ! [0,1,1,1,0];
+v2  := VS2n ! HorizontalJoin(v2a, v2b);
+SymplecticInnerProduct(v1,v2 : ExtendedFormat := true);
+assert $1 eq 0;
+e1 := &*[ BitFlips[i]   : i in Support(v1a) ] *
+      &*[ PhaseFlips[i] : i in Support(v1b) ];
+e2 := &*[ BitFlips[i]   : i in Support(v2a) ] *
+      &*[ PhaseFlips[i] : i in Support(v2b) ];
+e1*e2 eq e2*e1;
+assert $1;
+SetEchoInput(ei);

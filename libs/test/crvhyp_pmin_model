@@ -1,0 +1,69 @@
+
+_<x>:=PolynomialRing(Integers());
+R:=[-10^10..10^10];
+
+function get_curve1(deg,p) C:=[Random(R)*p^i : i in [0..deg]];
+ return HyperellipticCurve(Polynomial(C)); end function;
+
+function get_curve2(deg,p) C:=[Random(R)*p*p^i : i in [0..deg]];
+ return HyperellipticCurve(Polynomial(C)); end function;
+
+function get_curve3(deg,p) C:=[Random(R)*p*p^(i^2) : i in [0..deg]];
+ return HyperellipticCurve(Polynomial(C)); end function;
+
+function get_curve4(deg,p) C:=[Random(R)*p*p^(deg-i) : i in [0..deg]];
+ return HyperellipticCurve(Polynomial(C)); end function;
+
+function get_curve5(deg,p,k) r:=Random([1..p]);
+ f:=&*[x-r+Random(R)*p : i in [1..k]]; // (x-r)^k
+ g:=&*[x+Random(R) : i in [1..deg-k]];
+ return HyperellipticCurve(f*g); end function;
+
+function get_curve6(deg,p,k) r:=Random([1..p]);
+ f:=&*[x-r+Random(R)*p : i in [1..k]]; // (x-r)^k
+ g:=&*[x+Random(R) : i in [1..deg-k]];
+ return HyperellipticCurve(p*f*g); end function;
+
+function get_curve7(deg,p,k) r:=Random([1..p]); s:=Random([1..p]);
+ while s eq r do s:=Random([1..p]); end while;
+ f:=&*[x-r+Random(R)*p : i in [1..k]]; // (x-r)^k
+ g:=&*[x-s+Random(R)*p : i in [1..deg-k]]; // (x-s)^(d-k)
+ return HyperellipticCurve(f*g); end function;
+
+function get_curve8(deg,p,k) r:=Random([1..p]); s:=Random([1..p]);
+ while s eq r do s:=Random([1..p]); end while;
+ f:=&*[x-r+Random(R)*p : i in [1..k]]; // (x-r)^k
+ g:=&*[x-s+Random(R)*p : i in [1..deg-k]]; // (x-s)^(d-k)
+ return HyperellipticCurve(p*f*g); end function;
+
+function get_curve9(deg,p,k) r:=Random([1..p]); s:=Random([1..p]);
+ while s eq r do s:=Random([1..p]); end while;
+ f:=&*[x-r+Random(R)*p : i in [1..k]]; // (x-r)^k
+ g:=&*[Random(R)*p*x+Random(R) : i in [1..deg-k]]; // oo^(d-k)
+ return HyperellipticCurve(f*g); end function;
+
+function get_curve10(deg,p,k) r:=Random([1..p]); s:=Random([1..p]);
+ while s eq r do s:=Random([1..p]); end while;
+ f:=&*[x-r+Random(R)*p : i in [1..k]]; // (x-r)^k
+ g:=&*[Random(R)*p*x+Random(R) : i in [1..deg-k]]; // oo^(d-k)
+ return HyperellipticCurve(p*f*g); end function;
+
+P:=PrimesInInterval(3,100);
+for p in P,deg in [4..10],i in [1..1] do p,deg,i;
+  C:=get_curve1(deg,p); assert IspMinimal(pMinimalWeierstrassModel(C,p),p);
+  C:=get_curve2(deg,p); assert IspMinimal(pMinimalWeierstrassModel(C,p),p);
+  C:=get_curve3(deg,p); assert IspMinimal(pMinimalWeierstrassModel(C,p),p);
+  C:=get_curve4(deg,p); assert IspMinimal(pMinimalWeierstrassModel(C,p),p);
+  for k in [1.. deg-1] do C:=get_curve5(deg,p,k);
+   assert IspMinimal(pMinimalWeierstrassModel(C,p),p); end for;
+  for k in [1.. deg-1] do C:=get_curve6(deg,p,k);
+   assert IspMinimal(pMinimalWeierstrassModel(C,p),p); end for;
+  for k in [1.. deg-1] do C:=get_curve7(deg,p,k);
+   assert IspMinimal(pMinimalWeierstrassModel(C,p),p); end for;
+  for k in [1.. deg-1] do C:=get_curve8(deg,p,k);
+   assert IspMinimal(pMinimalWeierstrassModel(C,p),p); end for;
+  for k in [1.. deg-1] do C:=get_curve9(deg,p,k);
+   assert IspMinimal(pMinimalWeierstrassModel(C,p),p); end for;
+  for k in [1.. deg-1] do C:=get_curve10(deg,p,k);
+   assert IspMinimal(pMinimalWeierstrassModel(C,p),p); end for;
+ end for;

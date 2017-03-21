@@ -1,0 +1,37 @@
+"Source: Text/Lat/GLat.text";
+"Line: 1551";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Lat/GLat.text, line: 1551
+// Example: H32E9 ()
+print "Example: H32E9";
+ei := GetEchoInput();
+SetEchoInput(true);
+SetSeed(1);
+G:= MatrixGroup<8, IntegerRing() |
+   [ 0, 1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, 0, -1, 1,
+     0, 0, 0, 1, 0, 0, -1, 0, 0, 0, -1, 0, 0, 0, -1, 1,
+     0, 0, 0, 0, 0, 1, -1, 0, 0, 0, 0, 0, -1, 0, -1, 1,
+     0, 0, 0, 0, 0, 0, -1, 1, 0, 0, 0, 0, 0, 0, -2, 1 ],
+   [ 0, -1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0,
+    -1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, -1, 1,
+     0, 0, 0, -1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
+     0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ] >; #G;
+E:= EndomorphismRing(G);
+M:= MaximalOrder(ChangeRing(E, RationalField()));
+ok, M:= CanChangeUniverse(Basis(M), MatrixRing(Integers(), 8)); ok;
+w7:= IntegralMatrix(E.2 - Trace(E.2)/8);
+w7 div:= GCD( Eltseq(w7) );                   // a square root of 7
+V:= SublatticeLattice([ Matrix(G.i) : i in [1..Ngens(G)] ] cat M, [3,7]); #V;
+V ! w7;
+p:= 1 - (w7+1) div 2;
+q:= (w7+1) div 2;
+Gens:= [ Matrix(G.i) : i in [1..Ngens(G)] ];
+V:= SublatticeLattice(Gens cat M, 2: Levels:= 3);
+Levels(V);
+[ V | BasisMatrix(V ! i)*x : i in [1..3], x in [p,q] ];
+F:= PositiveDefiniteForm(G);
+N1:= Normalizer(AutomorphismGroup(LatticeWithGram(F)), G); #N1;
+A:= AutomorphismGroup(Lattice(BasisMatrix(V ! 2), F) : NaturalAction);
+N2:= Normalizer(A, ChangeRing(G, Rationals())); #N2;
+SetEchoInput(ei);

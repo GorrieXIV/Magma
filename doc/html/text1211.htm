@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>SAT solver</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1202.htm">[Next]</A><A  HREF = "text1210.htm">[Prev]</A> <A  HREF = "text1202.htm">[Right]</A> <A  HREF = "text1210.htm">[Left]</A> <A  HREF = "text1203.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "13534">SAT solver</A></H3>
+
+<P>
+<P>
+Magma V2.16 contains an interface to the {minisat}
+satisfiability (SAT) solver.  Such a solver is given a system
+of boolean expressions in conjunctive normal form and determines
+whether there is an assignment in the variables such that all
+the expressions are satisfied.  Magma supplies a function by
+which one may transform a system of boolean polynomial equations into
+an equivalent boolean system, and solve this via the SAT solver.
+<P>
+To use the interface function, the {minisat} program must currently
+be installed as a command external to Magma.  At the time of writing
+(November 2009), the latest version of {minisat} can be
+installed as follows on most Unix/Linux systems:
+<DL COMPACT class='compact'>
+<DT>(1)</DT><DD>Download <TT>http://minisat.se/downloads/minisat2-070721.zip</TT> from
+    the {minisat} website (<TT>minisat.se</TT>).
+<DT>(2)</DT><DD>Use the command <TT>unzip minisat2-070721.zip</TT> or equivalent to unzip
+    the files.
+<DT>(3)</DT><DD>Change directory into <TT>minisat/core</TT> and run <TT>make</TT> there.
+<DT>(4)</DT><DD>Copy the produced executable <TT>minisat</TT> into a place which is
+    in the current path when Magma is run.</DL>
+
+
+<P>
+<P>
+<H5><A NAME = "13535">SAT(B) : [ RngMPolBoolElt ] -&gt; BoolElt, [ FldFinElt ]</A></H5>
+<H5>SAT(B) : [ RngMPolElt ] -&gt; BoolElt, [ FldFinElt ]</H5>
+
+<PRE>    Exclude: [ RngMPolElt ]             Default: []</PRE>
+
+<PRE>    Verbose: BoolElt                    Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a sequence B of boolean polynomials in a rank-n boolean polynomial
+ring (or a rank-n polynomial ring over GF(2)), call {minisat} on
+the associated boolean system and return whether the system is satisfiable,
+and if so, return also a solution S as a length-n sequence of elements of
+GF(2).  (This assumes that {minisat} is in the executable path of
+external commands; see above for instructions for installing {minisat}).
+<P>
+The parameter <TT>Exclude</TT> may be set to a sequence [e<sub>1</sub>, ... e<sub>k</sub>],
+where each e<sub>i</sub> is a sequence of n elements of GF(2), specifying
+that the potential solutions in e<sub>i</sub> are to be excluded (this is
+done by adding new relations to the system to exclude the e<sub>i</sub>).
+The verbose information printed by {minisat} may be controlled by
+the parameter <TT>Verbose</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13536">Example <TT>GB_SAT (H111E15)</TT></A></H3>
+In Example <A  HREF = "text1207.htm#13513">H111E5</A>, we solved a boolean polynomial
+system via the standard Gr&ouml;bner basis method (which the function
+<TT>Variety</TT> uses).  Here we solve the same system via the SAT solver.
+Each time we obtain a solution, we can call the function again,
+but excluding the solution(s) already found.  We can thus find
+all the solutions to the system.  Of course, this is not worth doing
+when there are large numbers of solutions, but it may be of interest
+to find all solutions when it is expected there is a small number
+of solutions.
+<P>
+<P>
+<PRE>
+&gt; P&lt;a,b,c,d,e&gt; := BooleanPolynomialRing(5, "grevlex");
+&gt; B := [a*b + c*d + 1, a*c*e + d*e, a*b*e + c*e, b*c + c*d*e + 1];
+&gt; l, S := SAT(B);
+&gt; l;
+true
+&gt; S;
+[ 1, 1, 1, 0, 0 ]
+&gt; Universe(S);
+Finite field of size 2
+&gt; [Evaluate(f, S): f in B];
+[ 0, 0, 0, 0 ]
+&gt; l, S2 := SAT(B: Exclude := [S]);
+&gt; l;
+true
+&gt; S2;
+[ 0, 1, 1, 1, 0 ]
+&gt; [Evaluate(f, S2): f in B];
+[ 0, 0, 0, 0 ]
+&gt; l, S3 := SAT(B: Exclude := [S, S2]);
+&gt; l;
+false
+</PRE>
+<PRE></PRE> <A  HREF = "text1202.htm">[Next]</A><A  HREF = "text1210.htm">[Prev]</A> <A  HREF = "text1202.htm">[Right]</A> <A  HREF = "text1210.htm">[Left]</A> <A  HREF = "text1203.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

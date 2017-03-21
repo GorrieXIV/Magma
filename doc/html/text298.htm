@@ -1,0 +1,275 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Isometries and Similarities</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text299.htm">[Next]</A><A  HREF = "text297.htm">[Prev]</A> <A  HREF = "text299.htm">[Right]</A> <A  HREF = "text297.htm">[Left]</A> <A  HREF = "text291.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "2774">Isometries and Similarities</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+If &beta; is a bilinear or sesquilinear form on the vector space V,
+a linear transformation g of V is an <I>isometry</I> if g preserves
+&beta;; it is a <I>similarity</I> if it preserves &beta; up to a non-zero
+scalar multiple.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text298.htm#2775">Isometries</A>
+<LI> <A  HREF = "text298.htm#2788">Similarities</A>
+</UL>
+<H4><A NAME = "2775">Isometries</A></H4>
+
+
+
+<P>
+If J is an n x n matrix which represents a bilinear form and if M is 
+a non-singular n x n matrix, then J and MJM^(tr) are 
+said to be <I>congruent</I> and they define isometric polar spaces.
+<P>
+Conversely, given bilinear forms J<sub>1</sub> and J<sub>2</sub> the following example shows
+how to use the <TT>IsIsometric</TT> function to determine whether J<sub>1</sub> and J<sub>2</sub> 
+are congruent and if so how to find a matrix M such that J<sub>1</sub> = 
+MJ<sub>2</sub>M^(tr).
+<H5><A NAME = "2776">IsIsometry(U, V, f) : ModTupFld, ModTupFld, Map -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the map f is an isometry from U to V with respect to 
+the attached forms.
+</BLOCKQUOTE>
+<H5><A NAME = "2777">IsIsometry(f) : Map -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the map f is an isometry from its domain to its codomain.
+</BLOCKQUOTE>
+<H5><A NAME = "2778">IsIsometry(V, g) : ModTupFld, Mtrx -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the matrix g is an isometry of V with respect to the 
+attached form.
+</BLOCKQUOTE>
+<H5><A NAME = "2779">IsIsometric(V, W) : ModTupFld, ModTupFld -&gt; BoolElt, Map</A></H5>
+<BLOCKQUOTE>
+Determines whether the polar spaces V and W are isometric; 
+if they are, an isometry is returned (as a map).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2780">Example <TT>FldForms_isometric (H29E14)</TT></A></H3>
+A vector space is always equipped with a bilinear form and the default value
+is the identity matrix.  However the "standard" symmetric form is 
+Q + Q^(tr), where Q is the standard quadratic form.  In the following
+example the polar spaces defined by these forms are similar but not isometric.
+<P>
+<P>
+<P>
+<PRE>
+&gt; F := GF(5);
+&gt; V1 := VectorSpace(F,5);
+&gt; PolarSpaceType(V1);
+orthogonal space
+&gt; WittIndex(V1);
+2
+&gt; J2 := StandardSymmetricForm(5,F);
+&gt; J2;
+[0 0 0 0 1]
+[0 0 0 1 0]
+[0 0 2 0 0]
+[0 1 0 0 0]
+[1 0 0 0 0]
+&gt; V2 := VectorSpace(F,5,J2);
+&gt; IsIsometric(V1,V2);
+false
+&gt; V3 := VectorSpace(F,5,2*J2);
+&gt; flag, f := IsIsometric(V1,V3); flag;
+true
+&gt; IsIsometry(f);
+true
+</PRE>
+<HR>
+<H3><A NAME = "2781">Example <TT>FldForms_transform (H29E15)</TT></A></H3>
+Begin with alternating forms J<sub>1</sub> and J<sub>2</sub> over GF(25), construct the 
+corresponding symplectic spaces and then use the isometry to define the
+matrix M.
+<P>
+<P>
+<PRE>
+&gt; F&lt;x&gt; := GF(25);
+&gt; J1 := Matrix(F,4,4,[ 0, x^7, x^14, x^13, x^19, 0, x^8, x^5,
+&gt;   x^2, x^20, 0, x^17, x, x^17, x^5, 0 ]);
+&gt; J2 := Matrix(F,4,4,[ 0, x^17, 2, x^23, x^5, 0, x^15, x^5, 
+&gt;   3, x^3, 0, 4, x^11, x^17, 1, 0 ]);
+&gt; V1 := SymplecticSpace(J1);
+&gt; V2 := SymplecticSpace(J2);        
+&gt; flag, f := IsIsometric(V1,V2); assert flag;
+&gt; f;
+Mapping from: ModTupFld: V1 to ModTupFld: V2 given by a rule
+&gt; M := Matrix(F,4,4,[f(V1.i) : i in [1..4]]);
+&gt; J1 eq M*J2*Transpose(M);
+true
+</PRE>
+<HR>
+<H3><A NAME = "2782">Example <TT>FldForms_transformalt (H29E16)</TT></A></H3>
+Another way to obtain a matrix with the same effect as M is to use
+the function <TT>TransformForm</TT>.
+<P>
+<P>
+<PRE>
+&gt; M1 := TransformForm(J1,"symplectic");
+&gt; M2 := TransformForm(J2,"symplectic");
+&gt; M_alt := M1*M2^-1;
+&gt; J1 eq M_alt*J2*Transpose(M_alt);
+true
+</PRE>
+<HR>
+<H5><A NAME = "2783">CommonComplement(V, U, W) : ModTupFld, ModTupFld, ModTupFld -&gt; ModTupFld</A></H5>
+<BLOCKQUOTE>
+A common complement to the subspaces U and W in the vector space V.
+(The subspaces must have the same dimension.) This is used by the following
+function, which implements Witt's theorem.
+<P>
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "2784">ExtendIsometry(V, U, f) : ModTupFld, ModTupFld, Map -&gt; Map</A></H5>
+<BLOCKQUOTE>
+An extension of the isometry f : U to V to an isometry V to V, 
+where U is a subspace of the polar space V.
+<P>
+This is an implementation of Witt's theorem on the extension
+of an isometry defined on a subspace of a symplectic, unitary or 
+quadratic space.  The isometry f must satisfy
+f(U&cap;rad(V)) = f(U)&cap;rad(V). 
+<P>
+If the characteristic is two and the form J of V is symmetric,
+then J must be alternating.
+</BLOCKQUOTE>
+<H5><A NAME = "2785">IsometryGroup(V) : ModTupFld -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+The group of isometries of the polar space V. This includes degenerate
+polar spaces as well as polar spaces defined by a quadratic form over a
+field of characteristic two.
+</BLOCKQUOTE>
+<P>
+<P>
+<P>
+<P>
+Given a reflexive form J, the function <TT>IsometryGroup(J)</TT> defined in 
+Chapter <A  HREF = "text1000.htm#11296">ALGEBRAS WITH INVOLUTION</A> returns the isometry group of J.  More
+generally, if S is a sequence of reflexive forms, the function 
+<TT>IsometryGroup(S)</TT> returns the group of isometries of the system.
+<HR>
+<H3><A NAME = "2786">Example <TT>FldForms_isometrygroup (H29E17)</TT></A></H3>
+We give an example of an isometry group of a degenerate quadratic space 
+over a field of characteristic 2.
+<P>
+<P>
+<PRE>
+&gt; F := GF(4);
+&gt; Q1 := StandardQuadraticForm(4,F : Minus);
+&gt; Q := DiagonalJoin(Q1,ZeroMatrix(F,2,2));
+&gt; V := QuadraticSpace(Q);
+&gt; G := IsometryGroup(V);
+&gt; [ IsIsometry(V,g) : g in Generators(G) ];
+[ true, true, true, true, true, true, true ]
+&gt; #G;
+96259276800
+</PRE>
+<HR>
+<H3><A NAME = "2787">Example <TT>FldForms_conjisom (H29E18)</TT></A></H3>
+The matrix M constructed in Example <A  HREF = "text298.htm#2781">H29E15</A> can be used to
+conjugate the isometry group of J<sub>1</sub> to the isometry group of J<sub>2</sub>.
+<P>
+<P>
+<PRE>
+&gt; F&lt;x&gt; := GF(25);
+&gt; J1 := Matrix(F,4,4,[ 0, x^7, x^14, x^13, x^19, 0, x^8, x^5,
+&gt;   x^2, x^20, 0, x^17, x, x^17, x^5, 0 ]);
+&gt; J2 := Matrix(F,4,4,[ 0, x^17, 2, x^23, x^5, 0, x^15, x^5, 
+&gt;   3, x^3, 0, 4, x^11, x^17, 1, 0 ]);
+&gt; V1 := SymplecticSpace(J1);
+&gt; V2 := SymplecticSpace(J2);        
+&gt; flag, f := IsIsometric(V1,V2); assert flag;
+&gt; M := Matrix(F,4,4,[f(V1.i) : i in [1..4]]);
+&gt; G1 := IsometryGroup(V1);
+&gt; G2 := IsometryGroup(V2);
+&gt; M^-1*G1.1*M in G2;   
+true
+&gt; M^-1*G1.2*M in G2;
+true
+</PRE>
+<HR>
+<H4><A NAME = "2788">Similarities</A></H4>
+
+<P>
+<P>
+<P>
+If &beta; is a bilinear or sesquilinear form, a linear transformation
+f is a <I>similarity</I> with <I>multiplier</I> &lambda; if
+&beta;(uf, vf) = &lambda;&beta;(u, v) for all u, v.
+
+
+<H5><A NAME = "2789">IsSimilarity(U, V, f) : ModTupFld, ModTupFld, Map -&gt; BoolElt, FldElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the map f is a similarity from U to V with respect to 
+the attached forms.  The second return value is the multiplier.
+</BLOCKQUOTE>
+<H5><A NAME = "2790">IsSimilarity(f) : Map -&gt; BoolElt, FldElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the map f is a similarity from its domain to its codomain.
+The second return value is the multiplier.
+</BLOCKQUOTE>
+<H5><A NAME = "2791">IsSimilarity(V, g) : ModTupFld, Mtrx -&gt; BoolElt, FldElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the matrix g is a similarity of V with respect to the 
+attached form.  The second return value is the multiplier.
+</BLOCKQUOTE>
+<H5><A NAME = "2792">IsSimilar(V, W) : ModTupFld, ModTupFld -&gt; BoolElt, Map</A></H5>
+<BLOCKQUOTE>
+Determines whether the polar spaces V and W are similar; 
+if they are, a similarity is returned (as a map).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2793">Example <TT>FldForms_simherm (H29E19)</TT></A></H3>
+An example of two unitary spaces, the first defined by an hermitian
+form, the second by a skew-hermitian form.  The spaces are similar
+but not isometric.
+<P>
+<P>
+<PRE>
+&gt; F&lt;z&gt; := GF(25);
+&gt; sigma := hom&lt; F -&gt; F | x :-&gt; x^5 &gt;;
+&gt; J1 := Matrix(F,4,4,[
+&gt;    0, z^3, z^14, z^9,   z^15, 2, z^21, z^5,
+&gt;    z^22, z^9, 1, z^7,   z^21, z, z^11, 4]);
+&gt; J2 := Matrix(F,4,4,[
+&gt;    z^15, z^10, z^17, z^7,  z^14, z^15, z^14, z^9,
+&gt;    z, z^10, z^3, z^20,     z^23, z^9, z^16, z^21]);
+&gt; V1 := UnitarySpace(J1,sigma);
+&gt; V2 := UnitarySpace(J2,sigma);
+&gt; IsUnitarySpace(V1);
+true 1
+&gt; IsUnitarySpace(V2);
+true -1
+&gt; IsIsometric(V1,V2);
+false
+&gt; flag, f := IsSimilar(V1,V2);
+&gt; flag;
+true
+&gt; IsSimilarity(V1,V2,f);
+true z^3
+</PRE>
+<HR>
+<H5><A NAME = "2794">SimilarityGroup(V) : ModTupFld -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+The group of similarities of the polar space V. This includes degenerate
+polar spaces as well as polar spaces defined by a quadratic form over a
+field of characteristic two.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text299.htm">[Next]</A><A  HREF = "text297.htm">[Prev]</A> <A  HREF = "text299.htm">[Right]</A> <A  HREF = "text297.htm">[Left]</A> <A  HREF = "text291.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

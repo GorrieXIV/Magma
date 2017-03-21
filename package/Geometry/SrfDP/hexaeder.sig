@@ -1,0 +1,3 @@
+174,1
+S,CubicSurfaceByHexahedralCoefficients,"Given a separable polynomial of degree 6, this computes a cubic surface whose hexahedral coefficients are the roots of the given polynomial. (These surfaces automatically have a Galois-invariant double-six)",0,1,0,0,0,0,0,0,0,312,,63,-38,-38,-38,-38,-38
+S,CoblesRadicand,Evaluates Cobles quartic polynomial. Up to a square this gives the discriminant of the corresponding hexahedral cubic surface. All 27 lines of the cubic surface are defined over the quadratic extension of the splitting field of pol by this radicand,0,1,0,0,0,0,0,0,0,312,,-25,-38,-38,-38,-38,-38

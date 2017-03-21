@@ -1,0 +1,30 @@
+"Source: Text/Ring/FldFunRat.text";
+"Line: 1124";
+"Date: Tue Jun  7 22:27:15 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Ring/FldFunRat.text, line: 1124
+// Example: H43E11 ()
+print "Example: H43E11";
+ei := GetEchoInput();
+SetEchoInput(true);
+S<u> := PowerSeriesRing(Rationals());
+f := [1,u, -1-u^4-2*u^8+u^10+u^11-u^12+O(u^16),-u-u^5-u^9-u^14-u^15+O(u^16)];
+dist:=[2,2,3,3];
+seq := MinimalVectorSequence(f,13:Distortion:=dist);
+pade, padebasis, ord :=  PadeHermiteApproximant(f,dist);
+pade, ord;
+padebasis;
+padebasis eq seq;
+assert $1;
+[[Valuation(w[i]): i in [1..Degree(w)]] : w in seq]; 
+[[MaximumDegree([w[i]])-dist[i]: i in [1..Degree(w)] ] : w in seq]; 
+p:=2;
+seq := MinimalVectorSequence(f,12:Distortion:=dist,Power:=p);
+seq;
+seq[1]-seq[3];
+mp:= map<S->S|  x :-> (IsWeaklyZero(x) select 0 
+    else  &+([Coefficient(x,i)*(S.1)^(p*i) :  i in Exponents(x)]))
+      + (ISA(Type(v),RngIntElt) select O((S.1)^(p*v)) 
+  else S!0 where v := AbsolutePrecision(x))>;
+ [Valuation(&+([mp(Q[i])*f[i]: i in [1..#f]])) : Q in seq];
+SetEchoInput(ei);

@@ -1,0 +1,293 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Database of Almost-Simple  Groups</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text749.htm">[Next]</A><A  HREF = "text747.htm">[Prev]</A> <A  HREF = "text749.htm">[Right]</A> <A  HREF = "text747.htm">[Left]</A> <A  HREF = "text742.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "8580">Database of Almost-Simple  Groups</A></H3>
+
+<P>
+<P>
+<P>
+Magma includes a database containing information about almost simple groups
+G, where S &le;G &le;Aut(S) and S is a simple group of small
+order. The G that are included in the database are those associated with 
+S such that  |S| is 
+less than 16000000, as well as M<sub>24</sub>, HS, J<sub>3</sub>, 
+McL, Sz(32) and L<sub>6</sub>(2).
+<P>
+The information stored here is primarily for use in computing 
+maximal subgroups and automorphism groups. The database was originally
+conceived by Derek Holt, with a major extension by Volker Gebhardt and
+sporadic additions by Bill Unger. The implementation is by Bruce Cox.
+<P>
+It is possible to request the i-th entry of the database.
+Alternatively, and more usefully, one can supply three integers:  the
+order o1 of S, the order o2 of G and the sum k of the orders
+of the class representatives of G.  
+The last of these can be expensive to compute;
+however, knowledge of the classes is helpful to benefit from the
+information stored in the entry.  Of course, if the entry is beyond the
+range of the database, then it is a wasted computation---the intrinsics
+<TT>ExistsGroupData</TT> and <TT>NumberOfGroups</TT> are provided to determine 
+from the orders whether this is the case.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text748.htm#8581">The Record Fields</A>
+<LI> <A  HREF = "text748.htm#8582">Creating the Database</A>
+<LI> <A  HREF = "text748.htm#8584">Accessing the Database</A>
+</UL>
+<H4><A NAME = "8581">The Record Fields</A></H4>
+
+<P>
+<P>
+<P>
+The result returned by the <TT>GroupData</TT> function is a record with a number 
+of fields containing information about the almost simple group and its socle.
+This information includes information used to compute automorphisms and
+maximal subgroups of the almost simple group by these Magma functions.
+The following describes these fields. The groups G and S are as above
+the almost simple group G and its socle, the simple group S. Let A
+be the full automorphism group of S, and let F&lt; x, y &gt; be
+a free group on two generators, called x and y.
+<P>
+First comes information about S. Each S is two generated, by x and
+y as above, say.
+<P>
+<P>
+<P>
+Field <TT>resname</TT>: A string giving a name to the simple group S.
+(S is the soluble residual of G). 
+<P>
+<P>
+<P>
+Field <TT>resorder</TT>: The order of S as an integer.
+<P>
+<P>
+<P>
+Field <TT>geninfo</TT>: Information on where to find x and y in S.
+This is a sequence of two tuples, each with 3 entries. The first gives a
+generator order, the second the length of its conjugacy class, and the 
+third the probability of picking the right generator given the previous 
+information. The first tuple's order/length information always uniquely 
+defines one conjugacy class of the group S and has probability
+1, so x is easy to find.
+<P>
+<P>
+<P>
+Field <TT>rels</TT>: A sequence of words in F which,
+taken together with the generator orders from <TT>geninfo</TT>, form a
+presentation for S on x and y.
+<P>
+<P>
+<P>
+Field <TT>permrep</TT>: A permutation representation of the full automorphism
+group of S. The first two generators are x and y, followed by outer
+generators. In what follows the outer generators are called t, u, v.
+<P>
+<P>
+<P>
+Field <TT>outimages</TT> A sequence of sequences of words in F.
+These give the images of x and y under the generators
+of the outer automorphism group of S.
+<P>
+<P>
+<P>
+Field <TT>order</TT>: An integer, the order of G.
+<P>
+<P>
+<P>
+Field <TT>inv</TT>: The invariant used to separate non-isomorphic
+&lt; |S|, |G| &gt; possibilities. An integer, it is the sum over 
+the classes of G of the order of the elements in each class.
+<P>
+<P>
+<P>
+Field <TT>name</TT>: A name for G as a string.
+<P>
+<P>
+<P>
+Field <TT>conjelts</TT>: If G is not normal in the automorphism group, these
+words are coset representatives of the normaliser of G in A as
+words in t, u, v.
+<P>
+<P>
+<P>
+Field <TT>subgens</TT>: Words in  t, u, v that, together with x and y,
+generate G.
+<P>
+<P>
+<P>
+Field <TT>subpres</TT>: A presentation of G/S on <TT>subgens</TT>. Note: If
+G=S then <TT>subgens</TT> will be the empty sequence, but <TT>subpres</TT>
+will be the  trivial FP-group with one generator.
+<P>
+<P>
+<P>
+Field <TT>normgens</TT>: Words in  t, u, v that generate the outer 
+automorphism group of G.
+<P>
+<P>
+<P>
+Field <TT>normpres</TT>: A presentation of the outer automorphism group of G on
+<TT>normgens</TT>. Again, if A=G then <TT>normgens</TT> will be the empty sequence,
+but <TT>normpres</TT> will be the trivial FP-group with one generator.
+<P>
+<P>
+<P>
+Field <TT>maxsubints</TT>: A sequence of records describing the intersections
+of the maximal subgroups of G that do not contain S with S.
+Each record gives the order of the intersection, its class length in S,
+generators as words in x and y, and a presentation on these generators.
+
+
+<H4><A NAME = "8582">Creating the Database</A></H4>
+
+
+
+<H5><A NAME = "8583">AlmostSimpleGroupDatabase() : -&gt; DB</A></H5>
+<BLOCKQUOTE>
+This function returns a database object which contains information about the
+database.
+</BLOCKQUOTE>
+<H4><A NAME = "8584">Accessing the Database</A></H4>
+
+
+
+<H5><A NAME = "8585"># D : DB -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the number of entries stored in the database.
+</BLOCKQUOTE>
+<H5><A NAME = "8586">GroupData(D, i): DB, RngIntElt -&gt; Rec</A></H5>
+<H5>GroupData(D, o1, o2, k): DB, RngIntElt, RngIntElt, RngIntElt -&gt; Rec</H5>
+<BLOCKQUOTE>
+Returns the specified entry from the database D as a record.
+The first form gives the ith entry of the database. The second
+form gives information on an almost simple group of order o2, with
+socle of order o1. The value of k should be as explained in
+<TT>inv</TT> above.
+</BLOCKQUOTE>
+<H5><A NAME = "8587">ExistsGroupData(D, o1, o2): DB, RngIntElt, RngIntElt -&gt; BoolElt</A></H5>
+<H5>ExistsGroupData(D, o1, o2, i): DB, RngIntElt, RngIntElt, RngIntElt -&gt; BoolElt, Rec</H5>
+<BLOCKQUOTE>
+Returns whether any record exists for a simple group of order o1 and
+a supergroup G of order o2 lying within its automorphism group.
+In the second form an invariant, i as described above, is also supplied,
+and the result is true if there is a record in the database with the given 
+orders and invariant, and false otherwise. When the result is true, the 
+corresponding record is also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "8588">NumberOfGroups(D, o1, o2): DB, RngIntElt, RngIntElt -&gt; RngIntElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the number of records in the database D corresponding to a simple
+group of order o1 and a supergroup G of order o2 lying within its 
+automorphism group. The second return value gives the index of the first
+such record, if there is one. (This is most useful when the first return 
+value is 1.) If the return values are d and f, with d&gt;0, then the
+corresponding database entries are numbered f, f + 1, ..., f + d - 1.
+</BLOCKQUOTE>
+<H5><A NAME = "8589">IdentifyAlmostSimpleGroup(G) : GrpPerm -&gt; Map, GrpPerm</A></H5>
+<H5>IdentifyAlmostSimpleGroup(G) : GrpMat -&gt; Map, GrpPerm</H5>
+<BLOCKQUOTE>
+Use the information in the database to construct a monomorphism f
+from the almost simple group G into A, the permutation representation
+of the full automorphism group of its socle stored in the database.
+This function will also cope with  groups isomorphic to the 
+alternating and symmetric groups of degree up to 50, which are not 
+actually in the database. Note that the conjugacy class of the
+image of f in A determines G up to isomorphism.
+The algorithms used to deal with the alternating and symmetric groups
+not in the database are by Derek Holt, starting from the paper 
+of Bratus &amp; Pak <A  HREF = "text741.htm#bib_bratus-pak">[BP00]</A>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8590">Example <TT>GrpData_sgdb (H71E8)</TT></A></H3>
+We query the database on about an almost simple group of order 720.
+<P>
+<P>
+<PRE>
+&gt; G := PermutationGroup&lt;10 |
+&gt;  [ 7, 9, 5, 2, 1, 8, 10, 4, 6, 3 ],
+&gt;  [ 6, 3, 10, 7, 2, 4, 1, 8, 9, 5 ]&gt;;   
+&gt; #G;
+720
+&gt; CompositionFactors(G);
+    G
+    |  Cyclic(2)
+    *
+    |  Alternating(6)
+    1
+&gt; #Radical(G);
+1
+</PRE>
+There are 3 such groups, so we really do need k to tell them apart.
+<P>
+<P>
+<PRE>
+&gt; S := SolubleResidual(G);
+&gt; k := &amp;+[c[1]: c in Classes(G)];
+&gt; D := AlmostSimpleGroupDatabase();
+&gt; R := GroupData(D, #S, #G, k);
+&gt; R`name;
+M_10
+</PRE>
+The group is identified. Let's see some of the other information
+in R.
+<P>
+<P>
+<PRE>
+&gt; P := R`permrep;
+&gt; P;
+Permutation group P acting on a set of cardinality 10
+  (1, 6)(2, 9)(3, 10)(4, 8)
+  (1, 7, 9, 4)(2, 8, 5, 10)
+  (3, 5, 9, 6, 7, 4, 8, 10)
+  (3, 7)(4, 6)(5, 10)
+&gt; #P;
+1440
+&gt; R`subgens;
+[ t * u ]
+&gt; SS := sub&lt;P|P.1, P.2&gt;;
+&gt; #SS;
+360
+&gt; GG := sub&lt;P|SS, P.3*P.4&gt;;
+&gt; #GG;
+720
+&gt; R`normgens;
+[ t ]
+</PRE>
+The full automorphism group of S has order 1440. The group P
+is a representation of this automorphism group with first two
+generators generating a faithful image of S. The image of S, together
+with the product of <TT>P.3</TT> and <TT>P.4</TT>, generate a faithful image
+of G. The outer automorphism group of G is generated by <TT>P.3</TT> modulo
+<TT>GG</TT>. We can also get a constructive identification as follows.
+<P>
+<P>
+<PRE>
+&gt; f, A := IdentifyAlmostSimpleGroup(G);
+&gt; f;
+Homomorphism of GrpPerm: $, Degree 10, Order 2^4 * 3^2 * 5 
+into GrpPerm: A, Degree 10 induced by
+  (1, 10)(3, 8)(5, 9)(6, 7) |--&gt; (1, 6)(2, 9)(3, 10)(4, 8)
+  (1, 7, 2, 8)(3, 10, 4, 5) |--&gt; (1, 7, 9, 4)(2, 8, 5, 10)
+  (1, 10, 4, 8)(2, 6, 9, 5) |--&gt; (3, 10, 7, 6)(4, 8, 5, 9)
+&gt; A;
+Permutation group A acting on a set of cardinality 10
+  (1, 6)(2, 9)(3, 10)(4, 8)
+  (1, 7, 9, 4)(2, 8, 5, 10)
+  (3, 5, 9, 6, 7, 4, 8, 10)
+  (3, 7)(4, 6)(5, 10)
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text749.htm">[Next]</A><A  HREF = "text747.htm">[Prev]</A> <A  HREF = "text749.htm">[Right]</A> <A  HREF = "text747.htm">[Left]</A> <A  HREF = "text742.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

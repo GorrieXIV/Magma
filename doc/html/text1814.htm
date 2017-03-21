@@ -1,0 +1,591 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Standard Construction for  Multigraphs</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1815.htm">[Next]</A><A  HREF = "text1813.htm">[Prev]</A> <A  HREF = "text1815.htm">[Right]</A> <A  HREF = "text1813.htm">[Left]</A> <A  HREF = "text1809.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "20112">Standard Construction for  Multigraphs</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+As noted in the Introduction <A  HREF = "text1810.htm#20037">Introduction</A>, most of the 
+functions listed in this section correctly handle a graph's support 
+and vertex/edge decorations.  That is, these attributes are inherited 
+by the graph created as a result of applying such a function.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1814.htm#20113">Subgraphs</A>
+<LI> <A  HREF = "text1814.htm#20116">Incremental Construction of Multigraphs</A>
+<LI> <A  HREF = "text1814.htm#20141">Vertex Insertion, Contraction</A>
+<LI> <A  HREF = "text1814.htm#20147">Unions of Multigraphs</A>
+</UL>
+<H4><A NAME = "20113">Subgraphs</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+The construction of subgraphs from multigraphs or 
+   multidigraphs is similar 
+   to the construction of subgraphs from simple graphs
+   or digraphs (see Subsection <A  HREF = "text1788.htm#19753">Subgraphs and Quotient Graphs</A>).
+<P>
+Note that the support set, vertex labels and edge decorations 
+  are transferred from the supergraph to the subgraph.
+
+
+<H5><A NAME = "20114">sub&lt; G | list &gt; : GrphMult, List -&gt; GrphMult, GrphVertSet, GrphEdgeSet</A></H5>
+<BLOCKQUOTE>
+Construct the multigraph H as a subgraph of G.
+The function returns three values: The multigraph H, 
+  the vertex-set V of H; and the edge-set E of H.
+If G has a support set and/or if G has vertex/edge labels,
+  and/or edge capacities or edge weights
+  then <I>all</I> these attributes are transferred to the subgraph H.
+<P>
+The elements of V and of E are specified by the list list
+  whose items can be objects  of the following types:
+<P>
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>A vertex of G.
+  The resulting subgraph will be the subgraph induced on the subset 
+   of <TT>VertexSet(G)</TT> defined by the vertices  in list.
+<P>
+<DT>(b)</DT><DD>An edge of G.
+  The resulting subgraph will be the subgraph with vertex-set 
+    <TT>VertexSet(G)</TT>
+    whose edge-set consists of the edges in list.
+<P>
+<DT>(c)</DT><DD>A set of 
+<P>
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>Vertices of G.
+<DT>(ii)</DT><DD>Edges of G.
+<P>
+</DL>
+</DL>
+If the list of vertices and edges happens to contain duplicate 
+  elements, they will be ignored by the subgraph constructor.
+It is easy to recover the map that sends the vertices of the subgraph
+  to the vertices of the supergraph and vice-versa: Simply
+  coerce the vertex of the subgraph into the supergraph's vertex-set,
+  and,  if applicable, coerce the vertex of the supergraph into 
+  the subgraph's vertex-set.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20115">Example <TT>MultiGraph_GrphMult_Sub (H156E8)</TT></A></H3>
+We create a multidigraph G with a support set;
+<P>
+  we assign labels to its vertices, and labels, capacities 
+  and weights to its   edges.
+This demonstrates the fact that any subgraph of 
+  G retains the support set, as well as the vertex and edge decorations.
+<P>
+<P>
+<PRE>
+&gt; S := {@ "a", "b", "c" @};
+&gt; G := MultiDigraph&lt; S | &lt; 1, {2, 3} &gt;, &lt; 1, {2} &gt;, &lt; 2, {2, 3} &gt; &gt;;
+&gt; G;
+Multidigraph
+Vertex  Neighbours
+
+a       b c b ;
+b       c b ;
+c       ;
+
+&gt; 
+&gt; V := VertexSet(G);
+&gt; for u in V do
+&gt;     AssignLabel(~G, u, Random([ "X", "Y", "Z" ]));
+&gt; end for;
+&gt; 
+&gt; E := EdgeSet(G);
+&gt; I := Indices(G);
+&gt; for i in I do
+&gt;     AssignLabel(~G, E.i, Random([ "D", "E", "F" ]));
+&gt;     if not InitialVertex(E.i) eq TerminalVertex(E.i) then
+&gt;         AssignCapacity(~G, E.i, Random(1, 3));
+&gt;     end if;
+&gt;     AssignWeight(~G, E.i, Random(1, 3));
+&gt; end for;
+&gt; 
+&gt; VertexLabels(G);
+[ Z, Y, Z ]
+&gt; EdgeLabels(G);
+[ E, F, D, E, E ]
+&gt; EdgeCapacities(G);
+[ 2, 1, 3, 0, 2 ]
+&gt; EdgeWeights(G);
+[ 2, 1, 3, 1, 1 ]
+&gt; 
+&gt; V := VertexSet(G);
+&gt; H := sub&lt; G | V!1, V!2 &gt;;
+&gt; H;
+Multidigraph
+Vertex  Neighbours
+
+a       b b ;
+b       b ;
+
+&gt; 
+&gt; for u in VertexSet(H) do
+&gt;     assert Label(u) eq Label(V!u);
+&gt; end for;
+&gt; 
+&gt; for e in EdgeSet(H) do
+&gt;     u := InitialVertex(e);
+&gt;     v := TerminalVertex(e);
+&gt; 
+&gt;     assert SequenceToSet(Labels(Edges(u, v)))
+&gt;     eq SequenceToSet(Labels(Edges(V!u, V!v)));
+&gt;     assert SequenceToSet(Capacities(Edges(u, v)))
+&gt;     eq SequenceToSet(Capacities(Edges(V!u, V!v)));
+&gt;     assert SequenceToSet(Weights(Edges(u, v)))
+&gt;     eq SequenceToSet(Weights(Edges(V!u, V!v)));
+&gt; end for;
+</PRE>
+Note that since G is a multidigraph it is not possible to coerce 
+an edge of H into the edge-set of G.  This is because edge coercion 
+for multi(di)graphs involves the coercion of both the end-vertices 
+<I>and</I> the index of the edge.
+<P>
+A correspondence is established between the edges of H and the edges 
+of G by retrieving <I>all</I> the edges in H and G having same 
+end-vertices.
+<HR>
+<H4><A NAME = "20116">Incremental Construction of Multigraphs</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+The complete functionality for adding and removing vertices or edges 
+in simple graphs (see Subsection <A  HREF = "text1788.htm#19758">Incremental Construction of  Graphs</A>) is also 
+available for multigraphs.
+<P>
+Note that some functions adding an edge to a multigraph also
+  return the newly created edge.
+This feature is useful when there is a need to determine 
+  the index of this edge in the adjacency list
+  of the  modified multigraph.
+Also, there is the possibility of removing <I>all</I> the edges 
+  from u to v for given vertices u and v of the multigraphs.
+<P>
+<P>
+Further, whenever a vertex or an edge is added or removed from a graph,
+  the existing vertex labels
+  and the edge labels or capacities or weights are retained.
+The support of the graph is retained in all cases except when adding 
+  a new vertex.
+<P>
+Unless otherwise specified, each 
+  of the functions described in this section returns three values:
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>The multigraph G;
+<DT>(ii)</DT><DD>The vertex-set V of G;
+<DT>(iii)</DT><DD>The edge-set E of G.</DL>
+
+
+<H5><A NAME = "20117">Adding Vertices</A></H5>
+
+
+
+<H5><A NAME = "20118">G + n : GrphMult, RngIntElt -&gt; GrphMult</A></H5>
+<BLOCKQUOTE>
+Given a non-negative integer n, adds n new vertices to the 
+  multigraph G.
+The existing vertex labels and 
+   edge labels or capacities or weights are retained, 
+   but the support will become the standard support. 
+</BLOCKQUOTE>
+<H5><A NAME = "20119">G +:= n : GrphMult, RngIntElt -&gt;</A></H5>
+<H5>AddVertex(~G) : GrphMult -&gt;</H5>
+<H5>AddVertices(~G, n) : GrphMult, RngIntElt -&gt;</H5>
+<BLOCKQUOTE>
+The procedural version of the previous function. 
+<TT>AddVertex</TT> adds one vertex only to G.
+</BLOCKQUOTE>
+<H5><A NAME = "20120">AddVertex(~G, l) : GrphMult, . -&gt;</A></H5>
+<BLOCKQUOTE>
+Given a graph G and a label l, adds
+  a new vertex with label l  to  G.
+The existing vertex labels and 
+   edge labels or capacities or weights are retained, 
+   but the support will become the standard support. 
+</BLOCKQUOTE>
+<H5><A NAME = "20121">AddVertices(~G, n, L) : GrphMult, RngIntElt, SeqEnum -&gt;</A></H5>
+<BLOCKQUOTE>
+Given a graph G and a non-negative integer n, and a 
+  sequence L of n labels, adds
+  n new vertices to G with labels from  L.
+The existing vertex labels and 
+   edge labels or capacities or weights are retained, 
+   but the support will become the standard support. 
+</BLOCKQUOTE>
+<H5><A NAME = "20122">Removing Vertices</A></H5>
+
+
+
+<H5><A NAME = "20123">G - v : GrphMult, GrphVert -&gt; GrphMult</A></H5>
+<H5>G - U : GrphMult, { GrphVert } -&gt; GrphMult</H5>
+<BLOCKQUOTE>
+Given a vertex v of G, or a set U of vertices of G,
+  removes v (or the vertices in U) from G.
+The support, vertex labels, and edge labels or capacities or weights
+  are retained.
+</BLOCKQUOTE>
+<H5><A NAME = "20124">G -:= v : GrphMult, GrphVert -&gt;</A></H5>
+<H5>G -:= U : GrphMult, { GrphVert } -&gt;</H5>
+<H5>RemoveVertex(~G, v) : GrphMult, GrphVert -&gt;</H5>
+<H5>RemoveVertices(~G, U) : GrphMult, { GrphVert } -&gt;</H5>
+<BLOCKQUOTE>
+The procedural versions of the previous functions. 
+</BLOCKQUOTE>
+<H5><A NAME = "20125">Adding Edges</A></H5>
+
+
+
+<H5><A NAME = "20126">G + { u, v } : GrphMultUnd, { { GrphVert, GrphVert } } -&gt; GrphMultUnd, GrphEdge</A></H5>
+<H5>G + [ u, v ] : GrphMultDir, { [ GrphVert, GrphVert ] } -&gt; GrphMultDir, GrphEdge</H5>
+<H5>G + [ u, v ] : GrphNet, { [ GrphVert, GrphVert ] } -&gt; GrphNet, GrphEdge</H5>
+<BLOCKQUOTE>
+Given a graph G and a  pair
+  of vertices of G, add the edge to G described by this 
+  pairs.
+If G is undirected then the edge must
+  be given as a set of (two) vertices, if G is directed 
+  the edge is given as a sequence of (two) vertices.
+If G is a network, then the edge is added with a capacity of 1 (0 if 
+  a loop).
+The support, vertex labels, and edge labels or capacities or weights
+  are retained.
+This set of functions has two return values: The first is the modified
+  graph and the second is the newly created edge.
+This feature is especially useful when adding parallel edges.
+</BLOCKQUOTE>
+<H5><A NAME = "20127">G + { { u, v } } : GrphMultUnd, { { GrphVert, GrphVert } } -&gt; GrphMultUnd</A></H5>
+<H5>G + [ { u, v } ] : GrphMultUnd, [ { GrphVert, GrphVert } ] -&gt; GrphMultUnd</H5>
+<H5>G + { [ u, v ] } : GrphMultDir, { [ GrphVert, GrphVert ] } -&gt; GrphDir</H5>
+<H5>G + [ [ u, v ] ] : GrphMultDir, [ [ GrphVert, GrphVert ] ] -&gt; GrphDir</H5>
+<H5>G + { [ u, v ] } : GrphNet, { [ GrphVert, GrphVert ] } -&gt; GrphNet</H5>
+<H5>G + [ [ u, v ] ] : GrphNet, [ [ GrphVert, GrphVert ] ] -&gt; GrphNet</H5>
+<BLOCKQUOTE>
+Given a graph G and a  set or a sequence of pairs
+  of vertices of G, add the edges to G described by these 
+  pairs.
+If G is undirected then the edges must
+  be given as a set of (two) vertices, if G is directed 
+  the edges are given as a sequence of (two) vertices.
+If G is a network, then the edges are added with a capacity of 1 (0 if 
+  a loop).
+The support, vertex labels, and edge labels or capacities or weights
+  are retained.
+</BLOCKQUOTE>
+<H5><A NAME = "20128">G +:= { u, v } : GrphMultUnd, { GrphVert, GrphVert } -&gt;</A></H5>
+<H5>G +:= [ u, v ] : GrphDir, [ GrphVert, GrphVert ] -&gt;</H5>
+<H5>G +:= [ u, v ] : GrphNet, [ GrphVert, GrphVert ] -&gt;</H5>
+<H5>G +:= { { u, v } }: GrphMultUnd, { { GrphVert, GrphVert } } -&gt;</H5>
+<H5>G +:= [ { u, v } ] : GrphMultUnd, [ { GrphVert, GrphVert } ] -&gt;</H5>
+<H5>G +:= { [ u, v ] } : GrphMultDir, { [ GrphVert, GrphVert ] } -&gt;</H5>
+<H5>G +:= [ [ u, v ] ] : GrphMultDir, [ [ GrphVert, GrphVert ] ] -&gt;</H5>
+<H5>G +:= { [ u, v ] } : GrphNet, { [ GrphVert, GrphVert ] } -&gt;</H5>
+<H5>G +:= [ [ u, v ] ] : GrphNet, [ [ GrphVert, GrphVert ] ] -&gt;</H5>
+<BLOCKQUOTE>
+The procedural versions of the previous four functions. 
+</BLOCKQUOTE>
+<H5><A NAME = "20129">AddEdge(G, u, v) : GrphMult, GrphVert, GrphVert -&gt; GrphMult, GrphEdge</A></H5>
+<BLOCKQUOTE>
+Given a graph G, two vertices of G u and v,
+  returns a new edge  between u and v.
+If G is a network, the edge is added with a capacity of 1 (0 if loop).
+The support, vertex labels, and edge labels or capacities or weights
+  are retained.
+This function has two return values: The first is the modified
+  graph and the second is the newly created edge.
+This feature is especially useful when adding parallel edges.
+</BLOCKQUOTE>
+<H5><A NAME = "20130"></A><A NAME = "MultiGraph:AddEdgeLabel">AddEdge</A>(G, u, v, l) : GrphMultUnd, GrphVert, GrphVert, . -&gt; GrphMult, GrphEdge</H5>
+<H5>AddEdge(G, u, v, l) : GrphMultDir, GrphVert, GrphVert, . -&gt; GrphMultDir, GrphEdge</H5>
+<BLOCKQUOTE>
+Given a graph G which is not a network, 
+  two vertices of G u and v, and a label l,
+  adds a new edge with label l between u and v.
+The support, vertex labels, and edge labels or capacities or weights
+  are retained.
+This function has two return values: The first is the modified
+  graph and the second is the newly created edge.
+</BLOCKQUOTE>
+<H5><A NAME = "20131">AddEdge(G, u, v, c) : GrphNet, GrphVert, RngIntElt, . -&gt; GrphNet, GrphEdge</A></H5>
+<BLOCKQUOTE>
+Given a network G, 
+  two vertices of G u and v, and a non-negative integer c,
+  adds a new edge from u to v with capacity c.
+The support, vertex labels, and edge labels or capacities or weights
+  are retained.
+This function has two return values: The first is the modified
+  graph and the second is the newly created edge.
+</BLOCKQUOTE>
+<H5><A NAME = "20132">AddEdge(G, u, v, c, l) : GrphNet, GrphVert, GrphVert, RngIntElt, . -&gt; GrphNet, GrphEdge</A></H5>
+<BLOCKQUOTE>
+Given a network G, 
+  two vertices of G u and v, a non-negative integer c,
+  and a label l,
+  adds a new edge from u to v with capacity c and label l.
+If G is a network, then add a  new edge with label l and capacity
+  c between u and v.
+The support, vertex labels, and edge labels or capacities or weights
+  are retained.
+This function has two return values: The first is the modified
+  graph and the second is the newly created edge.
+</BLOCKQUOTE>
+<H5><A NAME = "20133">AddEdge(~G, u, v) : GrphMult, GrphVert, GrphVert  -&gt;</A></H5>
+<H5>AddEdge(~G, u, v, l) : GrphMultUnd, GrphVert, GrphVert, . -&gt;</H5>
+<H5>AddEdge(~G, u, v, l) : GrphMultDir, GrphVert, GrphVert, . -&gt;</H5>
+<H5>AddEdge(~G, u, v, c) : GrphNet, GrphVert, GrphVert, RngIntElt -&gt;</H5>
+<H5>AddEdge(~G, u, v, c, l) : GrphNet, GrphVert, GrphVert, RngIntElt, . -&gt;</H5>
+<BLOCKQUOTE>
+Procedural versions of the previous functions for adding edges to a graph.
+</BLOCKQUOTE>
+<H5><A NAME = "20134">AddEdges(G, S) : GrphMultUnd, { { GrphVert, GrphVert } } -&gt; GrphMultUnd</A></H5>
+<H5>AddEdges(G, S) : GrphMultUnd, [ { GrphVert, GrphVert } ] -&gt; GrphMultUnd</H5>
+<H5>AddEdges(G, S) : GrphMultDir, { [  GrphVert, GrphVert ] } -&gt; GrphMultDir</H5>
+<H5>AddEdges(G, S) : GrphMultDir, [ [  GrphVert, GrphVert ] ] -&gt; GrphMultDir</H5>
+<H5>AddEdges(G, S) : GrphNet, { [  GrphVert, GrphVert ] } -&gt; GrphNet</H5>
+<H5>AddEdges(G, S) : GrphNet, [ [  GrphVert, GrphVert ] ] -&gt; GrphNet</H5>
+<BLOCKQUOTE>
+Given a graph G, and a sequence or set S of pairs of vertices of G,
+the edges specified in S are added to G.  The elements of S must be 
+sets or sequences of two vertices of G, depending upon whether G is 
+undirected or directed respectively. 
+<P>
+If G is a network, the edges are added with a capacity of 1 (0 if a loop).
+The support, vertex labels, and edge labels or capacities or weights are 
+retained.
+</BLOCKQUOTE>
+<H5><A NAME = "20135">AddEdges(G, S, L) : GrphMult, SeqEnum, SeqEnum -&gt; GrphMult</A></H5>
+<BLOCKQUOTE>
+Given a graph G, a sequence S of pairs of vertices of G, and 
+a sequence L of labels of the same length, the edges specified in S 
+are added to G with its corresponding label as given in L.
+The  elements of S must be sets or sequences of two vertices of G, 
+depending upon whether G is undirected or directed respectively. 
+If G is a network, the edges are added with a capacity of 1 (0 if loop).
+The support, vertex labels, and edge labels or capacities or weights
+are retained.
+</BLOCKQUOTE>
+<H5><A NAME = "20136">AddEdges(~G, S) : GrphMultUnd, { { GrphVert, GrphVert } } -&gt;</A></H5>
+<H5>AddEdges(~G, S) : GrphMultUnd, [ { GrphVert, GrphVert } ] -&gt;</H5>
+<H5>AddEdges(~G, S) : GrphMultDir, { [  GrphVert, GrphVert ] } -&gt;</H5>
+<H5>AddEdges(~G, S) : GrphMultDir, [ [  GrphVert, GrphVert ] ] -&gt;</H5>
+<H5>AddEdges(~G, S) : GrphNet, { [  GrphVert, GrphVert ] } -&gt;</H5>
+<H5>AddEdges(~G, S) : GrphNet, [ [  GrphVert, GrphVert ] ] -&gt;</H5>
+<H5>AddEdges(~G, S, L) : GrphMult, SeqEnum, SeqEnum -&gt;</H5>
+<BLOCKQUOTE>
+These are procedural versions of the previous functions for adding edges to a graph.
+</BLOCKQUOTE>
+<H5><A NAME = "20137">Removing Edges</A></H5>
+
+
+
+<H5><A NAME = "20138">G - e : GrphMult, GrphEdge -&gt; GrphMult</A></H5>
+<H5>G - { e } : GrphMult, { GrphEdge } -&gt; GrphMult</H5>
+<BLOCKQUOTE>
+Given an edge e or a set S of edges of a multigraph G, this function 
+creates a graph that corresponds to G with the edge e (respectively,
+set of edges S) removed.  The resulting multigraph will have vertex-set 
+V(G) and edge-set E(G) - { e }  (respectively, 
+E(G) - S).  The support, vertex labels and edge labels 
+are retained on the remaining edges.
+</BLOCKQUOTE>
+<H5><A NAME = "20139">G - { { u, v } } : GrphMultUnd, { { GrphVert, GrphVert rbrace } -&gt; GrphMultUnd</A></H5>
+<H5>G - { [u, v] } : GrphMultDir, { [ GrphVert, GrphVert ] } -&gt; GrphMultDir</H5>
+<BLOCKQUOTE>
+Given a graph G and a set S of pairs { u, v } or [u, v],
+u, v vertices of G, this function forms the graph having vertex-set 
+V(G) and edge-set E(G) - S. That is, the graph returned is the same
+as G except that <I>all</I> the edges specified by pairs in S have been 
+removed.  An edge is represented as a set if G is undirected, and as a 
+sequence otherwise.  The support, vertex labels and edge labels are retained 
+on the remaining edges.
+</BLOCKQUOTE>
+<H5><A NAME = "20140">G -:= e : GrphMult, GrphEdge -&gt;</A></H5>
+<H5>G  -:= { e } : GrphMult, { GrphEdge } -&gt;</H5>
+<H5>G -:= { { u, v } } : GrphMultUnd, { { GrphVert, GrphVert rbrace } -&gt;</H5>
+<H5>G -:= { [u, v] } : GrphMultDir, { [ GrphVert, GrphVert ] } -&gt;</H5>
+<H5>RemoveEdge(~G, e) : GrphMult, GrphEdge  -&gt;</H5>
+<H5>RemoveEdges(~G, S) : GrphMult, { GrphEdge } -&gt;</H5>
+<H5>RemoveEdge(~G, u, v) : GrphMult, GrphVert, GrphVert -&gt;</H5>
+<H5>RemoveEdges(~G, S) : GrphMultDir, { { GrphVert, GrphVert } } -&gt;</H5>
+<H5>RemoveEdges(~G, S) : GrphMultDir, { [  GrphVert, GrphVert ] } -&gt;</H5>
+<BLOCKQUOTE>
+These operations represent procedural versions of the previous functions. 
+Whenever an edge is represented as a pair {u, v} or [u, v] of vertices 
+of G, it is assumed that <I>all</I> the edges from u to v are to be removed 
+from G.
+</BLOCKQUOTE>
+<H4><A NAME = "20141">Vertex Insertion, Contraction</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+As in the case of simple graphs (see Subsection <A  HREF = "text1788.htm#19781">Constructing Complements, Line Graphs; Contraction, Switching</A>)
+it is possible to insert a vertex in a multigraph edge.  The new edges 
+thus created will be unlabelled with their capacities and weights set as 
+follows: (These rules apply regardless as to whether the edge-set is 
+capacitated and/or weighted). 
+<P>
+Let e be an edge from u to v with capacity c and weight w in a 
+multigraph G.  After the insertion of a new vertex x in e, the edge e
+will be replaced by two edges, one from u to x and  the other from 
+x to v, <I>both</I> having capacity c and weight w.
+<P>
+These rules apply regardless as to whether the edge-set is capacitated 
+and/or weighted. 
+<P>
+The contraction operation can only be applied to a pair of vertices, since 
+contracting a single multigraph edge which might have parallel edges is 
+meaningless.  The graph's support and vertex/edges decorations are 
+retained when contracting its edges.
+<P>
+Each of the functions described below returns three values:
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>The multigraph G;
+<DT>(ii)</DT><DD>The vertex-set V of G;
+<DT>(iii)</DT><DD>The edge-set E of G.</DL>
+
+
+<H5><A NAME = "20142">InsertVertex(e) : GrphEdge -&gt; GrphMult</A></H5>
+<BLOCKQUOTE>
+Given an edge e of the multigraph G, this function inserts a new vertex 
+of degree 2 in e.  If appropriate, the two new edges that replace e
+will have the same capacity and weight as e.  They will be unlabelled.
+The vertex labels and the edge decorations of G are retained, but the 
+resulting graph will have standard support.
+</BLOCKQUOTE>
+<H5><A NAME = "20143">InsertVertex(T) : { GrphEdge } -&gt; GrphMult</A></H5>
+<BLOCKQUOTE>
+Given a set T of edges belonging to the multigraph G, this function
+inserts a vertex of degree 2 in each edge belonging to the set T.
+</BLOCKQUOTE>
+<H5><A NAME = "20144">Contract(e) : GrphEdge -&gt; GrphMult</A></H5>
+<BLOCKQUOTE>
+Given an edge e = {u, v} of the graph G, form the graph obtained
+by removing the edge e and then identifying the vertices u and v.
+New parallel edges and new loops may result from this operation but
+any new loop will be assigned zero capacity.  With the above exception, 
+the edge decorations are retained, as are the support and the vertex 
+labels of G.
+</BLOCKQUOTE>
+<H5><A NAME = "20145">Contract(u, v) : GrphVert, GrphVert -&gt; GrphMult</A></H5>
+<BLOCKQUOTE>
+Given vertices u and v belonging to the multigraph G, this 
+function returns the multigraph obtained by identifying the vertices 
+u and v.  New parallel edges and new loops may result from this 
+operation but any new loop will be assigned zero capacity.  With 
+the above exception, the edge decorations are retained, as are the 
+support and the vertex labels of G.
+</BLOCKQUOTE>
+<H5><A NAME = "20146">Contract(S) : { GrphVert }  -&gt; GrphMult</A></H5>
+<BLOCKQUOTE>
+Given a set S of vertices belonging to the multigraph G, this
+function returns the multigraph obtained by identifying all of the 
+vertices in S.
+</BLOCKQUOTE>
+<H4><A NAME = "20147">Unions of Multigraphs</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+Of the union operations available for simple graphs 
+(see Section <A  HREF = "text1789.htm#19792">Unions and Products of  Graphs</A>) only <TT>Union</TT> and <TT>EdgeUnion</TT>
+have been implemented for multigraphs.  It is straightforward to 
+write Magma code for other union functions with multigraphs.
+<P>
+In contrast with the other standard graph constructions, the support, 
+vertex labels and edge decorations are generally <I>not</I> handled by 
+the functions listed below. Thus, the resulting graph will always 
+have standard support and no vertex labels nor edge decorations.  
+The one exception occurs in the case of networks, where edge capacities 
+are properly handled.
+
+
+<H5><A NAME = "20148">Union(G, H) : GrphMultUnd, GrphMultUnd -&gt; GrphMultUnd</A></H5>
+<H5>Union(G, H) : GrphMultDir, GrphMultDir -&gt; GrphMultDir</H5>
+<H5>G join H : GrphMultUnd, GrphMultUnd -&gt; GrphMultUnd</H5>
+<H5>G join H : GrphMultDir, GrphMultDir -&gt; GrphMultDir</H5>
+<BLOCKQUOTE>
+Given multi(di)graphs G and H with disjoint vertex sets 
+V(G) and V(H) respectively, this function constructs 
+their union, i.e. the multi(di)graph with vertex-set 
+V(G) &cup;V(H), and edge-set E(G) &cup;E(H).
+The resulting  multi(di)graph has standard support and 
+no vertex labels nor edge decorations.   
+</BLOCKQUOTE>
+<H5><A NAME = "20149">Union(N, H) : GrphNet, GrphNet -&gt; GrphNet</A></H5>
+<H5>N join H : GrphNet, GrphNet -&gt; GrphNet</H5>
+<BLOCKQUOTE>
+Given networks N and H with disjoint vertex sets V(N) and 
+(H) respectively, construct their union, i.e. the network with 
+vertex-set V(N) &cup;V(H), and edge-set E(N) &cup;E(H).
+The resulting network has standard support and capacities but
+neither vertex labels, edge labels nor weights retained.
+</BLOCKQUOTE>
+<H5><A NAME = "20150">&amp; join S : [ MultiUnd ] -&gt; GrphMultUnd</A></H5>
+<H5>&amp; join S : [ GrphMultDir ] -&gt; GrphMultDir</H5>
+<H5>&amp; join S : [ GrphNet ] -&gt; GrphNet</H5>
+<H5>&amp; join S : { MultiUnd } -&gt; GrphMultUnd</H5>
+<H5>&amp; join S : { GrphMultDir } -&gt; GrphMultDir</H5>
+<H5>&amp; join S : { GrphNet } -&gt; GrphNet</H5>
+<BLOCKQUOTE>
+The union of the multigraphs or networks in the sequence 
+or the set S.
+</BLOCKQUOTE>
+<H5><A NAME = "20151">EdgeUnion(G, H) : GrphMultUnd, GrphMultUnd -&gt; GrphMultUnd</A></H5>
+<H5>EdgeUnion(G, H) : GrphMultDir, GrphMultDir -&gt; GrphMultDir</H5>
+<BLOCKQUOTE>
+Given multi(di)graphs G and H having the same number of
+vertices, construct their edge union K.  This construction 
+identifies the i-th vertex of G with the i-th vertex of 
+H for all i.  The edge union has the same vertex-set as 
+G (and hence as H) and there is an edge from u to v 
+in K if and only if there is an edge from u to v in either 
+G or H.  The resulting multi(di)graph has standard support 
+but neither vertex labels nor edge decorations.   
+</BLOCKQUOTE>
+<H5><A NAME = "20152">EdgeUnion(N, H) : GrphNet, GrphNet -&gt; GrphNet</A></H5>
+<BLOCKQUOTE>
+Given networks N and H having the same number of vertices, 
+construct their edge union K.  This construction identifies 
+the i-th vertex of N with the i-th vertex of H for all i. 
+The edge union has the same vertex-set as N (and hence as H) 
+and there is an edge [u, v] with capacity c in K if and only 
+if either there is an edge [u, v] with capacity c in N or 
+if there is an edge [u, v] with capacity c in H.
+The resulting network has standard support and the inherited
+edge capacities but neither vertex labels, edge labels nor weights.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text1815.htm">[Next]</A><A  HREF = "text1813.htm">[Prev]</A> <A  HREF = "text1815.htm">[Right]</A> <A  HREF = "text1813.htm">[Left]</A> <A  HREF = "text1809.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

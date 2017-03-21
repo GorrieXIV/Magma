@@ -1,0 +1,245 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Generating p-groups</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text720.htm">[Next]</A><A  HREF = "text718.htm">[Prev]</A> <A  HREF = "text720.htm">[Right]</A> <A  HREF = "text718.htm">[Left]</A> <A  HREF = "text706.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "8225">Generating p-groups</A></H3>
+
+<P>
+<P>
+The p-central series of a group G is the 
+descending sequence of subgroups
+ G= P<sub>0</sub>(G) &ge; ... &ge;P<sub>i - 1</sub>(G) &ge;P<sub>i</sub>(G) &ge; ... &ge;
+where P<sub>i</sub>(G)=[P<sub>i - 1</sub>(G), G]P<sub>i - 1</sub>(G)<sup>p</sup> for i&ge;1.
+<P>
+If P<sub>c</sub>(G)=1 and c is the smallest such integer then G has
+<I>p-class</I> c. A group with p-class c is nilpotent and 
+has nilpotency class at most c.  
+<P>
+Let G be a finite p-group with Frattini rank d and class c.
+A group H is a <I>descendant</I> of G if H has Frattini rank d and
+the quotient H/P<sub>c</sub>(H) is isomorphic to G. A group is an <I>immediate
+descendant</I> of G if it is a descendant of G and has class c + 1.
+<P>
+The p-group generation algorithm allows the construction
+of (immediate) descendants of a p-group.
+For a description of this algorithm, see
+<A  HREF = "text705.htm#bib_newman_pgrp_gen">[New77]</A>, <A  HREF = "text705.htm#bib_obrien-pgroup">[O'B90]</A>.
+<P>
+<TT>SetVerbose ("GeneratepGroups", 1)</TT> will provide
+information on the progress of the algorithm.
+
+
+<H5><A NAME = "8226">GeneratepGroups (p, d, c : parameters) : RngIntElt, RngIntElt,RngIntElt -&gt; [GrpPC], RngIntElt</A></H5>
+<BLOCKQUOTE>
+Generate all d-generator p-class at most c p-groups.
+<P>
+<P>
+<P>
+<PRE>
+     Exponent: RngIntElt                 Default: 0
+</PRE>
+All groups constructed satisfy the supplied exponent.
+<P>
+<P>
+<PRE>
+     OrderBound: RngIntElt               Default: 0
+</PRE>
+Given <TT>OrderBound := n</TT>, all groups constructed have order at most p<sup>n</sup>.
+<P>
+<P>
+<PRE>
+     StepSizes: [RngIntElt]              Default: []
+</PRE>
+Construct descendants of order p<sup>(n + s)</sup> of a group of 
+order p<sup>n</sup> only for s in <TT>StepSizes</TT>.   
+<P>
+<P>
+<PRE>
+     All: BoolElt                        Default: <TT>true</TT>
+</PRE>
+If <TT>true</TT>, return all groups. Otherwise, return only
+the capable groups (those which have descendants).
+</BLOCKQUOTE>
+<H5><A NAME = "8227">Descendants(G : parameters) : GrpPC -&gt; [GrpPC], RngIntElt</A></H5>
+<H5>Descendants(G, c : parameters) : GrpPC, RngIntElt -&gt; [GrpPC], RngIntElt</H5>
+<BLOCKQUOTE>
+Construct descendants of G having p-class at most c; if
+c is not supplied, it is assumed to be one larger than the
+p-class of G.
+This function supports the same variable arguments as <TT>GeneratepGroups</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8228">Example <TT>GrpPC_Generating_p_groups (H68E27)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; G := DihedralGroup(GrpPC, 16);
+&gt; T := Descendants (G, 8);
+&gt; #T;
+12
+&gt; H := T[5]; 
+&gt; H;
+GrpPC : H of order 128 = 2^7
+PC-Relations:
+    H.1^2 = H.7, 
+    H.2^2 = H.3 * H.4, 
+    H.3^2 = H.4 * H.5, 
+    H.4^2 = H.5 * H.6, 
+    H.5^2 = H.6 * H.7, 
+    H.6^2 = H.7, 
+    H.2^H.1 = H.2 * H.3, 
+    H.3^H.1 = H.3 * H.4, 
+    H.4^H.1 = H.4 * H.5, 
+    H.5^H.1 = H.5 * H.6, 
+    H.6^H.1 = H.6 * H.7
+
+</PRE>
+<HR>
+<H3><A NAME = "8229">Example <TT>GrpPC_GeneratepGroups (H68E28)</TT></A></H3>
+What is the soluble length of a 2-generator group of exponent 4?
+We construct the 2-generator 2-groups having exponent 4.
+<P>
+<P>
+<PRE>
+&gt; T := GeneratepGroups(2, 2, 10: Exponent := 4);
+&gt; "The number of 2-generator exponent 4 groups is ", # T;
+The number of 2-generator exponent 4 groups is  26
+</PRE>
+What are their soluble lengths?
+<P>
+<P>
+<PRE>
+&gt; for i := 1 to #T do
+&gt;       "Group ", i, " has soluble length ", DerivedLength (T[i]);
+&gt; end for;
+Group  1  has soluble length  1
+Group  2  has soluble length  2
+Group  3  has soluble length  2
+Group  4  has soluble length  1
+Group  5  has soluble length  2
+Group  6  has soluble length  2
+Group  7  has soluble length  2
+Group  8  has soluble length  2
+Group  9  has soluble length  2
+Group  10  has soluble length  2
+Group  11  has soluble length  2
+Group  12  has soluble length  2
+Group  13  has soluble length  2
+Group  14  has soluble length  2
+Group  15  has soluble length  2
+Group  16  has soluble length  2
+Group  17  has soluble length  2
+Group  18  has soluble length  2
+Group  19  has soluble length  2
+Group  20  has soluble length  2
+Group  21  has soluble length  3
+Group  22  has soluble length  3
+Group  23  has soluble length  3
+Group  24  has soluble length  3
+Group  25  has soluble length  3
+Group  26  has soluble length  3
+</PRE>
+<HR>
+<H3><A NAME = "8230">Example <TT>GrpPC_IsGood (H68E29)</TT></A></H3>
+Can we find all 2-generator 3-groups of abundance zero?
+Such groups have order at most 3<sup>5</sup>.
+First, we define a function which checks the number
+of conjugacy classes of a group (to determine abundance).
+<P>
+<P>
+<PRE>
+&gt; IsGoodGroup := function(G, k)
+&gt;
+&gt;    ncl := # Classes(G);
+&gt;
+&gt;    O := FactoredOrder(G);
+&gt;    p := O[1][1];
+&gt;    m := O[1][2];
+&gt;    n := Floor(m / 2);
+&gt;    e := m - n * 2;
+&gt;    Desired := n * (p^2 - 1) + p^e + k * (p - 1) * (p^2 - 1);
+&gt;
+&gt;    return (Desired eq ncl);
+&gt;
+&gt; end function;
+</PRE>
+Then, we generate the potential candidates and check
+each.
+<P>
+<P>
+<PRE>
+&gt; a := GeneratepGroups (3, 2, 4 : OrderBound := 5); 
+&gt; #a;
+42
+&gt;
+&gt; for i := 1 to #a do
+&gt;        G := a[i];
+&gt;        if IsGoodGroup(G, 0) then
+&gt;           "Group ", i, " of order ", Order(G), " has abundance 0";
+&gt;        end if;
+&gt; end for;
+Group  1  of order  9  has abundance 0
+Group  3  of order  27  has abundance 0
+Group  4  of order  27  has abundance 0
+Group  11  of order  81  has abundance 0
+Group  12  of order  81  has abundance 0
+Group  13  of order  81  has abundance 0
+Group  14  of order  81  has abundance 0
+Group  40  of order  243  has abundance 0
+Group  41  of order  243  has abundance 0
+Group  42  of order  243  has abundance 0
+</PRE>
+<HR>
+<H5><A NAME = "8231">ClassTwo(p, d : parameters) : RngIntElt, RngIntElt -&gt; SeqEnum</A></H5>
+<H5>ClassTwo(p, d, Step : parameters) : RngIntElt, RngIntElt, SeqEnum -&gt; SeqEnum</H5>
+<H5>ClassTwo(p, d, s : parameters) : RngIntElt, RngIntElt, RngIntElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Count the d-generator p-groups of p-class 2. 
+If s or Step is supplied, then count only those of 
+order p<sup>(d + s)</sup> or p<sup>(d + m)</sup> for m &isin;Step.
+In the first two invocations, the sequence returns
+a sequence of length d choose 2, whose m-th 
+entry is the number of groups of p<sup>(d + m)</sup>. 
+(Some additional entries may be deduced on the basis
+of duality.) The last invocation returns the number 
+of groups of p<sup>(d + s)</sup>.
+For details of the algorithm used see <A  HREF = "text705.htm#bib_EO-enum">[EO99]</A>.
+<P>
+<P>
+<PRE>
+     Exponent: RngIntElt                 Default: 0
+</PRE>
+If <TT>Exponent</TT> is <TT>true</TT>, count those groups which have exponent p.
+The directive <TT>SetVerbose ("ClassTwo", 1)</TT> will provide information on 
+the progress of the algorithm.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8232">Example <TT>GrpPC_ClassTwo (H68E30)</TT></A></H3>
+Count the number of 3-generator p-class 2 5-groups.
+<P>
+<P>
+<PRE>
+&gt; ClassTwo(5, 3);
+[ 4, 19, 42, 19, 4, 1 ]
+</PRE>
+For example, the number of 3-generator 5-groups of order 5<sup>6</sup> 
+and p-class 2 is precisely 42.
+<P>
+Count the number of 4-generator p-class 2 5-groups of order 5<sup>7</sup>.
+<P>
+<P>
+<PRE>
+&gt; ClassTwo(5, 4, 3);
+6598
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text720.htm">[Next]</A><A  HREF = "text718.htm">[Prev]</A> <A  HREF = "text720.htm">[Right]</A> <A  HREF = "text718.htm">[Left]</A> <A  HREF = "text706.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

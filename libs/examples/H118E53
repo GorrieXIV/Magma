@@ -1,0 +1,43 @@
+"Source: Text/Geometry/Scheme.text";
+"Line: 6767";
+"Date: Wed Jun  8 17:42:16 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/Scheme.text, line: 6767
+// Example: H118E53 ()
+print "Example: H118E53";
+ei := GetEchoInput();
+SetEchoInput(true);
+P3<x,y,z,t> := ProjectiveSpace(Rationals(),3);
+X := Scheme(P3,[x*t-y*z, x^2+y^2-4*z^2+7*t^2]);
+P4<a,b,c,d,e> := ProjectiveSpace(Rationals(),4);
+mp_seq := [x^3,y^3,z^3,t^3,y*z*t]; // polys defining a map to P^4
+mp := map<X->P4|mp_seq>;
+// Will now define the graph map
+R<x1,x2,x3,x4,y1,y2,y3,y4,y5> := PolynomialRing(Rationals(),9,"grevlex");
+hm := hom<CoordinateRing(P3) -> R |[R.i : i in [1..4]]>; // usual map
+grI := ideal<R|[(R.(i+4))*hm(mp_seq[j])-(R.(j+4))*hm(mp_seq[i]):
+  i in [j+1..5] , j in [1..5]] cat [hm(b) : b in Basis(Ideal(X))]>;
+gr_mp := SchemeGraphMap(X,P4,grI); // the graph map
+// check that gr_mp does give mp
+mp eq SchemeGraphMapToSchemeMap(gr_mp);
+assert $1;
+Y := gr_mp(X);
+Y eq mp(X);
+assert $1;
+// take restrictions to the image
+gr_mp1 := Restriction(gr_mp,X,Y);
+mp1 := Restriction(mp,X,Y);
+// check that gr_mp1 still gives mp1
+mp1 eq SchemeGraphMapToSchemeMap(gr_mp1);
+assert $1;
+boo := IsInvertible(gr_mp1);
+boo;
+assert $1;
+// find the image and preimage of a point
+pt := X![2,0,1,0];
+ipt := gr_mp1(X![2,0,1,0]);
+iminv := ipt @@ gr_mp1;
+Dimension(iminv); Degree(iminv);
+// the preimage is just pt doubled
+Support(iminv);
+SetEchoInput(ei);

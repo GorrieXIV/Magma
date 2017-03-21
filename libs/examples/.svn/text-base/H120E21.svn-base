@@ -1,0 +1,43 @@
+"Source: Text/Geometry/Crv.text";
+"Line: 3298";
+"Date: Wed Jun  8 14:01:03 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/Crv.text, line: 3298
+// Example: H120E21 ()
+print "Example: H120E21";
+ei := GetEchoInput();
+SetEchoInput(true);
+P2<x,y,z> := ProjectiveSpace(Rationals(),2);
+C := Curve(P2,x^3*y+y^3*z+z^3*x);
+P3<a,b,c,d> := ProjectiveSpace(Rationals(),3);
+D := Curve(P3,[b^2-a*d,a*b*c+b*d^2+c^3]);
+boo,im := IsIsomorphic(C,D);
+boo;
+assert $1;
+im;
+_,imi := IsInvertible(im);
+Inverse(imi);
+P2<x,y,z> := ProjectiveSpace(GF(11^3),2);
+C := Curve(P2,x^3*y+y^3*z+z^3*x);
+G := AutomorphismGroup(C);
+Order(G);
+assert $1 eq 168;
+[Order(g) : g in Generators(G)];
+G1 := AutomorphismGroup(C,[G.1,G.2]);
+Order(G1);
+assert $1 eq 21;
+PermutationGroup(G1);
+// can also find the normaliser of <G.3> via the 
+// permutation rep
+Gp,rep := PermutationRepresentation(G);
+H := Normaliser(Gp,sub<Gp|Gp.3>);
+#H;
+assert $1 eq 21;
+Hgens := [g@@rep : g in Generators(H)];
+[Order(g) : g in Hgens];
+h := Hgens[1];
+//check directly that h normalises <g> in G
+g := G.3;
+Index([g^i : i in [1..7]],h*g*(h^-1));
+assert $1 gt 0;
+SetEchoInput(ei);

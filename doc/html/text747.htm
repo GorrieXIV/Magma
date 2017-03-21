@@ -1,0 +1,282 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Database of Perfect Groups</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text748.htm">[Next]</A><A  HREF = "text746.htm">[Prev]</A> <A  HREF = "text748.htm">[Right]</A> <A  HREF = "text746.htm">[Left]</A> <A  HREF = "text742.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "8561">Database of Perfect Groups</A></H3>
+
+<P>
+<P>
+Magma includes a database of finite perfect groups.  This database
+includes all perfect groups up to order 50000, and many classes of
+perfect groups up to order one million.  Each group is defined by
+means of a finite presentation.  Further information is also provided
+which allows the construction of permutation representations.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text747.htm#8562">Specifying an Entry of the Database</A>
+<LI> <A  HREF = "text747.htm#8563">Creating the Database</A>
+<LI> <A  HREF = "text747.htm#8565">Accessing the Database</A>
+<LI> <A  HREF = "text747.htm#8571">Finding Legal Keys</A>
+</UL>
+<H4><A NAME = "8562">Specifying an Entry of the Database</A></H4>
+
+<P>
+<P>
+<P>
+There are three ways to key a particular entry of the database.
+Firstly, a single integer i simply denotes the i-th entry of the
+database.  There is no particular ordering in the correspondence.
+<P>
+Secondly, the database stores information to quickly locate perfect groups
+of a particular order; thus the pair o, i represents the i-th entry of
+order o.
+<P>
+The third method corresponds to the notation used in Chapter 5.3
+of <A  HREF = "text741.htm#bib_holt-plesken">[HP89]</A>. 
+In this book, the expression Q#p
+denotes the class of groups that are isomorphic to perfect extensions
+of p-groups by Q, where p is a prime and Q is a fixed finite
+perfect group in which the largest normal p-subgroup is assumed to be
+trivial.  Within a class Q#p, an isomorphism type of groups is
+denoted by an ordered pair of integers &lt; r, n &gt;, where
+r&ge;0 and n&ge;0.
+<P>
+To specify a particular group Q without extension, a (somewhat
+descriptive) string is given.  The set of possible values can be
+accessed using the function <TT>TopQuotients</TT>.  Among these strings,
+full or partial covering groups of G are named <TT>GCn</TT> where
+n is the index of G in <TT>GCn</TT>.  Also, there are five classes
+of 3-extensions of groups which are also defined in the database.  The
+names of these base groups are <TT>A5# 2&lt;r, n&gt;</TT> where 
+(r, n) are (4, 2), (5, 5), (5, 6), (5, 7) or (6, 7).  Furthermore, there
+are some extensions of direct products:  these have names of the form
+<TT>GxH</TT>.  The remainder are names of simple groups.  The
+convention with these names is that if they are elements of a family of
+simple groups with two parameters then the name will be <TT><I>fam</TT>(p<sub>1</sub>, p<sub>2</sub>)</I>, while one parameter families will just be the
+concatenation of the family name and the parameter.
+<P>
+To illustrate the naming conventions, here are some examples:
+<TT>A5</TT>, <TT>A5C2</TT>, <TT>A5# 2&lt;5, 5&gt;</TT>, <TT>L(2, 59)C2</TT>, 
+<TT>A5xL(2, 11)</TT>.
+Notice that there is never a space before the <TT>C</TT> denoting a covering group
+or on either side of the <TT>x</TT> denoting direct product.  However, there is
+always a space after a comma.
+<P>
+To specify a particular group Q#p&lt; r, n &gt; the four
+values Q, p, r and n should be given.  However, it should be
+noted that in three cases (<TT>A5# 2&lt; 5, 1&gt;</TT>, 
+<TT>L(3, 2)# 2&lt;3, 1&gt;</TT>, <TT>L(3, 2)# 2&lt;3, 2&gt;</TT>), 
+there are <I>two</I> versions of
+<TT>Q# p&lt;r, n&gt;</TT> stored in the database.  Strictly speaking,
+then, there is a fifth key value v required in this third method.
+However, it can be specified by an optional parameter <TT>Variant := v</TT>
+(if necessary), and can normally be ignored. The variant forms are
+isomorphic to the original forms, and are included for compatibility with
+Holt &amp; Plesken's tables.
+
+
+<H4><A NAME = "8563">Creating the Database</A></H4>
+
+
+
+<H5><A NAME = "8564">PerfectGroupDatabase() : -&gt; DB</A></H5>
+<BLOCKQUOTE>
+This function returns a database object which contains information about the
+database. It is required as first argument to the other access functions.
+</BLOCKQUOTE>
+<H4><A NAME = "8565">Accessing the Database</A></H4>
+
+
+
+<H5><A NAME = "8566">Group(D, i): DB, RngIntElt -&gt; GrpFP, SeqEnum</A></H5>
+<H5>Group(D, o, i): DB, RngIntElt, RngIntElt -&gt; GrpFP, SeqEnum</H5>
+<H5>Group(D, Q): DB, MonStgElt -&gt; GrpFP, SeqEnum</H5>
+<H5>Group(D, Q, p, r, n: parameters): DB, MonStgElt, RngIntElt, RngIntElt, RngIntElt, RngIntElt -&gt; GrpFP, SeqEnum</H5>
+
+<PRE>    Variant: RngIntElt                  Default: 1</PRE>
+<BLOCKQUOTE>
+Returns the specified entry from the database D as a finitely presented
+group.  In addition, it returns a sequence of pairs &lt; [i<sub>1</sub>, ..., i<sub>n</sub>],
+[H<sub>1</sub>, ..., H<sub>n</sub>] &gt;, each of which affords an isomorphism onto a
+permutation group of degree &sum;<sub>j=1</sub><sup>n</sup> i<sub>j</sub>. The subgroup H<sub>j</sub> has index
+i<sub>j</sub> in the defined group, and the sum of the permutation representations
+of the group on the cosets of the H<sub>j</sub>'s is faithful.
+For the meanings of the arguments, 
+see Subsection <A  HREF = "text747.htm#8562">Specifying an Entry of the Database</A> above.
+</BLOCKQUOTE>
+<H5><A NAME = "8567">IdentificationNumber(D, i): DB, RngIntElt -&gt; RngIntElt</A></H5>
+<H5>IdentificationNumber(D, o, i): DB, RngIntElt, RngIntElt -&gt; RngIntElt</H5>
+<H5>IdentificationNumber(D, Q): DB, MonStgElt -&gt; RngIntElt</H5>
+<H5>IdentificationNumber(D, Q, p, r, n: parameters): DB, MonStgElt, RngIntElt, RngIntElt, RngIntElt, RngIntElt -&gt; RngIntElt</H5>
+
+<PRE>    Variant: RngIntElt                  Default: 1</PRE>
+<BLOCKQUOTE>
+Returns a number which can be used to access the specified entry from the
+database D using method one.
+(See Subsection <A  HREF = "text747.htm#8562">Specifying an Entry of the Database</A> above).
+</BLOCKQUOTE>
+<H5><A NAME = "8568">NumberOfRepresentations(D, i): DB, RngIntElt -&gt; RngIntElt</A></H5>
+<H5>NumberOfRepresentations(D, o, i): DB, RngIntElt, RngIntElt -&gt; RngIntElt</H5>
+<H5>NumberOfRepresentations(D, Q): DB, MonStgElt -&gt; RngIntElt</H5>
+<H5>NumberOfRepresentations(D, Q, p, r, n: parameters): DB, MonStgElt, RngIntElt, RngIntElt, RngIntElt, RngIntElt -&gt; RngIntElt</H5>
+
+<PRE>    Variant: RngIntElt                  Default: 1</PRE>
+<BLOCKQUOTE>
+Returns the number of ways stored in the database for building a
+permutation group representation of the specified entry.
+(See Subsection <A  HREF = "text747.htm#8562">Specifying an Entry of the Database</A> above).
+</BLOCKQUOTE>
+<H5><A NAME = "8569">PermutationRepresentation(D, i: parameters): DB, RngIntElt -&gt; Hom(Grp), GrpFP, GrpPerm</A></H5>
+<H5>PermutationRepresentation(D, o, i: parameters) : DB, RngIntElt, RngIntElt -&gt; Hom(Grp), GrpFP, GrpPerm</H5>
+<H5>PermutationRepresentation(D, Q: parameters): DB, MonStgElt -&gt; Hom(Grp), GrpFP, GrpPerm</H5>
+<H5>PermutationRepresentation(D, Q, p, r, n: parameters): DB, MonStgElt, RngIntElt, RngIntElt, RngIntElt, RngIntElt -&gt; Hom(Grp), GrpFP, GrpPerm</H5>
+
+<PRE>    Variant: RngIntElt                  Default: 1</PRE>
+<BLOCKQUOTE>
+Returns the isomorphism from the finitely presented group G specified to a
+permutation group representation H as well as the groups G and H.
+(See Subsection <A  HREF = "text747.htm#8562">Specifying an Entry of the Database</A> above).
+<P>
+<P>
+<PRE>
+     Representation: RngIntElt           Default: 1
+</PRE>
+Selects which of the stored methods of constructing the permutation
+representation should be used.
+</BLOCKQUOTE>
+<H5><A NAME = "8570">PermutationGroup(D, i: parameters): DB, RngIntElt -&gt; GrpPerm</A></H5>
+<H5>PermutationGroup(D, o, i: parameters): DB, RngIntElt, RngIntElt -&gt; GrpPerm</H5>
+<H5>PermutationGroup(D, Q: parameters): DB, MonStgElt -&gt; GrpPerm</H5>
+<H5>PermutationGroup(D, Q, p, r, n: parameters): DB, MonStgElt, RngIntElt, RngIntElt, RngIntElt, RngIntElt -&gt; GrpPerm</H5>
+
+<PRE>    Variant: RngIntElt                  Default: 1</PRE>
+<BLOCKQUOTE>
+Returns the specified entry from the database D as a permutation group.
+(See Subsection <A  HREF = "text747.htm#8562">Specifying an Entry of the Database</A> above).
+<P>
+<P>
+<PRE>
+     Representation: RngIntElt           Default: 1
+</PRE>
+Selects which of the stored methods of constructing the permutation
+representation should be used.
+</BLOCKQUOTE>
+<H4><A NAME = "8571">Finding Legal Keys</A></H4>
+
+
+
+<H5><A NAME = "8572"># D : DB -&gt; RngIntElt</A></H5>
+<H5>NumberOfGroups(D) : DB -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Returns the number of entries stored in the database.
+(See Subsection <A  HREF = "text747.htm#8562">Specifying an Entry of the Database</A>, method 1, above).
+</BLOCKQUOTE>
+<H5><A NAME = "8573">NumberOfGroups(D, o) : DB, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the number of entries stored in the database of order o.
+(See Subsection <A  HREF = "text747.htm#8562">Specifying an Entry of the Database</A>, method 2, above).
+</BLOCKQUOTE>
+<H5><A NAME = "8574">TopQuotients(D) : DB -&gt; SetIndx</A></H5>
+<BLOCKQUOTE>
+Returns the set of strings denoting the fixed perfect groups Q.
+(See Subsection <A  HREF = "text747.htm#8562">Specifying an Entry of the Database</A>, method 3, above).
+</BLOCKQUOTE>
+<H5><A NAME = "8575">ExtensionPrimes(D, Q) : DB, MonStgElt -&gt; SetEnum</A></H5>
+<BLOCKQUOTE>
+Returns the set of primes p for which a non-trivial p-extension of the
+group denoted by Q lies in the database.
+(See Subsection <A  HREF = "text747.htm#8562">Specifying an Entry of the Database</A>, method 3, above).
+</BLOCKQUOTE>
+<H5><A NAME = "8576">ExtensionExponents(D, Q, p) : DB, MonStgElt, RngIntElt -&gt; SetEnum</A></H5>
+<BLOCKQUOTE>
+Returns the set of exponents r such that a non-trivial extension of
+the group denoted by Q by p<sup>r</sup> lies in the database.
+(See Subsection <A  HREF = "text747.htm#8562">Specifying an Entry of the Database</A>, method 3, above).
+</BLOCKQUOTE>
+<H5><A NAME = "8577">ExtensionNumbers(D, Q, p, r) : DB, MonStgElt, RngIntElt, RngIntElt -&gt; SetEnum</A></H5>
+<BLOCKQUOTE>
+Returns the set of numbers n such that there is a group
+Q#p&lt; r, n &gt; in the database.
+(See Subsection <A  HREF = "text747.htm#8562">Specifying an Entry of the Database</A>, method 3, above).
+</BLOCKQUOTE>
+<H5><A NAME = "8578">ExtensionClasses(D, Q) : DB, MonStgElt -&gt; SetEnum</A></H5>
+<BLOCKQUOTE>
+Returns the set of triples &lt; p, r, n &gt; such that there is
+a group Q#p&lt; r, n &gt; in the database.
+(See Subsection <A  HREF = "text747.htm#8562">Specifying an Entry of the Database</A>, method 3, above).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8579">Example <TT>GrpData_perfgps (H71E7)</TT></A></H3>
+We hunt through the various levels of key-finding functions available to
+find an extension of L(3,4) in the database.
+<P>
+<P>
+<PRE>
+&gt; DB := PerfectGroupDatabase();
+&gt; "L(3, 4)" in TopQuotients(DB);
+true
+&gt; ExtensionPrimes(DB, "L(3, 4)");
+{ 2 }
+&gt; ExtensionExponents(DB, "L(3, 4)", 2);
+{ 1, 2, 3, 4 }
+&gt; ExtensionNumbers(DB, "L(3, 4)", 2, 2);
+{ 1, 2, 3 }
+</PRE>
+The database contains extensions of L(3,4) by groups of order 2<sup>1</sup>, 2<sup>2</sup>, 
+2<sup>3</sup> and 2<sup>4</sup>.
+We will look at one of the 3 extensions by a group of order 4.
+<P>
+<P>
+<PRE>
+&gt; G := Group(DB, "L(3, 4)", 2, 2, 3);
+&gt; G;
+Finitely presented group G on 3 generators
+Relations
+  a^2 = Id(G)
+  b^4 * e^-2 = Id(G)
+  a * b * a * b * a * b * a * b * a * b * a * b * a * b * e 
+  = Id(G)
+  a * b^2 * a * b^2 * a * b^2 * a * b^2 * a * b^2 * e^-1 = 
+  Id(G)
+  a^-1 * b^-1 * a * b * a^-1 * b^-1 * a * b * a^-1 * b^-1 * 
+  a * b * a^-1 * b^-1 * a * b * a^-1 * b^-1 * a * b * e^-2 =
+  Id(G)
+  a * b * a * b * a * b^3 * a * b * a * b * a * b^3 * a * b 
+  * a * b * a * b^3 * a * b * a * b * a * b^3 * a * b * a * 
+  b * a * b^3 * e^-2 = Id(G)
+  (a * b * a * b * a * b^2 * a * b^-1)^5 = Id(G)
+  (a, e^-1) = Id(G)
+  (b, e^-1) = Id(G)
+&gt; P := PermutationGroup(DB, "L(3, 4)", 2, 2, 3);
+&gt; P;
+Permutation group P acting on a set of cardinality 224
+Order = 80640 = 2^8 * 3^2 * 5 * 7
+&gt; ChiefFactors(P);
+    G
+    |  A(2, 4)                = L(3, 4)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    1
+&gt; #Radical(P);
+4
+&gt; IsCyclic(Radical(P));
+true
+&gt; IsCentral(P, Radical(P));
+true
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text748.htm">[Next]</A><A  HREF = "text746.htm">[Prev]</A> <A  HREF = "text748.htm">[Right]</A> <A  HREF = "text746.htm">[Left]</A> <A  HREF = "text742.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Introduction</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1898.htm">[Next]</A><A  HREF = "text1896.htm">[Prev]</A> <A  HREF = "text1898.htm">[Right]</A> [____] <A  HREF = "text1896.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "21119">Introduction</A></H3>
+
+<P>
+<P>
+<P>
+Interest in quantum computing has grown rapidly following the 
+discovery by Peter Shor in 1994 of a polynomial-time algorithm 
+for integer factorization <A  HREF = "text1895.htm#bib_ShorFactoring">[Sho94]</A>.
+In a classical computer a sequence of N binary digits defines 
+one specific configuration among the 2<sup>N</sup> possible values.
+However, in a quantum computer a collection of N "qubits" has
+a state function 
+(in `ket' notation) ket(&psi;)
+in a <I>Hilbert space</I>, which
+can be in a superposition of all 2<sup>N</sup> possible values
+<P>
+ket(&psi;) = &sum;<sub>bv &isin;Z<sub>2</sub><sup>N</sup></sub> &alpha;<sub>bv</sub> ket(bv),
+	 qquad &alpha;<sub>bv</sub> &isin;C,   &sum;<sub>bv</sub> |&alpha;<sub>bv</sub>|<sup>2</sup> = 1.
+<P>
+<P>
+<P>
+A basic theorem in quantum information theory states that it is
+impossible to clone a quantum state. Since this implies that it
+is not possible to copy quantum information, it was initially
+believed that error-correction would be impossible on a quantum 
+computer.  However, in 1995 Shor showed that it <I>was</I> possible 
+to encode quantum information in such a way that errors can be
+corrected, assuming an error model in which errors occur independently 
+in distinct qubits <A  HREF = "text1895.htm#bib_ShorQECC">[Sho95]</A>.
+<P>
+<P>
+Following this discovery, a class of quantum error-correcting codes 
+known as <I>stabilizer codes</I> were developed. In <A  HREF = "text1895.htm#bib_CRSS">[CRSS98]</A> (which
+is the major reference for this chapter of the Magma Handbook),
+it was shown that stabilizer codes can be represented in terms
+of additive codes over finite fields (see chapter <A  HREF = "text1883.htm#20971">ADDITIVE CODES</A> 
+for a description of additive codes).
+This remarkable result reduces the problem of constructing fault-tolerant
+encodings on a continuous Hilbert space to that of constructing certain
+discrete codes, allowing the use of many of the tools developed in 
+classical coding theory.
+<P>
+<P>
+The current Magma package for quantum codes deals exclusively with 
+finite field representations of stabilizer codes.  It is important to 
+keep in mind that, although a quantum code is <I>represented</I> by a 
+code over a finite field, an actual quantum code is in fact a totally 
+different object.  The full theory behind quantum stabilizer codes will 
+not be described here, for that the reader should consult the main 
+reference <A  HREF = "text1895.htm#bib_CRSS">[CRSS98]</A>.  A brief synopsis will outline how the finite 
+field representation of a stabilizer code is to be interpreted, and the 
+specifics of this representation in Magma.
+<P>
+<P>
+Many of the conventions and functions for classical error-correcting 
+code types in Magma can be ambiguous in the context of quantum codes. 
+For this reason the handbook should be carefully consulted before assuming 
+that any particular aspect of a quantum code follows naturally from 
+classical coding theory definitions.
+<P>
+<P>
+The reduction of the problem of continuous errors on a Hilbert space to 
+a problem employing a discrete finite field representation is achieved 
+by confining attention to a finite <I>error group</I>.  An element of 
+the error group, acting on the N qubits, is expressed as a combination 
+of bit flip errors, designated by the operator X, and phase shift errors,
+designated by the operator Z (as well as an overall phase factor that 
+will be ignored here):
+<P>
+X(ba)Z(bb) ket(bv) = ( - 1)<sup>bv .bb</sup> ket(bv + ba)
+<P>
+The error group is given by the set 
+{ X(ba)Z(bb) : ba, bb &isin;Z<sub>2</sub><sup>n</sup> } and its elements
+can be written as length 2N binary vectors (ba|bb).
+An error represented by such a vector in Magma is said to be in 
+<I>extended format</I> which is distinct from the default representation.
+A more common (and practical) representation is as the element bw
+of F<sub>4</sub><sup>(N)</sup> given by  bw = ba + &omega; bb,
+where &omega; is a primitive element of GF(4).
+This representation is referred to as the <I>compact format</I>, 
+and is the default format used in Magma for quantum codes.
+Note that this is slightly different to the representation
+widehat(bw) = &omega; ba + /line(&omega;) bb
+used in <A  HREF = "text1895.htm#bib_CRSS">[CRSS98]</A> for binary quantum codes, but they are equivalent:
+bw = /line(&omega;) * widehat(bw).
+<P>
+<P>
+The Magma package also supports non-binary quantum codes, which are 
+obtained by generalizing from the binary case in a natural way.  For 
+quantum codes based on qubits over GF(q), the compact format in 
+GF(q<sup>2</sup>) will be bw = ba + &lambda; bb, where &lambda; is a 
+fixed element returned by the function <TT>QuantumBasisElement</TT>(GF(q<sup>2</sup>)).
+<P>
+<P>
+A symplectic inner product is defined on the group of errors, in its
+representation as a set of GF(q)-vectors. For vectors in extended
+format this is defined by
+<P>
+(ba<sub>1</sub>|bb<sub>1</sub>) * (ba<sub>2</sub>|bb<sub>2</sub>) = ba<sub>1</sub> .bb<sub>2</sub> - ba<sub>2</sub> .bb<sub>1</sub>
+<P>
+In compact format (over GF(4)) the equivalent inner product is 
+defined by
+<P>
+bw<sub>1</sub> * bw<sub>2</sub> = (Trace)(bw<sub>1</sub> ./line(bw)<sub>2</sub>).
+<P>
+Since the commutator of two errors is given by
+eqalign(
+Big[ big(X(ba<sub>1</sub>)&amp;Z(bb<sub>1</sub>)big)big(X(ba<sub>2</sub>)Z(bb<sub>2</sub>)big) - 
+	big(X(ba<sub>2</sub>)Z(bb<sub>2</sub>)big)big(X(ba<sub>1</sub>)Z(bb<sub>1</sub>)big)Big] ket(bv) cr
+ &amp;= ( - 1)<sup>bv.bb<sub>2</sub> + (bv + ba<sub>2</sub>).bb<sub>1</sub></sup>ket(bv + ba<sub>1</sub> + ba<sub>2</sub>)
+      + ( - 1)<sup>bv.bb<sub>1</sub> + (bv + ba<sub>1</sub>).bb<sub>2</sub></sup>ket(bv + ba<sub>1</sub> + ba<sub>2</sub>) cr
+ &amp;= Big[ ( - 1)<sup>ba<sub>2</sub>.bb<sub>1</sub></sup> - ( - 1)<sup>ba<sub>1</sub>.bb<sub>2</sub></sup> Big]
+		       ( - 1)<sup>bv.(bb<sub>1</sub> - bb<sub>2</sub>)</sup>ket(bv + ba<sub>1</sub> + ba<sub>2</sub>) cr
+ &amp;= Big[1 - &delta;<sub>ba<sub>1</sub>.bb<sub>2</sub>,  ba<sub>2</sub>.bb<sub>1</sub></sub> Big] ... cr
+)
+then clearly errors will commute if and only if their finite field 
+representations are orthogonal with respect to the symplectic inner 
+product.
+<P>
+<P>
+A quantum stabilizer code is defined by an abelian subgroup of the 
+error group.  In the context of its finite field representation this 
+translates to a self-orthogonal additive code under the symplectic 
+inner product. So a quantum stabilizer code Q is defined by a 
+symplectic self-orthogonal additive code S, which is (with some 
+redundancy) termed the stabilizer code of Q.
+<P>
+<P>
+The error-correcting capability of a code is determined by the set 
+of errors which can not be detected. For classical linear codes these 
+undetectable errors are precisely the non-zero codewords of the code, 
+while for a quantum code, the undetectable errors are given by the 
+set S<sup>perp</sup> \ S, where S<sup>perp</sup> is the symplectic dual 
+of S.
+<P>
+<P>
+The most important measure of the ability of a quantum code to
+correct errors is its <I>minimum weight</I>, that is, is the 
+minimum of the weights of the words of S<sup>perp</sup> \ S.
+An exception to this definition occurs in the case of quantum codes
+having dimension zero, which are defined by symplectic self-dual 
+stabilizer codes.  These are termed "self-dual quantum codes" 
+and are defined to have a minimum weight equal to the (classical) 
+minimum weight of their stabilizer code.
+
+
+<PRE></PRE> <A  HREF = "text1898.htm">[Next]</A><A  HREF = "text1896.htm">[Prev]</A> <A  HREF = "text1898.htm">[Right]</A> [____] <A  HREF = "text1896.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

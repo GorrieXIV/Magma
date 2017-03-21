@@ -1,0 +1,492 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Constructing Confluent Presentations</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text858.htm">[Next]</A><A  HREF = "text856.htm">[Prev]</A> <A  HREF = "text858.htm">[Right]</A> <A  HREF = "text856.htm">[Left]</A> <A  HREF = "text855.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "9909">Constructing Confluent Presentations</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text857.htm#9910">The Knuth-Bendix Procedure</A>
+<LI> <A  HREF = "text857.htm#9913">Defining Orderings</A>
+<LI> <A  HREF = "text857.htm#9917">Setting Limits</A>
+<LI> <A  HREF = "text857.htm#9920">Accessing Group Information</A>
+</UL>
+<H4><A NAME = "9910">The Knuth-Bendix Procedure</A></H4>
+
+<P>
+
+
+<H5><A NAME = "9911"></A><A NAME = "GrpRWS:RWSGroup">RWSGroup</A>(F: parameters) : MonFP -&gt; MonRWS</H5>
+<BLOCKQUOTE>
+Suppose F is a finitely presented group. Internally, the first step is to 
+construct a presentation for a monoid M. By default, the generators of M 
+are taken to be g<sub>1</sub>, g<sub>1</sub><sup> - 1</sup>, ..., g<sub>n</sub>, g<sub>n</sub><sup> - 1</sup>, where 
+g<sub>1</sub>, ..., g<sub>n</sub> are the generators of F. The relations for M are taken 
+to be the relations of F together with the trivial relations 
+g<sub>1</sub>g<sub>1</sub><sup> - 1</sup> = g<sub>1</sub><sup> - 1</sup>g<sub>1</sub> = 1.  
+The Knuth--Bendix completion procedure for monoids is now applied to M.
+Regardless of whether or not the completion procedure succeeds, the result will 
+be a rewrite monoid, M, containing a reduction machine and a sequence of 
+reduction relations. If the procedure succeeds M will be marked as confluent,
+and the word problem for M is therefore decidable. If, as is very likely, the
+procedure fails then M will be marked as non-confluent. In this case M will
+contain both the reduction relations and the reduction machine computed up to 
+the point of failure. Reductions made using these relations will be correct 
+in F, but words that are equal in F are not guaranteed to reduce to the 
+same word.
+<P>
+The Knuth--Bendix procedure requires ordering to be defined on both the
+generators and the words. The default generator ordering is that induced by
+the ordering of the generators of F while the default ordering on strings
+is the <TT>ShortLex</TT> order. We give a simple example and then discuss
+the parameters that allow the user to specify these two orderings.
+<P>
+As the Knuth--Bendix procedure will more often than not run forever,
+some conditions must be specified under which it will stop. These take the 
+form of limits that are placed on certain variables, such as the number of 
+reduction relations. If any of these limits are exceeded during a run of the
+completion procedure it will fail, returning a non-confluent rewrite monoid.
+The optimal values for these limits vary from example to example. The
+various parameters that allow the user to specify the limits for
+these variables will be described in a subsequent section.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9912">Example <TT>GrpRWS_RWSGroup (H79E1)</TT></A></H3>
+<P>
+We construct the Von Dyck (2, 3, 5) group. Since a string ordering is 
+not specified the default <TT>ShortLex</TT> ordering is used.  Similarly,
+since a generator ordering is not specified, the default generator
+ordering, in this case [ a, a<sup> - 1</sup>, b, b<sup> - 1</sup> ], is used.
+<P>
+<P>
+<P>
+<PRE>
+&gt; FG&lt;a,b&gt; := FreeGroup(2);
+&gt; F := quo&lt; FG | a*a=1, b*b=b^-1, a*b^-1*a*b^-1*a=b*a*b*a*b&gt;;
+&gt; G := RWSGroup(F);
+&gt; G;
+A confluent rewrite group.
+Generator Ordering = [ a, a^-1, b, b^-1 ]
+Ordering = ShortLex.
+The reduction machine has 39 states.
+The rewrite relations are:
+    a^2 = Id(F)
+    b * b^-1 = Id(F)
+    b^-1 * b = Id(F)
+    b^2 = b^-1
+    b * a * b * a * b = a * b^-1 * a * b^-1 * a
+    b^-2 = b
+    b^-1 * a * b^-1 * a * b^-1 = a * b * a * b * a
+    a^-1 = a
+    a * b^-1 * a * b^-1 * a * b = b * a * b * a * b^-1
+    b * a * b^-1 * a * b^-1 * a = b^-1 * a * b * a * b
+    a * b * a * b * a * b^-1 = b^-1 * a * b^-1 * a * b
+    b^-1 * a * b * a * b * a = b * a * b^-1 * a * b^-1
+    b * a * b * a * b^-1 * a * b * a = a * b^-1 * a * b * a * b^-1 * a * b^-1
+    b^-1 * a * b^-1 * a * b * a * b^-1 * a = a * b * a * b^-1 * a * b * a * b
+    b^-1 * a * b * a * b^-1 * a * b * a * b^-1 = b * a * b^-1 * a * b * a * b^-1
+        * a * b
+    b * a * b^-1 * a * b * a * b^-1 * a * b^-1 = (b^-1 * a * b * a)^2
+    b^-1 * a * b * a * b^-1 * a * b * a * b = (b * a * b^-1 * a)^2
+    b * a * b^-1 * a * b * a * b^-1 * a * b * a = a * b * a * b^-1 * a * b * a *
+        b^-1 * a * b
+</PRE>
+<HR>
+<H4><A NAME = "9913">Defining Orderings</A></H4>
+
+<P>
+
+
+<H5><A NAME = "9914">RWSGroup(F: parameters) : MonFP -&gt; MonRWS</A></H5>
+<BLOCKQUOTE>
+Attempt to construct a confluent presentation for the finitely
+presented group F using the Knuth-Bendix completion algorithm.
+In this section we describe how the user can specify the generator
+order and the ordering on strings.
+<P>
+<P>
+<P>
+<PRE>
+     GeneratorOrder: SeqEnum             Default: 
+</PRE>
+Give an ordering for the generators. This ordering affects the ordering 
+of words in the alphabet. If not specified the ordering defaults
+to the order induced by F's generators, that is [g<sub>1</sub>, ..., g<sub>n</sub>]
+where g<sub>1</sub>, ..., g<sub>n</sub> are the generators of F.
+<P>
+<P>
+<P>
+<P>
+<PRE>
+     Ordering: MonStgElt                 Default: "ShortLex"
+</PRE>
+<P>
+<PRE>
+     Levels: SeqEnum                     Default: 
+</PRE>
+<P>
+<PRE>
+     Weights: SeqEnum                    Default: 
+</PRE>
+<TT>Ordering := "ShortLex"</TT>:
+Use the short-lex ordering on strings.
+Shorter words come before longer, and for words of equal length
+lexicographical ordering is used, using the given ordering of the generators.
+<P>
+<P>
+<TT>Ordering := "Recursive" | "RtRecursive"</TT>:
+Use a recursive ordering on strings. 
+There are various ways to define this. Perhaps the quickest is as
+follows. Let u and v be strings in the generators.
+If one of u and v, say v,  is empty, then u &ge;v.
+Otherwise, let u=u' a and v=v' b,
+where a and b are generators.
+Then u &gt; v if and only if one of the following holds:
+<P>
+<P>
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>a = b and u' &gt; v';
+<DT>(ii)</DT><DD>a &gt; b and u &gt; v';
+<DT>(iii)</DT><DD>b &gt; a and u' &gt; v.
+<P>
+<P>
+</DL>
+The <TT>RtRecursive</TT> ordering is similar to the <TT>Recursive</TT> ordering, but 
+with u=au' and v=bv'.  Occasionally one or the other runs
+significantly quicker, but usually they perform similarly.
+<P>
+<P>
+<TT>Ordering := "WtLex"</TT>:
+Use a weighted-lex ordering.
+<TT>Weights</TT> should be a sequence of non-negative integers,
+with the i-th element of <TT>Weights</TT> giving the weight of the i-the
+generator. The length of <TT>Weights</TT> must equal the number of generators.
+The length of words in the generators is then computed by adding up
+the weights of the generators in the words. Otherwise, ordering is as for 
+short-lex. 
+<P>
+<P>
+<TT>Ordering := "Wreath"</TT>:
+Use a wreath-product ordering.
+<TT>Levels</TT> should be a sequence of non-negative integers,
+with the i-th element of <TT>Levels</TT> giving the level of the i-the
+generator. The length of <TT>Levels</TT> must equal the number of generators.
+In this ordering, two strings involving generators of the same level are
+ordered using short-lex, but all strings in generators of a higher level are
+larger than those involving generators of a lower level. That is not a
+complete definition; one can be found in <A  HREF = "text854.htm#bib_sims_fpgroups">[Sim94, pp. 46--50]</A>.
+Note that the recursive ordering is the special case in which the level
+of generator number i is i.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9915">Example <TT>GrpRWS_RWSGroup-2 (H79E2)</TT></A></H3>
+A confluent presentation is constructed for an infinite non-hopfian group 
+using the <TT>Recursive</TT> ordering.
+<P>
+<P>
+<P>
+<PRE>
+&gt; F&lt;a, b&gt; := Group&lt; a, b | b^-1*a^2*b=a^3&gt;;
+&gt; G := RWSGroup(F : Ordering :="Recursive");
+&gt; G;
+A confluent rewrite group.
+Generator Ordering = [ a, a^-1, b, b^-1 ]
+Ordering = Recursive.
+The reduction machine has 7 states.
+The rewrite relations are:
+    a * a^-1 = Id(FG)
+    a^-1 * a = Id(FG)
+    b * b^-1 = Id(FG)
+    b^-1 * b = Id(FG)
+    a^3 * b^-1 = b^-1 * a^2
+    a^2 * b = b * a^3
+    a^-1 * b^-1 = a^2 * b^-1 * a^-2
+    a^-1 * b = a * b * a^-3
+</PRE>
+<HR>
+<H3><A NAME = "9916">Example <TT>GrpRWS_RWSGroup-3 (H79E3)</TT></A></H3>
+<P>
+A confluent presentation of a free nilpotent group of rank 2 and class 2
+is constructed by the following code. Note that the lower weight generators 
+(in the sense of nilpotency class) need to come first in the ordering of 
+generators.
+<P>
+<P>
+<P>
+<PRE>
+&gt; FG&lt;a,b,c&gt; := FreeGroup(3);
+&gt; F := quo&lt; FG | b*a=a*b*c, c*a=a*c, c*b=b*c&gt;;
+&gt; G := RWSGroup(F : Ordering :="Recursive",
+&gt;                 GeneratorOrder := [c,c^-1,b,b^-1,a,a^-1]);
+&gt; G;
+A confluent rewrite group.
+Generator Ordering = [ c, c^-1, b, b^-1, a, a^-1 ]
+Ordering = Recursive.
+The reduction machine has 7 states.
+The rewrite relations are:
+    c * c^-1 = Id(FG)
+    c^-1 * c = Id(FG)
+    b * b^-1 = Id(FG)
+    b^-1 * b = Id(FG)
+    a * a^-1 = Id(FG)
+    a^-1 * a = Id(FG)
+    b * a = a * b * c
+    c * a = a * c
+    c * b = b * c
+    c^-1 * a = a * c^-1
+    c * a^-1 = a^-1 * c
+    c^-1 * b = b * c^-1
+    c * b^-1 = b^-1 * c
+    b^-1 * a = a * b^-1 * c^-1
+    b^-1 * a^-1 = a^-1 * b^-1 * c
+    c^-1 * a^-1 = a^-1 * c^-1
+    c^-1 * b^-1 = b^-1 * c^-1
+    b * a^-1 = a^-1 * b * c^-1
+</PRE>
+<HR>
+<H4><A NAME = "9917">Setting Limits</A></H4>
+
+<P>
+<P>
+In this section we introduce the various parameters used to control the
+execution of the Knuth-Bendix procedure.
+
+
+<H5><A NAME = "9918">RWSMonoid(F: parameters) : MonFP -&gt; MonRWS</A></H5>
+<BLOCKQUOTE>
+Attempt to construct a confluent presentation for the finitely
+presented group F using the Knuth-Bendix completion algorithm.
+We present details of the various parameters used to control the 
+execution of the Knuth-Bendix.
+<P>
+<P>
+<P>
+<P>
+<PRE>
+     MaxRelations: RngIntElt             Default: 32767
+</PRE>
+Limit the maximum number of reduction equations to <TT>MaxRelations</TT>.
+<P>
+<P>
+<PRE>
+     TidyInt: RngIntElt                  Default: 100
+</PRE>
+After finding <TT>TidyInt</TT> new reduction equations, the completion procedure interrupts 
+the main process of looking for overlaps, to tidy up the existing 
+set of equations. This will eliminate any redundant equations performing
+some reductions on their left and right hand sides to make the set as
+compact as possible. (The point is that equations discovered later often
+make older equations redundant or too long.) 
+<P>
+<P>
+<PRE>
+     RabinKarp: Tup                      Default: 
+</PRE>
+Use the Rabin-Karp algorithm for word-reduction on words having length at least
+l, provided that there are at least n equations,
+where <TT>RabinKarp := &lt;l, n&gt;</TT>. This uses less space than 
+the default reduction automaton, but it is distinctly slower, so it should only
+be used when seriously short of memory. Indeed this option is only really
+useful for examples in which collapse occurs - i.e. at some intermediate
+stage of the calculation there is a very large set of equations, which later
+reduces to a much smaller confluent set. Collapse is not
+uncommon when analysing pathological presentations of finite groups, and
+this is one situation where the performance of the Knuth--Bendix algorithm can
+be superior to that of Todd-Coxeter coset enumeration. The best setting for 
+<TT>RabinKarp</TT> varies from example to example - generally speaking, the 
+smaller l is, the slower things will be, so set it as high as possible 
+subject to not running out of memory. The number of equations n should be 
+set to a value greater than the expected final number of equations.
+<P>
+<P>
+<PRE>
+     MaxStates: RngIntElt                Default: 
+</PRE>
+Limit the maximum number 
+of states of the finite state automaton used for word reduction to <TT>MaxStates</TT>. 
+By default 
+there is no limit, and the space allocated is increased dynamically as 
+required. The space needed for the reduction automaton can also be restricted 
+by using the <TT>RabinKarp</TT> parameter. This limit is not usually needed.
+<P>
+<P>
+<PRE>
+     MaxReduceLen: RngIntElt             Default: 32767
+</PRE>
+Limit the maximum allowed length that a word can reach during reduction to 
+<TT>MaxReduceLen</TT>.  It is only likely to be exceeded when using the recursive 
+ordering on words.  This limit is usually not needed.
+<P>
+<P>
+<PRE>
+     ConfNum: RngIntElt                  Default: 500
+</PRE>
+If <TT>ConfNum</TT> overlaps are processed and no new equations are discovered, 
+then the overlap searching process is interrupted, and a fast check for
+confluence performed on the existing set of equations.  Doing this too often 
+wastes time, but doing it at the right moment can also save a lot of time. 
+If ConfNum = 0, then the fast confluence check is performed 
+only when the search for overlaps is complete.
+<P>
+<P>
+<P>
+<B>Warning:</B> Changing the default setting on any of the following parameters
+may either cause the procedure to terminate without having found a confluent
+presentation or may change the underlying group.
+<P>
+<P>
+<P>
+<P>
+<PRE>
+     MaxStoredLen: Tup                   Default: 
+</PRE>
+Only equations in which the left and right hand sides have lengths at most 
+l and r, respectively, where <TT>MaxStoredLen := &lt;l, r&gt;</TT> are kept. 
+Of course this may cause the overlap search to complete on a set of equations 
+that is not confluent. In some examples, particularly those involving collapse 
+(i.e. a large intermediate set of equations, which later simplifies to a small 
+set), it can result in a confluent set being found much more quickly. It is most 
+often useful when using a recursive ordering on words. Another danger with
+this option is that sometimes discarding equations can result in information 
+being lost, and the monoid defined by the equations changes.
+<P>
+<P>
+<PRE>
+     MaxOverlapLen: RngIntElt            Default: 
+</PRE>
+Only overlaps of total length at most <TT>MaxOverlapLen</TT> are processed.
+Of course this may cause the overlap search to complete on a set of equations 
+that is not confluent.
+<P>
+<P>
+<PRE>
+     Sort: BoolElt                       Default: <TT>false</TT>
+</PRE>
+<P>
+<PRE>
+     MaxOpLen: RngIntElt                 Default: 0
+</PRE>
+If <TT>Sort</TT> is set to {<TT>true</TT>} then the equations will be sorted in order of 
+increasing length of their
+left hand sides, rather than the default, which is to leave them in the
+order in which they were found. <TT>MaxOpLen</TT> should be a non-negative integer.
+If <TT>MaxOpLen</TT> is positive, then only equations with left hand sides having length
+at most <TT>MaxOpLen</TT> are output. If <TT>MaxOpLen</TT> is zero, then all equations are sorted 
+by length.
+Of course, if <TT>MaxOpLen</TT> is positive, there is a danger that the monoid
+defined by the output equations may be different from the original.
+</BLOCKQUOTE>
+<H5><A NAME = "9919">SetVerbose("KBMAG", v) : MonStgElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Set the verbose printing level for the Knuth-Bendix completion algorithm.
+Setting this level allows a user to control how much extra information on 
+the progress of the algorithm is printed.
+Currently the legal values for v are 0 to 3 inclusive. Setting
+v to 0 corresponds to the `-silent' option of KBMAG in which no extra output
+is printed. Setting v to 2 corresponds to the `-v' (verbose) option of 
+KBMAG in which a small amount of extra output is printed. Setting v to 3 
+corresponds to the `-vv' (very verbose) option of KBMAG in which
+a huge amount of diagnostic information is printed.
+</BLOCKQUOTE>
+<H4><A NAME = "9920">Accessing Group Information</A></H4>
+
+<P>
+<P>
+The functions in this group provide access to basic information stored for a
+rewrite group G.
+
+
+<H5><A NAME = "9921">G . i : GrpRWS, RngIntElt -&gt; GrpRWSElt</A></H5>
+<BLOCKQUOTE>
+The i-th defining generator for G.  The integer i must lie in the 
+range [ - r, r], where r is the number of 
+group G.
+</BLOCKQUOTE>
+<H5><A NAME = "9922">Generators(G) : GrpRWS -&gt; [GrpRWSElt]</A></H5>
+<BLOCKQUOTE>
+A sequence containing the defining generators for G.
+</BLOCKQUOTE>
+<H5><A NAME = "9923">NumberOfGenerators(G) : GrpRWS -&gt; RngIntElt</A></H5>
+<H5>Ngens(G) : GrpRWS -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The number of defining generators for G.
+</BLOCKQUOTE>
+<H5><A NAME = "9924"></A><A NAME = "GrpRWS:Relations">Relations</A>(G) : GrpRWS -&gt; [GrpFPRel]</H5>
+<BLOCKQUOTE>
+A sequence containing the defining relations for G. The relations
+will be given between elements of the free group of which G is a
+quotient. In these relations the (image of the) left hand side (in G) 
+will always be greater than the (image of the) right hand side (in G)
+in the ordering on words used to construct G.
+</BLOCKQUOTE>
+<H5><A NAME = "9925">NumberOfRelations(G) : GrpRWS -&gt; RngIntElt</A></H5>
+<H5>Nrels(G) : GrpRWS -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The number of relations in G.
+</BLOCKQUOTE>
+<H5><A NAME = "9926">Ordering(G) : GrpRWS -&gt; String</A></H5>
+<BLOCKQUOTE>
+The ordering of G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9927">Example <TT>GrpRWS_BasicAccess (H79E4)</TT></A></H3>
+We illustrate the access operations using the following 
+presentation of Z wreath C<sub>2</sub>.
+<P>
+<P>
+<PRE>
+&gt; FG&lt;a,b,t&gt; := FreeGroup(3);
+&gt; F := quo&lt; FG | t^2=1, b*a=a*b, t*a*t=b&gt;;
+&gt; G&lt;x,y,z&gt; := RWSGroup(F);
+&gt; G;
+A confluent rewrite group.
+Generator Ordering = [ a, a^-1, b, b^-1, t, t^-1 ]
+Ordering = ShortLex.
+The reduction machine has 6 states.
+The rewrite relations are:
+    a * a^-1 = Id(F)
+    a^-1 * a = Id(F)
+    b * b^-1 = Id(F)
+    b^-1 * b = Id(F)
+    t^2 = Id(F)
+    b * a = a * b
+    t * a = b * t
+    b^-1 * a = a * b^-1
+    t * b = a * t
+    b * a^-1 = a^-1 * b
+    t * a^-1 = b^-1 * t
+    t^-1 = t
+    b^-1 * a^-1 = a^-1 * b^-1
+    t * b^-1 = a^-1 * t
+&gt; G.1;
+x
+&gt; G.1*G.2;
+x * y
+&gt; Generators(G);
+[ x, y, z ]
+&gt; Ngens(G);
+3
+&gt; Relations(G);
+[ a * a^-1 = Id(F), a^-1 * a = Id(F), b * b^-1 = Id(F), b^-1 * b = Id(F), t^2 = 
+Id(F), b * a = a * b, t * a = b * t, b^-1 * a = a * b^-1, t * b = a * t, b * 
+a^-1 = a^-1 * b, t * a^-1 = b^-1 * t, t^-1 = t, b^-1 * a^-1 = a^-1 * b^-1, t * 
+b^-1 = a^-1 * t ]
+&gt; Nrels(G);
+14
+&gt; Ordering(G);
+ShortLex
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text858.htm">[Next]</A><A  HREF = "text856.htm">[Prev]</A> <A  HREF = "text858.htm">[Right]</A> <A  HREF = "text856.htm">[Left]</A> <A  HREF = "text855.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

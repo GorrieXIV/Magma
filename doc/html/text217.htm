@@ -1,0 +1,395 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Factorization</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text218.htm">[Next]</A><A  HREF = "text216.htm">[Prev]</A> <A  HREF = "text218.htm">[Right]</A> <A  HREF = "text216.htm">[Left]</A> <A  HREF = "text209.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "1856">Factorization</A></H3>
+
+<P>
+<P>
+<P>
+This section describes the functions for polynomial factorization
+and associated computations.
+These are available for several kinds of coefficient rings.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text217.htm#1857">Factorization and Irreducibility</A>
+<LI> <A  HREF = "text217.htm#1869">Resultant and Discriminant</A>
+<LI> <A  HREF = "text217.htm#1873">Hensel Lifting</A>
+</UL>
+<H4><A NAME = "1857">Factorization and Irreducibility</A></H4>
+
+
+
+<H5><A NAME = "1858"></A><A NAME = "vpoly_Factorization">Factorization</A>(f) : RngUPolElt -&gt; [ &lt; RngUPolElt, RngIntElt &gt;], RngElt</H5>
+<H5>Factorisation(f) : RngUPolElt -&gt; [ &lt; RngUPolElt, RngIntElt &gt;], RngElt</H5>
+
+<PRE>    Al: MonStgElt                       Default: "Default"</PRE>
+<BLOCKQUOTE>
+Given a univariate polynomial f over the ring R, this function returns
+the factorization of f as a factorization sequence Q,
+that is, a sequence of pairs, each consisting of an irreducible
+factor q<sub>i</sub> a positive integer k<sub>i</sub> (its multiplicity).
+Each irreducible factor is normalized (see the function
+<A  HREF = "text214.htm#vpoly_Normalize">Normalize</A>), so the expansion of the factorization
+sequence is the unique canonical associate of f.
+The function also returns the unit u of R giving the normalization, so
+f=u.&prod;<sub>i</sub> q<sub>i</sub><sup>k<sub>i</sub></sup>. 
+<P>
+The coefficient ring R must be one of the following: a finite field
+F<sub>q</sub>, the ring of integers Z, the field of rationals Q, an
+algebraic number field Q(&alpha;), a local ring, or a polynomial
+ring, function field (rational or algebraic) or
+finite-dimensional affine algebra (which is a field) over any of the above.
+<P>
+For factorization over very small finite fields, the Berlekamp
+algorithm is used by default, which depends on fast linear algebra (see, for
+example, <A  HREF = "text208.htm#bib_Knuth2">[Knu97, section 4.6.2]</A> or <A  HREF = "text208.htm#bib_GathenGerhard">[vzGG99, section 14.8]</A>).
+For medium to large finite fields, the von zur Gathen/Kaltofen/Shoup algorithm
+(<A  HREF = "text208.htm#bib_GS_Frobenius">[vzGS92]</A>, <A  HREF = "text208.htm#bib_KS_Factorization">[KS95]</A>, <A  HREF = "text208.htm#bib_Shoup_Factorization">[Sho95]</A>) is used by
+default.  The parameter <TT>Al</TT> may be used to specify the
+factorization algorithm over finite fields.  The possible values are:
+<P>
+<DL COMPACT class='compact'>
+<DT>(1)</DT><DD><TT>"Default"</TT>: The default strategy, whereby an appropriate
+    choice will be made.
+<DT>(2)</DT><DD><TT>"BerlekampSmall"</TT> or <TT>"BerlekampLarge"</TT> for the Berlekamp
+    algorithm (see <A  HREF = "text208.htm#bib_Knuth2">[Knu97, pp. 446--447]</A> for the difference between
+    these two variants).
+<DT>(3)</DT><DD><TT>"GKS"</TT> for the von zur Gathen/Kaltofen/Shoup algorithm.
+<P>
+<P>
+<P>
+</DL>
+Since V2.8 (July 2001), Magma uses the algorithm of
+Mark van Hoeij <A  HREF = "text208.htm#bib_vHoeij1">[vH02]</A>, <A  HREF = "text208.htm#bib_vHoeij2">[vH01]</A> to factor polynomials over the
+integers or rationals.  First a factorization of f is found modulo a
+suitable small prime, then Hensel lifting is applied, as in the
+standard Berlekamp-Zassenhaus (BZ) algorithm <A  HREF = "text208.htm#bib_Knuth2">[Knu97, p. 452]</A>.
+The Hensel lifting is performed using Victor Shoup's `tree lifting' algorithm,
+as described in <A  HREF = "text208.htm#bib_GathenGerhard">[vzGG99, Sec. 15.5]</A>.
+Easy factors are also detected at various stages, if possible, using heuristics
+developed by Allan Steel.
+But the final search for the correct combination of modular factors
+(which has exponential worst-case complexity in the standard BZ
+algorithm) is now performed by van Hoeij's algorithm, which efficiently
+finds the correct combinations by solving a Knapsack problem via the
+LLL lattice-basis reduction algorithm <A  HREF = "text208.htm#bib_LLL">[LLL82]</A>.
+<P>
+van Hoeij's new algorithm is <I>much</I> more efficient in practice than
+the original lattice-based factoring algorithm proposed in <A  HREF = "text208.htm#bib_LLL">[LLL82]</A>:
+the lattice constructed in van Hoeij's algorithm has dimension equal to
+the number of modular factors (not the degree of the input polynomial),
+and the entries of the lattice are very much smaller.  Many polynomials
+can now be easily factored which were out of reach for any previous
+algorithm (see the examples below).
+<P>
+For polynomials over algebraic number fields, algebraic function fields and
+affine algebras, the norm-based algorithm of Trager
+<A  HREF = "text208.htm#bib_Trager_Factorization">[Tra76]</A> is used, which performs a suitable
+substitution and resultant computation, and then factors the resulting
+polynomial with one less variable.  In characteristic zero, the
+difficult case (where there are very many factors of this integral
+polynomial modulo any prime) is now easily handled by van Hoeij's
+combination algorithm above.  In small characteristic, where
+inseparable field extensions may occur, an algorithm of Allan Steel
+(<A  HREF = "text208.htm#bib_SteelInsep">[Ste05]</A>) is used.
+</BLOCKQUOTE>
+<H5><A NAME = "1859">HasPolynomialFactorization(R) : Rng -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a ring R, return whether factorization of polynomials
+over R is allowed in Magma.
+</BLOCKQUOTE>
+<H5><A NAME = "1860">SetVerbose("PolyFact", v) : MonStgElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+(Procedure.)
+Change the verbose printing level for all polynomial factorization
+algorithms to be v.  Currently the legal levels are 0, 1, 2 or 3.
+</BLOCKQUOTE>
+<H5><A NAME = "1861">FactorisationToPolynomial(f) : [Tup] -&gt; BoolElt</A></H5>
+<H5>Facpol(f) : [Tup] -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Given a sequence of tuples, each consisting of pairs of irreducible polynomials
+and positive integer exponents, return the product polynomial.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "1862">Example <TT>RngPol_SwinnertonDyerPolynomial (H23E6)</TT></A></H3>
+To demonstrate the power of the van Hoeij combination algorithm,
+in this example we factor Swinnerton-Dyer polynomials, which
+are worse-case inputs for the Berlekamp-Zassenhaus factorization
+algorithm for polynomials over Z.
+<P>
+<P>
+<P>
+<P>
+<P>
+The n-th Swinnerton-Dyer polynomial is defined to be
+&prod;(x &#8723; Sqrt(2) &#8723; Sqrt(3) &#8723; Sqrt(5) &#8723; ... &#8723; Sqrt(p<sub>n</sub>)),
+where p<sub>i</sub> is the i-th prime and the product runs over all 2<sup>n</sup>
+possible combinations of + and - signs.  This polynomial lies in
+Z[x], has degree 2<sup>n</sup>, is irreducible over Z, and has at least
+2<sup>n - 1</sup> factors modulo any prime.  This last fact is easy to see, since,
+given any finite field K, the polynomial must split into linear factors
+over a quadratic
+extension of K, so it will have only linear or quadratic factors over
+K.  See also <A  HREF = "text208.htm#bib_GathenGerhard">[vzGG99, section 15.3]</A> for further discussion.
+<P>
+<P>
+<P>
+In this example, we use the function <TT>SwinnertonDyerPolynomial</TT>
+to construct the polynomials (see Example <A  HREF = "text425.htm#4402">H42E2</A> in the
+chapter on algebraically closed fields for an explanation of how
+this function works).
+<P>
+<P>
+<P>
+First we display the first 4 polynomials.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x&gt; := PolynomialRing(IntegerRing());          
+&gt; SwinnertonDyerPolynomial(1);
+x^2 - 2
+&gt; SwinnertonDyerPolynomial(2);
+x^4 - 10*x^2 + 1
+&gt; SwinnertonDyerPolynomial(3);
+x^8 - 40*x^6 + 352*x^4 - 960*x^2 + 576
+&gt; SwinnertonDyerPolynomial(4);
+x^16 - 136*x^14 + 6476*x^12 - 141912*x^10 + 1513334*x^8 - 7453176*x^6 + 
+    13950764*x^4 - 5596840*x^2 + 46225
+&gt; IsIrreducible($1);
+true
+</PRE>
+We note the degree patterns of the factorizations of the first
+eight Swinnerton-Dyer polynomials over the three finite fields GF(3),
+GF(23) and GF(503).  There are only linear or quadratic factors,
+as expected.
+<P>
+<P>
+<PRE>
+&gt; for i := 1 to 8 do
+&gt;    f := SwinnertonDyerPolynomial(i);
+&gt;    printf "%o:", i;
+&gt;    for p in [3, 23, 503] do
+&gt;         L := Factorization(PolynomialRing(GF(p)) ! f);
+&gt;         printf " %o", {* Degree(t[1])^^t[2]: t in L *};
+&gt;     end for;
+&gt;     "";
+&gt; end for;
+1: {* 2 *} {* 1^^2 *} {* 1^^2 *}
+2: {* 2^^2 *} {* 1^^4 *} {* 1^^4 *}
+3: {* 1^^4, 2^^2 *} {* 2^^4 *} {* 2^^4 *}
+4: {* 1^^8, 2^^4 *} {* 2^^8 *} {* 2^^8 *}
+5: {* 1^^8, 2^^12 *} {* 2^^16 *} {* 2^^16 *}
+6: {* 1^^16, 2^^24 *} {* 2^^32 *} {* 2^^32 *}
+7: {* 1^^48, 2^^40 *} {* 2^^64 *} {* 2^^64 *}
+8: {* 1^^96, 2^^80 *} {* 1^^16, 2^^120 *} {* 2^^128 *}
+</PRE>
+We now construct the 6-th polynomial, note its largest coefficient, and then
+factor it; it takes only a second to prove that it is irreducible,
+even though there are 32 modular factors.
+<P>
+<P>
+<PRE>
+&gt; sd6 := SwinnertonDyerPolynomial(6);
+&gt; Degree(sd6);
+64
+&gt; Max([Abs(x): x in Coefficients(sd6)]);
+1771080720430629161685158978892152599456 11
+&gt; time L := Factorization(sd6);
+Time: 1.009
+&gt; #L;
+1
+</PRE>
+Now we factor the 7-th polynomial!
+<P>
+<P>
+<PRE>
+&gt; sd7 := SwinnertonDyerPolynomial(7);
+&gt; Degree(sd7);
+128
+&gt; Max([Abs(x): x in Coefficients(sd7)]);
+8578344714036018778166274416336425267466563380359649680696924587\
+44011458425706833248256 19
+&gt; time L := Factorization(sd7);
+Time: 11.670
+&gt; #L;
+1
+</PRE>
+We now factor the product of the 6-th and 7-th polynomials.  This
+has degree 192 and has at least 96 factors modulo any prime!  But
+the van Hoeij algorithms easily finds the correct factors over the integers.
+<P>
+<P>
+<PRE>
+&gt; p := sd6*sd7;
+&gt; Degree(p);
+192
+&gt; Max([Abs(x): x in Coefficients(p)]);    
+4617807523303144159751988353619837233948679680057885997820625979\
+481789171112550210109817070112666284891955285248592492005163008 
+31
+&gt; time L := Factorization(p);
+Time: 16.840
+&gt; #L;
+2
+&gt; L[1,1] eq sd6;
+true
+&gt; L[2,1] eq sd7;
+true
+</PRE>
+See also Example <A  HREF = "text425.htm#4402">H42E2</A> in the chapter on algebraically closed fields
+for a generalization of the Swinnerton-Dyer polynomials.
+<HR>
+<H5><A NAME = "1863">SquarefreeFactorization(f) : RngUPolElt -&gt; [ &lt;RngUPolElt, RngIntElt&gt; ]</A></H5>
+<BLOCKQUOTE>
+Given a univariate polynomial f over the ring R, this function returns
+the squarefree factorization of f as a sequence of pairs,
+each consisting of a (not necessarily irreducible) factor and an
+integer indicating the multiplicity.  The factors do not contain
+the square of any non-constant polynomial.
+<P>
+The coefficient ring R must be the integer ring or any field.
+The algorithm works by computing the GCD of f with its
+derivative and repeating as necessary (special considerations
+are also necessary for characteristic p).
+</BLOCKQUOTE>
+<H5><A NAME = "1864">DistinctDegreeFactorization(f) : RngUPolElt -&gt; [ &lt;RngIntElt, RngUPolElt&gt; ]</A></H5>
+
+<PRE>    Degree: RngIntElt                   Default: 0</PRE>
+<BLOCKQUOTE>
+Given a squarefree univariate polynomial f&isin;F[x] with F a finite field,
+this function returns the distinct-degree factorization of f as a sequence of
+pairs, each consisting of a degree d, together with the product of the
+degree-d irreducible factors of f.
+<P>
+If the optional parameter <TT>Degree</TT> is given a value L &gt; 0, then only 
+(products of) factors up to degree L are returned.
+</BLOCKQUOTE>
+<H5><A NAME = "1865">EqualDegreeFactorization(f, d, g) : RngUPolElt, RngIntElt, RngUPolElt -&gt; [ RngUPolElt ]</A></H5>
+<BLOCKQUOTE>
+Given a squarefree univariate polynomial f&isin;F[x] with F a finite field,
+and integer d and another polynomial g&isin;F[x] such that F is known
+to be the product of distinct degree-d irreducible polynomials alone,
+and g is x<sup>q</sup> mod f, where q is the cardinality of F, 
+this function returns the irreducible factors of f as a sequence of
+polynomials (no multiplicities are needed).
+<P>
+If the conditions are not satisfied, the result is unpredictable.
+This function allows one to split f, assuming that one has computed
+f in some special way.
+</BLOCKQUOTE>
+<H5><A NAME = "1866">IsIrreducible(f) : RngUPolElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a univariate polynomial f over the ring R, this function returns
+returns <TT>true</TT> if and only f is irreducible over R.
+The conditions on R are the same as for the function
+<A  HREF = "text217.htm#vpoly_Factorization">Factorization</A> above.
+</BLOCKQUOTE>
+<H5><A NAME = "1867">IsSeparable(f) : RngUPolElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a polynomial f&isin;K[x]
+such that f is a polynomial of degree &ge;1 and K is a field
+allowing polynomial factorization,
+this function returns <TT>true</TT> iff f is separable.
+</BLOCKQUOTE>
+<H5><A NAME = "1868">QMatrix(f) : RngUPolElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Given a univariate polynomial f of degree d over a finite field F
+this function returns the Berlekamp Q-matrix associated with f,
+which is an element of the degree d - 1 matrix algebra over F.
+</BLOCKQUOTE>
+<H4><A NAME = "1869">Resultant and Discriminant</A></H4>
+
+
+
+<H5><A NAME = "1870">Discriminant(f) : RngUPolElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The discriminant D of f&isin;R[x] is returned.
+The discriminant is an element of R that can be defined by
+D = c<sub>n</sub> ^ (2n - 2)&prod;<sub>i != j</sub>(&alpha;<sub>i</sub> - &alpha;<sub>j</sub>), where c<sub>n</sub> is the leading
+coefficient of f and the &alpha;<sub>i</sub> are the zeros of f
+(in some algebraic closure of R). 
+The coefficient ring R must be a domain.
+</BLOCKQUOTE>
+<H5><A NAME = "1871">Resultant(f, g) : RngUPolElt, RngUPolElt -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+The resultant of univariate polynomials f and g
+(of degree m and n) in R[x], which is by definition the determinant
+of the Sylvester matrix for f and g (a matrix of rank m + n containing
+coefficients of f and g as entries).
+The resultant is an element of R.
+The coefficient ring R must be a domain.
+</BLOCKQUOTE>
+<H5><A NAME = "1872">CompanionMatrix(f) : RngUPolElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Given a monic univariate polynomial f of degree d
+over some ring R, return the companion matrix of f as an
+element of the full matrix algebra of degree d - 1 over R. The companion
+matrix for f=a<sub>0</sub> + a<sub>1</sub>x + ... + a<sub>d - 1</sub>x<sup>d - 1</sup> + x<sup>d</sup> is given by
+<PRE>
+
+    [    0    1    0    ...        0 ]
+    [    0    0    1    ...        0 ]
+    [    .    .    .    .          . ]
+    [    .    .    .     .         . ]
+    [    .    .    .      .        . ]
+    [ -a_0 -a_1 -a_2    ... -a_(d-1) ]
+</PRE>
+</BLOCKQUOTE>
+<H4><A NAME = "1873">Hensel Lifting</A></H4>
+
+
+
+<H5><A NAME = "1874">HenselLift(f, s, P) : RngUPolElt, [ RngUPolElt ], RngUPol -&gt; [ RngUPolElt ]</A></H5>
+<BLOCKQUOTE>
+Given the sequence of irreducible factors s modulo some prime p
+of the univariate integer polynomial f, return the Hensel lifting into
+the polynomial ring P, which must be the univariate polynomial
+ring over a residue class ring modulo some power of p. Thus
+given f &equiv; &prod;<sub>i</sub> s<sub>i</sub> mod p, this returns f &equiv; &prod;<sub>i</sub> t<sub>i</sub> mod p<sup>k</sup>
+for some k &ge;1, as a sequence of polynomials in Z/p<sup>k</sup>Z.
+The factorization of f modulo p must be squarefree, that is, s
+should not contain repeated factors.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "1875">Example <TT>RngPol_Hensel (H23E7)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; R&lt;x&gt; := PolynomialRing(Integers());
+&gt; b := x^5 - x^3 + 2*x^2 - 2;
+&gt; F&lt;f&gt; := PolynomialRing(GF(5));
+&gt; s := [ w[1] : w in Factorization( F ! b ) ];
+&gt; s;
+[
+    f + 1,
+    f + 3,
+    f + 4,
+    f^2 + 2*f + 4
+]
+&gt; T&lt;t&gt; := PolynomialRing(Integers(5^3));
+&gt; h := HenselLift(b, s, T);
+&gt; h;
+[
+    t + 1,
+    t + 53,
+    t + 124,
+    t^2 + 72*t + 59
+]
+&gt; &amp;*h;
+t^5 + 124*t^3 + 2*t^2 + 123
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text218.htm">[Next]</A><A  HREF = "text216.htm">[Prev]</A> <A  HREF = "text218.htm">[Right]</A> <A  HREF = "text216.htm">[Left]</A> <A  HREF = "text209.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

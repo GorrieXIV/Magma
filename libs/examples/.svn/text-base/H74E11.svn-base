@@ -1,0 +1,40 @@
+"Source: Text/Group/GrpAb.text";
+"Line: 1427";
+"Date: Wed Jun  8 13:55:26 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Group/GrpAb.text, line: 1427
+// Example: H74E11 ()
+print "Example: H74E11";
+ei := GetEchoInput();
+SetEchoInput(true);
+n := 6;
+Dk := -4*(10^n + 1);
+Q := QuadraticForms(Dk);   
+
+p := 2;
+S := {};
+while #S lt 10 do 
+   if KroneckerSymbol(Dk,p) eq 1 then
+      I := Reduction(PrimeForm(Q,p));
+      Include(~S, I);
+   end if; 
+   p := NextPrime(p);
+end while;
+
+GA_qf := GenericAbelianGroup(Q : UserGenerators := S,
+                              ComputeStructure := true,
+                              UseUserGenerators := true);  
+_ := AbelianGroup(GA_qf);
+n := 38716;
+Ip := Reduction(PrimeForm(Q,11));
+g := GA_qf!Ip;
+d := n * g;
+
+l1 := Log(g, d : BSGSStepWidth := Floor((-Dk)^(1/4)/2));
+l2 := Log(g, d : AlInPohligHellmanLoop := "PollardRho");
+l3 := Log(g, d : ComputeGroupOrder := false);
+l4 := Log(g, d: ComputeGroupOrder := false, 
+                BSGSStepWidth := Floor((-Dk)^(1/4)/2));
+assert l1 eq l2 and l2 eq l3 and l3 eq l4;
+assert IsDivisibleBy(n - l1, Order(g));
+SetEchoInput(ei);

@@ -1,0 +1,3 @@
+174,1
+S,BasicAlgebra,Creates the basic algebra from the algebra given by the presentation. F is a free algebra where the first n variables represent idempotent elements. The sequence R is the relations in F among the nonidempotent generators. The sequence p consists of tuples giving the indexes of the beginning an ending vertices (idempotents) of the nonidempotent generators of the algebra,0,4,0,0,0,0,0,0,0,82,,0,0,148,,0,0,82,,0,0,71,,34,-38,-38,-38,-38,-38
+S,BasicAlgebra,Creates the basic algebra from the local algebra given by the presentation. F is the free algebra on the nonidempotent generators of the algebra. The sequence R is a collection of generators for the ideal of relations,0,2,0,0,0,0,0,0,0,82,,0,0,71,,34,-38,-38,-38,-38,-38

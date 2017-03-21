@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>The Mordell--Weil Group</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1462.htm">[Next]</A><A  HREF = "text1460.htm">[Prev]</A> <A  HREF = "text1462.htm">[Right]</A> <A  HREF = "text1460.htm">[Left]</A> <A  HREF = "text1455.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16616">The Mordell--Weil Group</A></H3>
+
+<P>
+<P>
+The machinery in this section and the next section is for curves defined
+over a rational function field k(t) whose field of constants k is finite.
+<P>
+The Mordell--Weil group can be computed (and generators found) for a curve
+y<sup>2</sup> + a<sub>1</sub>xy + a<sub>3</sub>y=x<sup>3</sup> + a<sub>2</sub>x<sup>2</sup> + a<sub>4</sub>x + a<sub>6</sub> where each a<sub>i</sub> is a <I>polynomial</I>
+in k[t] &sub;k(t) of degree at most i.
+<P>
+When this hypothesis is not satisfied, it may still be possible to bound the
+Mordell--Weil rank and find Mordell--Weil generators using the 2-descent
+routines described in the next section.
+
+
+<H5><A NAME = "16617">RankBounds(E) : CrvEll[FldFunG] -&gt; RngIntElt, RngIntElt</A></H5>
+<H5>RankBound(E) : CrvEll[FldFunG] -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+These functions return lower and upper bounds (or just an upper bound)
+on the rank of the Mordell--Weil group E(F) for an elliptic curve E
+defined over a function field F with finite constant field.  The bound
+is obtained by applying all the available tools (those described in this
+section together with the <TT>AnalyticInformation</TT> obtained from the L-function).
+</BLOCKQUOTE>
+<H5><A NAME = "16618">MordellWeilGroup(E : parameters) : CrvEll[FldFunRat] -&gt; GrpAb, Map</A></H5>
+
+<PRE>    Al: MonStgElt                       Default: "Geometric"</PRE>
+<BLOCKQUOTE>
+This function computes the Mordell--Weil group of an elliptic curve E
+that satisfies the hypotheses stated in the introduction immediately above.
+The function returns two values: an abelian group A and a map m
+from A to E.  The map m provides an isomorphism between the
+abstract group A and the Mordell--Weil group.
+<P>
+The algorithm used by default is the geometric method described above.
+However, when <TT>Al</TT> is set to <TT>"Descent"</TT> it instead uses the
+2-descent tools described in the next section; if the curve admits
+2-isogenies then it uses a separate implementation of descent by 2-isogenies
+(described in <A  HREF = "text1454.htm#bib_roberts-phd">[Rob07]</A>).
+These descent methods do not always determine the full Mordell--Weil group
+(in which case a warning is printed); their advantages are that
+they do not require the degrees of the coefficients to be bounded
+and in many cases are very efficient.
+</BLOCKQUOTE>
+<H5><A NAME = "16619">MordellWeilLattice(E) : CrvEll[FldFunRat] -&gt; Lat, Map</A></H5>
+<BLOCKQUOTE>
+This function computes the Mordell--Weil lattice of an elliptic curve E
+that satisfies the hypotheses stated in the introduction immediately above.
+This is the free part of the Mordell--Weil
+group with an inner product given by the N&eacute;ron--Tate height pairing.
+The function returns two values: the lattice L and a map m
+from L to E.
+</BLOCKQUOTE>
+<H5><A NAME = "16620">GeometricMordellWeilLattice(E) : CrvEll[FldFunRat] -&gt; Lat, Map</A></H5>
+<BLOCKQUOTE>
+This function computes the geometric Mordell--Weil lattice of an elliptic
+curve E that satisfies the hypotheses stated in the introduction
+immediately above.
+This consists of the free part of the
+group of points on E that are defined over the function field with a
+possibly extended constant field, together with the N&eacute;ron--Tate pairing.
+The function returns two values: a lattice L and a map m
+from L to E', where E' is a base change of E over the larger
+field.
+</BLOCKQUOTE>
+<H5><A NAME = "16621">Generators(E) : CrvEll[FldFunRat] -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E over a rational function field F that
+satisfies the  hypotheses stated in the introduction immediately above,
+this function returns a sequence of points in E(F) which are
+generators of the Mordell--Weil group.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16622">Example <TT>CrvEllFldFun_rank2 (H129E1)</TT></A></H3>
+<P>
+We find that the curve y<sup>2</sup> = x<sup>3</sup> + (t<sup>4</sup> + 2t<sup>2</sup>)x + t<sup>3</sup> + 2t over F<sub>3</sub>(t)
+has rank 2 and has no 2-torsion in its Tate--Shafarevich group.
+<P>
+<P>
+<PRE>
+&gt; F&lt;t&gt; := FunctionField(GF(3));
+&gt; E := EllipticCurve([ t^4 + 2*t^2, t^3 + 2*t ]);
+&gt; S2E := TwoSelmerGroup(E);
+&gt; S2E;
+Abelian Group isomorphic to Z/2 + Z/2
+Defined on 2 generators
+Relations:
+    2*S2E.1 = 0
+    2*S2E.2 = 0
+&gt; MordellWeilGroup(E);
+Abelian Group isomorphic to Z + Z
+Defined on 2 generators (free)
+Mapping from: Abelian Group isomorphic to Z + Z
+Defined on 2 generators (free) to CrvEll: E given by a rule [no inverse]
+</PRE>
+Furthermore, we may compute the regulator of E as follows.
+<P>
+<P>
+<PRE>
+&gt; Determinant(HeightPairingMatrix(Generators(E)));
+12
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1462.htm">[Next]</A><A  HREF = "text1460.htm">[Prev]</A> <A  HREF = "text1462.htm">[Right]</A> <A  HREF = "text1460.htm">[Left]</A> <A  HREF = "text1455.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

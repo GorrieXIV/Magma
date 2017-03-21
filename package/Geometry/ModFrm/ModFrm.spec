@@ -1,0 +1,30 @@
+{
+	abelian_varieties.m
+	arithmetic.m
+	bases.m
+	categories.m
+        cohen_oesterle_formulas.m
+	congruences.m
+	creation.m
+	degeneracy_maps.m
+        eisenstein.m
+        elliptic_curve.m
+        half-integral.m
+	hecke_algebras.m
+        input_output.m
+        level1.m
+	l_series.m
+        misc.m
+	modular_symbols.m
+	newforms.m
+	operators.m
+        overconvergent.m
+        p-adic.m
+        predicates.m
+	q-expansions.m
+        qexp_mappings.m
+        relations.m
+	subspaces.m
+	verbose.m
+        weight1.m
+}

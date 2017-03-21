@@ -1,0 +1,6 @@
+174,1
+V,AlgLieIsom,3
+S,IsIsomorphism,Check whether phi is an isomorphism of Lie algebras,1,0,2,175,0,15,0,15,1,0,0,0,0,0,0,0,175,,36,-38,-38,-38,-38,-38
+S,IsKnownIsomorphic,"Check whether the Lie algebras L1 and L2 are isomorphic. Returns whether known as 1st value; if so, then true/false as 2nd value; if true then map as 3rd value (or false if it couldn't be computed), if false then string (reason) as 3rd value. Pass split Cartan/toral subalgebras as optional parameters. Currently only works for reductive Lie algebras and small-dimensional nilpotent and solvable Lie algebras",0,2,0,0,0,0,0,0,0,15,,0,0,15,,36,-1,-38,-38,-38,-38
+S,IsIsomorphic,"Check whether the Lie algebras L1 and L2 are isomorphic. Returns true/false as 1st value; if true then map as 2nd value, if false then string (reason) as 2nd value. Pass split Cartan/toral subalgebras as optional parameters. Currently only works for reductive Lie algebras and small-dimensional nilpotent and solvable Lie algebras",0,2,0,0,0,0,0,0,0,15,,0,0,15,,36,-1,-38,-38,-38,-38
+S,Isomorphism,Find an isomorphism between the L1 and L2. Pass split Cartan/toral subalgebras as optional parameters. Currently only works for reductive Lie algebras and small-dimensional nilpotent and solvable Lie algebras,0,2,0,0,0,0,0,0,0,15,,0,0,15,,36,-1,-38,-38,-38,-38

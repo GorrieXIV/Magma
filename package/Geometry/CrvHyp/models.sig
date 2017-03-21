@@ -1,0 +1,41 @@
+174,1
+V,CrvHypMinimal,3
+S,IsSimplifiedModel,Returns true if C is of the form y^2 = f(x),0,1,0,0,0,0,0,0,0,338,,36,-38,-38,-38,-38,-38
+S,IsIntegral,Returns true if C has integral coefficients,0,1,0,0,0,0,0,0,0,338,,36,-38,-38,-38,-38,-38
+S,IspIntegral,Returns true if C has p-adically integral coefficients,0,2,0,0,0,0,0,0,0,148,,0,0,338,,36,-38,-38,-38,-38,-38
+S,IspIntegral,Returns true if C has p-adically integral coefficients,0,2,0,0,0,0,0,0,0,267,,0,0,338,,36,-38,-38,-38,-38,-38
+S,IspIntegral,Returns true if C has p-adically integral coefficients,0,2,0,0,0,0,0,0,0,312,,0,0,338,,36,-38,-38,-38,-38,-38
+S,IspIntegral,Returns true if C has p-adically integral coefficients,0,2,0,0,0,0,0,0,0,238,,0,0,338,,36,-38,-38,-38,-38,-38
+S,IspIntegral,Returns true if C has p-adically integral coefficients,0,2,0,0,0,0,0,0,0,147,,0,0,338,,36,-38,-38,-38,-38,-38
+S,IspNormal,Returns true if C is p-adically normal,0,2,0,0,0,0,0,0,0,148,,0,0,338,,36,-38,-38,-38,-38,-38
+S,IspNormal,Returns true if C is p-adically normal,0,2,0,0,0,0,0,0,0,267,,0,0,338,,36,-38,-38,-38,-38,-38
+S,IspNormal,Returns true if C is p-adically normal,0,2,0,0,0,0,0,0,0,312,,0,0,338,,36,-38,-38,-38,-38,-38
+S,IspNormal,Returns true if C is p-adically normal,0,2,0,0,0,0,0,0,0,238,,0,0,338,,36,-38,-38,-38,-38,-38
+S,IspNormal,Returns true if C is p-adically normal,0,2,0,0,0,0,0,0,0,147,,0,0,338,,36,-38,-38,-38,-38,-38
+S,IspMinimal,"Returns false, false if C is not a p-integral p-minimal model. Returns true, false if C is p-integral, p-minimal, but not the unique p-minimal model (up to the action of GL(2,O_p)). Returns true, true if C is the unique (up to the action of GL(2,O_p)) p-integral p-minimal model",0,2,0,0,0,0,0,0,0,148,,0,0,338,,36,36,-38,-38,-38,-38
+S,IspMinimal,"Returns false, false if C is not a p-integral p-minimal model. Returns true, false if C is p-integral, p-minimal, but not the unique p-minimal model (up to the action of GL(2,O_p)). Returns true, true if C is the unique (up to the action of GL(2,O_p)) p-integral p-minimal model",0,2,0,0,0,0,0,0,0,267,,0,0,338,,36,36,-38,-38,-38,-38
+S,IspMinimal,"Returns false, false if C is not a p-integral p-minimal model. Returns true, false if C is p-integral, p-minimal, but not the unique p-minimal model (up to the action of GL(2,O_p)). Returns true, true if C is the unique (up to the action of GL(2,O_p)) p-integral p-minimal model",0,2,0,0,0,0,0,0,0,312,,0,0,338,,36,36,-38,-38,-38,-38
+S,IspMinimal,"Returns false, false if C is not a p-integral p-minimal model. Returns true, false if C is p-integral, p-minimal, but not the unique p-minimal model (up to the action of GL(2,O_p)). Returns true, true if C is the unique (up to the action of GL(2,O_p)) p-integral p-minimal model",0,2,0,0,0,0,0,0,0,238,,0,0,338,,36,36,-38,-38,-38,-38
+S,IspMinimal,"Returns false, false if C is not a p-integral p-minimal model. Returns true, false if C is p-integral, p-minimal, but not the unique p-minimal model (up to the action of GL(2,O_p)). Returns true, true if C is the unique (up to the action of GL(2,O_p)) p-integral p-minimal model",0,2,0,0,0,0,0,0,0,147,,0,0,338,,36,36,-38,-38,-38,-38
+S,SimplifiedModel,Returns an isomorphic curve C' in the form v^2 = f(u) and the isomorphism C -> C',0,1,0,0,0,0,0,0,0,338,,338,375,-38,-38,-38,-38
+S,IntegralModel,"Returns an isomorphic curve C' given by polynomials with integral coefficients, together with the map C -> C' and the transformation used. Base field must be the rationals. If Reduce is set, common divisors of the coefficients are eliminated as far as possible",1,0,1,338,0,262,1,0,0,0,0,0,0,0,338,,338,375,-38,-38,-38,-38
+S,HasOddDegreeModel,"Checks whether C has a model of the form y^2 = f(x) with f of odd degree. If so, returns this model together with the map from the old to the new model",0,1,0,0,0,0,0,0,0,338,,36,338,375,-38,-38,-38
+S,pIntegralModel,"Returns an isomorphic curve C' given by polynomials with p-integral coefficients, together with the map C -> C' and the transformation used. Base field must be the rationals. If Reduce is set, common divisors of the coefficients are eliminated as far as possible",0,2,0,0,0,0,0,0,0,148,,0,0,338,,338,375,-38,-38,-38,-38
+S,pIntegralModel,"Returns an isomorphic curve C' given by polynomials with p-integral coefficients, together with the map C -> C' and the transformation used. Base field must be the rationals. If Reduce is set, common divisors of the coefficients are eliminated as far as possible",0,2,0,0,0,0,0,0,0,267,,0,0,338,,338,375,-38,-38,-38,-38
+S,pIntegralModel,"Returns an isomorphic curve C' given by polynomials with p-integral coefficients, together with the map C -> C' and the transformation used. Base field must be the rationals. If Reduce is set, common divisors of the coefficients are eliminated as far as possible",0,2,0,0,0,0,0,0,0,312,,0,0,338,,338,375,-38,-38,-38,-38
+S,pIntegralModel,"Returns an isomorphic curve C' given by polynomials with p-integral coefficients, together with the map C -> C' and the transformation used. Base field must be the rationals. If Reduce is set, common divisors of the coefficients are eliminated as far as possible",0,2,0,0,0,0,0,0,0,238,,0,0,338,,338,375,-38,-38,-38,-38
+S,pIntegralModel,"Returns an isomorphic curve C' given by polynomials with p-integral coefficients, together with the map C -> C' and the transformation used. Base field must be the rationals. If Reduce is set, common divisors of the coefficients are eliminated as far as possible",0,2,0,0,0,0,0,0,0,147,,0,0,338,,338,375,-38,-38,-38,-38
+S,pNormalModel,"Given a hyperellitpic curve C and a place p, returns a normal Weierstrass model of the curve at p",0,2,0,0,0,0,0,0,0,148,,0,0,338,,338,375,-38,-38,-38,-38
+S,pNormalModel,"Given a hyperellitpic curve C and a place p, returns a normal Weierstrass model of the curve at p",0,2,0,0,0,0,0,0,0,267,,0,0,338,,338,375,-38,-38,-38,-38
+S,pNormalModel,"Given a hyperellitpic curve C and a place p, returns a normal Weierstrass model of the curve at p",0,2,0,0,0,0,0,0,0,312,,0,0,338,,338,375,-38,-38,-38,-38
+S,pNormalModel,"Given a hyperellitpic curve C and a place p, returns a normal Weierstrass model of the curve at p",0,2,0,0,0,0,0,0,0,238,,0,0,338,,338,375,-38,-38,-38,-38
+S,pNormalModel,"Given a hyperellitpic curve C and a place p, returns a normal Weierstrass model of the curve at p",0,2,0,0,0,0,0,0,0,147,,0,0,338,,338,375,-38,-38,-38,-38
+S,pMinimalWeierstrassModel,"Given a hyperelliptic curve C and a place p, returns a minimal Weierstrass model of C at p",0,2,0,0,0,0,0,0,0,148,,0,0,338,,338,375,-38,-38,-38,-38
+S,pMinimalWeierstrassModel,"Given a hyperelliptic curve C and a place p, returns a minimal Weierstrass model of C at p",0,2,0,0,0,0,0,0,0,267,,0,0,338,,338,375,-38,-38,-38,-38
+S,pMinimalWeierstrassModel,"Given a hyperelliptic curve C and a place p, returns a minimal Weierstrass model of C at p",0,2,0,0,0,0,0,0,0,312,,0,0,338,,338,375,-38,-38,-38,-38
+S,pMinimalWeierstrassModel,"Given a hyperelliptic curve C and a place p, returns a minimal Weierstrass model of C at p",0,2,0,0,0,0,0,0,0,238,,0,0,338,,338,375,-38,-38,-38,-38
+S,pMinimalWeierstrassModel,"Given a hyperelliptic curve C and a place p, returns a minimal Weierstrass model of C at p",0,2,0,0,0,0,0,0,0,147,,0,0,338,,338,375,-38,-38,-38,-38
+S,MinimalWeierstrassModel,"Given a hyperelliptic Curve C over the rationals, this returns a globally minimal Weierstrass model of C. If Bound is set, it gives an upper bound for the bad primes that are checked (this uses trial division, so Bound should not be much larger than 10^7.)",0,1,0,0,0,0,0,0,0,338,,338,375,-38,-38,-38,-38
+S,ReducedWamelenModel,"Given a hyperelliptic curve C over Q, returns a reduced and partially minimized model of some quadratic twist of C",0,1,0,0,0,0,0,0,0,338,,338,-38,-38,-38,-38,-38
+S,ReducedModel,"Given a curve with integral coefficients, computes a model that is reduced with respect to the action of SL(2,Z)",0,1,0,0,0,0,0,0,0,338,,338,375,-38,-38,-38,-38
+S,ReducedMinimalWeierstrassModel,"Given a hyperelliptic Curve C over the rationals, returns a globally minimal Weierstrass model of C that is reduced with respect to the action of SL(2,Z). (Compare Reduce.)",0,1,0,0,0,0,0,0,0,338,,338,375,-38,-38,-38,-38

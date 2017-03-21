@@ -1,0 +1,246 @@
+// SetDelCheck(true);
+
+/*
+Test Invariant Theory.
+AKS Oct 96, Jan 07.
+*/
+
+
+VERB := true;
+VERB := false;
+SetVerbose("Invariants", 0);
+SetVerbose("HilbertGroebner", 0);
+SetVerbose("Decomposition", 0);
+SetVerbose("LLL", 0);
+
+
+procedure test_invariant_ring(R: SkipHard := false, SkipRelations := false)
+
+    TT := Cputime();
+
+    G := Group(R);
+    K := CoefficientField(R);
+
+    procedure compute(S, F)
+	if VERB then
+	    S;
+	    time F(R);
+	else
+	    S;
+	    time _ := F(R);
+	end if;
+    end procedure;
+
+    "";
+    "";
+    "**************";
+    R;
+    if SkipHard then
+	"Skip hard";
+    end if;
+    //G, K;
+    "";
+
+    compute("Primary invariants:", PrimaryInvariants);
+    compute("Secondary invariants:", SecondaryInvariants);
+    compute("Fundamental invariants:", FundamentalInvariants);
+
+    "Hilbert Series:";
+    HilbertSeries(R);
+
+    hd := 20;
+    PS<u> := PowerSeriesRing(IntegerRing(), hd);
+    "Hilbert Power Series:";
+    h := PS ! HilbertSeries(R);
+    h;
+
+    "Cohen-Macaulay:", IsCohenMacaulay(R);
+
+    M, f := Module(R);
+    //assert HilbertSeries(SyzygyModule(M)) eq HilbertSeries(R);
+    assert HilbertSeries(M) eq HilbertSeries(R);
+
+    if not SkipHard then
+	s := SecondaryInvariants(R);
+	for i := 1 to #s do
+	    v := UnitVector(M, i);
+	    assert f(s[i]) eq v;
+	    assert v@@f eq s[i];
+	end for;
+
+	p := PrimaryInvariants(R);
+	assert p[1] in R;
+    end if;
+
+    T := Cputime();
+    d := 0;
+    //while /*d le 20 and*/ Cputime(T) le 0.5 do
+    while d le Max([TotalDegree(f): f in PrimaryInvariants(R)] cat [5]) do
+	if d ge hd then
+	    hd := 2 * hd;
+	    PS<u> := PowerSeriesRing(IntegerRing(), hd);
+	    h := PS ! HilbertSeries(R);
+	end if;
+	assert Coefficient(h, d) eq #InvariantsOfDegree(R, d);
+	d +:= 1;
+    end while;
+    "Hilbert coefficients tested up to", d - 1;
+
+    if not SkipHard and not SkipRelations then
+	"Relations";
+	time rel := Relations(R);
+	L := PrimaryInvariants(R) cat IrreducibleSecondaryInvariants(R);
+	"Relations check";
+	time for f in rel do
+	    assert IsZero(Evaluate(f, L));
+	end for;
+    end if;
+
+    "Total invar ring time:", Cputime(TT);
+end procedure;
+
+procedure test_mat(G: SkipHard := false, SkipRelations := false)
+    test_invariant_ring(
+	InvariantRing(G): SkipHard := SkipHard, SkipRelations := SkipRelations
+    );
+end procedure;
+
+procedure test_perm(G, K: SkipHard := false, SkipRelations := false)
+    test_invariant_ring(
+	InvariantRing(G, K):
+	    SkipHard := SkipHard, SkipRelations := SkipRelations
+    );
+end procedure;
+
+procedure test_relations(R)
+end procedure;
+
+Q := RationalField();
+
+////////////////////////
+////////////////////////
+
+test_perm(PermutationGroup<6 | (1,2,3)(4,5,6), (1,2)(4,5)>, Q);
+
+test_mat(
+    MatrixGroup<4, Q | [0,1,0,0, 0,0,1,0, 0,0,0,1, -1,-1,-1,-1]>: SkipRelations
+);
+
+K<i> := CyclotomicField(4);
+test_mat(MatrixGroup<2, K | [i,0, 0,-i]>);
+K<z>:=CyclotomicField(5);
+w := -z^3 - z^2;
+test_mat(MatrixGroup<3,K | [1,0,-w, 0,0,-1, 0,1,-w],[-1,-1,w, -w,0,w, -w,0,1]>);
+
+test_perm(CyclicGroup(4), GF(2));
+test_perm(PermutationGroup<6 | (1,2,3)(4,5,6), (1,2)(4,5)>, GF(2));
+test_mat(MatrixGroup<4, GF(2) | [1,1,0,0, 0,1,1,0, 0,0,1,1, 0,0,0,1]>);
+test_mat(MatrixGroup<4, GF(3) | [1,0,0,0, 1,1,0,0, 0,1,1,0, 0,0,1,1]>);
+test_mat(MatrixGroup<5, GF(2) | [1,1,0,0,0, 0,1,1,0,0, 0,0,1,0,0, 0,0,0,1,1,
+				0,0,0,0,1]>);
+test_mat(MatrixGroup<5, GF(5) | [1,1,0,0,0, 0,1,1,0,0, 0,0,1,0,0, 0,0,0,1,1,
+				0,0,0,0,1]>: SkipRelations);
+test_mat(MatrixGroup<5,GF(2)|
+    [0,1,0,0,0, 0,0,1,0,0, 0,0,0,1,0, 0,0,0,0,1, 1,0,0,0,0],
+    [1,0,0,0,0, 0,0,0,0,1, 0,0,0,1,0, 0,0,1,0,0, 0,1,0,0,0]>);
+test_mat(MatrixGroup<5,GF(5)|
+    [0,1,0,0,0, 0,0,1,0,0, 0,0,0,1,0, 0,0,0,0,1, 1,0,0,0,0],
+    [1,0,0,0,0, 0,0,0,0,1, 0,0,0,1,0, 0,0,1,0,0, 0,1,0,0,0]>: SkipRelations);
+test_mat(MatrixGroup<5,GF(5) | [1,1,0,0,0, 0,1,1,0,0, 0,0,1,0,0, 0,0,0,1,1,
+    0,0,0,0,1]>: SkipRelations);
+
+K<w> := ExtensionField<GF(3), x | x^2-x-1>;
+test_mat(MatrixGroup<3,K |
+    [1,0,-w, 0,0,-1, 0,1,-w],
+    [-1,-1,w, -w,0,w, -w,0,1]>);
+K<w> := ExtensionField<GF(2), x | x^2-x-1>;
+test_mat(MatrixGroup<3,K |
+    [1,0,-w, 0,0,-1, 0,1,-w],
+    [-1,-1,w, -w,0,w, -w,0,1]>);
+K := GF(5); w := K!3;
+test_mat(MatrixGroup<3,K |
+    [1,0,-w, 0,0,-1, 0,1,-w],
+    [-1,-1,w, -w,0,w, -w,0,1]>);
+
+test_mat(MatrixGroup<4,GF(5) | [1,0,0,0, 1,1,0,0, 0,1,1,0, 0,0,1,1]>);
+test_mat(MatrixGroup<5,GF(5) |
+    [1,0,0,0,0, 1,1,0,0,0, 0,1,1,0,0, 0,0,1,1,0, 0,0,0,1,1]>: SkipRelations);
+
+/*
+// Too slow:
+test_mat(MatrixGroup<4, GF(3) |
+    [ 2, 0, 2, 1, 1, 1, 1, 1, 0, 0, 1, 2, 0, 0, 0, 2 ],
+    [ 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 1, 0, 0, 1, 2 ] >);
+*/
+
+test_mat(MatrixGroup<6,GF(2) |
+  [1,1,0,0,0,0, 0,1,0,0,0,0, 0,0,1,1,0,0, 0,0,0,1,0,0,
+  0,0,0,0,1,1, 0,0,0,0,0,1]>);
+
+R := InvariantRing(
+    MatrixGroup<6,GF(2) |
+	[1,1,0,0,0,0, 0,1,0,0,0,0, 0,0,1,1,0,0, 0,0,0,1,0,0,
+	0,0,0,0,1,1, 0,0,0,0,0,1]>);
+H := HilbertSeries(R);
+test_invariant_ring(R);
+
+anf := false;
+if anf then
+    P<x> := PolynomialRing(IntegerRing());
+    K<w> := NumberField(x^4 - x^3 + 2*x^2 + x + 1);
+    G := MatrixGroup<3, K | 
+	[ 1/2*(-w^3 - 1), 0, 1/2*(w^3 + 2*w + 1), 0, -1, 0,
+	    1/2*(-w^3 + 2*w^2 - 2*w + 1), 0, 1/2*(w^3 + 1) ],
+	[ 1, -w^2 + w - 1, w^2 - w, 0, w, -w, 0, -w^3 + w^2 - w - 1, -w ]>;
+    R := InvariantRing(G);
+    // test_invariant_ring(R); // too slow
+    "\n****\nPrimaryInvariants for:", R;
+    time p := PrimaryInvariants(R);
+    assert [Degree(f): f in p] eq [ 6, 12, 30 ];
+    assert p[1]^G eq {p[1]};
+    assert p[2]^G eq {p[2]};
+end if;
+
+test_perm(CyclicGroup(6), Q: SkipRelations);
+test_perm(CyclicGroup(7), Q: SkipHard);
+
+K := RationalField();
+GL := GeneralLinearGroup(2,K);
+sigma := One(GL);
+G := sub<GL|[sigma]>;
+R := InvariantRing(G);
+F := FundamentalInvariants(R);
+P := PolynomialRing(R);
+assert F eq [P.1, P.2];
+
+///
+
+d := 7;
+D7 := 
+[
+    [ 1, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4,
+	4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6,
+	6, 6, 7, 7, 7, 7, 7, 7 ],
+    [ 1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5,
+	6, 6, 6, 7, 7, 7 ],
+    [ 1, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 6,
+	6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7 ],
+    [ 1, 2, 3, 3, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 7, 7,
+	7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 9 ],
+    [ 1, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7 ],
+    [ 1, 2, 3, 4, 5, 6, 7, 21 ],
+    [ 1, 2, 3, 4, 5, 6, 7 ]
+];
+
+time for i := 1 to NumberOfTransitiveGroups(d) do
+    printf "TransitiveGroup of degree %o, number %o\n", d, i;
+
+    G := TransitiveGroup(d, i);
+    p := rep{p: p in [2 .. #G] | IsPrime(p) and #G mod p ne 0};
+    R := InvariantRing(G, GF(p));
+    F := FundamentalInvariants(R);
+    assert [Degree(f): f in F] eq D7[i];
+end for;
+
+
+

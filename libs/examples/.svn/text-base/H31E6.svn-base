@@ -1,0 +1,68 @@
+"Source: Text/Lat/LatNF.text";
+"Line: 1005";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Lat/LatNF.text, line: 1005
+// Example: H31E6 ()
+print "Example: H31E6";
+ei := GetEchoInput();
+SetEchoInput(true);
+K<s5> := QuadraticField(5);
+L := NumberFieldLattice(K,3); // standard lattice
+phi := (1-s5)/2; // negative golden ratio
+vecs := [L.2+phi*L.3, L.2-phi*L.3, -L.1-phi*L.2];
+SUB := sub<L|vecs>;
+LAT := NumberFieldLattice([Vector(v) : v in vecs]);
+LAT eq SUB; // either way gives the same lattice
+assert $1;
+Determinant(LAT); // (1-s5)^2
+[Norm(v) : v in vecs];
+A := AutomorphismGroup(LAT);
+IsIsomorphic(A/Center(A),AlternatingGroup(5));
+assert $1;
+B := AutomorphismGroup(L);
+IsIsomorphic(B/Center(B),SymmetricGroup(4));
+assert $1;
+vecs[1]^(A.1);
+Norm($1); // not the same
+(LAT!vecs[1])^(A.1);
+Norm($1); // as desired
+assert $1 eq Norm(vecs[1]);
+#Sphere(L,1); // 6 vectors of norm 1
+assert $1 eq 6;
+#Sphere(L,(5-s5)/2); // 24 vectors of this norm
+assert $1 eq 24;
+#Sphere(L,3); // 32 of norm 3
+assert $1 eq 32;
+assert Set(vecs) subset Set(Sphere(L,(5-s5)/2));
+#Sphere(LAT,1); // no vectors of norm 1
+assert $1 eq 0;
+#Sphere(LAT,(5-s5)/2); // 12 vectors of this norm
+assert $1 eq 12;
+#Sphere(LAT,3); // 20 of norm 3
+assert $1 eq 20;
+Lvecs := ChangeUniverse(vecs, LAT);
+assert Set(Lvecs) subset Set(Sphere(LAT,(5-s5)/2));
+Set(Sphere(LAT,(5-s5)/2)) eq Orbit(A,Lvecs[1]);
+assert $1;
+FACE3 := {LAT.1,LAT.2,LAT.3}; // vertices of a face
+#(FACE3^A); // all 20 faces, each vertex appears 5 times
+assert $1 eq 20;
+Multiplicities(Multiset(&cat[SetToSequence(x) : x in FACE3^A]));
+assert &and[Norm(InnerProduct(a,b)) eq -1 : a,b in FACE3 | a ne b];
+// now the dodecahedron
+S3 := Sphere(LAT,3);
+w1 := LAT ! [(1+s5)/2,0,-(1-s5)/2];
+w2 := LAT ! [1,-1,-1];
+w3 := LAT ! [1,-1,1];
+w4 := LAT ! [(1+s5)/2,0,(1-s5)/2];
+w5 := LAT ! [-(1-s5)/2,-(1+s5)/2,0];
+FACE5 := {w1,w2,w3,w4,w5}; // vertices of a face
+#(FACE5^A); // all 12 faces, each vertex appears thrice
+assert $1 eq 12;
+Multiplicities(Multiset(&cat[SetToSequence(x) : x in FACE5^A]));
+O1 := OrthogonalComplement(LAT,w1);
+O2 := OrthogonalComplement(LAT,w2);
+IsIsometric(O1,O2);
+assert $1;
+SetEchoInput(ei);

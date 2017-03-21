@@ -1,0 +1,205 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Constructing Extensions</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text782.htm">[Next]</A><A  HREF = "text780.htm">[Prev]</A> <A  HREF = "text782.htm">[Right]</A> <A  HREF = "text780.htm">[Left]</A> <A  HREF = "text773.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "8852">Constructing Extensions</A></H3>
+
+
+
+<H5><A NAME = "8853"></A><A NAME = "GrpCoh:Extension">Extension</A>(CM, s) : ModCoho, SeqEnum -&gt; Grp, HomGrp, Map</H5>
+<H5>Extension(CM, s) : ModCoho, ModTupRngElt -&gt; Grp, HomGrp, Map</H5>
+<BLOCKQUOTE>
+Given the cohomology module CM for the group G acting on the module M
+and an element s of H<sup>2</sup>(G, M), this function returns the corresponding 
+extension E of the module M by G as a finitely presented group. The
+generators of E are chosen so that the generators of the acting group G 
+(or rather strong generators for G when G is a permutation or matrix 
+group) come first, and the generators of M come last. The argument s 
+should be either an element of H<sup>2</sup>(G, M) or a sequence of integers defining 
+such an element.
+<P>
+The projection from E to G and the injection from an abelian group
+isomorphic to M to E are also returned.
+<P>
+This function may only be applied when the module M used to define 
+CM is defined over a finite field of prime order, the integers, or as 
+an abelian group in a call of <TT>CohomologyModule(G, Q, T)</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "8854">SplitExtension(CM) : ModCoho -&gt; Grp, HomGrp, Map</A></H5>
+<BLOCKQUOTE>
+Given the cohomology module CM for the group G acting on the module M,
+this function returns the split extension E of the module M by G as 
+a finitely presented group. The generators of E are chosen so that the 
+generators of the acting group G (or strong generators for G when G 
+is a permutation or matrix group) come first, and the generators of M 
+come last. The extension returned is the same as for <TT>Extension(CM, s)</TT> 
+with s taken as the zero element of H<sup>2</sup>(G, M), but <TT>SplitExtension</TT> 
+is much faster, and does not require H<sup>2</sup>(G, M) to be calculated first.
+This function will also work when the group used to define CM was a
+finitely presented group.
+<P>
+The projection from E to G and the injection from an abelian group
+isomorphic to M to E are also returned.
+<P>
+This function may only be applied when the module M used to define 
+CM is defined over a finite field of prime order, the integers, or as 
+an abelian group in a call of <TT>CohomologyModule(G, Q, T)</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "8855">pMultiplicator(G, p) : GrpPerm, RngIntElt -&gt; [ RngIntElt ]</A></H5>
+<BLOCKQUOTE>
+Given the permutation group G and a prime p dividing the order 
+of G, return the invariant factors of the p-part of the Schur 
+multiplicator of G. This function calls Derek Holt's original
+cohomology code (see <A  HREF = "text772.htm#bib_holt-multiplier">[Hol84]</A>).
+</BLOCKQUOTE>
+<H5><A NAME = "8856">pCover(G, F, p) : GrpPerm, GrpFP, RngIntElt -&gt; GrpFP</A></H5>
+<BLOCKQUOTE>
+Given the permutation group G and the finitely presented group F 
+such that G is an epimorphic image of F in the sense described below, 
+and a prime p, return a presentation for the p-cover of G, constructed 
+as an extension of the p-multiplier by F. Note that the epimorphism 
+of F onto G must satisfy the conditions that, firstly, the generators 
+of F are in one-to-one correspondence with those of G and, secondly, 
+the relations of F are satisfied by the generators of G. In other 
+words, the mapping taking the i-th generator of F to the i-th 
+generator of G must be an epimorphism. Usually this mapping will be 
+an isomorphism, although this is not mandatory.  This function calls 
+Derek Holt's original cohomology code (see <A  HREF = "text772.htm#bib_holt-cover">[Hol85a]</A>).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8857">Example <TT>GrpCoh_straightforward (H73E6)</TT></A></H3>
+We apply the machinery to construct a non-split extension of the 
+elementary abelian group of order 3<sup>8</sup> by A<sub>8</sub>. 
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := Alt(8);
+&gt; M := PermutationModule(G,GF(3));
+&gt; X := CohomologyModule(G,M);
+&gt; C := CohomologyGroup(X,2);
+&gt; C;
+Full Vector space of degree 1 over GF(3)
+</PRE>
+<P>
+The function <TT>Extension</TT> is used to construct a non-split extension E 
+of the module M by the group G.
+<P>
+<P>
+<P>
+<PRE>
+&gt; E := Extension(X,[1]);
+</PRE>
+<P>
+The object E is a finitely presented group, in which the 8 module 
+generators come last. We now construct a (rather large-degree) faithful 
+permutation representation of E.
+<P>
+<P>
+<P>
+<PRE>
+&gt; n := Ngens(E);
+&gt; D := sub&lt; E | [E.i : i in [n-7..n-1]] &gt;;
+&gt; ct := CosetTable(E,D:CosetLimit:=10^6,Hard:=true);
+&gt; P := CosetTableToPermutationGroup(E,ct);
+&gt; Degree(P);
+60480
+&gt; #P eq 3^8 * #G;
+true
+</PRE>
+<P>
+We extract the normal subgroup of order 3<sup>8</sup> of the extension E, 
+and verify that the extension is non-split.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Q := sub&lt;P | [P.i : i in [n-7..n]] &gt;;
+&gt; #Q eq 3^8;
+true
+&gt; IsNormal(P,Q);
+true
+&gt; Complements(P,Q);
+[]
+</PRE>
+<HR>
+<H3><A NAME = "8858">Example <TT>GrpCoh_module-integers (H73E7)</TT></A></H3>
+We investigate the cohomology of the permutation module for
+A<sub>5</sub> taken over the integers.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := Alt(5);
+&gt; M := PermutationModule(G,Integers());
+&gt; X := CohomologyModule(G,M);
+&gt; CohomologyGroup(X,0);     
+Full Quotient RSpace of degree 1 over Integer Ring
+Column moduli:
+[ 0 ]
+&gt; CohomologyGroup(X,1);     
+Full Quotient RSpace of degree 0 over Integer Ring
+Column moduli:
+[ ]
+&gt; CohomologyGroup(X,2);     
+Full Quotient RSpace of degree 1 over Integer Ring
+Column moduli:
+[ 3 ]
+</PRE>
+<P>
+While we can form extensions of M in this case, we are unable
+to determine the distinct extensions. 
+<P>
+<P>
+<P>
+<PRE>
+&gt; E := Extension(X,[1]);
+&gt; E;
+Finitely presented group E on 8 generators
+Relations
+    (E.4, E.5) = Id(E)
+    (E.4, E.6) = Id(E)
+    (E.4, E.7) = Id(E)
+    (E.4, E.8) = Id(E)
+    (E.5, E.6) = Id(E)
+    (E.5, E.7) = Id(E)
+    (E.5, E.8) = Id(E)
+    (E.6, E.7) = Id(E)
+    (E.6, E.8) = Id(E)
+    (E.7, E.8) = Id(E)
+    (E.1, E.4^-1) = Id(E)
+    (E.1, E.5^-1) = Id(E)
+    E.1^-1 * E.6 * E.1 * E.7^-1 = Id(E)
+    E.1^-1 * E.7 * E.1 * E.8^-1 = Id(E)
+    E.1^-1 * E.8 * E.1 * E.6^-1 = Id(E)
+    E.2^-1 * E.4 * E.2 * E.5^-1 = Id(E)
+    E.2^-1 * E.5 * E.2 * E.6^-1 = Id(E)
+    E.2^-1 * E.6 * E.2 * E.4^-1 = Id(E)
+    (E.2, E.7^-1) = Id(E)
+    (E.2, E.8^-1) = Id(E)
+    (E.3, E.4^-1) = Id(E)
+    E.3^-1 * E.5 * E.3 * E.6^-1 = Id(E)
+    E.3^-1 * E.6 * E.3 * E.7^-1 = Id(E)
+    E.3^-1 * E.7 * E.3 * E.5^-1 = Id(E)
+    (E.3, E.8^-1) = Id(E)
+    E.1^-3 * E.4^-1 * E.5^-2 = Id(E)
+    (E.1^-1 * E.3^-1)^2 = Id(E)
+    E.3^-3 * E.4 * E.8^2 = Id(E)
+    E.2^-1 * E.1 * E.3^-1 * E.2 * E.1^-1 * E.4^-1 * E.8^2 = Id(E)
+    E.2 * E.3 * E.2 * E.3 * E.8^-4 = Id(E)
+    E.2^-1 * E.3^-1 * E.2^2 * E.3^-1 * E.4 * E.5 * E.6^-2 * E.7 = Id(E)
+&gt; DE := DistinctExtensions(X);
+Sorry, can only compute distinct extensions over prime field or finite abelian 
+group
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text782.htm">[Next]</A><A  HREF = "text780.htm">[Prev]</A> <A  HREF = "text782.htm">[Right]</A> <A  HREF = "text780.htm">[Left]</A> <A  HREF = "text773.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

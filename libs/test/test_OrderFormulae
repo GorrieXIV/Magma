@@ -1,0 +1,209 @@
+// Order formulae for all classical groups
+
+
+// Part I
+// Order polynomials for the general, special and conformal versions
+// of the finite classical groups
+
+// Linear
+GL_OrderPoly := function(n);
+  P<q> := PolynomialRing(Integers());
+  return q^N * &*[ q^i - 1 : i in [1..n]] where N is n*(n-1) div 2;
+end function;
+
+SL_OrderPoly := function(n);
+  P<q> := PolynomialRing(Integers());
+  return q^N * &*[ q^i - 1 : i in [2..n]] where N is n*(n-1) div 2;
+end function;
+
+// Unitary
+U_OrderPoly := function(n);
+  P<q> := PolynomialRing(Integers());
+  return q^N * &*[ q^i - (-1)^i : i in [1..n]] where N is n*(n-1) div 2;
+end function;
+
+SU_OrderPoly := function(n);
+  P<q> := PolynomialRing(Integers());
+  return q^N * &*[ q^i - (-1)^i : i in [2..n]] where N is n*(n-1) div 2;
+end function;
+
+CU_OrderPoly := function(n);
+  P<q> := PolynomialRing(Integers());
+  return q^N * (q-1) * &*[ q^i - (-1)^i : i in [1..n]] where N is n*(n-1) div 2;
+end function;
+
+// Symplectic
+Sp_OrderPoly := function(n);
+  P<q> := PolynomialRing(Integers());
+  error if IsOdd(n), "n must be even";
+  return q^(m*m) * &*[ q^(2*i) - 1 : i in [1..m]] where m is n div 2;
+end function;
+
+CSp_OrderPoly := function(n);
+  P<q> := PolynomialRing(Integers());
+  error if IsOdd(n), "n must be even";
+  return q^(m*m) * (q-1) * &*[ q^(2*i) - 1 : i in [1..m]] where m is n div 2;
+end function;
+
+// Orthogonal, odd degree
+O_OrderPolyOdd := function(n); // odd characteristic
+  P<q> := PolynomialRing(Integers());
+  error if IsEven(n), "n must be odd";
+  return 2 * q^(m*m) * &*[ q^(2*i) - 1 : i in [1..m]] where m is (n-1) div 2;
+end function;
+
+O_OrderPolyEven := function(n); // characteristic 2
+  P<q> := PolynomialRing(Integers());
+  error if IsEven(n), "n must be odd";
+  return q^(m*m) * &*[ q^(2*i) - 1 : i in [1..m]] where m is (n-1) div 2;
+end function;
+
+SO_OrderPoly := function(n);
+  P<q> := PolynomialRing(Integers());
+  error if IsEven(n), "n must be odd";
+  return q^(m*m) * &*[ q^(2*i) - 1 : i in [1..m]] where m is (n-1) div 2;
+end function;
+
+CO_OrderPoly := function(n);
+  P<q> := PolynomialRing(Integers());
+  error if IsEven(n), "n must be odd";
+  return (q-1) * q^(m*m) * &*[ q^(2*i) - 1 : i in [1..m]] where m is (n-1) div 2;
+end function;
+
+// Orthogonal plus (even degree)
+OPlus_OrderPoly := function(n);
+  P<q> := PolynomialRing(Integers());
+  error if IsOdd(n), "n must be even";
+  return 2 * q^(m*(m-1)) * (q^m-1) * &*[ q^(2*i) - 1 : i in [1..m-1]] where m is n div 2;
+end function;
+
+SOPlus_OrderPoly := function(n);
+  P<q> := PolynomialRing(Integers());
+  error if IsOdd(n), "n must be even";
+  return q^(m*(m-1)) * (q^m-1) * &*[ q^(2*i) - 1 : i in [1..m-1]] where m is n div 2;
+end function;
+
+COPlus_OrderPoly := function(n);
+  P<q> := PolynomialRing(Integers());
+  error if IsOdd(n), "n must be even";
+  return 2 * (q-1) * q^(m*(m-1)) * (q^m-1) * &*[ q^(2*i) - 1 : i in [1..m-1]] where m is n div 2;
+end function;
+
+// Orthogonal minus (even degree)
+OMinus_OrderPoly := function(n);
+  P<q> := PolynomialRing(Integers());
+  error if IsOdd(n), "n must be even";
+  return 2 * q^(m*(m-1)) * (q^m+1) * &*[ q^(2*i) - 1 : i in [1..m-1]] where m is n div 2;
+end function;
+
+SOMinus_OrderPoly := function(n);
+  P<q> := PolynomialRing(Integers());
+  error if IsOdd(n), "n must be even";
+  return q^(m*(m-1)) * (q^m+1) * &*[ q^(2*i) - 1 : i in [1..m-1]] where m is n div 2;
+end function;
+
+COMinus_OrderPoly := function(n);
+  P<q> := PolynomialRing(Integers());
+  error if IsOdd(n), "n must be even";
+  return 2 * (q-1) * q^(m*(m-1)) * (q^m+1) * &*[ q^(2*i) - 1 : i in [1..m-1]] where m is n div 2;
+end function;
+
+// Part II
+// Tests
+
+oddprimepowers := [ q : q in [3..100 by 2] | IsPrimePower(q) ];
+evenprimepowers := [ 2^i : i in [1..7]];
+allprimepowers := oddprimepowers cat evenprimepowers;
+print "General and special linear groups";
+for n := 2 to 6 do
+  fg := GL_OrderPoly(n);
+  fs := SL_OrderPoly(n);
+  for q in allprimepowers do
+    assert Order(GL(n,q)) eq Evaluate(fg,q);
+    assert Order(SL(n,q)) eq Evaluate(fs,q);
+  end for;
+end for;
+
+print "Unitary groups";
+for n := 2 to 6 do
+  fu := U_OrderPoly(n);
+  fs := SU_OrderPoly(n);
+  fc := CU_OrderPoly(n);
+  for q in allprimepowers do
+    assert Order(GU(n,q)) eq Evaluate(fu,q);
+    assert Order(SU(n,q)) eq Evaluate(fs,q);
+    assert Order(CU(n,q)) eq Evaluate(fc,q);
+  end for;
+end for;
+
+print "Symplectic groups";
+for n := 2 to 12 by 2 do
+  fs := Sp_OrderPoly(n);
+  fc := CSp_OrderPoly(n);
+  for q in allprimepowers do
+    assert Order(Sp(n,q)) eq Evaluate(fs,q);
+    assert Order(CSp(n,q)) eq Evaluate(fc,q);
+  end for;
+end for;
+
+print "Orthogonal groups: odd degree, odd characteristic";
+for n := 3 to 11 by 2 do
+  fo := O_OrderPolyOdd(n);
+  fs := SO_OrderPoly(n);
+  fc := CO_OrderPoly(n);
+  for q in oddprimepowers do
+    assert Order(GO(n,q)) eq Evaluate(fo,q);
+    assert Order(SO(n,q)) eq Evaluate(fs,q);
+    assert Order(CO(n,q)) eq Evaluate(fc,q);
+  end for;
+end for;
+
+print "Orthogonal groups: odd degree, characteristic 2";
+for n := 3 to 11 by 2 do
+  fo := O_OrderPolyEven(n);
+  fs := SO_OrderPoly(n);
+  fc := CO_OrderPoly(n);
+  for q in evenprimepowers do
+    assert Order(GO(n,q)) eq Evaluate(fo,q);
+    assert Order(SO(n,q)) eq Evaluate(fs,q);
+    assert Order(CO(n,q)) eq Evaluate(fc,q);
+  end for;
+end for;
+
+print "Orthogonal groups plus";
+for n := 4 to 12 by 2 do
+  fo := OPlus_OrderPoly(n);
+  fs := SOPlus_OrderPoly(n);
+  fc := COPlus_OrderPoly(n);
+  for q in oddprimepowers do
+    assert Order(GOPlus(n,q)) eq Evaluate(fo,q);
+    assert Order(SOPlus(n,q)) eq Evaluate(fs,q);
+    assert Order(COPlus(n,q)) eq Evaluate(fc,q);
+  end for;
+  for q in evenprimepowers do
+    assert Order(GOPlus(n,q)) eq Evaluate(fo,q);
+    // Magma uses the determinant, not the Dickson invariant to 
+    // define the special orthogonal groups in characteristic 2
+    assert Order(SOPlus(n,q)) eq 2*Evaluate(fs,q);
+    assert Order(COPlus(n,q)) eq Evaluate(fc,q);
+  end for;
+end for;
+
+print "Orthogonal groups minus";
+for n := 4 to 12 by 2 do
+  fo := OMinus_OrderPoly(n);
+  fs := SOMinus_OrderPoly(n);
+  fc := COMinus_OrderPoly(n);
+  for q in oddprimepowers do
+    assert Order(GOMinus(n,q)) eq Evaluate(fo,q);
+    assert Order(SOMinus(n,q)) eq Evaluate(fs,q);
+    assert Order(COMinus(n,q)) eq Evaluate(fc,q);
+  end for;
+  for q in evenprimepowers do
+    assert Order(GOMinus(n,q)) eq Evaluate(fo,q);
+    assert Order(SOMinus(n,q)) eq 2*Evaluate(fs,q);
+    assert Order(COMinus(n,q)) eq Evaluate(fc,q);
+  end for;
+end for;
+
+

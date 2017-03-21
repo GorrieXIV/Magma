@@ -1,0 +1,372 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Genera and Spinor Genera</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text319.htm">[Next]</A><A  HREF = "text317.htm">[Prev]</A> <A  HREF = "text319.htm">[Right]</A> <A  HREF = "text317.htm">[Left]</A> <A  HREF = "text305.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "3042">Genera and Spinor Genera</A></H3>
+
+<P>
+<P>
+<P>
+The genus of an exact lattice has a distinct type <TT>SymGen</TT> 
+which holds a representative lattice, and the local data defining 
+the genus.  Each genus consists of 2<sup>n</sup> spinor genera, for some 
+integer n, typically 1.  The spinor genera share the same 
+type <TT>SymGen</TT>.  Unlike the genus, the spinor genus is not 
+determined solely by the local data of the genus, so the cached 
+representative is necessary to define the spinor class.
+<P>
+Equality testing of genera is fast, since this requires only 
+a comparison of the canonical local information.  It is also 
+possible to enumerate representatives of all equivalences classes 
+in a genus or spinor genus.  This is done by a process of exploration 
+of the p-neighbour graph, for an appropriate prime p.  
+The neighbouring functions can be applied to individual lattices to 
+find p-neighbours or the closure under the p-neighbour process.  
+Functions for computing and comparing the local p-adic equivalence 
+classes of lattices, mediated by the type <TT>SymGenLoc</TT>.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text318.htm#3043">Genus Constructions</A>
+<LI> <A  HREF = "text318.htm#3047">Invariants of Genera and Spinor  Genera</A>
+<LI> <A  HREF = "text318.htm#3060">Invariants of p-adic Genera</A>
+<LI> <A  HREF = "text318.htm#3066">Neighbour Relations and Graphs</A>
+</UL>
+<H4><A NAME = "3043">Genus Constructions</A></H4>
+
+
+
+<H5><A NAME = "3044">Genus(L) : Lat -&gt; SymGen</A></H5>
+<H5>Genus(G) : SymGen -&gt; SymGen</H5>
+<BLOCKQUOTE>
+Given an exact lattice L or a spinor genus G this function 
+returns the genus of L.  If given a genus the function returns 
+G itself.
+</BLOCKQUOTE>
+<H5><A NAME = "3045">SpinorGenus(L) : Lat -&gt; SymGen</A></H5>
+<BLOCKQUOTE>
+Given an exact lattice L, returns the spinor genus of L.
+</BLOCKQUOTE>
+<H5><A NAME = "3046">SpinorGenera(G) : SymGen -&gt; [ SymGen ]</A></H5>
+<BLOCKQUOTE>
+Given a genus G, returns the sequence of spinor genera. 
+If G is a spinor genus, then this function returns the sequence 
+consisting of G itself.
+</BLOCKQUOTE>
+<H4><A NAME = "3047">Invariants of Genera and Spinor  Genera</A></H4>
+
+
+
+<H5><A NAME = "3048">Representative(G) : SymGen -&gt; Lat</A></H5>
+<BLOCKQUOTE>
+Returns a representative lattice for the genus symbol G.
+</BLOCKQUOTE>
+<H5><A NAME = "3049">IsSpinorGenus(G) : SymGen -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if G is a spinor genus.  This is the 
+negation of <TT>IsGenus(G)</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "3050">IsGenus(G) : SymGen -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if G is a genus.  This is the negation 
+of <TT>IsSpinorGenus(G)</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "3051">Determinant(G) : SymGen -&gt; Lat</A></H5>
+<BLOCKQUOTE>
+Returns the determinant of the genus symbol G.
+</BLOCKQUOTE>
+<H5><A NAME = "3052">LocalGenera(G) : SymGen -&gt; Lat</A></H5>
+<BLOCKQUOTE>
+Returns the sequence of p-adic genera of the genus symbol G.
+</BLOCKQUOTE>
+<H5><A NAME = "3053">Representative(G) : SymGen -&gt; Lat</A></H5>
+<BLOCKQUOTE>
+Returns a representative lattice for the genus symbol G.
+</BLOCKQUOTE>
+<H5><A NAME = "3054">G1 eq G2 : SymGen, SymGen -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given two genus symbols, return <TT>true</TT> if and only if they represent 
+the same genus.  This computation is fast for genera, but currently
+for spinor genera invokes a call to <TT>Representatives</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "3055"># G : SymGen -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The number of isometry classes in the genus or spinor genus G.
+<P>
+Enumeration of isometry classes is done by an explicit call to 
+<TT>Representatives</TT>, so that <TT>#G</TT> is an expensive computation.
+</BLOCKQUOTE>
+<H5><A NAME = "3056">SpinorCharacters(G) : SymGen -&gt; [ GrpDrchElt ]</A></H5>
+<BLOCKQUOTE>
+Return the spinor characters of the genus symbol G as a sequence of Dirichlet characters 
+whose kernels intersect exactly in the group of automorphous 
+numbers.  Consult Conway and Sloane <A  HREF = "text304.htm#bib_ConwaySloane">[JC98]</A>
+for precise definitions and significance of the spinor kernel
+and automorphous numbers.
+</BLOCKQUOTE>
+<H5><A NAME = "3057">SpinorGenerators(G) : SymGen -&gt; [ RngIntElt ]</A></H5>
+<BLOCKQUOTE>
+Return the spinor generators of the genus symbol G as a sequence of primes which generate 
+the group of spinor norms.  The primes generate a group dual 
+to that generated by the spinor characters. 
+</BLOCKQUOTE>
+<H5><A NAME = "3058">AutomorphousClasses(L,p) : Lat, RngIntElt -&gt;  RngIntElt</A></H5>
+<H5>AutomorphousClasses(G,p) : SymGen, RngIntElt -&gt;  RngIntElt</H5>
+<BLOCKQUOTE>
+A set of integer representatives of the p-adic square classes 
+in the image of the spinor norm of the lattice L (respectively the genus symbol G).  
+</BLOCKQUOTE>
+<H5><A NAME = "3059">IsSpinorNorm(G,p) : SymGen, RngIntElt -&gt;  RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if p is coprime to 2 and the determinant,
+and p is the norm of an element of the spinor kernel of G.
+</BLOCKQUOTE>
+<H4><A NAME = "3060">Invariants of p-adic Genera</A></H4>
+
+
+
+<H5><A NAME = "3061">Prime(G) : SymGenLoc -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Return the prime p for which G represents the p-adic genus.
+</BLOCKQUOTE>
+<H5><A NAME = "3062">Representative(G) : SymGenLoc -&gt; Lat</A></H5>
+<BLOCKQUOTE>
+Returns a canonical representative lattice of the p-adic genus G,
+with Gram matrix in Jordan form.  For odd p the Jordan form is 
+diagonalized.
+</BLOCKQUOTE>
+<H5><A NAME = "3063">Determinant(G) : SymGenLoc -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+This function 
+returns a canonical p-adic representative of the determinant of the p-adic
+genus G.
+The determinant is well-defined only up to squares.
+</BLOCKQUOTE>
+<H5><A NAME = "3064">Dimension(G) : SymGenLoc -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Return the dimension of the p-adic
+genus G.
+</BLOCKQUOTE>
+<H5><A NAME = "3065">G1 eq G2 : SymGenLoc, SymGenLoc -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given local genus symbols G1 and G2, return <TT>true</TT> if and only if they 
+have the same prime and the same canonical Jordan form.
+</BLOCKQUOTE>
+<H4><A NAME = "3066">Neighbour Relations and Graphs</A></H4>
+
+
+
+<H5><A NAME = "3067">Neighbour(L, v, p) : Lat, LatElt, RngIntElt -&gt; Lat</A></H5>
+<H5>Neighbor(L, v, p) : Lat, LatElt, RngIntElt -&gt; Lat</H5>
+<BLOCKQUOTE>
+Let L be an integral lattice, p a prime which does not divide 
+(Determinant)(L) and v a vector in L - pL with 
+(v, v) &isin;p<sup>2</sup> Z. 
+The p-neighbour of L with respect to v is the lattice generated 
+by L<sub>v</sub> and p<sup> - 1</sup> v, where L<sub>v</sub> := { x &isin;L | (x, v) &isin;p Z }.
+<P>
+See <A  HREF = "text304.htm#bib_Kneser">[Kne57]</A> for the original definition and <A  HREF = "text304.htm#bib_Schulze-Pillot">[SP91]</A>
+for a generalization of the neighbouring method.
+</BLOCKQUOTE>
+<H5><A NAME = "3068">Neighbours(L, p) : Lat, RngIntElt -&gt; Lat</A></H5>
+<H5>Neighbors(L, p) : Lat, RngIntElt -&gt; Lat</H5>
+<BLOCKQUOTE>
+For an integral lattice L and prime p, returns the sequence of 
+p-neighbours of L.
+</BLOCKQUOTE>
+<H5><A NAME = "3069">NeighbourClosure(L, p) : Lat, RngIntElt -&gt; Lat</A></H5>
+<H5>NeighborClosure(L, p) : Lat, RngIntElt -&gt; Lat</H5>
+
+<PRE>    Bound: RngIntElt                    Default: 2^{32}</PRE>
+<BLOCKQUOTE>
+For an integral lattice L and prime p, returns the sequence of 
+lattices obtained by transitive closure of the p-neighbours of L.
+<P>
+<P>
+Note that neighbours with respect to two vectors v<sub>1</sub>, v<sub>2</sub> whose
+images in L/pL lie in the same projective orbit of (Aut)(L) 
+on L/pL are isometric.  Therefore only projective orbit 
+representatives of the action of (Aut)(L) on L/pL are used. 
+The large number of orbits restricts the complexity of this 
+algorithm, hence the function gives an error if p^((Rank)(L))
+is greater than <TT>Bound</TT>, by default set to 2<sup>32</sup>.
+</BLOCKQUOTE>
+<H5><A NAME = "3070">GenusRepresentatives(L) : Lat -&gt; [ Lat ]</A></H5>
+<H5>SpinorRepresentatives(L) : Lat -&gt; [ Lat ]</H5>
+<H5>Representatives(G) : SymGen -&gt; [ Lat ]</H5>
+
+<PRE>    Bound: RngIntElt                    Default: 2^{32}</PRE>
+
+<PRE>    Depth: RngIntElt                    Default: </PRE>
+<BLOCKQUOTE>
+For an exact lattice L with genus or spinor genus G, this
+function enumerates the isometry classes in G by constructing 
+the p-neighbour closure (up to isometry).  This construction used 
+using an appropriate prime or primes p not dividing the determinant 
+of L.  For the genus, sufficiently many primes p are chosen to 
+generate the full image, modulo the spinor kernel, of each character 
+defining the spinor kernel.  The parameters are exactly as for the 
+<TT>NeighbourClosure</TT> function. 
+</BLOCKQUOTE>
+<H5><A NAME = "3071">AdjacencyMatrix(G,p) : SymGen, RngIntElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+For a genus or spinor genus G, this function determines the 
+adjacency matrix of the p-neighbour graph on the representative 
+classes for G.  The integer p must be prime, and if G is a 
+spinor genus, then an error ensues if p is not an automorphous 
+number for G. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3072">Example <TT>Lat_Neighbour (H30E20)</TT></A></H3>
+We construct the root lattice E<sub>8</sub> (the unique even unimodular lattice of
+dimension 8) as a 2-neighbour of the 8-dimensional standard lattice.
+<P>
+<P>
+<PRE>
+&gt; Z8 := StandardLattice(8);
+&gt; v := Z8 ! [1,1,1,1,1,1,1,1];
+&gt; E8 := Neighbour(Z8, v, 2);
+&gt; E8;
+Lattice of rank 8 and degree 8
+Basis:
+( 2  0  0  0  0  0  0  2)
+( 2  0  0  0  0  0  0 -2)
+( 1  1 -1  1  1 -1  1  1)
+( 1  1 -1 -1 -1 -1 -1 -1)
+( 1 -1 -1 -1 -1 -1  1 -1)
+( 0  0  2  0  0  0  0  2)
+( 0  0  0  0  2  0  0  2)
+( 0  0  0  0  0  2  0  2)
+Basis denominator: 2
+</PRE>
+The so-obtained lattice is in fact identical to the one returned by the standard
+construction.
+<P>
+<P>
+<PRE>
+&gt; L := Lattice("E", 8);
+&gt; L;
+Lattice of rank 8 and degree 8
+Basis:
+( 4  0  0  0  0  0  0  0)
+(-2  2  0  0  0  0  0  0)
+( 0 -2  2  0  0  0  0  0)
+( 0  0 -2  2  0  0  0  0)
+( 0  0  0 -2  2  0  0  0)
+( 0  0  0  0 -2  2  0  0)
+( 0  0  0  0  0 -2  2  0)
+( 1  1  1  1  1  1  1  1)
+Basis Denominator: 2
+&gt; E8 eq L;
+true
+</PRE>
+<HR>
+<H3><A NAME = "3073">Example <TT>Lat_Genus (H30E21)</TT></A></H3>
+In this example we enumerate representatives for the genus of the 
+Coxeter-Todd lattice, performing the major steps manually.  
+The whole computation can be done simply by calling the 
+<TT>GenusRepresentatives</TT> function but the example illustrates 
+how the function actually works.
+<P>
+<P>
+We use a combination of the automorphism group, isometry and neighbouring 
+functions. The idea is that the neighbouring graph spans the full genus 
+which therefore can be computed by successively generating neighbours
+and checking them for isometry with already known ones. The automorphism 
+group comes into play, since neighbours with respect to vectors in the
+same projective orbit under the automorphism group are isometric.
+<P>
+<P>
+<PRE>
+&gt; L := CoordinateLattice(Lattice("Kappa", 12));
+&gt; G := AutomorphismGroup(L);
+&gt; G2 := ChangeRing(G, GF(2));
+&gt; O := LineOrbits(G2);
+&gt; [ Norm(L!Rep(o).1) : o in O ];
+[ 4, 8, 10 ]
+</PRE>
+Hence only the first and second orbits give rise to a 2-neighbour. 
+To obtain an even neighbour, the second vector has to be adjusted 
+by an element of 2 * L such that it has norm divisible by 8.
+<P>
+<P>
+<PRE>
+&gt; v1 := L ! Rep(O[1]).1;
+&gt; v1 +:= 2 * Rep({ u : u in Basis(L) | (v1,u) mod 2 eq 1 });
+&gt; v2 := L ! Rep(O[2]).1;
+&gt; Norm(v1), Norm(v2);
+16 8
+&gt; L1 := Neighbour(L, v1, 2);
+&gt; L2 := Neighbour(L, v2, 2);
+&gt; bool := IsIsometric(L, L1); bool;
+true
+&gt; bool := IsIsometric(L, L2); bool;
+false
+</PRE>
+So we obtain only one non-isometric even neighbour of L. 
+To obtain the full genus we can now proceed with L2 in the 
+same way, and do this with the following function <TT>EvenGenus</TT>.  
+Note that this function is simply one component of the function 
+<TT>GenusRepresentatives</TT>.
+<P>
+<P>
+<PRE>
+&gt; function EvenGenus(L)
+&gt;      // Start with the lattice L
+&gt;      Lambda := [ CoordinateLattice(LLL(L)) ];
+&gt;      cand := 1;
+&gt;      while cand le #Lambda do
+&gt;          L := Lambda[cand];
+&gt;          G := ChangeRing( AutomorphismGroup(L), GF(2) );
+&gt;          // Get the projective orbits on L/2L
+&gt;          O := LineOrbits(G);
+&gt;          for o in O do
+&gt;              v := L ! Rep(o).1;
+&gt;              if Norm(v) mod 4 eq 0 then
+&gt;                  // Adjust the vector such that its norm is divisible by 8
+&gt;                  if not Norm(v) mod 8 eq 0 then
+&gt;                      v +:= 2 * Rep({ u : u in Basis(L) | (v,u) mod 2 eq 1 });
+&gt;                  end if;
+&gt;                  N := LLL(Neighbour(L, v, 2));
+&gt;                  new := true;
+&gt;                  for i in [1..#Lambda] do
+&gt;                      if IsIsometric(Lambda[i], N) then
+&gt;                          new := false;
+&gt;                          break i;
+&gt;                      end if;
+&gt;                  end for;
+&gt;                  if new then
+&gt;                      Append(~Lambda, CoordinateLattice(N));
+&gt;                  end if;
+&gt;              end if;
+&gt;          end for;
+&gt;          cand +:= 1;
+&gt;      end while;
+&gt;      return Lambda;
+&gt; end function;
+&gt;
+&gt; time Lambda := EvenGenus(L);
+Time: 9.300
+&gt; #Lambda;
+10
+&gt; [ Minimum(L) : L in Lambda ];
+[ 4, 2, 2, 2, 2, 2, 2, 2, 2, 2 ]
+&gt; &amp;+[ 1/#AutomorphismGroup(L) : L in Lambda ];
+4649359/4213820620800
+</PRE>
+We see that the genus consists of 10 classes of lattices where only the
+Coxeter-Todd lattice has minimum 4 and get the mass of the genus as
+4649359/4213820620800.
+<HR>
+<PRE></PRE> <A  HREF = "text319.htm">[Next]</A><A  HREF = "text317.htm">[Prev]</A> <A  HREF = "text319.htm">[Right]</A> <A  HREF = "text317.htm">[Left]</A> <A  HREF = "text305.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

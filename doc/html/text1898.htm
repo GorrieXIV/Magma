@@ -1,0 +1,572 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Constructing Quantum Codes</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1899.htm">[Next]</A><A  HREF = "text1897.htm">[Prev]</A> <A  HREF = "text1899.htm">[Right]</A> <A  HREF = "text1897.htm">[Left]</A> <A  HREF = "text1896.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "21120">Constructing Quantum Codes</A></H3>
+
+<P>
+<P>
+<P>
+A quantum code of length n over GF(q) is defined in terms of a 
+symplectic self-orthogonal stabilizer code, which is given either 
+as a length n additive code over GF(q<sup>2</sup>) (compact format)
+or as a length 2n additive code over GF(q) (extended format).
+If Q is a quantum code with generator matrix G<sub>1</sub> in compact 
+format, and generator matrix G<sub>2</sub> = (A|B) in extended format, then
+     G<sub>1</sub> = A + &lambda; B,
+where &lambda; is a fixed element returned by the function 
+<TT>QuantumBasisElement</TT>(GF(q<sup>2</sup>)).
+By default Magma assumes the compact format. However, the extended
+format can be flagged by setting the variable argument 
+<TT>ExtendedFormat</TT> to <TT>true</TT>.
+<P>
+<P>
+An [n, k] symplectic self-orthogonal linear code over GF(q<sup>2</sup>) will
+generate an [[n, n/2 - k]] quantum stabilizer code.
+A (compact format) additive symplectic self-orthogonal code C 
+over GF(q<sup>2</sup>) will give a quantum code of the same length and 
+"dimension" log<sub>q</sub>(N), where N is the number of code words in C.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1898.htm#21121">Construction of General Quantum Codes</A>
+<LI> <A  HREF = "text1898.htm#21135">Construction of Special Quantum Codes</A>
+<LI> <A  HREF = "text1898.htm#21138">CSS Codes</A>
+<LI> <A  HREF = "text1898.htm#21141">Cyclic Quantum Codes</A>
+<LI> <A  HREF = "text1898.htm#21148">Quasi-Cyclic Quantum Codes</A>
+</UL>
+<H4><A NAME = "21121">Construction of General Quantum Codes</A></H4>
+
+
+
+<H5><A NAME = "21122">QuantumCode(S) : Code -&gt; CodeQuantum</A></H5>
+
+<PRE>    ExtendedFormat: BoolElt             Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given an additive code S which is self-orthogonal with respect to the 
+symplectic inner product, return the quantum code defined by S.
+By default, S is interpreted as being in compact format, that is, a 
+length n additive code over GF(q<sup>2</sup>). If <TT>ExtendedFormat</TT> is set 
+<I>true</I>, then S is interpreted as being in extended format, that is,
+a length 2n additive code over GF(q).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "21123">Example <TT>QECC_SimpleQuantConstr (H164E1)</TT></A></H3>
+<P>
+<P>
+A linear code over GF(4) that is <I>even</I> is symplectic self-orthogonal.
+Note that when a quantum code is printed in Magma, an <I>additive</I> 
+stabilizer matrix over GF(q<sup>2</sup>) is displayed.
+<P>
+<P>
+<P>
+<PRE>
+&gt; F&lt;w&gt; := GF(4);
+&gt; M := Matrix(F, 2, 6, [1,0,0,1,w,w, 0,1,0,w,w,1]);
+&gt; C := LinearCode(M);
+&gt; C;
+[6, 2, 4] Linear Code over GF(2^2)
+Generator matrix:
+[  1   0   0   1   w   w]
+[  0   1   0   w   w   1]
+&gt; IsEven(C);
+true
+&gt; IsSymplecticSelfOrthogonal(C);
+true
+&gt; Q := QuantumCode(C);
+&gt; Q;
+[[6, 2]] Quantum code over GF(2^2), stabilized by:
+[  1   0   0   1   w   w]
+[  w   0   0   w w^2 w^2]
+[  0   1   0   w   w   1]
+[  0   w   0 w^2 w^2   w]
+&gt; MinimumWeight(Q);
+1
+&gt; Q;
+[[6, 2, 1]] Quantum code over GF(2^2), stabilized by:
+[  1   0   0   1   w   w]
+[  w   0   0   w w^2 w^2]
+[  0   1   0   w   w   1]
+[  0   w   0 w^2 w^2   w]
+</PRE>
+<HR>
+<H3><A NAME = "21124">Example <TT>QECC_SimpleQuantExtendedConstr (H164E2)</TT></A></H3>
+Any stabilizer code used to construct a quantum code, may be expressed in 
+either compact or extended format. The length 6 quaternary additive
+code S in the previous example (<A  HREF = "text1898.htm#21123">H164E1</A>) is equivalent 
+to a length 12 binary additive code in extended format.
+<P>
+Note that the code will still be displayed in compact format.
+<P>
+<P>
+<PRE>
+&gt; F&lt;w&gt; := GF(4);
+&gt; C := LinearCode&lt;GF(2), 12 |
+&gt;      [ 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1 ],
+&gt;      [ 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0 ],
+&gt;      [ 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0 ],
+&gt;      [ 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1 ] &gt;;
+&gt; C;
+[12, 4, 4] Linear Code over GF(2)
+Generator matrix:
+[1 0 0 0 0 1 1 1 0 0 1 1]
+[0 1 0 0 0 1 0 0 0 1 1 0]
+[0 0 0 1 0 1 1 1 0 0 0 0]
+[0 0 0 0 1 1 1 0 0 1 1 1]
+&gt; Q := QuantumCode(C : ExtendedFormat := true);
+&gt; Q;
+[[6, 2]] Quantum code over GF(2^2), stabilized by:
+[  1   0   0   1   w   w]
+[  w   0   0   w w^2 w^2]
+[  0   1   0   w   w   1]
+[  0   w   0 w^2 w^2   w]
+</PRE>
+<HR>
+<H3><A NAME = "21125">Example <TT>QECC_SimpleQuantSelfDualConstr (H164E3)</TT></A></H3>
+Any self-orthogonal code which has a rate of 1/2 must be self-dual,
+and gives rise to a dimension zero quantum code (which is also termed 
+self-dual).  In this example we construct the hexacode, which is the 
+unique extremal length 6 self-dual quantum code of minimum weight 4.
+<P>
+<P>
+<P>
+<PRE>
+&gt; F&lt;w&gt; := GF(4);
+&gt; M := Matrix(F, 3, 6, [0,0,1,1,1,1, 0,1,0,1,w,w^2, 1,0,0,1,w^2,w]);
+&gt; C := LinearCode(M);
+&gt; C;
+[6, 3, 4] Linear Code over GF(2^2)
+Generator matrix:
+[  1   0   0   1 w^2   w]
+[  0   1   0   1   w w^2]
+[  0   0   1   1   1   1]
+&gt; IsSymplecticSelfOrthogonal(C);
+true
+&gt; Q := QuantumCode(C);
+&gt; MinimumWeight(Q);
+4
+&gt; Q;
+[[6, 0, 4]] self-dual Quantum code over GF(2^2), stabilized by:
+[  1   0   0   1 w^2   w]
+[  w   0   0   w   1 w^2]
+[  0   1   0   1   w w^2]
+[  0   w   0   w w^2   1]
+[  0   0   1   1   1   1]
+[  0   0   w   w   w   w]
+</PRE>
+<HR>
+<H3><A NAME = "21126">Example <TT>QECC_SimpleQuantAdditiveConstr (H164E4)</TT></A></H3>
+Stabilizer codes neither have to be linear nor even and indeed any additive 
+code which is symplectic self-orthogonal will generate a quantum code.
+The following code was randomly generated.
+<P>
+<P>
+<P>
+<P>
+<PRE>
+&gt; F&lt;w&gt; := GF(4);
+&gt; M := Matrix(F, 3, 7, [1,w,w,w,0,0,1, w,0,1,0,w^2,0,1, 0,w^2,w,w^2,w,0,0]);
+&gt; C := AdditiveCode(GF(2),M);
+&gt; C;
+[7, 1 1/2 : 3, 4] GF(2)-Additive Code over GF(2^2)
+Generator matrix:
+[  1   w   w   w   0   0   1]
+[  w   0   1   0 w^2   0   1]
+[  0 w^2   w w^2   w   0   0]
+&gt; IsSymplecticSelfOrthogonal(C);
+true
+</PRE>
+<P>
+The code C can be shown to be neither linear nor even: in fact it has 
+the same number of even and odd codewords.
+<P>
+<P>
+<P>
+<PRE>
+&gt; IsLinear(C);
+false
+&gt; {* Weight(v) mod 2 : v in C *};
+{* 0^^4, 1^^4 *}
+&gt;
+&gt; Q := QuantumCode(C);
+&gt; MinimumWeight(Q);
+1
+&gt; Q;
+[[7, 4, 1]] Quantum code over GF(2^2), stabilized by:
+[  1   w   w   w   0   0   1]
+[  w   0   1   0 w^2   0   1]
+[  0 w^2   w w^2   w   0   0]
+</PRE>
+<HR>
+<H5><A NAME = "21127">QuantumCode(M) : ModMatRngElt -&gt; CodeQuantum</A></H5>
+
+<PRE>    ExtendedFormat: BoolElt             Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a matrix M over GF(q<sup>2</sup>) for which the GF(q) additive 
+span of its rows is a self-orthogonal code S with respect to 
+the symplectic inner product, return the quantum code defined by S.
+By default, M is interpreted as being in compact format, that is, 
+a matrix whose rows are length n vectors over GF(q<sup>2</sup>). However, 
+if <TT>ExtendedFormat</TT> is set <TT>true</TT>, then M will be interpreted 
+as being in extended format, that is, a matrix whose rows are length 
+2n vectors over GF(q).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "21128">Example <TT>QECC_SimpleQuantConstrMat (H164E5)</TT></A></H3>
+A quantum code can be constructed directly from an additive stabilizer 
+matrix, thereby avoiding creation of the stabilizer code.  The quantum 
+code given in example <A  HREF = "text1898.htm#21126">H164E4</A> could have also been 
+constructed as follows:
+<P>
+<P>
+<P>
+<PRE>
+&gt; F&lt;w&gt; := GF(4);
+&gt; M := Matrix(F, 3, 7, [1,w,w,w,0,0,1, w,0,1,0,w^2,0,1, 0,w^2,w,w^2,w,0,0]);
+&gt; Q := QuantumCode(M);
+&gt; Q;
+[[7, 4]] Quantum code over GF(2^2), stabilized by:
+[  1   w   w   w   0   0   1]
+[  w   0   1   0 w^2   0   1]
+[  0 w^2   w w^2   w   0   0]
+</PRE>
+<HR>
+<H5><A NAME = "21129">QuantumCode(G) : Grph -&gt; CodeQuantum</A></H5>
+<BLOCKQUOTE>
+Given a graph G, return the self-dual (dimension 0) quantum
+code defined by the adjacency matrix of G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "21130">Example <TT>QECC_HexacodeQuant (H164E6)</TT></A></H3>
+The unique extremal [[6, 0, 4]] hexacode can be defined in terms of a
+graph representing a 5--spoked wheel.
+The graph is specified by listing the edges comprising its circumference, 
+followed by the spokes radiating out from the center.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := Graph&lt;6 | {1,2},{2,3},{3,4},{4,5},{5,1}, &lt;6, {1,2,3,4,5}&gt; &gt;;
+&gt; Q := QuantumCode(G);
+&gt; Q:Minimal;
+[[6, 0]] self-dual Quantum code over GF(2^2)
+&gt; MinimumWeight(Q);
+4
+&gt; Q:Minimal;
+[[6, 0, 4]] self-dual Quantum code over GF(2^2)
+</PRE>
+<HR>
+<H3><A NAME = "21131">Example <TT>QECC_DodecacodeQuant (H164E7)</TT></A></H3>
+The unique extremal [[12, 0, 6]] dodecacode can also be described by
+a graph with a nice mathematical structure.  The graph construction 
+is derived from the diagram given by Danielson in <A  HREF = "text1895.htm#bib_DanielsonMasters">[Dan05]</A>.
+In order to employ modular arithmetic, the graph vertices are numbered 
+from 0 to 11.
+<P>
+<P>
+<P>
+<PRE>
+&gt; S := {@ i : i in [0 .. 11] @};
+&gt; G := Graph&lt;S |
+&gt;     { {4*k+i,4*k+i+2} : i in [0..1], k in [0..2] },
+&gt;     { {4*k+i,4*k+(i+1) mod 4} : i in [0..3], k in [0..2] },
+&gt;     { {4*k+i,4*((k+1) mod 3)+(i+1) mod 4} : i in [0..3], k in [0..2] } &gt;;
+&gt; Q := QuantumCode(G);
+&gt; MinimumWeight(Q);
+6
+&gt; Q:Minimal;
+[[12, 0, 6]] self-dual Quantum code over GF(2^2)
+</PRE>
+<HR>
+<H5><A NAME = "21132">RandomQuantumCode(F, n, k) : FldFin, RngIntElt, RngIntElt -&gt; CodeQuantum</A></H5>
+<BLOCKQUOTE>
+Let F be a degree 2 extension of a finite field GF(q). Given positive
+integers n and k such that n &ge;k, this function returns a random 
+[[n, k]] quantum stabilizer code over F. The field F is assumed to
+be given in compact format.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "21133">Example <TT>QECC_RandomQuantConstr (H164E8)</TT></A></H3>
+We construct a random [[10, 6]] quantum code over GF(4).
+<P>
+<P>
+<P>
+<PRE>
+&gt; F&lt;w&gt; := GF(4);
+&gt; Q := RandomQuantumCode(F, 10, 6);
+&gt; Q;
+[[10, 6]] Quantum code over GF(2^2), stabilized by:
+[  w   0   0   w   1   1   w w^2   w w^2]
+[  0   1   0   w   1 w^2 w^2   1   w   w]
+[  0   w   1   1   1   0 w^2   0   0   0]
+[  0   0   w   1   1   0   1 w^2   1   w]
+</PRE>
+<HR>
+<H5><A NAME = "21134">Subcode(Q, k) : CodeQuantum, RngIntElt -&gt; CodeQuantum</A></H5>
+<BLOCKQUOTE>
+Given a quantum code Q of dimension k<sub>Q</sub> &ge;k then return a
+subcode of Q of dimension k.
+</BLOCKQUOTE>
+<H4><A NAME = "21135">Construction of Special Quantum Codes</A></H4>
+
+
+
+<H5><A NAME = "21136">Hexacode() : -&gt; CodeQuantum</A></H5>
+<BLOCKQUOTE>
+Return the [[6, 0, 4]] self-dual quantum hexacode.
+</BLOCKQUOTE>
+<H5><A NAME = "21137">Dodecacode() : -&gt; CodeQuantum</A></H5>
+<BLOCKQUOTE>
+Return the [[12, 0, 6]] self-dual quantum dodecacode.
+</BLOCKQUOTE>
+<H4><A NAME = "21138">CSS Codes</A></H4>
+
+
+
+<H5><A NAME = "21139">CSSCode(C1, C2) : Code, Code -&gt; CodeQuantum</A></H5>
+<H5>CalderbankShorSteaneCode(C1, C2) : Code, Code -&gt; CodeQuantum</H5>
+<BLOCKQUOTE>
+Given two classical linear binary codes C<sub>1</sub> and C<sub>2</sub> of length
+n such that C<sub>2</sub> is a subcode of C<sub>1</sub>, form a quantum code using 
+the construction of Calderbank, Shor and Steane 
+<A  HREF = "text1895.htm#bib_CSS1">[CS96]</A>, <A  HREF = "text1895.htm#bib_CSS2">[Ste96a]</A>, <A  HREF = "text1895.htm#bib_CSS3">[Ste96b]</A>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "21140">Example <TT>QECC_CSSQuantConstr (H164E9)</TT></A></H3>
+Let C<sub>1</sub> denote the [7, 4, 3] Hamming code and C<sub>2</sub> denote its dual.
+Observing that C<sub>1</sub> contains C<sub>2</sub>, we may apply the CSS construction 
+using C<sub>1</sub> and C<sub>2</sub> to obtain a [[7, 1, 3]] code.
+<P>
+<P>
+<P>
+<PRE>
+&gt; F&lt;w&gt; := GF(4);
+&gt; C1 := HammingCode(GF(2), 3);
+&gt; C1;
+[7, 4, 3] "Hamming code (r = 3)" Linear Code over GF(2)
+Generator matrix:
+[1 0 0 0 1 1 0]
+[0 1 0 0 0 1 1]
+[0 0 1 0 1 1 1]
+[0 0 0 1 1 0 1]
+&gt; C2 := Dual(C1);
+&gt; C2;
+[7, 3, 4] Cyclic Linear Code over GF(2)
+Generator matrix:
+[1 0 0 1 0 1 1]
+[0 1 0 1 1 1 0]
+[0 0 1 0 1 1 1]
+&gt; C2 subset C1;
+true
+&gt; Q := CSSCode(C1, C2);
+&gt; MinimumWeight(Q);
+3
+&gt; Q;
+[[7, 1, 3]] CSS Quantum code over GF(2^2), stabilised by:
+[  1   0   0   1   0   1   1]
+[  w   0   0   w   0   w   w]
+[  0   1   0   1   1   1   0]
+[  0   w   0   w   w   w   0]
+[  0   0   1   0   1   1   1]
+[  0   0   w   0   w   w   w]
+</PRE>
+<HR>
+<H4><A NAME = "21141">Cyclic Quantum Codes</A></H4>
+
+<P>
+<P>
+<P>
+Cyclic quantum codes are those having cyclic stabilizer codes.
+Conditions are listed in <A  HREF = "text1895.htm#bib_CRSS">[CRSS98]</A> for generating polynomials
+which give rise to symplectic self-orthogonal stabilizer codes.
+
+
+<H5><A NAME = "21142">QuantumCyclicCode(v) : ModTupFldElt -&gt; CodeAdd</A></H5>
+<H5>QuantumCyclicCode(Q) : [ModTupFldElt] -&gt; CodeAdd</H5>
+
+<PRE>    LinearSpan: BoolElt                 Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given either a single vector v or sequence of vectors Q defined
+over a finite field F, return the quantum code generated by the span 
+of the cyclic shifts of the supplied vectors. The span must be 
+self-orthogonal with respect to the symplectic inner product.
+By default, the additive span is taken over the prime field, but if the 
+variable argument <TT>LinearSpan</TT> is set to <TT>true</TT>, then the linear span 
+will be taken.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "21143">Example <TT>QECC_CyclicQuantCodesimple (H164E10)</TT></A></H3>
+A large number of good cyclic quantum codes exist. For example, the best 
+known binary self-dual quantum code of length 15 is cyclic.
+<P>
+<P>
+<P>
+<PRE>
+&gt; F&lt;w&gt; := GF(4);
+&gt; v := VectorSpace(F, 15) ! [w,1,1,0,1,0,1,0,0,1,0,1,0,1,1];
+&gt; Q := QuantumCyclicCode(v);
+&gt; MinimumWeight(Q);
+6
+&gt; Q:Minimal;
+[[15, 0, 6]] self-dual Quantum code over GF(2^2)
+</PRE>
+<HR>
+<H5><A NAME = "21144">QuantumCyclicCode(n, f) : RngIntElt, RngUPolElt -&gt; CodeAdd</A></H5>
+<H5>QuantumCyclicCode(n, Q) : RngIntElt, [RngUPolElt] -&gt; CodeAdd</H5>
+
+<PRE>    LinearSpan: BoolElt                 Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Let n be a positive integer.  Given either a single polynomial f
+or a sequence of polynomials Q over some finite field F, return 
+the quantum code of length n generated by the additive span of their 
+cyclic shifts. The additive span must be symplectic self-orthogonal.
+By default, the additive span is taken over the prime field, but
+if the variable argument <TT>LinearSpan</TT> is set to <TT>true</TT>, then
+the linear span will be taken.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "21145">Example <TT>QECC_CyclicQuantCodePoly (H164E11)</TT></A></H3>
+Since classical cyclic codes correspond to factors of cyclotomic
+polynomials it is frequently convenient to specify a cyclic code in
+terms of polynomials.  Here we construct the best known binary 
+quantum codes with parameters [[23, 12, 4]] and [[25, 0, 8]].
+<P>
+<P>
+<P>
+<PRE>
+&gt; F&lt;w&gt; := GF(4);
+&gt; P&lt;x&gt; := PolynomialRing(F);
+&gt; f := x^16 + x^15 + x^13 + w*x^12 + x^11 + w*x^10 + x^9 + x^8 + w^2*x^7 +
+&gt;      x^6 + x^5 + w*x^4 + w^2*x^3 + w*x^2 + w^2*x + w^2;
+&gt; Q := QuantumCyclicCode(23, f);
+&gt; MinimumWeight(Q);
+4
+&gt; Q:Minimal;
+[[23, 12, 4]] Quantum code over GF(2^2)
+&gt;
+&gt; f := x^12 + x^11 + x^10 + x^8 + w*x^6 + x^4 + x^2 + x + 1;
+&gt; Q := QuantumCyclicCode(25, f);
+&gt; MinimumWeight(Q);
+8
+&gt; Q:Minimal;
+[[25, 0, 8]] self-dual Quantum code over GF(2^2)
+</PRE>
+<HR>
+<H5><A NAME = "21146">QuantumCyclicCode(v4, v2) : ModTupFldElt, ModTupFldElt -&gt; CodeAdd</A></H5>
+<BLOCKQUOTE>
+In the important case of GF(2)-additive codes over GF(4), any
+cyclic code can be specified by two generators.  Given vectors 
+v4 and v2 both of length n, where v<sub>4</sub> is over GF(4) 
+and v<sub>2</sub> is over GF(2), this function returns the length n 
+quantum code generated by the additive span of their cyclic shifts. 
+This span must be self-orthogonal with respect to the symplectic 
+inner product.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "21147">Example <TT>QECC_CyclicQuantCodeGF4GF2 (H164E12)</TT></A></H3>
+Any cyclic binary quantum code of length n is determined by a cyclic
+stabilizer code, which can be defined uniquely in terms of an
+n-dimensional vector over GF(4) together with an n-dimensional 
+vector over GF(2).
+We construct the best known [[21, 0, 8]] and [[21, 5, 6]] cyclic binary 
+quantum codes.
+<P>
+<P>
+<P>
+<PRE>
+&gt; F&lt;w&gt; := GF(4);
+&gt; v4 := RSpace(F, 21) ! [w^2,w^2,1,w,0,0,1,1,1,1,0,1,0,1,1,0,1,1,0,0,0];
+&gt; v2 := RSpace(GF(2),21) ! [1,0,1,1,1,0,0,1,0,1,1,1,0,0,1,0,1,1,1,0,0];
+&gt; Q := QuantumCyclicCode(v4,v2);
+&gt; MinimumWeight(Q);
+8
+&gt; Q:Minimal;
+[[21, 0, 8]] self-dual Quantum code over GF(2^2)
+&gt;
+&gt; v4 := RSpace(F, 21) ! [w,0,w^2,w^2,w,w^2,w^2,0,w,1,0,0,1,0,0,0,0,1,0,0,1];
+&gt; v2 := RSpace(GF(2), 21) ! [1,0,1,1,1,0,0,1,0,1,1,1,0,0,1,0,1,1,1,0,0];
+&gt; Q := QuantumCyclicCode(v4,v2);
+&gt; MinimumWeight(Q);
+6
+&gt; Q:Minimal;
+[[21, 5, 6]] Quantum code over GF(2^2)
+</PRE>
+<HR>
+<H4><A NAME = "21148">Quasi-Cyclic Quantum Codes</A></H4>
+
+<P>
+<P>
+<P>
+Quasi-cyclic quantum codes are those having quasi-cyclic stabilizer codes.
+
+
+<H5><A NAME = "21149">QuantumQuasiCyclicCode(n, Q) : RngIntElt, SeqEnum[RngUPolElt] -&gt; CodeAdd</A></H5>
+
+<PRE>    LinearSpan: BoolElt                 Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given an integer n, and a sequence Q of polynomials over some
+finite field F, let S be the quasi-cyclic classical code generated
+by the span of the set of vectors formed by concatenating cyclic 
+blocks generated by the polynomials in Q. Assuming that S is 
+self-orthogonal with respect to the symplectic inner product, this
+function returns the quasi-cyclic quantum code with stabiliser code S.
+If the span of the vectors is not symplectic self-orthogonal, an 
+error will be flagged.
+<P>
+By default the additive span is taken over the prime field, but
+if the variable argument <TT>LinearSpan</TT> is set to <TT>true</TT>, then
+the linear span will be taken.
+</BLOCKQUOTE>
+<H5><A NAME = "21150">QuantumQuasiCyclicCode(Q) : SeqEnum[ModTupFldElt] -&gt; CodeAdd</A></H5>
+
+<PRE>    LinearSpan: BoolElt                 Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a sequence Q of vectors, return the quantum code whose additive 
+stabilizer matrix is constructed from the length n cyclic blocks 
+generated by the cyclic shifts of the vectors in Q. If the variable argument 
+<TT>LinearSpan</TT> is set to <TT>true</TT>, then the linear span of the shifts 
+will be used, else the additive span will be used (default).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "21151">Example <TT>QECC_QuasiCyclicQuantCode (H164E13)</TT></A></H3>
+Most quasi-cyclic quantum codes currently known are linear, since
+this is where most research on quasi-cyclic codes has been focused.
+In this example we construct the best known quasi-cyclic binary quantum 
+codes with parameters [[14, 0, 6]] and [[18, 6, 5]].
+<P>
+<P>
+<P>
+<PRE>
+&gt; F&lt;w&gt; := GF(4);
+&gt; V7 := VectorSpace(F, 7);
+&gt; v1 := V7 ! [1,0,0,0,0,0,0];
+&gt; v2 := V7 ! [w^2,1,w^2,w,0,0,w];
+&gt; Q := QuantumQuasiCyclicCode([v1, v2] : LinearSpan := true);
+&gt; MinimumWeight(Q);
+6
+&gt; Q:Minimal;
+[[14, 0, 6]] self-dual Quantum code over GF(2^2)
+&gt;
+&gt; V6 := VectorSpace(F, 6);
+&gt; v1 := V6 ! [1,1,0,0,0,0];
+&gt; v2 := V6 ! [1,0,1,w^2,0,0];
+&gt; v3 := V6 ! [1,1,w,1,w,0];
+&gt; Q := QuantumQuasiCyclicCode([v1, v2, v3] : LinearSpan := true);
+&gt; MinimumWeight(Q);
+5
+&gt; Q:Minimal;
+[[18, 6, 5]] Quantum code over GF(2^2)
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1899.htm">[Next]</A><A  HREF = "text1897.htm">[Prev]</A> <A  HREF = "text1899.htm">[Right]</A> <A  HREF = "text1897.htm">[Left]</A> <A  HREF = "text1896.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

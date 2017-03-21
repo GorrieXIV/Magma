@@ -1,0 +1,190 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Clifford Algebra Structure</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1013.htm">[Next]</A><A  HREF = "text1011.htm">[Prev]</A> <A  HREF = "text1013.htm">[Right]</A> <A  HREF = "text1011.htm">[Left]</A> <A  HREF = "text1008.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "11366">Clifford Algebra Structure</A></H3>
+
+<P>
+<P>
+<P>
+Clifford algebras are associative structure constant algebras and 
+therefore the intrinsics in chapters on structure constant algebras
+and associative algebras may be used with Clifford algebra arguments.
+
+
+<H5><A NAME = "11367">HomogeneousComponent(v,k) : AlgClffElt, RngIntElt -&gt; AlgClffElt</A></H5>
+<BLOCKQUOTE>
+The homogeneous component of degree k of the Clifford algebra
+element v.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11368">Example <TT>AlgClff_HomComp (H93E5)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; F := GF(5);
+&gt; C,V,f := CliffordAlgebra(IdentityMatrix(F,4));
+&gt; v := (f(V.1)*f(V.2)+3*f(V.2))*(f(V.3)+f(V.4));
+&gt; AsPolynomial(HomogeneousComponent(v,2));
+3*e1*e3 + 3*e2*e4
+</PRE>
+<HR>
+<H5><A NAME = "11369">EvenSubalgebra(C : parameters) : AlgClff -&gt; AlgAss, Map</A></H5>
+<BLOCKQUOTE>
+The even subalgebra C_ + of the Clifford algebra C.  This is 
+the algebra of fixed points of the main involution. The second 
+return value of this function is the canonical embedding of C_ + in C.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11370">Example <TT>AlgClff_CliffGenQuatEx (H93E6)</TT></A></H3>
+A (generalised) quaternion algebra can also be realised as the even
+subalgebra of a Clifford algebra.
+<P>
+<P>
+<P>
+<PRE>
+&gt; F&lt;a,b&gt; := RationalFunctionField(Rationals(),2);
+&gt; Q := DiagonalMatrix(F,[1,-a,-b]);  
+&gt; C,V,f := CliffordAlgebra(Q);
+&gt; E, h := EvenSubalgebra(C);
+&gt; i := E.2;
+&gt; j := E.3;
+&gt; i^2;
+(a 0 0 0)
+&gt; j^2;
+(b 0 0 0)
+&gt; i*j eq -j*i;
+true
+</PRE>
+<HR>
+<H5><A NAME = "11371">Centre(C) : AlgClff -&gt; AlgAss, Map</A></H5>
+<H5>Center(C) : AlgClff -&gt; AlgAss, Map</H5>
+<BLOCKQUOTE>
+The centre of the Clifford algebra C. The second return value
+is the embedding in C.
+</BLOCKQUOTE>
+<P>
+<P>
+<P>
+<P>
+The following examples illustrate the fact that over a finite field F
+a Clifford algebra C of a non-degenerate quadratic form Q is either a 
+simple algebra or the direct sum of two simple algebras.  Furthermore,
+the same is true of its even subalgebra E. Let V denote the quadratic
+space of Q.
+<HR>
+<H3><A NAME = "11372">Example <TT>AlgClff_EvenDimPlus (H93E7)</TT></A></H3>
+If the dimension of V is 2m and the Witt index of Q is m,
+then C is a central simple algebra.
+<P>
+<P>
+<PRE>
+&gt; F := GF(3);
+&gt; Q := StandardQuadraticForm(6,F);
+&gt; C,V,f := CliffordAlgebra(Q);
+&gt; WittIndex(V);
+3
+&gt; IsSimple(C);
+true
+&gt; #Centre(C);
+3
+</PRE>
+<P>
+The even subalgebra E of C is the direct sum of two simple ideals 
+E(1 - z) and E(1 + z), where z<sup>2</sup> = 1 and z anticommutes with every 
+element of V.
+<P>
+<P>
+<P>
+<PRE>
+&gt; E,h := EvenSubalgebra(C);
+&gt; IsSimple(E);
+false
+&gt; #MinimalIdeals(E);
+2
+&gt; Z := Centre(E); Z;
+Associative Algebra of dimension 2 with base ring GF(3)
+&gt; #{ z : z in Z | IsUnit(z) };
+4
+&gt; exists(z){ z : z in Z | z^2 eq One(E) and 
+&gt;   forall{ v : v in V | f(v)*h(z) eq - h(z)*f(v) } };
+true
+&gt; E1 := ideal&lt; E | 1-z &gt;;
+&gt; IsSimple(E1);
+true
+&gt; E2 := ideal&lt; E | 1+z &gt;;
+&gt; IsSimple(E2);
+true
+</PRE>
+<HR>
+<H3><A NAME = "11373">Example <TT>AlgClff_EvenDimMinus (H93E8)</TT></A></H3>
+If dim V = 2m and the Witt index of Q is m - 1, the even subalgebra of 
+C is a simple algebra whose centre is a quadratic extension of F.
+<P>
+<P>
+<PRE>
+&gt; F := GF(3);
+&gt; Q := StandardQuadraticForm(6,F : Minus);
+&gt; C,V,f := CliffordAlgebra(Q);
+&gt; WittIndex(V);
+2
+&gt; IsSimple(C);
+true
+&gt; #Centre(C);
+3
+&gt; E := EvenSubalgebra(C);
+&gt; IsSimple(E);
+true
+&gt; Z := Centre(E); Z;
+Associative Algebra of dimension 2 with base ring GF(3)
+&gt; #{ z : z in Z | IsUnit(z) };
+8
+</PRE>
+<HR>
+<H3><A NAME = "11374">Example <TT>AlgClff_OddDim (H93E9)</TT></A></H3>
+If dim V = 2m + 1 and the Witt index of Q is m, the even subalgebra 
+is central simple and C is the either simple or the direct sum of two simple 
+algebras.
+<P>
+<P>
+<PRE>
+&gt; F := GF(3);
+&gt; Q := StandardQuadraticForm(5,F);
+&gt; C,V,f := CliffordAlgebra(Q);
+&gt; WittIndex(V);
+2
+&gt; IsSimple(C);
+false
+&gt; Z := Centre(C); Z;
+Associative Algebra of dimension 2 with base ring GF(3)
+&gt; #{ z : z in Z | IsUnit(z) };
+4
+&gt; E := EvenSubalgebra(C);
+&gt; IsSimple(E);
+true
+</PRE>
+In this example the Clifford algebra is the direct sum of two simple
+ideals.  But it is possible that the Clifford algebra of a scalar multiple
+of Q is a simple algebra over a quadratic extension of the base field.
+<P>
+<P>
+<PRE>
+&gt; C,V,f := CliffordAlgebra(2*Q);
+&gt; IsSimple(C);
+true
+&gt; #Z,#{ z : z in Centre(C) | IsUnit(z) };
+9 8
+</PRE>
+The non-zero elements of Z are invertible and hence Z is a field, namely
+GF(9).
+<HR>
+<PRE></PRE> <A  HREF = "text1013.htm">[Next]</A><A  HREF = "text1011.htm">[Prev]</A> <A  HREF = "text1013.htm">[Right]</A> <A  HREF = "text1011.htm">[Left]</A> <A  HREF = "text1008.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,25 @@
+aut
+{
+    +spec
+}
+pgrps
+{
+    +spec
+}
+count-pgrps
+{
+    +spec
+}
+central
+{
+    central.m
+}
+metacyclic
+{
+    +spec
+}
+{
+    chtr_conlon.m
+    misc.m
+    orbit_stabilizer.m
+}

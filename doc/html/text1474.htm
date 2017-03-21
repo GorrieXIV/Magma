@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Minimisation and Reduction</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1475.htm">[Next]</A><A  HREF = "text1473.htm">[Prev]</A> <A  HREF = "text1475.htm">[Right]</A> <A  HREF = "text1473.htm">[Left]</A> <A  HREF = "text1468.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16695">Minimisation and Reduction</A></H3>
+
+<P>
+<P>
+<P>
+This section contains functions for obtaining a simpler model
+of a given genus one curve.
+<P>
+We use the following terminology, which has become fairly standard.
+Here a model will always mean a global integral model.
+<P>
+<I>Minimisation</I> refers to computing a model which is isomorphic
+to the original one (over its ground field) but possibly not integrally
+equivalent.  A model is <I>minimal</I> if it is locally minimal at all
+primes; a model is locally minimal if the valuation of its discriminant
+is as small as possible among all integral models.  For locally solvable
+models this minimal discriminant is equal to that of the associated
+elliptic curve.
+<P>
+<I>Reduction</I> refers to computing a model which is integrally
+equivalent to the original one
+(meaning there exist transformations in both directions over the
+ring of integers of the base field).  Informally, a
+<I>reduced model</I> is one whose coefficients have small height.
+One approach to formulating this precisely is to attach to each model
+an <I>invariant</I> in some symmetric space: The model is then said
+to be reduced iff its invariant lies in some fixed fundamental domain.
+This idea is also the basis for algorithms used to obtain reduced models.
+<P>
+The algorithms used for models of degree 2, 3, and 4 over Q
+are described in <A  HREF = "text1467.htm#bib_cremona-fisher-stoll">[CFS10]</A>.  For degree 5
+it is necessary to use some different techniques developed by Fisher.
+For models of degree 2 over number fields the algorithms use
+additional techniques developed by Donnelly and Fisher.
+
+
+<H5><A NAME = "16696">Minimise(model : parameters) : ModelG1 -&gt; ModelG1, TransG1</A></H5>
+
+<PRE>    Transformation: BoolElt             Default: <TT>true</TT></PRE>
+
+<PRE>    CrossTerms: BoolElt                 Default: <TT>false</TT></PRE>
+
+<PRE>    UsePrimes: SeqEnum                  Default: []</PRE>
+
+<PRE>    ClassGroupPrimes: SeqEnum           Default: []</PRE>
+
+<PRE>    SetVerbose("Minimisation", n):      Maximum: 3</PRE>
+<BLOCKQUOTE>
+Given a genus one model (of degree 2, 3, 4, or 5) with coefficients in Q,
+this returns a minimal model in the sense described above.
+<P>
+It is also implemented for genus one models of degree 2 without cross terms,
+and returns a model that is minimal among models without cross terms
+when this is possible.  When this is not possible (due to class group
+obstructions) it returns a model that is nearly minimal, in the sense
+that the extra factor appearing in the discriminant is chosen to have
+small norm.
+The primes dividing the extra factor may be specified via the optional argument 
+<TT>ClassGroupPrimes</TT>.
+<P>
+The transformation taking the original model to the minimal model is
+also returned, unless the optional argument <TT>Transformation</TT> is set
+to <TT>false</TT>.
+(The syntax for transformations is explained in Section <A  HREF = "text1472.htm#16682">Transformations between  Genus One Models</A>).
+<P>
+For degree 2, when the optional argument <TT>CrossTerms</TT> is set to <TT>false</TT>
+then a model without cross terms is returned that is minimal among models
+of this kind.
+<P>
+The third value returned is the set of primes where the minimal model
+has positive level.
+These are the primes where the model is not soluble over Q<sub>p</sub><sup>nr</sup>,
+the maximal non-ramified extension of Q<sub>p</sub>
+(except for p = 2 for models of degree 2 when <TT>CrossTerms</TT> is <TT>false</TT>).
+<P>
+The degree 5 routine is not yet proven to work in all cases.
+</BLOCKQUOTE>
+<H5><A NAME = "16697">Minimise(f) : RngMPolElt -&gt; RngMPolElt, TransG1</A></H5>
+<BLOCKQUOTE>
+Given the equation f of a nonsingular projective plane cubic curve,
+this returns the equation of a minimal model of the curve and a tuple
+specifying the transformation
+(as explained in Section <A  HREF = "text1472.htm#16682">Transformations between  Genus One Models</A> below).
+</BLOCKQUOTE>
+<H5><A NAME = "16698">pMinimise(f, p) : RngMPolElt, RngIntElt -&gt; RngMPolElt, AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Given the equation f of a nonsingular projective plane cubic curve,
+this function returns a model of the curve which is minimal at p.
+Also returned is a matrix M giving the transformation; up to scaling,
+the minimised cubic is the original cubic evaluated at M[x, y, z]<sup>tr</sup>.
+</BLOCKQUOTE>
+<H5><A NAME = "16699">Reduce(model) : ModelG1 -&gt; ModelG1, TransG1</A></H5>
+<H5>Reduce(f) : RngMPolElt -&gt; RngMPolElt, TransG1</H5>
+
+<PRE>    SetVerbose("Reduce", n):            Maximum: 3</PRE>
+<BLOCKQUOTE>
+Given a genus one model of degree 2, 3, or 4 over Q,
+this function computes a reduced model in the sense described above.
+<P>
+The model may instead be described by the appropriate polynomial f,
+which must be either a homogeneous polynomial that defines
+a genus one model of degree 2 or 3, or a univariate polynomial that
+defines a genus one model of degree 2 without cross terms.
+<P>
+The transformation taking the original model to the reduced model
+is also returned.  (The syntax for transformations between genus one models
+is explained in Section <A  HREF = "text1472.htm#16682">Transformations between  Genus One Models</A>).
+</BLOCKQUOTE>
+<H5><A NAME = "16700">ReduceQuadrics(seq) : [RngMPolElt] -&gt; [RngMPolElt], AlgMatElt, AlgMatElt</A></H5>
+
+<PRE>    SetVerbose("Reduce", n):            Maximum: 3</PRE>
+<BLOCKQUOTE>
+This function computes a reduced basis for the space spanned by the
+given quadrics (which should be given as a sequence of homogeneous quadratic forms
+in variables x<sub>1</sub>, ..., x<sub>n</sub>).
+This means making a linear change of the
+homogeneous coordinates, and also finding a new basis for the space
+of forms, with the aim of making the resulting coefficients small.
+The second and third objects returned are matrices S and T giving the transformation.
+The change of homogeneous coordinate variables is given by S, while T specifies
+the change of basis of the space of forms.
+The returned forms are therefore obtained by substituting
+[x<sub>1</sub>, ..., x<sub>n</sub>].S for [x<sub>1</sub>, ..., x<sub>n</sub>] in the original forms,
+and then applying T to this basis of forms (where T acts from the left).
+<P>
+The current implementation of this routine is not optimal; nevertheless
+it is useful in some situations.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text1475.htm">[Next]</A><A  HREF = "text1473.htm">[Prev]</A> <A  HREF = "text1475.htm">[Right]</A> <A  HREF = "text1473.htm">[Left]</A> <A  HREF = "text1468.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

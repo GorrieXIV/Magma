@@ -1,0 +1,33 @@
+"Source: Text/Algebra/AlgLie.text";
+"Line: 3198";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Algebra/AlgLie.text, line: 3198
+// Example: H106E36 ()
+print "Example: H106E36";
+ei := GetEchoInput();
+SetEchoInput(true);
+R := TwistedRootDatum(RootDatum("A2") : Twist := 2);
+L := TwistedLieAlgebra(R, GF(5));
+H := SplitToralSubalgebra(L);
+LK, phi, ChevBas, m := TwistedBasis(L, H, R);
+m;
+K := CoefficientRing(LK);
+simp := ChevBas`BasisPos[[1..Rank(R)]];
+simp;
+fr := FrobeniusMap(K);
+frv := func<x | Vector([ fr(i) : i in Eltseq(x)])>;
+[ Position(simp, frv(x)) : x in simp ];
+p := ChevBas`BasisPos;
+n := ChevBas`BasisNeg;
+c := ChevBas`BasisCart;
+pi := Sym(6)!(1, 2)(4, 5);
+ChevBasLK := VectorSpaceWithBasis([ Vector(x) : x in p cat n cat c]);
+piL := DiagramAutomorphism(LK, pi);
+for i in [1..Dimension(L)] do
+   b := phi(L.i);
+   printf "i = %o, b =    %o\n", i, Coordinates(ChevBasLK, Vector(b));
+   printf "   pi(b)^fr = %o\n", [ fr(i) : i in 
+                             Coordinates(ChevBasLK, Vector(piL(b))) ];
+end for;
+SetEchoInput(ei);

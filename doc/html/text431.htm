@@ -1,0 +1,233 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Absolute Field</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text420.htm">[Next]</A><A  HREF = "text430.htm">[Prev]</A> <A  HREF = "text420.htm">[Right]</A> <A  HREF = "text430.htm">[Left]</A> <A  HREF = "text421.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "4431">Absolute Field</A></H3>
+
+<P>
+<P>
+One may construct an absolute field isomorphic to the current
+subfield represented by an algebraically closed field.
+The construction of the absolute field may be very expensive,
+as it involves factoring polynomials over successive subfields.
+In fact, it is often the case that the degree of the absolute field is
+an extremely large integer, so that an absolute field is not practically
+representable, yet the system may allow one to compute effectively
+with the original non-absolute presentation.
+
+
+<H5><A NAME = "4432">AbsoluteAffineAlgebra(A) : FldAC -&gt; RngUPolRes</A></H5>
+<H5>AbsoluteQuotientRing(A) : FldAC -&gt; RngUPolRes</H5>
+<BLOCKQUOTE>
+Simplify the algebraically closed field A fully (see <A  HREF = "text430.htm#FldAC:Simplify">Simplify</A><TT>(A)</TT> above) and then return an
+absolute field as a univariate affine algebra R which is
+isomorphic to the current (true) algebraic field represented by A, and
+also return the isomorphism f:A -&gt; R.
+</BLOCKQUOTE>
+<H5><A NAME = "4433">AbsolutePolynomial(A) : FldAC -&gt;</A></H5>
+<BLOCKQUOTE>
+Simplify the algebraically closed field A fully (see <A  HREF = "text430.htm#FldAC:Simplify">Simplify</A><TT>(A)</TT> above) and then compute an
+absolute field isomorphic to the current (true) algebraic field
+represented by A and return the defining polynomial of
+the absolute field.  That is, return a polynomial f
+such that K[x]/&lt;f&gt; is isomorphic to A in its current state.
+</BLOCKQUOTE>
+<H5><A NAME = "4434"></A><A NAME = "FldAC:Absolutize">Absolutize</A>(A) : FldAC -&gt;</H5>
+<BLOCKQUOTE>
+Modify the algebraically closed field A in place so that has an absolute presentation.
+That is, compute an isomorphic absolute field and absolute polynomial
+f as in <TT>AbsolutePolynomial</TT> and modify A and its elements in
+place so that A now only has one variable v and corresponding
+defining polynomial f(v) and the elements of A correspond via
+the isomorphism to their old representation.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "4435">Example <TT>FldAC_Cyclic6 (H42E5)</TT></A></H3>
+We show how one can easily compute the number field over which the complete
+variety of the Cyclic-6 ideal can be defined.
+<P>
+We first create the ideal I over Q and compute its variety over A,
+the algebraic closure of Q.
+<P>
+<P>
+<PRE>
+&gt; P&lt;a,b,c,d,e,f&gt; := PolynomialRing(RationalField(), 6);
+&gt; B := [
+&gt;     a + b + c + d + e + f,
+&gt;     a*b + b*c + c*d + d*e + e*f + f*a,
+&gt;     a*b*c + b*c*d + c*d*e + d*e*f + e*f*a + f*a*b,
+&gt;     a*b*c*d + b*c*d*e + c*d*e*f + d*e*f*a + e*f*a*b + f*a*b*c,
+&gt;     a*b*c*d*e + b*c*d*e*f + c*d*e*f*a + d*e*f*a*b +
+&gt;         e*f*a*b*c + f*a*b*c*d,
+&gt;     a*b*c*d*e*f - 1];
+&gt; I := ideal&lt;P | B&gt;;
+&gt; time Groebner(I);
+Time: 1.459
+&gt; A := AlgebraicClosure();
+&gt; time V := Variety(I, A);
+Time: 4.219
+&gt; #V;
+156
+</PRE>
+We now notice that there are 28 variables in A and we check that all
+elements of V satisfy the original polynomials.
+<P>
+<P>
+<PRE>
+&gt; Rank(A);
+30
+&gt; V[1];
+&lt;-1, -1, -1, -1, r1 + 4, -r1&gt;
+&gt; V[156];
+&lt;r28^3 + 2*r28^2*r9 - 2*r9, -r28^3 - 2*r28^2*r9 + 2*r9, r9, -r28, r28, -r9&gt;
+&gt; {Evaluate(f, v): v in V, f in B};
+{
+    0
+}
+</PRE>
+We now simplify A to ensure that it represents a true field, and
+prune away useless variables now having linear defining polynomials.
+<P>
+<P>
+<PRE>
+&gt; time Simplify(A);
+Time: 3.330
+&gt; Prune(A);
+&gt; A;
+Algebraically closed field with 3 variables
+Defining relations:
+[
+    r3^2 - 1/3*r3*r2*r1 - 5/3*r3*r2 + 2/3*r3*r1 - 2/3*r3 + r2*r1 + 4*r2 + 1,
+    r2^2 - r2*r1 - 4*r1 - 1,
+    r1^2 + 4*r1 + 1
+]
+&gt; V[1];
+&lt;-1, -1, -1, -1, r1 + 4, -r1&gt;
+&gt; V[156];
+&lt;2/3*r3*r2*r1 + 7/3*r3*r2 - 1/3*r3*r1 - 2/3*r3 + 5/3*r2*r1 + 
+    19/3*r2 + 2/3*r1 + 4/3, -2/3*r3*r2*r1 - 7/3*r3*r2 + 1/3*r3*r1
+    + 2/3*r3 - 5/3*r2*r1 - 19/3*r2 - 2/3*r1 - 4/3, -4/3*r2*r1 - 
+    14/3*r2 - 1/3*r1 - 2/3, 2/3*r3*r2*r1 + 7/3*r3*r2 - 1/3*r3*r1 
+    - 2/3*r3 - 5/3*r2*r1 - 19/3*r2 + 1/3*r1 - 1/3, -2/3*r3*r2*r1 
+    - 7/3*r3*r2 + 1/3*r3*r1 + 2/3*r3 + 5/3*r2*r1 + 19/3*r2 - 
+    1/3*r1 + 1/3, 4/3*r2*r1 + 14/3*r2 + 1/3*r1 + 2/3&gt;
+</PRE>
+Finally we compute an absolute polynomial for A, and then modify
+A in place using <A  HREF = "text431.htm#FldAC:Absolutize">Absolutize</A> to make A be defined
+by one polynomial of degree 8.
+<P>
+<P>
+<PRE>
+&gt; time AbsolutePolynomial(A);
+x^8 + 4*x^6 - 6*x^4 + 4*x^2 + 1
+Time: 0.080
+&gt; time Absolutize(A);        
+Time: 0.259
+&gt; A;
+Algebraically closed field with 1 variables
+Defining relations:
+[
+    r1^8 + 4*r1^6 - 6*r1^4 + 4*r1^2 + 1
+]
+&gt; V[1];
+&lt;-1, -1, -1, -1, 1/2*r1^6 + 2*r1^4 - 7/2*r1^2 + 3, -1/2*r1^6 - 
+    2*r1^4 + 7/2*r1^2 + 1&gt;
+&gt; V[156];
+&lt;r1^7 + 4*r1^5 - 6*r1^3 + 4*r1, -r1^7 - 4*r1^5 + 6*r1^3 - 4*r1, 
+    -1/4*r1^7 - 3/4*r1^5 + 11/4*r1^3 - 7/4*r1, -r1, r1, 1/4*r1^7 
+    + 3/4*r1^5 - 11/4*r1^3 + 7/4*r1&gt;
+&gt; {Evaluate(f, v): v in V, f in B};
+{
+    0
+}
+</PRE>
+<HR>
+<H3><A NAME = "4436">Example <TT>FldAC_Split (H42E6)</TT></A></H3>
+In this example we compute the splitting field of a certain polynomial
+of degree 8.
+<P>
+We first set f to a degree-8 polynomial using the database of
+polynomials with given Galois group.  The Galois group has order
+16, so we know that the splitting field will have absolute degree
+16.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x&gt; := PolynomialRing(IntegerRing());
+&gt; load galpols;
+Loading "/home/magma/libs/galpols/galpols"
+&gt; PolynomialWithGaloisGroup(8, 6);
+x^8 - 2*x^7 - 9*x^6 + 10*x^5 + 22*x^4 - 14*x^3 - 15*x^2 + 2*x + 1
+&gt; f := $1;
+&gt; #GaloisGroup(f);
+16
+</PRE>
+We next create an algebraic closure A and compute the roots of f
+over A.
+<P>
+<P>
+<PRE>
+&gt; A := AlgebraicClosure();
+&gt; r := Roots(f, A);
+&gt; #r;
+8
+&gt; A;
+Algebraically closed field with 8 variables
+Defining relations:
+[
+    r8^8 - 2*r8^7 - 9*r8^6 + 10*r8^5 + 22*r8^4 - 14*r8^3 - 15*r8^2 + 2*r8 + 1,
+    r7^8 - 2*r7^7 - 9*r7^6 + 10*r7^5 + 22*r7^4 - 14*r7^3 - 15*r7^2 + 2*r7 + 1,
+    r6^8 - 2*r6^7 - 9*r6^6 + 10*r6^5 + 22*r6^4 - 14*r6^3 - 15*r6^2 + 2*r6 + 1,
+    r5^8 - 2*r5^7 - 9*r5^6 + 10*r5^5 + 22*r5^4 - 14*r5^3 - 15*r5^2 + 2*r5 + 1,
+    r4^8 - 2*r4^7 - 9*r4^6 + 10*r4^5 + 22*r4^4 - 14*r4^3 - 15*r4^2 + 2*r4 + 1,
+    r3^8 - 2*r3^7 - 9*r3^6 + 10*r3^5 + 22*r3^4 - 14*r3^3 - 15*r3^2 + 2*r3 + 1,
+    r2^8 - 2*r2^7 - 9*r2^6 + 10*r2^5 + 22*r2^4 - 14*r2^3 - 15*r2^2 + 2*r2 + 1,
+    r1^8 - 2*r1^7 - 9*r1^6 + 10*r1^5 + 22*r1^4 - 14*r1^3 - 15*r1^2 + 2*r1 + 1
+]
+</PRE>
+Finally we simplify A.  There are defining polynomials of degrees 2 and
+8 in the simplified field.  The absolute polynomial of degree 16
+defines the splitting field of f.
+<P>
+<P>
+<PRE>
+&gt; time Simplify(A);
+Time: 2.870
+&gt; A;
+Algebraically closed field with 8 variables
+Defining relations:
+[
+    r8 + 1/2*r3*r1^6 - 2*r3*r1^5 - r3*r1^4 + 8*r3*r1^3 - 2*r3*r1^2 - 
+        5*r3*r1 - 1/2*r3 + r1^7 - 3/2*r1^6 - 9*r1^5 + 4*r1^4 + 19*r1^3
+        - r1^2 - 9*r1 - 5/2,
+    r7 - 1/2*r3*r1^6 + 2*r3*r1^5 + r3*r1^4 - 8*r3*r1^3 + 2*r3*r1^2 + 
+        5*r3*r1 + 1/2*r3,
+    r6 + r3 - 3/2*r1^7 + 2*r1^6 + 14*r1^5 - 5*r1^4 - 28*r1^3 + 3*r1^2 
+        + 19/2*r1,
+    r5 - 1/2*r3*r1^6 + 2*r3*r1^5 + r3*r1^4 - 8*r3*r1^3 + 2*r3*r1^2 + 
+        4*r3*r1 + 1/2*r3 + r1^6 - r1^5 - 9*r1^4 - r1^3 + 14*r1^2 + 
+        6*r1,
+    r4 + 1/2*r3*r1^6 - 2*r3*r1^5 - r3*r1^4 + 8*r3*r1^3 - 2*r3*r1^2 - 
+        4*r3*r1 - 1/2*r3 - 1,
+    r3^2 - 3/2*r3*r1^7 + 2*r3*r1^6 + 14*r3*r1^5 - 5*r3*r1^4 - 
+        28*r3*r1^3 + 3*r3*r1^2 + 19/2*r3*r1 + 3/2*r1^6 - r1^5 - 
+        15*r1^4 - 4*r1^3 + 27*r1^2 + 11*r1 - 9/2,
+    r2 + 1/2*r1^7 - 3/2*r1^6 - 4*r1^5 + 10*r1^4 + 10*r1^3 - 16*r1^2 - 
+        11/2*r1 + 3/2,
+    r1^8 - 2*r1^7 - 9*r1^6 + 10*r1^5 + 22*r1^4 - 14*r1^3 - 15*r1^2 + 
+        2*r1 + 1
+]
+&gt; AbsolutePolynomial(A);
+x^16 - 36*x^14 + 488*x^12 - 3186*x^10 + 10920*x^8 - 19804*x^6 + 17801*x^4 -
+    6264*x^2 + 64
+</PRE>
+<PRE></PRE> <A  HREF = "text420.htm">[Next]</A><A  HREF = "text430.htm">[Prev]</A> <A  HREF = "text420.htm">[Right]</A> <A  HREF = "text430.htm">[Left]</A> <A  HREF = "text421.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

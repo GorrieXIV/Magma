@@ -1,0 +1,4 @@
+174,1
+S,ThreeIsogenySelmerGroups,"Given an elliptic curve E over Q admitting a 3-isogeny, computes the Selmer groups corresponding to some 3-isogenies E' -> E and E -> E', each followed by a map to some algebra",0,1,0,0,0,0,0,0,0,334,,107,175,107,175,376,-38
+S,ThreeIsogenyDescent,"Given an elliptic curve E over Q admitting a 3-isogeny, computes plane cubic curves and covering maps representing the elements of the Selmer groups corresponding to 3-isogenies E' -> E and E -> E'",0,1,0,0,0,0,0,0,0,334,,82,168,82,168,376,-38
+S,ThreeIsogenyDescentCubic,"For an isogeny E -> E' of elliptic curve over Q, and an element alpha in (the algebra associated to) the Selmer group of that isogeny, represents the Selmer element as a plane cubic C, and also returns a covering map C ->E",0,2,0,0,0,0,0,0,0,-1,,0,0,376,,371,376,-38,-38,-38,-38

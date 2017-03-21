@@ -1,0 +1,137 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Isotropic Subspaces</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text336.htm">[Next]</A><A  HREF = "text340.htm">[Prev]</A> <A  HREF = "text336.htm">[Right]</A> <A  HREF = "text340.htm">[Left]</A> <A  HREF = "text337.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "3293">Isotropic Subspaces</A></H3>
+
+
+
+<H5><A NAME = "3294">IsotropicSubspace(f) : RngMPolElt -&gt; ModTupRng</A></H5>
+<H5>IsotropicSubspace(M) : Mtrx -&gt; ModTupRng</H5>
+<BLOCKQUOTE>
+This returns an isotropic subspace for the given quadratic form
+(which must be either integral or rational),
+which may be given either as a multivariate polynomial f
+or as a symmetric matrix M.
+The subspace returned is in many cases guaranteed
+to be a maximal totally isotropic subspace.
+More precisely (assuming that the form is nonsingular),
+upon writing (r, s) for the signature of f with r&ge;s,
+the dimension of the space returned is at least min(r, s + 2) - 2,
+which is maximum possible when s&le;r + 2.
+Since version 2.18, an improvement to the original algorithm has been
+appended, which typically (subject to a solvability criterion for a
+4-dimensional subspace) enlarges the dimension of space by 1
+when r + s is even and s&le;r + 2.
+<P>
+The algorithm used is due to Simon (see <A  HREF = "text336.htm#bib_simon-dimension-4-5-more">[Sim05]</A>),
+and uses on the Bosma-Stevenhagen algorithm for the 2-part of
+the class groups of a quadratic field (see <A  HREF = "text336.htm#bib_bosma-stevenhagen">[BS96]</A>).
+There is no corresponding intrinsic for a lattice: since
+the associated form is definite, there are no isotropic vectors.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3295">Example <TT>QuadForm_isotropy-and-witt (H33E1)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; v :=  [ 6, -2, -7, 5, -2, -10, -3, 5, -7, -3, 10, -8, 5, 5, -8, 0 ];
+&gt; M := Matrix(4, 4, v); M;
+[  6  -2  -7   5]
+[ -2 -10  -3   5]
+[ -7  -3  10  -8]
+[  5   5  -8   0]
+&gt; Determinant(M); Factorization(Determinant(M));
+1936
+[ &lt;2, 4&gt;, &lt;11, 2&gt; ]
+&gt; WittInvariant(M, 2);
+-1
+&gt; WittInvariant(M, 11);
+1
+&gt; D := Diagonalization(M); D; // signature (2,2)
+[     6      0      0      0]
+[     0    -96      0      0]
+[     0      0     18      0]
+[     0      0      0 -34848]
+&gt; pSignature(M, -1); // should be the difference of 2 and 2
+0
+&gt; n := Degree(Parent(M));
+&gt; Q := Rationals();
+&gt; E := [ Q ! D[i][i] : i in [1..n]];
+&gt; &amp;*[ &amp;*[ HilbertSymbol(E[i], E[j], 2) : i in [j+1..n]] : j in [1..n-1]];
+-1
+&gt; &amp;*[ &amp;*[ HilbertSymbol(E[i], E[j], 11) : i in [j+1..n]] : j in [1..n-1]];
+1
+&gt; IsotropicSubspace(M);
+RSpace of degree 4, dimension 2 over Integer Ring
+Generators:
+( 3 -3  0  4)
+( 4 -4  0 -2)
+Echelonized basis:
+( 1 -1  0 16)
+( 0  0  0 22)
+&gt; pSignature(M, 2) mod 8;
+0
+&gt; pSignature(M, 11) mod 8;
+4
+&gt; pSignature(M, 5) mod 8; // equals Dimension at good primes
+4
+</PRE>
+<HR>
+<H3><A NAME = "3296">Example <TT>QuadForm_second-example-Witt (H33E2)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; SetSeed(12345);
+&gt; n := 20;
+&gt; P := PolynomialRing(Integers(),n);
+&gt; f := &amp;+[&amp;+[Random([-10..10])*P.i*P.j : i in [j..n]] : j in [1..n]];
+&gt; M := ChangeRing(2*SymmetricMatrix(f), Integers()); M;
+[12 -2 -8 1 -6 0 3 -5 -6 -5 10 7 -1 -3 -7 -5 -6 -3 -3 -8]
+[-2 2 10 -10 3 6 -3 -9 0 -5 7 -5 -5 -4 1 -5 1 -6 7 -8]
+[-8 10 14 1 6 -8 -3 4 -2 3 -4 7 0 -8 -6 -4 -5 7 -4 8]
+[1 -10 1 6 -5 0 8 1 7 -1 7 -7 6 7 -1 -9 -8 1 6 6]
+[-6 3 6 -5 12 7 -3 -10 -5 -4 -6 1 -5 -9 4 -8 2 5 -4 -10]
+[0 6 -8 0 7 -6 -4 3 0 2 -3 0 4 10 5 -8 6 1 -7 2]
+[3 -3 -3 8 -3 -4 16 -5 -10 7 -9 9 -6 -2 0 -1 1 -4 6 2]
+[-5 -9 4 1 -10 3 -5 2 -4 -3 0 -3 9 -1 3 -5 2 2 -1 -10]
+[-6 0 -2 7 -5 0 -10 -4 0 -1 5 1 3 5 3 0 1 -7 5 10]
+[-5 -5 3 -1 -4 2 7 -3 -1 10 -9 5 2 -4 8 6 -4 9 -3 5]
+[10 7 -4 7 -6 -3 -9 0 5 -9 2 2 -7 3 8 -4 7 -3 -3 6]
+[7 -5 7 -7 1 0 9 -3 1 5 2 6 -10 -6 0 -2 -3 8 2 -9]
+[-1 -5 0 6 -5 4 -6 9 3 2 -7 -10 -10 7 0 8 -1 -2 9 3]
+[-3 -4 -8 7 -9 10 -2 -1 5 -4 3 -6 7 -6 -2 -3 3 -9 9 6]
+[-7 1 -6 -1 4 5 0 3 3 8 8 0 0 -2 2 -8 5 2 3 -4]
+[-5 -5 -4 -9 -8 -8 -1 -5 0 6 -4 -2 8 -3 -8 -18 5 4 6 4]
+[-6 1 -5 -8 2 6 1 2 1 -4 7 -3 -1 3 5 5 6 -3 7 -7]
+[-3 -6 7 1 5 1 -4 2 -7 9 -3 8 -2 -9 2 4 -3 14 5 2]
+[-3 7 -4 6 -4 -7 6 -1 5 -3 -3 2 9 9 3 6 7 5 16 -3]
+[-8 -8 8 6 -10 2 2 -10 10 5 6 -9 3 6 -4 4 -7 2 -3 -4]
+&gt; D := Integers() ! Determinant(M); D;
+276132003816103322711292
+&gt; [ &lt;u[1], WittInvariant(f, u[1])&gt; : u in Factorization(D)];
+[ &lt;2, -1&gt;, &lt;3, -1&gt;, &lt;7, 1&gt;, &lt;199, 1&gt;, &lt;879089, -1&gt;, &lt;6263690372711, -1&gt; ]
+&gt; &amp;+[ pExcess(f, u[1]) : u in Factorization(D) cat [&lt;-1, 0&gt;]] mod 8;
+0
+&gt; time S := IsotropicSubspace(f);
+Time: 0.640
+&gt; Dimension(S);
+8
+&gt; pSignature(f, -1); // difference of 12 and 8
+4
+&gt; B := Basis(S);
+&gt; InnerProduct(B[1], B[1]*M);
+0
+&gt; &amp;and [InnerProduct(B[i], B[j]*M) eq 0 : i, j in [1..Dimension(S)]];
+true
+</PRE>
+<PRE></PRE> <A  HREF = "text336.htm">[Next]</A><A  HREF = "text340.htm">[Prev]</A> <A  HREF = "text336.htm">[Right]</A> <A  HREF = "text340.htm">[Left]</A> <A  HREF = "text337.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

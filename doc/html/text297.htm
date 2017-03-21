@@ -1,0 +1,353 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Constructing Polar Spaces</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text298.htm">[Next]</A><A  HREF = "text296.htm">[Prev]</A> <A  HREF = "text298.htm">[Right]</A> <A  HREF = "text296.htm">[Left]</A> <A  HREF = "text291.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "2738">Constructing Polar Spaces</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+If J is an n x n matrix, the command <TT>VectorSpace(K,n,J)</TT> creates 
+a vector space of dimension n over K with a bilinear form whose matrix
+is J.  
+<P>
+The default form attached to every vector space in Magma is the 
+symmetric form whose matrix is the identity matrix.
+<P>
+A vector space V is recognised as a polar space if any of the following 
+conditions apply. (There is no check to ensure that the inner product matrix is
+is non-degenerate.)
+<P>
+<DL COMPACT class='compact'>
+<DT>1.</DT><DD>There is a quadratic form attached to V.
+<DT>2.</DT><DD>There is a field involution attached to V and the inner product
+matrix of V is hermitian or skew-hermitian with respect to this involution.
+<DT>3.</DT><DD>The inner product matrix of V is symmetric or alternating.
+<P>
+<P>
+<P>
+</DL>
+Thus a vector space with a symmetric inner product matrix but no quadratic 
+form attached is a polar space. If the characteristic of the field is 2 and 
+the form is not alternating it is a pseudo-symplectic space, otherwise we 
+shall call it an orthogonal space to distinguish it from quadratic spaces.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text297.htm#2742">Symplectic Spaces</A>
+<LI> <A  HREF = "text297.htm#2747">Unitary Spaces</A>
+<LI> <A  HREF = "text297.htm#2752">Quadratic Spaces</A>
+</UL>
+<H5><A NAME = "2739">IsPolarSpace(V) : ModTupFld -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Check if the vector space V is a quadratic space or if the Gram matrix 
+of V is a reflexive form.
+</BLOCKQUOTE>
+<H5><A NAME = "2740">PolarSpaceType(V) : ModTupFld -&gt; MonStgElt</A></H5>
+<BLOCKQUOTE>
+The type of the polar space V, returned as a string.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2741">Example <TT>FldForms_polarspace (H29E10)</TT></A></H3>
+Create the standard vector space of dimension 4 over the rational field
+and check if it is a polar space.
+<P>
+<P>
+<P>
+<PRE>
+&gt; V := VectorSpace(Rationals(),4);
+&gt; IsPolarSpace(V);
+true
+&gt; PolarSpaceType(V);
+orthogonal space
+
+</PRE>
+<HR>
+<H4><A NAME = "2742">Symplectic Spaces</A></H4>
+
+
+
+<H5><A NAME = "2743">SymplecticSpace(J) : AlgMatElt -&gt; ModTupRng</A></H5>
+<BLOCKQUOTE>
+The symplectic space of dimension n defined by the n x n matrix J.
+This function checks to ensure that J is alternating.
+</BLOCKQUOTE>
+<H5><A NAME = "2744">IsSymplecticSpace(W) : ModTupFld -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the <TT>Involution</TT> attribute of the generic vector space 
+W is not assigned and the space carries an alternating form, otherwise <TT>false</TT>.  
+<P>
+Note that a quadratic space over a field of characteristic 2 satisfies these 
+conditions and consequently this function will return <TT>true</TT> for these spaces.
+</BLOCKQUOTE>
+<H5><A NAME = "2745">IsPseudoSymplecticSpace(W) : ModTupFld -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a vector space W over a finite field, this intrinsic returns <TT>true</TT> 
+if the base field has characteristic 2, the <TT>Involution</TT> attribute is 
+not assigned to the generic space and the form is symmetric but not 
+alternating, otherwise <TT>false</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "2746">DirectSum(V,W) : ModTupRng, ModTupRng -&gt; ModTupRng, Map, Map</A></H5>
+<BLOCKQUOTE>
+If V and W are symplectic spaces this function returns the orthogonal
+direct sum V perp W and linear embeddings V to V perp W and
+W to V perp W.
+</BLOCKQUOTE>
+<H4><A NAME = "2747">Unitary Spaces</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+In order to accommodate hermitian forms it is necessary to assign a field 
+automorphism of order two to the <TT>Involution</TT> attribute of the vector 
+space.
+<P>
+Thus a unitary space is characterised as a vector space V
+whose ambient space, <TT>Generic(V)</TT>, has the attribute <TT>Involution</TT>
+and whose inner product matrix is either hermitian or skew hermitian.
+<P>
+
+
+<H5><A NAME = "2748">UnitarySpace(J, sigma) : AlgMatElt, Map -&gt; ModTupFld</A></H5>
+<BLOCKQUOTE>
+The n-dimensional unitary space over the base field K of J, where
+&sigma; is an automorphism of K of order 2 and where J is an 
+n x n matrix which is hermitian or skew-hermitian with respect to 
+&sigma;.
+</BLOCKQUOTE>
+<H5><A NAME = "2749">IsUnitarySpace(W) : ModTupFld -&gt; BoolElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if the <TT>Involution</TT> attribute of the generic space of W 
+is assigned and the form is either hermitian or skew-hermitian when restricted 
+to W. The second return value is 1 if the form is hermitian and -1 if
+the form is skew-hermitian.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2750">Example <TT>FldForms_unitaryform (H29E11)</TT></A></H3>
+Create a unitary geometry with the standard hermitian form and
+check that the given vector is isotropic.  Note that the
+function <TT>DotProduct</TT> takes both the form and the 
+field involution into account when calculating its
+values.  For finite fields, the function <TT>InnerProduct</TT> 
+<I>ignores</I> the field involution.
+<P>
+<P>
+<P>
+<PRE>
+&gt; K&lt;z&gt; := GF(25);
+&gt; J, sigma := StandardHermitianForm(5,K);
+&gt; J;
+[   0    0    0    0    1]
+[   0    0    0    1    0]
+[   0    0    1    0    0]
+[   0    1    0    0    0]
+[   1    0    0    0    0]
+&gt; sigma(z);
+z^5
+&gt; V := UnitarySpace(J,sigma);
+&gt; u := V![1,z,0,z^2,-1];
+&gt; DotProduct(u,u);
+0
+&gt; InnerProduct(u,u);
+z^20
+
+</PRE>
+<HR>
+<H5><A NAME = "2751">ConjugateTranspose(M, sigma) : Mtrx, Map -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+The transpose of the matrix &sigma;(M), where &sigma; is
+an automorphism of the base field of the matrix M.
+</BLOCKQUOTE>
+<H4><A NAME = "2752">Quadratic Spaces</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+A vector space V with an attached quadratic form is called a 
+<I>quadratic space</I>. The polar form of a quadratic 
+space is the inner product matrix J of the space. If the characteristic of 
+the field is not 2, the value of the quadratic form on a row vector v is 
+(1/2)(v * J * v<sup>tr</sup>). 
+
+
+<H5><A NAME = "2753">QuadraticSpace(Q) : AlgMatElt -&gt; ModTupRng</A></H5>
+<BLOCKQUOTE>
+The quadratic space of dimension n defined by the quadratic form represented 
+by an upper triangular n x n matrix Q. The inner product matrix of the
+space is Q + Q<sup>tr</sup>. If Q is not upper triangular, the space will be 
+constructed but there is no guarantee that other functions in this package
+will return correct results.
+</BLOCKQUOTE>
+<H5><A NAME = "2754">QuadraticSpace(f) : RngMPolElt -&gt; ModTupRng</A></H5>
+<BLOCKQUOTE>
+The quadratic space of dimension n whose quadratic form is given by the 
+quadratic polynomial f in n variables. If the variables are x<sub>1</sub>, ..., x<sub>n</sub>, then for i&le;j, the (i, j)-th entry of the matrix of the 
+form is the coefficient of x<sub>i</sub>x<sub>j</sub> in f.
+</BLOCKQUOTE>
+<H5><A NAME = "2755">SymmetricToQuadraticForm(J) : AlgMatElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Provided the characteristic of the field is not two, this is
+the upper triangular matrix which represents the same quadratic form 
+as the symmetric matrix J.
+</BLOCKQUOTE>
+<H5><A NAME = "2756">QuadraticFormMatrix(V) : ModTupRng -&gt; ModAlgElt</A></H5>
+<BLOCKQUOTE>
+The (upper triangular) matrix which represents the quadratic form of the 
+quadratic space V.
+</BLOCKQUOTE>
+<H5><A NAME = "2757">QuadraticNorm(v) : ModTupFldElt -&gt; FldElt</A></H5>
+<BLOCKQUOTE>
+The value Q(v), where Q is the quadratic form attached to the generic
+space of the parent of the vector v.
+</BLOCKQUOTE>
+<H5><A NAME = "2758">QuadraticFormPolynomial(V) : ModTupRng -&gt; RngPolElt</A></H5>
+<BLOCKQUOTE>
+The polynomial &sum;<sub>i&le;j</sub> q<sub>ij</sub>x<sub>i</sub>x<sub>j</sub>, where Q = (q<sub>ij</sub>) is the 
+matrix of the quadratic form of the quadratic space V.
+</BLOCKQUOTE>
+<H5><A NAME = "2759">QuadraticFormPolynomial(Q) : AlgMatElt -&gt; RngPolElt</A></H5>
+<BLOCKQUOTE>
+The polynomial &sum;<sub>i&le;j</sub> q<sub>ij</sub>x<sub>i</sub>x<sub>j</sub>, where Q = (q<sub>ij</sub>) is an 
+upper triangular matrix representing a quadratic form.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2760">Example <TT>FldForms_polyquad (H29E12)</TT></A></H3>
+The quadratic space defined by a polynomial.
+<P>
+<P>
+<PRE>
+&gt; _&lt;x,y,z&gt; := PolynomialRing(Rationals(),3);
+&gt; f := x^2 + x*y +3*x*z - 2*y*z + y^2 +z^2;
+&gt; V := QuadraticSpace(f);
+&gt; PolarSpaceType(V);
+quadratic space
+&gt; IsNonsingular(V);
+true
+&gt; QuadraticFormMatrix(V);
+[ 1  1  3]
+[ 0  1 -2]
+[ 0  0  1]
+
+</PRE>
+<HR>
+<H5><A NAME = "2761">OrthogonalSum(V, W) : ModTupFld, ModTupFld -&gt; ModTupFld, Map, Map</A></H5>
+<BLOCKQUOTE>
+The orthogonal direct sum V of the quadratic spaces V and W together
+with linear embeddings V to V perp W and W to V perp W.
+</BLOCKQUOTE>
+<H5><A NAME = "2762">OrthogonalTensorProduct(V, W) : ModTupFld, ModTupFld -&gt; ModTupFld</A></H5>
+<BLOCKQUOTE>
+The tensor product of the quadratic spaces V and W. If &beta; and
+&gamma; are the symmetric bilinear forms on V and W, respectively,
+and if &xi; is the bilinear form on the tensor product, then
+&xi;(v<sub>1</sub> tensor w<sub>1</sub>, v<sub>2</sub> tensor w<sub>2</sub>) = &beta;(v<sub>1</sub>, v<sub>2</sub>)&gamma;(w<sub>1</sub>, w<sub>2</sub>).
+</BLOCKQUOTE>
+<H5><A NAME = "2763">TotallySingularComplement(V, U, W) : ModTupFld, ModTupFld, ModTupFld -&gt; ModTupFld</A></H5>
+<BLOCKQUOTE>
+Given totally singular subspaces U and W of the quadratic space V such 
+that U<sup>perp</sup> &cap;W = 0 this function returns a totally singular subspace X 
+such that V = X direct-sum U<sup>perp</sup> and W&sube;X. 
+</BLOCKQUOTE>
+<H5><A NAME = "2764">Discriminant(V) : ModTupFld -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+If V is a vector space over the finite field K and if J is the Gram matrix
+of V, the <I>discriminant</I> of V is the determinant &Delta; of J modulo
+squares.  That is, the discriminant is 0 if &Delta; is a square in K, 1 if it
+is a non-square.  The form J is required to be non-degenerate.
+</BLOCKQUOTE>
+<H5><A NAME = "2765">ArfInvariant(V) : ModTupFld -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The Arf invariant of the quadratic space V.
+<P>
+Currently this is available only for quadratic spaces of even dimension 2m
+over a finite field F of characteristic 2. In this case there are two 
+possibilities: either the Witt index of the form is m and the Arf invariant 
+is 0, or the Witt index is m - 1 and the Arf invariant is 1.
+</BLOCKQUOTE>
+<H5><A NAME = "2766">DicksonInvariant(V, f) : ModTupFld, Mtrx -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The Dickson invariant of the isometry f of the quadratic space V is
+the rank (mod 2) of 1 - f.  If the polar form of Q is non-degenerate, 
+the Dickson invariant defines a homomorphism from the orthogonal group 
+O(V) onto the additive group of order 2.
+</BLOCKQUOTE>
+<H5><A NAME = "2767">SpinorNorm(V, f) : ModTupFld, Mtrx -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The spinor norm of the isometry f of the quadratic space V. This
+is the discriminant of the Wall form (Section <A  HREF = "text301.htm#2804">Wall Forms</A>) of f.
+</BLOCKQUOTE>
+<H5><A NAME = "2768">HyperbolicBasis(U, B, W) : ModTupFld, SeqEnum, ModTupFld -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given complementary totally singular subspaces U and W of a quadratic 
+space and a basis B for U, return a sequence of pairwise orthogonal 
+hyperbolic pairs whose second components form a basis for W.
+</BLOCKQUOTE>
+<H5><A NAME = "2769">OrthogonalReflection(a) : ModTupFldElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+The reflection determined by a non-singular vector of a quadratic space.
+</BLOCKQUOTE>
+<H5><A NAME = "2770">RootSequence(V, f) : ModTupFld, Mtrx -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a matrix f representing an isometry of the quadratic space V,
+return a sequence of vectors such that the product of the corresponding 
+orthogonal reflections is f. The empty sequence is returned if
+f is the identity matrix.
+</BLOCKQUOTE>
+<H5><A NAME = "2771">ReflectionFactors(V, f) : ModTupFld, Mtrx -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a matrix f representing an isometry of the quadratic space V,
+return a sequence of reflections whose product is f. The empty sequence 
+corresponds to the identity matrix.
+</BLOCKQUOTE>
+<P>
+<P>
+<P>
+<P>
+Given a quadratic space V defined by a quadratic form Q with polar
+form &beta; and non-zero vectors u, v &isin;V such that u is singular and
+&beta;(u, v) = 0, the <I>Siegel transformation</I> (also
+called an Eichler transformation) is the isometry &rho;<sub>u, v</sub> defined
+by
+<P>
+  x &rho;<sub>u, v</sub> = x + &beta;(x, v)u - &beta;(x, u)v - Q(v)&beta;(x, u) u.
+<H5><A NAME = "2772">SiegelTransformation(u, v) : ModTupFldElt, ModTupFldElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+The Siegel transformation defined by a singular vector u and a
+vector v orthogonal to u.  The common parent of u and v must 
+be a quadratic space.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2773">Example <TT>FldForms_siegel (H29E13)</TT></A></H3>
+A group of isometries generated by Siegel transformations.
+<P>
+<P>
+<PRE>
+&gt; Q := StandardQuadraticForm(4,3);
+&gt; V := QuadraticSpace(Q);
+&gt; u := V.1;
+&gt; QuadraticNorm(u);
+0
+&gt; X := { v : v in V | DotProduct(u,v) eq 0 and QuadraticNorm(v) ne 0 };
+&gt; #X;
+12
+&gt; H := sub&lt; GL(V) | [SiegelTransformation(u,v) : v in X]&gt;;
+&gt; #H;
+9
+
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text298.htm">[Next]</A><A  HREF = "text296.htm">[Prev]</A> <A  HREF = "text298.htm">[Right]</A> <A  HREF = "text296.htm">[Left]</A> <A  HREF = "text291.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

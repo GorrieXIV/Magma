@@ -1,0 +1,118 @@
+function pelt(H, p)
+
+// Find an element of order p in the p-group H.
+
+    return random{ x^(Order(x) div p) : x in Centre(H) | x ne Id(H) };
+
+end function;
+
+
+function reldegs(G, N, p)
+
+// The following function takes p, a rational prime, G a a finite p-group,
+// and N a central, cyclic subgroup of G.  If lambda is a faithful character
+// of N, then we return a sequence S [C_0, C_1, ...], where C_i is the
+// number of irreducible characters of G lying over lambda with degree p^i.
+
+    k := Index(G, N);
+    if k le p then
+	return [k];
+    end if;
+
+    // The index of N in G is greater than p
+
+    Q, f := quo<G | N>;
+    x := pelt(Q, p);
+    M := sub<G | x@@f, N>;
+    C := Centralizer(G, M);
+    if IsCyclic(M) then
+	 // T := $$(C, sub<C | {C!m : m in Generators(M)}>, p);
+	 T := $$(C, M, p);
+	if G eq C then
+	    return [p * T[i] : i in [1..#T]];
+	end if;
+	// G > C
+	Insert( ~T, 1, 0 );
+	return T;
+    end if;
+
+    // M is not cyclic
+    repeat
+	y := pelt(M, p);
+    until y notin N;
+    if G eq C then
+	x := pelt(N, p);
+	S := [Integers()|];
+	for i := 1 to p do
+	    y := y * x;
+	    // Q, f := quo<G | sub<G | G!y>>;
+	    // Q, f := quo<G | G!y >;
+	    Q, f := quo<G | y >;
+	    // M2 := sub<Q | {m@f : m in Generators(M)}>;
+	    M2 := M@f;
+	    T := $$(Q, M2, p);
+	    if #S lt #T then
+		S := [S[i] + T[i] : i in [1..#S]] cat
+		     [T[i] : i in [#S + 1..#T]];
+	    elif #S eq #T then
+		S := [S[i] + T[i] : i in [1..#S]];
+	    else
+		S := [S[i] + T[i] : i in [1..#T]] cat
+		     [S[i] : i in [#T + 1..#S]];
+	    end if;
+	end for;
+	return S;
+    end if;
+
+    // G > C
+    // Q, f := quo<C | sub<C | C!y>>;
+    Q, f := quo<C | y >;
+    // M := sub<Q | {(C!m)@f : m in Generators(M)}>;
+    M := M@f;
+    return [0] cat $$(Q, M, p);
+end function;
+
+// Given a finite p-group G, return an integer sequence [C_0, C_1, ...],
+// where C_i is the number of irreducible characters of G with degree p^i;
+
+function chardegs(G)
+    k := Order(G);
+    p := FactoredOrder(G)[1][1];
+    if k le p * p then
+	return [k];
+    end if;
+
+    // order of G is more than p^2
+    Z := Centre(G);
+    X := sub<G | pelt(Z, p)>;
+    S := $$(G / X);
+    T := reldegs(G, X, p);
+    // return [S[i] + (p - 1) * T[i] : i in [1..#S]] cat
+    //     [(p - 1) * T[i] : i in [#S + 1..#T]];
+    if #S lt #T then
+	// print "Yep, #S lt #T";
+	return [S[i] + (p-1)*T[i] : i in [1..#S]] cat
+	     [(p-1)*T[i] : i in [#S + 1..#T]];
+    elif #S eq #T then
+	// print "Hmm, #S eq #T";
+	return [S[i] + (p-1)*T[i] : i in [1..#S]];
+    else
+	// print "Oops, #S ge #T";
+	// error "need more careful sequence usage";
+	return [S[i] + (p-1)*T[i] : i in [1..#T]] cat
+	     [S[i] : i in [#T + 1..#S]];
+    end if;
+end function;
+
+// The following function returns true if the character degrees as given
+// in S are correct for the group G
+
+function checkchardegs(G, S)
+    p := FactoredOrder(G)[1][1];
+    k := Order(G);
+    sum := 0;
+    for i := 1 to #S do
+	sum +:= S[i] * p^(2 * (i - 1));
+    end for;
+    return sum eq k;
+end function;

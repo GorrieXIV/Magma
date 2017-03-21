@@ -1,0 +1,10 @@
+174,1
+S,IsInvertible,"Determines if phi is birationally invertible. If it is, then true is returned, together with the inverse map (knowing about the original map as its inverse). If not, false is returned. Presently, domain and codomain should be irreducible. It uses a Groebner basis computation, so is potentially expensive. If Maximal is provided, the inverse returned (if any) will have multiple patches installed to maximize its domain of definition. This is not guaranteed to be really maximal. It just makes the extension that is easy from the computed data. Use AlternativePatches to get more",0,1,0,0,0,0,0,0,0,376,,36,376,-38,-38,-38,-38
+S,Prune,"Returns a map with superfluous defining equations removed. If an inverse is known, then this is preserved but not pruned",0,1,0,0,0,0,0,0,0,376,,376,-38,-38,-38,-38,-38
+S,Expand,"Given a map in factored form, returns the expansion of the map. If alternative equations are available, then these are combined. The result has both the map and a possible inverse pruned",0,1,0,0,0,0,0,0,0,376,,376,-38,-38,-38,-38,-38
+S,AlternativePatches,"Given a map between affine schemes, computes a number of patches that extend the map to a larger domain of definition",0,1,0,0,0,0,0,0,0,376,,376,-38,-38,-38,-38,-38
+S,Extend,Use groebner basis methods to extend the rational map phi to a domain of definition that is as large as possible,0,1,0,0,0,0,0,0,0,376,,376,-38,-38,-38,-38,-38
+S,Expand,"Given a graph map in factored form, returns the expansion of the map",0,1,0,0,0,0,0,0,0,474,,474,-38,-38,-38,-38,-38
+S,SchemeGraphMapToSchemeMap,Converts a scheme graph map to a conventional scheme map,0,1,0,0,0,0,0,0,0,474,,376,-38,-38,-38,-38,-38
+S,IsInvertible,"Determines if phi is birationally invertible. If it is, then true is returned, together with the inverse map. If phi is a composite map and all components aren't already known invertible, then phi is first expanded",0,1,0,0,0,0,0,0,0,474,,36,474,-38,-38,-38,-38
+S,Restriction,The restriction of f to the scheme X in its domain and Y in its codomain,0,3,0,0,0,0,0,0,0,380,,0,0,380,,0,0,474,,474,-38,-38,-38,-38,-38

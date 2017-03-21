@@ -1,0 +1,8 @@
+174,1
+S,ParametrizeRationalNormalCurve,C is a rational normal curve of degree d in P^d (warning: this is not fully checked!). Finds an isomorphism from the projective line (resp. a plane conic) to C if d is odd (resp. even) using adjunction maps,0,1,0,0,0,0,0,0,0,371,,375,-38,-38,-38,-38,-38
+S,ParametrizeOrdinaryCurve,C is an (irreducible) ordinary rational plane curve with adjoint ideal Iadj. p is a non-singular rational point on C. Returns a parametrisation of C taking infinity to p,0,3,0,0,0,0,0,0,0,64,,0,0,377,,0,0,371,,375,-38,-38,-38,-38,-38
+S,ParametrizeOrdinaryCurve,C is an (irreducible) ordinary rational plane curve with adjoint ideal Iadj. p is a degree 1 place of C. Returns a parametrisation of C taking infinity to p,0,3,0,0,0,0,0,0,0,64,,0,0,232,,0,0,371,,375,-38,-38,-38,-38,-38
+S,ParametrizeOrdinaryCurve,C is an (irreducible) ordinary rational plane curv. p is a non-singular rational point on C. Returns a parametrisation of C taking infinity to p,0,2,0,0,0,0,0,0,0,377,,0,0,371,,375,-38,-38,-38,-38,-38
+S,ParametrizeOrdinaryCurve,C is an (irreducible) ordinary rational plane curve. p is a degree 1 place of C. Returns a parametrisation of C taking infinity to p,0,2,0,0,0,0,0,0,0,232,,0,0,371,,375,-38,-38,-38,-38,-38
+S,ParametrizeOrdinaryCurve,"C is an (irreducible) ordinary rational plane curve. Returns a parametrisation of C. If the degree of C is even, must be able to find a point on a conic over the basefield",0,1,0,0,0,0,0,0,0,371,,375,-38,-38,-38,-38,-38
+S,ParametrizeOrdinaryCurve,"C is an (irreducible) ordinary rational plane curve with adjoint ideal Iadj. Returns a parametrisation of C. If the degree of C is even, must be able to find a point on a conic over the basefield",0,2,0,0,0,0,0,0,0,64,,0,0,371,,375,-38,-38,-38,-38,-38

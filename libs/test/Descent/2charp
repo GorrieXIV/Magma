@@ -1,0 +1,40 @@
+
+SetSeed(1);
+
+QUICK := true;
+
+SetVerbose("Selmer",1);
+SetVerbose("CasselsTate",1);
+
+F<t> := FunctionField(GF(5));
+
+Es := [ EllipticCurve([t,1]),
+        EllipticCurve([t,t-1]),
+        EllipticCurve([t,1,1,t,t-1]),
+        EllipticCurve([1,t-3,t-1,1,t^2])  // rank 2
+      ];
+for E in Es do 
+  if #TwoTorsionSubgroup(E) ne 1 then continue; end if;
+  ""; E; //"\nElliptic curve =", Coefficients(E);
+  "Seed =", GetSeed();
+  time td := TwoDescent(E); 
+  "2-descent coverings are:"; 
+  for C in td do C:Magma; end for;
+  if #td gt 1 then 
+    "Trying Cassels-Tate pairing"; time
+    if QUICK then
+      ct := CasselsTatePairing(td[1], td[2]); ct; 
+      assert ct eq 0; // for the examples here so far
+    else
+      "Cassels-Tate pairing matrix =";  time
+      mat := Matrix(GF(2), #td, [CasselsTatePairing(C,D) : C,D in td]);
+      mat; assert IsSymmetric(mat); 
+      assert IsZero(mat); // for the examples here so far
+    end if;
+  /* TO DO: make this work
+    "Testing point-search on 2-coverings:";
+    for C2 in td do time Points(C2 : Bound:=2); end for;
+  */
+  end if;
+end for;
+

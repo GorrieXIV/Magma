@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Creation from Invariants</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1488.htm">[Next]</A><A  HREF = "text1486.htm">[Prev]</A> <A  HREF = "text1488.htm">[Right]</A> <A  HREF = "text1486.htm">[Left]</A> <A  HREF = "text1483.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16816">Creation from Invariants</A></H3>
+
+<P>
+<P>
+<P>
+The problem is to construct a curve of genus 2 from a given set of
+Igusa--Clebsch invariants defined over the same field as the field of
+moduli (simply the smallest field in which the invariants lie).
+Mestre <A  HREF = "text1482.htm#bib_mestre_inv">[Mes91]</A> shows that this is not always possible, even
+in theory. But over a finite field or the rationals he gives a method
+for deciding whether it is possible and if it is, for finding such a
+curve. Mestre's algorithm was implemented by P. Gaudry. Mestre's
+algorithm does not work when the curve has a split Jacobian. Cardona 
+and Quer <A  HREF = "text1482.htm#bib_cardona">[CQ05]</A> showed that in this case one can always find 
+a curve defined over the field of moduli and gave equations for such 
+a curve. This works over any field of characteristic not 2, 3 or 5.
+<P>
+In any characteristic, the code package of Lercier and Ritzenthaler
+produces a genus 2 curve from a given set of Cardona-Quer-Nart-Pujola
+invariants (see Subsection <A  HREF = "text1486.htm#16790">Igusa Invariants</A>).
+They use the work of Cardona and Quer cited in the previous
+paragraph in the odd characteristic case, with some extra work for 
+characteristics 3 and 5. In characteristic 2, they use the models from
+<A  HREF = "text1482.htm#bib_CaNaPu_g2">[CNP05]</A>.
+<P>
+Lercier and Ritzenthaler have also contributed a package for
+genus 3 hyperelliptic curves that produces a curve from a given set of
+Shioda invariants (see Subsection <A  HREF = "text1486.htm#16807">Shioda Invariants</A>).
+This works in characteristic not 2, 3, 5 or 7.
+<P>
+Over a field of characteristic zero, the equation of the curve 
+returned by these methods can involve huge coefficients.   
+For curves over the rationals, this curve can be processed by the 
+algorithm of P. Wamelen <A  HREF = "text1482.htm#bib_wam_red">[Wam99]</A> and <A  HREF = "text1482.htm#bib_wam_code">[Wam01]</A>.  
+While, in practice, this algorithm often produces a curve with much
+smaller coefficients, for certain curves the algorithm may not 
+significantly reduce their size.  
+
+
+<P>
+<H5><A NAME = "16817">HyperellipticCurveFromIgusaClebsch(S) : SeqEnum -&gt; CrvHyp</A></H5>
+
+<PRE>    Reduce: BoolElt                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+This attempts to build a curve of genus 2 with the given Igusa-Clebsch
+invariants (see Subsection <A  HREF = "text1486.htm#16790">Igusa Invariants</A>) by Mestre's
+algorithm (and Cardona's in case of non-hyperelliptic involutions)
+defined over the field F in which the invariants lie. Currently this
+field must be the rationals, a number field, or a finite field of characteristic 
+greater than 5.  If there exists no such curve defined over F, then either 
+a curve over some quadratic extension is returned (when F is the rationals), 
+or an error results (when F is a number field). 
+<P>
+When the base field is the rationals, the parameter <TT>Reduce</TT> 
+invokes Wamelen's reduction algorithm, and is equivalent to a call 
+to <TT>ReducedModel</TT> with the algorithm specified as <TT>"Wamelen"</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "16818">HyperellipticCurveFromG2Invariants(S) : SeqEnum[FldFin] -&gt; CrvHyp, GrpFP</A></H5>
+<BLOCKQUOTE>
+From a given sequence of Cardona-Quer-Nart-Pujola invariants (as
+described in Subsection <A  HREF = "text1486.htm#16790">Igusa Invariants</A>) over a finite
+field or the rationals, return a genus 2 curve with these absolute invariants.
+This works in all characteristics as noted in the introduction to the
+section. The geometric automorphism group is also returned as a
+finitely-presented group.
+</BLOCKQUOTE>
+<H5><A NAME = "16819">HyperellipticCurveFromShiodaInvariants(JI) : SeqEnum[FldFin] -&gt; CrvHyp, GrpPerm</A></H5>
+<H5>HyperellipticPolynomialFromShiodaInvariants(JI) : SeqEnum[FldFin] -&gt; RngUPolElt, GrpPerm</H5>
+<BLOCKQUOTE>
+Given a sequence of 9 Shioda invariants JI over the rationals or a finite field k, the first
+intrinsic returns a genus 3 hyperelliptic curve over k with these invariants.
+The abstract geometric automorphism group is also returned as a permutation group.
+This will cause an error if JI are singular Shioda invariants.
+<P>
+The second intrinsic also works for singular invariants.
+It returns a polynomial f of degree &le;8 with the given invariants. If JI
+are non-singular, y<sup>2</sup>=f(x) is a genus 3 curve with invariants JI.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16820">Example <TT>CrvHyp_CurveFromInvts (H131E10)</TT></A></H3>
+A typical run would look like:
+<P>
+<P>
+<PRE>
+&gt; SetVerbose("Igusa",1);
+&gt; IgCl := [ Rationals() | 
+&gt;   -549600, 8357701824, -1392544870972992, -3126674637319431000064 ];
+&gt; time C := HyperellipticCurveFromIgusaClebsch(IgCl);
+Found conic point:
+(-64822283782462146583672682837123736006679080996161747198790\
+94839597076141357421875/1363791104410093031413327266775768846\
+086857295667582286386963073756856153402049457884003686477312, 
+10188009335968531191794821132584413878133549529657888880045011\
+3779781952464580535888671875/107297694738676628355433722672369\
+86876862256732919126043768293539723478848063808819839532581156\
+5610468983296)
+Time: 0.990
+&gt; time C := ReducedModel(C : Al := "Wamelen");
+Time: 161.680
+&gt; HyperellipticPolynomials(C);
+-23*x^6 + 52*x^5 - 55*x^4 + 40*x^3 - 161*x^2 + 92*x - 409
+0
+</PRE>
+<P>
+An example in characteristic 2 from Cardona-Quer-Nart-Pujola invariants:
+<P>
+<P>
+<PRE>
+&gt; k&lt;t&gt; := GF(16);
+&gt; g2_invs := [t^3,t^2,t];
+&gt; HyperellipticCurveFromG2Invariants(g2_invs);
+Hyperelliptic Curve defined by y^2 + (x^2 + x)*y = 
+   t*x^5 + t*x^3 + t*x^2 + t*x over GF(2^4)
+
+Finitely presented group on 3 generators
+Relations
+    $.2^2 = Id($)
+    $.1^-3 = Id($)
+    ($.1^-1 * $.2)^2 = Id($)
+    $.3^2 = Id($)
+    $.1 * $.3 = $.3 * $.1
+    $.2 * $.3 = $.3 * $.2
+&gt; _,auts := $1;
+&gt; #auts; // auts = D_12
+12
+</PRE>
+<P>
+A genus 3 example using Shioda invariants
+<P>
+<P>
+<P>
+<PRE>
+&gt; k := GF(37);
+&gt; FJI := [k| 30, 29, 13, 13, 16, 9];
+&gt; ShiodaAlgebraicInvariants(FJI);
+[
+    [ 30, 29, 13, 13, 16, 9, 14, 35, 0 ],
+    [ 30, 29, 13, 13, 16, 9, 36, 32, 22 ],
+    [ 30, 29, 13, 13, 16, 9, 36, 32, 23 ]
+]
+&gt; JI := ($1)[1];
+&gt; HyperellipticCurveFromShiodaInvariants(JI);
+Hyperelliptic Curve defined by y^2 = 19*x^8 + 13*x^7 + 29*x^6 +
+		3*x^5 + 16*x^4 + 19*x^3 + x^2 + 27*x + 12 
+over GF(37)
+Symmetric group acting on a set of cardinality 2
+Order = 2
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1488.htm">[Next]</A><A  HREF = "text1486.htm">[Prev]</A> <A  HREF = "text1488.htm">[Right]</A> <A  HREF = "text1486.htm">[Left]</A> <A  HREF = "text1483.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,260 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Sockets</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text37.htm">[Next]</A><A  HREF = "text35.htm">[Prev]</A> <A  HREF = "text37.htm">[Right]</A> <A  HREF = "text35.htm">[Left]</A> <A  HREF = "text29.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "322">Sockets</A></H3>
+
+<P>
+<P>
+<P>
+Sockets may be used to establish communication channels between machines
+on the same network.  Once established, they can be read from or written
+to in much the same ways as more familiar I/O constructs like files.
+One major difference is that the data is not instantly available, so the
+I/O operations take much longer than with files.
+Currently sockets are only available on UNIX systems.
+<P>
+Strictly speaking, a <I>socket</I> is a communication endpoint whose
+defining information consists of a network address and a port number.
+(Even more strictly speaking, the communication protocol is also part of
+the socket.  Magma only uses TCP sockets, however, so we ignore this
+point from now on.)
+<P>
+The network address selects on which of the available network interfaces
+communication will take place; it is a string identifying the machine
+on that network, in either domain name or dotted-decimal format.
+For example, both <TT>"localhost"</TT> and <TT>"127.0.0.1"</TT> identify the
+machine on the loopback interface (which is only accessible from the
+machine itself), whereas <TT>"foo.bar.com"</TT> or <TT>"10.0.0.3"</TT> might
+identify the machine in a local network, accessible from other machines
+on that network.
+<P>
+The port number is just an integer that identifies the socket on a
+particular network interface.  It must be less than 65 536.
+A value of 0 will indicate that the port number should be chosen
+by the operating system.
+<P>
+There are two types of sockets, which we will call client sockets and
+server sockets.
+The purpose of a client socket is to initiate a connection to a
+server socket, and the purpose of a server socket is to wait for
+clients to initiate connections to it.
+(Thus the server socket needs to be created before the client can
+connect to it.)
+Once a server socket accepts a connection from a client socket, a
+communication channel is established and the distinction between
+the two becomes irrelevant, as they are merely each side of a
+communication channel.
+<P>
+In the following descriptions, the network address will often be
+referred to as the <I>host</I>.  So a socket is identified by a
+<I>(host, port)</I> pair, and an established communication channel
+consists of two of these pairs:
+<I>(local-host, local-port), (remote-host, remote-port)</I>.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text36.htm#323">Socket Creation</A>
+<LI> <A  HREF = "text36.htm#327">Socket Properties</A>
+<LI> <A  HREF = "text36.htm#329">Socket Predicates</A>
+<LI> <A  HREF = "text36.htm#331">Socket I/O</A>
+</UL>
+<H4><A NAME = "323">Socket Creation</A></H4>
+
+
+
+<H5><A NAME = "324">Socket(H, P : parameters) : MonStgElt, RngIntElt -&gt; IOSocket</A></H5>
+
+<PRE>    LocalHost: MonStgElt                Default: none</PRE>
+
+<PRE>    LocalPort: RngIntElt                Default: 0</PRE>
+<BLOCKQUOTE>
+Attempts to create a (client) socket connected to port P of host H.
+Note: these are the <I>remote</I> values; usually it does not matter
+which local values are used for client sockets, but for those rare
+occasions where it does they may be specified using the parameters
+<TT>LocalHost</TT> and <TT>LocalPort</TT>.
+If these parameters are not set then suitable values will be chosen by
+the operating system.
+Also note that port numbers below 1 024 are usually reserved for
+system use, and may require special privileges to be used as the
+local port number.
+</BLOCKQUOTE>
+<H5><A NAME = "325">Socket( : parameters) : -&gt; IOSocket</A></H5>
+
+<PRE>    LocalHost: MonStgElt                Default: none</PRE>
+
+<PRE>    LocalPort: RngIntElt                Default: 0</PRE>
+<BLOCKQUOTE>
+Attempts to create a server socket on the current machine, that
+can be used to accept connections.  The parameters <TT>LocalHost</TT> and
+<TT>LocalPort</TT> may be used to specify which network interface and port
+the socket will accept connections on; if either of these are not set
+then their values will be determined by the operating system.
+Note that port numbers below 1 024 are usually reserved for
+system use, and may require special privileges to be used as the
+local port number.
+</BLOCKQUOTE>
+<H5><A NAME = "326">WaitForConnection(S) : IO -&gt; IO</A></H5>
+<BLOCKQUOTE>
+This may only be used on server sockets.  It waits for a connection
+attempt to be made, and then creates a new socket to handle the
+resulting communication channel.  Thus S may continue to be used
+to accept connection attempts, while the new socket is used for
+communication with whatever entity just connected.
+Note: this new socket is <I>not</I> a server socket.
+</BLOCKQUOTE>
+<H4><A NAME = "327">Socket Properties</A></H4>
+
+
+
+<H5><A NAME = "328">SocketInformation(S) : IO -&gt; Tup, Tup</A></H5>
+<BLOCKQUOTE>
+This routine returns the identifying information for the socket as
+a pair of tuples.  Each tuple is a {<TT>&lt;</TT><I>host, port</I><TT>&gt;</TT>} pair ---
+the first tuple gives the local information and the second gives the
+remote information.  Note that this second tuple will be undefined for
+server sockets.
+</BLOCKQUOTE>
+<H4><A NAME = "329">Socket Predicates</A></H4>
+
+
+
+<H5><A NAME = "330">IsServerSocket(S) : IO -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns whether S is a server socket or not.
+</BLOCKQUOTE>
+<H4><A NAME = "331">Socket I/O</A></H4>
+
+<P>
+<P>
+Due to the nature of the network, it takes significant time to transmit
+data from one machine to another.  Thus when a read request is begun it
+may take some time to complete, usually because the data to be read has
+not yet arrived.  Also, data written to a socket may be broken up into
+smaller pieces for transmission, each of which may take different amounts
+of time to arrive.
+Thus, unlike files, there is no easy way to tell if there is still more
+data to be read; the current lack of data is no indicator as to whether
+more might arrive.
+<P>
+When a read request is made on a socket, the available data is returned.
+If no data is currently available, then the process waits until some
+does becomes available, and returns that.  (It will also return if the
+socket has been closed and hence no more data can be transmitted.)
+It does not continue trying to read more data, as it cannot tell whether
+or not there is some "on the way".
+<P>
+The upshot of all this is that care must be exercised as reads may
+return less data than is expected.
+
+
+<H5><A NAME = "332">Read(S : parameters) : IO -&gt; MonStgElt</A></H5>
+
+<PRE>    Max: RngIntElt                      Default: 0</PRE>
+<BLOCKQUOTE>
+Waits for data to become available for reading from S and then returns
+it as a string.  If the parameter <TT>Max</TT> is set to a positive value
+then at most that many characters will be read.  Note that fewer than
+<TT>Max</TT> characters may be returned, depending on the amount of
+currently available data.
+<P>
+If the socket has been closed then the special EOF marker string is
+returned.
+</BLOCKQUOTE>
+<H5><A NAME = "333">ReadBytes(S : parameters) : IO -&gt; SeqEnum</A></H5>
+
+<PRE>    Max: RngIntElt                      Default: 0</PRE>
+<BLOCKQUOTE>
+Waits for data to become available for reading from S and then returns
+it as a sequence of bytes (integers in the range 0 ... 255).
+If the parameter <TT>Max</TT> is set to a positive value then at most that
+many bytes will be read.  Note that fewer than <TT>Max</TT> bytes may be
+returned, depending on the amount of currently available data.
+<P>
+If the socket has been closed then the empty sequence is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "334">ReadBytes(S, n) : IO, RngIntElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Keeps reading from S, waiting for data as necessary, until either n
+bytes have been read or an end of file condition is encountered.  The data
+read is returned as a sequence of bytes (integers in the range 0 ... 255).
+Note that fewer than n bytes may be returned if the end of file
+condition is encountered.
+</BLOCKQUOTE>
+<H5><A NAME = "335">Write(S, s) : IO, MonStgElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Writes the characters of the string s to the socket S.
+</BLOCKQUOTE>
+<H5><A NAME = "336">WriteBytes(S, Q) : IO, SeqEnum -&gt;</A></H5>
+<BLOCKQUOTE>
+Writes the bytes in the byte sequence Q to the socket S.  Each
+byte must be an integer in the range 0 ... 255.
+</BLOCKQUOTE>
+<H5><A NAME = "337">WaitForIO(S : parameters) : SeqEnum -&gt; SeqEnum</A></H5>
+
+<PRE>    TimeLimit: RngIntElt                Default: &infin;</PRE>
+<BLOCKQUOTE>
+Given a sequence S of I/O objects, returns the sequence of those
+elements of S which are ready for I/O.  If no elements of S are ready
+(and S is not empty) then this function will wait until one does become
+ready, or until the specified time limit has elapsed, whichever comes first.
+Note that in the case of server sockets, "ready for I/O" means that a
+connection attempt has been made and a call to <TT>WaitForConnection</TT>
+will return without delay.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "338">Example <TT>IO_Sockets (H3E12)</TT></A></H3>
+Here is a trivial use of sockets to send a message from one Magma
+process to another running on the same machine.
+The first Magma process sets up a server socket and waits for
+another Magma to contact it.
+<P>
+<P>
+<PRE>
+&gt; // First Magma process
+&gt; server := Socket(: LocalHost := "localhost");
+&gt; SocketInformation(server);
+&lt;localhost, 32794&gt;
+&gt; S1 := WaitForConnection(server);
+</PRE>
+The second Magma process establishes a client socket connection
+to the first, writes a greeting message to it, and closes the socket.
+<P>
+<P>
+<PRE>
+&gt; // Second Magma process
+&gt; S2 := Socket("localhost", 32794);
+&gt; SocketInformation(S2);
+&lt;localhost, 32795&gt; &lt;localhost, 32794&gt;
+&gt; Write(S2, "Hello, other world!");
+&gt; delete S2;
+</PRE>
+The first Magma process is now able to continue; it reads and
+displays all data sent to it until the socket is closed.
+<P>
+<P>
+<PRE>
+&gt; // First Magma process
+&gt; SocketInformation(S1);
+&lt;localhost, 32794&gt; &lt;localhost, 32795&gt;
+&gt; repeat
+&gt;     msg := Read(S1);
+&gt;     msg;
+&gt; until IsEof(msg);
+Hello, other world!
+EOF
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text37.htm">[Next]</A><A  HREF = "text35.htm">[Prev]</A> <A  HREF = "text37.htm">[Right]</A> <A  HREF = "text35.htm">[Left]</A> <A  HREF = "text29.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

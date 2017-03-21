@@ -1,0 +1,158 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Local-Global Correspondence</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1420.htm">[Next]</A><A  HREF = "text1418.htm">[Prev]</A> <A  HREF = "text1420.htm">[Right]</A> <A  HREF = "text1418.htm">[Left]</A> <A  HREF = "text1415.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16036">Local-Global Correspondence</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+The Hasse--Minkowski principle for quadratic forms implies that a
+conic has a point over a number field if and only if it has a point
+over its completion at every finite and infinite prime.
+This provides an effective set of conditions for determining whether
+a conic has a point: Only the finite number of primes dividing the
+discriminant of the curve need to be checked, and by Hensel's lemma
+it is only necessary to check this condition to finite precision.
+The theory holds over any global field (a number field or the
+function field of a curve over a finite field) but the algorithms
+implemented at present only treat the field Q.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1419.htm#16037">Local Conditions for Conics</A>
+<LI> <A  HREF = "text1419.htm#16039">Local Solubility</A>
+<LI> <A  HREF = "text1419.htm#16041">Norm Residue Symbol</A>
+</UL>
+<H4><A NAME = "16037">Local Conditions for Conics</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+We say that p is a ramified or bad prime for a conic C
+if there exists no p-integral model for C with nonsingular
+reduction.  Every such prime is a divisor of the coefficients of
+the Legendre polynomial.  However, in general it is not possible
+to have a Legendre model whose coefficients are divisible only
+by the ramified primes.  We use the term ramified or bad prime
+for a conic to refer to the local properties of C which are
+independent of the models.
+
+
+<H5><A NAME = "16038">BadPrimes(C) : CrvCon -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a conic C over the rationals, returns the sequence of
+the finite ramified primes of C: Those at which C has intrinsic
+locally singular reduction. This uses quaternion algebras.
+<P>
+<P>
+N.B. Although the infinite prime is not included, the data of
+whether or not C/Q is ramified at infinity is carried by the
+length of this sequence.  The number of bad primes, including
+infinity, must be even so the parity of the sequence length
+specifies the ramification information at infinity.
+</BLOCKQUOTE>
+<H4><A NAME = "16039">Local Solubility</A></H4>
+
+<P>
+<P>
+By computing the Hilbert symbol at all bad primes, it is possible
+to determine whether a conic is <I>globally</I> soluble.  This is
+an easier problem than finding a global solution.
+
+
+<H5><A NAME = "16040">IsLocallySolvable(C) : CrvCon -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+This returns <TT>true</TT> if and only if the conic has points over all completions
+of its coefficient field.  It is implemented for conics over Q, 
+number fields and function fields.
+</BLOCKQUOTE>
+<H4><A NAME = "16041">Norm Residue Symbol</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+Hilbert's norm residue symbol gives a precise condition for a 
+quadratic form to represent zero over a local field (equivalently,
+for a conic to have points over that field).
+<P>
+An explicit treatment of the properties and theory of the norm
+residue symbol can be found in Cassels <A  HREF = "text1414.htm#bib_Cassels78">[Cas78]</A>; the
+Hilbert symbol is treated by Lam <A  HREF = "text1414.htm#bib_Lam73">[Lam73]</A>.
+
+
+<H5><A NAME = "16042">NormResidueSymbol(a, b, p) : FldRatElt, FldRatElt, RngIntElt -&gt; RngIntElt</A></H5>
+<H5>NormResidueSymbol(a, b, p) : RngIntElt, RngIntElt, RngIntElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Given two rational numbers or integers a and b, and a prime p,
+returns 1 if the quadratic form ax<sup>2</sup> + by<sup>2</sup> - z<sup>2</sup> represents zero
+over Q<sub>p</sub> and returns -1 otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "16043">HilbertSymbol(a, b, p : parameters) : FldRatElt, FldRatElt, RngIntElt -&gt; RngIntElt</A></H5>
+<H5>HilbertSymbol(a, b, p : parameters) : RngIntElt, RngIntElt, RngIntElt -&gt; RngIntElt</H5>
+<H5>HilbertSymbol(a, b, p) : FldAlgElt, FldAlgElt, RngOrdIdl -&gt; RngIntElt</H5>
+
+<PRE>    Al: MonStgElt                       Default: "NormResidueSymbol"</PRE>
+<BLOCKQUOTE>
+Computes the Hilbert symbol (a, b)<sub>p</sub>,
+where a and b are elements of a number field and p is either a prime
+number (if a, b &isin;Q) or a prime ideal.
+For a, b &isin;Q, by default Magma uses <TT>NormResidueSymbol</TT> to compute
+the Hilbert symbol;
+one may insist on instead using the same algorithm as for number fields by
+setting the optional argument <TT>Al</TT> to <TT>"Evaluate"</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16044">Example <TT>CrvCon_LocalGlobal (H125E6)</TT></A></H3>
+In the following example we show how the norm residue symbols can
+be used to determine the bad primes of a conic.
+<P>
+<P>
+<PRE>
+&gt; P2&lt;x,y,z&gt; := ProjectiveSpace(RationalField(), 2);
+&gt; a := 234;
+&gt; b := -33709;
+&gt; c := 127;
+&gt; C := Conic(P2, a*x^2 + b*y^2 + c*z^2);
+&gt; HasRationalPoint(C);
+false
+&gt; fac := Factorization(Integers()!Discriminant(C));
+&gt; fac;
+[ &lt;2, 3&gt;, &lt;3, 2&gt;, &lt;13, 2&gt;, &lt;127, 1&gt;, &lt;2593, 1&gt; ]
+</PRE>
+So we only need to test the primes 2, 3, 13, 127 and 2593.
+By scaling the defining polynomial of the curve ax<sup>2</sup> + by<sup>2</sup> + cz<sup>2</sup> = 0
+by -1/c, we obtain the quadratic form -a/c x<sup>2</sup> - b/c y<sup>2</sup> - z<sup>2</sup>;
+this means that we want to check the Hilbert symbols for the coefficient
+pair ( - a/c, - b/c).
+<P>
+<P>
+<PRE>
+&gt; [ NormResidueSymbol(-a/c, -b/c, p[1]) : p in fac ];
+[ -1, 1, 1, -1, 1 ];
+</PRE>
+The norm residue symbol indicates that only 2 and 127 have
+no local p-adic solutions, which confirms the bad primes as
+reported by Magma:
+<P>
+<P>
+<PRE>
+&gt; BadPrimes(C);
+[ 2, 127 ]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1420.htm">[Next]</A><A  HREF = "text1418.htm">[Prev]</A> <A  HREF = "text1420.htm">[Right]</A> <A  HREF = "text1418.htm">[Left]</A> <A  HREF = "text1415.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

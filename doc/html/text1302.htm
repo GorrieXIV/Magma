@@ -1,0 +1,207 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Changing Related Structures</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1303.htm">[Next]</A><A  HREF = "text1301.htm">[Prev]</A> <A  HREF = "text1303.htm">[Right]</A> <A  HREF = "text1301.htm">[Left]</A> <A  HREF = "text1297.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "14164">Changing Related Structures</A></H3>
+
+<P>
+<P>
+<P>
+Sometimes whilst working with a differential
+ring R, one might wish to consider the same ring, but with a different
+derivation or with a larger constant ring. 
+It is a consequence of the creation of a differential ring, 
+that its constant ring may actually be smaller than its differential ring
+of constants.
+<P>
+To alter the settings defined by the creation of a differential
+ring or field the following functions are available. 
+
+
+<H5><A NAME = "14165">ChangeDerivation(R, f) : RngDiff, RngElt -&gt; RngDiff, Map</A></H5>
+<BLOCKQUOTE>
+Returns a differential ring isomorphic to R, but whose derivation is 
+the map f.<TT>Derivation(R)</TT> induced by the isomorphism.
+The ring element f must be non--zero.
+The isomorphism of R to the new differential ring
+is also returned.
+The new differential ring has the same underlying ring as R.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14166">Example <TT>RngDiff_diff-ring-change-derivation (H117E18)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; F&lt;z&gt; := RationalDifferentialField(Rationals());
+&gt; Derivative(z^2);
+2*z
+&gt; K, toK := ChangeDerivation(F, z);
+&gt; K;
+Differential Ring of Algebraic function field defined over Rational Field by
+$.2 - 4711
+with derivation given by (1/z) d(z)
+&gt; toK;
+Mapping from: RngDiff: F to RngDiff: K given by a rule
+&gt; Derivative(toK(z^2));
+2*z^2
+&gt; UnderlyingRing(F) eq UnderlyingRing(K);
+true
+</PRE>
+Notice that the differential of K is (1/z) (d) (z),
+so that the derivation of K is z.(d)/(d)z,
+as requested.
+<HR>
+<H5><A NAME = "14167">ChangeDifferential(F, df) : RngDiff, DiffFunElt -&gt;  RngDiff, Map</A></H5>
+<BLOCKQUOTE>
+Returns the algebraic differential field, whose underlying ring is the 
+one of F, but with derivation with respect to the differential df. 
+The map returned is the bijective map from F into the 
+new algebraic differential field.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14168">Example <TT>RngDiff_diff-ring-change-differential (H117E19)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; F&lt;z&gt; := RationalDifferentialField(Rationals());
+&gt; df := Differential(1/z);
+&gt; df in DifferentialSpace(UnderlyingRing(F));
+true
+&gt; M&lt;u&gt;, mp := ChangeDifferential(F,df);
+&gt; IsAlgebraicDifferentialField(M);
+true
+&gt; Domain(mp) eq F and Codomain(mp) eq M;
+true
+&gt; Differential(M);
+(-1/u^2) d(u)
+&gt; mp(z);
+u
+&gt; Derivation(M)(u);
+u^2
+&gt; Derivation(F)(z);
+1
+&gt; dg := Differential(z^3+5);
+&gt; N&lt;v&gt;, mp := ChangeDifferential(F,dg);
+&gt; Differential(M);
+(3*v^2) d(v)
+&gt; mp(z);
+v
+&gt; Derivation(N)(mp(z));
+1/3/v^2
+</PRE>
+<HR>
+<H5><A NAME = "14169">ConstantFieldExtension(F, C) : RngDiff, Fld -&gt; RngDiff, Map</A></H5>
+<BLOCKQUOTE>
+Returns the differential field isomorphic 
+to the differential field F, but whose constant field is the extension C,
+and the isomorphism from F to 
+the new field.
+The differential field F must be an algebraic function field.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14170">Example <TT>RngDiff_diff-ring-constant-field-extension (H117E20)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; F&lt;z&gt; := RationalDifferentialField(Rationals());
+&gt; _&lt;X&gt; := PolynomialRing(F);
+&gt; M := ext&lt; F | X^2-2 &gt;;
+&gt; ConstantField(M);
+Rational Field
+&gt; _&lt;x&gt;:=PolynomialRing(Rationals());
+&gt; C := NumberField(x^2-2);
+&gt; Mext, toMext := ConstantFieldExtension(M, C);
+&gt; ConstantField(Mext);
+Number Field with defining polynomial x^2 - 2 over the Rational Field
+&gt; toMext;
+Mapping from: RngDiff: M to RngDiff: Mext given by a rule
+</PRE>
+<HR>
+<H3><A NAME = "14171">Example <TT>RngDiff_diff-ring-constant-field-extension-series (H117E21)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; S&lt;t&gt;:=DifferentialLaurentSeriesRing(Rationals());
+&gt; P&lt;T&gt; := PolynomialRing(Rationals());
+&gt; Cext := ext&lt;Rationals()|T^2+1&gt;;
+&gt; Sext&lt;text&gt;, mp := ConstantFieldExtension(S,Cext);
+&gt; IsDifferentialLaurentSeriesRing(Sext);
+true
+&gt; ConstantRing(Sext) eq Cext;
+true
+&gt; Derivative(text^(-2)+7+2*text^3+O(text^6));
+-2*text^-2 + 6*text^3 + O(text^6);
+&gt; mp;
+Mapping from: RngDiff: S to RngDiff: Sext given by a rule
+&gt; mp(t);
+text
+</PRE>
+<HR>
+<H5><A NAME = "14172">Completion(F, p) : RngDiff, PlcFunElt -&gt; RngDiff, Map</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: &infin;</PRE>
+<BLOCKQUOTE>
+The completion of the differential field F with respect to the place p.
+The place p should be an element of the set of places of F.
+The derivation of the completion is the one naturally induced by
+the derivation of F.
+The map returned is the embedding of F into the completion.
+Upon creation one can set the precision by using <TT>Precision</TT>.
+If no precision is given, then a default value is taken.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14173">Example <TT>RngDiff_diff-ring-completion-create (H117E22)</TT></A></H3>
+This example illustrates the creation of the differential Laurent
+series ring by using the command <TT>Completion</TT>.
+<P>
+<P>
+<PRE>
+&gt; F&lt;z&gt; := RationalDifferentialField(Rationals());
+&gt; pl := Zeros(z)[1];
+&gt; S&lt;t&gt;, mp := Completion(F,pl: Precision := 5);
+&gt; IsDifferentialLaurentSeriesRing(S);
+true
+&gt; mp;
+Mapping from: RngDiff: F to RngDiff: S given by a rule
+&gt; Domain(mp) eq F, Codomain(mp) eq S;
+true true
+&gt; Derivation(S)(t);
+1
+&gt; 1/(1-t);
+1 + t + t^2 + t^3 + t^4 + O(t^5)
+</PRE>
+<HR>
+<H3><A NAME = "14174">Example <TT>RngDiff_diff-ring-completion-elliptic (H117E23)</TT></A></H3>
+This example shows that one does not have to restrict to differential fields
+of genus 0 to use <TT>Completion</TT>.
+<P>
+<P>
+<PRE>
+&gt; F&lt;z&gt; := RationalDifferentialField(Rationals());
+&gt; P&lt;Y&gt; := PolynomialRing(F);
+&gt; K&lt;y&gt; := ext&lt;F|Y^2-z^3+z+1&gt;;
+&gt; Genus(UnderlyingRing(K));
+1
+&gt; pl:=Zeros(K!z)[1];
+&gt; Degree(pl);
+2
+&gt; S&lt;t&gt;, mp := Completion(K,pl);
+&gt; IsDifferentialLaurentSeriesRing(S);
+true
+&gt; C&lt;c&gt; := ConstantRing(S);
+&gt; C;
+Number Field with defining polynomial $.1^2 + 1 over the Rational Field
+&gt; mp(y) + O(t^4);
+c - t - 4*t^3 + O(t^4)
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1303.htm">[Next]</A><A  HREF = "text1301.htm">[Prev]</A> <A  HREF = "text1303.htm">[Right]</A> <A  HREF = "text1301.htm">[Left]</A> <A  HREF = "text1297.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

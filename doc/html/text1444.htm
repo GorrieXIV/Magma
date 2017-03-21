@@ -1,0 +1,107 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Discrete Logarithms</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1436.htm">[Next]</A><A  HREF = "text1443.htm">[Prev]</A> <A  HREF = "text1436.htm">[Right]</A> <A  HREF = "text1443.htm">[Left]</A> <A  HREF = "text1437.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16331">Discrete Logarithms</A></H3>
+
+<P>
+<P>
+Computing discrete logarithms on elliptic curves over finite fields
+is considered to be a very difficult problem.  The best algorithms
+for general elliptic curves take exponential time, and do not take
+much advantage of properties of the curve.  Solving such problems
+can thus be computationally infeasible for large curves.  Indeed, elliptic
+curves are becoming increasingly appealing for applications in
+cryptography.
+<P>
+Although hard instances of the elliptic curve discrete logarithm
+may be impossible to solve, Magma is able to efficiently solve
+reasonable sized instances, or instances where the large prime factor
+of the order of the base point is not too big.  Magma does
+this as follows:
+The first step is to compute the factorisation of the order of the
+base point, which may require calling SEA if the order of the curve is not
+already known to Magma.
+Then it checks that the order of the base point is a multiple of
+the order of the other point.
+If this is not true then there is no solution.
+It next breaks the problem down to solving the discrete logarithm
+modulo the prime power factors of the order using the Pohlig--Hellman
+algorithm.
+<P>
+For very small primes it will try to solve this by exhaustive search.
+If a solution does not exist then Magma might determine this during
+the exhaustive search and abort the remaining computations.
+For the larger prime power factors, Magma uses the parallel collision
+search version of Pollard's rho algorithm.
+The implementation includes Edlyn Teske's idea of r-adding walks
+and Michael Wiener's and Robert Zuccherato's idea of treating
+the point P the same as -P (for curves of the form
+y<sup>2</sup> = x<sup>3</sup> + a x + b) so as to reduce the search space by a factor of
+1/Sqrt(2) (this idea was independently discovered by other
+researchers).  It should be noted that Magma is not always able to
+determine the nonexistence of a solution and therefore may run
+forever if given very bad parameters.
+For this reason, the user has the option of setting a time limit
+on the calculation.
+
+
+<H5><A NAME = "16332">Log(Q, P) : PtEll, PtEll -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The discrete log of P to the base Q (an integer n satisfying
+n * Q = P where 0 &le;n &lt; <TT>Order</TT>(Q)).
+The arguments Q and P must be points on the same elliptic curve,
+which must be defined over a finite field.
+The function returns -1 if it is determined that no solution exists.
+</BLOCKQUOTE>
+<H5><A NAME = "16333">Log(Q, P, t) : PtEll, PtEll, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The discrete log of P to the base Q (an integer n satisfying
+n * Q = P where 0 &le;n &lt; <TT>Order</TT>(Q)).
+The arguments Q and P must be points on the same elliptic curve,
+which must be defined over a finite field.
+The argument t is a time limit in seconds on the calculation; if this
+limit is exceeded then the calculation is aborted.
+The time limit t must be a small positive integer.
+This function returns -1 if it is determined that no solution exists;
+if the calculation is aborted due to the time limit being exceeded then
+-2 is returned.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16334">Example <TT>CrvEllFldFin_ECDL (H127E10)</TT></A></H3>
+In the example below we create a random elliptic curve over a
+randomly chosen 40-bit prime field.
+Our base point Q is chosen randomly on the curve, and
+the other point P is selected as a random multiple of Q.
+Using the <TT>Log</TT> function, we recover that multiplier (m)
+and finally we verify that the solution is correct.
+<P>
+<P>
+<PRE>
+&gt; K := GF(RandomPrime(40));
+&gt; E := EllipticCurve([Random(K), Random(K)]);
+&gt; E;
+Elliptic Curve defined by y^2 = x^3 + 456271502613*x + 504334195864
+over GF(742033232201)
+&gt; Q := Random(E);
+&gt; Q;
+(174050269867 : 191768822966 : 1)
+&gt; FactoredOrder(Q);
+[ &lt;31, 1&gt;, &lt;7789, 1&gt;, &lt;3073121, 1&gt; ]
+&gt; P := Random(Order(Q))*Q;
+&gt; P;
+(495359429535 : 455525174166 : 1)
+&gt; m := Log(Q, P);
+&gt; m*Q - P;
+(0 : 1 : 0)
+</PRE>
+<PRE></PRE> <A  HREF = "text1436.htm">[Next]</A><A  HREF = "text1443.htm">[Prev]</A> <A  HREF = "text1436.htm">[Right]</A> <A  HREF = "text1443.htm">[Left]</A> <A  HREF = "text1437.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

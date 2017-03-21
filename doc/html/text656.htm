@@ -1,0 +1,213 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Homomorphisms</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text657.htm">[Next]</A><A  HREF = "text655.htm">[Prev]</A> <A  HREF = "text657.htm">[Right]</A> <A  HREF = "text655.htm">[Left]</A> <A  HREF = "text653.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "7433">Homomorphisms</A></H3>
+
+<P>
+<P>
+Homomorphisms are an important part of group theory, and Magma
+supports homomorphisms between groups. Many useful homomorphisms
+are returned by constructors and intrinsic functions. Examples of these 
+are the <TT>quo</TT> constructor, the <TT>sub</TT> constructor and intrinsic 
+functions such as <TT>OrbitAction</TT> and <TT>FPGroup</TT>,
+which are described in more detail elsewhere in this chapter. In this 
+section we describe how the user may create their own homomorphisms with 
+domain a matrix group.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text656.htm#7441">Construction of Extensions</A>
+</UL>
+<H5><A NAME = "7434">hom&lt;G -&gt; H | L&gt; : GrpMat, Grp, List -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Given the matrix group G, construct the homomorphism
+f : G to H given by the generator images in L. H must be
+a group.
+The clause L may be any one of the following types:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>A list of elements of H, giving images of the generators 
+of G;
+<DT>(b)</DT><DD>A list of pairs, where the first in the pair is an
+element of G and the second its image in H, where pairs may be given in
+either of the (equivalent) forms <TT>&lt;g,h&gt;</TT> or <TT>g -&gt; h</TT>;
+<DT>(c)</DT><DD>A sequence of elements of H, as in (a);
+<DT>(d)</DT><DD>A set or sequence of pairs, as in (b);
+<P>
+<P>
+</DL>
+Each image element specified by the list must belong to the
+<I>same</I> group H. In the cases where pairs are given the
+given elements of G must generate G.
+</BLOCKQUOTE>
+<H5><A NAME = "7435">Domain(f) : Map -&gt; Grp</A></H5>
+<BLOCKQUOTE>
+The domain of the homomorphism f.
+</BLOCKQUOTE>
+<H5><A NAME = "7436">Codomain(f) : Map -&gt; Grp</A></H5>
+<BLOCKQUOTE>
+The codomain of the homomorphism f.
+</BLOCKQUOTE>
+<H5><A NAME = "7437">Image(f) : Map -&gt; Grp</A></H5>
+<BLOCKQUOTE>
+The image or range of the homomorphism f. This will be a 
+subgroup of the codomain of f.  The algorithm computes the 
+image and kernel simultaneously (see <A  HREF = "text652.htm#bib_grp-homs">[LGPS91]</A>).
+</BLOCKQUOTE>
+<H5><A NAME = "7438">Kernel(f) : Map -&gt; Grp</A></H5>
+<BLOCKQUOTE>
+The kernel of the homomorphism f. This will be a normal
+subgroup of the domain of f. The algorithm computes the 
+image and kernel simultaneously (see <A  HREF = "text652.htm#bib_grp-homs">[LGPS91]</A>).
+</BLOCKQUOTE>
+<H5><A NAME = "7439">IsHomomorphism(G, H, Q) : GrpMat, GrpMat, SeqEnum[GrpMatElt] -&gt; Bool, Map</A></H5>
+<BLOCKQUOTE>
+Return the value <TT>true</TT> if the sequence Q defines a homomorphism from 
+the group G to the group H.  The sequence Q must have length 
+<TT>Ngens(G)</TT> and must contain elements of H.  The i-th element 
+of Q is interpreted as the image of the i-th generator of G and
+the function decides if these images extend to a homomorphism. If so,
+the homomorphism is also returned. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7440">Example <TT>GrpMatGen_Homomorphism (H64E5)</TT></A></H3>
+We construct the usual degree 2 matrix representation of the
+dihedral group of order 20, and a homomorphism from it to the symmetric
+group of degree 5.
+<P>
+<P>
+<PRE>
+&gt; K&lt;z&gt; := CyclotomicField(20);                      
+&gt; zz := RootOfUnity(10, K);
+&gt; i := RootOfUnity(4, K);
+&gt; cos := (zz+ComplexConjugate(zz))/2;
+&gt; sin := (zz-ComplexConjugate(zz))/(2*i);
+&gt; gl := GeneralLinearGroup(2, K);                   
+&gt; M := sub&lt; gl | [cos, sin, -sin, cos], [-1,0,0,1]&gt;;
+&gt; #M;
+20
+&gt; S := SymmetricGroup(5);
+&gt; f := hom&lt;M-&gt;S |[S|(1,2,3,4,5), (1,5)(2,4)]&gt;;                        
+&gt; Codomain(f);
+Symmetric group S acting on a set of cardinality 5
+Order = 120 = 2^3 * 3 * 5
+&gt; Image(f);
+Permutation group acting on a set of cardinality 5
+Order = 10 = 2 * 5
+  (1, 2, 3, 4, 5)
+  (1, 5)(2, 4)
+&gt; Kernel(f);
+MatrixGroup(2, K) of order 2
+Generators:
+  [-1  0]
+  [ 0 -1]
+</PRE>
+<HR>
+<H4><A NAME = "7441">Construction of Extensions</A></H4>
+
+
+
+<H5><A NAME = "7442">DirectProduct(G, H) : GrpMat, GrpMat -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Given two matrix groups G and H of degrees m and n respectively, 
+construct the direct product of G and H as a matrix group of degree
+m + n.
+</BLOCKQUOTE>
+<H5><A NAME = "7443">DirectProduct(Q) : [ GrpMat ] -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a sequence Q of n matrix groups, construct the direct product
+Q[1] x Q[2] x ... x Q[n] as a matrix group of degree equal
+to the sum of the degrees of the groups Q[i], (i = 1, ..., n).
+</BLOCKQUOTE>
+<H5><A NAME = "7444">SemiLinearGroup(G, S) : GrpMat, FldFin -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G over the finite field K and a subfield S
+of K, construct the semilinear extension of G over the subfield
+S.
+</BLOCKQUOTE>
+<H5><A NAME = "7445">TensorWreathProduct(G, H) : GrpMat, GrpPerm -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G and a permutation group H, construct
+action of the wreath product on the tensor power of G by H,
+which is the (image of) the wreath product in its action on the
+tensor power (of the space that G acts on).  The degree of the
+new group is d<sup>k</sup> where d is the degree of G and k is the
+degree of H.
+</BLOCKQUOTE>
+<H5><A NAME = "7446">WreathProduct(G, H) : GrpMat, GrpPerm -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G and a permutation group H, construct 
+the wreath product G wreath H of G and H.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7447">Example <TT>GrpMatGen_Constructions (H64E6)</TT></A></H3>
+We define G to be SU(3, 4) and H to be the symmetric group 
+of order 6. We then proceed to form the direct product of G with itself and the 
+tensor and wreath products of G and H.
+<P>
+<P>
+<P>
+<PRE>
+&gt; K&lt;w&gt; := FiniteField(4);
+&gt; G := SpecialUnitaryGroup(3, K);
+&gt; D := DirectProduct(G, G);
+&gt; D;
+MatrixGroup(6, GF(2, 2))
+Generators:
+[  1   w   w   0   0   0]
+[  0   1 w^2   0   0   0]
+[  0   0   1   0   0   0]
+[  0   0   0   1   0   0]
+[  0   0   0   0   1   0]
+[  0   0   0   0   0   1]
+
+
+[w 1 1 0 0 0]
+[1 1 0 0 0 0]
+[1 0 0 0 0 0]
+[0 0 0 1 0 0]
+[0 0 0 0 1 0]
+[0 0 0 0 0 1]
+
+
+[  1   0   0   0   0   0]
+[  0   1   0   0   0   0]
+[  0   0   1   0   0   0]
+[  0   0   0   1   w   w]
+[  0   0   0   0   1 w^2]
+[  0   0   0   0   0   1]
+
+
+[1 0 0 0 0 0]
+[0 1 0 0 0 0]
+[0 0 1 0 0 0]
+[0 0 0 w 1 1]
+[0 0 0 1 1 0]
+[0 0 0 1 0 0]
+&gt; Order(D);
+46656
+&gt; H := SymmetricGroup(3);
+&gt; E := WreathProduct(G, H);
+&gt; Degree(E);
+9
+&gt; Order(E);
+60466176
+&gt; F := TensorWreathProduct(G, H);
+&gt; Degree(F);
+27
+&gt; Order(F);
+6718464
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text657.htm">[Next]</A><A  HREF = "text655.htm">[Prev]</A> <A  HREF = "text657.htm">[Right]</A> <A  HREF = "text655.htm">[Left]</A> <A  HREF = "text653.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

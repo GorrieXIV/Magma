@@ -1,0 +1,487 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Diophantine Equations</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text394.htm">[Next]</A><A  HREF = "text392.htm">[Prev]</A> <A  HREF = "text394.htm">[Right]</A> <A  HREF = "text392.htm">[Left]</A> <A  HREF = "text383.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "3909">Diophantine Equations</A></H3>
+
+<P>
+<P>
+<P>
+Magma has routines for solving norm equations, Thue equations, 
+index form equations and unit equations.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text393.htm#3910">Norm Equations</A>
+<LI> <A  HREF = "text393.htm#3917">Thue Equations</A>
+<LI> <A  HREF = "text393.htm#3923">Unit Equations</A>
+<LI> <A  HREF = "text393.htm#3926">Index Form Equations</A>
+</UL>
+<H4><A NAME = "3910">Norm Equations</A></H4>
+
+<P>
+<P>
+<P>
+Norm equations in the context of number fields occur in many applications.
+While Magma contains efficient algorithms to solve norm equations
+it is important to understand the difference between the various types of
+norm equations that occur. Given some element &theta; in 
+a number field k together with a finite extension K/k, there are two
+different types of norm equations attached to this data:
+<DL COMPACT class='compact'>
+<DT></DT><DD>- Diophantine norm equations, that is norm equations where a solution
+x&isin;K is restricted to a particular order (or any additive subgroup), and
+<DT></DT><DD>- field theoretic norm equations where any element in x&isin;K with
+N(x) = &theta; is a solution.
+<P>
+</DL>
+While in the first case the number of <I>different</I> (up to equivalence) 
+solutions is finite, no such restriction holds in the field case.
+On the other hand, the field case often allows to prove the existence
+or non-existence of solutions quickly, while no efficient tests exist
+for the Diophantine case. So it is not surprising that different
+methods are applied for the different cases. We will discuss the differences
+with the individual intrinsics.
+
+
+<H5><A NAME = "3911">NormEquation(O, m) : RngOrd, RngIntElt -&gt; BoolElt, [ RngOrdElt ]</A></H5>
+<H5>NormEquation(O, m) : RngOrd, RngOrdElt -&gt; BoolElt, [ RngOrdElt ]</H5>
+
+<PRE>    All: BoolElt                        Default: <TT>true</TT></PRE>
+
+<PRE>    Solutions: RngIntElt                Default: All</PRE>
+
+<PRE>    Exact: BoolElt                      Default: <TT>false</TT></PRE>
+
+<PRE>    Ineq: BoolElt                       Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given an order O and an element m of the ground ring of O which can be
+a positive integer or an element of a suborder, this intrinsic solves
+a Diophantine norm equation. 
+<P>
+This function returns a
+boolean indicating whether an element &alpha;&isin;O exists such that
+N<sub>F/L</sub>(&alpha;), the norm of &alpha; with respect to the subfield L
+of F (the field of fractions of O),
+equals m, and if so, a sequence of length at most <TT>Solutions</TT>
+of solutions &alpha;.
+<P>
+The parameter <TT>Exact</TT> may be used to indicate whether
+an exact solution is required (with <TT>Exact := true</TT>) or
+whether a solution up to a torsion unit suffices.
+<P>
+The maximal number of required solutions can be indicated with
+the <TT>Solutions</TT> parameter, but setting <TT>All := true</TT>
+will override this and the search will find all solutions.
+<P>
+If the order is absolute, then the parameter <TT>Ineq</TT> may be
+set to true.  If so, all solutions x with |N(x)| &lt;= m will be found
+using a variation of Fincke's ellipsoid method (<A  HREF = "text382.htm#bib_Fin1">[Fin84]</A>, <A  HREF = "text382.htm#bib_pohst1">[PZ89]</A>).
+<P>
+Depending on whether the order is absolute maximal, absolute or (simple)
+relative, different algorithms are used.
+<P>
+If the order is an absolute maximal order, Magma will, in a first step,
+enumerate all integral ideals having the required norm (up to sign).
+Next, all the ideals are tested for principality using the 
+class group based method. If <TT>Exact := true</TT>, then a third step is added:
+we try to find a unit in O
+of norm -1. This unit is used to sign adjust the solution(s).
+If there is no such unit, we drop all solutions of the wrong sign.
+<P>
+If the order is absolute, but not maximal, the norm equation is first solved
+in the maximal order using the above outlined method. In a second step,
+a complete set of representatives for the unit group of the maximal order
+modulo the units of O is computed and Magma attempts to combine solutions
+in the maximal order with those representatives to get solutions in O.
+<P>
+If <TT>Solutions</TT> is set, the search stops after the required number of
+solutions is found.
+<P>
+In case the order is of type <TT>RngOrd</TT> and in some imaginary quadratic
+field, the norm function is a positive definite quadratic form, thus
+algorithms based on that property are used.
+In case the right hand side m equals &#8723; 1, lattice based methods are
+applied.
+<P>
+If <TT>Ineq</TT> is <TT>true</TT>, which is only supported for absolute fields, 
+lattice enumeration techniques (<A  HREF = "text382.htm#bib_Fin1">[Fin84]</A>, <A  HREF = "text382.htm#bib_pohst1">[PZ89]</A>) based
+on Fincke's ellipsoid method are used.
+<P>
+If the order is (simply) relative different algorithms are implemented, 
+depending on the number of solutions sought. However, common to all of them
+is that they (partially) work in the <TT>AbsoluteOrder</TT> of O.
+<P>
+If O is a relative maximal order and if we only want to find 1 solution
+(or to prove that there is none), Magma first looks for (integral) solutions 
+in the field using an S-unit based approach as outlined in 
+<A  HREF = "text393.htm#RngOrd:NormEquation:Fld">NormEquation</A>. This step gives an affine subspace
+of the S-unit group that contains all integral solutions of our equation.
+In a second step, a simplex based technique is used to find totally
+positive elements in the subspace.
+<P>
+In <TT>All</TT> is given or <TT>Solutions</TT> is &gt;1, then 
+lattice based methods are used (<A  HREF = "text382.htm#bib_Fi1">[Fie97]</A>, <A  HREF = "text382.htm#bib_Jurk">[Jur93]</A>, <A  HREF = "text382.htm#bib_FiJuPo">[FJP97]</A>).
+</BLOCKQUOTE>
+<H5><A NAME = "3912"></A><A NAME = "RngOrd:NormEquation:Fld">NormEquation</A>(F, m) : FldAlg, RngIntElt -&gt; BoolElt, [ FldAlgElt ]</H5>
+<H5>NormEquation(F, m) : FldAlg, FldAlgElt -&gt; BoolElt, [ FldAlgElt ]</H5>
+<H5>NormEquation(F, m) : FldAlg, FldRatElt -&gt; BoolElt, [ FldAlgElt ]</H5>
+
+<PRE>    Primes: eseq of prime ideals        Default: []</PRE>
+
+<PRE>    Nice: BoolElt                       Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a field F and an element m of the base field  of F,
+this function returns a
+boolean indicating whether an element &alpha;&isin;F exists such that
+N<sub>F/L</sub>(&alpha;), the norm of &alpha; with respect to the base field L
+of F 
+equals m, and if so, a sequence of length 1
+of solutions &alpha;.
+<P>
+The field theoretic norm equations are all solved using S-units. Before
+discussing some details, we outline the method.
+<DL COMPACT class='compact'>
+<DT></DT><DD>- Determine a set S of prime ideals. We try to obtain a solution
+ as a S-unit for this set S.
+<DT></DT><DD>- Compute a basis for the S-units
+<DT></DT><DD>- Compute the action of the norm-map
+<DT></DT><DD>- Obtain a solution as a preimage.
+<P>
+</DL>
+In general, no effective method is known for the first step. If the 
+field is relative normal however, it is known that is S generates the
+class group of F and if m is a S-unit, then S is large
+enough (<I>suitable</I> in (<A  HREF = "text382.htm#bib_cohen2">[Coh00, 7.5]</A>) <A  HREF = "text382.htm#bib_Fi1">[Fie97]</A>, <A  HREF = "text382.htm#bib_Simon1">[Sim02]</A>, <A  HREF = "text382.htm#bib_Garbanati">[Gar80]</A>.
+Thus to find S we have to compute the class group of F. If a (conditional)
+class group is already known, it is used, otherwise an <I>unconditional</I>
+class group is computed. The initial set S consists of all
+prime ideals occurring in the decomposition of mZ<sub>F</sub>. Note that
+this step includes the factorisation of m and thus can take a long 
+time is m is large.
+<P>
+Next, we determine a basis for the S-unit group and the action of the norm
+on it. This give the norm map as a map on the S-unit group as an 
+abstract abelian group.
+<P>
+Finally, the right hand side m is represented as an element of the S-unit 
+group and a solution is then obtained as a preimage under the norm map.
+<P>
+If <TT>Nice</TT> is true, then Magma attempts to find a smaller solution 
+by applying a LLL reduction to the original solution.
+<P>
+If <TT>Primes</TT> is give it must contain a list of prime ideals of L. 
+Together with the primes dividing m it is used to form the set S bypassing
+the computation of an unconditional class group in this step.
+If L is not normal this can be used 
+to guarantee that S is large enough. Note that the class group
+computation is still performed when the S-units are computed. Since the
+correctness of the S-unit group (we need only p-maximality for all primes
+dividing the (relative) degree of L) can be verified independently of the
+correctness of the class group, this can be used to derive provable
+results in cases where the class group cannot be computed unconditionally.
+<P>
+By default, the <TT>MaximalOrder(L)</TT> is used to compute the class group.
+If the attribute <TT>NeqOrder</TT> is set on L it must contain a
+maximal order of L. If present, this order will be used for all the
+subsequent computations.
+</BLOCKQUOTE>
+<H5><A NAME = "3913">NormEquation(m, N): RngElt, Map -&gt; BoolElt, RngElt</A></H5>
+
+<PRE>    Raw: BoolElt                        Default: <TT>false</TT></PRE>
+
+<PRE>    Primes: eseq of prime ideals        Default: []</PRE>
+<BLOCKQUOTE>
+Let N be a map on the multiplicative group of some number field. Formally
+N may also be defined on the maximal order of the field. This intrinsic
+tries to find a pre-image for m under N.
+<P>
+This function works by realising N as a endomorphism of S-units
+for a suitable set S.
+<P>
+If N is a relative norm and if L is (absolutely) normal then
+the set S as computed for the field theoretic norm equation is
+guaranteed to be large enough to find a solution if it exists.
+Note: this condition is not checked.
+<P>
+If <TT>Primes</TT> is given it will be supplemented by the primes
+dividing m and then used as the set S.
+<P>
+If <TT>Raw</TT> is given, the solution is returned as an unevaluated
+power product. See the example for details.
+<P>
+The main use of this function is for Galois theoretical constructions
+where the subfields are defined as fields fixed by certain automorphisms.
+In this situation the norm function can be realised as the product over
+the fixed group. It is therefore not necessary to compute a (very messy)
+relative representation of the field.
+</BLOCKQUOTE>
+<H5><A NAME = "3914">IntegralNormEquation(a, N, O) : RngElt, Map, RngOrd -&gt; BoolElt, [RngOrdElt]</A></H5>
+
+<PRE>    Nice: BoolElt                       Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+For a an integer or a unit in some number field, N being a multiplicative
+function on some number field k which is the field of fractions of the 
+order O, try to find a unit in O that is the preimage of a under N.
+In particular, N restricted to O must be an endomorphism of O.
+If <TT>Nice</TT> is <TT>true</TT>, the solution will be size-reduced. In particular
+when the conductor of O in the maximal order of k is large, and therefore 
+the unit index (Z<sub>k</sub>)<sup> * </sup> : O<sup> * </sup> is large as well, this function is much more
+efficient than the lattice based approach above.
+</BLOCKQUOTE>
+<H5><A NAME = "3915">SimNEQ(K, e, f) : FldNum, FldNumElt, FldNumElt -&gt; BoolElt, [FldNumElt]</A></H5>
+
+<PRE>    S: [RngOrdIdl]                      Default: <TT>false</TT></PRE>
+
+<PRE>    HasSolution: BoolElt                Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+For a number field K and subfield elements e&isin;k<sub>1</sub> and f&isin;k<sub>2</sub>,
+try to find a solution to the simultaneous norm equations
+N<sub>K/k<sub>1</sub></sub>(x) = e and N<sub>K/k<sub>2</sub></sub>(x) = f.
+The algorithm proceeds by first guessing a likely set S of prime ideals
+that will support a solution - it is exists. Initially S will contain
+all ramified primes in K, the support of e and f and enough primes
+to generate the class group of K. In case K is normal over Q
+this set is large enough to support a solution if there is a solution at all.
+For arbitrary fields that is most likely not the case.
+However, if <TT>S</TT> is passed in as a parameter then the set used internally 
+will contain at least this set.
+If <TT>HasSolution</TT> is <TT>true</TT>, Magma will add primes to S until a 
+solution has been found. This is useful in situations where for some theoretical
+reason it is known that there has to be a solution.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3916">Example <TT>RngOrd_norm-equation (H38E21)</TT></A></H3>
+We try to solve N(x) = 3 in some relative extension:
+(Note that since the larger field is a quadratic extension, the
+second call tells us that there is no integral element with norm 3)
+<P>
+<P>
+<PRE>
+&gt; x := PolynomialRing(Integers()).1;
+&gt; O := MaximalOrder(NumberField([x^2-229, x^2-2]));
+&gt; NormEquation(O, 3);
+false
+&gt; NormEquation(FieldOfFractions(O), 3);
+true [
+  5/1*$.1*O.1 + 2/3*$.1*O.2
+]
+</PRE>
+Next we solve the same equation but come from a different angle,
+we will define the norm map as an element of the group ring and, instead
+of explicitly computing a relative extension, work instead with the
+implicit fix-field.
+<P>
+<P>
+<PRE>
+&gt; K := AbsoluteField(FieldOfFractions(O));
+&gt; t := K!NumberField(O).2;
+&gt; t^2;
+2/1*K.1
+&gt; A, _, mA := AutomorphismGroup(K);
+&gt; F := sub&lt;A | [ x : x in A | mA(x)(t) eq t]&gt;;
+&gt; N := map&lt;K -&gt; K | x:-&gt; &amp;* [ mA(y)(x) : y in F]&gt;;
+&gt; NormEquation(3, N);
+true [
+    5/1*K.1 + 2/3*K.3
+]
+</PRE>
+Finally, to show the effect of <TT>Raw</TT>:
+<P>
+<P>
+<PRE>
+&gt; f, s, base := NormEquation(3, N:Raw);
+&gt; s;
+[
+    (0 -1 0 -2 0 1 0 0 0 -1 0 1 0 0 0 0 0 0 0 0 0 0 0 
+       0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0
+       0 0 0 0 0 0 0 0 1 0)
+]
+&gt; z := PowerProduct(base, s[1]);
+&gt; z;
+5/1*K.1 + 2/3*K.3
+&gt; N(z);
+3/1*K.1;
+</PRE>
+<HR>
+<H4><A NAME = "3917">Thue Equations</A></H4>
+
+<P>
+<P>
+Thue equations are Diophantine equations of the form f(x, y) = k, where k
+is some integer constant and f is a homogeneous polynomial in two variables.
+Methods for computing all solutions to such equations are known, although the
+search space may be larger than is practical.
+To work with such equations in Magma a Thue object (category <TT>Thue</TT>)
+must be created to store information related to the computations.
+To solve Thue equations the reduction of Bilu and Hanrot (<A  HREF = "text382.htm#bib_BiHa">[BH96]</A>)
+is used.
+
+
+<H5><A NAME = "3918">Thue(f) : RngUPolElt -&gt; Thue</A></H5>
+<BLOCKQUOTE>
+Given a polynomial f of degree at least 2 over the integers, this function
+returns the `Thue object' corresponding to f; such objects are used by the
+functions for solving Thue equations. They are printed as the homogeneous 
+version of f.
+</BLOCKQUOTE>
+<H5><A NAME = "3919">Thue(O) : RngOrd -&gt; Thue</A></H5>
+<BLOCKQUOTE>
+Given an order O with Z as its coefficient ring, this function
+returns the Thue object corresponding to the defining polynomial of O.
+</BLOCKQUOTE>
+<H5><A NAME = "3920">Evaluate(t, a, b) : Thue, RngIntElt, RngIntElt -&gt; RngIntElt</A></H5>
+<H5>Evaluate(t, S) : Thue, [ RngIntElt ] -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Given a Thue object t and integers a, b, this function returns 
+the evaluation of
+the homogeneous polynomial f involved in t at (a, b), that is
+f(a, b).  The second form takes as argument the sequence [a, b] instead.
+This can be convenient if checking the results from an inexact solution.
+</BLOCKQUOTE>
+<H5><A NAME = "3921">Solutions(t, a) : Thue, RngIntElt -&gt; [ [ RngIntElt, RngIntElt ] ]</A></H5>
+
+<PRE>    Exact: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    SetVerbose("ThueEq", n):            Maximum: 5</PRE>
+<BLOCKQUOTE>
+Given a Thue object t and an integer a, this function returns a sequence
+consisting of all sequences of two integers [x, y] which solve the
+equation f(x, y) = a, where f is the (homogeneous form of) the Thue
+equation associated with t.  If the optional parameter <TT>Exact</TT> is
+set to <TT>false</TT> then solutions to f(x, y) = - a will also be found.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3922">Example <TT>RngOrd_thue (H38E22)</TT></A></H3>
+A use of thue equations is shown.
+<P>
+<P>
+<PRE>
+&gt; R&lt;x&gt; := PolynomialRing(Integers());
+&gt; f := x^3 + x + 1;
+&gt; T := Thue(f);
+&gt; T;
+Thue object with form:  X^3 + X Y^2 + Y^3
+&gt; Evaluate(T, 3, 2);
+47
+&gt; Solutions(T, 4);
+[]
+&gt; Solutions(T, 7);
+[]
+&gt; Solutions(T, 47);
+[
+    [ -1, 4 ],
+    [ 3, 2 ]
+]
+&gt; S := Solutions(T, -47 : Exact := false);
+&gt; S;
+[
+    [ -3, -2 ],
+    [ -1, 4 ],
+    [ 1, -4 ],
+    [ 3, 2 ]
+]
+&gt; [Evaluate(T, s) : s in S];
+[ -47, 47, -47, 47 ]
+</PRE>
+<HR>
+<H4><A NAME = "3923">Unit Equations</A></H4>
+
+<P>
+<P>
+Unit equations are equations of the form
+a&epsilon; + b&eta; = c
+where a, b and c are some algebraic numbers and &epsilon; and &eta;
+are unknown units in the same field.
+
+
+<H5><A NAME = "3924">UnitEquation(a, b, c) : FldNumElt, FldNumElt, FldNumElt -&gt; [ ModHomElt ]</A></H5>
+
+<PRE>    SetVerbose("UnitEq", n):            Maximum: 5</PRE>
+<BLOCKQUOTE>
+Return the sequence of 1 x 2 matrices (e1, e2) 
+such that ae<sub>1</sub> + be<sub>2</sub> = c for number field elements a, b and c,
+where e<sub>1</sub> and e<sub>2</sub> are units in the maximal order.
+The algorithm uses Wildanger's method (<A  HREF = "text382.htm#bib_Wi2">[Wil97]</A>, <A  HREF = "text382.htm#bib_Wi3">[Wil00]</A>).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3925">Example <TT>RngOrd_uniteq (H38E23)</TT></A></H3>
+Usage of <TT>UnitEquation</TT> is shown.
+<P>
+<P>
+<PRE>
+&gt; R&lt;x&gt; := PolynomialRing(Integers());
+&gt; K&lt;a&gt; := NumberField(x^7 - x^6 + 8*x^5 + 2);
+&gt; UnitEquation(a^7, 4*a^2 + a^80, a^7 + a^80 + 4*a^2);
+[
+    [[1, 0, 0, 0, 0, 0, 0] [1, 0, 0, 0, 0, 0, 0]]
+]
+</PRE>
+<HR>
+<H4><A NAME = "3926">Index Form Equations</A></H4>
+
+<P>
+<P>
+Given an absolute number field K with some order O, index form
+equations are equations of the form (O:Z[&alpha;]) = k where k is some
+positive integer.
+<P>
+In particular, if k=1 this function will find "all" integral power bases.
+<P>
+In this context "all" means up to equivalence, where two solutions
+&alpha; and &beta; are equivalent iff &alpha; = &#8723; &beta; + r for
+some integer r.
+<P>
+If the field degree is larger than 4, the field must be normal and
+an integral power basis must already be known.
+<P>
+The implementation follows <A  HREF = "text382.htm#bib_Wi2">[Wil97]</A>, <A  HREF = "text382.htm#bib_Wi3">[Wil00]</A> for large degree equations,
+<A  HREF = "text382.htm#bib_GaPePo1">[GPP93]</A>, <A  HREF = "text382.htm#bib_GaPePo2">[GPP96]</A> for quartics and <A  HREF = "text382.htm#bib_GaSch">[GS89]</A> for cubic fields.
+
+
+<H5><A NAME = "3927">IndexFormEquation(O, k) : RngOrd, RngIntElt -&gt; [ RngOrdElt ]</A></H5>
+
+<PRE>    SetVerbose("IndexFormEquation", n):  Maximum: 5</PRE>
+<BLOCKQUOTE>
+Given an absolute order O, this function will find "all"
+(up to equivalence) solutions &alpha;&isin;OP to (O:Z[&alpha;])=k.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3928">Example <TT>RngOrd_index-form (H38E24)</TT></A></H3>
+We try to compute all integral power bases of the field defined by
+a zero of x<sup>4</sup> - 14x<sup>3</sup> + 14x<sup>2</sup> - 14x + 14:
+<P>
+<P>
+<PRE>
+&gt; x := PolynomialRing(Integers()).1;
+&gt; O := MaximalOrder(x^4-14*x^3+14*x^2-14*x+14);
+&gt; IndexFormEquation(O, 1);
+[
+    [0, 1, 0, 0]
+    [0, 1, -13, 1],
+    [0, 1, -1, 1],
+]
+&gt; [ MinimalPolynomial(x) :x in $1 ];
+[
+    x^4 - 14*x^3 + 14*x^2 - 14*x + 14,
+    x^4 - 28*x^3 + 56*x^2 + 3962*x - 28014,
+    x^4 - 2044*x^3 + 6608*x^2 - 7126*x + 2562
+]
+&gt; [ Discriminant(x) : x in $1 ] ;
+[ -80240048, -80240048, -80240048 ]
+&gt; Discriminant(O);
+-80240048
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text394.htm">[Next]</A><A  HREF = "text392.htm">[Prev]</A> <A  HREF = "text394.htm">[Right]</A> <A  HREF = "text392.htm">[Left]</A> <A  HREF = "text383.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

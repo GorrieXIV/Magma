@@ -1,0 +1,153 @@
+
+VERB := false;
+
+mset_test := procedure(A, size, rand_alg)
+    print "mset_test:", size, A;
+
+    S := {* rand_alg(A): i in { 1 .. size } *};
+    T := {* rand_alg(A): i in { 1 .. size } *};
+
+    if VERB then
+	print "#S:", #S;
+	print "#T:", #T;
+    end if;
+
+    assert not IsNull(S);
+    assert not IsEmpty(S);
+
+    assert {* Universe(S) | *} eq {* A | *};
+
+    assert {* x: x in S *} eq S;
+    assert &and{* x in S: x in S *};
+    assert {* T | x: x in T *} eq T;
+
+    C := {* *};      
+    for x in S do
+        Include(~C, x);
+    end for;
+    assert C eq S;        
+                       
+    assert S in Parent(S); 
+    assert Rep(S) in S;
+    assert S ! Rep(S) in S;                             
+
+    repeat          
+        x := rand_alg(A);
+    until x notin S;
+
+    C := S;
+    //assert Refcount(C) eq 2;
+    Include(~C, x);
+    //assert Refcount(C) eq 1;
+    assert C ne S;
+
+    repeat
+        x := rand_alg(A);
+    until x notin C;
+
+    Include(~C, x);
+    //assert Refcount(C) eq 1;
+    assert C ne S;
+
+    loop_size := Max(10, size div 2);
+
+    if VERB then
+	print "loop_size:", loop_size;
+    end if;
+
+    L := { 1 .. loop_size };
+
+    M := S meet T;
+    if VERB then
+	print "#M:", #M;
+    end if;
+    assert M subset S;
+    assert M subset T;
+    MS := Set(M);
+    if #M gt 0 then
+	for i in L do
+	    r := Random(MS);
+	    assert r in M;
+	    assert r in S;
+	    assert r in T;
+	end for;
+    end if;
+
+    SS := Set(S);
+    TS := Set(T);
+    J := S join T;
+    if VERB then
+	print "#J:", #J;
+    end if;
+    assert S subset J;
+    assert T subset J;
+    //assert {* Random(SS) : i in L *} subset J;
+    //assert {* Random(TS) : i in L *} subset J;
+    //assert {* Random(SS) : i in L *} join {* Random(TS) : i in L *} subset J;
+    JS := Set(J);
+    for i in L do
+	r := Random(JS);
+	assert r in S or r in T;
+	r := Random(SS);
+	assert r in J;
+	r := Random(TS);
+	assert r in J;
+    end for;
+
+    x := rand_alg(A);
+    repeat
+        y := rand_alg(A);
+    until y ne x;
+    S := {* x, x, x, y^^10 *};
+    T := {* y, y, y, x^^10 *};
+    assert Multiplicity(S, x) eq 3;
+    assert Multiplicity(S, y) eq 10;
+    assert #S eq 13 and #T eq 13;
+    J := S join T;
+    M := S meet T;
+    assert #J eq 26;
+    assert #M eq 6;
+    assert S subset J and T subset J;
+    assert M subset S and M subset T;
+end procedure;
+
+sym_rand := func<G | Random(G: Short := true)>;
+
+//show mem;
+//mset mark := true;
+
+mset_test(IntegerRing(), 100, func<x | Random(-50, 50)>);
+
+mset_test(MatrixAlgebra(GF(2), 4), 10000, Random);   
+mset_test(MatrixAlgebra(GF(23), 10), 1000, Random);   
+
+mset_test(SL(3, GF(4)), 1000, Random);   
+
+mset_test(Sym(5), 10, sym_rand);
+mset_test(Sym(10), 5000, sym_rand);
+
+mset_test(IntegerRing(), 10000, func<x | Random(-1000000, 1000000)>);
+
+mset_test(RationalField(), 1000, func<x | Random(-100, 100) / Random(1, 100)>);
+
+mset_test(
+    PowerSet(IntegerRing()), 100, func<x | { Random(1, 10) : i in { 1..10 } }>
+);
+
+mset_test(
+    PowerMultiset(IntegerRing()), 100,
+    func<x | {* Random(1, 10) : i in { 1..10 } *}>
+);
+
+mset_test(
+    PowerSet(PowerSet(RationalField())), 500,
+    func<x | { { Random(1, 3) / Random(1, 3) : i in { 1..3 } }: j in { 1..3 } }>
+);
+
+mset_test(
+    PowerMultiset(PowerMultiset(RationalField())), 500,
+    func<x |
+	{* {* Random(1, 3) / Random(1, 3) : i in { 1..3 } *}: j in { 1..3 } *}
+>);
+
+//quit;

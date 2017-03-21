@@ -1,0 +1,829 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Divisors</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1366.htm">[Next]</A><A  HREF = "text1364.htm">[Prev]</A> <A  HREF = "text1366.htm">[Right]</A> <A  HREF = "text1364.htm">[Left]</A> <A  HREF = "text1356.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "15151">Divisors</A></H3>
+
+<P>
+<P>
+<P>
+We work implicitly on the resolution of a particular, usually singular,
+model of a curve C that has been referred to as tilde(C).
+To handle prime divisors at the singularities
+properly we use the notion of <I>places</I> of the curve and devote
+the first section below to their construction. Places include
+the case of prime divisors at points of degree greater than 1, that is,
+points whose coordinates do not lie in the base ring. Following this are
+sections on constructions of divisors and their basic arithmetic.
+It may seem a little strange at first to distinguish places from other
+divisors, but in practice when doing arithmetic the difference is not
+noticeable.
+<P>
+The most important invariant associated with a divisor D is its
+<I>Riemann--Roch</I> space, often denoted by L(D) or H<sup>0</sup>(D).
+This is a vector subspace of the function field of a curve.
+Its computation has an enormous number of applications.
+One we give as an illustration is the computation of the
+canonical embedding of C (in the case that C is non-hyperelliptic).
+<P>
+This section, together with Section <A  HREF = "text1366.htm#15227">Linear Equivalence of Divisors</A>, is devoted to Magma's
+facility to work with divisors on curves.
+A <I>divisor</I> on a nonsingular curve 
+C is a formal sum of points
+&Sigma; n<sub>i</sub>p<sub>i</sub>, where each p<sub>i</sub>&isin;C and each n<sub>i</sub> is an integer.
+It is clear that divisors form a group under componentwise addition.
+This group, and various variants of it, is an important invariant of
+the curve C.
+For a singular (but still irreducible) curve, one can make a similar
+definition in which <I>points</I> are replaced by <I>places</I>, a notion
+that makes precise the vague idea that singularities arise in different
+ways, both by "gluing" nonsingular points together and by "pinching"
+tangent vectors at a particular point.
+The sections of this chapter contain very brief discussions
+which will help to orient the user who already knows something about
+divisors. For a more complete account one should consult an advanced textbook
+such as <A  HREF = "text1355.htm#bib_hartshorne">[Har77]</A> Chapter II 6, or <A  HREF = "text1355.htm#bib_fulton">[Ful69]</A> Chapter 8.
+<P>
+We start with a description of <I>prime divisors</I> or <I>places</I>.
+Then we show how to create divisor groups and divisors in them and go on
+to explain the basic arithmetic of divisors.
+All of the functions here are based on equivalent functions which apply
+to algebraic function fields. All calculations are done in that context
+using the functionality of Chapter <A  HREF = "text442.htm#4512">ALGEBRAIC FUNCTION FIELDS</A>.
+A translation is made in the
+background for all functions described here. For information about
+function fields, their representations and translations see 
+Section <A  HREF = "text1364.htm#15091">Function Fields</A>. The translations should not be explicitly needed
+in the ordinary course of working with curves and their divisors.
+<P>
+<P>
+<P>
+The main concern when working with divisors is with questions of linear
+equivalence. In this respect, one should at least have in mind
+that the most substantial calculations really make sense on projective 
+curves. However, the functions below allow constructions using an affine curve
+and its points which are reinterpreted in terms of the projective closure.
+<P>
+Section <A  HREF = "text1366.htm#15227">Linear Equivalence of Divisors</A> describes those functions which are related to
+linear equivalence of divisors.
+A divisor is called <I>principal</I> if it is linearly equivalent to
+the zero divisor.
+In the case of a curve defined over a finite field, we can compute the
+class group, that is, the group of divisors modulo principal divisors.
+In fact, we compute a finitely presented abelian group isomorphic to the
+class group and a map which transforms elements between the divisor group
+and the class group.
+<P>
+For any divisor on any curve, there are functions to compute Riemann-Roch
+spaces and a host of related entities.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1365.htm#15152">Places</A>
+<LI> <A  HREF = "text1365.htm#15187">Divisor Group</A>
+<LI> <A  HREF = "text1365.htm#15191">Creation of Divisors</A>
+<LI> <A  HREF = "text1365.htm#15208">Arithmetic of Divisors</A>
+<LI> <A  HREF = "text1365.htm#15222">Other Operations on Divisors</A>
+</UL>
+<H4><A NAME = "15152">Places</A></H4>
+
+<P>
+<P>
+A <I>place</I> is a point of the resolution of a curve or, equivalently, a
+valuation of the function field of a curve.
+It is characterised by a point on the curve and, if that point is
+singular, some data that distinguishes a single resolved point above it.
+
+
+<H5><A NAME = "15153">Sets of Places</A></H5>
+
+
+
+<H5><A NAME = "15154">Places(C) : Crv -&gt; PlcCrv</A></H5>
+<BLOCKQUOTE>
+The set of places of the curve C.
+</BLOCKQUOTE>
+<H5><A NAME = "15155">Curve(P) : PlcCrv -&gt; Crv</A></H5>
+<BLOCKQUOTE>
+The curve on which the places in the set of places P lie.
+This will be a projective curve.
+</BLOCKQUOTE>
+<H5><A NAME = "15156">P eq Q : PlcCrv, PlcCrv -&gt; BoolElt</A></H5>
+<H5>P ne Q : PlcCrv, PlcCrv -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the sets of places P and Q are (not) 
+equal.
+</BLOCKQUOTE>
+<H5><A NAME = "15157">Places</A></H5>
+
+<P>
+<P>
+There are
+some explicit methods for constructing places.
+As we show later, places arise implicitly as components of divisors
+and this is a common way of getting hold of them.
+
+
+<H5>p1 + p2 : PlcCrvElt, PlcCrvElt -&gt; DivCrvElt</H5>
+
+<H5>- p1 : PlcCrvElt -&gt; DivCrvElt</H5>
+
+<H5>p1 - p2 : PlcCrvElt, PlcCrvElt -&gt; DivCrvElt</H5>
+
+<H5>k * p : RngIntElt, PlcCrvElt -&gt; DivCrvElt</H5><P>
+
+
+<H5>p div k : PlcCrvElt, RngIntElt -&gt; DivCrvElt</H5>
+
+<H5>p mod k : PlcCrvElt, RngIntElt -&gt; DivCrvElt</H5>
+
+<H5>Quotrem(p1, k) : PlcCrvElt, RngIntElt -&gt; DivCrvElt, DivCrvElt</H5><P>
+
+
+<H5>P in S : Any, PlcCrv -&gt; BoolElt</H5>
+
+<H5>P notin S : Any, PlcCrv -&gt; BoolElt</H5><P>
+
+
+<H5><A NAME = "15158">Places(C, m) : Crv[FldFin], RngIntElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+A sequence of all places of degree m on C, a curve defined over
+a finite field, where m is a positive integer.
+</BLOCKQUOTE>
+<H5><A NAME = "15159">HasPlace(C, m) : Crv[FldFin], RngIntElt -&gt; BoolElt,PlcCrvElt</A></H5>
+<H5>RandomPlace(C, m) : Crv[FldFin], RngIntElt -&gt; BoolElt,PlcCrvElt</H5>
+<BLOCKQUOTE>
+If a place of degree m exists on the curve C over a finite field, 
+then this returns <TT>true</TT>
+and a single such place, where m is a positive integer.
+Otherwise it returns <TT>false</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "15160">Place(p) : Pt -&gt; PlcCrvElt</A></H5>
+<BLOCKQUOTE>
+The place corresponding to the nonsingular point p of some curve.
+</BLOCKQUOTE>
+<H5><A NAME = "15161">Places(p) : Pt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+A sequence containing the places corresponding to the point p of some curve.
+</BLOCKQUOTE>
+<H5><A NAME = "15162">Place(C, I) : Crv, RngMPol -&gt; PlcCrvElt</A></H5>
+<BLOCKQUOTE>
+Return the place of the curve C defined by the ideal I of the coordinate
+ring of C.
+</BLOCKQUOTE>
+<H5><A NAME = "15163">WeierstrassPlaces(C) : Crv -&gt; [PlcCrvElt]</A></H5>
+<BLOCKQUOTE>
+The Weierstrass places of the curve C, which are the Weierstrass places of
+the zero divisor of C.
+</BLOCKQUOTE>
+<H5><A NAME = "15164">Place(Q) : [FldFunFracSchElt] -&gt; PlcCrvElt</A></H5>
+<BLOCKQUOTE>
+The place of a curve C determined by the sequence of elements of
+the sequence Q, which should all be contained in the function
+field of C.
+</BLOCKQUOTE>
+<H5><A NAME = "15165">Ideal(P) : PlcCrvElt -&gt; RngMPol</A></H5>
+<BLOCKQUOTE>
+Given a place P of a curve C return
+the prime ideal of the coordinate ring of the ambient of C of coordinate 
+functions which vanish at the place P.
+</BLOCKQUOTE>
+<H5><A NAME = "15166">TwoGenerators(P) : PlcCrvElt -&gt; FldFunFracSchElt, FldFunFracSchElt</A></H5>
+<BLOCKQUOTE>
+Return two elements of the function field of P which determine the place P.
+The sequence containing these two elements can be used as input to
+<TT>Place</TT> to create a place equal to P.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15167">Example <TT>Crv_place-equations (H120E28)</TT></A></H3>
+In this example we show how to use rational functions to create
+a place on a curve. This is not directly a very geometric operation.
+However, it is very useful since a pair of rational functions which
+determine a place form a very concise description of that place.
+Thus one often uses this method to recreate a given place on a curve
+in one step.
+We illustrate that by first finding a place and later recreating it
+from rational functions.
+<P>
+<P>
+<PRE>
+&gt; P2&lt;x,y,z&gt; := ProjectivePlane(FiniteField(17));
+&gt; C := Curve(P2,x^5 + x^2*y^3 - z^5);
+&gt; p := C ! [1,0,1];
+&gt; Places(p);
+[
+    Place at (1 : 0 : 1)
+]
+&gt; P := $1[1];
+&gt; P:Minimal;
+Place at (1 : 0 : 1)
+&gt; TwoGenerators(P);
+$.1 + 16 
+$.1^2*$.2 
+</PRE>
+So now we have a place and some rational functions.
+As usual, these functions are elements of the function field of the
+curve C, so to be able to read them conveniently we assign names
+to that function field.
+<P>
+<P>
+<PRE>
+&gt; FC&lt;a,b&gt; := FunctionField(C);
+&gt; TwoGenerators(P);
+a + 16
+a^2*b
+</PRE>
+We can use this sequence to recreate the place P.
+The real convenience of the first line of code below is that it could be in a
+different Magma session in which only the curve C has been defined
+together with the names a, b of its function field.
+(You can confirm this by running the four relevant lines in a separate
+Magma session.)
+The final line is simply to confirm that we really have created the
+same place P as we started with.
+<P>
+<P>
+<PRE>
+&gt; Place([a+16,a^2*b]);
+Place at (1 : 0 : 1)
+&gt; Place([a+16,a^2*b]) eq P;
+true
+&gt; Place([a+16,a*b,a^2*b^2]) eq P;
+true
+</PRE>
+Notice that in the final line we create exactly the same place using
+more than the two elements that <TT>TwoGenerators</TT>
+returned. 
+<HR>
+<H5><A NAME = "15168">Zeros(f) : FldFunFracSchElt[Crv] -&gt; SeqEnum[PlcCrvElt]</A></H5>
+<H5>Poles(f) : FldFunFracSchElt[Crv] -&gt; SeqEnum[PlcCrvElt]</H5>
+<BLOCKQUOTE>
+A sequence of places of the curve C containing the zeros or poles of
+f where f is an element of the function field of C.
+</BLOCKQUOTE>
+<H5><A NAME = "15169">Zeros(C, f) : Crv, RngElt -&gt; [PlcCrvElt]</A></H5>
+<H5>Poles(C, f) : Crv, RngElt -&gt; [PlcCrvElt]</H5>
+<BLOCKQUOTE>
+A sequence of places of the curve C containing the zeros or poles of
+f where f is some function on C, i.e. f is coercible into the 
+function field of C.
+</BLOCKQUOTE>
+<H5><A NAME = "15170">CommonZeros(L) : [FldFunFracSchElt[Crv]] -&gt; [PlcCrvElt]</A></H5>
+<H5>CommonZeros(C, L) : Crv, [FldFunFracSchElt] -&gt; [PlcCrvElt]</H5>
+<BLOCKQUOTE>
+Given a sequence L of elements of the function field of some curve C
+or a curve C and a sequence L of functions on C,
+return the zeros which are common to all elements of L as places of C.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15171">Example <TT>Crv_zeros-and-poles (H120E29)</TT></A></H3>
+The second argument to the intrinsic <TT>Poles(C,f)</TT> can be either an
+element of the function field of the curve C or an element of the
+function field of its ambient space.
+<P>
+<P>
+<PRE>
+&gt; A&lt;x,y&gt; := AffineSpace(GF(2),2);
+&gt; C := Curve(A,x^8*y^3 + x^3*y^2 + y + 1);
+&gt; FA&lt;X,Y&gt; := FunctionField(A);
+&gt; FC&lt;a,b&gt; := FunctionField(C);
+&gt; Poles(C,X/Y);               
+[
+    Place at (1 : 0 : 0)
+]
+&gt; Poles(C,a/b);               
+[
+    Place at (1 : 0 : 0)
+]
+&gt; $1 eq $2;
+true
+</PRE>
+In particular, we did not use the ambient coordinates x, y in
+the arguments.
+<HR>
+<H5><A NAME = "15172">Curve(P) : PlcCrvElt -&gt; Crv</A></H5>
+<BLOCKQUOTE>
+The projective curve on which the place P lies.
+</BLOCKQUOTE>
+<H5><A NAME = "15173">RepresentativePoint(P) : PlcCrv -&gt; Pt</A></H5>
+<BLOCKQUOTE>
+A representative point of the projective model of the curve 
+underlying the place.
+</BLOCKQUOTE>
+<H5><A NAME = "15174">P eq Q : PlcCrvElt, PlcCrvElt -&gt; BoolElt</A></H5>
+<H5>P ne Q : PlcCrvElt, PlcCrvElt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the two places are (not) the same.
+</BLOCKQUOTE>
+<H5><A NAME = "15175">Valuation(f, P) : RngElt, PlcCrvElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The order of vanishing of the function f on the curve C
+at the place P of C.
+A negative value indicates a pole at P.
+</BLOCKQUOTE>
+<H5><A NAME = "15176">Valuation(P) : PlcCrvElt -&gt; Map</A></H5>
+<BLOCKQUOTE>
+The valuation of the function field centred at the place P.
+This is a map from the function field to the integers.
+</BLOCKQUOTE>
+<H5><A NAME = "15177">Valuation(a, P) : DiffCrvElt, PlcCrvElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The valuation of the differential a at the place P.
+</BLOCKQUOTE>
+<H5><A NAME = "15178">Residue(a, P) : DiffCrvElt, PlcCrvElt -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+The residue of the differential a at the degree 1 place P.
+</BLOCKQUOTE>
+<H5><A NAME = "15179">UniformizingParameter(P) : PlcCrvElt -&gt; FldFunFracSchElt</A></H5>
+<BLOCKQUOTE>
+A function on the curve of the place P
+having valuation 1 at P.
+</BLOCKQUOTE>
+<H5><A NAME = "15180">IsWeierstrassPlace(P) : PlcCrvElt -&gt; BoolElt</A></H5>
+<H5>IsWeierstrassPlace(D, P) : DivCrvElt, PlcCrvElt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the place P (which must have degree 1)
+is a Weierstrass place (of divisor D if given).
+</BLOCKQUOTE>
+<H5><A NAME = "15181">ResidueClassField(P) : PlcCrvElt -&gt; Rng</A></H5>
+<BLOCKQUOTE>
+The residue class field of the place P.
+</BLOCKQUOTE>
+<H5><A NAME = "15182">Evaluate(a, P) : FldFunFracSchElt, PlcCrvElt -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+Evaluate the element a in the function field of the curve of the place P,
+returning an element of the residue class field of P.
+</BLOCKQUOTE>
+<H5><A NAME = "15183">Lift(a, P) : RngElt, PlcCrvElt -&gt; FldFunFracSchElt</A></H5>
+<H5>Lift(i, P) : Infty, PlcCrvElt -&gt; FldFunFracSchElt</H5>
+<BLOCKQUOTE>
+Lift the element a of the residue class field of the place P
+(including infinity) to a function on the curve of P.
+</BLOCKQUOTE>
+<H5><A NAME = "15184">Degree(P) : PlcCrvElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The degree of the place P of a curve over the base ring of the curve of P.
+</BLOCKQUOTE>
+<H5><A NAME = "15185">GapNumbers(C, P) : Crv, PlcCrvElt -&gt; [RngIntElt]</A></H5>
+<H5>GapNumbers(P) : PlcCrvElt -&gt; [RngIntElt]</H5>
+<BLOCKQUOTE>
+The gap numbers of the curve C at the degree 1 place P.
+</BLOCKQUOTE>
+<H5><A NAME = "15186">Parametrization(C, p) : Crv, Pt -&gt; MapSch</A></H5>
+<H5>Parametrization(C, p) : Crv, PlcCrvElt -&gt; MapSch</H5>
+<H5>Parametrization(C, p, P) : Crv, PlcCrvElt, Crv -&gt; MapSch</H5>
+<BLOCKQUOTE>
+Returns a map parametrizing the rational curve C at the rational point p
+or place p of degree 1. If p is a <I>singular</I> point on C, then it must
+have a unique place above it of degree 1.
+If P is also given it must be the projective line
+of dimension 1 as a curve (ie of type <TT>Crv</TT>) and then the domain of the
+map will be P.
+<P>
+<P>
+</BLOCKQUOTE>
+<H4><A NAME = "15187">Divisor Group</A></H4>
+
+<P>
+<P>
+A curve has an associated
+group of divisors which is simply the formal abelian group
+generated by the places of the curve C.
+Divisors are elements of this group.
+In other words, divisors are expressions of the form &Sigma; n<sub>i</sub> p<sub>i</sub>
+where n<sub>i</sub> are integers, p<sub>i</sub> are places of the curve which one
+usually assumes to be distinct.
+Each term n p is called a <I>summand</I> of d or the <I>component
+of d corresponding to p</I>.
+The integer n will be called the <I>coefficient</I> or <I>multiplicity</I> of
+the summand.
+<P>
+Divisors are created by specifying the curve for which they will a divisor
+(if that is not clear) and then giving sufficient data to identify precisely 
+the divisor in question. This data could be a list of points or places together 
+with integers, but there are many other creation methods.
+Divisors are printed as a linear combination of the places
+which support them, if such a combination is known.
+However, giving this information can be extremely expensive so often
+printing simply refers to the curve.
+
+
+<H5><A NAME = "15188">DivisorGroup(C) : Crv -&gt; DivCrv</A></H5>
+<BLOCKQUOTE>
+The group of divisors of the curve C.
+This curve may be either an affine or projective curve.
+</BLOCKQUOTE>
+<H5><A NAME = "15189">Curve(Div) : DivCrv -&gt; Crv</A></H5>
+<BLOCKQUOTE>
+The curve that was used to create the divisor group Div, or its projective
+model.
+</BLOCKQUOTE>
+<H5><A NAME = "15190">Div1 eq Div2 : DivCrv, DivCrv -&gt; BoolElt</A></H5>
+<H5>Div1 ne Div2 : DivCrv, DivCrv -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only the divisor groups Div1 and Div2 are (not)
+equal.
+<P>
+<P>
+<P>
+</BLOCKQUOTE>
+<H4><A NAME = "15191">Creation of Divisors</A></H4>
+
+
+
+<H5><A NAME = "15192">DivisorGroup(D) : DivCrvElt -&gt; DivCrv</A></H5>
+<BLOCKQUOTE>
+The divisor group in which the divisor D lies.
+</BLOCKQUOTE>
+<H5><A NAME = "15193">Curve(D) : DivCrvElt -&gt; Crv</A></H5>
+<BLOCKQUOTE>
+The (projective) curve on which the divisor D lies.
+</BLOCKQUOTE>
+<H5><A NAME = "15194">Identity(D) : DivCrv -&gt; DivCrvElt</A></H5>
+<H5>Id(D) : DivCrv -&gt; DivCrvElt</H5>
+<H5>D ! 0 : DivCrv,RngIntElt -&gt; DivCrvElt</H5>
+<BLOCKQUOTE>
+The zero divisor of the divisor group D of a curve.
+</BLOCKQUOTE>
+<H5><A NAME = "15195">Div ! p : DivCrv, PlcCrvElt -&gt; DivCrvElt</A></H5>
+<H5>Div ! p : DivCrv, Pt -&gt; DivCrvElt</H5>
+<H5>Divisor(p) : PlcCrvElt -&gt; DivCrvElt</H5>
+<H5>Divisor(p) : Pt -&gt; DivCrvElt</H5>
+<BLOCKQUOTE>
+The prime divisor in the divisor group Div of the curve C
+corresponding to the place or nonsingular point p of some curve C.
+</BLOCKQUOTE>
+<H5><A NAME = "15196">Divisor(D, S) : DivCrv, SeqEnum -&gt; DivCrvElt</A></H5>
+<H5>Divisor(C, S) : Crv, SeqEnum -&gt; DivCrvElt</H5>
+<H5>Divisor(S) : [&lt;PlcCrvElt, RngIntElt&gt;] -&gt; DivCrvElt</H5>
+<BLOCKQUOTE>
+The divisor of the curve
+C or the curve of the divisor group D 
+described by the factorization sequence S.
+The sequence should contain tuples of the form <TT>&lt;place,integer&gt;</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15197">Example <TT>Crv_divisor-equations (H120E30)</TT></A></H3>
+One can use the intrinsic <TT>Divisor(S)</TT> to reconstruct a divisor
+from concise data related to it.
+The intrinsics <TT>Support</TT> and <TT>CanonicalDivisor</TT> are
+defined below.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z&gt; := ProjectivePlane(FiniteField(17));
+&gt; C := Curve(P,x^5 + x^2*y^3 - z^5);
+&gt; F&lt;a,b&gt; := FunctionField(C);
+&gt; K := CanonicalDivisor(C);
+&gt; supp, exps := Support(K);
+&gt; Q := [ &lt; RationalFunctions(supp[i]),exps[i] &gt; : i in [1..#supp] ]; 
+&gt; Q;
+[
+    &lt;[ a, 2*a^2*b^2 + 4*a*b ], 2&gt;,
+    &lt;[ a + 16, a^2*b ], 2&gt;,
+    &lt;[ a^4 + a^3 + a^2 + a + 1, a^2*b ], 2&gt;,
+    &lt;[ 1/a, (a + b)/a ], -2&gt;,
+    &lt;[ 1/a, (a^2 + 16*a*b + b^2)/a^2 ], -2&gt;
+]
+&gt; K;
+Divisor 2*Place at (0 : 1 : 0) + 2*Place at (1 : 0 : 1) + 2*Place at
+($.1 : 0 : 1) - 2*Place at (16 : 1 : 0) - 2*Place at (16*$.1 + 1 : 1 : 0)
+</PRE>
+Now we can reconstruct the divisor K using this sequence.
+<P>
+<P>
+<PRE>
+&gt; Divisor([&lt;Place(f[1]), f[2]&gt; : f in Q]);
+Divisor on Curve over GF(17) defined by
+x^5 + x^2*y^3 + 16*z^5
+&gt; K eq $1;
+true
+</PRE>
+<HR>
+<H5><A NAME = "15198">PrincipalDivisor(C, f) : Crv, RngElt -&gt; DivCrvElt</A></H5>
+<H5>PrincipalDivisor(D, f) : DivCrv, RngElt -&gt; DivCrvElt</H5>
+<H5>PrincipalDivisor(f) : FldFunFracSchElt[Crv] -&gt; DivCrvElt</H5>
+<H5>Divisor(C, f) : Crv, RngElt -&gt; DivCrvElt</H5>
+<H5>Divisor(D, f) : DivCrv, RngElt -&gt; DivCrvElt</H5>
+<H5>Divisor(f) : FldFunFracSchElt[Crv] -&gt; DivCrvElt</H5>
+<BLOCKQUOTE>
+The principal divisor corresponding to f, that is, the divisor of the curve
+C of zeros and poles of the function field element f, where C is the 
+curve of the divisor group D if given.
+</BLOCKQUOTE>
+<H5><A NAME = "15199">Divisor(a) : DiffCrvElt -&gt; DivCrvElt</A></H5>
+<BLOCKQUOTE>
+The divisor of the curve C corresponding to the differential a of C.
+</BLOCKQUOTE>
+<H5><A NAME = "15200">Divisor(C, X) : Crv, Sch -&gt; DivCrvElt</A></H5>
+<H5>Divisor(D, X) : DivCrv, Sch -&gt; DivCrvElt</H5>
+<BLOCKQUOTE>
+The divisor described by intersection of the curve C with the scheme X,
+(where C is the curve of the divisor group D if the group is given instead
+of the curve).
+</BLOCKQUOTE>
+<H5><A NAME = "15201">Divisor(C, p, q) : Crv,Pt,Pt -&gt; DivCrvElt</A></H5>
+<H5>Divisor(D, p, q) : DivCrv, Pt, Pt -&gt; DivCrvElt</H5>
+<BLOCKQUOTE>
+The principal divisor corresponding to the line through points
+p and q (the tangent
+line to the curve C there if they coincide) where C is the curve of the
+divisor group D if given.
+</BLOCKQUOTE>
+<H5><A NAME = "15202">Divisor(C, I) : Crv, RngMPol -&gt; DivCrvElt</A></H5>
+<H5>Divisor(D, I) : DivCrv, RngMPol -&gt; DivCrvElt</H5>
+<BLOCKQUOTE>
+The divisor of the curve C defined by the ideal I of the ambient 
+coordinate ring where C is the curve of the divisor group D if given.
+</BLOCKQUOTE>
+<H5><A NAME = "15203">Decomposition(D) : DivCrvElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The decomposition sequence of D as a sequence of tuples 
+of the form <TT>&lt;place, multiplicity&gt;</TT> characterizing the 
+divisor D.
+</BLOCKQUOTE>
+<H5><A NAME = "15204">Support(D) : DivCrvElt -&gt; SeqEnum, SeqEnum</A></H5>
+<BLOCKQUOTE>
+The sequence of places in the support of D, followed by 
+their sequence of multiplicities in D.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15205">Example <TT>Crv_divisor1 (H120E31)</TT></A></H3>
+A curve, its divisor group and some divisors are created.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(GF(7), 2);
+&gt; C := Curve(P,y^2*z - x^3 - x*z^2 - z^3);
+&gt; Div := DivisorGroup(C);
+&gt; Div;
+Group of divisors of Curve over GF(7) defined by
+6*x^3 + 6*x*z^2 + y^2*z + 6*z^3
+&gt; FP&lt;a,b&gt; := FunctionField(P);
+&gt; D := Divisor(C,a);
+&gt; D;
+Divisor of Curve over GF(7) defined by
+6*x^3 + 6*x*z^2 + y^2*z + 6*z^3
+&gt; Decomposition(D);
+[
+    &lt;Place at (0 : 1 : 0), -2&gt;,
+    &lt;Place at (0 : 6 : 1), 1&gt;,
+    &lt;Place at (0 : 1 : 1), 1&gt;
+]
+&gt; D;
+Divisor -2*Place at (0 : 1 : 0) + 1*Place at (0 : 6 : 1) + 1*Place at (0 : 1 : 1)
+</PRE>
+The support of a
+divisor is written in the style of the factorization of other objects
+in Magma; compare with the factorization of the integer 84 below.
+This expression is called the <I>factorization</I> of a divisor and provides
+a method of accessing the individual components.
+<P>
+<P>
+<PRE>
+&gt; Factorization(84);
+[ &lt;2, 2&gt;, &lt;3, 1&gt;, &lt;7, 1&gt; ]
+&gt; Support(D)[2];
+Place at (0 : 6 : 1)
+</PRE>
+One can access the point underlying a given place.
+<P>
+<P>
+<PRE>
+&gt; p := Support(D)[1];
+&gt; p;
+Place at (0 : 1 : 0)
+&gt; RepresentativePoint(p);
+(0 : 1 : 0)
+</PRE>
+<HR>
+<H5><A NAME = "15206">CanonicalDivisor(C) : Crv -&gt; DivCrvElt</A></H5>
+<BLOCKQUOTE>
+A divisor in the canonical divisor class of the curve C.
+</BLOCKQUOTE>
+<H5><A NAME = "15207">RamificationDivisor(C) : Crv -&gt; DivCrvElt</A></H5>
+<BLOCKQUOTE>
+The ramification divisor of the curve C.
+<P>
+<P>
+</BLOCKQUOTE>
+<H4><A NAME = "15208">Arithmetic of Divisors</A></H4>
+
+
+
+<H5>D + E : DivCrvElt,DivCrvElt -&gt; DivCrvElt</H5>
+
+<H5>D + E : DivCrvElt, PlcCrvElt -&gt; DivCrvElt</H5>
+
+<H5>D + E : PlcCrvElt, DivCrvElt -&gt; DivCrvElt</H5>
+
+<H5>D + E : PlcCrvElt, PlcCrvElt -&gt; DivCrvElt</H5>
+
+<H5>- D : DivCrvElt -&gt; DivCrvElt</H5>
+
+<H5>- D : PlcCrvElt -&gt; DivCrvElt</H5>
+
+<H5>D - E : DivCrvElt,DivCrvElt -&gt; DivCrvElt</H5>
+
+<H5>D - E : DivCrvElt,PlcCrvElt -&gt; DivCrvElt</H5>
+
+<H5>D - E : PlcCrvElt,DivCrvElt -&gt; DivCrvElt</H5>
+
+<H5>D - E : PlcCrvElt,PlcCrvElt -&gt; DivCrvElt</H5>
+
+<H5>n * D : RngIntElt,DivCrvElt -&gt; DivCrvElt</H5>
+
+<H5>n * D : RngIntElt,PlcCrvElt -&gt; DivCrvElt</H5>
+
+<H5>D div n : DivCrvElt,RngIntElt -&gt; DivCrvElt</H5>
+
+<H5>D div n : PlcCrvElt,RngIntElt -&gt; DivCrvElt</H5>
+
+<H5>D mod n : DivCrvElt,RngIntElt -&gt; DivCrvElt</H5>
+
+<H5>D mod n : PlcCrvElt,RngIntElt -&gt; DivCrvElt</H5><P>
+
+
+
+Basic formal arithmetic of divisors; D and E are divisors (or places) 
+and n is an integer.
+
+
+<H5>d in D : Any, DivCrv -&gt; BoolElt</H5>
+
+<H5>d notin D : Any, DivCrv -&gt; BoolElt</H5><P>
+
+
+<H5>D lt E : DivCrvElt, DivCrvElt -&gt; BoolElt</H5>
+
+<H5>D le E : DivCrvElt, DivCrvElt -&gt; BoolElt</H5>
+
+<H5>D gt E : DivCrvElt, DivCrvElt -&gt; BoolElt</H5>
+
+<H5>D ge E : DivCrvElt, DivCrvElt -&gt; BoolElt</H5><P>
+
+
+<H5><A NAME = "15209">Quotrem(D, n) : DivCrvElt, RngIntElt -&gt; DivCrvElt, DivCrvElt</A></H5>
+<BLOCKQUOTE>
+The quotient and remainder on dividing the divisor D by the integer n.
+</BLOCKQUOTE>
+<H5><A NAME = "15210">Degree(D) : DivCrvElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The sum of coefficients of the divisor D multiplied by the degrees of the
+places of the corresponding components.
+</BLOCKQUOTE>
+<H5><A NAME = "15211">IsEffective(D) : DivCrvElt -&gt; BoolElt</A></H5>
+<H5>IsPositive(D) : DivCrvElt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if all coefficients of the divisor D are nonnegative.
+</BLOCKQUOTE>
+<H5><A NAME = "15212">Numerator(D) : DivCrvElt -&gt; DivCrvElt</A></H5>
+<H5>Denominator(D) : DivCrvElt -&gt; DivCrvElt</H5>
+<BLOCKQUOTE>
+The numerator, respectively denominator, of the divisor D of a curve.
+The numerator and denominator are both positive divisors such that
+D is the difference between numerator and denominator.
+</BLOCKQUOTE>
+<H5><A NAME = "15213">SignDecomposition(D) : DivCrvElt -&gt; DivElt,DivElt</A></H5>
+<BLOCKQUOTE>
+The minimal effective divisors A and B such that the equality
+of divisors D = A - B holds.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15214">Example <TT>Crv_divisor2 (H120E32)</TT></A></H3>
+The sign decomposition of the previous example is calculated.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(GF(7),2);
+&gt; C := Curve(P,y^2*z - x^3 - x*z^2 - z^3);
+&gt; Div := DivisorGroup(C);
+&gt; phi := hom&lt; Parent(x/z) -&gt; FP | [FP.1,FP.2,1] &gt;
+&gt;             where FP is FunctionField(P);
+&gt; D := Divisor(Div,phi(x/z));
+&gt; Decomposition(D);
+[
+    &lt;Place at (0 : 1 : 0), -2&gt;,
+    &lt;Place at (0 : 6 : 1), 1&gt;,
+    &lt;Place at (0 : 1 : 1), 1&gt;
+]
+&gt; Decomposition(D div 2);
+[
+    &lt;Place at (0 : 1 : 0), -1&gt;
+]
+&gt; A, B := SignDecomposition(D);
+&gt; IsEffective(A);
+true
+&gt; IsEffective(B);
+true
+&gt; A - B eq D;
+true
+</PRE>
+<HR>
+<H5><A NAME = "15215">D eq E : DivCrvElt, DivCrvElt -&gt; BoolElt</A></H5>
+<H5>D ne E : DivCrvElt, DivCrvElt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only the divisors D and E are (not) equal.
+Note that this means equality in the group of divisors and is not the
+same as being linearly equivalent.
+</BLOCKQUOTE>
+<H5><A NAME = "15216">AreLinearlyEquivalent(D,E) : DivCrvElt, DivCrvElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only the divisors D and E are linearly equivalent.
+</BLOCKQUOTE>
+<H5><A NAME = "15217">IsZero(D) : DivCrvElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if all coefficients of the divisor D are zero.
+</BLOCKQUOTE>
+<H5><A NAME = "15218">IsCanonical(D) : DivCrvElt -&gt; BoolElt, DiffCrvElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the divisor D is the divisor of a differential, in which
+case also return a differential realising this.
+</BLOCKQUOTE>
+<H5><A NAME = "15219">GCD(D1, D2) : DivCrvElt, DivCrvElt -&gt; DivCrvElt</A></H5>
+<H5>Gcd(D1, D2) : DivCrvElt, DivCrvElt -&gt; DivCrvElt</H5>
+<H5>GreatestCommonDivisor(D1, D2) : DivCrvElt, DivCrvElt -&gt; DivCrvElt</H5>
+<BLOCKQUOTE>
+The greatest common divisor of the divisors D1 and D2. This is the divisor
+supported on the places common to the support of both divisors with
+coefficients the minimum of those occurring in D1 and D2.
+</BLOCKQUOTE>
+<H5><A NAME = "15220">LCM(D1, D2) : DivCrvElt, DivCrvElt -&gt; DivCrvElt</A></H5>
+<H5>Lcm(D1, D2) : DivCrvElt, DivCrvElt -&gt; DivCrvElt</H5>
+<H5>LeastCommonMultiple(D1, D2) : DivCrvElt, DivCrvElt -&gt; DivCrvElt</H5>
+<BLOCKQUOTE>
+The least common multiple of the divisors D1 and D2. This is the divisor
+supported on all the places in the supports of D1 and D2 with coefficients
+the maximum of those occurring in the input divisors.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15221">Example <TT>Crv_canonical_divisor (H120E33)</TT></A></H3>
+We find that a given divisor is actually a canonical divisor.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(GF(7),2);
+&gt; C := Curve(P,y^2*z - x^3 - x*z^2 - z^3);
+&gt; Div := DivisorGroup(C);
+&gt; phi := hom&lt; Parent(x/z) -&gt; FP | [FP.1,FP.2,1] &gt;
+&gt;               where FP is FunctionField(P);
+&gt; D := Divisor(Div,phi(x/z));
+&gt; IsCanonical(D);
+true (($.1) ^ 1 * ($.1^3 + $.1 + 1) ^ -1 * ($.1) ^ 1) d($.1)
+</PRE>
+The printing of the differential in the last line above is not very
+clear since names have not been assigned, but nonetheless, it can
+be used as an argument to intrinsics.
+<P>
+<P>
+<PRE>
+&gt; _, dd := IsCanonical(D);
+&gt; Valuation(dd,Support(D)[1]);
+-2
+</PRE>
+<HR>
+<H4><A NAME = "15222">Other Operations on Divisors</A></H4>
+
+
+
+<H5><A NAME = "15223">Ideal(D) : DivCrvElt -&gt; RngMPol</A></H5>
+<BLOCKQUOTE>
+Given a divisor D of a curve C, returns the ideal of the coordinate
+ring of the ambient of C of coordinate functions 
+which cuts out D. The ideal D must be effective.
+</BLOCKQUOTE>
+<H5><A NAME = "15224">Cluster(D) : DivCrvElt -&gt; Clstr</A></H5>
+<BLOCKQUOTE>
+Given a divisor D of a curve C, returns the cluster (zero-dimensional
+scheme) which gives D as a subscheme of C. This is the scheme
+defined by <TT>Ideal(D)</TT>. The ideal D must be effective.
+</BLOCKQUOTE>
+<H5><A NAME = "15225">Valuation(D,p) : DivCrvElt, Pt -&gt; DivCrvElt</A></H5>
+<H5>Valuation(D,P) : DivCrvElt, PlcCrvElt -&gt; DivCrvElt</H5>
+<BLOCKQUOTE>
+The coefficient of the divisor summand of the divisor D corresponding to the
+point p or place P.
+</BLOCKQUOTE>
+<H5><A NAME = "15226">ComplementaryDivisor(D,p) : DivCrvElt,Pt -&gt; DivCrvElt</A></H5>
+<H5>ComplementaryDivisor(D,P) : DivCrvElt,PlcCrvElt -&gt; DivCrvElt</H5>
+<BLOCKQUOTE>
+The divisor after removing from the divisor
+D the component corresponding to the point p or place P.
+<P>
+<P>
+<P>
+<P>
+<P>
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text1366.htm">[Next]</A><A  HREF = "text1364.htm">[Prev]</A> <A  HREF = "text1366.htm">[Right]</A> <A  HREF = "text1364.htm">[Left]</A> <A  HREF = "text1356.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

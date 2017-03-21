@@ -1,0 +1,616 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Creation Functions</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1428.htm">[Next]</A><A  HREF = "text1426.htm">[Prev]</A> <A  HREF = "text1428.htm">[Right]</A> <A  HREF = "text1426.htm">[Left]</A> <A  HREF = "text1425.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16077">Creation Functions</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1427.htm#16078">Creation of an Elliptic Curve</A>
+<LI> <A  HREF = "text1427.htm#16089">Creation Predicates</A>
+<LI> <A  HREF = "text1427.htm#16093">Changing the Base Ring</A>
+<LI> <A  HREF = "text1427.htm#16099">Alternative Models</A>
+<LI> <A  HREF = "text1427.htm#16105">Predicates on Curve Models</A>
+<LI> <A  HREF = "text1427.htm#16112">Twists of Elliptic Curves</A>
+</UL>
+<H4><A NAME = "16078">Creation of an Elliptic Curve</A></H4>
+
+<P>
+<P>
+An elliptic curve E may be created by specifying Weierstrass
+coordinates for the curve over a field K, where integer coordinates
+are interpreted as elements of Q.  Note that the coordinate ring
+K defines the base point set of E, and points defined over an
+extension field of K must be created in the appropriate point set.
+
+
+<H5><A NAME = "16079">EllipticCurve([a, b]) : [ RngElt ] -&gt; CrvEll</A></H5>
+<H5>EllipticCurve([a1, a2, a3, a4, a6]) : [ RngElt ] -&gt; CrvEll</H5>
+<BLOCKQUOTE>
+Given a sequence of elements of a ring K, this function creates
+the elliptic curve E over K defined by taking the elements
+of the sequence as Weierstrass coefficients. The length of the
+sequence must either be two, that is s=[a, b], in which
+case E is defined by y<sup>2</sup> = x<sup>3</sup> + ax + b, or five, that is
+s=[a<sub>1</sub>, a<sub>2</sub>, a<sub>3</sub>, a<sub>4</sub>, a<sub>6</sub>], in which case
+E is given by  y<sup>2</sup> + a<sub>1</sub>xy + a<sub>3</sub>y=x<sup>3</sup> + a<sub>2</sub>x<sup>2</sup> + a<sub>4</sub>x + a<sub>6</sub>.
+Currently K must be field; if integers are given then they will be
+coerced into Q. The given coefficients must define a nonsingular
+curve; that is, the discriminant of the curve must be nonzero.
+</BLOCKQUOTE>
+<H5><A NAME = "16080">EllipticCurve(f) : RngUPolElt -&gt; CrvEll</A></H5>
+<H5>EllipticCurve(f, h) : RngUPolElt, RngUPolElt -&gt; CrvEll</H5>
+<BLOCKQUOTE>
+Given univariate polynomials f and h, this function creates the elliptic
+curve defined by y<sup>2</sup> + h(x)y = f(x), or by y<sup>2</sup> = f(x) if h is not given.
+The polynomial f must be monic of degree 3 and h must have degree
+at most 1.
+</BLOCKQUOTE>
+<H5><A NAME = "16081">EllipticCurveFromjInvariant(j) : RngElt -&gt; CrvEll</A></H5>
+<H5>EllipticCurveWithjInvariant(j) : RngElt -&gt; CrvEll</H5>
+<BLOCKQUOTE>
+Given a ring element j, this function creates an elliptic curve E
+over K with j-invariant equal to j defined as follows:
+If j = 0 and K does not have characteristic 3 then E is
+defined by y<sup>2</sup> + y = x<sup>3</sup>;
+if j = 1728 then E is defined by y<sup>2</sup> = x<sup>3</sup> + x (which covers
+the case where j = 0 and K has characteristic 3);
+otherwise j - 1728 is invertible in K and E is defined by
+y<sup>2</sup> + xy = x<sup>3</sup> - (36/(j - 1728))x - 1/(j - 1728).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16082">Example <TT>CrvEll_Creation (H126E1)</TT></A></H3>
+We create one particular elliptic curve over Q in three different
+ways:
+<P>
+<P>
+<PRE>
+&gt; EllipticCurve([1, 0]);
+Elliptic Curve defined by y^2 = x^3 + x over Rational Field
+&gt; Qx&lt;x&gt; := PolynomialRing(Rationals());
+&gt; EllipticCurve(x^3 + x);
+Elliptic Curve defined by y^2 = x^3 + x over Rational Field
+&gt; EllipticCurveWithjInvariant(1728);
+Elliptic Curve defined by y^2 = x^3 + x over Rational Field
+</PRE>
+<HR>
+<H5><A NAME = "16083"></A><A NAME = "CrvEll:EllipticCurve">EllipticCurve</A>(C) : Sch -&gt; CrvEll, MapSch</H5>
+
+<PRE>    SetVerbose("EllModel", n):          Maximum: 3</PRE>
+<BLOCKQUOTE>
+Given a scheme C describing a curve of genus 1 with an easily
+recognised rational point, this function returns an elliptic curve E
+together with a birational map from C to E.
+If there is no "obvious" rational point then this routine will fail.
+C must belong to one of the following classes:
+<P>
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>Hyperelliptic curves of genus 1 of the form
+C: y<sup>2</sup> + h(x)y=f(x)
+with f of degree 3 or 4 and h of degree at most 1.
+If the function x on C has a rational branch point then that point
+is sent to the origin on E.
+Otherwise, if C has a rational point at x=&infin; then that point
+is used.
+<P>
+<DT>(ii)</DT><DD>Nonsingular plane curves of degree 3.
+If the curve is already in general Weierstrass form up to a permutation
+of the variables then this is recognised and used as a model for the
+elliptic curve.
+Otherwise the base field of the curve must have characteristic different
+from 2 and 3;
+in this case, the curve is tested for having a rational flex.
+If it has then a linear transformation suffices to get the curve into
+general Weierstrass form, and this is used.
+<P>
+<DT>(iii)</DT><DD>Singular plane curves of degree 4 over a base field
+of characteristic different from 2 with a unique cusp, with the
+tangent cone meeting the curve only at that point.
+Up to linear transformation, these are curves of type
+y<sup>2</sup>=f(x),
+with f of degree 4.
+Such curves are brought into the standard form above.
+If either a rational point exists with x=0 or the curve intersects
+the line at infinity in a rational point then that point is used to
+put the curve in general Weierstrass form.</DL>
+</BLOCKQUOTE>
+<H5><A NAME = "16084">EllipticCurve(C, P) : Crv, Pt -&gt; CrvEll, MapSch</A></H5>
+
+<PRE>    SetVerbose("EllModel", n):          Maximum: 3</PRE>
+<BLOCKQUOTE>
+Given a scheme C describing a curve of genus 1 with a nonsingular
+rational point P, this function returns an elliptic curve E together
+with a birational map sending the supplied point to the origin on E.
+<P>
+If C is a plane curve of degree 3 over a base field having
+characteristic different from 2 and 3 then particular tricks are tried.
+If the supplied point is a flex then a linear transformation is used.
+Otherwise, Nagell's algorithm <A  HREF = "text1424.htm#bib_Nag28">[Nag28]</A>,
+also described in <A  HREF = "text1424.htm#bib_Cassels91">[Cas91]</A>, is used.
+<P>
+If C is a plane curve of degree 4 over a base field of
+characteristic different from 2 with a unique cusp and a
+tangent cone that meets the curve only in that cusp, then a
+construction in <A  HREF = "text1424.htm#bib_Cassels91">[Cas91]</A> is used.
+<P>
+In all other cases, C has to be a plane curve and a Riemann--Roch
+computation is used. This is potentially very expensive.
+</BLOCKQUOTE>
+<H5><A NAME = "16085">EllipticCurve(C, pl) : Crv, PlcCrvElt -&gt; CrvEll, MapSch</A></H5>
+
+<PRE>    SetVerbose("EllModel", n):          Maximum: 3</PRE>
+<BLOCKQUOTE>
+Given a plane curve C of genus 1 and a place pl of degree 1,
+this function returns an elliptic curve E together with a birational
+map from C to E.
+<P>
+This routine uses a (potentially expensive) Riemann--Roch computation.
+This is different to the routine that takes a point instead of a place,
+which uses special methods when the curve has degree 3 or 4.
+</BLOCKQUOTE>
+<H5><A NAME = "16086">SupersingularEllipticCurve(K) : FldFin -&gt; CrvEll</A></H5>
+<BLOCKQUOTE>
+Given a finite field K, this function returns a representative supersingular
+elliptic curve over K.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16087">Example <TT>CrvEll_CreationFromCurve (H126E2)</TT></A></H3>
+In the following example Nagell's algorithm is applied.
+<P>
+<P>
+<PRE>
+&gt; P2&lt;X, Y, Z&gt; := ProjectiveSpace(Rationals(), 2);
+&gt; C := Curve(P2, X^3 + Y^2*Z - X*Y*Z - Z^3);
+&gt; pt := C![0, 1, 1];
+&gt; time E1, phi1 := EllipticCurve(C, pt);
+Time: 0.070
+&gt; E1;
+Elliptic Curve defined by y^2 = x^3 - 5/16*x^2 + 1/32*x + 15/1024 over Rational
+Field
+</PRE>
+Whereas this next call (given a place) is forced to do the
+Riemann--Roch computation.
+<P>
+<P>
+<PRE>
+&gt; time E2, phi2 := EllipticCurve(C, Place(pt));
+Time: 0.120
+&gt; E2;
+Elliptic Curve defined by y^2 + 1024*y = x^3 + 16*x^2 over Rational Field
+&gt; phi1;
+Mapping from: CrvPln: C to CrvEll: E1
+with equations :
+9/8*X^2 - 1/4*X*Y
+-1/8*X^2 + 1/4*X*Y + 13/16*X*Z - 1/8*Y*Z - 1/8*Z^2
+X^2 - 2*X*Y + 2*X*Z
+and inverse
+$.1^2 - 3/16*$.1*$.3 + 1/128*$.3^2
+1/2*$.1^2 + $.1*$.2 - 15/32*$.1*$.3 + 9/256*$.3^2
+$.1*$.2 + 1/8*$.1*$.3 - 1/8*$.2*$.3 - 1/64*$.3^2
+&gt; phi2;
+Mapping from: CrvPln: C to CrvEll: E2
+with equations :
+-64*X^2*Y + 64*X^2*Z - 128*X*Y^2 + 256*X*Y*Z - 128*X*Z^2 + 64*Y^2*Z - 64*Y*Z^2
+256*X^2*Y + 256*X^2*Z + 1024*X*Y*Z - 1024*X*Z^2 + 1792*Y^2*Z - 4352*Y*Z^2 +
+    2048*Z^3
+Y^3 - 3*Y^2*Z + 3*Y*Z^2 - Z^3
+</PRE>
+<HR>
+<H3><A NAME = "16088">Example <TT>CrvEll_CreationFromCurve2 (H126E3)</TT></A></H3>
+In this example the starting curve is less clearly elliptic.  Since this
+curve does not match any of the special forms described the Riemann--Roch
+computation will be used.
+<P>
+<P>
+<PRE>
+&gt; P2&lt;X, Y, Z&gt; := ProjectiveSpace(Rationals(), 2);
+&gt; C := Curve(P2, X^3*Y^2 + X^3*Z^2 - Z^5);
+&gt; Genus(C);
+1
+&gt; pt := C![1, 0, 1];
+&gt; E, toE := EllipticCurve(C, pt);
+&gt; E;
+Elliptic Curve defined by y^2 = x^3 + 3*x^2 + 3*x over Rational Field
+&gt; toE;
+Mapping from: CrvPln: C to CrvEll: E
+</PRE>
+<HR>
+<H4><A NAME = "16089">Creation Predicates</A></H4>
+
+
+
+<H5><A NAME = "16090">IsEllipticCurve([a, b]) : [ RngElt ] -&gt; BoolElt, CrvEll</A></H5>
+<H5>IsEllipticCurve([a1, a2, a3, a4, a6]) : [ RngElt ] -&gt; BoolElt, CrvEll</H5>
+<BLOCKQUOTE>
+The function returns <TT>true</TT> if the given sequence of ring elements defines an elliptic curve (in other words, if the discriminant is nonzero).
+When true, the elliptic curve is also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "16091">IsEllipticCurve(C) : CrvHyp -&gt; BoolElt, CrvEll, MapIsoSch, MapIsoSch</A></H5>
+<BLOCKQUOTE>
+Given a hyperelliptic curve, the function returns <TT>true</TT> if C has degree 3.
+When true, the function also returns the elliptic curve, and isomorphisms to and from it.
+This function is deprecated and will be removed in a later release.
+Instead, use <TT>Degree(C) eq 3</TT> and <TT>EllipticCurve(C)</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16092">Example <TT>CrvEll_CreationTest (H126E4)</TT></A></H3>
+We check a few small primes to see which ones make certain coefficients
+define an elliptic curve.
+<P>
+<P>
+<PRE>
+&gt; S := [ p : p in [1..20] | IsPrime(p) ];
+&gt; for p in S do
+&gt;     ok, E := IsEllipticCurve([GF(p) | 1, 1, 0, -3, -17 ]);
+&gt;     if ok then print E; end if;
+&gt; end for;
+Elliptic Curve defined by y^2 + x*y = x^3 + x^2 + 1 over GF(3)
+Elliptic Curve defined by y^2 + x*y = x^3 + x^2 + 10*x + 9 over GF(13)
+Elliptic Curve defined by y^2 + x*y = x^3 + x^2 + 14*x over GF(17)
+</PRE>
+<HR>
+<H4><A NAME = "16093">Changing the Base Ring</A></H4>
+
+<P>
+<P>
+The following general scheme functions provide a convenient way to
+generate a new elliptic curve similar to an old one but defined over
+a different field.  Some care must be taken, however: If the result
+is not a valid elliptic curve then the functions will still succeed
+but the object returned will be a general curve rather than an elliptic
+curve.
+
+
+<H5><A NAME = "16094">BaseChange(E, K) : CrvEll, Rng -&gt; CrvEll</A></H5>
+<H5>BaseExtend(E, K) : CrvEll, Rng -&gt; CrvEll</H5>
+<BLOCKQUOTE>
+Given an elliptic curve E defined over a field k, and a field K
+which is an extension of k, returns an elliptic curve
+E' over K using the natural inclusion of k in K to map the
+coefficients of E into K.
+</BLOCKQUOTE>
+<H5><A NAME = "16095">ChangeRing(E, K) : CrvEll, Rng -&gt; CrvEll</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E defined over a field k, and a field K,
+returns an elliptic curve E' over K by using the standard coercion
+from k to K to map the coefficients of E into K.  This is useful
+when there is no appropriate ring homomorphism between k and K
+(e.g., when k=Q and K is a finite field).
+</BLOCKQUOTE>
+<H5><A NAME = "16096">BaseChange(E, h) : CrvEll, Map -&gt; CrvEll</A></H5>
+<H5>BaseExtend(E, h) : CrvEll, Map -&gt; CrvEll</H5>
+<BLOCKQUOTE>
+Given an elliptic curve E over a field k and a ring map
+h : k -&gt; K, returns an elliptic curve E' over K by
+applying h to the coefficients of E.
+</BLOCKQUOTE>
+<H5><A NAME = "16097">BaseChange(E, n) : CrvEll, RngIntElt -&gt; CrvEll</A></H5>
+<H5>BaseExtend(E, n) : CrvEll, RngIntElt -&gt; CrvEll</H5>
+<BLOCKQUOTE>
+Given an elliptic curve E defined over a finite field K, returns
+the base extension of E to the degree n extension of K.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16098">Example <TT>CrvEll_BaseExtend (H126E5)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; K1 := GF(23);
+&gt; K2 := GF(23, 2);
+&gt; f := hom&lt;K1 -&gt; K2 | &gt;;
+&gt; E1 := EllipticCurve([K1 | 1, 1]);
+&gt; E2 := EllipticCurve([K2 | 1, 1]);
+&gt; assert E2 eq BaseExtend(E1, K2);
+&gt; assert E2 eq BaseExtend(E1, f);
+&gt; assert E2 eq BaseExtend(E1, 2);
+&gt; // this is illegal, since K1 is not an extension of K2
+&gt; BaseExtend(E2, K1);
+
+
+&gt;&gt; BaseExtend(E2, K1);
+             ^
+Runtime error in 'BaseExtend': Coercion of equations is not possible
+&gt; assert E1 eq ChangeRing(E2, K1);  // but this is OK
+</PRE>
+<HR>
+<H4><A NAME = "16099">Alternative Models</A></H4>
+
+<P>
+<P>
+<P>
+Given an elliptic curve E, there are standard alternative models
+for E that may be of interest.  Each of the functions in this section
+returns an isomorphic curve E' that is the desired model,
+together with the isomorphisms E -&gt; E' and E' -&gt; E.
+<P>
+<B>Note</B>: The second isomorphism is now completely redundant as it is the
+inverse of the first; in a later release only the first will be returned.
+
+
+<H5><A NAME = "16100">WeierstrassModel(E) : CrvEll -&gt; CrvEll, Map, Map</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E, this function returns an isomorphic elliptic
+curve E' in simplified Weierstrass form y<sup>2</sup> = x<sup>3</sup> + ax + b.
+It does not apply when the base ring of E has characteristic 2 or 3
+(in which case such a simplified form may not exist).
+</BLOCKQUOTE>
+<H5><A NAME = "16101">IntegralModel(E) : CrvEll -&gt; CrvEll, Map, Map</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E defined over a number field K (which may
+be Q), this function returns an isomorphic elliptic curve E' defined
+over K with integral coefficients.
+</BLOCKQUOTE>
+<H5><A NAME = "16102">SimplifiedModel(E): CrvEll -&gt; CrvEll, Map, Map</A></H5>
+<BLOCKQUOTE>
+A simplified model of the elliptic curve E is returned.  If E is defined
+over Q this has the same effect as <TT>MinimalModel</TT> below.  Otherwise,
+if the characteristic of the base ring is different from 2 and 3,
+the simplified model agrees with the <TT>WeierstrassModel</TT>.
+For characteristics 2 and 3 the situation is more complicated; see
+chapter 4 of <A  HREF = "text1424.htm#bib_connell-ech">[Con99]</A>
+for the definition for curves defined over finite fields.
+</BLOCKQUOTE>
+<H5><A NAME = "16103">MinimalModel(E) : CrvEll -&gt; CrvEll, Map, Map</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E defined over Q or a number field K
+with class number one, returns a global minimal model E' for E.
+By definition, the global minimal model E' is an integral model
+isomorphic to E over K such that the discriminant of E' has
+minimal valuation at all non-zero prime ideals &pi; of K.
+(For Q, this means that it has minimal p-adic valuation at all primes p.)
+<P>
+Such a global minimal model is only guaranteed to exist when the class
+number of K is 1 (and so one always exists when K = Q); depending
+on the curve, however, such a model may exist even when this is not
+the case.  If no such minimal model exists then a runtime error will
+occur.
+</BLOCKQUOTE>
+<H5><A NAME = "16104">MinimalModel(E, p) : CrvEll, RngIntElt -&gt; CrvEll, Map, Map</A></H5>
+<H5>MinimalModel(E, P : parameters) : CrvEll, RngOrdIdl -&gt; CrvEll, Map</H5>
+<BLOCKQUOTE>
+Given an elliptic curve E defined over a number field K, and
+a prime ideal P, returns a curve isomorphic to E which is minimal
+at P.
+If K is Q then the ideal may be specified by the
+appropriate (integer) prime p.
+<P>
+For curves over number fields, when the parameter
+<TT>UseGeneratorAsUniformiser</TT> is set to <TT>true</TT> then
+Magma will check whether the ideal is principal;
+if so, an ideal generator will be used as the uniformising element.
+This means that at other primes the returned model will
+remain integral, or minimal, if the given model was.
+</BLOCKQUOTE>
+<H4><A NAME = "16105">Predicates on Curve Models</A></H4>
+
+
+
+<H5><A NAME = "16106">IsWeierstrassModel(E) : CrvEll -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the elliptic curve E is in simplified Weierstrass form.
+</BLOCKQUOTE>
+<H5><A NAME = "16107">IsIntegralModel(E) : CrvEll -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the elliptic curve E is an integral model.
+</BLOCKQUOTE>
+<H5><A NAME = "16108">IsSimplifiedModel(E) : CrvEll -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the elliptic curve E is a simplified model.
+</BLOCKQUOTE>
+<H5><A NAME = "16109">IsMinimalModel(E) : CrvEll -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the elliptic curve E is a minimal model.
+</BLOCKQUOTE>
+<H5><A NAME = "16110">IsIntegralModel(E, P) : CrvEll, RngOrdIdl -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the defining coefficients of the elliptic curve E, a curve over a number
+field, have non-negative valuation at the prime ideal P, which must be an
+ideal of an order of the coefficient ring of E.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16111">Example <TT>CrvEll_Models (H126E6)</TT></A></H3>
+We define an elliptic curve over the rationals and then find an integral model,
+a minimal model, and an integral model for the short Weierstrass form.
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([1/2, 1/2, 1, 1/3, 4]);
+&gt; E;
+Elliptic Curve defined by y^2 + 1/2*x*y + y = x^3 + 1/2*x^2 + 1/3*x + 4
+over Rational Field
+&gt; IE := IntegralModel(E);
+&gt; IE;
+Elliptic Curve defined by y^2 + 3*x*y + 216*y = x^3 + 18*x^2 + 432*x +
+186624 over Rational Field
+&gt; ME := MinimalModel(IE);
+&gt; ME;
+Elliptic Curve defined by y^2 + x*y + y = x^3 - x^2 + 619*x + 193645
+over Rational Field
+&gt; WE := WeierstrassModel(E);
+&gt; WE;
+Elliptic Curve defined by y^2 = x^3 + 9909/16*x + 6201603/32 over
+Rational Field
+&gt; IWE := IntegralModel(WE);
+&gt; IWE;
+Elliptic Curve defined by y^2 = x^3 + 649396224*x + 208091266154496
+over Rational Field
+&gt; IsIsomorphic(IWE, ME);
+true
+</PRE>
+<HR>
+<H4><A NAME = "16112">Twists of Elliptic Curves</A></H4>
+
+<P>
+<P>
+In the following, all twists will be returned in the form of simplified
+models.
+
+
+<H5><A NAME = "16113">QuadraticTwist(E, d) : CrvEll, RngElt -&gt; CrvEll</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E and an element d of the base ring,
+returns the quadratic twist by d.
+This is isomorphic to E if and only if either
+the characteristic is 2 and the trace of d is 0,
+or the characteristic is not 2 and d is a square.
+The routine does not always work in characteristic 2.
+</BLOCKQUOTE>
+<H5><A NAME = "16114">QuadraticTwist(E) : CrvEll -&gt; CrvEll</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E over a finite field, returns a quadratic
+twist; that is, a nonisomorphic curve whose trace is the negation of
+<TT>Trace(E)</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "16115">QuadraticTwists(E) : CrvEll -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E over a finite field, returns the sequence
+of nonisomorphic quadratic twists.
+The first of these curves is isomorphic to E.
+</BLOCKQUOTE>
+<H5><A NAME = "16116">Twists(E) : CrvEll -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve over a finite field K, returns the sequence
+of all nonisomorphic elliptic curves over K which are isomorphic
+over an extension field.
+The first of these curves is isomorphic to E.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16117">Example <TT>CrvEll_QuadraticTwists (H126E7)</TT></A></H3>
+In this example we compute the quadratic twists of an elliptic curve
+over the finite field F<sub>13</sub> and verify that they fall in two
+isomorphism classes over the base field.
+<P>
+<P>
+<PRE>
+&gt; E1 := EllipticCurve([GF(13) | 3, 1]);
+&gt; E5 := QuadraticTwist(E1, 5);
+&gt; E5;
+Elliptic Curve defined by y^2 = x^3 + 10*x + 8 over GF(13)
+&gt; S := QuadraticTwists(E1);
+&gt; S;
+[
+    Elliptic Curve defined by y^2 = x^3 + 3*x + 1 over GF(13),
+    Elliptic Curve defined by y^2 = x^3 + 12*x + 5 over GF(13)
+]
+&gt; [ IsIsomorphic(E1, E) : E in S ];
+[ true, false ]
+&gt; [ IsIsomorphic(E5, E) : E in S ];
+[ false, true ]
+</PRE>
+<HR>
+<H5><A NAME = "16118">IsTwist(E, F) : CrvEll, CrvEll -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the elliptic curves E and F are isomorphic over an
+extension field --- this function only tests the j-invariants
+of the curves.
+</BLOCKQUOTE>
+<H5><A NAME = "16119">IsQuadraticTwist(E, F) : CrvEll, CrvEll -&gt; BoolElt, RngElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the elliptic curves
+E and F are isomorphic over a
+quadratic extension field; if so, returns an element d of the
+base field such that F is isomorphic to <TT>QuadraticTwist(E, d)</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16120">Example <TT>CrvEll_NonquadraticTwists (H126E8)</TT></A></H3>
+In this example we take curves of j-invariant 0 and 12<sup>3</sup> = 12
+over the finite field F<sub>13</sub>, and compute all twists.  Since the
+automorphism groups are nontrivial the number of twists is larger
+than the number of quadratic twists.  By computing the numbers of
+points we see that the curves are indeed pairwise nonisomorphic over
+the base field.
+<P>
+<P>
+<PRE>
+&gt; E3 := EllipticCurve([GF(13) | 0, 1]);
+&gt; jInvariant(E3);
+0
+&gt; E4 := EllipticCurve([GF(13) | 1, 0]);
+&gt; jInvariant(E4);
+12
+&gt; T3 := Twists(E3);
+&gt; T3;
+[
+    Elliptic Curve defined by y^2 = x^3 + 1 over GF(13),
+    Elliptic Curve defined by y^2 = x^3 + 2 over GF(13),
+    Elliptic Curve defined by y^2 = x^3 + 4 over GF(13),
+    Elliptic Curve defined by y^2 = x^3 + 8 over GF(13),
+    Elliptic Curve defined by y^2 = x^3 + 3 over GF(13),
+    Elliptic Curve defined by y^2 = x^3 + 6 over GF(13)
+]
+&gt; [ #E : E in T3 ];
+[ 12, 19, 21, 16, 9, 7 ]
+&gt; T4 := Twists(E4);
+&gt; T4;
+[
+    Elliptic Curve defined by y^2 = x^3 + x over GF(13),
+    Elliptic Curve defined by y^2 = x^3 + 2*x over GF(13),
+    Elliptic Curve defined by y^2 = x^3 + 4*x over GF(13),
+    Elliptic Curve defined by y^2 = x^3 + 8*x over GF(13)
+]
+&gt; [ #E : E in T4 ];
+[ 20, 10, 8, 18 ]
+</PRE>
+Observe that exactly two of the twists are quadratic twists (as must
+always be the case).
+<P>
+<P>
+<PRE>
+&gt; [ IsQuadraticTwist(E3, E) : E in T3 ];
+[ true, false, false, true, false, false ]
+&gt; [ IsQuadraticTwist(E4, E) : E in T4 ];
+[ true, false, true, false ]
+</PRE>
+<HR>
+<H5><A NAME = "16121">MinimalQuadraticTwist(E) : CrvEll -&gt; CrvEll, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Determine the minimal twist of the rational elliptic curve E. This is
+defined locally prime-by-prime, and the algorithm for finding it is
+based on this observation. For each odd prime p of bad reduction
+the algorithm iteratively replaces the curve by its twist by p if
+the latter has smaller discriminant.
+<P>
+For p=2 there is no accepted definition of minimal, and the
+prime at infinity also plays a role. After having handled all the odd primes
+there are only twists by -1, 2, and -2 left to consider. The algorithm
+implemented in Magma first chooses a twist with minimal 2-valuation of
+the conductor; this is unique precisely when this 2-valuation is less
+than 5.
+[Note that others have chosen instead to minimise the 2-valuation of
+&Delta;.]
+<P>
+The prime 2 can be eliminated at this point as was done in the case
+of the odd primes, leaving only the consideration of twisting the curve
+by -1.  Here the algorithm arbitrarily chooses the curve that has
+( - 1)<sup>v<sub>2</sub>(c<sub>6</sub>)</sup>(odd)(c<sub>6</sub>) congruent to 3 mod 4.
+The function returns as its second argument the integer d by which
+the curve was twisted to obtain the minimal twist.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16122">Example <TT>CrvEll_min_twist (H126E9)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; E:=EllipticCurve([0, 1, 0, 135641131, 1568699095683]);
+&gt; M, tw := MinimalQuadraticTwist(E);
+&gt; M, tw;
+Elliptic Curve defined by y^2 + y = x^3 + x^2 + 3*x + 5 over Rational Field
+7132
+&gt; MinimalModel(QuadraticTwist(M, tw));
+Elliptic Curve defined by y^2 = x^3 + x^2 + 135641131*x + 1568699095683 over
+Rational Field
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1428.htm">[Next]</A><A  HREF = "text1426.htm">[Prev]</A> <A  HREF = "text1428.htm">[Right]</A> <A  HREF = "text1426.htm">[Left]</A> <A  HREF = "text1425.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

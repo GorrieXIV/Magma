@@ -1,0 +1,99 @@
+
+/*
+  Compute representatives for the conjugacy classes of
+  the reflection subgroups of Shephard and Todd group G_k
+*/
+
+ReflectionSubgroupClasses := function(k)
+  G := ShephardTodd(k);
+  N := #G;
+  refs := [];
+  for g in Generators(G) do
+    if g notin refs then
+      Append(~refs,g);
+    end if;
+  end for;
+  R := &join[ Class(G,r) : r in refs];
+  L := SetToSequence({sub<G|r> : r in refs});
+  layers := [L];
+  mflag := AssociativeArray();
+  for A in L do mflag[A] := false; end for;
+  while true do
+    nextlayer := [];
+    n := #layers;
+    for H in layers[n] do
+//      print "#H:",#H;
+      X := {sub<G|H,s> : s in R | s notin H};
+      mflag[H] := not IsNull(X) and forall{ Q : Q in X | #Q eq N };
+      for A in X do
+        if not exists(B){B : B in L | IsConjugate(G,A,B)} then
+          Append(~nextlayer,A);
+          Append(~L,A);
+          mflag[A] := false;
+        end if;
+      end for;
+    end for;
+    if IsEmpty(nextlayer) then break; end if;
+    Append(~layers,nextlayer);
+    print "";
+    print n+1,"generators";
+    m := #nextlayer;
+    suffix := m eq 1 select "" else "s";
+    print m, "group"*suffix;
+    [#A : A in nextlayer];
+  end while;
+  return G, R, layers, [ A : A in L | mflag[A] ];
+end function;
+
+braid := function(x,y,n)
+  b := Parent(x)!1;
+  toggle := true;
+  while n gt 0 do
+    if toggle then
+      b := b*x;
+    else 
+      b := b*y;
+    end if;
+    toggle := not toggle;
+    n -:= 1;
+  end while;
+  return b;
+end function;
+
+Shephard := [<4,3>,<5,4>,<6,6>,<8,3>,<9,6>,<10,4>,<14,8>,<16,3>,<17,6>,<18,4>,<20,5>,<21,10>];
+
+for p in Shephard do
+  G := ShephardTodd(p[1]);
+  q := p[2];
+  assert braid(G.1,G.2,q) eq braid(G.2,G.1,q);
+  for k := 2 to q-1 do
+    assert braid(G.1,G.2,k) ne braid(G.2,G.1,k);
+  end for;
+end for;
+
+braidmat := function(G)
+  N := Ngens(G);
+  M := ZeroMatrix(Integers(),N,N);
+  for i := 1 to N do
+    M[i,i] := Order(G.i);
+    x := G.i;
+    for j := i+1 to N do
+      y := G.j;
+      m := Order(x*y);
+      q := m;
+      for q := 2 to m do
+        if braid(x,y,q) eq braid(y,x,q) then
+          M[i,j] := q;
+          M[j,i] := q;
+          break;
+        end if;
+      end for;
+    end for;
+  end for;
+  return M;
+end function;
+
+G,R,L,M := ReflectionSubgroupClasses(26);
+assert Sort([Order(Q) : Q in M]) eq [48,162,648];
+
+

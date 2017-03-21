@@ -1,0 +1,225 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Changing Related Structures</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1311.htm">[Next]</A><A  HREF = "text1309.htm">[Prev]</A> <A  HREF = "text1311.htm">[Right]</A> <A  HREF = "text1309.htm">[Left]</A> <A  HREF = "text1297.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "14277">Changing Related Structures</A></H3>
+
+<P>
+<P>
+<P>
+It may happen that certain intrinsics only work for differential operator
+rings whose derivations are of a specific form, or whose constant fields have
+to be large enough.
+Some of the functions available for changing settings of the differential
+rings or fields can be used to change the desired related structure on 
+the operator ring directly.
+To alter some of the settings of a differential operator ring, the following
+functions are available.
+
+
+<H5><A NAME = "14278">ChangeDerivation(R, f) : RngDiffOp, RngElt -&gt; RngDiffOp, Map</A></H5>
+<BLOCKQUOTE>
+Returns a differential operator ring isomorphic to R, but whose 
+derivation is given by f *  <TT>Derivation(R)</TT>.
+The ring element f must be non--zero.
+The isomorphism of R to the new differential ring
+is also returned.
+The base ring of the new differential operator ring is isomorphic to the one 
+of R, but it has derivation <TT>ChangeDerivation(BaseRing(R))</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "14279">ChangeDifferential(R, df) : RngDiffOp, DiffFunElt -&gt; RngDiffOp, Map</A></H5>
+<BLOCKQUOTE>
+Returns the differential operator ring with differential df, and whose 
+underlying ring of its basefield coincides with the one of R. 
+The map returned is the bijective map of R into the new operator ring.
+The base ring of the new differential operator ring is isomorphic to the one 
+of R. 
+However, the returned inclusion map and taking derivatives may
+not be commutative.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14280">Example <TT>RngDiff_example-diff-op-ring-changing-differential (H117E46)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; F&lt;z&gt; := RationalDifferentialField(Rationals());
+&gt; R&lt;D&gt; := DifferentialOperatorRing(F);
+&gt; df := Differential(z^3+5);
+&gt; RM&lt;DM&gt;, mp := ChangeDifferential(R,df);
+&gt; Domain(mp) eq R and Codomain(mp) eq RM;
+true
+&gt; M&lt;u&gt; := BaseRing(RM);
+&gt; IsDifferentialOperatorRing(RM) and IsAlgebraicDifferentialField(M);
+true
+&gt; mp(RM!z);
+u
+&gt; mp(D);
+3*u^2*DM
+&gt; D*z, mp(D*z);
+u*D + 1
+3*u^3*DM + 1
+&gt; DM*u;
+u*DM + 1/3/u^2
+&gt; Differential(RM);
+(3*u^2) d(u)
+</PRE>
+<HR>
+<H5><A NAME = "14281">ConstantFieldExtension(R, C) : RngDiffOp,Fld -&gt; RngDiffOp, Map</A></H5>
+<BLOCKQUOTE>
+Returns the ring of differential operators with base ring isomorphic 
+to that of the differential operator ring R, but whose constant field is C.
+The derivation is extended over the new constant field.
+The second argument returned is the map from R to the new operator ring.
+</BLOCKQUOTE>
+<H5><A NAME = "14282">PurelyRamifiedExtension(R,f) : RngDiffOp,RngUPolElt -&gt; RngDiffOp, Map</A></H5>
+<BLOCKQUOTE>
+When R is a differential operator ring over a differential ring F, 
+this function returns an operator ring over the purely ramified extension of F, 
+as induced by the polynomial f.
+The polynomial f is of the form X<sup>n</sup> - a.(F.1) for some
+constant element a in F and positive integer n.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14283">Example <TT>RngDiff_diff-op-ring-purely-ramified-extension-DLSR (H117E47)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; S&lt;t&gt; := DifferentialLaurentSeriesRing(Rationals());
+&gt; R&lt;D&gt; := DifferentialOperatorRing(S);
+&gt; _&lt;T&gt; := PolynomialRing(S);
+&gt; Rext&lt;Dext&gt;, mp := PurelyRamifiedExtension(R, T^7-3*t);
+&gt; Sext&lt;text&gt; := BaseRing(Rext);
+&gt; Domain(mp) eq R and Codomain(mp) eq Rext;
+true
+&gt; IsDifferentialLaurentSeriesRing(Sext);
+true
+&gt; BaseRing(Sext) eq S;
+true
+&gt; RelativePrecision(Sext) eq 7*RelativePrecision(S);
+true
+&gt; D*t;
+t*D + t
+&gt; mp(D);
+Dext
+&gt; mp(R!t) eq Rext!(1/3*text^7);
+true
+&gt; Dext*text;
+text*Dext + 1/7*text
+</PRE>
+<HR>
+<H5><A NAME = "14284">Completion(R, p) : RngDiffOp, PlcFunElt  -&gt; RngDiffOp, Map</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: &infin;</PRE>
+<BLOCKQUOTE>
+Returns the operator ring tilde(R), whose base ring is the completion 
+of the base ring of the operator ring R w.r.t. the place p.
+The second return value is the natural embedding of R into tilde(R).
+The precision of the base ring of tilde(R) can be set by setting <TT>Precision</TT>
+upon creation.
+If no precision is set, a default value for the precision is taken.
+</BLOCKQUOTE>
+<H5><A NAME = "14285">Localization(R, p) : RngDiffOp, PlcFunElt -&gt; RngDiffOp, Map, PlcFunElt</A></H5>
+<BLOCKQUOTE>
+Returns the operator ring whose differential has valuation -1 at p,
+with derivation t.d/dt, where t is the uniformizing element at the
+place p. 
+The natural map between the operator rings, and the induced image of p
+are also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "14286">Localization(L, p) : RngDiffOpElt, PlcFunElt -&gt; RngDiffOpElt, Map, PlcFunElt</A></H5>
+<BLOCKQUOTE>
+Given the differential operator L over an algebraic differential field,
+returns the localized operator of L at the place p. 
+The embedding map between 
+the parents as well as the induced image of the place are also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "14287">Localization(R) : RngDiffOp -&gt; RngDiffOp, Map</A></H5>
+<BLOCKQUOTE>
+Given a differential operator ring R over the differential Laurent series
+ring C((t)), returns the operator ring whose derivation 
+is of the form t.d/dt, and the natural map between the operator rings.
+</BLOCKQUOTE>
+<H5><A NAME = "14288">Localization(L) : RngDiffOpElt -&gt; RngDiffOpElt, Map</A></H5>
+<BLOCKQUOTE>
+Given the differential operator L over a differential series ring,
+returns the localized operator of L and the embedding map between 
+the parents.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14289">Example <TT>RngDiff_example-diff-op-ring-changing-attributes-DLSR (H117E48)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; S&lt;t&gt;:=DifferentialLaurentSeriesRing(Rationals());
+&gt; R&lt;D&gt; := DifferentialOperatorRing(S);
+&gt; D*t;
+t*D + t
+&gt; Rprime&lt;Dprime&gt;, mp := ChangeDerivation(R,t^2);
+&gt; Fprime&lt;tprime&gt; := BaseRing(Rprime);
+&gt; mp;
+Mapping from: RngDiffOp: R to RngDiffOp: Rprime given by a rule
+&gt; Dprime*tprime;
+tprime*Dprime + tprime^3
+&gt; P&lt;T&gt; := PolynomialRing(Rationals());
+&gt; Cext := ext&lt;Rationals()|T^2+1&gt;;
+&gt; Rext&lt;Dext&gt;, mp := ConstantFieldExtension(R,Cext);
+&gt; Cext eq ConstantRing(BaseRing(Rext));
+true
+&gt; mp(D);
+Dext
+</PRE>
+<HR>
+<H3><A NAME = "14290">Example <TT>RngDiff_example-diff-op-ring-completion (H117E49)</TT></A></H3>
+This examples illustrates how to use <TT>Completion</TT> on operator rings.
+<P>
+<P>
+<PRE>
+&gt; F&lt;z&gt; := RationalDifferentialField(Rationals());
+&gt; R&lt;D&gt; := DifferentialOperatorRing(F);
+&gt; pl := Zeros(z)[1];
+&gt; Rcompl&lt;Dcompl&gt;, mp := Completion(R,pl);
+&gt; IsDifferentialOperatorRing(Rcompl);
+true
+&gt; S&lt;t&gt; := BaseRing(Rcompl);
+&gt; IsDifferentialLaurentSeriesRing(S);
+true
+&gt; mp(D);
+Dcompl
+&gt; Dcompl*t;
+t*Dcompl + 1
+</PRE>
+<HR>
+<H3><A NAME = "14291">Example <TT>RngDiff_example-diff-op-ring-localization (H117E50)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; F&lt;z&gt; := RationalDifferentialField(Rationals());
+&gt; R&lt;D&gt; := DifferentialOperatorRing(F);
+&gt; pl := Zeros(z-1)[1];
+&gt; Rloc&lt;Dloc&gt;, mp, place:=  Localization(R,pl);
+&gt; Domain(mp) eq R, Codomain(mp) eq Rloc;
+true true
+&gt; place;
+(z - 1)
+&gt; Differential(BaseRing(Rloc));
+(1/(z - 1)) d(z)
+&gt; mp(D);
+1/(z - 1)*Dloc
+&gt; Dloc*(z-1);
+(z - 1)*Dloc + z - 1
+&gt; L := D + z;
+&gt; Lloc, mp, place := Localization(L,Zeros(z)[1]);
+&gt; Lloc;
+1/z*$.1 + z
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1311.htm">[Next]</A><A  HREF = "text1309.htm">[Prev]</A> <A  HREF = "text1311.htm">[Right]</A> <A  HREF = "text1309.htm">[Left]</A> <A  HREF = "text1297.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,431 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Creation of Automatic Groups</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text868.htm">[Next]</A><A  HREF = "text866.htm">[Prev]</A> <A  HREF = "text868.htm">[Right]</A> <A  HREF = "text866.htm">[Left]</A> <A  HREF = "text865.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "9976">Creation of Automatic Groups</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text867.htm#9977">Construction of an Automatic Group</A>
+<LI> <A  HREF = "text867.htm#9980">Modifying Limits</A>
+<LI> <A  HREF = "text867.htm#9985">Accessing Group Information</A>
+</UL>
+<H4><A NAME = "9977">Construction of an Automatic Group</A></H4>
+
+
+
+<H5><A NAME = "9978">AutomaticGroup(F: parameters) : GrpFP -&gt; GrpAtc</A></H5>
+<H5>IsAutomaticGroup(F: parameters) : GrpFP -&gt; BoolElt, GrpAtc</H5>
+<BLOCKQUOTE>
+Internally a monoid presentation P of the group F is constructed. By 
+default the generators of P are taken to be 
+g<sub>1</sub>, (g<sub>1</sub>)<sup> - 1</sup>, ..., g<sub>n</sub>, (g<sub>n</sub>)<sup> - 1</sup> where g<sub>1</sub>, ..., g<sub>n</sub> are 
+the generators of F. The relations of 
+P are taken to be the relations of F. The trivial
+relations between the generators and their inverses are also added.
+The word ordering is the short-lex ordering.
+The Knuth--Bendix completion procedure for monoids is now run on P
+to calculate the word difference automata corresponding to the generated 
+equations, which are then used to calculate the finite state automata
+associated with a short-lex automatic group. In successful cases these
+automata are proved correct in the final step.
+<P>
+If the procedure succeeds the result will be an automatic group, G, 
+containing four automata. These are the first and second word-difference 
+machines, the word acceptor, and the word multiplier. The form 
+<TT>AutomaticGroup</TT> returns an automatic group while the form 
+<TT>IsAutomaticGroup</TT> returns the boolean value <I>true</I> and 
+the automatic group. If the procedure fails, the first form does
+not return a value while the second returns the boolean value <I>false</I>.
+<P>
+For simple examples, the algorithms work quickly, and do not require
+much space. For more difficult examples, the algorithms are often capable of
+completing successfully, but they can sometimes be expensive in terms of
+time and space requirements. 
+Another point to be borne in mind is that the algorithms sometimes produce 
+temporary disk files which the user does not normally see (because they are
+automatically removed after use), but can occasionally be very large.
+These files are stored in the <I>/tmp</I> directory. If you interrupt
+a running automatic group calculation you must remove these temporary 
+files yourself.
+<P>
+As the Knuth--Bendix procedure will more often than not run forever,
+some conditions must be specified under which it will stop. These take the 
+form of limits that are placed on certain variables, such as the number of 
+reduction relations. If any of these limits are exceeded during a run of the
+completion procedure it will fail, returning a non-confluent automatic group.
+The optimal values for these limits varies from example to example. Some
+of these limits may be specified by setting parameters (see the next section).
+In particular, if a first attempt to compute the automatic structure of a group 
+fails, it should be run again with the parameter <TT>Large</TT> (or <TT>Huge</TT>)
+set to {<TT>true</TT>}.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9979">Example <TT>GrpAtc_AutomaticGroup (H80E1)</TT></A></H3>
+<P>
+We construct the automatic structure for the fundamental group of the torus.  
+Since a generator ordering is not specified, the default generator ordering,
+[ a, a<sup> - 1</sup>, b, b<sup> - 1</sup>, c, c<sup> - 1</sup>, d, d<sup> - 1</sup>], is used.
+<P>
+<P>
+<P>
+<PRE>
+&gt; FG&lt;a,b,c,d&gt; := FreeGroup(4);
+&gt; F := quo&lt; FG | a^-1*b^-1*a*b=d^-1*c^-1*d*c&gt;;
+&gt; f, G := IsAutomaticGroup(F);
+
+Running Knuth-Bendix with the following parameter values
+MaxRelations  = 200
+MaxStates     = 0
+TidyInt       = 20
+MaxWdiffs     = 512
+HaltingFactor = 100
+MinTime       = 5
+#Halting with 118 equations.
+#First word-difference machine with 33 states computed.
+#Second word-difference machine with 33 states computed.
+#System is confluent, or halting factor condition holds.
+#Word-acceptor with 36 states computed.
+#General multiplier with 104 states computed.
+#Validity test on general multiplier succeeded.
+#General length-2 multiplier with 220 states computed.
+#Checking inverse and short relations.
+#Checking relation:  _8*_6*_7*_5 = _2*_4*_1*_3
+#Axiom checking succeeded.
+
+&gt; G;
+
+An automatic group.
+Generator Ordering = [ a, a^-1, b, b^-1, c, c^-1, d, d^-1 ]
+The second word difference machine has 33 states.
+The word acceptor has 36 states.
+</PRE>
+<HR>
+<H4><A NAME = "9980">Modifying Limits</A></H4>
+
+<P>
+<P>
+In this section we describe the various parameters used to control the
+execution of the procedures employed to determine the automatic structure.
+
+
+<H5><A NAME = "9981">AutomaticGroup(F: parameters) : GrpFP -&gt; GrpAtc</A></H5>
+<H5>IsAutomaticGroup(F: parameters) : GrpFP -&gt; BoolElt, GrpAtc</H5>
+<BLOCKQUOTE>
+Attempt to construct an automatic structure  for the finitely presented 
+group F (see the main entry).  We now present details of the various 
+parameters used to control the execution of the procedures.
+<P>
+<P>
+<P>
+<PRE>
+     Large: BoolElt                      Default: <TT>false</TT>
+</PRE>
+If <TT>Large</TT> is set to <TT>true</TT> large hash tables are used
+internally. Also the Knuth--Bendix algorithm is run with larger
+parameters, specifically <TT>TidyInt</TT> is set to 500, <TT>MaxRelations</TT> is set to 262144, <TT>MaxStates</TT> is set to unlimited, <TT>HaltingFactor</TT> is set to 100, <TT>MinTime</TT> is set to 20 and <TT>ConfNum</TT> is set to 0.  It is advisable to use this option only after
+having first tried without it, since it will result in much longer
+execution times for easy examples.
+<P>
+<P>
+<P>
+<PRE>
+     Huge: BoolElt                       Default: <TT>false</TT>
+</PRE>
+Setting <TT>Huge</TT> to <TT>true</TT> doubles the size of the hash tables
+and <TT>MaxRelations</TT> over the <TT>Large</TT> parameter.
+As with the <TT>Large</TT> parameter, it is advisable to use this option
+only after having first tried without it.
+<P>
+<P>
+<P>
+<PRE>
+     MaxRelations: RngIntElt             Default: 200
+</PRE>
+Limit the maximum number of reduction equations to <TT>MaxRelations</TT>.
+<P>
+<P>
+<P>
+<PRE>
+     TidyInt: RngIntElt                  Default: 20
+</PRE>
+After finding n new reduction equations, the completion procedure
+interrupts the main process of looking for overlaps, to tidy up the
+existing set of equations. This will eliminate any redundant
+equations performing some reductions on their left and right hand
+sides to make the set as compact as possible. (The point is that
+equations discovered later often make older equations redundant or
+too long.) The word-differences arising from the equations are
+calculated after each such tidying and the number reported if verbose
+printing is on.  The best strategy in general is to try a small value
+of <TT>TidyInt</TT> first and, if that is not successful, try increasing
+it. Large values such as 1000 work best in really difficult
+examples.
+<P>
+<P>
+<PRE>
+     GeneratorOrder: SeqEnum             Default: 
+</PRE>
+Give an ordering for the generators of P. This ordering affects the
+ordering of words in the alphabet. If not specified, the ordering
+defaults to [g<sub>1</sub>, (g<sub>1</sub>)<sup> - 1</sup>, ..., g<sub>n</sub>, (g<sub>n</sub>)<sup> - 1</sup>] where g<sub>1</sub>, ..., g<sub>n</sub> are the generators of F.
+<P>
+<P>
+<P>
+<PRE>
+     MaxWordDiffs: RngIntElt             Default: 
+</PRE>
+Limit the maximum number of word differences to <TT>MaxWordDiffs</TT>.
+The default behaviour is to increase the number of allowed word
+differences dynamically as required, and so usually one does not need
+to set this option.
+<P>
+<P>
+<P>
+<PRE>
+     HaltingFactor: RngIntElt            Default: 100
+</PRE>
+<P>
+<PRE>
+     MinTime: RngIntElt                  Default: 5
+</PRE>
+These options are experimental halting options. <TT>HaltingFactor</TT>
+is a positive integer representing a percentage.  After each tidying
+it is checked whether both the number of equations and the number of
+states have increased by more than <TT>HaltingFactor</TT> percent since
+the number of word-differences was last less than what it is now.  If
+so the program halts. A sensible value seems to be 100, but
+occasionally a larger value is necessary.  If the <TT>MinTime</TT>
+option is also set then halting only occurs if at least <TT>MinTime</TT>
+seconds of cpu-time have elapsed altogether.  This is sometimes
+necessary to prevent very early premature halting.  It is not very
+satisfactory, because of course the cpu-time depends heavily on the
+particular computer being used, but no reasonable alternative has
+been found yet.
+</BLOCKQUOTE>
+<H5><A NAME = "9982">SetVerbose("KBMAG", v) : MonStgElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Set the verbose printing level for the Knuth--Bendix completion algorithm.
+Setting this level allows a user to control how much extra information on
+the progress of the algorithm is printed.
+Currently the legal values for v are 0 to 3 inclusive. Setting
+v to 0 corresponds to the `-silent' option of KBMAG in which no extra output
+is printed. Setting v to 2 corresponds to the `-v' (verbose) option of
+KBMAG in which a small amount of extra output is printed.
+Setting v to 3 corresponds to
+the `-vv' (very verbose) option of KBMAG in which
+a huge amount of diagnostic information is printed.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9983">Example <TT>GrpAtc_AutomaticGroup-3 (H80E2)</TT></A></H3>
+<P>
+We attempt to construct an automatic structure for one of Listing's 
+knot groups. 
+<P>
+<P>
+<P>
+<PRE>
+&gt; F := Group&lt; d, f | f*d*f^-1*d*f*d^-1*f^-1*d*f^-1*d^-1=1&gt;;
+&gt; b, G := IsAutomaticGroup(F); 
+Running Knuth-Bendix with the following parameter values
+MaxRelations  = 200
+MaxStates     = 0
+TidyInt       = 20
+MaxWdiffs     = 512
+HaltingFactor = 100
+MinTime       = 5
+#Maximum number of equations exceeded.
+#Halting with 195 equations.
+#First word-difference machine with 45 states computed.
+#Second word-difference machine with 53 states computed.
+&gt; b;
+false;
+</PRE>
+<P>
+So this attempt has failed.  We run the <TT>IsAutomaticGroup</TT> function 
+again setting <TT>Large</TT> to <TT>true</TT>. This time we succeed.
+<P>
+<P>
+<P>
+<PRE>
+&gt; f, G := IsAutomaticGroup(F : Large := true);
+Running Knuth-Bendix with the following parameter values
+MaxRelations  = 262144
+MaxStates     = 0
+TidyInt       = 500
+MaxWdiffs     = 512
+HaltingFactor = 100
+MinTime       = 5
+#Halting with 3055 equations.
+#First word-difference machine with 49 states computed.
+#Second word-difference machine with 61 states computed.
+#System is confluent, or halting factor condition holds.
+#Word-acceptor with 101 states computed.
+#General multiplier with 497 states computed.
+#Multiplier incorrect with generator number 3.
+#General multiplier with 509 states computed.
+#Multiplier incorrect with generator number 3.
+#General multiplier with 521 states computed.
+#Multiplier incorrect with generator number 3.
+#General multiplier with 525 states computed.
+#Validity test on general multiplier succeeded.
+#General length-2 multiplier with 835 states computed.
+#Checking inverse and short relations.
+#Checking relation:  _3*_1*_4*_1*_3 = _1*_3*_2*_3*_1
+#Axiom checking succeeded.
+&gt; G;
+An automatic group.
+Generator Ordering = [ d, d^-1, f, f^-1 ]
+The second word difference machine has 89 states.
+The word acceptor has 101 states.
+</PRE>
+<HR>
+<H3><A NAME = "9984">Example <TT>GrpAtc_AutomaticGroup-4 (H80E3)</TT></A></H3>
+<P>
+We construct the automatic group corresponding to the fundamental
+group of the trefoil knot. A generator order is specified.
+<P>
+<P>
+<P>
+<PRE>
+&gt; F&lt;a, b&gt; := Group&lt; a, b | b*a^-1*b=a^-1*b*a^-1&gt;;
+&gt; f, G := IsAutomaticGroup(F: GeneratorOrder := [a,a^-1, b, b^-1]);
+
+Running Knuth-Bendix with the following parameter values
+MaxRelations  = 200
+MaxStates     = 0
+TidyInt       = 20
+MaxWdiffs     = 512
+HaltingFactor = 100
+MinTime       = 5
+#Halting with 83 equations.
+#First word-difference machine with 15 states computed.
+#Second word-difference machine with 17 states computed.
+#System is confluent, or halting factor condition holds.
+#Word-acceptor with 15 states computed.
+#General multiplier with 67 states computed.
+#Multiplier incorrect with generator number 4.
+#General multiplier with 71 states computed.
+#Validity test on general multiplier succeeded.
+#General length-2 multiplier with 361 states computed.
+#Checking inverse and short relations.
+#Checking relation:  _3*_2*_3 = _2*_3*_2
+#Axiom checking succeeded.
+
+&gt; G;
+
+An automatic group.
+Generator Ordering = [ a, a^-1, b, b^-1 ]
+The second word difference machine has 21 states.
+The word acceptor has 15 states.
+</PRE>
+<HR>
+<H4><A NAME = "9985">Accessing Group Information</A></H4>
+
+<P>
+<P>
+The functions in this group provide access to basic information stored for an
+automatic group G.
+
+
+<H5><A NAME = "9986">G . i : GrpRWS, RngIntElt -&gt; GrpRWSElt</A></H5>
+<BLOCKQUOTE>
+The i-th defining generator for G.  The integer i must lie in the 
+range [ - r, r], where r is the number of 
+group G.
+</BLOCKQUOTE>
+<H5><A NAME = "9987">Generators(G) : GrpRWS -&gt; [GrpRWSElt]</A></H5>
+<BLOCKQUOTE>
+A sequence containing the defining generators for G.
+</BLOCKQUOTE>
+<H5><A NAME = "9988">NumberOfGenerators(G) : GrpRWS -&gt; RngIntElt</A></H5>
+<H5>Ngens(G) : GrpRWS -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The number of defining generators for G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9989">Example <TT>GrpAtc_BasicAccess (H80E4)</TT></A></H3>
+We illustrate the access operations using the
+Von Dyck (2,3,5) group (isomorphic to A<sub>5</sub>).
+<P>
+<P>
+<PRE>
+&gt; F&lt;a,b&gt; := FreeGroup(2);
+&gt; Q := quo&lt; F | a*a=1, b*b=b^-1, a*b^-1*a*b^-1*a=b*a*b*a*b&gt;;
+&gt; f, G&lt;a,b&gt; := IsAutomaticGroup(Q);
+&gt; G;
+
+An automatic group.
+Generator Ordering = [ a, a^-1, b, b^-1 ]
+The second word difference machine has 33 states.
+The word acceptor has 28 states.
+
+&gt; print G.1*G.2;
+a * b
+&gt; print Generators(G);
+[ a, b ]
+&gt; print Ngens(G);
+2
+&gt; rels := Relations(G);
+&gt; print rels[1];
+Q.2 * Q.2^-1 = Id(Q)
+&gt; print rels[2];
+Q.2^-1 * Q.2 = Id(Q)
+&gt; print rels[3];
+Q.1^2 = Id(Q)
+&gt; print rels[4];
+Q.2^2 = Q.2^-1
+&gt; print Nrels(G);
+18
+&gt; print Ordering(G);
+ShortLex
+</PRE>
+<HR>
+<H5><A NAME = "9990">FPGroup(G) : GrpAtc -&gt; GrpFP, Map</A></H5>
+<BLOCKQUOTE>
+Returns the finitely presented group F used in the construction of G,
+and the isomorphism from F to G.
+</BLOCKQUOTE>
+<H5><A NAME = "9991">WordAcceptor(G) : GrpAtc -&gt; Rec</A></H5>
+<BLOCKQUOTE>
+A record describing the word acceptor automaton stored in G.
+</BLOCKQUOTE>
+<H5><A NAME = "9992">WordAcceptorSize(G) : GrpAtc -&gt; RngIntElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+The number of states of the word acceptor automaton stored in G, and
+the size of the alphabet of this automaton.
+</BLOCKQUOTE>
+<H5><A NAME = "9993">WordDifferenceAutomaton(G) : GrpAtc -&gt; Rec</A></H5>
+<BLOCKQUOTE>
+A record describing the word difference automaton stored in G.
+</BLOCKQUOTE>
+<H5><A NAME = "9994">WordDifferenceSize(G) : GrpAtc -&gt; RngIntElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+The number of states of the 2nd word difference automaton stored in G, and
+the size of the alphabet of this automaton.
+</BLOCKQUOTE>
+<H5><A NAME = "9995">WordDifferences(G) : GrpAtc -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The labels of the states of the word difference automaton stored in G.
+The result is a sequence of elements of the  finitely presented group used
+in the construction of G.
+</BLOCKQUOTE>
+<H5><A NAME = "9996">GeneratorOrder(G) : GrpAtc -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The value of the <TT>GeneratorOrder</TT> parameter used in the construction of G.
+The result is a sequence of generators and their inverses from the 
+finitely presented group used in the construction of G.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text868.htm">[Next]</A><A  HREF = "text866.htm">[Prev]</A> <A  HREF = "text868.htm">[Right]</A> <A  HREF = "text866.htm">[Left]</A> <A  HREF = "text865.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,502 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Automorphism Group and  Isometry Testing</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text334.htm">[Next]</A><A  HREF = "text332.htm">[Prev]</A> <A  HREF = "text334.htm">[Right]</A> <A  HREF = "text332.htm">[Left]</A> <A  HREF = "text331.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "3198">Automorphism Group and  Isometry Testing</A></H3>
+
+<P>
+<P>
+<P>
+The functions in this section compute the automorphism group of a lattice
+and test lattices for isometry. 
+Currently the lattices to which these functions are applied must be
+exact (over Z or Q).
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text333.htm#3208">Automorphism Group and  Isometry Testing over F<sub>q</sub>[t]</A>
+</UL>
+<H5><A NAME = "3199">AutomorphismGroup(L) : Lat -&gt; GrpMat</A></H5>
+
+<PRE>    Stabilizer: RngIntElt               Default: 0</PRE>
+
+<PRE>    BacherDepth: RngIntElt              Default: -1</PRE>
+
+<PRE>    Generators: [ GrpMatElt ]           Default: </PRE>
+
+<PRE>    NaturalAction: Bool                 Default: <TT>false</TT></PRE>
+
+<PRE>    Decomposition: Bool                 Default: <TT>false</TT></PRE>
+
+<PRE>    Vectors: Mtrx                       Default: </PRE>
+<BLOCKQUOTE>
+This function computes the automorphism group G of a lattice L which
+is defined to be the group of those automorphisms of the Z-module underlying
+L which preserve the inner product of L.
+L must be an exact lattice (over Z or Q).
+The group G is returned as an integral matrix group of degree m
+acting on the <I>coordinate</I> vectors of L by multiplication where m is
+the rank of L.
+The coordinate vectors of L are the elements of the coordinate lattice C of
+L which has the same Gram matrix as L, but standard basis of degree m
+(C can be created using the function <TT>CoordinateLattice</TT>).
+G does not act on the elements of L, since there is no natural matrix
+action of the automorphism group on L in the case that the rank of
+L is less than its degree.  However, if the rank of L equals its
+degree, then the parameter <TT>NaturalAction</TT> may be set to <TT>true</TT>,
+in which case the resulting group has the natural action on the
+basis vectors (not the coordinate vectors); note that in this case
+the resulting matrix group will have (non-integral) rational entries in general,
+even though the image under the group of an integral basis vector will always
+be integral.
+<P>
+The algorithm uses a backtrack search to find images of the basis vectors.
+A vector is a possible image if it has the correct inner product with the
+images chosen so far. Additional invariants which have to be respected by
+automorphisms are used by default and are usually sufficient for satisfactory
+performance. For difficult examples the parameters described below allow to
+consider further invariants which are more sophisticated and harder to compute,
+but often find dead ends in the backtrack at an early stage.
+<P>
+The algorithm computes and stores a set of short vectors in the lattice
+that spans the lattice and is guaranteed closed under the action of the
+automorphism group.
+This restricts its general application, as for high dimensional lattices
+the number of vectors of minimal length may be too large to work with.
+However, the function can of course be applied to
+lattices in higher dimensions with a reasonable number of short vectors.
+<P>
+Setting the parameter <TT>Stabilizer := i</TT> will cause the function
+to compute only the point stabilizer of i basis vectors. These will in
+general not be the first i basis vectors, as the function chooses the
+basis to speed up the computation.
+<P>
+The parameter <TT>Depth</TT> is retained for compatibility with previous
+versions of Magma (which used Souvignier's AUTO program)
+but it is now ignored. The improved backtrack search achieved by using
+ordered partition methods has made the <TT>Depth</TT> concept unnecessary. 
+<P>
+In some hard examples one may want to use Bacher polynomials, which are a
+combinatorial invariant that usually separates the orbits of the automorphism
+group on the short vectors. However, these are expensive to calculate and should
+only be used if one suspects that the automorphism group has many orbits on
+the short vectors. 
+The parameter <TT>BacherDepth</TT> specifies to which depth the Bacher polynomials
+may used and should usually be chosen to be 1, since even small automorphism
+groups will have only very few (most likely 1) orbits on the vectors having 
+correct scalar product with the first image. Setting <TT>BacherDepth</TT>
+to zero forbids the use of Bacher polynomial invariant. Setting it to
+anything else allows the algorithm to use this invariant at level 1. 
+Bacher polynomials are computed by counting pairs of vectors having a
+certain scalar product with other vectors. This scalar product is by default
+chosen to be half the norm of the vector, since this will usually be the
+value which occurs least frequent. 
+<P>
+In some situations one may already know a subgroup of the full automorphism
+group, either by the construction of the lattice or an earlier stabilizer
+computation.
+This subgroup can be made available by setting <TT>Generators := Q</TT>, where
+Q is a set or sequence containing the generators of the subgroup.
+<P>
+Since V2.13, the algorithm has had the ability to first attempt to compute
+an orthogonal
+decomposition of L by considering the sublattices spanned by the set of
+shortest vectors, and if there is a non-trivial decomposition
+the automorphism group is computed via an algorithm of G. Nebe which
+computes the automorphism groups for the components and combines these.
+This decomposition method can be invoked by setting <TT>Decomposition</TT>
+to {<TT>true</TT>}.
+<P>
+When decomposition is suppressed, it is possible to supply the backtrack
+algorithm with the set of vectors to be used as domain for the search.
+To do this set the parameter <TT>Vectors</TT> to be a matrix so that the rows of
+the matrix give the lattice elements to be used. (Only one of a vector and its
+negative should be given.)
+To guarantee correctness of the result, the rows of the matrix should satisfy
+two conditions:
+<DL COMPACT class='compact'>
+<DT></DT><DD>The rows, together with their negations, must be closed under the
+action of the full automorphism group, and
+<DT></DT><DD>The sublattice of L generated by the rows of the matrix must equal L.
+<P>
+These conditions are not checked by the code, and it is up to the user
+of this parameter to ensure the correctness of their input.
+For example, the function <TT>ShortVectorsMatrix</TT> returns a matrix which
+satisfies the first condition.
+If the first condition is not satisfied, there are no guarantees about what
+will happen.
+The second condition may be violated and still give a useful result. In particular,
+if the sublattice generated by the vectors given has finite index in the full lattice,
+then the final result will be the correct automorphism group. The problem is that the
+backtrack search may not be particularly efficient. This may still be better than
+working with a very large set of vectors satisfying the second condition.</DL>
+</BLOCKQUOTE>
+<H5><A NAME = "3200">AutomorphismGroup(L, F) : Lat, [ AlgMatElt ] -&gt; GrpMat</A></H5>
+<H5>AutomorphismGroup(L, F) : Lat,  AlgMatElt  -&gt; GrpMat</H5>
+
+<PRE>    Stabilizer: RngIntElt               Default: 0</PRE>
+
+<PRE>    BacherDepth: RngIntElt              Default: 0</PRE>
+
+<PRE>    Generators: [ GrpMatElt ]           Default: </PRE>
+
+<PRE>    Vectors: Mtrx                       Default: </PRE>
+<BLOCKQUOTE>
+This function computes the subgroup of the automorphism group of the lattice L which
+fixes also the forms given in the set or sequence F.
+The matrices in F are not required to be positive definite or even symmetric.
+This is for example useful to compute automorphism groups of lattices over 
+algebraic number fields.
+The parameters are as above.
+</BLOCKQUOTE>
+<H5><A NAME = "3201">AutomorphismGroup(F) : [ AlgMatElt ] -&gt; GrpMat</A></H5>
+
+<PRE>    Stabilizer: RngIntElt               Default: 0</PRE>
+
+<PRE>    BacherDepth: RngIntElt              Default: 0</PRE>
+
+<PRE>    Generators: [ GrpMatElt ]           Default: </PRE>
+<BLOCKQUOTE>
+This function computes the matrix group fixing all forms given as matrices in the sequence
+F. The first form in F must be symmetric and positive definite, while
+the others are arbitrary.
+The call of this function is equivalent to
+<TT>AutomorphismGroup( LatticeWithGram(F[1]), [ F[i] : i in [2..#F] ] )</TT>.
+This function can be used to compute the Bravais group of a matrix group G 
+which is defined to be the full automorphism group of the forms fixed by G.
+The parameters are as above.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3202">Example <TT>GLat_AutoAction (H32E1)</TT></A></H3>
+In this example we compute the automorphism group of the root lattice E<sub>8</sub>
+and manually transform the action on the coordinates into an action on the
+lattice vectors.  Note that this exactly the same as using the
+<TT>NaturalAction</TT> parameter for the function <TT>AutomorphismGroup</TT>.
+<P>
+<P>
+<PRE>
+&gt; L := Lattice("E", 8);
+&gt; G := AutomorphismGroup(L);
+&gt; #G; FactoredOrder(G);
+696729600
+[ &lt;2, 14&gt;, &lt;3, 5&gt;, &lt;5, 2&gt;, &lt;7, 1&gt; ]
+&gt; M := MatrixRing(Rationals(), 8);
+&gt; B := BasisMatrix(L);
+&gt; A := MatrixGroup&lt;8, Rationals() | [B^-1 * M!G.i * B : i in [1 .. Ngens(G)]]&gt;;
+&gt; A;
+MatrixGroup(8, Rational Field)
+Generators:
+    [   0    0 -1/2  1/2 -1/2  1/2    0    0]
+    [   0    0  1/2  1/2  1/2  1/2    0    0]
+    [   0    0 -1/2  1/2  1/2 -1/2    0    0]
+    [-1/2  1/2    0    0    0    0 -1/2  1/2]
+    [   0    0 -1/2 -1/2  1/2  1/2    0    0]
+    [-1/2 -1/2    0    0    0    0 -1/2 -1/2]
+    [-1/2 -1/2    0    0    0    0  1/2  1/2]
+    [ 1/2 -1/2    0    0    0    0 -1/2  1/2]
+
+
+    [ 1/4  1/4  1/4 -1/4 -3/4 -1/4 -1/4 -1/4]
+    [-1/4 -1/4  3/4  1/4 -1/4  1/4  1/4  1/4]
+    [-1/4 -1/4 -1/4  1/4 -1/4  1/4  1/4 -3/4]
+    [-1/4 -1/4 -1/4  1/4 -1/4  1/4 -3/4  1/4]
+    [ 1/4 -3/4  1/4 -1/4  1/4 -1/4 -1/4 -1/4]
+    [ 3/4 -1/4 -1/4  1/4 -1/4  1/4  1/4  1/4]
+    [-1/4 -1/4 -1/4  1/4 -1/4 -3/4  1/4  1/4]
+    [-1/4 -1/4 -1/4 -3/4 -1/4  1/4  1/4  1/4]
+
+
+    [1 0 0 0 0 0 0 0]
+    [0 1 0 0 0 0 0 0]
+    [0 0 1 0 0 0 0 0]
+    [0 0 0 1 0 0 0 0]
+    [0 0 0 0 1 0 0 0]
+    [0 0 0 0 0 1 0 0]
+    [0 0 0 0 0 0 0 1]
+    [0 0 0 0 0 0 1 0]
+&gt; [ #Orbit(A, b) : b in Basis(L) ];
+[ 2160, 240, 240, 240, 240, 240, 240, 240 ]
+&gt; AutomorphismGroup(L: NaturalAction) eq A;
+true
+</PRE>
+<HR>
+<H3><A NAME = "3203">Example <TT>GLat_AutoL19 (H32E2)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; L := Lattice("Lambda", 19);
+&gt; time G := AutomorphismGroup(L);
+Time: 0.300
+&gt; #G;
+23592960
+&gt; DS := DerivedSeries(G);
+&gt; [ #DS[i]/#DS[i+1] : i in [1..#DS-1] ];
+[ 4, 3, 4 ]
+&gt; [ IsElementaryAbelian(DS[i]/DS[i+1]) : i in [1..#DS-1] ];
+[ true, true, true ]
+&gt; H := DS[#DS];
+&gt; C := Core(G, Sylow(H, 2));
+&gt; Q := H/C; #Q, IsSimple(Q);
+60 true
+&gt; LS := LowerCentralSeries(C);
+&gt; [ #LS[i]/#LS[i+1] : i in [1..#LS-1] ];
+[ 256, 16, 2 ]
+</PRE>
+Hence, G := (Aut)(&Lambda;<sub>19</sub>) has a series of normal subgroups
+with factors 2<sup>2</sup>, 3, 2<sup>2</sup>, A<sub>5</sub>, 2<sup>8</sup>, 2<sup>4</sup>, 2.
+<HR>
+<H5><A NAME = "3204">IsIsometric(L, M) : Lat, Lat -&gt; BoolElt, AlgMatElt</A></H5>
+<H5>IsIsomorphic(L, M) : Lat, Lat -&gt; BoolElt, AlgMatElt</H5>
+
+<PRE>    BacherDepth: RngIntElt              Default: 0</PRE>
+
+<PRE>    LeftGenerators: [ GrpMatElt ]       Default: </PRE>
+
+<PRE>    RightGenerators: [ GrpMatElt ]      Default: </PRE>
+
+<PRE>    LeftVectors: Mtrx                   Default: </PRE>
+
+<PRE>    RightVectors: Mtrx                  Default: </PRE>
+<BLOCKQUOTE>
+This function determines whether the lattices L and M are isometric.
+The method is a backtrack search analogous to the one used to compute the
+automorphism group of a lattice.
+If the lattices are isometric, the function returns a transformation matrix
+T as a second return value such that F<sub>2</sub> = T F<sub>1</sub> T<sup>tr</sup>, where F<sub>1</sub> and
+F<sub>2</sub> are the Gram matrices of L and M, respectively.
+<P>
+For isometric lattices the cost of finding an isometry is roughly the cost of
+finding one automorphism of the lattice. Again, the computation may be sped
+up by using the additional invariants described for the automorphism group
+computation.
+<P>
+In many applications one will check whether a lattice is isometric to one for
+which the automorphism group is already known. In this situation the
+automorphism group of the second lattice can be made available by setting
+<TT>RightGenerators := Q</TT>, where Q is a set or sequence containing the generators
+of the group. Note however, that for isometric lattices this may slow down the
+computation, since generators for stabilizers have to be recomputed.
+Similarly, generators for an automorphism group of the first lattice may be
+supplied as <TT>LeftGenerators</TT>.
+<P>
+Corresponding to the <TT>Vectors</TT> parameter for automorphism group calculation, 
+the parameters <TT>LeftVectors</TT> and <TT>RightVectors</TT> allow the user to. As
+above, left refers to the first lattice, right to the second. Either both of these
+parameters can be set, or neither, an error results if just one is set.
+The restrictions on what constitutes correct values for these parameters are as for the 
+<TT>Vectors</TT> parameter above. For correct isometry testing, the vectors given must
+be such that any isometry will map the left vectors into the union of the right
+vectors and their negatives. These conditions are not checked in the code, they are
+the responsibility of the user.
+</BLOCKQUOTE>
+<H5><A NAME = "3205">IsIsometric(L, F<sub>1</sub>, M, F()<sub>2</sub>) : Lat, [ AlgMatElt ], Lat, [ AlgMatElt ] -&gt; BoolElt, AlgMatElt</A></H5>
+<H5>IsIsomorphic(L, F<sub>1</sub>, M, F()<sub>2</sub>) : Lat, [ AlgMatElt ], Lat, [ AlgMatElt ] -&gt; BoolElt, AlgMatElt</H5>
+<H5>IsIsometric(L, M) : Lat, Lat -&gt; BoolElt, AlgMatElt</H5>
+<H5>IsIsomorphic(L, M) : Lat, Lat -&gt; BoolElt, AlgMatElt</H5>
+
+<PRE>    BacherDepth: RngIntElt              Default: 0</PRE>
+
+<PRE>    LeftGenerators: [ GrpMatElt ]       Default: </PRE>
+
+<PRE>    RightGenerators: [ GrpMatElt ]      Default: </PRE>
+
+<PRE>    LeftVectors: Mtrx                   Default: </PRE>
+
+<PRE>    RightVectors: Mtrx                  Default: </PRE>
+<BLOCKQUOTE>
+This function determines whether the lattices L and M are isometric with an
+isometry respecting also additional bilinear forms given by the sequences of
+Gram matrices F<sub>1</sub> and F<sub>2</sub>.
+The return values and parameters are as above.
+</BLOCKQUOTE>
+<H5><A NAME = "3206">IsIsometric(F<sub>1</sub>, F()<sub>2</sub>) : [ AlgMatElt ], [ AlgMatElt ] -&gt; BoolElt, AlgMatElt</A></H5>
+<H5>IsIsomorphic(F<sub>1</sub>, F()<sub>2</sub>) : [ AlgMatElt ], [ AlgMatElt ] -&gt; BoolElt, AlgMatElt</H5>
+
+<PRE>    BacherDepth: RngIntElt              Default: 0</PRE>
+
+<PRE>    LeftGenerators: [ GrpMatElt ]       Default: </PRE>
+
+<PRE>    RightGenerators: [ GrpMatElt ]      Default: </PRE>
+
+<PRE>    LeftVectors: Mtrx                   Default: </PRE>
+
+<PRE>    RightVectors: Mtrx                  Default: </PRE>
+<BLOCKQUOTE>
+For two sequences of F<sub>1</sub> and F<sub>2</sub> of Gram matrices, determine whether a
+simultaneous isometry exists, i.e., a matrix T such that
+T F<sub>1</sub>[i] T<sup>tr</sup> = F<sub>2</sub>[i] for i in [1..#F<sub>1</sub>].
+The first form in both sequences must be positive definite.
+The return values and parameters are as above.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3207">Example <TT>GLat_Isom (H32E3)</TT></A></H3>
+We construct the 16-dimensional Barnes-Wall lattice in two different ways and
+show that the so-obtained lattices are isometric. 
+<P>
+<P>
+<PRE>
+&gt; L := Lattice("Lambda", 16);
+&gt; LL := Lattice(ReedMullerCode(1, 4), "B");
+&gt; time bool, T := IsIsometric(L, LL : Depth := 4);
+Time: 2.029
+&gt; bool;
+true
+&gt; T * GramMatrix(L) * Transpose(T) eq GramMatrix(LL);
+true
+</PRE>
+We can also show that L is a 2-modular lattice (i.e., isometric to its
+rescaled dual).
+<P>
+<P>
+<PRE>
+&gt; IsIsometric(L, Dual(L));
+true
+[ 0  1  1 -1  1 -1  0  0 -1  1 -1  0  0  0  0  0]
+[-2 -3 -4  1 -2  3 -1 -2  0  1 -1 -1  1  1  1 -1]
+[-1 -1 -1  1  0 -1  0 -1  0  2 -1 -1  1  1  1 -1]
+[ 0  1  1 -1  1  0  0  0 -1  0  0  0  0  0  0  0]
+[ 0 -1 -2  0 -1  2 -1 -1  0  1 -1  0  1  0  0  0]
+[ 1  2  2  0  2 -3  0  0 -2  4 -2 -1  1  1 -1 -1]
+[-1 -1 -2  0  0  1  0 -1  0  0  0 -1  1  1  1 -1]
+[ 1  2  3 -1  2 -3  1  1 -1  0  0  0  0  0 -1  1]
+[ 0  1  1  0  2 -3  0 -1 -2  4 -2 -2  1  1  1 -1]
+[ 0 -1 -2  0 -2  3 -1  0  1 -1  0  1  0  0 -1  0]
+[ 0  0  1  1  0 -1  1  1  1 -1  0  1  0  0 -1  0]
+[ 0 -1 -1  1 -2  2 -1  0  1  0  0  1  0 -1 -1  0]
+[ 0  0  0  0  0  0  0  1  1 -1  0  1  0  0 -1  0]
+[ 0 -1 -2  0 -2  3  0  0  1 -2  0  1  1  0 -2  1]
+[ 0  1  1 -1  1 -1  0  0 -1  1  0 -1  0  0  1  0]
+[ 0  0 -1 -1  0  1  0 -1 -1  1 -1 -1  1  1  0  0]
+</PRE>
+<HR>
+<H4><A NAME = "3208">Automorphism Group and  Isometry Testing over F<sub>q</sub>[t]</A></H4>
+
+<P>
+<P>
+<P>
+Let q be some power of an odd prime.
+A bilinear form b over F<sub>q</sub>[t] is said to be definite if
+the corresponding quadratic form is anisotropic over the 
+completion of F<sub>q</sub>(t) at the infinite place (1/t).
+<P>
+The functions in this section compute automorphism groups and
+isometries of definite bilinear forms over F<sub>q</sub>[t].
+
+
+<H5><A NAME = "3209">DominantDiagonalForm(X) : Mtrx[RngUPol] -&gt; Mtrx, Mtrx, GrpMat, FldFin</A></H5>
+
+<PRE>    Canonical: Bool                     Default: <TT>false</TT></PRE>
+
+<PRE>    ExtensionField: FldFin              Default: </PRE>
+<BLOCKQUOTE>
+Let X be a symmetric n x n-matrix of rank n 
+over a polynomial ring K[t] where K denotes a field
+of characteristic different from 2.
+The function returns a symmetric matrix G and some 
+T &isin;GL(n, K[t]) such that G = T X T<sup>tr</sup> has
+dominant diagonal. I.e. the degrees of the diagonal entries of G
+are ascending and the degree of a non-diagonal entry 
+is less than the degrees of the corresponding diagonal entries
+(see <A  HREF = "text330.htm#bib_forms_fqx">[Ger03]</A>).
+<P>
+If K is a finite field and X represents a definite form
+and <TT>Canonical</TT> is set to <TT>true</TT>, then the form G 
+will be unique and the third return value will be the
+automorphism group of G i.e. the stabilizer of G in
+ GL(n, K[t]).
+The algorithm employed is <A  HREF = "text330.htm#bib_kirschmer-fqt">[Kir12]</A>.
+Note however, the uniqueness depends on
+some internal choices being made. Thus the fourth return
+value is a finite field E which must be given as the optional
+argument <TT>ExtensionField</TT> in subsequent runs over K 
+to ensure that results are compatible (c.f. the following example).
+In particular, the defining polynomial and the primitive element of
+E are important for the uniqueness.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3210">Example <TT>GLat_DDF-fqt (H32E4)</TT></A></H3>
+We test whether two definite forms over F<sub>q</sub>[t] are isometric.
+<P>
+<P>
+<PRE>
+&gt; R&lt;t&gt; := PolynomialRing( GF(5) );
+&gt; X1:= SymmetricMatrix([ t^3, t+1, 2*t^2+2*t+2 ] );
+&gt; X2:= SymmetricMatrix([ t^3, t^4+2*t+2, t^5+2*t^2+2*t+3 ]);
+&gt; G1, T1, Aut, E:= DominantDiagonalForm(X1 : Canonical);
+&gt; T1 * X1 * Transpose(T1) eq G1;
+true
+&gt; GG:= [ Matrix(g) : g in Generators(Aut) ];
+&gt; forall{g : g in GG | g * G1 * Transpose(g) eq G1 };
+true
+</PRE>
+So the form G<sub>1</sub> is invariant under Aut. Now we reduce the
+second form X<sub>2</sub>. To be able to compare the results, we have to
+provide the field E from above.
+<P>
+<P>
+<PRE>
+&gt; G2, T2 := DominantDiagonalForm(X2 : Canonical, ExtensionField:= E);
+&gt; G1 eq G2;
+true
+</PRE>
+Thus the two forms X<sub>1</sub> and X<sub>2</sub> are isometric and T<sub>1</sub><sup> - 1</sup>T<sub>2</sub>
+is an isometry.
+<HR>
+<H5><A NAME = "3211">AutomorphismGroup(G) : Mtrx[RngUPol] -&gt; GrpMat, FldFin</A></H5>
+
+<PRE>    ExtensionField: FldFin              Default: </PRE>
+<BLOCKQUOTE>
+Computes the automorphism group of the definite bilinear form
+given by the symmetric matrix G over F<sub>q</sub>[t].
+<P>
+The second return value is a finite field as explained in 
+<TT>DominantDiagonalForm</TT> above.
+It may be supplied for later calls
+over the same ground field F<sub>q</sub> via the optional argument
+<TT>ExtensionField</TT> to safe some time if q is large.
+The correctness of the algorithm does not depend on it.
+</BLOCKQUOTE>
+<H5><A NAME = "3212">IsIsometric(G1, G2) : Mtrx[RngUPol], Mtrx[RngUPol] -&gt; BoolElt, Mtrx, FldFin</A></H5>
+
+<PRE>    ExtensionField: FldFin              Default: </PRE>
+<BLOCKQUOTE>
+Tests whether two definite bilinear forms over F<sub>q</sub>[t]
+are isometric. If so, the second return value is a matrix
+T &isin;GL(n, q) such that T G1 T<sup>tr</sup> = G2.
+<P>
+The third return value is a finite field as explained in
+<TT>DominantDiagonalForm</TT> above.
+It may be supplied for later calls
+over the same ground field F<sub>q</sub> via the optional argument
+<TT>ExtensionField</TT> to safe some time if q is large.
+The correctness of the algorithm does not depend on it.
+</BLOCKQUOTE>
+<H5><A NAME = "3213">ShortestVectors(G) : Mtrx[RngUPol] -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Returns a sequence Q which contains the shortest non-zero
+vectors with respect to a given definite bilinear form G
+over F<sub>q</sub>[t] where q is odd.
+The sequence Q contains tuples &lt;v, r&gt; where v is a
+shortest vector and r denotes its norm with respect to G.
+</BLOCKQUOTE>
+<H5><A NAME = "3214">ShortVectors(G, B) : Mtrx[RngUPol], RngIntElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Let G be a definite bilinear form of rank n over F<sub>q</sub>[t]
+for some odd q.
+The function returns a sequence Q which contains all vectors
+in F<sub>q</sub>[t]<sup>n</sup> whose norm with respect to G is at most B.
+The sequence Q contains tuples &lt;v, r&gt; where v is such a
+short vector and r denotes its norm with respect to G.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text334.htm">[Next]</A><A  HREF = "text332.htm">[Prev]</A> <A  HREF = "text334.htm">[Right]</A> <A  HREF = "text332.htm">[Left]</A> <A  HREF = "text331.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

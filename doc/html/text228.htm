@@ -1,0 +1,249 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Factorization and Irreducibility</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text229.htm">[Next]</A><A  HREF = "text227.htm">[Prev]</A> <A  HREF = "text229.htm">[Right]</A> <A  HREF = "text227.htm">[Left]</A> <A  HREF = "text222.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "2010">Factorization and Irreducibility</A></H3>
+
+<P>
+<P>
+We describe the functions for multivariate polynomial factorization
+and associated computations.
+
+
+<H5><A NAME = "2011">Factorization(f) : RngMPolElt -&gt; [ &lt; RngMPolElt, RngIntElt &gt;], RngElt</A></H5>
+<BLOCKQUOTE>
+Given a multivariate polynomial f over the ring R, this function returns
+the factorization of f as a factorization sequence Q,
+that is, a sequence of pairs, each consisting of an irreducible
+factor q<sub>i</sub> a positive integer k<sub>i</sub> (its multiplicity).
+Each irreducible factor is normalized (see the function
+<A  HREF = "text227.htm#dpoly_Normalize">Normalize</A>), so the expansion of the factorization
+sequence is the unique canonical associate of f.
+The function also returns the unit u of R giving the normalization, so
+f=u.&prod;<sub>i</sub> q<sub>i</sub><sup>k<sub>i</sub></sup>.
+<P>
+The coefficient ring R must be one of the following: a finite field
+F<sub>q</sub>, the ring of integers Z, the field of rationals Q, an
+algebraic number field Q(&alpha;), or a polynomial ring, function field
+(rational or algebraic) or finite-dimensional affine algebra (which is
+a field) over any of the above.
+<P>
+For bivariate polynomials, a polynomial-time algorithm in the same
+spirit as van Hoeij's Knapsack factoring algorithm <A  HREF = "text221.htm#bib_vHoeij1">[vH02]</A>
+is used.
+<P>
+For polynomials over the integers or rationals, an algorithm similar to
+that presented in <A  HREF = "text221.htm#bib_Wang_Fact">[Wan78]</A> and <A  HREF = "text221.htm#bib_GCL">[GCL92, section 6.8]</A>, based on
+evaluation and sparse ideal-adic multivariate Hensel lifting, is used.
+<P>
+For polynomials over any finite field, a similar algorithm is used,
+with a few special modifications for non-zero characteristic (see, for
+example, <A  HREF = "text221.htm#bib_BernardinMonagan_Fact">[BM97]</A>).
+<P>
+For polynomials over algebraic number fields and affine algebras, a
+multivariate version of the norm-based algorithm of Trager
+<A  HREF = "text221.htm#bib_Trager_Factorization">[Tra76]</A> is used, which performs a suitable
+substitution and multivariate resultant computation, and then factors
+the resulting integral multivariate polynomial.
+<P>
+Each of these algorithms reduces to univariate factorization over the
+base ring; for details of how this factorization is done in each case,
+see the function <A  HREF = "text217.htm#vpoly_Factorization">Factorization</A> in the univariate polynomial
+rings chapter.
+<P>
+For polynomials over another polynomial ring or function field, the
+polynomials are first "flattened" to be inside a multivariate
+polynomial ring over the base coefficient ring, then the appropriate
+algorithm is used for that base coefficient ring.
+</BLOCKQUOTE>
+<H5><A NAME = "2012">SquarefreeFactorization(f) : RngMPolElt -&gt; [ &lt;RngMPolElt, RngIntElt&gt; ]</A></H5>
+<BLOCKQUOTE>
+Return the squarefree factorization of the multivariate polynomial 
+f as a sequence of tuples of length 2, 
+each consisting of a (not necessarily irreducible) factor 
+and an integer indicating the multiplicity. 
+The factors do not contain
+the square of any polynomial of degree greater than 0.
+The allowable coefficient rings are the same as those
+allowable for the function <TT>Factorization</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "2013">SquarefreePart(f) : RngMPolElt -&gt; RngMPolElt</A></H5>
+<BLOCKQUOTE>
+Return the squarefree part of the multivariate polynomial 
+f, which is the largest (normalized) 
+divisor g of f which is squarefree.
+</BLOCKQUOTE>
+<H5><A NAME = "2014">IsIrreducible(f) : RngMPolElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a multivariate polynomial f over a ring R, this function
+returns whether f is irreducible over R.
+The allowable coefficient rings are the same as those
+allowable for the function <TT>Factorization</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "2015">SetVerbose("PolyFact", v) : MonStgElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+(Procedure.)
+Change the verbose printing level for all polynomial factorization 
+algorithms to be v.  Currently the legal levels are 0, 1, 2 or 3.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2016">Example <TT>RngMPol_Trinomials (H24E8)</TT></A></H3>
+We create a polynomial f in the polynomial ring in three indeterminates over
+the ring of integers by multiplying together various trinomials.  The resulting
+product f has 461 terms and total degree 15.
+We then factorize f to recover the trinomials.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x, y, z&gt; := PolynomialRing(IntegerRing(), 3);
+&gt; f := &amp;*[x^i+y^j+z^k: i,j,k in [1..2]];
+&gt; #Terms(f);
+461
+&gt; TotalDegree(f);
+15
+&gt; time Factorization(f);
+[
+    &lt;x + y + z, 1&gt;,
+    &lt;x + y + z^2, 1&gt;,
+    &lt;x + y^2 + z, 1&gt;,
+    &lt;x + y^2 + z^2, 1&gt;,
+    &lt;x^2 + y + z, 1&gt;,
+    &lt;x^2 + y + z^2, 1&gt;,
+    &lt;x^2 + y^2 + z, 1&gt;,
+    &lt;x^2 + y^2 + z^2, 1&gt;
+]
+Time: 0.290
+</PRE>
+<HR>
+<H3><A NAME = "2017">Example <TT>RngMPol_Vandermonde (H24E9)</TT></A></H3>
+We construct a Vandermonde matrix of rank 6, find its determinant, and
+factorize that determinant.
+<P>
+<P>
+<PRE>
+&gt; // Create polynomial ring over R of rank n
+&gt; PRing := function(R, n)
+&gt;     P := PolynomialRing(R, n);
+&gt;     AssignNames(~P, ["x" cat IntegerToString(i): i in [1..n]]);
+&gt;     return P;
+&gt; end function;
+&gt;
+&gt; // Create Vandermonde matrix of rank n
+&gt; Vandermonde := function(n)
+&gt;     P := PRing(IntegerRing(), n);
+&gt;     return MatrixRing(P, n) ! [P.i^(j - 1): i, j in [1 .. n]];
+&gt; end function;
+&gt;
+&gt; V := Vandermonde(6);
+&gt; V;
+[   1   x1 x1^2 x1^3 x1^4 x1^5]
+[   1   x2 x2^2 x2^3 x2^4 x2^5]
+[   1   x3 x3^2 x3^3 x3^4 x3^5]
+[   1   x4 x4^2 x4^3 x4^4 x4^5]
+[   1   x5 x5^2 x5^3 x5^4 x5^5]
+[   1   x6 x6^2 x6^3 x6^4 x6^5]
+&gt; D := Determinant(V);
+&gt; #Terms(D);
+720
+&gt; TotalDegree(D);
+15
+&gt; time Factorization(D);
+[
+    &lt;x5 - x6, 1&gt;,
+    &lt;x4 - x6, 1&gt;,
+    &lt;x4 - x5, 1&gt;,
+    &lt;x3 - x6, 1&gt;,
+    &lt;x3 - x5, 1&gt;,
+    &lt;x3 - x4, 1&gt;,
+    &lt;x2 - x6, 1&gt;,
+    &lt;x2 - x5, 1&gt;,
+    &lt;x2 - x4, 1&gt;,
+    &lt;x2 - x3, 1&gt;,
+    &lt;x1 - x6, 1&gt;,
+    &lt;x1 - x5, 1&gt;,
+    &lt;x1 - x4, 1&gt;,
+    &lt;x1 - x3, 1&gt;,
+    &lt;x1 - x2, 1&gt;
+]
+Time: 0.030
+</PRE>
+<HR>
+<H3><A NAME = "2018">Example <TT>RngMPol_Heron (H24E10)</TT></A></H3>
+We construct a polynomial A2 in three indeterminates a, b, and c
+over the rational field such that A2 is the square of the area of the
+triangle with side lengths a, b, c.  Using elementary trigonometry
+one can derive the expression (4 * a<sup>2</sup> * b<sup>2</sup> - (a<sup>2</sup> + b<sup>2</sup> - c<sup>2</sup>)<sup>2</sup>)/16 for A2.
+Factorizing A2 gives a nice formulation of the square of the area which is
+similar to that given by <I>Heron's formula</I>.
+<P>
+<P>
+<PRE>
+&gt; P&lt;a, b, c&gt; := PolynomialRing(RationalField(), 3);
+&gt; A2 := 1/16 * (4*a^2*b^2 - (a^2 + b^2 - c^2)^2);
+&gt; A2;
+-1/16*a^4 + 1/8*a^2*b^2 + 1/8*a^2*c^2 - 1/16*b^4 + 1/8*b^2*c^2 - 1/16*c^4
+&gt; F, u := Factorization(A2);
+&gt; F;
+[
+    &lt;a - b - c, 1&gt;,
+    &lt;a - b + c, 1&gt;,
+    &lt;a + b - c, 1&gt;,
+    &lt;a + b + c, 1&gt;
+]
+&gt; u;
+-1/16
+</PRE>
+<HR>
+<H3><A NAME = "2019">Example <TT>RngMPol_FiniteFieldFactorization (H24E11)</TT></A></H3>
+We factorize a multivariate polynomial over a finite field.
+<P>
+<P>
+<PRE>
+&gt; Frob := function(G)
+&gt;     n := #G;
+&gt;     I := {@ g: g in G @};
+&gt;     P := PolynomialRing(GF(2), n);
+&gt;     AssignNames(~P, [CodeToString(96 + i): i in [1 .. n]]);
+&gt;     M := MatrixRing(P, n);
+&gt;     return M ! &amp;cat[
+&gt;         [P.Index(I, I[i] * I[j]): j in [1 .. n]]: i in [1 .. n]
+&gt;     ];
+&gt; end function;
+&gt; A := Frob(Sym(3));
+&gt; A;
+[a b c d e f]
+[b c a f d e]
+[c a b e f d]
+[d e f a b c]
+[e f d c a b]
+[f d e b c a]
+&gt; Determinant(A);
+a^6 + a^4*d^2 + a^4*e^2 + a^4*f^2 + a^2*b^2*c^2 + 
+    a^2*b^2*d^2 + a^2*b^2*e^2 + a^2*b^2*f^2 + a^2*c^2*d^2 + 
+    a^2*c^2*e^2 + a^2*c^2*f^2 + a^2*d^4 + a^2*d^2*e^2 + 
+    a^2*d^2*f^2 + a^2*e^4 + a^2*e^2*f^2 + a^2*f^4 + b^6 + 
+    b^4*d^2 + b^4*e^2 + b^4*f^2 + b^2*c^2*d^2 + b^2*c^2*e^2 
+    + b^2*c^2*f^2 + b^2*d^4 + b^2*d^2*e^2 + b^2*d^2*f^2 + 
+    b^2*e^4 + b^2*e^2*f^2 + b^2*f^4 + c^6 + c^4*d^2 + 
+    c^4*e^2 + c^4*f^2 + c^2*d^4 + c^2*d^2*e^2 + c^2*d^2*f^2 
+    + c^2*e^4 + c^2*e^2*f^2 + c^2*f^4 + d^6 + d^2*e^2*f^2 + 
+    e^6 + f^6
+&gt; time Factorization(Determinant(A));
+[
+    &lt;a + b + c + d + e + f, 2&gt;,
+    &lt;a^2 + a*b + a*c + b^2 + b*c + c^2 + d^2 + d*e + d*f + 
+        e^2 + e*f + f^2, 2&gt;
+]
+Time: 0.049
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text229.htm">[Next]</A><A  HREF = "text227.htm">[Prev]</A> <A  HREF = "text229.htm">[Right]</A> <A  HREF = "text227.htm">[Left]</A> <A  HREF = "text222.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

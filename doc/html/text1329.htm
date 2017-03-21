@@ -1,0 +1,120 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Zero-dimensional Schemes</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1330.htm">[Next]</A><A  HREF = "text1328.htm">[Prev]</A> <A  HREF = "text1330.htm">[Right]</A> <A  HREF = "text1328.htm">[Left]</A> <A  HREF = "text1321.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "14513">Zero-dimensional Schemes</A></H3>
+
+<P>
+<P>
+This section describes intrinsics for creating zero dimensional schemes
+or <I>clusters</I>. It also discusses those functions which converts 
+a finite set of points into the reduced zero dimensional having this 
+support.  Throughout this subsection, a lowercase p denotes a point 
+of a scheme.
+<P>
+The word cluster refers to schemes that are known to be zero dimensional.
+In general, the intrinsic <TT>Cluster</TT> converts points to clusters 
+while the function <TT>RationalPoints</TT> finds the points on a cluster 
+which are rational over its base field.
+<P>
+Note that there are four constructors of the form <TT>Cluster(X,data)</TT>
+analogous to the four <TT>Scheme(X,data)</TT> constructors but which make an
+additional dimension test and type change before returning a cluster
+determined as a subscheme of X by the data of the second argument.
+
+
+<H5><A NAME = "14514">Cluster(p) : Pt -&gt; Clstr</A></H5>
+<H5>Cluster(X, p) : Sch, Pt -&gt; Clstr;</H5>
+<H5>Cluster(S) : SetEnum -&gt; Clstr</H5>
+<H5>Cluster(S) : SetIndx -&gt; Clstr</H5>
+<H5>Cluster(X, S) : Sch, SetEnum -&gt; Clstr</H5>
+<H5>Cluster(X, S) : Sch, SetIndx -&gt; Clstr</H5>
+<BLOCKQUOTE>
+The reduced scheme supported at the point p, or supported
+at the set of points S, as a subscheme of the scheme X if given.
+</BLOCKQUOTE>
+<H5><A NAME = "14515">RationalPoints(Z) : Sch -&gt; SetEnum</A></H5>
+<H5>RationalPoints(Z,L) : Sch, Rng -&gt; SetEnum</H5>
+<BLOCKQUOTE>
+The set of rational points of the cluster Z.
+If an extension of the base field L is given as a second argument, the set
+of points of Z(L), those points whose coordinates lie in L, is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "14516">PointsOverSplittingField(Z) : Clstr -&gt; SetEnum</A></H5>
+<BLOCKQUOTE>
+If Z is a cluster this will determine some (not necessarily optimal) point
+set Z(L) in which all points of Z having coordinates in an algebraic closure
+of the base field lie and will return all points of Z(L).
+</BLOCKQUOTE>
+<H5><A NAME = "14517">HasPointsOverExtension(X) : Sch -&gt; BoolElt</A></H5>
+<H5>HasPointsOverExtension(X,L) : Sch,Rng -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>false</TT> if and only if all points in the support of the scheme X over an
+algebraic closure of its base field are already defined over its
+current base field, or all lie in the point set X(L) if the second
+argument L is given.
+This intrinsic is most useful when trying to decide whether or not to make
+an extension of the base field of X to reveal non-rational points.
+The base field of X does not need to be a finite field.
+</BLOCKQUOTE>
+<H5><A NAME = "14518">Degree(Z) : Clstr -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The degree of the cluster Z.
+If Z is reduced, this is equal to the maximum number of points in the support
+over Z over some extension of its base ring.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14519">Example <TT>Scheme_cluster-degree5 (H118E17)</TT></A></H3>
+In this example we intersect a pair of plane curves.
+(Note that much more specialised machinery for working with curves is
+available in Chapter <A  HREF = "text1356.htm#14904">ALGEBRAIC CURVES</A>.)
+First we define two curves and find their points of intersection over
+the base field. The degree of the cluster Z is the usual numerical
+<I>intersection number</I> of the curves C and D.
+Here we are more interested in finding exactly those points that
+lie in the intersection.
+<P>
+<P>
+<PRE>
+&gt; k := FiniteField(5);    
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(k,2);
+&gt; C := Scheme(P,x^3 + y^3 - z^3);
+&gt; D := Scheme(P,x^2 + y^2 - z^2);
+&gt; Z := Intersection(C,D);
+&gt; IsCluster(Z);
+true
+&gt; Degree(Z);
+6
+&gt; RationalPoints(Z);                 
+{ (1 : 0 : 1), (0 : 1 : 1) }
+&gt; HasPointsOverExtension(Z);
+true
+</PRE>
+If C and D were rather general, that is, if Z was reduced, then
+we would expect 6 points in their intersection.
+We can't expect that here, but the final line above does confirm that
+we haven't yet seen all the points of intersection.
+We allow Magma to compute directly over a splitting field.
+<P>
+<P>
+<PRE>
+&gt; PointsOverSplittingField(Z);
+{ (0 : 1 : 1), ($.1^14 : $.1^22 : 1), ($.1^22 : $.1^14 : 1), (1 : 0 : 1) }
+&gt; L&lt;w&gt; := Ring(Universe($1));
+&gt; L;
+Finite field of size 5^2
+&gt; PointsOverSplittingField(Z);
+{ (0 : 1 : 1), (w^14 : w^22 : 1), (w^22 : w^14 : 1), (1 : 0 : 1) }
+</PRE>
+In this case we see that the support is not six points but only four.
+<HR>
+<PRE></PRE> <A  HREF = "text1330.htm">[Next]</A><A  HREF = "text1328.htm">[Prev]</A> <A  HREF = "text1330.htm">[Right]</A> <A  HREF = "text1328.htm">[Left]</A> <A  HREF = "text1321.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

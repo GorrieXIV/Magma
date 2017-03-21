@@ -1,0 +1,1080 @@
+/*
+Multivariate polynomials test.
+AKS 08/10/97.
+New version 21/04/00.
+New new version May 04.
+*/
+
+
+ClearVerbose();
+
+VERB := true;
+VERB := false;
+
+/*******************************************************************************
+				Constants
+*******************************************************************************/
+
+Z := IntegerRing();
+Q := RationalField();
+BIG_LIMIT := 10^20;
+NICE_POLY_LIMIT := 50;
+NICE_IDEAL_LIMIT := 200;
+
+/*******************************************************************************
+				Auxiliary
+*******************************************************************************/
+
+function sum(Q)
+    s := Universe(Q) ! 0;
+    for x in Q do
+	s := s + x;
+    end for;
+    return s;
+end function;
+
+function nice_poly(f)
+    S := Sprint(f);
+    if #S gt NICE_POLY_LIMIT then
+	S := Substring(Sprint(f), 1, NICE_POLY_LIMIT) cat " ...";
+    end if;
+    return S;
+end function;
+
+function nice_ideal(f)
+    S := Sprint(f);
+    if #S gt NICE_IDEAL_LIMIT then
+	S := Substring(Sprint(f), 1, NICE_IDEAL_LIMIT) cat " ...";
+    end if;
+    return S;
+end function;
+
+sylvesterm := function(f, g, v)
+    m := Degree(f, v);
+    n := Degree(g, v);
+
+    R := CoefficientRing(Parent(f));
+    R := (Parent(f));
+
+    z := func<n | [zero: i in [1..n]]> where zero is R ! 0;
+
+    fc := Reverse(Coefficients(f, v));
+    gc := Reverse(Coefficients(g, v));
+
+    return /*Determinant*/(
+    //return (
+        MatrixAlgebra(R, m + n) !
+            (&cat[z(i) cat fc cat z(n - 1 - i): i in [0 .. n - 1]] cat
+            &cat[z(i) cat gc cat z(m - 1 - i): i in [0 .. m - 1]])
+    );
+end function;
+
+resm := func<f, g, v | Determinant(sylvesterm(f, g, v))>;
+
+MyResultant := function(f, g, v)
+    // Tests resultant by Sylvester method too, if not too large.
+    r := Resultant(f, g, v);
+    if f ne 0 and g ne 0 and Degree(f, v) + Degree(g, v) le 8 then
+	rr := resm(f, g, v);
+	assert rr eq r;
+    end if;
+    return r;
+end function;
+
+/*******************************************************************************
+				Random
+*******************************************************************************/
+
+rand_int := func<r | Random(-r, r)>;
+rand_rat := func<r | Random(-r, r) / Random(1, r)>;
+
+rand_sign := func<| Random([-1, 1])>;
+rand_real := func<a, b | a + (RealField(100)!b - a)*Random(0, 10^10)/10^10>;
+rand_log_frac := func<n |
+    Max(1, Floor(Exp(rand_real(0, l)))) where l is Log(RealField(100)!n)>;
+rand_log_frac := func<n | rand_sign()*RandomBits(Random(0, Ilog2(n)))>;
+rand_log_frac_half := func<n |
+    Max(1, Floor(Exp(rand_real(l/2, l)))) where l is Log(n)>;
+ 
+function rand_c(R, r)
+    if R cmpeq Z then
+        return rand_int(r);
+    elif R cmpeq Q then
+        return rand_rat(r);
+    elif Type(R) eq FldFunRat then
+	return R.Random(1, Rank(R)) + rand_int(r);
+    elif Type(R) eq FldQuad then
+        return rand_rat(r) + R.1 * rand_rat(r);
+    elif Type(R) in {FldCyc, FldNum} then
+        return R![rand_rat(r): i in [1 .. Degree(R)]];
+    else
+        return R ! rand_rat(r);
+    end if;
+end function;
+
+rand_poly := func<P, length, mons, rand |
+    &+[P | rand()*Random(mons): i in [1 .. length]]>;
+
+function rand_elts(P, k, l, d, r)
+    n := Rank(P);
+    R := BaseRing(P);
+    if Type(R) eq FldFin then
+	rand := func<|Random(R)>;
+    else
+	//rand := func<|Random(-r, r)>;
+	rand := func<|rand_c(R, r)>;
+    end if;
+
+    return 
+	[
+	    &+[rand() * &*[P.i^Random(0, d): i in [1..n]]: i in [1..l]] +
+		Random(-1, 1):
+	    i in [1..k]
+	];
+end function;
+
+function rand_vecs(M, k, l, d, r)
+    P := BaseRing(M);
+    c := Degree(M);
+    B := Basis(M);
+    return [
+	sum([E[i] * B[i]: i in [1 .. #B]]) where
+	    E is rand_elts(P, #B, l, d, r):
+	    c in [1 .. k]
+    ];
+end function;
+
+/*******************************************************************************
+				Creation
+*******************************************************************************/
+
+function create_ideal(P, k, l, d, r)
+    // k: npolys, l: length, d: degree, r: range
+    return ideal<P | rand_elts(P, k, l, d, r)>;
+end function;
+
+function create_module(M, k, l, d, r)
+    return sub<M | rand_vecs(M, k, l, d, r)>;
+end function;
+
+/*******************************************************************************
+				Element test
+*******************************************************************************/
+
+procedure element_test(P, length, drange, crange, count)
+// P:		polynomial ring/quotient ring
+// length:	length of polynomials
+// drange:	range of degrees [low .. high]
+// crange:	range of coefficients (integer)
+// count:	number of times
+
+    "\n**************";
+    "Element test:", P: Minimal;
+
+    IndentPush();
+
+    R := BaseRing(P);
+    n := Rank(P);
+
+    is_quo := ISA(Type(P), RngMPolRes);
+    if is_quo then
+	PP := PreimageRing(P);
+    else
+	PP := P;
+    end if;
+
+    CPU := Cputime();
+
+    char_0 := Characteristic(R) eq 0;
+    is_field := IsField(R);
+    is_ff := Type(R) eq FldFin;
+    is_finite := is_ff or Type(R) eq RngIntRes;
+    is_char_0_field := char_0 and is_field;
+    is_char_2 := Characteristic(R) eq 2;
+    has_gcd := is_field or R cmpeq Z;
+    has_fact := is_field or R cmpeq Z;
+    has_resultant := IsUFD(R);
+ 
+    if is_finite then
+        rand_func := func<| Random(R)>;
+    elif R cmpeq Z then
+        rand_func := func<| rand_int(crange)>;
+    elif R cmpeq Q then
+        rand_func := func<| rand_rat(crange)>;
+    elif Type(R) eq FldQuad then
+        rand_func := func<| rand_rat(crange) + R.1 * rand_rat(crange)>;
+    elif Type(R) eq FldCyc then
+        rand_func := func<| R ! [rand_rat(crange): i in [1 .. Degree(R)]]>;
+    elif Type(R) eq FldFunRat then
+	rand_func := func<| R.Random(1, Rank(R)) + rand_int(crange)>;
+    elif Type(R) eq FldQuad then
+        rand_func := func<| rand_rat(crange) + R.1 * rand_rat(crange)>;
+    else
+        rand_func := func<| R!rand_int(crange)>;
+    end if;
+
+    mons := [ChangeUniverse(MonomialsOfDegree(PP, d), P): d in drange];
+    allmons := [x: x in M, M in mons];
+ 
+    zero := P ! 0;
+    one := P ! 1;
+    minus_one := P ! -1;
+    assert IsZero(zero);
+    assert IsOne(one);
+    assert IsMinusOne(minus_one);
+
+    if crange lt 0 then
+        random_k := func<| Random(R)>;
+    else
+        random_k := func<| Random(1, crange)>;
+    end if;
+
+    for i in [1 .. count] do
+	ii := ((i - 1) mod #mons) + 1;
+
+        "Loop number:", i;
+        "Seed:", GetSeed();
+ 
+        L := [ P |
+            0,
+            1,
+            -1,
+	    rand_poly(P, length, allmons, rand_func),
+	    rand_poly(P, length, mons[ii], rand_func),
+	    rand_poly(P, Random(1, length), Random(mons), rand_func),
+	    rand_poly(P, Random(length div 2, length), Random(mons), rand_func),
+	    rand_poly(P, length, allmons, rand_sign)
+        ];
+
+// L := Reverse(L); L := [rand_poly(P, length, allmons, rand_func)] cat L;
+
+        if is_finite then
+            L cat:= [
+                rand_poly(P, Random(1, length), allmons, rand_func),
+                rand_poly(P, rand_log_frac_half(length), allmons, rand_func)
+            ];
+            if not is_char_2 then
+                L cat:= [
+                    rand_poly(P, length, rand_func)
+                ];
+            end if;
+        else
+            L cat:= [
+                rand_poly(P, length, allmons, func<| rand_log_frac(crange)>),
+                rand_poly(
+		    P, Random(1, length),
+		    mons[ii], func<| rand_log_frac(crange)>
+		),
+                rand_poly(
+                    P, rand_log_frac_half(length), allmons,
+		    func<| rand_log_frac(crange)>
+                )
+            ];
+        end if;
+
+	do_fact := func<f | true>;
+	fact_list := [];
+
+        for fi := 1 to #L do
+            f := L[fi];
+
+            //printf "f := %o\n", nice_poly(f);
+
+	    IndentPush();
+
+            if f ne 0 and Length(f) le 10 then
+		fc := Coefficients(f);
+		fm := Monomials(f);
+		ft := Terms(f);
+		assert #fm eq #fc and #ft eq #fc;
+		assert is_quo or Polynomial(fc, fm) eq f;
+		assert Reductum(f) eq &+[P | ft[i]: i in [2 .. #ft]];
+		for i := 1 to #fc do
+		    assert ft[i] eq fc[i] * fm[i];
+		    assert MonomialCoefficient(f, fm[i]) eq fc[i];
+		end for;
+		assert LeadingCoefficient(f) eq fc[1];
+		assert TrailingCoefficient(f) eq fc[#fc];
+		assert LeadingMonomial(f) eq fm[1];
+		//assert TrailingMonomial(f) eq fm[#fm];
+		assert LeadingTerm(f) eq ft[1];
+		assert TrailingTerm(f) eq ft[#ft];
+		assert TotalDegree(f) eq Max([&+Exponents(t): t in ft]);
+		assert LeadingTotalDegree(f) eq TotalDegree(ft[1]);
+		T := Terms(f, 1);
+		assert T eq [Term(f, 1, i): i in [0 .. Degree(f, 1)]];
+		assert Reductum(f, 1) eq &+Prune(T);
+		for v := 1 to n do
+		    x := P.v;
+		    d := Degree(f, v);
+		    assert is_quo or Degree(f, P.v) eq d;
+		    m := Min({Degree(g, v): g in Monomials(f)});
+		    mm := Max({Degree(g, v): g in Monomials(f)});
+		    assert forall{
+			i: i in [0 .. m - 1] | Coefficient(f, v, i) eq 0
+		    };
+/*
+"f:", f;
+"v:", v;
+"m:", m;
+"trail:", TrailingCoefficient(f, v);
+"coeff:", Coefficient(f, v, m);
+*/
+		    assert TrailingCoefficient(f, v) eq Coefficient(f, v, m);
+		    assert LeadingCoefficient(f, v) eq Coefficient(f, v, d);
+		    assert TrailingTerm(f, v) eq TrailingCoefficient(f, v)*x^m;
+		    assert LeadingTerm(f, v) eq LeadingCoefficient(f, v)*x^d;
+		    assert Coefficient(f, v, m) ne 0;
+		    assert Term(f, v, mm) eq Coefficient(f, v, mm)*x^mm;
+		    assert Evaluate(f, v, 0) eq Coefficient(f, v, 0);
+		    assert Evaluate(f, v, 1) eq &+Coefficients(f, v);
+		end for;
+
+		H := HomogeneousComponents(f);
+		assert &+H eq f;
+		assert forall{
+		    c: c in H |
+			IsHomogeneous(c) and 
+			(c eq 0 or c eq HomogeneousComponent(f, TotalDegree(c)))
+		};
+            end if;
+	    assert Evaluate(f, [0: i in [1 .. n]]) eq
+		MonomialCoefficient(f, P!1);
+
+            assert (-1) * f eq -f;
+            assert f + f eq 2 * f;
+            assert 3 * f eq f + f + f;
+            assert f * 4 eq f + f + f + f;
+            ff := f * f;
+            assert f^2 eq ff;
+            assert f^3 eq ff * f;
+            assert f^0 eq 1;
+            assert f^1 eq f;
+            assert (f + 1)^2 eq ff + 2*f + 1;
+            assert f + 0 eq f;
+            assert f - f eq 0;
+            assert f * 0 eq 0;
+            assert IsZero(f - f);
+	    if is_field then
+		if is_finite then
+		    u := random{x: x in R | IsUnit(x)};
+		else
+		    u := -1;
+		end if;
+		assert f/u eq R!(1/u)*f;
+	    end if;
+
+	    if is_quo then
+		if IsUnit(f) then
+		    inv := f^-1;
+		    assert f*inv eq 1;
+		end if;
+	    else
+		assert IsUnit(f) eq
+		    (TotalDegree(f) eq 0 and IsUnit(LeadingCoefficient(f)));
+	    end if;
+
+	    if not is_quo then
+		l, U, v := IsUnivariate(f);
+		if l then
+		    ll, UU := IsUnivariate(f, v);
+		    assert ll and UU eq U;
+		    assert MultivariatePolynomial(P, U, v) eq f;
+		    assert MultivariatePolynomial(P, U, P.v) eq f;
+		end if;
+ 
+		f_is_big := R cmpeq Z or R cmpeq Q and f ne 0 and
+		    Abs(Max(Coefficients(f))) ge BIG_LIMIT;
+     
+		D, V := Max([Degree(f, v): v in [1 .. n]]);
+		D +:= 1;
+		if is_field and (not is_finite or #R gt D) and D le 100 then
+		    c := 0;
+		    pr := 1;
+		    repeat
+			if is_finite then
+			    p := [R | Random(R): i in [1 .. D]];
+			else
+			    pr +:= 1;
+			    p := [R | rand_c(R, pr): i in [1 .. D]];
+			end if;
+			c +:= 1;
+		    until #Set(p) eq #p or c eq 10;
+     
+		    if #Set(p) eq #p then
+			//printf "Interp f: %o\n", f;
+			//printf "Interp p: %o\n", p;
+			//ev := [R | Evaluate(f, x): x in p];
+			ev := [P | Evaluate(f, V, x): x in p];
+			//printf "Interp eval: %o\n", ev;
+			I := Interpolation(p, ev, V);
+			assert I eq f;
+		    end if;
+		end if;
+     
+		if has_gcd and not f_is_big then
+		    //printf "P<x> := %m;\n", Parent(f);
+		    //printf "f := %o;\n", f;
+		    //printf "ff := %o;\n", ff;
+		    assert GCD(ff, ff + f) eq Normalize(f);
+		    c, p := ContentAndPrimitivePart(f);
+		    assert c eq Content(f);
+		    assert p eq PrimitivePart(f);
+		    assert c * p eq f;
+                    if is_field then
+                        assert IsZero(f) select IsZero(c) else IsOne(c);
+                     else
+                        assert c eq GCD(Coefficients(f));
+                    end if;
+
+		    if f ne 0 then
+			c, p := ContentAndPrimitivePart(f, V);
+			assert c eq Content(f, V);
+			assert p eq PrimitivePart(f, V);
+			assert c * p eq f;
+			assert c eq GCD(Coefficients(f, V));
+		    end if;
+		end if;
+     
+		if has_resultant and D le 10 then
+		    if f_is_big then
+			l := 3;
+		    else
+			l := 10;
+		    end if;
+		    ft := Terms(f);
+		    l := Min(l, #ft);
+		    a := &+[P | ft[i]: i in [1 .. l]] + 1;
+		    b := &+[P | ft[i]: i in [#ft - l + 1 .. #ft]] - 1;
+		    ft_half := #ft div 2;
+		    l_half := l div 2;
+		    fe := &+[P |
+			ft[i]: i in
+			[
+			    Max(1, ft_half - l_half) ..
+			    Min(#ft, ft_half + l_half)
+			]
+		    ];
+
+		    A := a;
+		    B := b;
+		    /*
+		    printf "A := %o;\n", A;
+		    printf "B := %o;\n", B;
+		    printf "fe := %o;\n", fe;
+		    printf "V := %o;\n", V;
+		    */
+		    res1 := MyResultant(fe, A, V);
+		    //"res1:", res1;
+		    res2 := MyResultant(fe, B, V);
+		    //"res2:", res2;
+		    res3 := MyResultant(fe, A*B, V);
+		    //"res3:", res3;
+		    assert res1*res2 eq res3;
+		    //time "res:", MyResultant(fe, A * B);
+		    d := Degree(fe, V);
+		    if d ge 1 and LeadingCoefficient(fe, V) eq 1 then
+			assert Discriminant(fe, V) eq
+			    MyResultant(fe, Derivative(fe, V), V) *
+				((-1)^((d * (d - 1)) div 2) /
+				LeadingCoefficient(fe, V));
+		    end if;
+		end if;
+     
+		if is_char_0_field then
+		    int_f := Integral(f, V);
+		    assert Derivative(int_f, V) eq f;
+		end if;
+     
+		assert Derivative(f, 0, V) eq f;
+		assert Derivative(f, Degree(f, V) + 1, V) eq 0;
+
+		assert Derivative(f, 3, V) eq
+		    Derivative(Derivative(Derivative(f, V), V), V);
+
+		if has_fact and f ne 0 and do_fact(f) then
+		    //"Factorization";
+		    fact_list[fi] := Factorization(f);
+		    //fact_list[fi];
+		    assert &*[P|t[1]^t[2]: t in fact_list[fi]] eq Normalize(f);
+		end if;
+	    end if;
+ 
+            for gi := 1 to fi do
+                g := L[gi];
+ 
+                //printf "g := %o\n", nice_poly(g);
+		IndentPush();
+ 
+		g_is_big := R cmpeq Z or R cmpeq Q and g ne 0 and
+		    Abs(Max(Coefficients(g))) ge BIG_LIMIT;
+                fg := f * g;
+                gg := g * g;
+                assert f + g eq g + f;
+                assert fg eq g * f;
+                assert (f + g) * (f - g) eq ff - gg;
+                assert (f + g)^2 eq ff + 2*fg + gg;
+                assert f * (f + g) eq ff + fg;
+                assert f - g eq -(g - f);
+		assert (f lt g) eq (g gt f);
+ 
+		if not is_quo then
+		    if g ne 0 then
+			l, q := IsDivisibleBy(fg, g);
+			assert l and q eq f;
+		    end if;
+
+		    if has_gcd and not f_is_big and not g_is_big then
+			assert GCD(fg, fg + f) eq Normalize(f);
+			if f eq 0 and g eq 0 then
+			    assert LCM(f, g) eq 0;
+			else
+			    assert LCM(f, g) eq Normalize(f div GCD(f, g) * g);
+			end if;
+		    end if;
+
+		    if has_fact and fg ne 0 and do_fact(fg) and
+			IsDefined(fact_list, fi) and IsDefined(fact_list, gi)
+		    then
+			ffact := fact_list[fi];
+			gfact := fact_list[gi];
+			//"fgfact of", fg;
+			fgfact := Factorization(fg);
+			//fgfact;
+			assert &*[P | t[1]^t[2]: t in fgfact] eq Normalize(fg);
+			mset := {* P | t[1]^^t[2]: t in ffact *} join
+			        {* P | t[1]^^t[2]: t in gfact *};
+			factors := {P | h: h in mset};
+			list := [<x, Multiplicity(mset, x)>: x in factors];
+			Sort(~list);
+			if list ne fgfact then
+			    "list", list;
+			    "fgfact", fgfact;
+			    "ffact", ffact;
+			    "gfact", gfact;
+			    "f", f;
+			    "g", g;
+			    error "BAD";
+			end if;
+		    end if;
+
+		    if Max(TotalDegree(f), TotalDegree(g)) le 200 then
+			assert
+			    Derivative(fg, V) eq
+			    f * Derivative(g, V) + g * Derivative(f, V);
+		    end if;
+		end if;
+
+		IndentPop();
+            end for;
+
+	    IndentPop();
+        end for;
+    end for;
+
+    x := P.1;
+    y := P.Min(n, 2);
+    S := {x, y, x^2, x*y};
+    _ := x^500;
+    assert x in S;
+    assert x*y in S;
+
+    IndentPop();
+    t := Cputime(CPU);
+    t, "seconds";
+
+end procedure;
+
+procedure main_test(R, n, length, drange, crange, count)
+    P := PolynomialRing(R, n, "grevlex");
+    AssignNames(~P, [CodeToString(i + 96): i in [1 .. n]]);
+    element_test(P, length, drange, crange, count);
+    if IsField(R) then
+	Q := quo<P |
+	    [
+		P.i^Random(1, 3) + &+[P | P.j^Random(1, 3): j in [i + 1 .. n]]:
+		    i in [1 .. n]
+	    ]>;
+	AssignNames(~Q, [CodeToString(i + 96): i in [1 .. n]]);
+	element_test(Q, length, drange, crange, count);
+    end if;
+end procedure;
+
+//////////
+//main_test(CyclotomicField(5), 3, 5, [1 .. 2], 2, 1);
+//////////
+
+//"HACK"; main_test(GF(2), 3, 3, [1 .. 10], 2, 1);
+
+main_test(RationalField(), 3, 5, [1 .. 3], 10^10, 1);
+main_test(RationalField(), 3, 5, [1 .. 3], 10, 2);
+main_test(IntegerRing(), 3, 5, [1 .. 3], 10^10, 1);
+main_test(CyclotomicField(5), 3, 5, [1 .. 2], 2, 1);
+main_test(QuadraticField(-1), 3, 5, [1 .. 3], 10, 1);
+main_test(FunctionField(GF(2), 3), 3, 5, [1 .. 2], 2, 1);
+main_test(FunctionField(Z), 3, 5, [1 .. 2], 2, 1);
+main_test(FunctionField(Z, 2), 3, 5, [1 .. 2], 2, 1);
+main_test(GF(2, 10), 3, 3, [1 .. 10], 2, 1);
+main_test(GF(2), 3, 3, [1 .. 10], 2, 1);
+main_test(RationalField(), 3, 3, [1 .. 10], 2, 1);
+main_test(RationalField(), 5, 10, [1 .. 2], 2, 1);
+main_test(IntegerRing(), 3, 5, [1 .. 3], 10, 1);
+
+/*******************************************************************************
+				Power test
+*******************************************************************************/
+
+for p in [2, 3, 5, 13, 23] do
+    K := GF(p);
+    "Power test:", p;
+
+    P<x,y,z> := PolynomialRing(K, 3);
+    f := 2*x^10*y^6*z^3 - 2*x^6*y^3*z^9 - 5*x^3*y^2*z^9 + y^7*z^6 - x^4*y^7;
+    time for e in [Random(p div 2, 130): i in [1 .. 20]] cat [p, p^2] do
+	g := f^e;
+	// i := Random(1, e); j := e - i; assert g eq f^i * f^j;
+	//assert g eq f^(e - 1)*f;
+	B := [Random(K): j in [1 .. 3]];
+	assert Evaluate(g, B) eq Evaluate(f, B)^e;
+    end for;
+end for;
+
+/*******************************************************************************
+				Ideals
+*******************************************************************************/
+
+is_easy := func<I |
+    Type(BaseRing(Generic(I))) in {FldFin} or #Sprint(I) le 1000>;
+ 
+procedure ideal_test(K, n, k, l, d, r)
+    P := PolynomialRing(K, n, "grevlex");
+    AssignNames(~P, [CodeToString(i + 96): i in [1 .. n]]);
+
+//    element_test(P);
+
+    if false then
+	print "\n******************\n";
+    end if;
+
+    print "\n******************\n";
+    print "Ideal test";
+    K;
+    P;
+    IndentPush();
+
+    print "Ideal test:", K, n, k, l, d, r;
+
+    //SetVerbose("GroebnerWalk", true);
+    //SetVerbose("Groebner", true);
+
+    I := create_ideal(P, k, l, d, r);
+    J := create_ideal(P, k, l, d, r);
+
+    BI := Basis(I);
+    BJ := Basis(J);
+
+    //VERB := r ge 10^10;
+
+    if VERB then
+	"I:", I;
+	"J:", J;
+	//"Groebner Seed:", GetSeed();
+    end if;
+
+    Groebner(I);
+    Groebner(J);
+
+    if VERB then
+	"\nGroebner I:"; I;
+	"\nGroebner J:"; J;
+    end if;
+
+    _ := I eq P or IsZeroDimensional(I);
+    _ := J eq P or IsZeroDimensional(J);
+
+    if VERB then
+	print "Groebner I:", I;
+	print "Groebner J:", J;
+
+	print "IsZeroDimensional(I):", IsZeroDimensional(I);
+	print "IsZeroDimensional(J):", IsZeroDimensional(J);
+    end if;
+
+    "I len:", #Sprint(I);
+    "J len:", #Sprint(J);
+
+    easy_I := is_easy(I);
+    easy_J := is_easy(J);
+    easy := easy_I and easy_J;
+
+    assert IsProper(I) eq (1 notin I);
+    assert IsZero(I) eq (#GroebnerBasis(I) eq 0);
+
+    if easy then
+	"Easy";
+	GetSeed();
+	//"meet Seed:", GetSeed();
+	M := I meet J;
+	//"ColonIdeal Seed:", GetSeed();
+	GetSeed();
+	C := ColonIdeal(I, J);
+	for f in Basis(C) do
+	    assert forall{g: g in Basis(J) | f * g in I};
+	end for;
+
+	S := I + J;
+	T := I * J;
+    else
+	"Not easy";
+	//M := T;
+    end if;
+
+    F := &+Basis(I);
+    G := &+Basis(J);
+
+    assert F in I;
+    assert G in J;
+
+    assert IsInRadical(F, I);
+    assert IsInRadical(G, J);
+
+    assert NormalForm(F, I) eq 0;
+    assert NormalForm(G, J) eq 0;
+
+    assert forall{f: f in BI | (P!f) in I};
+    assert forall{f: f in BJ | (P!f) in J};
+
+    if easy then
+	assert I subset S;
+	assert J subset S;
+
+	assert NormalForm(F, J) in S;
+	if F ne 0 and G ne 0 then
+	    assert SPolynomial(F, G) in S;
+	end if;
+
+	assert M subset I;
+	assert M subset J;
+	assert T subset M;
+	H := &+Basis(M);
+	assert H in M;
+	assert IsInRadical(H, M);
+    end if;
+
+    if easy_I and Dimension(I) le 0 then
+	VI := Variety(I);
+	if VERB then
+	    "\nVariety I:";
+	    VI;
+	end if;
+	assert forall{t: t in VI, f in Basis(I) | Evaluate(f, t) eq 0};
+    end if;
+
+    if easy_J and Dimension(J) le 0 then
+	VJ := Variety(J);
+	if VERB then
+	    "\nVariety J:";
+	    VJ;
+	end if;
+	assert forall{t: t in VJ, f in Basis(J) | Evaluate(f, t) eq 0};
+    end if;
+
+    if easy and assigned M and Dimension(M) le 0 then
+	VM := Variety(M);
+	if VERB then
+	    "\nVariety M:";
+	    VM;
+	end if;
+	assert forall{t: t in VM, f in Basis(M) | Evaluate(f, t) eq 0};
+	assert not (assigned VI and assigned VJ) or
+	    Set(VM) eq Set(VI) join Set(VJ);
+    end if;
+
+    C := Coordinates(I, F);
+    assert &+[P | C[i]*BasisElement(I, i): i in [1..#C]] eq F;
+
+    IndentPop();
+end procedure;
+
+// ideal_test(K, n, k, l, d, r)
+// n: nvars, k: npolys, l: length, d: degree, r: range
+
+ideal_test(GF(2147483659), 3, 3, 2, 3, 2);
+
+ideal_test(RationalField(), 2, 2, 2, 3, 2);
+
+for i := 1 to 40 by 5 do
+    ideal_test(GF(2, i), 3, 3, 2, 3, 2);
+    ideal_test(GF(NextPrime(2^i)), 3, 3, 2, 2, 2);
+end for;
+
+ideal_test(RationalField(), 2, 2, 5, 3, 1);
+ideal_test(RationalField(), 2, 2, 4, 3, 2);
+ideal_test(RationalField(), 3, 3, 2, 3, 2);
+
+anf := false;
+anf := true;
+if anf then
+
+    "Quad/Cyclo";
+    ideal_test(QuadraticField(-3), 3, 2, 2, 2, 2);
+    ideal_test(QuadraticField(7), 3, 2, 2, 2, 2);
+
+    ideal_test(CyclotomicField(5), 3, 2, 2, 2, 2);
+    ideal_test(CyclotomicField(4), 2, 2, 5, 3, 1);
+    ideal_test(QuadraticField(-1), 3, 2, 5, 3, 1);
+
+    "ANF";
+    P<x> := PolynomialRing(IntegerRing());
+    ideal_test(NumberField(x^3 + 2), 3, 2, 5, 3, 1);
+    ideal_test(NumberField(x^5 + x + 3), 3, 2, 5, 3, 1);
+    ideal_test(NumberField(x^5 + 5*x + 31), 3, 2, 5, 3, 1);
+    ideal_test(NumberField(x^4 + x + 3), 4, 3, 3, 3, 1);
+end if;
+
+ideal_test(RationalField(), 3, 2, 2, 2, 10^20);
+
+ideal_test(RationalField(), 3, 3, 2, 3, 2);
+
+ideal_test(FunctionField(Z, 2), 2, 2, 2, 2, 2);
+ideal_test(FunctionField(Z, 3), 2, 3, 2, 1, 10);
+
+//"HACK"; ideal_test(RationalField(), 3, 3, 2, 2, 10^20);
+
+p := 11863283;
+
+for q in [2, 4, 257, 65537, 11863279, 2^31 - 1] do
+    "Generic test:", q;
+    K := GF(q);
+    time
+    for n := 1 to 7 do
+	P := PolynomialRing(K, n, "univ", n);
+	B := [
+	    &+[Random(K)*m: m in &join[MonomialsOfDegree(P, d): d in [0..2]]]:
+	    i in [1 .. n]
+	];
+	I := Ideal(B);
+	if IsZeroDimensional(I) then
+	    G := GroebnerBasis(I);
+	    f := G[#G];
+	    L := Factorization(f);
+	    d := 0;
+	    for t in L do
+		I2 := ideal<P | G, t[1]^t[2]>;
+		Groebner(I2: Al := "Direct");
+		assert IsZeroDimensional(I2);
+		assert 1 notin I2;
+		d +:= Dimension(P/I2);
+	    end for;
+	    assert d eq Dimension(P/I);
+	end if;
+    end for;
+end for;
+
+
+/*******************************************************************************
+				Modules
+*******************************************************************************/
+
+procedure module_test_M(M, k, l, d, r)
+    if VERB then
+	print "\n******************\n";
+    end if;
+
+    print "Module test:", M;
+
+    function rand_module(M)
+	return create_module(M, k, l, d, r);
+    end function;
+
+    for count := 1 to 4 do
+	if count mod 2 eq 0 then
+	    G := M / rand_module(M);
+	else
+	    G := M;
+	end if;
+
+	A := rand_module(G);
+	B := rand_module(G);
+
+	Groebner(A);
+	Groebner(B);
+
+	if VERB then
+	    print "A:", A;
+	    print "B:", B;
+	end if;
+
+	ZA := SyzygyModule(A);
+	ZB := SyzygyModule(B);
+	Groebner(ZA);
+	Groebner(ZB);
+
+	if VERB then
+	    print "ZA:", ZA;
+	    print "ZB:", ZB;
+	end if;
+
+"ZA:", ZA;
+"A:", A;
+	PA := BasisMatrix(ZA) * BasisMatrix(A);
+"PA:", PA;
+	assert forall{i: i in [1..Nrows(PA)] | IsZero(A!PA[i])};
+	PB := BasisMatrix(ZB) * BasisMatrix(B);
+	assert forall{i: i in [1..Nrows(PB)] | IsZero(A!PB[i])};
+
+	S := A + B;
+	D := A meet B;
+
+	Groebner(D);
+
+	if VERB then
+	    print "D:", D;
+	end if;
+	/*
+	C := ColonIdeal(A, B);
+	if VERB then
+	    print "C:", C;
+	end if;
+	*/
+
+	assert A subset S;
+	assert B subset S;
+	assert D subset A;
+	assert D subset B;
+
+	//assert IsZero(A) eq (#GroebnerBasis(A) eq 0);
+
+	f := sum(Basis(A));
+	g := sum(Basis(B));
+	h := sum(Basis(D));
+
+	assert f in A;
+	assert g in B;
+	assert h in D;
+	//assert IsInRadical(f, A);
+	//assert IsInRadical(g, B);
+	//assert IsInRadical(h, D);
+	assert NormalForm(f, A) eq G!0;
+	assert NormalForm(g, B) eq G!0;
+	assert NormalForm(f, B) in S;
+	//assert SPolynomial(f, g) in S;
+
+	C := Coordinates(A, f);
+	assert sum([C[i]*BasisElement(A, i): i in [1..#C]]) eq f;
+
+    end for;
+end procedure;
+
+procedure module_test_P(P, K, n, c, k, l, d, r)
+    M := Module(P, c);
+    module_test_M(M, k, l, d, r);
+end procedure;
+
+procedure module_test(K, n, c, k, l, d, r)
+    P := PolynomialRing(K, n, "grevlex");
+    AssignNames(~P, [CodeToString(i + 96): i in [1 .. n]]);
+    module_test_P(P, K, n, c, k, l, d, r);
+    Q := P / create_ideal(P, k, l, d, r);
+    module_test_P(Q, K, n, c, k, l, d, r);
+end procedure;
+
+procedure both_test(K, n, c, k, l, d, r)
+    module_test(K, n, c, k, l, d, r);
+end procedure;
+
+//both_test(RationalField(), 2, 10, 2, 3, 2, 3);
+//both_test(GF(2), 6, 5, 2, 5, 1, 2);
+//both_test(GF(23), 2, 5, 2, 3, 4, 23);
+//both_test(RationalField(), 3, 5, 2, 15, 1, 1);
+
+P<a,b,c> := PolynomialRing(Z, 3);
+fe := a^3 - b^3 - c^3;
+V:=1;
+dfe := Derivative(fe, V);
+assert MyResultant(fe, dfe, V) eq 27*b^6 + 54*b^3*c^3 + 27*c^6;
+
+K := Q;
+P<x,t> := PolynomialRing(K,2);
+f := x^11+x^2+t;
+d := Derivative(f, x);
+assert MyResultant(f, d, x) eq 285311670611*t^10 + 1549681956*t;
+d := -Derivative(f, x);
+assert MyResultant(f, d, x) eq -285311670611*t^10 - 1549681956*t;
+
+// SetVerbose("Resultant",1);
+P<x,y> := PolynomialRing(Q, 2);
+f := 378089444731722233953867379643788100*y^2 +
+    (756178889463444467907734759287576200*x + 6148897825884914100)*y +
+    378089444731722233953867379643788100*x^2 + 6148897825884914100*x + 1;
+g := y - 1;
+SetSeed(1, 821); res := Resultant(f, g, y);
+assert res eq 378089444731722233953867379643788100*x^2 + 
+  756178889463444474056632585172490300*x + 378089444731722240102765205528702201;
+
+
+B<u,v> := PolynomialRing(Integers(), 2);
+P<x,y> := PolynomialRing(B, 2);
+assert ExactQuotient(2*x, 2) eq x;
+assert ExactQuotient(y*x+y, x+1) eq y;
+assert not IsDivisibleBy(y*x+y, x+2);
+l, q := IsDivisibleBy(y*x+y, x+1);
+assert l and q eq y;
+
+R<x,y,z> := PolynomialRing(GF(2), 3);
+L := [x*y+1,z];
+M := [x*y+1,x];
+//assert GroebnerBasis(L,1) eq L; assert GroebnerBasis(M,1) eq M;
+
+n := 32;
+P<[x]> := PolynomialRing(GF(2),n);
+feqns := [x[i]^2+x[i]:i in [1..n]];
+linlist := [&+[Random(GF(2))*x[i]:i in [1..n]]+Random(GF(2)):j in [1..10]];
+GB := GroebnerBasis(linlist cat feqns,2);
+assert #GB eq n;
+
+// Mar 2012
+
+R<x1, x2, x3, x4, x5, x6> := PolynomialRing(Q, 6);
+PR1 := -(10/9)*x1-(295/304)*x5 +x1*x5 + (9/10)*x2*x5 +(1/9)*x3*x5 +(1/10)*x4*x5;
+PR2 := 10*x1 - 161*x2 + (143451/1000)*x2*x5 + (6009/377)*x4*x5;
+PR3 := (59/76) + (31/50)*x2 - (295/304)*x5;
+PR4 := -(10/9)*x3 - (295/304)*x6 + (1/9)*x1*x6 + (1/10)*x2*x6 + x3*x6 +
+(9/10)*x4*x6;
+PR5 := 10*x3-161*x4 + (6009/377)*x2*x6 + (143451/1000)*x4*x6;
+PR6 := (59/76) + (7/50)*x4 -(295/304)*x6;
+B := [PR1, PR2, PR3, PR4, PR5, PR6];
+I := Ideal(B);
+
+assert QuotientDimension(I) eq 9;
+VC := Variety(I, ComplexField(50));
+VR := Variety(I, RealField(50));
+assert #VC eq 9;
+assert #VR eq 3;
+assert forall{t: t in VC, f in B | Norm(Evaluate(f, t)) le 1E-40};
+assert forall{t: t in VR, f in B | Norm(Evaluate(f, t)) le 1E-40};
+
+// Apr 2013
+
+P<x,y,z> := PolynomialRing(GF(3),3,"lex");
+I := ideal<P|[x^2*y + y^3 + x^2*z + x*y*z + z^3, x^4 + 2*y^3*z + y*z^3]>;
+R := Radical(I);
+assert I subset R;
+
+// Apr 2016
+FF := GF(100003);
+NCS<[y]>:=FreeAlgebra(FF,4);
+relations:=[
+    3*y[2]*y[1]^2*y[3]^3 + 9*y[2]^3*y[3]^3 + 100000*y[3]^3*y[2]*y[1]^2 +
+        99994*y[3]^3*y[2]^3,
+    y[1]^2*y[3] + 100002*y[3]*y[1]^2,
+    y[1]^2*y[3] + y[1]^2*y[4] + y[2]*y[1]*y[3] + y[2]*y[1]*y[4] +
+        100002*y[3]*y[1]^2 + 100002*y[3]*y[2]*y[1] + 100002*y[4]*y[1]^2 +
+        100002*y[4]*y[2]*y[1],
+    y[1]*y[4]*y[3] + y[2]*y[4]*y[3] + 100002*y[4]*y[3]*y[1] +
+    100002*y[4]*y[3]*y[2]
+];
+SetVerbose("Groebner", 4);
+gb := GroebnerBasis(relations, 6);
+assert [Degree(f): f in gb] eq [ 6, 4, 3, 3, 3 ];
+

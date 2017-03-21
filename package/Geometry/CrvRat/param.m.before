@@ -1,0 +1,236 @@
+freeze;
+///////////////////////////////////////////////////////////////////////
+// param.m
+// Florian Hess. Installed GDB May 2001
+// May 2002: David Kohel 
+// Revised to include inverse maps and multiple defining sequences
+///////////////////////////////////////////////////////////////////////
+
+intrinsic Parametrization(C::Crv, p::Pt) -> MapSch
+{}
+    K := BaseRing(C); 
+    require IsField(K): "Base ring of argument 1 must be a field.";
+    require Genus(C) eq 0: "Argument 1 must be of genus 0.";
+    require IsCoercible(C,p):
+        "Argument 2 must be a point of argument 1 over its base ring.";
+    require IsOrdinaryProjective(Ambient(C)):
+        "Argument 1 must have ordinary projective ambient space.";
+    p := Places(p);
+    require #p eq 1 and Degree(p[1]) eq 1 : "Point must determine a unique place of degree 1";
+    return Parametrization(C, p[1]);
+end intrinsic;
+
+intrinsic Parametrization(C::Crv, p::PlcCrvElt) -> MapSch
+{}
+    K := BaseRing(C); 
+    require IsField(K): "Base ring of argument 1 must be a field.";
+    require Genus(C) eq 0: "Argument 1 must be of genus 0.";
+    require IsCoercible(Places(C),p) and Degree(Places(C)!p) eq 1:
+        "Argument 2 must be a place of argument 1 of degree 1.";
+    require IsOrdinaryProjective(Ambient(C)):
+        "Argument 1 must have ordinary projective ambient space.";
+    return Parametrization(C, p, ProjectiveSpace(K, 1));
+end intrinsic;
+
+intrinsic Parametrization(C::CrvCon, p::Pt, P::Prj) -> MapSch
+{}
+    require Gradings(P) eq [[1,1]] : 
+	"Argument 3 must be an ordinary projective line.";
+    require IsOrdinaryProjective(Ambient(C)):
+        "Argument 1 must have ordinary projective ambient space.";
+    K := BaseRing(C);
+    require IsField(K): "Base ring of argument 1 must be a field.";
+    require Genus(C) eq 0: "Argument 1 must be of genus 0.";
+    require IsCoercible(C,p):
+        "Argument 2 must be a point of argument 1 over its base ring.";
+
+/* added 02/05 - mch. */
+
+    F := DefiningPolynomial(C);
+    CR := Parent(F);
+    inds := [1,2,3];
+    pcs := Coordinates(p);
+    L2 := [Evaluate(Derivative(F,i),pcs) : i in inds];
+    // L2 = coeffs of tangent line at p
+
+    cnz := Min([j : j in inds | L2[j] ne 0]);
+    Remove(~inds,cnz);
+    L1 := [pcs[inds[2]],-pcs[inds[1]]];
+    Insert(~L1,cnz,0); // L1 = coeffs of another line through p
+
+     // map C -> P given by [X:Y:Z] -> [L1:L2] - we'll find the inverse of this.
+     //  for this we consider the linear form s*L1-t*L2=0 in k(s,t)[X,Y,Z],
+     //   find CR.cnz as a k(s,t) linear comb. of the other two CR.j, substitute
+     //   into F, divide this by L2 and get a second linear form L3 in the two CR.j.
+     //   X,Y,Z can then be recovered from L1=a*t*s, L2=a*s^2, L3=0  for a linear
+     //   form L in s and t s.t. X, Y ,Z are homogeneous degree 2.
+     //   By homogeneity we can take t = 1 and rehomogenise later
+
+    K<s> := RationalFunctionField(BaseRing(CR): Global := false);
+    R<x> := PolynomialRing(K: Global := false);
+    Lst := ((s*L1[inds[1]]-L2[inds[1]])*x +
+	    (s*L1[inds[2]]-L2[inds[2]]) )/ L2[cnz];
+
+    vec := [x,R!1];
+    Insert(~vec,cnz,Lst);
+    F1 := Evaluate(F,vec)/(x*L1[inds[1]]+L1[inds[2]]);
+    assert(Denominator(F1) eq 1);
+    F1 := Numerator(F1);
+    vec := [IntegerRing(K)|Coefficient(F1,0),-Coefficient(F1,1)];
+    vec := [v div g: v in vec] where g is GCD(vec);
+    assert &and[Degree(v) le 2 : v in vec];
+
+    // here L3 given by v1*CR.inds[1]+v2*CR.inds[2]=0 where
+    //   vi(s,t) is the homogenized vec[i](s)
+    //  Can now build the inverse map
+    L := L1[inds[1]]*vec[1]+L1[inds[2]]*vec[2];
+    assert (L ne 0);
+    s := IntegerRing(K)!s;
+    if (Degree(L) eq 0) then
+	L *:= s; vec := [v*s : v in vec];
+    end if; 
+    assert ((Degree(L) eq 1) and (Coefficient(L,0) eq 0));
+    Xst := (s*L-L2[inds[1]]*vec[1]-L2[inds[2]]*vec[2])/ L2[cnz];
+    Insert(~vec,cnz,Xst);
+
+    return iso<P->C | [Evaluate(v,s_t) : v in vec],
+		[ &+[L1[i]*CR.i : i in [1..3]], &+[L2[i]*CR.i : i in [1..3]] ] >
+		where s_t is FunctionField(P)!(P.2/P.1); 
+
+end intrinsic;
+
+intrinsic Parametrization(C::CrvRat, p::Pt, P::Prj) -> MapSch
+{}
+    require Gradings(P) eq [[1,1]] : 
+	"Argument 3 must be an ordinary projective line.";
+    require IsOrdinaryProjective(Ambient(C)):
+        "Argument 1 must have ordinary projective ambient space.";
+    K := BaseRing(C);
+    require IsField(K): "Base ring of argument 1 must be a field.";
+    require Genus(C) eq 0: "Argument 1 must be of genus 0.";
+    require IsCoercible(C,p):
+        "Argument 2 must be a point of argument 1 over its base ring.";
+
+    A := Ambient(C);
+    f := DefiningPolynomial(C);
+    a, b, c := Explode([ MonomialCoefficient(f,A.i) : i in [1..3] ]);
+    if b ne 0 then
+	return map< P -> C | [b*P.1,-a*P.1-c*P.2,b*P.2], [A.1,A.3] >;
+    elif c ne 0 then
+	return map< P -> C | [c*P.1,c*P.2,-a*P.1-b*P.2], [A.1,A.2] >;
+    else 
+	return map< P -> C | [-b*P.1-c*P.2,a*P.1,a*P.2], [A.2,A.3] >;
+    end if;
+end intrinsic;
+
+intrinsic Parametrization(C::CrvCon, p::PlcCrvElt, P::Prj) -> MapSch
+{}
+    require Gradings(P) eq [[1,1]] : 
+	"Argument 3 must be an ordinary projective line.";
+    require IsOrdinaryProjective(Ambient(C)):
+        "Argument 1 must have ordinary projective ambient space.";
+    K := BaseRing(C);
+    require IsField(K): "Base ring of argument 1 must be a field.";
+    require Genus(C) eq 0: "Argument 1 must be of genus 0.";
+    bool, p := IsCoercible(Places(C),p);
+    require bool and Degree(p) eq 1 :
+        "Argument 2 must be a place on argument 1 of degree 1.";
+    return Parametrization(C, RepresentativePoint(p), P);
+end intrinsic;
+
+intrinsic Parametrization(C::CrvRat, p::PlcCrvElt, P::Prj) -> MapSch
+{}
+    require Gradings(P) eq [[1,1]] : 
+	"Argument 3 must be an ordinary projective line.";
+    require IsOrdinaryProjective(Ambient(C)):
+        "Argument 1 must have ordinary projective ambient space.";
+    K := BaseRing(C);
+    require IsField(K): "Base ring of argument 1 must be a field.";
+    require Genus(C) eq 0: "Argument 1 must be of genus 0.";
+    bool, p := IsCoercible(Places(C),p);
+    require bool and Degree(p) eq 1 :
+        "Argument 2 must be a place on argument 1 of degree 1.";
+    return Parametrization(C, RepresentativePoint(p), P);
+end intrinsic;
+
+intrinsic Parametrization(C::Crv, p::PlcCrvElt, P::Prj) -> MapSch
+{Parametrization of the rational curve C given a rational point or a place p on C. The projective line P will be set as the domain of this map if included as an argument.}
+    require Gradings(P) eq [[1,1]] : 
+	"Argument 3 must be an ordinary projective line.";
+    require IsOrdinaryProjective(Ambient(C)):
+        "Argument 1 must have ordinary projective ambient space.";
+    K := BaseRing(C);
+    require IsField(K): "Base ring of argument 2 must be a field.";
+    require Genus(C) eq 0: "Argument 2 must be of genus 0.";
+    bool, p := IsCoercible(Places(C),p);
+    require bool and Degree(p) eq 1 :
+        "Argument 2 must be a place on argument 1 of degree 1.";
+
+    F := FunctionField(C);
+    FF,m := AlgorithmicFunctionField(F);
+    // The exisiting ff parametrisation intrinsic uses the 'infinite'
+    // function fields, so I translate further to that for the calculation.
+    FFF := UnderlyingRing(FF);
+    x, fncs := Parametrization(FFF,
+        DivisorGroup(FFF)!FunctionFieldDivisor(Divisor(p)));
+    // This answer has two parts:  x and fncs.
+    // x is a function and should be regarded as a map to P^1
+    // fncs is a seq of 2 functions in the coeff ring of the ff,
+    // and these should be regarded as a map from P^1 to the curve.
+    // We merely need to translate this info to our situation and build the map.
+
+    // Order of generators of FF is reversed.
+    Reversion(~fncs);
+
+    // equations of map P^1 to curve
+    ChangeUniverse(~fncs,FF);
+    CC := CoefficientRing(FF);
+    ChangeUniverse(~fncs,CC);
+    RP := Integers(CC);
+    den := RP!LCM([ Denominator(f) : f in fncs ]);
+    map_there := [ RP | f*den : f in fncs ] cat [ den ];
+    // these equations are right, but they are expressed in terms of the
+    // base ring of the finite-extension ff:  we translate to our given P^1.
+    CP := CoordinateRing(P);
+    to_P := hom< RP -> CP | CP.1 >;
+    map_there := [ Homogenization(to_P(f),CP.2,deg) : f in map_there ]
+		where deg := Maximum([Degree(f):f in map_there]);
+    // equations of map curve to P^1
+    x := ProjectiveFunction((FF ! x) @@ m);
+    RC := CoordinateRing(Ambient(C));
+    map_back := [ RC | Numerator(x), Denominator(x) ];
+    // done
+    return map< P -> C | map_there, map_back : Check:=false >;
+end intrinsic;
+
+intrinsic Parametrization(C::CrvCon) -> MapSch
+    {}
+    K := BaseRing(C);
+    require Type(K) eq RngInt or IsField(K):
+        "Base ring of argument 2 must be a field.";
+    require HasPoint(C) : "Argument 2 must have a rational point.";
+    require IsOrdinaryProjective(Ambient(C)):
+        "Argument must have ordinary projective ambient space.";
+    return Parametrization(C, ProjectiveSpace(K,1));
+end intrinsic;
+
+intrinsic Parametrization(C::CrvCon, P::Prj) -> MapSch
+    {Parametrization of the conic curve C; if provided, the 
+    projective line P will be used as the domain of this map.} 
+    require Gradings(P) eq [[1,1]] : 
+	"Argument 1 must be an ordinary projective line.";
+    K := BaseRing(C);
+    require Type(K) in {RngInt,FldRat} :
+        "Base ring of argument 2 must be the rationals.";
+    require BaseRing(P) cmpeq K : "Base rings of arguments must be equal.";
+    require HasPoint(C) : "Argument 2 must have a rational point.";
+    PX2 := [ P.1^2, P.1*P.2, P.2^2 ]; // 2-uple embedding of P1
+    M := ParametrizationMatrix(C);    // variable change for 2-uple image   
+    eqns0 := [ &+[ M[i,j]*PX2[i] : i in [1..3] ] : j in [1..3] ];
+    N := Adjoint(M);                  // inverse variable change
+    eqns1 := [ &+[ N[i,j]*Ambient(C).i : i in [1..3] ] : j in [1..3] ];
+    return iso< P -> C | [ eqns0 ],
+           [ eqns1[[1,2] ], eqns1[[2,3]] ] : Check := false >;
+end intrinsic;
+
+

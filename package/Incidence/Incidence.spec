@@ -1,0 +1,31 @@
+AlgSym
+{
+    Limit.m
+    IsHomogenous.m
+    Tableaux.m
+    SymmetricCharacter.m
+    Sort.m
+}
+Designs
+{
+    had_db.m
+    hadamard.m
+}
+Graph
+{
+    graphs.m
+    invars.m
+	dual.m
+}
+IncGeom
+{
+    intersect_prop.m
+}
+Plane
+{
+    geom.m
+}
+Tableau
+{
+    +Tableau.spec
+}

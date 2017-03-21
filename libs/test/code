@@ -1,0 +1,156 @@
+/*
+Basic coding theory test.
+AKS April 2008.
+*/
+
+
+procedure test_code(C: GMW := "undef", GWD := "undef")
+
+    procedure test_given(G, V)
+	if G cmpne "undef" then
+	    assert G eq V;
+	end if;
+    end procedure;
+
+    if GMW cmpeq "undef" and GWD cmpne "undef" then
+	GMW := GWD[2, 1];
+    end if;
+
+    MW := MinimumWeight(C);
+    test_given(GMW, MW);
+
+    printf "%o%o\n",
+	Sprint(C, "Minimal"), IsCyclic(C) select ", cyclic" else "";
+
+    if Min(#C, #Dual(C)) le 2^30 then
+	WD := WeightDistribution(C);
+	test_given(GWD, WD);
+
+// WD;
+
+	assert WD[1] eq <0, 1>;
+	assert WD[2, 1] eq MW;
+
+	WD[2, 2], "minimum word(s)";
+	if WD[2, 2] le 10^5 then
+	    W := MinimumWords(C);
+	    assert #W eq WD[2, 2];
+	    assert forall{v: v in W | Weight(v) eq MW};
+	end if;
+    end if;
+
+end procedure;
+
+for q in [q: q in [2 .. 9] | IsPrimePower(q)] do
+    repeat
+	n := Random(15, 25);
+    until GCD(n, q) eq 1;
+    // test_code(BCHCode(GF(q), n, n div 4));
+    test_code(HammingCode(GF(q), 3));
+end for;
+
+for m := 1 to 6 do
+    for r := 1 to m - 1 do
+	test_code(ReedMullerCode(r, m));
+    end for;
+end for;
+
+C := BCHCode(GF(3), 13, 3);
+v := Random(C);
+b, w := EuclideanDecoding(C, v);
+assert b;
+assert w eq v;
+
+/******************************************************************************/
+
+function APNCode(K, f)
+    n := Degree(K, GF(2));
+    w := PrimitiveElement(K);
+    GBase := [w^i : i in [0 .. n-1]];
+    CL := [1: x in K] cat
+	[Trace(x*(GBase[i])): x in K, i in [1..n]] cat
+	[Trace(f(x)*(GBase[i])): x in K, i in [1..n]];
+    CM := Matrix(2*n+1, 2^n, CL);
+    return LinearCode(CM);
+end function;
+
+base := 4;
+APNWD := [
+    [ <0, 1>, <4, 20>, <6, 160>, <8, 150>, <10, 160>, <12, 20>, <16, 1> ],
+    [ <0, 1>, <12, 496>, <16, 1054>, <20, 496>, <32, 1> ],
+    [ <0, 1>, <24, 336>, <28, 2688>, <32, 2142>, <36, 2688>, <40, 336>,
+	<64, 1> ],
+    [ <0, 1>, <56, 8128>, <64, 16510>, <72, 8128>, <128, 1> ],
+    [ <0, 1>, <112, 5440>, <120, 43520>, <128, 33150>, <136, 43520>,
+	<144, 5440>, <256, 1> ],
+    [ <0, 1>, <240, 130816>, <256, 262654>, <272, 130816>, <512, 1> ],
+    [ <0, 1>, <480, 87296>, <496, 698368>, <512, 525822>, <528, 698368>, <544, 
+	87296>, <1024, 1> ],
+    [ <0, 1>, <992, 2096128>, <1024, 4196350>, <1056, 2096128>, <2048, 1> ],
+    [ <0, 1>, <1984, 1397760>, <2016, 11182080>, <2048, 8394750>,
+	<2080, 11182080>, <2112, 1397760>, <4096, 1> ]
+];
+
+"\nAPN";
+for n := base to #APNWD + base - 1 do
+    test_code(APNCode(GF(2^n), func<x | x^3>): GWD := APNWD[n - (base - 1)]);
+end for;
+
+/******************************************************************************/
+
+// Regression tests for coding theory bugs
+Z4 := Integers(4);
+
+// Markus Grassl:
+c := LinearCode<Z4, 4 | [ 0, 0, 1, 1 ] >;
+w := MinimumLeeWeight(c);	// crashes prior to 9482
+assert w eq 2;
+
+// Markus Grassl:
+c := LinearCode<Z4, 5 | [2, 2, 2, 2, 2 ]>;
+ok,bound,exact := VerifyMinimumLeeWeightLowerBound(c, 10);
+// Should return true 10 true, returns false 1 false prior to 9482
+assert ok;
+assert bound eq 10;
+assert exact;
+
+// This next one only failed on 32-bit machines, and takes to long to
+// run by default. :(
+/*
+seq := func<v,n | [ v : k in [1..n] ]>;
+N := 32;
+first := &cat[ seq(1,1), seq(0, N-1), seq(1,1), seq(0,N-1), seq(2,1) ];
+middle := [ &cat[seq(0,k), seq(2,1), seq(0,N-1), seq(2,1), seq(0,N-k)]
+	    : k in [1..N] ];
+last := &cat[ seq(0,N+1), seq(2,N) ];
+rows := [ first ] cat middle cat [ last ];
+C := LinearCode<Z4, 2*N + 1 | rows>;
+w := MinimumLeeWeight(C);	// would get -1 prior to 9448
+assert w eq 2;
+*/
+
+gens:=[PolynomialRing(GF(5))|
+[1,0,0,0,0,0,0,4,1,4,1,4],
+[0,0,2,2,0,4,2,2,1,1,3,3],
+[0,3,0,0,4,2,0,4,0,0,4,3],
+[0,2,3,2,1,1,0,2,2,3,0,4],
+[4,3,3,3,1,3,0,3,2,3,3,2],
+[4,4,1,3,3,3,3,1,2,0,2,4],
+[4,4,0,3,1,0,0,4,0,3,1],
+[0,4,0,1,2,1,0,3,1,4,1,3]];
+C:=QuasiCyclicCode(96,gens);
+assert WeightDistribution(C) eq
+[ <0, 1>, <58, 24>, <60, 48>, <61, 48>, <62, 312>, <63, 832>, <64, 1728>, <65, 
+2880>, <66, 5232>, <67, 9792>, <68, 20124>, <69, 28704>, <70, 45192>, <71, 
+64128>, <72, 88316>, <73, 116256>, <74, 148416>, <75, 173136>, <76, 191916>, 
+<77, 199824>, <78, 192032>, <79, 177408>, <80, 148752>, <81, 118656>, <82, 
+86160>, <83, 57504>, <84, 36936>, <85, 21360>, <86, 10176>, <87, 4448>, <88, 
+1128>, <89, 1008>, <90, 456>, <91, 144>, <92, 48> ]
+;
+assert not IsMDS(C);
+
+// Sendai, failed on Intel64-OSX 2.16-10 with crash on MinimumWeight()
+Z2 := Integers(2);
+C := CyclicCode(Vector(Z2,23,
+[1,1,0,0,0,1,1,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0]));
+assert MinimumWeight(C) eq 7;

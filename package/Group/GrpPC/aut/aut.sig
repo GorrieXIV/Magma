@@ -1,0 +1,6 @@
+174,1
+S,AutomorphismGroupSolubleGroup,"Computes the automorphism group of the soluble group G, with the optional parameter 'p' which should be a prime dividing the order of G (the calculation relies on Aut(Syl_p(G))). Default value of p is taken to be the prime diving the order of G which defines the largest Sylow p-subgroup",0,1,0,0,0,0,0,0,0,129,,118,-38,-38,-38,-38,-38
+S,AutomorphismGroupSolubleGroup,Computes the automorphism group of the soluble group G using the automorphism group of a Sylow p-subgroup of G. Setting p to 1 is equivalent to calling AutomorphismGroupSolubleGroup(G),0,2,0,0,0,0,0,0,0,148,,0,0,129,,118,-38,-38,-38,-38,-38
+S,AutomorphismGroupBreakOut,Breakout from c algorithm,0,1,0,0,0,0,0,0,0,129,,118,-38,-38,-38,-38,-38
+S,AutomorphismGroup2,Constructs automorphism group of G based on the mappings defined in imgs using generators gens. Ensures that automorphism maps are defined by the actual PC generators of G rather than gens,2,1,1,82,0,130,2,1,82,1,82,0,130,3,0,0,0,0,0,0,0,82,,0,0,82,,0,0,129,,118,-38,-38,-38,-38,-38
+S,AutomorphismGroup2,Constructs automorphism group of G based on the mappings defined in imgs using generators gens. Ensures that automorphism maps are defined by the actual PC generators of G rather than gens,2,1,1,82,0,-28,2,1,82,1,82,0,-28,3,0,0,0,0,0,0,0,82,,0,0,82,,0,0,-27,,118,-38,-38,-38,-38,-38

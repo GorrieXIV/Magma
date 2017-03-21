@@ -1,0 +1,327 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Automorphism Groups</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1830.htm">[Next]</A><A  HREF = "text1846.htm">[Prev]</A> <A  HREF = "text1830.htm">[Right]</A> <A  HREF = "text1846.htm">[Left]</A> <A  HREF = "text1831.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "20639">Automorphism Groups</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1847.htm#20640">Introduction</A>
+<LI> <A  HREF = "text1847.htm#20641">Group Actions</A>
+<LI> <A  HREF = "text1847.htm#20649">Automorphism Group</A>
+<LI> <A  HREF = "text1847.htm#20658">Equivalence and Isomorphism of Codes</A>
+</UL>
+<H4><A NAME = "20640">Introduction</A></H4>
+
+<P>
+<P>
+Let C be an [n, k] linear code and G a permutation group of degree
+n.  Then G acts on C in the following way: for a codeword v of
+C and a permutation x of G, the image of v under x is obtained
+from v by permuting the coordinate positions of v according to x.
+We call this the <I>permutation</I> action of G on C.
+<P>
+If C is a non-binary code over a finite field,
+there is also a <I>monomial</I> action on C.
+Let K be the alphabet of C.  A monomial permutation of monomial degree
+n is equivalent to a permutation s on
+K<sup> * </sup> x { 1, ..., n } which satisfies the following
+property:
+(&alpha;, i)<sup>s</sup> = (&beta;, j)  implies 
+(&gamma;&alpha;, i)<sup>s</sup> = (&gamma;&beta;, j)
+for all &alpha;, &beta;, &gamma; &isin;K<sup> * </sup> and i, j &isin;{ 1, ..., n }.  The actual degree of s is (q - 1)n.
+Note that s is completely determined by its action
+on the points (1, i) for each i, and
+the matrix representation of s is also determined by its action 
+on the elements (1, i), for 1 &le;i &le;n.
+To represent a monomial permutation of monomial degree
+n, we number the pair (&alpha;, i) by (q - 1)(i - 1) + &alpha; and
+then use a permutation s of degree (q - 1)n.
+<P>
+The functions in this section allow one to investigate such actions.
+The algorithms in Magma to compute with such actions are backtrack
+searches due to Jeff Leon <A  HREF = "text1830.htm#bib_Leon1">[Leo82]</A><A  HREF = "text1830.htm#bib_Leon2">[Leo97]</A>.  
+There are 4 algorithms which are provided for codes of
+length n over a field of cardinality q:
+<P>
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD><I>Automorphism group</I> or <I>Monomial group</I>.  Computes the
+    group of monomials which map a code into itself, where monomials
+    are represented as permutations of degree (q - 1)n (so the
+    group has degree (q - 1)n).
+    For this function q may be any small prime or 4.
+<P>
+<DT>(b)</DT><DD><I>Permutation group</I>.  Computes the group of permutations
+    which map a code into itself (so the group has degree n).
+    For this function q may be any small prime or 4.
+<P>
+<DT>(c)</DT><DD><I>Equivalence test</I>.  Computes whether there is a monomial
+    permutation which maps a code to another code and, if so, returns
+    the monomial as a permutation of degree (q - 1)n.  For this function,	
+    q may be any small prime or 4.
+<P>
+<DT>(d)</DT><DD><I>Isomorphism test</I>.  Computes whether there is a permutation
+    which maps a code to another code and returns the permutation
+    (of degree n) if so.  For this function q may only be 2.
+<P>
+<P>
+<P>
+</DL>
+For more information on permutation group actions and orbits, see Chapter
+<A  HREF = "text629.htm#6871">PERMUTATION GROUPS</A>.
+
+
+<H4><A NAME = "20641">Group Actions</A></H4>
+
+
+
+<H5><A NAME = "20642">v ^ x : ModTupFldElt, GrpPermElt -&gt; ModTupFldElt</A></H5>
+<BLOCKQUOTE>
+Given a codeword v belonging to the [n, k] code C and
+an element x belonging to a permutation group G, construct the
+vector w obtained from v by the action of x.  If G has degree
+n, the permutation action is used; otherwise G should have degree
+n(q - 1) and the monomial action is used.
+</BLOCKQUOTE>
+<H5><A NAME = "20643">v ^ G : ModTupFldElt, GrpPerm -&gt; GSet{ ModTupFldElt }</A></H5>
+<BLOCKQUOTE>
+Given a codeword v belonging to the [n, k] code C and
+a permutation group G (with permutation or monomial action on C),
+construct the vector orbit Y of v under the action of G. 
+The orbit Y is a G-set for the group G.
+</BLOCKQUOTE>
+<H5><A NAME = "20644">C ^ x : Code, GrpPermElt -&gt; Code</A></H5>
+<BLOCKQUOTE>
+Given an [n, k] code C and an element x belonging to a
+permutation group G (with permutation or monomial action on C),
+construct the code consisting of all the images of the
+codewords of C under the action of x.
+</BLOCKQUOTE>
+<H5><A NAME = "20645">C ^ G : Code, GrpPerm -&gt; GSet{ Code }</A></H5>
+<BLOCKQUOTE>
+Given an [n, k] code C and a permutation group G
+(with permutation or monomial action on C), construct
+the orbit Y of C under the action of G. The orbit  
+Y is a G-set for the group G.
+</BLOCKQUOTE>
+<H5><A NAME = "20646">S ^ x : { ModTupFldElt }, GrpPermElt -&gt; { ModTupFldElt }</A></H5>
+<H5>S ^ x : [ModTupFldElt], GrpPermElt -&gt; [ModTupFldElt]</H5>
+<BLOCKQUOTE>
+Given a set or sequence S of codewords belonging to the [n, k] code C
+and an element x belonging to a permutation group
+(with permutation or monomial action on the codewords),
+construct the set or sequence of the vectors obtained by permuting the
+coordinate positions of v, for each v in S, 
+according to the permutation x.
+</BLOCKQUOTE>
+<H5><A NAME = "20647">S ^ x : { Code }, GrpPermElt -&gt; { Code }</A></H5>
+<H5>S ^ x : [Code], GrpPermElt -&gt; [Code]</H5>
+<BLOCKQUOTE>
+Given a set or sequence S of codes of length n
+and an element x belonging to a permutation group
+(with permutation or monomial action on the codes) construct the set
+or sequence of the codes consisting of all the 
+images of the codewords of C under the action of x.
+</BLOCKQUOTE>
+<H5><A NAME = "20648">Fix(C, G) : Code, GrpPerm -&gt; Code</A></H5>
+<BLOCKQUOTE>
+Given an [n, k] code C and a permutation group G of
+degree n, find the subcode of C which consists of those
+vectors of C which are fixed by the elements of G.
+That is, the subcode consists of those codewords that are fixed
+by the group G.
+</BLOCKQUOTE>
+<H4><A NAME = "20649">Automorphism Group</A></H4>
+
+
+
+<H5><A NAME = "20650">AutomorphismGroup(C: parameters) : Code -&gt; GrpPerm, PowMap, Map</A></H5>
+<H5>MonomialGroup(C: parameters) : Code -&gt; GrpPerm, PowMap, Map</H5>
+
+<PRE>    Weight: RngIntElt                   Default: 0</PRE>
+<BLOCKQUOTE>
+The automorphism group A of the [n, k] linear code C over the field K,
+where A is the group of all monomial-action permutations which preserve the
+code.  Thus both permutation of coordinates and multiplication of
+components by non-zero elements from K is allowed, and the degree
+of A is n(q - 1) where q is the cardinality of K.
+A power structure P and transfer map t are also returned, so that, given
+a permutation g from A, one can create a map f = t(g) which represents
+the automorphism g as a mapping P: C -&gt; C.
+<P>
+If the code is known to have very few words of low weight, then it may take
+some time to compute the <I>support</I> of the code (a set of low weight words).
+The optional parameter
+<TT>Weight</TT> can be used to specify the set of vectors of 
+the specified weight to be used as the support in the algorithm.
+This set should be of a reasonable size, (possibly hundreds for a large code),
+while also keeping the weight as small as possible.
+<P>
+Warning: If <TT>Weight</TT> specifies a set that is too small, then the
+algorithm risks getting stuck. 
+</BLOCKQUOTE>
+<H5><A NAME = "20651">PermutationGroup(C) : Code -&gt; GrpPerm, PowMap, Map</A></H5>
+<BLOCKQUOTE>
+The permutation group G of the [n, k] linear code C over the field K,
+where G is the group of all permutation-action permutations which preserve the
+code.  Thus only permutation of coordinates is allowed, and the degree
+of G is always n.
+A power structure P and transfer map t are also returned, so that, given
+a permutation g from G, one can create a map f = t(g) which represents
+the automorphism g as a mapping P: C -&gt; C.
+</BLOCKQUOTE>
+<H5><A NAME = "20652">AutomorphismSubgroup(C) : Code -&gt; GrpPerm, PowMap, Map</A></H5>
+<H5>MonomialSubgroup(C) : Code -&gt; GrpPerm, PowMap, Map</H5>
+<BLOCKQUOTE>
+A subgroup of the (monomial) automorphism group A of the code C. If the 
+automorphism group of C is already known then the group returned is the
+full automorphism group, otherwise it will be a subgroup generated by
+one element.
+This allows one to find just one automorphism of C if desired.
+A power structure P and transfer map t are also returned, so that, given
+a permutation g from A, one can create a map f = t(g) which represents
+the automorphism g as a mapping P: C -&gt; C.
+</BLOCKQUOTE>
+<H5><A NAME = "20653">AutomorphismGroupStabilizer(C, k) : Code, RngIntElt -&gt; GrpPerm, PowMap, Map</A></H5>
+<H5>MonomialGroupStabilizer(C, k) : Code, RngIntElt -&gt; GrpPerm, PowMap, Map</H5>
+<BLOCKQUOTE>
+The subgroup of the (monomial) automorphism group A of the code C, which
+stabilizes the first k base points as chosen by the backtrack search.
+These base points may be different to those of the returned group.
+A power structure P and transfer map t are also returned, so that, given
+a permutation g from A, one can create a map f = t(g) which represents
+the automorphism g as a mapping P: C -&gt; C.
+</BLOCKQUOTE>
+<H5><A NAME = "20654">Aut(C) : Code -&gt; Pow, Map</A></H5>
+<BLOCKQUOTE>
+The power structure A of all automorphisms of the code C
+(with monomial action), together with the transfer map t into A
+from the generic symmetric group associated with the automorphism group of
+C.
+</BLOCKQUOTE>
+<H5><A NAME = "20655">Aut(C, T) : Code, MonStgElt -&gt; Pow, Map</A></H5>
+<BLOCKQUOTE>
+The power structure A of all automorphisms of the code C, together with the
+transfer map t into A from the generic symmetric group associated with the
+automorphism group of C; the string T determines which action type should
+be used: <TT>"Monomial"</TT> or <TT>"Permutation"</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20656">Example <TT>CodeFld_AutomorphismGroup (H158E48)</TT></A></H3>
+We compute the automorphism group of the second order Reed--Muller
+code of length 64.
+<P>
+<P>
+<PRE>
+&gt; C := ReedMullerCode(2, 6);
+&gt; aut := AutomorphismGroup(C);
+&gt; FactoredOrder(aut);
+[ &lt;2, 21&gt;, [3, 4&gt;, &lt;5, 1&gt;, &lt;7, 2&gt;, &lt;31, 1&gt; ]
+&gt; CompositionFactors(aut);
+    G
+    |  A(5, 2)                = L(6, 2)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    1
+</PRE>
+<HR>
+<H3><A NAME = "20657">Example <TT>CodeFld_AutoMorphismGroupWithWeight (H158E49)</TT></A></H3>
+We compute the automorphism group of a BCH code using the set of
+vectors of minimal weight as the invariant set. We look first at its
+weight distribution to confirm that there is sufficient vectors.
+<P>
+<P>
+<PRE>
+&gt; C := BCHCode(GF(2),23,2);                
+&gt; C;
+[23, 12, 7] BCH code (d = 2, b = 1) over GF(2)
+Generator matrix:
+[1 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 1 1 1 0 1 0]
+[0 1 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 1 1 1 0 1]
+[0 0 1 0 0 0 0 0 0 0 0 0 1 1 1 1 0 1 1 0 1 0 0]
+[0 0 0 1 0 0 0 0 0 0 0 0 0 1 1 1 1 0 1 1 0 1 0]
+[0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 1 1 1 0 1 1 0 1]
+[0 0 0 0 0 1 0 0 0 0 0 0 1 1 0 1 1 0 0 1 1 0 0]
+[0 0 0 0 0 0 1 0 0 0 0 0 0 1 1 0 1 1 0 0 1 1 0]
+[0 0 0 0 0 0 0 1 0 0 0 0 0 0 1 1 0 1 1 0 0 1 1]
+[0 0 0 0 0 0 0 0 1 0 0 0 1 1 0 1 1 1 0 0 0 1 1]
+[0 0 0 0 0 0 0 0 0 1 0 0 1 0 1 0 1 0 0 1 0 1 1]
+[0 0 0 0 0 0 0 0 0 0 1 0 1 0 0 1 0 0 1 1 1 1 1]
+[0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 1 1 1 0 1 0 1]
+&gt; WeightDistribution(C);
+[ &lt;0, 1&gt;, &lt;7, 253&gt;, &lt;8, 506&gt;, &lt;11, 1288&gt;, &lt;12, 1288&gt;, &lt;15, 506&gt;, 
+&lt;16, 253&gt;, &lt;23, 1&gt; ]
+&gt; AutomorphismGroup(C : Weight := MinimumWeight(C) );
+Permutation group acting on a set of cardinality 23
+Order = 10200960 = 2^7 * 3^2 * 5 * 7 * 11 * 23
+    (6, 15, 12)(7, 20, 19)(8, 9, 17)(10, 13, 22)(11, 14, 23)(16, 
+        18, 21)
+    (5, 17, 9)(6, 21, 20)(7, 16, 23)(10, 13, 22)(11, 12, 19)(14, 
+        18, 15)
+    (5, 16, 21)(6, 23, 19)(7, 17, 12)(8, 14, 15)(9, 20, 11)(10, 
+        13, 22)
+    (1, 2)(4, 12)(5, 7)(6, 17)(9, 10)(13, 21)(15, 18)(22, 23)
+    (2, 3)(4, 21, 6, 20)(5, 10, 12, 17)(7, 13, 9, 11)(15, 18)(16,
+        19, 22, 23)
+    (3, 8)(4, 5, 20, 22)(6, 16, 21, 12)(7, 11, 13, 9)(10, 17, 19,
+        23)(15, 18)
+    (4, 8, 6, 21, 20)(5, 10, 14, 17, 12)(7, 22, 18, 16, 9)(11, 
+        23, 19, 13, 15)
+</PRE>
+<HR>
+<H4><A NAME = "20658">Equivalence and Isomorphism of Codes</A></H4>
+
+
+
+<H5><A NAME = "20659">IsIsomorphic(C, D: parameters) : Code, Code -&gt; BoolElt, Map</A></H5>
+<H5>IsEquivalent(C, D: parameters) : Code, Code -&gt; BoolElt, Map</H5>
+
+<PRE>    AutomorphismGroups: MonStgElt       Default: "Right"</PRE>
+
+<PRE>    Weight: RngIntElt                   Default: 0</PRE>
+<BLOCKQUOTE>
+Given [n, k] codes C and D, this function returns <TT>true</TT> if and only
+if C is equivalent to D.  If C is equivalent to D, an equivalence
+map f is also returned from C onto D. 
+The equivalence is with respect to the monomial action.
+The function first computes none, one, or both of the automorphism groups
+of the left and right codes.  This may assist the isomorphism testing.
+<P>
+The parameter <TT>AutomorphismGroups</TT>, with valid string values
+<TT>Both</TT>, <TT>Left</TT>, <TT>Right</TT>, <TT>None</TT>, may be used to specify
+which of the automorphism groups should be constructed first if not already
+known.  The default is <TT>Right</TT>.
+<P>
+In rare cases this algorithm can get stuck, due to an insufficient
+set of invariant vectors. In this case, the optional parameter
+<TT>Weight</TT> can be used to specify this set to be the vectors of
+the specified weight.
+This set should be of a reasonable size, (possibly hundreds for large codes),
+while also keeping the weight as small as possible.
+<P>
+Warning: If <TT>Weight</TT> specifies a set that is too small, then the
+algorithm risks getting stuck.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text1830.htm">[Next]</A><A  HREF = "text1846.htm">[Prev]</A> <A  HREF = "text1830.htm">[Right]</A> <A  HREF = "text1846.htm">[Left]</A> <A  HREF = "text1831.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

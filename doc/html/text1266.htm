@@ -1,0 +1,804 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Free Resolutions</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1267.htm">[Next]</A><A  HREF = "text1265.htm">[Prev]</A> <A  HREF = "text1267.htm">[Right]</A> <A  HREF = "text1265.htm">[Left]</A> <A  HREF = "text1254.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "13913">Free Resolutions</A></H3>
+
+<P>
+<P>
+The functions in this section deal with free resolutions and associated
+properties.  Free resolutions are returned as
+chain complexes (see Chapter <A  HREF = "text598.htm#6308">CHAIN COMPLEXES</A>).
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1266.htm#13914">Constructing Free Resolutions</A>
+<LI> <A  HREF = "text1266.htm#13919">Betti Numbers and Related  Invariants</A>
+</UL>
+<H4><A NAME = "13914">Constructing Free Resolutions</A></H4>
+
+
+
+<H5><A NAME = "13915"></A><A NAME = "PMod:FreeResolution">FreeResolution</A>(M) : ModMPol -&gt; ModCpx, ModMPolHom</H5>
+
+<PRE>    Minimal: BoolElt                    Default: <TT>true</TT></PRE>
+
+<PRE>    Limit: RngIntElt                    Default: 0</PRE>
+
+<PRE>    Homogenize: BoolElt                 Default: <TT>true</TT></PRE>
+
+<PRE>    Al: MonStgElt                       Default: "LaScala"</PRE>
+<BLOCKQUOTE>
+Given an R-module M, return a free resolution M as a complex C,
+and a comparison homomorphism f: C<sub>0</sub> -&gt; M (where C<sub>0</sub> is
+the term of C of degree 0).
+<P>
+<P>
+By default, the free resolution will be <B>minimal</B>.  Setting the
+parameter <TT>Minimal</TT> to {<TT>false</TT>} will construct a non-minimal
+resolution (which is constructed via a sequence of successive syzygy
+modules, with no minimization).
+<P>
+Magma has two algorithms for computing resolutions:
+<DL COMPACT class='compact'>
+<DT>(1)</DT><DD>The <B>La Scala</B> (LS) <A  HREF = "text1253.htm#bib_LaScalaStillman">[SS98]</A> algorithm, which
+    works with a homogeneous module.  The Magma implementation involves
+    an extension of this algorithm which uses techniques from the
+    Faug{&egrave;re F<sub>4</sub> <A  HREF = "text1253.htm#bib_FaugereF4">[Fau99]</A> algorithm to compute many normal
+    forms together in a block.
+<DT>(2)</DT><DD>The <B>Iterative</B> algorithm, which simply computes successive
+    syzygy modules progressively (minimizing as it goes if and only a
+    minimal resolution is desired).
+<P>
+<P>
+<P>
+<P>
+</DL>
+By default the LS algorithm is used if M is homogeneous and the
+coefficient ring of R is a finite field or the rational field, since
+this tends to be faster in general.  But for some inputs the iterative
+algorithm may be significantly faster, particularly for some modules
+over the rationals.  So one may set the parameter <TT>Al</TT> to <TT>"Iterative"</TT> to select the iterative algorithm.  Uniqueness of the terms
+in the resolution is as follows.
+<P>
+<DL COMPACT class='compact'>
+<DT>(1)</DT><DD>If M is homogeneous or defined over a local
+    ring R, then the resulting complex C is guaranteed to be minimal,
+    so the ranks of the terms in C and the associated Betti numbers
+    will be unique.
+<P>
+<DT>(2)</DT><DD>If M is non-homogeneous and over a global ring R, then the boundary
+    maps of C will not have any entries which are units, but C
+    cannot be guaranteed to be an absolutely minimal free resolution,
+    so the ranks of the terms and the associated Betti numbers will not
+    be unique in general.  Also, Magma may 
+    choose to compute C by computing the free resolution C<sub>H</sub>
+    of a homogenization M<sub>H</sub> of M, and then specializing C<sub>H</sub> to
+    yield C, since this method is usually
+    faster (since the LS algorithm can then be used).  One may
+    set the parameter <TT>Homogenize</TT> to {<TT>true</TT>} or {<TT>false</TT>} to force
+    Magma to use this homogenization technique or not.
+<P>
+<P>
+<P>
+<P>
+</DL>
+If the parameter <TT>Limit</TT> is set to a non-zero value l, then
+at most l terms (plus the term corresponding to the free module)
+are computed.  If R is an affine algebra or exterior algebra
+of rank n, then by default the limit is set to n, since the
+resolution is not finite in general.
+</BLOCKQUOTE>
+<H5><A NAME = "13916">SetVerbose("Resolution", v) : MonStgElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+(Procedure.)  Change the verbose printing level for the free resolution
+algorithm and related functions to be v.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13917">Example <TT>PMod_FreeResolution (H115E7)</TT></A></H3>
+We construct the module M=R<sup>1</sup>/I where I is the ideal of the twisted cubic
+and then construct a minimal free resolution of M and
+note simple properties of this.
+<P>
+<P>
+<PRE>
+&gt; R&lt;x,y,z,t&gt; := PolynomialRing(RationalField(), 4, "grevlex");
+&gt; B := [
+&gt;     -x^2 + y*t, -y*z + x*t, x*z - t^2,
+&gt;     x*y - t^2, -y*z + x*t, -x^2 + z*t
+&gt; ];
+&gt; M := GradedModule(Ideal(B));
+&gt; M;
+Graded Module R^1/&lt;relations&gt;
+Relations:
+[-x^2 + y*t],
+[-y*z + x*t],
+[ x*z - t^2],
+[ x*y - t^2],
+[-y*z + x*t],
+[-x^2 + z*t]
+&gt; C := FreeResolution(M);
+&gt; C;
+Chain complex with terms of degree 4 down to -1
+Dimensions of terms: 0 1 5 5 1 0
+&gt; Terms(C);
+[
+    Free Graded Module R^0,
+    Free Graded Module R^1 with grading [5],
+    Free Graded Module R^5 with grading [3, 3, 3, 3, 3],
+    Free Graded Module R^5 with grading [2, 2, 2, 2, 2],
+    Free Graded Module R^1,
+    Free Graded Module R^0
+]
+&gt; B := BoundaryMaps(C);
+&gt; B;
+[*
+    Graded module homomorphism (0 by 1),
+    Graded module homomorphism (1 by 5) of degree 0
+    Ambient matrix:
+    [ x*z - t^2  x^2 - z*t -y*t + z*t  y*z - x*t -x*y + t^2],
+    Graded module homomorphism (5 by 5) of degree 0
+    Ambient matrix:
+    [-y  x  0 -t  0]
+    [ 0 -z  y  0  t]
+    [ t -z  0  x  0]
+    [ 0 -t  t  0  x]
+    [-z  0  x -t  z],
+    Graded module homomorphism (5 by 1) of degree 0
+    Ambient matrix:
+    [x^2 - z*t]
+    [x*y - t^2]
+    [x*z - t^2]
+    [y*z - x*t]
+    [y*t - z*t],
+    Graded module homomorphism (1 by 0)
+*]
+&gt; B[2]*B[3];
+Module homomorphism (1 by 5)
+Ambient matrix:
+[0 0 0 0 0]
+&gt; B[3]*B[4];
+Module homomorphism (5 by 1)
+Ambient matrix:
+[0]
+[0]
+[0]
+[0]
+[0]
+&gt; Image(B[3]) eq Kernel(B[4]);
+true
+</PRE>
+<HR>
+<H3><A NAME = "13918">Example <TT>PMod_FreeResolution1 (H115E8)</TT></A></H3>
+Following <A  HREF = "text1253.htm#bib_UAG_CLO">[CLO98, p.248]</A>, we compute the ideal I of Q[x, y]
+whose affine variety is a certain list of 6 pairs.
+<P>
+<P>
+<PRE>
+&gt; R&lt;x,y&gt; := PolynomialRing(RationalField(), 2, "grevlex");
+&gt; L := [&lt;0, 0&gt;, &lt;1, 0&gt;, &lt;0, 1&gt;, &lt;2, 1&gt;, &lt;1, 2&gt;, &lt;3, 3&gt;];
+&gt; I := Ideal(L, R);
+&gt; I;
+Ideal of Polynomial ring of rank 2 over Rational Field
+Graded Reverse Lexicographical Order
+Variables: x, y
+Inhomogeneous, Dimension 0
+Groebner basis:
+[
+    x^3 - 5*x^2 + 2*x*y - 2*y^2 + 4*x + 2*y,
+    x^2*y - 5*x^2 + 3*x*y - 4*y^2 + 5*x + 4*y,
+    x*y^2 - 4*x^2 + 3*x*y - 5*y^2 + 4*x + 5*y,
+    y^3 - 2*x^2 + 2*x*y - 5*y^2 + 2*x + 4*y
+]
+</PRE>
+I is not homogeneous, and we compute a non-minimal free resolution
+of the module R/I.
+<P>
+<P>
+<PRE>
+&gt; M := QuotientModule(I);
+&gt; M;
+Reduced Module R^1/&lt;relations&gt;
+Relations:
+[  x^3 - 5*x^2 + 2*x*y - 2*y^2 + 4*x + 2*y],
+[x^2*y - 5*x^2 + 3*x*y - 4*y^2 + 5*x + 4*y],
+[x*y^2 - 4*x^2 + 3*x*y - 5*y^2 + 4*x + 5*y],
+[  y^3 - 2*x^2 + 2*x*y - 5*y^2 + 2*x + 4*y]
+&gt; C := FreeResolution(M: Minimal := false);
+&gt; C;
+Chain complex with terms of degree 3 down to -1
+Dimensions of terms: 0 3 4 1 0
+&gt; B := BoundaryMaps(C);
+&gt; B;
+[*
+    Module homomorphism (0 by 3),
+    Module homomorphism (3 by 4)
+    Ambient matrix:
+    [-y + 5  x - 8      6     -2]
+    [     4 -y - 8  x + 8     -4]
+    [     2     -6 -y + 8  x - 5],
+    Module homomorphism (4 by 1)
+    Ambient matrix:
+    [  x^3 - 5*x^2 + 2*x*y - 2*y^2 + 4*x + 2*y]
+    [x^2*y - 5*x^2 + 3*x*y - 4*y^2 + 5*x + 4*y]
+    [x*y^2 - 4*x^2 + 3*x*y - 5*y^2 + 4*x + 5*y]
+    [  y^3 - 2*x^2 + 2*x*y - 5*y^2 + 2*x + 4*y],
+    Module homomorphism (1 by 0)
+*]
+&gt; IsZero(B[2]*B[3]);
+true
+</PRE>
+As noted in <A  HREF = "text1253.htm#bib_UAG_CLO">[CLO98]</A>, the 3 by 3 minors of the boundary map
+from R<sup>3</sup> to R<sup>4</sup> generate the ideal I again, and this is due
+to the Hilbert-Burch Theorem.
+<P>
+<P>
+<PRE>
+&gt; U := Minors(Matrix(B[2]), 3); 
+&gt; U;
+[
+    y^3 - 2*x^2 + 2*x*y - 5*y^2 + 2*x + 4*y,
+    x*y^2 - 4*x^2 + 3*x*y - 5*y^2 + 4*x + 5*y,
+    x^2*y - 5*x^2 + 3*x*y - 4*y^2 + 5*x + 4*y,
+    x^3 - 5*x^2 + 2*x*y - 2*y^2 + 4*x + 2*y
+]
+&gt; Ideal(U) eq I;
+true
+</PRE>
+<HR>
+<H4><A NAME = "13919">Betti Numbers and Related  Invariants</A></H4>
+
+<P>
+<P>
+Each of the functions in this section compute numerical properties of a free
+resolution of a module M.  Each function takes the same parameters
+as the function <A  HREF = "text1266.htm#PMod:FreeResolution">FreeResolution</A> (not repeated here),
+thus allowing control of the construction of the underlying resolution.
+<P>
+In particular, by default the <B>minimal</B> free resolution of M is
+used (so the Betti numbers correspond to that), so the relevant
+invariant is guaranteed to be unique if M is graded or over a local
+ring R.  Otherwise, one may set the parameter <TT>Minimal</TT> to {<TT>false</TT>}
+to give the Betti numbers for a non-minimal resolution.
+<P>
+<B>Note:</B> If M is graded and the LS algorithm is used (which will be the
+case by default), then computing any of the invariants to do
+with Betti numbers in this section may be quicker than computing
+the full resolution (since minimization of the actual resolution is
+needed for the latter).  Thus it is preferable just to use one
+of the following functions instead of <A  HREF = "text1266.htm#PMod:FreeResolution">FreeResolution</A> if
+only the numerical invariants are desired.
+
+
+<H5><A NAME = "13920">BettiNumbers(M) : ModMPol -&gt; [ RngIntElt ]</A></H5>
+<BLOCKQUOTE>
+Given a module M, return the Betti numbers of M, which is simply the
+sequence of integers consisting of the degrees of the non-zero terms
+of the free resolution of M.  See the discussion above concerning
+the parameters.  Since the underlying resolution is minimal by default,
+if M is graded or over a local ring, then the result is unique.
+</BLOCKQUOTE>
+<H5><A NAME = "13921">BettiNumber(M, i, j) : ModMPol, RngIntElt, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a module M and integers i, j&ge;0, return the graded Betti number
+&beta;<sub>i, j</sub> of M as an integer.  This is the 
+number of generators of degree j in the i-th term F<sub>i</sub>
+of the free resolution of M.
+</BLOCKQUOTE>
+<H5><A NAME = "13922">MaximumBettiDegree(M, i) : ModMPol, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a module M and an integer i&ge;0, return the maximum degree
+of the generators in the i-th term of the free resolution of M.
+Equivalently, this is the maximum j such that <TT>BettiNumber(M, i, j)</TT>
+is non-zero.
+</BLOCKQUOTE>
+<H5><A NAME = "13923">BettiTable(M) : ModMPol -&gt; [[ RngIntElt ]], RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a module M, return the Betti table of M as a sequence S of
+sequences of integers, and a shift s.  This is designed so that
+if M is non-zero, then <TT>S[1, 1]</TT> is always non-zero and
+<TT>S[i, j]</TT> equals <TT>BettiNumber(M, i, j - i + s)</TT>.
+(So the degrees are shifted by s.)
+</BLOCKQUOTE>
+<H5><A NAME = "13924">Regularity(M) : ModMPol -&gt; RngInt</A></H5>
+<BLOCKQUOTE>
+Given an R-module M which is either graded or over a local ring,
+return the Castelnuovo-Mumford regularity.  This is the least r such
+that in a minimal free resolution of M, the maximum of the degrees
+of the generators of the i-th term F<sub>i</sub> is at most i + r.
+A simple consequence of this is that M is generated by elements
+of degree at most r.  See
+<A  HREF = "text1253.htm#bib_EisenbudCommAlg">[Eis95, Sec. 20.5]</A> or <A  HREF = "text1253.htm#bib_DeckerLossen">[DL06, p. 167]</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "13925">HomologicalDimension(M) : ModMPol -&gt; RngInt</A></H5>
+<BLOCKQUOTE>
+Given a module M, return the homological dimension of M.  This is
+just the length of a minimal free resolution of M (the number of
+non-zero boundary maps).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13926">Example <TT>PMod_Koszul (H115E9)</TT></A></H3>
+For an integer n, we can construct a Koszul complex as the
+free resolution of R/I, where I is the ideal of
+R=K[x<sub>1</sub>, ..., x<sub>n</sub>] generated by the n variables.
+<P>
+<P>
+<PRE>
+&gt; Q := RationalField();
+&gt; n := 3;
+&gt; R&lt;[x]&gt; := PolynomialRing(Q, n);
+&gt; I := Ideal([R.i: i in [1 .. n]]);
+&gt; M := QuotientModule(I);
+&gt; M;
+Graded Module R^1/&lt;relations&gt;
+Relations:
+[x[1]],
+[x[2]],
+[x[3]]
+&gt; C := FreeResolution(M);
+&gt; C;
+Chain complex with terms of degree 4 down to -1
+Dimensions of terms: 0 1 3 3 1 0
+&gt; BoundaryMaps(C);
+[*
+    Module homomorphism (0 by 1),
+    Module homomorphism (1 by 3)
+    Ambient matrix:
+    [ x[3] -x[2]  x[1]],
+    Module homomorphism (3 by 3)
+    Ambient matrix:
+    [-x[2]  x[1]     0]
+    [-x[3]     0  x[1]]
+    [    0 -x[3]  x[2]],
+    Module homomorphism (3 by 1)
+    Ambient matrix:
+    [x[1]]
+    [x[2]]
+    [x[3]],
+    Module homomorphism (1 by 0)
+*]
+</PRE>
+In general, the i-th Betti number is (n choose i).
+We can see this for n=10.  Each boundary map consists of linear
+relations alone, so the regularity is zero.
+<P>
+<P>
+<PRE>
+&gt; n := 10;
+&gt; R&lt;[x]&gt; := PolynomialRing(Q, n);  
+&gt; I := Ideal([R.i: i in [1 .. n]]);  
+&gt; M := QuotientModule(I);  
+&gt; time C := FreeResolution(M);  
+Time: 0.060
+&gt; C;
+Chain complex with terms of degree 11 down to -1
+Dimensions of terms: 0 1 10 45 120 210 252 210 120 45 10 1 0
+&gt; Terms(C);
+[
+    Free Graded Module R^0,
+    Free Graded Module R^1 with grading [10],
+    Free Graded Module R^10 with grading [9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+    Free Graded Module R^45 with grading [8^^45],
+    Free Graded Module R^120 with grading [7^^120],
+    Free Graded Module R^210 with grading [6^^210],
+    Free Graded Module R^252 with grading [5^^252],
+    Free Graded Module R^210 with grading [4^^210],
+    Free Graded Module R^120 with grading [3^^120],
+    Free Graded Module R^45 with grading [2^^45],
+    Free Graded Module R^10 with grading [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    Free Graded Module R^1,
+    Free Graded Module R^0
+]
+&gt; B := BoundaryMaps(C);
+&gt; B: Minimal;
+[*
+    Graded module homomorphism (0 by 1),
+    Graded module homomorphism (1 by 10) of degree 0,
+    Graded module homomorphism (10 by 45) of degree 0,
+    Graded module homomorphism (45 by 120) of degree 0,
+    Graded module homomorphism (120 by 210) of degree 0,
+    Graded module homomorphism (210 by 252) of degree 0,
+    Graded module homomorphism (252 by 210) of degree 0,
+    Graded module homomorphism (210 by 120) of degree 0,
+    Graded module homomorphism (120 by 45) of degree 0,
+    Graded module homomorphism (45 by 10) of degree 0,
+    Graded module homomorphism (10 by 1) of degree 0,
+    Graded module homomorphism (1 by 0)
+*]
+&gt; [Binomial(n, i): i in [0 .. n]];
+[ 1, 10, 45, 120, 210, 252, 210, 120, 45, 10, 1 ]
+&gt; BettiTable(M);                                                        
+[
+    [ 1, 10, 45, 120, 210, 252, 210, 120, 45, 10, 1 ]
+]
+&gt; $1 eq [[Binomial(n, i): i in [0 .. n]]];
+true
+&gt; Regularity(M);
+0
+</PRE>
+<HR>
+<H3><A NAME = "13927">Example <TT>PMod_ExteriorAlgebra (H115E10)</TT></A></H3>
+We can construct the same type of ideal and module as in the
+last example for n=3, but over an exterior algebra.
+The free resolution
+is infinite here, but we can construct the resolution partially (by
+default, a bound is set on the number of terms).
+In this general construction, the i-th Betti number will be (i choose n - 1).
+<P>
+<P>
+<PRE>
+&gt; Q := RationalField();
+&gt; n := 3;
+&gt; R&lt;[x]&gt; := ExteriorAlgebra(Q, n);
+&gt; I := Ideal([R.i: i in [1 .. n]]);  
+&gt; M := QuotientModule(I);  
+&gt; M;
+Reduced Module R^1/&lt;relations&gt;
+Relations:
+[x[1]],
+[x[2]],
+[x[3]]
+&gt; BettiNumbers(M);
+[ 1, 3, 6, 10, 15 ]
+&gt; [Binomial(i + n - 1, n - 1): i in [0..4]];
+[ 1, 3, 6, 10, 15 ]
+&gt; C := FreeResolution(M);
+&gt; C;
+Chain complex with terms of degree 5 down to -1
+Dimensions of terms: 0 15 10 6 3 1 0
+&gt; BoundaryMaps(C);
+[*
+    Graded module homomorphism (0 by 15),
+    Graded module homomorphism (15 by 10) of degree 0
+    Ambient matrix:
+    [x[3]    0    0    0    0    0    0    0    0    0]
+    [   0 x[3]    0 x[2]    0    0    0    0    0    0]
+    [   0    0 x[2]    0    0    0    0    0    0    0]
+    [   0 x[2] x[3]    0    0    0    0    0    0    0]
+    [x[2]    0    0 x[3]    0    0    0    0    0    0]
+    [   0    0    0    0 x[3]    0    0    0    0 x[1]]
+    [   0    0    0    0    0 x[2]    0    0 x[1]    0]
+    [   0    0    0    0 x[2] x[3]    0 x[1]    0    0]
+    [   0    0    0    0    0    0 x[1]    0    0    0]
+    [   0    0    0    0    0 x[1] x[2]    0    0    0]
+    [   0    0    0    0 x[1]    0 x[3]    0    0    0]
+    [   0    0    0 x[1]    0    0    0 x[3]    0 x[2]]
+    [   0    0 x[1]    0    0    0    0    0 x[2]    0]
+    [   0 x[1]    0    0    0    0    0 x[2] x[3]    0]
+    [x[1]    0    0    0    0    0    0    0    0 x[3]],
+    Graded module homomorphism (10 by 6) of degree 0
+    Ambient matrix:
+    [x[3]    0    0    0    0    0]
+    [   0 x[3] x[2]    0    0    0]
+    [   0 x[2]    0    0    0    0]
+    [x[2]    0 x[3]    0    0    0]
+    [   0    0    0 x[3]    0 x[1]]
+    [   0    0    0 x[2] x[1]    0]
+    [   0    0    0 x[1]    0    0]
+    [   0    0 x[1]    0 x[3] x[2]]
+    [   0 x[1]    0    0 x[2]    0]
+    [x[1]    0    0    0    0 x[3]],
+    Graded module homomorphism (6 by 3) of degree 0
+    Ambient matrix:
+    [x[3]    0    0]
+    [   0 x[2]    0]
+    [x[2] x[3]    0]
+    [   0    0 x[1]]
+    [   0 x[1] x[2]]
+    [x[1]    0 x[3]],
+    Graded module homomorphism (3 by 1) of degree 0
+    Ambient matrix:
+    [x[3]]
+    [x[2]]
+    [x[1]],
+    Graded module homomorphism (1 by 0)
+*]
+</PRE>
+<HR>
+<H3><A NAME = "13928">Example <TT>PMod_FreeResolutionLocal (H115E11)</TT></A></H3>
+We construct a non-homogeneous quotient module M of Q<sup>3</sup>.
+As expected, the Betti numbers of the localization of M are
+smaller than the Betti numbers of M.
+<P>
+<P>
+<PRE>
+&gt; R&lt;x,y,z&gt; := PolynomialRing(RationalField(), 3, "grevlex");
+&gt; R3 := RModule(R, 3); 
+&gt; B := [R3 | [x*y, x^2, z], [x*z^3, x^3, y], [y*z, z, x],
+&gt;       [z, y*z, x], [y, z, x]];                              
+&gt; M := quo&lt;R3 | B&gt;;
+&gt; M;
+Reduced Module R^3/&lt;relations&gt;
+Relations:
+[  x*y,   x^2,     z],
+[x*z^3,   x^3,     y],
+[  y*z,     z,     x],
+[    z,   y*z,     x],
+[    y,     z,     x]
+&gt; BettiNumbers(M);
+[ 3, 5, 4, 2 ]
+&gt; BettiNumbers(Localization(M));
+[ 3, 5, 3, 1 ]
+</PRE>
+Since M is non-homogeneous, the Betti numbers are not unique.
+If we create a second module M<sub>2</sub> which is equivalent to M and
+compute the Betti numbers this time without homogenization (in the
+internal free resolution algorithm), then we obtain different Betti numbers
+for M<sub>2</sub>.  But since the Betti numbers over a local ring are unique,
+we get the same result for the localization of M<sub>2</sub>.
+<P>
+<P>
+<PRE>
+&gt; M2 := quo&lt;R3 | B&gt;;
+&gt; BettiNumbers(M2: Homogenize :=false);
+[ 3, 6, 5, 2 ]
+&gt; BettiNumbers(Localization(M2): Homogenize:=false);
+[ 3, 5, 3, 1 ]
+</PRE>
+<HR>
+<H3><A NAME = "13929">Example <TT>PMod_HilbertSeriesBetti (H115E12)</TT></A></H3>
+Suppose M is a graded R-module.  Given the graded Betti numbers
+&beta;<sub>i, j</sub> of M, one can compute the Hilbert series H<sub>M</sub>(t)
+of M via the formula (<A  HREF = "text1253.htm#bib_EisenbudCommAlg">[Eis95, Thm. 1.13]</A>
+or <A  HREF = "text1253.htm#bib_DeckerLossen">[DL06, Thm. 1.22]</A>):
+H<sub>M</sub>(t) = ((&sum;<sub>i, j</sub> ( - 1)<sup>i</sup> &beta;<sub>i, j</sub>t<sup>j</sup>)/(D)),
+where D is the Hilbert denominator of M: this depends on the
+underlying ring R and equals
+&prod;<sub>i=1</sub><sup>n</sup> (1 - t<sup>w<sub>i</sub></sup>),
+where n is the rank of R and w<sub>i</sub> is the weight of the i-th variable
+(1 by default).
+We can thus write a simple function to compute the Hilbert series numerator
+via this formula.
+<P>
+<P>
+<PRE>
+&gt; function HilbertNumeratorBetti(M)
+&gt;    P&lt;t&gt; := PolynomialRing(IntegerRing());
+&gt;    return &amp;+[
+&gt;        (-1)^i*BettiNumber(M, i, j)*t^j:
+&gt;           j in [0 .. MaximumBettiDegree(M, i)],
+&gt;           i in [0 .. #BettiNumbers(M)]
+&gt;    ];
+&gt; end function;
+</PRE>
+We then check that this function agrees with the Magma internal
+function <TT>HilbertNumerator</TT> for some modules.  (Since the
+modules do not have negative gradings, we do not have to worry about
+the denominator shift which is 0 for these modules.)  First we try
+the Twisted Cubic.
+<P>
+<P>
+<PRE>
+&gt; Q := RationalField();
+&gt; R&lt;x,y,z,t&gt; := PolynomialRing(Q, 4, "grevlex");
+&gt; B := [
+&gt;     -x^2 + y*t, -y*z + x*t, x*z - t^2,
+&gt;     x*y - t^2, -y*z + x*t, -x^2 + z*t
+&gt; ];
+&gt; M := GradedModule(Ideal(B));
+&gt; HilbertNumeratorBetti(M);  
+-t^5 + 5*t^3 - 5*t^2 + 1
+&gt; HilbertNumerator(M);     
+-t^5 + 5*t^3 - 5*t^2 + 1
+0
+</PRE>
+Now we apply the function to the module M=R<sup>1</sup>/I where I is the
+ideal generated by the 2 x 2 minors of a generic 4 x 4 matrix.
+Computing the Hilbert series numerator via the Betti numbers takes a
+little time since the resolution is non-trivial.  Note the
+components of the Betti table which contribute to the terms of
+the Hilbert series numerator.
+<P>
+<P>
+<PRE>
+&gt; n := 4;
+&gt; R&lt;[x]&gt; := PolynomialRing(Q, n^2, "grevlex");
+&gt; A := Matrix(n, [R.i: i in [1 .. n^2]]);
+&gt; A;
+[ x[1]  x[2]  x[3]  x[4]]
+[ x[5]  x[6]  x[7]  x[8]]
+[ x[9] x[10] x[11] x[12]]
+[x[13] x[14] x[15] x[16]]
+&gt; I := Ideal(Minors(A, 2));
+&gt; #Basis(I);
+36
+&gt; M := QuotientModule(I);
+&gt; time HilbertNumeratorBetti(M);
+-t^12 + 36*t^10 - 160*t^9 + 315*t^8 - 288*t^7 + 288*t^5 - 315*t^4 + 160*t^3 - 
+    36*t^2 + 1
+Time: 0.470
+&gt; time HilbertNumerator(M);
+-t^12 + 36*t^10 - 160*t^9 + 315*t^8 - 288*t^7 + 288*t^5 - 315*t^4 + 160*t^3 - 
+    36*t^2 + 1
+0
+Time: 0.000
+&gt; assert $1 eq $2;
+&gt; BettiNumbers(M);
+[ 1, 36, 160, 315, 388, 388, 315, 160, 36, 1 ]
+&gt; BettiTable(M);
+[
+    [ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+    [ 0, 36, 160, 315, 288, 100, 0, 0, 0, 0 ],
+    [ 0, 0, 0, 0, 100, 288, 315, 160, 36, 0 ],
+    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ]
+]
+0
+</PRE>
+<HR>
+<H3><A NAME = "13930">Example <TT>PMod_Regularity (H115E13)</TT></A></H3>
+Given a graded module M=R<sup>1</sup>/I, one can obtain an upper bound on
+the regularity of M by computing the regularity of M<sub>L</sub>=R<sup>1</sup>/I<sub>L</sub>,
+where I<sub>L</sub> is the leading monomial ideal of I.
+This will be faster in general (since the associated free resolution
+will be easier to compute).
+<P>
+<P>
+<PRE>
+
+&gt; wts := [ 1, 5, 9, 13, 17, 5, 1, 1, 1 ];
+&gt; K := GF(32003);
+&gt; R&lt;x0,x1,x2,x3,x4,y0,y1,u,t&gt; := PolynomialRing(K, wts);
+&gt; I := Ideal([
+&gt;     x0*y0 - y1^3*u^3 - x1*t,
+&gt;     x1*y1 - x0*u^5 - t^6,
+&gt;     x1^2 - x0*x2 + y1^2*u^3*t^5,
+&gt;     x2^2 - x1*x3 + y0*y1*u^8*t^4,
+&gt;     x3^2 - x2*x4 + y0^2*u^13*t^3,
+&gt;     x3*y0 - u^18 - x4*t,
+&gt;     x4*y1 - x3*u^5 - y0^3*t^3,
+&gt;     x1*x2 - x0*x3 + y0*y1^2*u^3*t^4 + y1*u^8*t^5,
+&gt;     x2^2 - x0*x4 + y0*y1*u^8*t^4 + u^13*t^5,
+&gt;     x2*x3 - x1*x4 + y0^2*y1*u^8*t^3 + y0*u^13*t^4,
+&gt;     x1*y0 - y1^2*u^8 - x2*t,
+&gt;     x2*y0 - y1*u^13 - x3*t,
+&gt;     x2*y1 - x1*u^5 - y0*t^5,
+&gt;     x3*y1 - x2*u^5 - y0^2*t^4]);
+&gt; IsHomogeneous(I);
+true
+&gt; M := GradedModule(I);
+&gt; time Regularity(M);
+67
+Time: 3.360
+&gt; IL := LeadingMonomialIdeal(I);
+&gt; ML := GradedModule(IL);
+&gt; time Regularity(ML);
+92
+Time: 0.530
+&gt; BettiNumbers(M);
+[ 1, 14, 45, 72, 76, 58, 29, 8, 1 ]
+&gt; BettiNumbers(ML);
+[ 1, 42, 210, 505, 723, 659, 388, 144, 31, 3 ]
+</PRE>
+<HR>
+<H3><A NAME = "13931">Example <TT>PMod_Genus11Curve (H115E14)</TT></A></H3>
+The following example shows how to explicitly use the resolution and
+syzygy functions to compute the ideal of a random space curve (in P<sup>3</sup>)
+of genus 11. The construction is described in Section 1.2 of <A  HREF = "text1253.htm#bib_schreyer_tonoli">[ST02]</A>
+and an equivalent form of the following computation is used by Magma's
+<TT>RandomCurveByGenus</TT> function to produce such curves.
+<P>
+We work over the field GF(101), which will be referred to as K and the
+polynomial ring R will be the 4 variable polynomial ring over K. The
+construction begins by choosing a random 8 x 3 matrix with entries
+given by random linear and quadratic polynomials of R in appropriate
+positions. The minimal free resolution of the reduced module having
+this as the matrix of relations is computed. The image of the second
+boundary map of the resolution is the module referred to as (G)<sup> * </sup>
+in the above reference. Taking the submatrix of rows of a certain weighting
+of the matrix defining this map, we multiply by a 6 x 8 matrix with random
+entries in K. The resulting matrix represents a map from a free module F
+of rank 6 to (G)<sup> * </sup>, whose kernel is isomorphic to R as a submodule
+of F. The 6 coordinates of a generator of the kernel generate the desired
+ideal I. This kernel is computed with a syzygy computation (note: we could
+also use <TT>Kernel</TT> for the matrix giving the map). We also check that the
+quotient module of I has a minimal free resolution of the right form.
+<P>
+<P>
+<PRE>
+&gt; K := GF(101);
+&gt; R&lt;x,y,z,t&gt; := PolynomialRing(GF(101),4,"grevlex");
+&gt; v := [1,1,1,1,1,1,2,2];
+&gt; // generate the base random relations with appropriate linear and quadratic
+&gt; // entries using the Random function for multivariate polynomials.
+&gt; rels := [[Random(i,R,0): j in [1..3]] : i in v];
+&gt; Matrix(8,3,[TotalDegree(e) : e in &amp;cat(rels)]);
+[1 1 1]
+[1 1 1]
+[1 1 1]
+[1 1 1]
+[1 1 1]
+[1 1 1]
+[2 2 2]
+[2 2 2]
+&gt; // get the quotient module
+&gt; F := RModule(R,3);
+&gt; M := quo&lt;F|rels&gt;;
+</PRE>
+Get the minimal free resolution and check that it has the
+correct Betti table.
+<P>
+<P>
+<PRE>
+&gt; res := MinimalFreeResolution(M);
+&gt; BettiTable(res);
+[
+    [ 3, 6, 0, 0, 0 ],
+    [ 0, 2, 8, 0, 0 ],
+    [ 0, 0, 3, 10, 4 ]
+]
+0
+</PRE>
+Get the 2nd boundary map matrix and then the 8 x 8 submatrix of linear and
+quadratic entry rows.
+<P>
+<P>
+<PRE>
+&gt; mat :=  Matrix(BoundaryMap(res,2));
+&gt; Nrows(mat); Ncols(mat);
+11
+8
+&gt; u := [1,1,2,2,2,2,2,2];
+&gt; mat := Matrix(R,[ri : i in [1..11] |
+&gt;          &amp;and[(ri[j] eq 0) or (TotalDegree(ri[j]) eq u[j]):
+&gt;             j in [1..8]] where ri is Eltseq(mat[i])]);
+&gt; Nrows(mat); Ncols(mat);
+8
+8
+&gt; Matrix(8,8,[TotalDegree(m) :m in Eltseq(mat)]); 
+[1 1 2 2 2 2 2 2]
+[1 1 2 2 2 2 2 2]
+[1 1 2 2 2 2 2 2]
+[1 1 2 2 2 2 2 2]
+[1 1 2 2 2 2 2 2]
+[1 1 2 2 2 2 2 2]
+[1 1 2 2 2 2 2 2]
+[1 1 2 2 2 2 2 2]
+</PRE>
+Now generate the random 6 x 8 matrix over K, compute the kernel of the
+composition via syzygies and generate the matrix I.
+<P>
+<P>
+<PRE>
+&gt; mat1 := Matrix(R,6,8,[Random(K) : i in [1..48]]);
+&gt; matc := mat1*mat;
+&gt; F1 := EModule(R,[2-x : x in u]);
+&gt; syz := SyzygyModule(sub&lt;F1|RowSequence(matc)&gt;);
+&gt; B := MinimalBasis(syz);
+&gt; #B;
+1
+&gt; I := ideal&lt;R|Eltseq(B[1])&gt;;
+</PRE>
+Finally, check I has the right dimension (2) and degree (12) and that
+R/I has the correct minimal free resolution with Betti table as given
+in <A  HREF = "text1253.htm#bib_schreyer_tonoli">[ST02]</A>.
+<P>
+<P>
+<PRE>
+&gt; Dimension(I); Degree(I);
+2 [ 3, 4 ]
+12
+&gt; OC := QuotientModule(I);
+&gt; BettiTable(MinimalFreeResolution(OC));
+[
+    [ 1, 0, 0, 0 ],
+    [ 0, 0, 0, 0 ],
+    [ 0, 0, 0, 0 ],
+    [ 0, 0, 0, 0 ],
+    [ 0, 6, 2, 0 ],
+    [ 0, 0, 6, 3 ]
+]
+0
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1267.htm">[Next]</A><A  HREF = "text1265.htm">[Prev]</A> <A  HREF = "text1267.htm">[Right]</A> <A  HREF = "text1265.htm">[Left]</A> <A  HREF = "text1254.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

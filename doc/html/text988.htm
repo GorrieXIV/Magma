@@ -1,0 +1,234 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Hilbert Symbols and  Embeddings</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text989.htm">[Next]</A><A  HREF = "text987.htm">[Prev]</A> <A  HREF = "text989.htm">[Right]</A> <A  HREF = "text987.htm">[Left]</A> <A  HREF = "text982.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "11191">Hilbert Symbols and  Embeddings</A></H3>
+
+<P>
+<P>
+Let A be a quaternion algebra over Q, F<sub>q</sub>(X) (with q odd) or a
+number field F with defining elements a, b, and let v be
+a place of F.  If v is unramified in A 
+(i.e. A tensor <sub>F</sub> F<sub>v</sub> isomorphic to M<sub>2</sub>(F<sub>v</sub>), we define the <I>Hilbert symbol</I>
+(a, b)<sub>v</sub> to be 1, and otherwise we define (a, b)<sub>v</sub>= - 1.
+
+
+<H5><A NAME = "11192">HilbertSymbol(a, b, p) : FldRatElt, FldRatElt, RngIntElt -&gt; RngIntElt</A></H5>
+<H5>HilbertSymbol(a, b, p) : FldFunRatElt, FldFunRatElt, RngElt p -&gt; RngIntElt</H5>
+<H5>HilbertSymbol(a, b, p) : FldNumElt, FldNumElt, RngOrdIdl -&gt; RngIntElt</H5>
+<H5>HilbertSymbol(A, p) : AlgQuat[FldRat], RngIntElt -&gt; RngIntElt</H5>
+<H5>HilbertSymbol(A, p) : AlgQuat[FldFunRat], RngElt -&gt; RngIntElt</H5>
+<H5>HilbertSymbol(A, p) : AlgQuat, RngOrdIdl -&gt; RngIntElt</H5>
+
+<PRE>    Al: MonStgElt                       Default: "NormResidueSymbol"</PRE>
+<BLOCKQUOTE>
+Computes the Hilbert symbol for the quaternion algebra A over F, 
+namely (a, b)<sub>p</sub>, where a, b &isin;F and p is either a prime 
+(if a, b &isin;Q or F<sub>q</sub>(X)) or a prime ideal.  If a, b &isin;Q, 
+by default table-lookup is used to compute the Hilbert symbol; one 
+can optionally insist on using the full algorithm by setting the 
+parameter <TT>Al</TT> to the value <TT>"Evaluate"</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "11193">IsRamified(p, A) : RngElt, AlgQuat -&gt; BoolElt</A></H5>
+<H5>IsUnramified(p, A) : RngElt, AlgQuat -&gt; BoolElt</H5>
+<H5>IsRamified(p, A) : RngUPol, AlgQuat[FldFunRat] -&gt; BoolElt</H5>
+<H5>IsUnramified(p, A) : RngUPol, AlgQuat[FldFunRat] -&gt; BoolElt</H5>
+<H5>IsRamified(p, A) : RngOrdIdl, AlgQuat[FldAlg] -&gt; BoolElt</H5>
+<H5>IsUnramified(p, A) : RngOrdIdl, AlgQuat[FldAlg] -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the prime or prime ideal p is ramified 
+(unramified) in the quaternion algebra A.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11194">Example <TT>AlgQuat_Hilbert_Symbols (H91E12)</TT></A></H3>
+We first verify the correctness of all Hilbert symbols over the rationals.
+<P>
+<P>
+<P>
+<PRE>
+&gt; QQ := Rationals();
+&gt; for a,b in [1..8] do
+&gt;   bl := HilbertSymbol(QQ ! a, QQ ! b,2 : Al := "Evaluate") 
+&gt;                eq NormResidueSymbol(a,b,2);
+&gt;   print &lt;a,b,bl&gt;;
+&gt;   if not bl then
+&gt;     break a;
+&gt;   end if;
+&gt; end for;
+&lt;1, 1, true&gt;
+&lt;1, 2, true&gt;
+&lt;1, 3, true&gt;
+...
+</PRE>
+<P>
+For a second test, we input a quaternion algebra which is unramified at all finite
+places.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P&lt;x&gt; := PolynomialRing(Rationals());
+&gt; F&lt;b&gt; := NumberField(x^3-3*x-1);
+&gt; Z_F := MaximalOrder(F);
+&gt; A := QuaternionAlgebra&lt;F | -3,b&gt;;
+&gt; symbols := [];
+&gt; for p in [p : p in [2..100] | IsPrime(p)] do
+&gt;   pps := Decomposition(Z_F,p);
+&gt;   for pp in pps do
+&gt;     Append(~symbols,HilbertSymbol(A,pp[1]));
+&gt;   end for; 
+&gt; end for;
+&gt; symbols;
+[ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ]
+</PRE>
+<P>
+Finally, we test "random" quaternion algebras over quadratic extensions at
+even primes, the hardest case.  We use the fact that the quaternion algebra (a, b)
+is ramified at a prime ideal p if and only if b is a norm from the extension
+F(Sqrt(a)), so we can test this condition using <TT>IsLocalNorm</TT>. Note that
+this takes substantially more time.
+<P>
+<P>
+<P>
+<PRE>
+&gt; for c in [2,-2,6,-6,-1,3,-3] do
+&gt;   K&lt;s&gt; := NumberField(x^2-c);
+&gt;   Z_K := MaximalOrder(K);
+&gt;   Z_Kmod8, f8 := quo&lt;Z_K | 8&gt;;
+&gt;   PPK&lt;xK&gt; := PolynomialRing(K);
+&gt;   for i := 1 to 10 do
+&gt;     S := [x+y*Z_K.2 : x,y in [0..7] | x*y ne 0];
+&gt;     a := Random(S);
+&gt;     b := Random(S);
+&gt;     A := QuaternionAlgebra&lt;K | a,b&gt;;
+&gt;     for pp in Decomposition(Z_K,2) do
+&gt;       hsym := HilbertSymbol(A,pp[1]);
+&gt;       if not IsIrreducible(xK^2-a) then
+&gt;         print &lt;c, a, b, hsym eq 1&gt;;
+&gt;         if hsym ne 1 then
+&gt;           break c;
+&gt;         end if;
+&gt;       else
+&gt;         lclsym := IsLocalNorm(AbelianExtension(ext&lt;K | xK^2-a&gt;),Z_K ! b,pp[1]);
+&gt;         bl := (hsym eq 1) eq lclsym;
+&gt;         print &lt;c, a, b, bl&gt;;
+&gt;         if not bl then
+&gt;           break c;
+&gt;         end if;
+&gt;       end if;
+&gt;     end for;
+&gt;   end for;
+&gt; end for;
+&lt;2, 5/1*Z_K.1 + 3/1*Z_K.2, Z_K.1 + 7/1*Z_K.2, true&gt;
+&lt;2, 6/1*Z_K.1 + 4/1*Z_K.2, 4/1*Z_K.1 + Z_K.2, true&gt;
+&lt;2, 7/1*Z_K.1 + Z_K.2, 2/1*Z_K.1 + 2/1*Z_K.2, true&gt;
+...
+</PRE>
+<HR>
+<H5><A NAME = "11195">pMatrixRing(A, p) : AlgQuat, RngOrdIdl -&gt; AlgMat, Map, Map</A></H5>
+<H5>pMatrixRing(A, p) : AlgQuat, RngElt -&gt; AlgMat, Map, Map</H5>
+<H5>pMatrixRing(O, p) : AlgAssVOrd, RngOrdIdl -&gt; AlgMat, Map, Map</H5>
+<H5>pMatrixRing(O, p) : AlgQuatOrd, RngElt -&gt; AlgMat, Map, Map</H5>
+<H5>pMatrixRing(O, p) : AlgQuatOrd[RngInt], RngInt -&gt; AlgMat, Map, Map</H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Let A be a quaternion algebra A over a field F where F is the 
+rationals, a number field or F<sub>q</sub>(x) with q odd.  Given A and 
+a prime (ideal) p of the ring of integers R of F such that p 
+is unramified in A, this function returns the matrix ring over the 
+completion F<sub>p</sub> of F at p, a map from A to M<sub>2</sub>(F<sub>p</sub>) and the 
+embedding F to F<sub>p</sub>.
+<P>
+Given a p-maximal order O in A, the map from A to M<sub>2</sub>(F<sub>p</sub>)
+induces a map from O to &lt;Meta&gt;-<sub>2</sub>(R<sub>p</sub>).
+</BLOCKQUOTE>
+<H5><A NAME = "11196">IsSplittingField(K, A) : Fld, AlgQuat -&gt; BoolElt, AlgQuatElt, Map</A></H5>
+<H5>HasEmbedding(K, A) : Fld, AlgQuat -&gt; BoolElt, AlgQuatElt, Map</H5>
+
+<PRE>    ComputeEmbedding: BoolElt           Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a quaternion algebra A defined over Q, F<sub>q</sub>(X) 
+(with q odd) or a number field F and K a quadratic extension
+of F, the function returns <TT>true</TT> if and only if there exists an 
+embedding K to A over F. This is done by comparison of ramified 
+places in K and A (see <A  HREF = "text981.htm#bib_Vigneras80">[Vig80, Cor. III.3.5]</A>).
+If no embedding exists, the second return value
+will be a witness place. If an embedding exists and the optional
+argument <TT>ComputeEmbedding</TT> is set to <TT>true</TT>, the second and
+third return values contain the result of a call to 
+<TT>Embed</TT> as described below.
+</BLOCKQUOTE>
+<H5><A NAME = "11197">Embed(K, A) : Fld, AlgQuat -&gt; AlgQuatElt, Map</A></H5>
+
+<PRE>    Al: MonStgElt                       Default: "NormEquation"</PRE>
+<BLOCKQUOTE>
+Given a quaternion algebra A defined over Q, F<sub>q</sub>(X)
+(with q odd) or
+a number field F and K a quadratic extension of F,
+returns an embedding K to A over F, given as
+an element of A, the image of the primitive
+generator of K, and the map K to A.
+<P>
+The algorithm by default involves solving a relative
+norm equation. Alternatively, a naive search algorithm
+may be selected by setting the optional parameter 
+<TT>Al:="Search"</TT>.
+<P>
+If there is no embedding, a runtime error occurs
+(or the <TT>"Search"</TT> runs forever).
+To check whether an embedding exists, use <TT>HasEmbedding</TT>
+(see immediately above).
+</BLOCKQUOTE>
+<H5><A NAME = "11198">Embed(Oc, O) : RngOrd, AlgAssVOrd -&gt; AlgAssVOrdElt, Map</A></H5>
+
+<PRE>    Al: MonStgElt                       Default: "NormEquation"</PRE>
+<BLOCKQUOTE>
+Given a quadratic order O<sub>c</sub> with base number ring R
+and a quaternion order O with base ring R, the function
+computes an embedding O<sub>c</sub> -&gt; O over R. 
+It returns the image of the second generator <TT>Oc.2</TT> of 
+<TT>Oc</TT>; secondly it returns the embedding map O<sub>c</sub> to O.
+<P>
+The algorithm by default involves solving a relative
+norm equation. Alternatively, a naive search algorithm
+may be selected by setting the optional parameter
+<TT>Al:="Search"</TT>.
+<P>
+<I>Notes.</I> Let K be the number field containing Oc. 
+<P>
+<I>(i)</I> <TT>Oc.1, Oc.2</TT> are the generators of Oc as a
+module, and <TT>Oc.2</TT> is unrelated to <TT>K.1</TT>,
+where K is the number field containing Oc.
+<P>
+<I>(ii)</I> To check whether an embedding of K into the algebra exists, 
+ one can use  <TT>HasEmbedding(K, Algebra(O) : ComputeEmbedding:=false</TT>).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11199">Example <TT>AlgQuat_Embed (H91E13)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; F&lt;b&gt; := NumberField(Polynomial([1,-3,0,1]));
+&gt; A := QuaternionAlgebra&lt;F | -3, b&gt;;
+&gt; K := ext&lt;F | Polynomial([2,-1,1])&gt;;
+&gt; mu, iota := Embed(K, A);
+&gt; mu;
+1/2 + 1/6*(-2*b^2 + 2*b + 7)*i + 1/2*(2*b^2 + b - 6)*j + 1/6*(-2*b^2 - b + 4)*k
+&gt; MinimalPolynomial(mu);
+$.1^2 - $.1 + 2
+&gt; iota(K.1) eq mu;
+true
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text989.htm">[Next]</A><A  HREF = "text987.htm">[Prev]</A> <A  HREF = "text989.htm">[Right]</A> <A  HREF = "text987.htm">[Left]</A> <A  HREF = "text982.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

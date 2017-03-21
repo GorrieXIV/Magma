@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Equivalence Testing</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1777.htm">[Next]</A><A  HREF = "text1775.htm">[Prev]</A> <A  HREF = "text1777.htm">[Right]</A> <A  HREF = "text1775.htm">[Left]</A> <A  HREF = "text1774.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "19642">Equivalence Testing</A></H3>
+
+
+
+<H5><A NAME = "19643">IsHadamard(H) : AlgMatElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the matrix H is a Hadamard matrix.
+</BLOCKQUOTE>
+<H5><A NAME = "19644">HadamardNormalize(H) : AlgMatElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Given a Hadamard matrix H, returns a normalized matrix equivalent to H.
+This matrix is created by negating rows and columns to ensure that the
+first row and column consist entirely of ones.
+</BLOCKQUOTE>
+<H5><A NAME = "19645">HadamardCanonicalForm(H) : AlgMatElt -&gt; AlgMatElt, AlgMatElt, AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Given a Hadamard matrix H, returns a Hadamard-equivalent matrix H'
+and transformation matrices X and Y such that H' = XHY.
+The matrix H' is canonical in the sense that all matrices that are
+Hadamard-equivalent to H (and no others) will produce the same
+matrix H'.
+</BLOCKQUOTE>
+<H5><A NAME = "19646">HadamardInvariant(H) : AlgMatElt -&gt; [ RngIntElt ]</A></H5>
+<BLOCKQUOTE>
+Returns a sequence S of integers giving the 4-profile of the Hadamard
+matrix H.
+All Hadamard-equivalent matrices have the same 4-profile, but so may
+some inequivalent ones.
+Thus this test may determine inequivalence of two matrices more cheaply
+than performing a full equivalence test, but cannot establish equivalence.
+</BLOCKQUOTE>
+<H5><A NAME = "19647">IsHadamardEquivalent(H, J : parameters) : AlgMatElt, AlgMatElt -&gt; BoolElt, AlgMatElt, AlgMatElt</A></H5>
+
+<PRE>    Al: MonStgElt                       Default: "nauty"</PRE>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the Hadamard matrices H and J
+are Hadamard equivalent.
+The parameter <TT>Al</TT> may be set to either <TT>"Leon"</TT> or <TT>"nauty"</TT>
+(the default).
+If the <TT>"nauty"</TT> option is chosen and the matrices are equivalent
+then transformation matrices X and Y are also returned, such that
+J = XHY.
+</BLOCKQUOTE>
+<H5><A NAME = "19648">HadamardMatrixToInteger(H) : AlgMatElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns an integer that encodes the entries in the given Hadamard matrix
+in more compact form.
+The intended use is to save time when testing for equality against the
+same set of matrices many times.
+</BLOCKQUOTE>
+<H5><A NAME = "19649">HadamardMatrixFromInteger(x, n) : RngIntElt, RngIntElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Returns a Hadamard matrix of degree n whose encoded form is the
+integer x.
+This function is the inverse of <TT>HadamardMatrixToInteger()</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19650">Example <TT>Hadamard_hadamard-equiv (H154E1)</TT></A></H3>
+We demonstrate the use of some of these functions on certain degree
+16 Hadamard matrices.  For convenience, we create them from the more
+compact integer form.
+<P>
+<P>
+<PRE>
+&gt; S := [
+&gt;   47758915483058652629300889924143904114798786457834842901517979108472281628672,
+&gt;   52517743516350345514775635367035460577743730272737765852723792818755052170805,
+&gt;   69809270372633075610047556428719374057869882804054059134346034969950931648512,
+&gt;   7209801227548712796135507135820555403251560090614832684136782016680445345792
+&gt; ];
+&gt; T := [ HadamardMatrixFromInteger(x, 16) : x in S ];
+&gt; &amp;and [ IsHadamard(m) : m in T ];
+true
+</PRE>
+Now we can test them for equivalence; we start by checking the 4-profiles.
+<P>
+<P>
+<PRE>
+&gt; [ HadamardInvariant(m) : m in T ];
+[
+    [ 1680, 0, 140 ],
+    [ 1680, 0, 140 ],
+    [ 1344, 448, 28 ],
+    [ 1344, 448, 28 ]
+]
+</PRE>
+We see that the only possible equivalencies are between the first two
+and the last two, since equivalent matrices must have the same 4-profile.
+<P>
+<P>
+<PRE>
+&gt; equiv,X,Y := IsHadamardEquivalent(T[1], T[2]);
+&gt; equiv;
+true
+&gt; T[2] eq X*T[1]*Y;
+true
+&gt; equiv,X,Y := IsHadamardEquivalent(T[3], T[4]);
+&gt; equiv;
+false
+</PRE>
+So we have three inequivalent matrices.
+An alternative way to determine the inequivalent matrices would
+have been to use the canonical forms.
+<P>
+<P>
+<PRE>
+&gt; #{ HadamardCanonicalForm(m) : m in T };
+3
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1777.htm">[Next]</A><A  HREF = "text1775.htm">[Prev]</A> <A  HREF = "text1777.htm">[Right]</A> <A  HREF = "text1775.htm">[Left]</A> <A  HREF = "text1774.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

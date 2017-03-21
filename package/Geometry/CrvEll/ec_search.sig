@@ -1,0 +1,5 @@
+174,1
+V,ECSearch,3
+S,EllipticCurveSearch,Search for elliptic curves with conductor equal to the ideal N. This is a search routine only: it does not necessarily return all such curves! 'Effort' controls the length of the search (running time is roughly linear in this),0,2,0,0,0,0,0,0,0,148,,0,0,217,,82,-38,-38,-38,-38,-38
+S,EllipticCurveWithGoodReductionSearch,"Search for elliptic curves with good reduction except at primes dividing N, or in the ideal S. This is a search routine only: it does not necessarily return all such curves! 'Effort' controls the length of the search (running time is roughly linear in this)",0,2,0,0,0,0,0,0,0,148,,0,0,217,,82,-38,-38,-38,-38,-38
+S,EllipticCurveWithGoodReductionSearch,"Search for elliptic curves with good reduction except at primes dividing N, or in the ideal S. This is a search routine only: it does not necessarily return all such curves! 'Effort' controls the length of the search (running time is roughly linear in this)",0,2,0,0,0,0,0,0,0,148,,0,0,-50,,82,-38,-38,-38,-38,-38

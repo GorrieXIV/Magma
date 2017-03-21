@@ -1,0 +1,545 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Creation Functions</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text191.htm">[Next]</A><A  HREF = "text189.htm">[Prev]</A> <A  HREF = "text191.htm">[Right]</A> <A  HREF = "text189.htm">[Left]</A> <A  HREF = "text188.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "1564">Creation Functions</A></H3>
+
+<P>
+<P>
+A database of low-term irreducible polynomials for finite fields
+of small characteristic is available in Magma (see the
+function <A  HREF = "text193.htm#IrreducibleLowTermGF2Polynomial">IrreducibleLowTermGF2Polynomial</A> below).
+This database goes up
+to degree 120,000 for GF(2), and to reasonably high degrees
+for the fields GF(q) for q up to 128.
+Thus one can create
+the finite field GF(p<sup>k</sup>) for p, k within this range and compute
+within the field without any delay in the creation.  Advantage
+is also taken of the special form of the defining polynomial.
+<P>
+Previous to V2.11, sparse trinomial/pentanomial irreducible polynomials
+(see the function <A  HREF = "text193.htm#IrreducibleSparseGF2Polynomial">IrreducibleSparseGF2Polynomial</A>) were used
+by default for
+constructing GF(2<sup>k</sup>) when k is beyond the Conway range.  To enable
+compatibility with older versions, one may select these sparse
+polynomials with the parameter <TT>Sparse</TT> in the creation functions.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text190.htm#1565">Creation of Structures</A>
+<LI> <A  HREF = "text190.htm#1582">Creating Relations</A>
+<LI> <A  HREF = "text190.htm#1585">Special Options</A>
+<LI> <A  HREF = "text190.htm#1592">Homomorphisms</A>
+<LI> <A  HREF = "text190.htm#1594">Creation of Elements</A>
+<LI> <A  HREF = "text190.htm#1599">Special Elements</A>
+<LI> <A  HREF = "text190.htm#1606">Sequence Conversions</A>
+</UL>
+<H4><A NAME = "1565">Creation of Structures</A></H4>
+
+
+
+<H5><A NAME = "1566">FiniteField(q) : RngIntElt -&gt; FldFin</A></H5>
+<H5>GaloisField(q) : RngIntElt -&gt; FldFin</H5>
+<H5>GF(q) : RngIntElt -&gt; FldFin</H5>
+
+<PRE>    Optimize: BoolElt                   Default: <TT>true</TT></PRE>
+
+<PRE>    Sparse: BoolElt                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given q = p<sup>n</sup>, where p is a prime, 
+create the finite field GF(q).
+If p is very big, it is advised to use the form <TT>FiniteField(p, n)</TT>
+described below instead, because Magma will first attempt to factor
+q completely.
+<P>
+The primitive polynomial used to 
+construct GF(q) when n &gt; 1 will be a Conway 
+polynomial, if it is available.
+If the parameter <TT>Optimize</TT> is <TT>false</TT>, then no optimized representation
+(i.e., by using Zech logarithm tables or internal multi-step extensions)
+will be constructed for the new field which means that the time to create the
+field will be trivial but arithmetic operations in the field may be slower --
+this is useful if say one wishes to just compute a few trivial operations
+on a few elements of the field alone.
+<P>
+If q=2<sup>k</sup> and k is beyond the Conway range, then a low-term irreducible
+is used (see <A  HREF = "text193.htm#IrreducibleLowTermGF2Polynomial">IrreducibleLowTermGF2Polynomial</A> below).  Setting
+the parameter <TT>Sparse</TT> to <TT>true</TT> will cause a sparse polynomial to
+be used instead if possible (see <A  HREF = "text193.htm#IrreducibleSparseGF2Polynomial">IrreducibleSparseGF2Polynomial</A> below).
+</BLOCKQUOTE>
+<H5><A NAME = "1567">FiniteField(p, n) : RngIntElt, RngIntElt -&gt; FldFin</A></H5>
+<H5>GaloisField(p, n) : RngIntElt, RngIntElt -&gt; FldFin</H5>
+<H5>GF(p, n) : RngIntElt, RngIntElt -&gt; FldFin</H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Optimize: BoolElt                   Default: <TT>true</TT></PRE>
+
+<PRE>    Sparse: BoolElt                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a prime p and an exponent n &ge;1, create the finite field
+GF(p<sup>n</sup>).
+The primitive polynomial used to
+construct GF(q) when n &gt; 1 will be a Conway
+polynomial, if it is available.
+<P>
+By default p is checked to be a strong pseudoprime for 20 random bases
+b with 1 &lt; b &lt; p;
+if the parameter <TT>Check</TT> is <TT>false</TT>, then no check is done on p at all
+(this is useful when p is very large and one does not wish to perform
+an expensive primality test on p).
+<P>
+The parameters are as above.
+</BLOCKQUOTE>
+<H5><A NAME = "1568">ext&lt;F | n&gt; : FldFin, RngIntElt -&gt; FldFin, Map</A></H5>
+
+<PRE>    Optimize: BoolElt                   Default: <TT>true</TT></PRE>
+
+<PRE>    Sparse: BoolElt                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a finite field F and a positive integer n, create an extension G
+of degree n of F, as well as the embedding map &phi; : F -&gt; G.
+The parameter <TT>Optimize</TT> has the same behaviour as that for the
+<TT>FiniteField</TT> function.
+If F is a default field, then G will also be a default field (so its
+ground field will be the prime field).
+Otherwise, the ground field of G will be F.
+<P>
+The parameters are as above.
+</BLOCKQUOTE>
+<H5><A NAME = "1569">ext&lt;F | P&gt; : FldFin, RngUPolElt[FldFin] -&gt; FldFin, Map</A></H5>
+
+<PRE>    Optimize: BoolElt                   Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a finite field F and a polynomial P of degree n over
+F, create an extension G=F[&alpha;] of degree n of F, as well as the
+natural embedding map &phi; : F -&gt; G; the 
+polynomial P must be irreducible over F, and &alpha; is one of its roots.
+Thus the defining polynomial of G over F will be P.
+The parameter <TT>Optimize</TT> has the same behaviour as that for the
+<TT>FiniteField</TT> function.
+The ground field of G will be F.
+<P>
+The parameter is as above.
+</BLOCKQUOTE>
+<H5><A NAME = "1570">ExtensionField&lt;F, x | P&gt; : FldFin, ... -&gt; FldFin, Map</A></H5>
+<BLOCKQUOTE>
+Given a finite field F, a literal identifier x, and a polynomial P
+of degree n over F presented as a (polynomial) expression in x,
+create an extension G=F[x] of degree n of F, as well as the
+natural embedding map &phi; : F -&gt; G; the 
+polynomial P must be irreducible over F, and x is one of its roots.
+Thus the defining polynomial of G over F will be P.
+The parameter <TT>Optimize</TT> has the same behaviour as in the
+<TT>FiniteField</TT> function.
+</BLOCKQUOTE>
+<H5><A NAME = "1571">RandomExtension(F, n) : FldFin, RngIntElt -&gt; FldFin</A></H5>
+<BLOCKQUOTE>
+Given a finite field F and a degree n, return the extension of F
+by a random degree-n irreducible polynomial over F.
+</BLOCKQUOTE>
+<H5><A NAME = "1572">SplittingField(P) : RngUPolElt[FldFin] -&gt; FldFin</A></H5>
+<BLOCKQUOTE>
+Given a univariate polynomial P over a finite field F, create the
+minimal splitting field
+of P, that is, the smallest-degree extension field G of F such that
+P factors completely into linear factors over G.
+</BLOCKQUOTE>
+<H5><A NAME = "1573">SplittingField(S) : RngUPolElt[FldFin]  -&gt; FldFin</A></H5>
+<BLOCKQUOTE>
+Given a set S of univariate polynomials each over a finite field F,
+create the minimal splitting field of S, that is, the smallest-degree
+extension
+field G of
+F such that for every polynomial P of S, P factors completely into
+linear factors over G.
+</BLOCKQUOTE>
+<H5><A NAME = "1574">sub&lt;F | d&gt; : FldFin, RngIntElt -&gt; FldFin, Map</A></H5>
+
+<PRE>    Optimize: BoolElt                   Default: <TT>true</TT></PRE>
+
+<PRE>    Sparse: BoolElt                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a finite field F of cardinality p<sup>n</sup>
+and a positive divisor d of n,
+create a subfield E of F of degree d, as well
+as the embedding map &phi; : E -&gt; F.
+<P>
+The parameters are as above.
+</BLOCKQUOTE>
+<H5><A NAME = "1575">sub&lt;F | f&gt; : FldFin, RngUPolElt[FldFin] -&gt; FldFin, Map</A></H5>
+
+<PRE>    Optimize: BoolElt                   Default: <TT>true</TT></PRE>
+
+<PRE>    Sparse: BoolElt                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a finite field F  and an element f of F,
+create the subfield E of F generated by f, together with the
+embedding map &phi; : E -&gt; F.
+The map and field are constructed so that &phi;(w)=f, where
+w is the generator of E (that is, <TT>E.1</TT>).
+<P>
+The parameters are as above.
+</BLOCKQUOTE>
+<H5><A NAME = "1576">GroundField(F) : FldFin -&gt; FldFin</A></H5>
+<H5>BaseField(F) : FldFin -&gt; FldFin</H5>
+<BLOCKQUOTE>
+Given a finite field F, return its ground field.
+If F was constructed as an extension of the field E, this function
+returns E; if F was not explicitly constructed as an extension
+then the prime field is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "1577">PrimeField(F) : FldFin -&gt; FldFin</A></H5>
+<BLOCKQUOTE>
+The subfield of F of prime cardinality.
+</BLOCKQUOTE>
+<H5><A NAME = "1578">IsPrimeField(F) : Fld -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns whether field F is a prime field.
+</BLOCKQUOTE>
+<H5><A NAME = "1579">F meet G : FldFin, FldFin -&gt; FldFin</A></H5>
+<BLOCKQUOTE>
+Given finite fields F and G of the same characteristic p, return
+the finite field that forms the intersection F&cap;G.
+</BLOCKQUOTE>
+<H5><A NAME = "1580">CommonOverfield(K, L) : FldFin, FldFin -&gt; FldFin</A></H5>
+<BLOCKQUOTE>
+Given finite fields K and L, both of characteristic p, return
+the smallest field which contains both of them.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "1581">Example <TT>FldFin_Extensions (H21E1)</TT></A></H3>
+To define the field of 7 elements, use
+<P>
+<P>
+<PRE>
+&gt; F7 := FiniteField(7);
+</PRE>
+We can define the field of 7<sup>4</sup> elements in several different
+ways.  We can use the Conway polynomial:
+<P>
+<P>
+<PRE>
+&gt; F&lt;z&gt; := FiniteField(7^4);
+&gt; F;
+Finite field of size 7^4
+</PRE>
+We can define it as an extension of the field of 7 elements,
+using the internal polynomial:
+<P>
+<P>
+<PRE>
+&gt; F&lt;z&gt; := ext&lt; F7 | 4 &gt;;
+&gt; F;
+Finite field of size 7^4
+</PRE>
+We can supply our own polynomial, say x<sup>4</sup> + 4x<sup>3</sup> + 2x + 3:
+<P>
+<P>
+<PRE>
+&gt; P&lt;x&gt; := PolynomialRing(F7);
+&gt; p := x^4+4*x^3+2*x+3;
+&gt; F&lt;z&gt; := ext&lt; F7 | p &gt;;
+&gt; F;
+Finite field of size 7^4
+</PRE>
+We can define it as an extension of the field of 7<sup>2</sup> elements:
+<P>
+<P>
+<PRE>
+&gt; F49&lt;w&gt; := ext&lt; F7 | 2 &gt;;
+&gt; F&lt;z&gt; := ext&lt; F49 | 2 &gt;;
+&gt; F;
+Finite field of size 7^4
+</PRE>
+<HR>
+<H4><A NAME = "1582">Creating Relations</A></H4>
+
+
+
+<H5><A NAME = "1583">Embed(E, F) : FldFin, FldFin -&gt;</A></H5>
+<BLOCKQUOTE>
+Given finite fields E and F of cardinality p<sup>d</sup> and p<sup>n</sup>,
+such that d divides n, assert the embedding relation
+between E and F. That is, an isomorphism between E and the
+subfield of F of cardinality p<sup>d</sup> is chosen and set up, and can be used
+from then on to move between the fields E and F. See <A  HREF = "text187.htm#bib_FiniteFields">[BCS97]</A>
+for details as to how this is done.  If both
+E and F have been defined with Conway polynomials then the
+isomorphism will be such that the generator &beta; of F
+is mapped to &alpha;^((p<sup>n</sup> - 1)/(p<sup>d</sup> - 1)), where &alpha; is the
+generator of F.
+</BLOCKQUOTE>
+<H5><A NAME = "1584">Embed(E, F, x) : FldFin, FldFin -&gt;</A></H5>
+<BLOCKQUOTE>
+Given finite fields E and F of cardinality p<sup>d</sup> and p<sup>n</sup>
+such that d divides n,
+as well as an element x&isin;F,
+assert the embedding relation
+between E and F mapping the generator of E to x.
+The element x must be a root of the polynomial defining E
+over the prime field.
+Thus an isomorphism between E and the
+subfield of F of cardinality p<sup>d</sup> is set up, and can be used
+from then on to move between the fields E and F.
+</BLOCKQUOTE>
+<H4><A NAME = "1585">Special Options</A></H4>
+
+<P>
+<P>
+For finite fields for which the complete table of Zech logarithms
+is stored (and which must therefore be small),
+printing of elements can be done in two ways: either as powers of the
+primitive element or as polynomials in the generating element.
+<P>
+Note that power printing is not available in all cases where
+the logarithm table is stored however (the defining polynomial may not
+be primitive); for convenience element of a prime field are always
+printed as integers, and therefore
+power printing on prime fields will not work. Also, if a field
+is created with a generator that is not primitive, then power printing
+will be impossible.
+
+
+<H5><A NAME = "1586">AssertAttribute(FldFin, "PowerPrinting", l) : Cat, MonStgElt, BoolElt -&gt;</A></H5>
+<BLOCKQUOTE>
+This attribute is used to change the <I>default</I> printing for
+all (small) finite fields created after the <TT>AssertAttribute</TT> command
+is executed.
+If l is <TT>true</TT> all elements of finite fields small enough for the
+Zech logarithms to be stored will be printed by default
+as a power of the primitive element -- see
+<TT>PrimitiveElement</TT>). If l is <TT>false</TT> every finite field element
+is printed by default as a polynomial in
+the generator <TT>F.1</TT> of degree less than n over the ground
+field. The default can be overruled for a particular finite field
+by use of the <TT>AssertAttribute</TT> option listed below.
+The value of this attribute is obtained by use of <TT>HasAttribute(FldFin,
+"PowerPrinting")</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "1587">SetPowerPrinting(F, l) : FldFin, BoolElt -&gt;</A></H5>
+<H5>AssertAttribute(F, "PowerPrinting", l) : FldFin, MonStgElt, BoolElt -&gt;</H5>
+<BLOCKQUOTE>
+Given a finite field F, the Boolean value l can be used to
+control the printing of elements of F, provided that F is small
+enough for the table of Zech logarithms to be stored.
+If l is <TT>true</TT> all
+elements will be printed as a power of the primitive element -- see
+<TT>PrimitiveElement</TT>). If l is <TT>false</TT> (which is the only possibility for
+big fields), every element of F is printed as a polynomial in
+the generator <TT>F.1</TT> of degree less than n over the ground
+field of F, where n is the degree of F over its ground field.
+The function <TT>HasAttribute(F, "PowerPrinting")</TT> may be used to
+obtain the current value of this flag.
+</BLOCKQUOTE>
+<H5><A NAME = "1588">HasAttribute(FldFin, "PowerPrinting", l) : Cat, MonStgElt, BoolElt -&gt;</A></H5>
+<BLOCKQUOTE>
+This function is used to find the current default printing style for
+all (small) finite fields.
+It returns <TT>true</TT> (since this attribute is always defined for FldFin),
+and also returns the current value of the attribute. 
+The procedure <TT>AssertAttribute(FldFin, "PowerPrinting", l)</TT> may be
+used to control the value of this flag.
+</BLOCKQUOTE>
+<H5><A NAME = "1589">HasAttribute(F, "PowerPrinting") : FldFin, MonStgElt -&gt; BoolElt, BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a finite field F that is small enough for the table of 
+Zech logarithms to be stored, returns <TT>true</TT> if the attribute
+<TT>"PowerPrinting"</TT>
+is defined, else returns <TT>false</TT>. If the attribute is defined, the function 
+also returns the value of the attribute. 
+The procedure <TT>AssertAttribute(F, "PowerPrinting", l)</TT> may be
+used to control the value of this flag.
+</BLOCKQUOTE>
+<H5><A NAME = "1590">AssignNames(~F, [f]) : FldFin, [ MonStgElt ]) -&gt;</A></H5>
+<BLOCKQUOTE>
+Procedure to change the name of the generating element in the
+finite field F to the contents of the string f.
+When F is created, the name will be <TT>F.1</TT>.
+<P>
+This procedure only changes the name used in printing the elements of F.
+It does <I>not</I> assign to an identifier called f
+the value of the generator in F; to do this, use an assignment statement,
+or use angle brackets when creating the field.
+<P>
+Note that since this is a procedure that modifies F,
+it is necessary to have a reference <TT>~F</TT> to F
+in the call to this function.
+</BLOCKQUOTE>
+<H5><A NAME = "1591">Name(F, 1) : FldFin, RngIntElt -&gt; FldFinElt</A></H5>
+<BLOCKQUOTE>
+Given a finite field F, return the
+element which has the name attached to it, that is, return the element <TT>F.1</TT>
+of F.
+</BLOCKQUOTE>
+<H4><A NAME = "1592">Homomorphisms</A></H4>
+
+
+
+<H5><A NAME = "1593">hom&lt; F -&gt; G | x &gt; : FldFin, Rng -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Given a finite field F, create a homomorphism with F as its domain
+and G as its codomain. If F is a prime field, then the right hand side
+in the constructor must be empty; in this case the ring homomorphism
+is completely determined by the rule that the map must be unitary, that
+is, 1 of F is mapped to 1 of G.
+If F is not of prime cardinality, then
+the homomorphism must be specified by supplying one element x in the
+codomain, which serves as the image of the generator of the field F
+over its prime field.
+Note that it is the responsibility of the user that the map defines
+a homomorphism.
+</BLOCKQUOTE>
+<H4><A NAME = "1594">Creation of Elements</A></H4>
+
+
+
+<H5>One(F) : FldFin -&gt; FldFinElt</H5>
+
+<H5>Identity(F) : FldFin -&gt; FldFinElt</H5><P>
+
+<H5>Zero(F) : FldFin -&gt; FldFinElt</H5>
+
+<H5>Representative(F) : FldFin -&gt; FldFinElt</H5><P>
+
+
+These generic functions 
+create 1, 1, 0, and 0 respectively, in any finite field.
+
+
+<H5><A NAME = "1595">F . 1 : FldFin -&gt; FldFinElt</A></H5>
+<BLOCKQUOTE>
+The generator for F as an algebra over its ground field. Thus, if
+F was defined by the polynomial P=P(X) over E, so
+F isomorphic to E[X]/P(X), then <TT>F.1</TT> is the image of X in F.
+<P>
+If F is a prime field, then 1=1<sub>F</sub> will be returned.
+</BLOCKQUOTE>
+<H5><A NAME = "1596">elt&lt;F | a&gt; : FldFin, RngElt -&gt; FldFinElt</A></H5>
+<H5>F ! a : FldFin, RngElt -&gt; FldFinElt</H5>
+<BLOCKQUOTE>
+Given a finite field F create the element specified by a; here
+a is allowed to be an element coercible into F, which means
+that a may be
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>an element of F;
+<DT>(ii)</DT><DD>an element of a subfield of F;
+<DT>(iii)</DT><DD>an element of an overfield of F that lies in F;
+<DT>(iv)</DT><DD>an integer, to be identified with a modulo the characteristic of F;
+<DT>(v)</DT><DD>a sequence of elements of the ground field E of F, of length
+equal to the degree of F over E. In this case the element
+a<sub>0</sub> + a<sub>1</sub>w + ... + a<sub>n - 1</sub>w<sup>n - 1</sup> is created, where a=[a<sub>0</sub>, ... a<sub>n - 1</sub>] and w is the generator <TT>F.1</TT> of F over E.</DL>
+</BLOCKQUOTE>
+<H5><A NAME = "1597">elt&lt;F | a<sub>0</sub>, ..., a<sub>n</sub> - 1&gt; : FldFin, [FldFinElt] -&gt; FldFinElt</A></H5>
+<BLOCKQUOTE>
+Given a finite field F with generator w
+of degree n over the ground field E, create the element
+a<sub>0</sub> + a<sub>1</sub>w + ... + a<sub>n - 1</sub>w<sup>n - 1</sup>&isin;F, where a<sub>i</sub>&isin;E (0&le;i&le;(n - 1)).
+If the a<sub>i</sub> are in some subfield of E or the a<sub>i</sub> are integers,
+they will be coerced into the ground field.
+</BLOCKQUOTE>
+<H5><A NAME = "1598">Random(F) : FldFin -&gt; FldFinElt</A></H5>
+<BLOCKQUOTE>
+Create a `random' element of finite field F.
+</BLOCKQUOTE>
+<H4><A NAME = "1599">Special Elements</A></H4>
+
+
+
+<H5><A NAME = "1600">F . 1 : FldFin, RngIntElt -&gt; FldFinElt</A></H5>
+<H5>Generator(F) : FldFin -&gt; FldFinElt</H5>
+<BLOCKQUOTE>
+Given a finite field F, this function returns the element f of
+F that generates F over its ground field E, so F=E[f]. This
+is the same as the element <TT>F.1</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "1601">Generator(F, E) : FldFin, FldFin -&gt; FldFinElt</A></H5>
+<BLOCKQUOTE>
+Given a finite field F and a subfield E of
+F, this function returns an element f of
+F that generates F over E, so F=E[f].
+Note that this element may be different from
+the element <TT>F.1</TT>, but if <TT>F.1</TT> works it will be returned.
+</BLOCKQUOTE>
+<H5><A NAME = "1602">PrimitiveElement(F) : FldFin -&gt; FldFinElt</A></H5>
+<BLOCKQUOTE>
+Given a finite field F, this function returns a primitive element for F,
+that is, a generator for the multiplicative group F<sup> * </sup> of F.
+Note that this may be an element different from the generator <TT>F.1</TT>
+for the field as an algebra.
+This function will return the same element upon different calls with
+the same field; the primitive element that is returned is the one that
+is used as basis for the <TT>Log</TT> function.
+</BLOCKQUOTE>
+<H5><A NAME = "1603"></A><A NAME = "FF:SetPrimitiveElement">SetPrimitiveElement</A>(F, x) : FldFin, FldFinElt -&gt;</H5>
+<BLOCKQUOTE>
+(Procedure.)
+Given a finite field F and a <I>primitive</I> element x of F,
+set the internal primitive element p of F to be x.  If the internal
+primitive element p of F has already been computed or set, x must
+equal it.  The function <TT>Log</TT> (given one argument) returns the logarithm
+of its argument with respect to the base p;
+this function thus allows one to specify which base should be used.
+(One can also use <TT>Log(x, b)</TT> for a given base but
+setting the primitive element and using <TT>Log(x)</TT> will be faster
+if many logarithms are to be computed.)
+</BLOCKQUOTE>
+<H5><A NAME = "1604">NormalElement(F) : FldFin -&gt; FldFinElt</A></H5>
+<BLOCKQUOTE>
+Given a finite field F=GF(p<sup>n</sup>),
+this function returns a normal element for F over the ground field
+G,
+that is, an element &alpha;&isin;F such that &alpha;, &alpha;<sup>q</sup>, ...,
+&alpha;^(q<sup>n - 1</sup>) forms a basis for F over G, where q is the
+cardinality of G, and n the degree for F over G.
+Two calls to this function with the same field may result in
+different normal elements.
+</BLOCKQUOTE>
+<H5><A NAME = "1605">NormalElement(F, E) : FldFin, FldFin -&gt; FldFinElt</A></H5>
+<BLOCKQUOTE>
+Given a finite field F=GF(q<sup>n</sup>) and a subfield E=GF(q),
+this function returns a normal element for F over E,
+that is, an element &alpha;&isin;F such that &alpha;, &alpha;<sup>q</sup>, ...,
+&alpha;^(q<sup>n - 1</sup>) forms a basis for F over E.
+</BLOCKQUOTE>
+<H4><A NAME = "1606">Sequence Conversions</A></H4>
+
+
+
+<H5><A NAME = "1607">SequenceToElement(s, F) : [ FldFinElt ] -&gt; FldFinElt</A></H5>
+<H5>Seqelt(s, F) : [ FldFinElt ] -&gt; FldFinElt</H5>
+<BLOCKQUOTE>
+Given a sequence s=[s<sub>0</sub>, ..., s<sub>n - 1</sub>] of elements of a finite field
+E, of length equal to the degree
+of the field F over its subfield E,
+construct the element s=s<sub>0</sub> + s<sub>1</sub>w + ... + s<sub>n - 1</sub>w<sup>n - 1</sup> of F, where
+w is the generator <TT>F.1</TT> of F over E.
+</BLOCKQUOTE>
+<H5><A NAME = "1608">ElementToSequence(a) : FldFinElt -&gt; [ FldFinElt ]</A></H5>
+<H5>Eltseq(a) : FldFinElt -&gt; [ FldFinElt ]</H5>
+<BLOCKQUOTE>
+Given an element a of the finite field F, return the sequence of
+coefficients [a<sub>0</sub>, ..., a<sub>n - 1</sub>] in the ground field E of F
+such that a=a<sub>0</sub> + a<sub>1</sub>w + ... + a<sub>n - 1</sub>w<sup>n - 1</sup>, with w the generator
+of F over E, and n the degree of F over E.
+</BLOCKQUOTE>
+<H5><A NAME = "1609">ElementToSequence(a, E) : FldFinElt, FldFin -&gt; [ FldFinElt ]</A></H5>
+<H5>Eltseq(a, E) : FldFinElt, FldFin -&gt; [ FldFinElt ]</H5>
+<BLOCKQUOTE>
+Given an element a of the finite field F, return the sequence of
+coefficients [a<sub>0</sub>, ..., a<sub>n - 1</sub>] in the subfield E of F
+such that a=a<sub>0</sub> + a<sub>1</sub>w + ... + a<sub>n - 1</sub>w<sup>n - 1</sup>, with w the generator
+of F over E, and n the degree of F over E.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text191.htm">[Next]</A><A  HREF = "text189.htm">[Prev]</A> <A  HREF = "text191.htm">[Right]</A> <A  HREF = "text189.htm">[Left]</A> <A  HREF = "text188.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

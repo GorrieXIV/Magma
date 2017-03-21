@@ -1,0 +1,2063 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Maps between Schemes</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1337.htm">[Next]</A><A  HREF = "text1335.htm">[Prev]</A> <A  HREF = "text1337.htm">[Right]</A> <A  HREF = "text1335.htm">[Left]</A> <A  HREF = "text1321.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "14599">Maps between Schemes</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+Given schemes X and Y one can define a map f: X -&gt; Y
+in a number of ways. The basic method is to give a sequence of polynomials
+or quotients of polynomials defined on X. If X has an associated
+function field then function field elements may also be used. Alternative
+sets of defining polynomials/rational functions may also be given, as
+long as these represent the same rational map as the original defining set.
+<P>
+Scheme maps in Magma represent <I>rational</I> maps 
+between schemes. That is, a map f: X -&gt; Y between schemes X and Y
+actually corresponds to a morphism from a dense Zariski-open subset of X to Y
+and two maps f and g from X to Y are considered to be equal (and will be 
+so deemed by <TT>eq</TT>, for example) if they are equal as morphisms when restricted 
+to a dense open subset of X that lies in a domain of definition of f and a
+domain of definition of g. The precise open domain of definition U of a map
+f is unspecified but in most functional contexts, it is equal to the complement of
+the base scheme f as returned by <TT>BaseScheme(f)</TT>. This is the set of
+scheme-theoretic points at which none of the maps given by the defining 
+polynomials/rational functions or any set of alternative defining polynomials are
+`naively' defined. The intrinsic <TT>Extend</TT> computes alternative defining equations that
+reduces the base scheme so that its open complement is equal to the maximal
+domain of definition of the rational map represented. However, this is a
+fairly generic implementation that can be computationally very heavy in
+many cases. When the domain X is a curve with function field and the codomain Y is
+ordinary projective, the implicit domain of definition for computing the image of
+points is the maximal domain of definition of f rather than the base scheme.
+The function field machinery is used here.
+<P>
+Similarly, isomorphisms between schemes can be defined using inverse defining 
+polynomials/rational functions and these represent birational
+maps rather than actual scheme isomorphisms.  
+<P>
+There are some natural functions associated to a map f and
+some other more complicated functions.
+The most natural things are, for a point p of X, computing the
+image point f(p) and, for a subscheme S&sub;Y computing the
+preimage scheme <TT>Pullback(f,S)</TT>. More complicated functions include
+the standard Gr&ouml;bner basis algorithm 
+for computing images f(T)&sub;Y of subschemes T of X. This is
+defined when T doesn't lie in the base scheme of f and the image
+is actually the scheme theoretic closure of the image of f restricted
+to the open subset of T on which it is defined.
+<P>
+For some functions such as the image computation just mentioned,
+it is a requirement that the schemes X and Y be defined over a common
+base ring and that the map f be defined over the identity map (or coercion
+map) of this common base ring.
+<P>
+Maps respect point set structures. Indeed, given a map f as above
+and an extension L of k, the base ring of X, there is
+a map f(L): X(L) -&gt; Y(L).
+The point set of Y is determined by the composition of the map of
+base rings with the extension map k -&gt; L.
+This map f(L) cannot be created without creating the scheme map f first,
+and in any case it is not usually explicitly required: the evaluation of
+f(p) will invoke it in the background, for example.
+But when the main purpose of f is to transfer a large number of points
+from X(L) to Y(L) then it is best to assign g := f(L) explicitly
+and use the map g. In this way the small additional overheads involved in
+repetitively constructing f(L) are avoided. Perhaps more importantly, 
+it also ensures that the image points all lie in the same point set.
+<P>
+Maps respect projective closures of schemes. That is,
+given f as above one can compute the projective closure of f which
+is a map from the projective closure of X to that of Y and which agrees
+with f where they are both defined.
+<P>
+From V2.16, there is a slight variant on the basic scheme map type (<TT>MapSch</TT>),
+which we refer to as scheme graph maps and are defined by the graph of the
+map in the product of the domain and codomain. These currently only have very
+basic constructors and somewhat less functionality than scheme maps. They
+will be described in a separate subsection.
+<P>
+Much of the functionality only works for scheme maps f between schemes
+whose base rings are fields. We usually do not explicitly mention in this 
+documentation when this is a requirement, but the functions will return
+an error if the base rings are not fields in cases where they must be.
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1336.htm#14600">Creation of Maps</A>
+<LI> <A  HREF = "text1336.htm#14628">Basic Attributes</A>
+<LI> <A  HREF = "text1336.htm#14647">Maps and Points</A>
+<LI> <A  HREF = "text1336.htm#14653">Maps and Schemes</A>
+<LI> <A  HREF = "text1336.htm#14663">Maps and Closure</A>
+<LI> <A  HREF = "text1336.htm#14669">Automorphisms</A>
+<LI> <A  HREF = "text1336.htm#14703">Scheme Graph Maps</A>
+</UL>
+<H4><A NAME = "14600">Creation of Maps</A></H4>
+
+<P>
+<P>
+The most basic map constructors are described here. It is possible
+to create maps defined over a map of the base rings of the schemes.
+
+
+<P>
+<P>
+<P>
+<P>
+<H5><A NAME = "14601">map&lt; X -&gt; Y | F &gt; : Sch,Sch,SeqEnum -&gt; MapSch</A></H5>
+<H5>map&lt; X -&gt; Y | F, G &gt; : Sch,Sch,SeqEnum -&gt; MapSch</H5>
+<H5>map&lt; X -&gt; Y | u, F &gt; : Sch,Sch,Map,SeqEnum -&gt; MapSch</H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    CheckInverse: BoolElt               Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Create the map X -&gt; Y of schemes determined by the sequence F
+of polynomials or rational functions defined on X.
+The two schemes X and Y must be defined over compatible base rings,
+that is, there must exist a ring map u from the base ring of Y to that
+of X.
+The polynomials can be elements of the coordinate ring of the ambient
+space containing X or elements of the coordinate ring of X itself.
+In any case, the polynomials will be lifted to elements of the
+coordinate ring of the ambient space and any ring elements which admit
+this operation could be used. If the function field of X exists then
+elements of this may also be used.
+<P>
+The argument u is a map from the base ring of Y to that of X.
+If it is omitted then natural coercion map is assumed.
+In practice, the base rings are often identical in which case coercion
+will simply be the identity map.
+<P>
+A birational inverse specified by polynomials or rational functions on Y can 
+be given as the sequence G.
+<P>
+It is also allowed for F and G to be a sequence of sequences
+of polynomials or rational functions, giving alternate sets of defining equations (inverse defining
+equations) that must define the same rational map on X (rational inverse on Y). The base scheme
+of the map (the inverse) is the intersection of the base schemes of the individual sets of defining
+equations (inverse defining equations) as described in <TT>BaseScheme</TT>.
+<P>
+There are two parameters <TT>Check</TT> and <TT>CheckInverse</TT> which control
+exactly what validation checks are carried out.
+<P>
+If the parameter <TT>Check</TT> is set to <TT>false</TT> then no checking 
+occurs at all.
+<P>
+If <TT>Check</TT> is <TT>true</TT> but CheckInverse is <TT>false</TT>, then the map is 
+checked to be well defined from domain to codomain and any inverse to be well 
+defined in the opposite direction. However if there are inverse functions
+specified, it is not checked that the forward and inverse functions actually define
+(birational) inverse maps.
+<P>
+If both parameters are <TT>true</TT> then all checks mentioned above are done.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14602">iso&lt; X -&gt; Y | F, G &gt; : Sch,Sch,SeqEnum,SeqEnum -&gt; MapAutSch</A></H5>
+<BLOCKQUOTE>
+Create the map X -&gt; Y of schemes determined by the sequence F
+for which the map Y -&gt; X determined by the sequence G is
+a birational inverse. The sequences F and G should contain polynomials or rational
+functions defined on X and Y respectively.
+The two schemes X and Y must be defined over the same base ring.
+<P>
+The two check parameters for the main map constructor also apply here
+with the same meaning.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14603">Example <TT>Scheme_map-creation (H118E32)</TT></A></H3>
+Map creation is very similar to that for maps between polynomial rings,
+although here one must put the polynomial arguments into a single sequence.
+<P>
+<P>
+<PRE>
+&gt; k := Rationals();
+&gt; A&lt;t&gt; := AffineSpace(k,1);
+&gt; B&lt;x,y&gt; := AffineSpace(k,2);
+&gt; f := map&lt; A -&gt; B | [t^3 + t, t^2 - 3] &gt;;
+&gt; f;
+Mapping from: Aff: A to Aff: B
+with equations : 
+t^3 + t
+t^2 - 3
+</PRE>
+Features of the map can be computed. Of course, the domain and codomain
+are trivial attributes of the map while its image requires a Gr&ouml;bner
+basis computation.
+<P>
+<P>
+<PRE>
+&gt; Domain(f) eq A;
+true
+Variables : t
+&gt; Codomain(f);
+Affine Space of dimension 2
+Variables : x, y
+&gt; Image(f);
+Scheme over Rational Field defined by
+-x^2 + y^3 + 11*y^2 + 40*y + 48
+</PRE>
+<HR>
+<H3><A NAME = "14604">Example <TT>Scheme_map-fnfld (H118E33)</TT></A></H3>
+Defining maps using function field elements directly can be particularly
+convenient for curves. For example, the user may have a set of such
+functions coming from some divisor computations. Here is a simple
+(artificial!) example where a rational map from a projective curve
+or any of it's affine patchs to the projective line corresponding to
+a rational function is defined.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(Rationals(),2);
+&gt; C := Curve(P,x^2+y^2-z^2);
+&gt; C1 := AffinePatch(C,1);
+&gt; C2 := AffinePatch(C,2);
+&gt; F := FunctionField(C);
+&gt; f := F!(x/y);
+&gt; P1 := ProjectiveSpace(Rationals(),1);
+&gt; mp1 := map&lt;C-&gt;P1 | [f,1]&gt;;
+&gt; mp2 := map&lt;C1-&gt;P1 | [f,1]&gt;;
+&gt; mp3 := map&lt;C2-&gt;P1 | [f,1]&gt;;
+</PRE>
+<HR>
+<H3><A NAME = "14605">Example <TT>Scheme_map-frobenius (H118E34)</TT></A></H3>
+Maps of the base ring can be included in scheme maps as is the case for
+maps of polynomial rings. Here we make a Frobenius map.
+<P>
+<P>
+<PRE>
+&gt; k&lt;w&gt; := FiniteField(3^2);
+&gt; u := hom&lt; k -&gt; k | w^3 &gt;;
+&gt; A&lt;t&gt; := AffineSpace(k,1);
+&gt; f := map&lt; A -&gt; A | u, [t^3] &gt;;
+&gt; f;
+Mapping from: Aff: A to Aff: A
+with equations : 
+t^3
+and map between base rings
+Mapping from: FldFin: k to FldFin: k given by a rule [no inverse]
+</PRE>
+Notice next how the map f fixes points defined over the prime subfield of
+k but moves those points with coordinates having nontrivial w component.
+<P>
+<P>
+<PRE>
+&gt; p := A ! [w];
+&gt; f(p);
+(w^3)
+&gt; f(A ! [2]);
+(2)
+</PRE>
+<HR>
+<H5><A NAME = "14606">IdentityMap(X) : Sch -&gt; MapSch</A></H5>
+<BLOCKQUOTE>
+Create the identity map of the scheme X.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14607">ConstantMap(X,Y,p) : Sch,Sch,Pt -&gt; MapSch</A></H5>
+<H5>map&lt; X -&gt; Y | Q &gt; : Sch,Sch,SeqEnum -&gt; MapSch</H5>
+<BLOCKQUOTE>
+The map taking all points of the scheme X to the point p of scheme
+Y where Q is the sequence of coordinates of p.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14608">Projection(X,Y) : Prj,Prj -&gt; MapSch</A></H5>
+<BLOCKQUOTE>
+The linear projection from projective space X to projective space Y that
+omits the first dim X - dim Y coordinates.
+</BLOCKQUOTE>
+<H5><A NAME = "14609">Projection(X, Q) : Sch, Prj -&gt; Sch, MapSch</A></H5>
+<H5>Projection(X) : Sch -&gt; Sch, MapSch</H5>
+<H5>Projection(X, p) : Sch, Pt -&gt; Sch, MapSch</H5>
+<BLOCKQUOTE>
+The projection of the scheme X away from the point
+p into the projective ambient space Q 
+(if given). If p is not given it is taken to be (1:0: ... :0).
+</BLOCKQUOTE>
+<H5><A NAME = "14610">ProjectionFromNonsingularPoint(X,p) : Sch,Pt -&gt; Sch,MapSch,Sch</A></H5>
+<BLOCKQUOTE>
+The projection of the scheme X from the nonsingular (and rational) point
+p of X. The projection map is returned as a second value.
+The image of the blowup of p as a point of X is returned as a third
+value. If this is a point, it is returned as a point type.
+</BLOCKQUOTE>
+<H5><A NAME = "14611">ProjectiveMap(L, Y) : [FldFunFracSchElt], Sch -&gt; MapSch</A></H5>
+<H5>ProjectiveMap(L) : [FldFunFracSchElt]-&gt; MapSch</H5>
+<BLOCKQUOTE>
+Given a list L of functions in the function field of X, where X is a
+projective scheme, return the projective map X to Y defined by taking
+those functions as projective coordinates. 
+The scheme Y should be a projective space of dimension one less than the 
+length of L.
+If Y is not supplied, a new projective space of appropriate
+dimension is created.
+</BLOCKQUOTE>
+<H5><A NAME = "14612">ProjectiveMap(f, Y) : FldFunFracSchElt, Sch -&gt; MapSch</A></H5>
+<H5>ProjectiveMap(f) : FldFunFracSchElt -&gt; MapSch</H5>
+<BLOCKQUOTE>
+A short form for <TT>ProjectiveMap([f,1],X,Y)</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14613">Example <TT>Scheme_map-creation-prj (H118E35)</TT></A></H3>
+The above function is illustrated.
+<P>
+<P>
+<PRE>
+&gt; P2&lt;X,Y,Z&gt;:=ProjectiveSpace(Rationals(),2);
+&gt; C:=Curve(P2,
+&gt;      X^4-2*X^3*Y-X^2*Y^2-2*X^2*Y*Z+2*X*Y^3+2*X*Y^2*Z+Y^4-7*Y^3*Z+Y^2*Z^2);
+&gt; omega:=CanonicalDivisor(C);
+&gt; Degree(omega); //genus 0 curve
+-2
+&gt; L:=Basis(-omega);
+&gt; L;
+[
+    ($.2 - 4/25) * ($.1^3 - $.1*$.2 + 5/56*$.2^3 + 20/63*$.2^2) * ($.2 - 4) *
+    ($.1^3*$.2 - 1/4*$.1^2*$.2^2 - 26/5*$.1^2*$.2 + 4/5*$.1^2 - 7/4*$.1*$.2^3 -
+        2*$.1*$.2^2 - 3/4*$.2^4 + 151/20*$.2^3 + 4*$.2^2 - 4/5*$.2)^-1,
+    ($.2) * ($.1^2 - 3/14*$.2^2 + 1/63*$.2) * ($.2 - 4) * ($.2 - 4/25) *
+    ($.1^3*$.2 - 1/4*$.1^2*$.2^2 - 26/5*$.1^2*$.2 + 4/5*$.1^2 - 7/4*$.1*$.2^3 -
+        2*$.1*$.2^2 - 3/4*$.2^4 + 151/20*$.2^3 + 4*$.2^2 - 4/5*$.2)^-1,
+    ($.1 + 13/28*$.2 - 8/63) * ($.2 - 4) * ($.2 - 4/25) * ($.2)^2 * ($.1^3*$.2 -
+        1/4*$.1^2*$.2^2 - 26/5*$.1^2*$.2 + 4/5*$.1^2 - 7/4*$.1*$.2^3 -
+        2*$.1*$.2^2 - 3/4*$.2^4 + 151/20*$.2^3 + 4*$.2^2 - 4/5*$.2)^-1
+]
+&gt; mp:=ProjectiveMap(L,P2); //anticanonical embedding
+&gt; mp;
+Mapping from: Crv: C to Prj: P2
+with equations :
+23/16*X^3 - 113/64*X^2*Y + 5/16*X^2*Z - 71/64*X*Y^2 + 93/16*X*Y*Z + 21/64*Y^3 -
+    61/64*Y^2*Z - 5/16*Y*Z^2
+-1/8*X^3 + 23/16*X^2*Y + X^2*Z - 19/16*X*Y^2 - 15/8*X*Y*Z - 21/16*Y^3 +
+    115/16*Y^2*Z - Y*Z^2
+X^3 - 53/32*X^2*Y - 1/8*X^2*Z - 11/32*X*Y^2 - 3/4*X*Y*Z + 21/32*Y^3 -
+    13/32*Y^2*Z + 1/8*Y*Z^2
+&gt; mp(C);
+Curve over Rational Field defined by
+X^2 - 15/8*X*Y + 23/4*X*Z - 229/32*Y^2 - 17/16*Y*Z - Z^2
+</PRE>
+<HR>
+<H5><A NAME = "14614">Elimination(X,V) : Sch,SeqEnum -&gt; Sch</A></H5>
+<BLOCKQUOTE>
+The affine scheme obtained by eliminating the ambient variables of the
+affine scheme X whose indices appear in V from the equations of X.
+Thus if V=[2, 5] then the result will be a scheme in the affine subspace
+u=v=0 where u and v are the second and fifth variables of the ambient
+space of X.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14615">Inverse(f) : MapSch -&gt; MapSch</A></H5>
+<BLOCKQUOTE>
+The inverse of the map of schemes f if inverse defining equations have been included
+in the definition of f, otherwise an error.
+</BLOCKQUOTE>
+<H5><A NAME = "14616">IsInvertible(f) : MapSch -&gt; Bool, MapSch</A></H5>
+<BLOCKQUOTE>
+Tests whether the map f between schemes is birational. If so, returns a birational inverse.
+This function works fairly generically, using Groebner basis computations over standard affine patches
+of the domain and codomain to compute the closure of the graph of f and retrieve inverse equations
+from that. It can be very expensive computationally. 
+</BLOCKQUOTE>
+<H5><A NAME = "14617">HasKnownInverse(f) : MapSch -&gt; Bool</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the map f has an inverse stored.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14618">Example <TT>Scheme_map_creation_inv (H118E36)</TT></A></H3>
+This example shows how <TT>IsInvertible</TT> is more powerful then <TT>Inverse</TT>.
+<P>
+<P>
+<PRE>
+&gt; P2&lt;X,Y,Z&gt; := ProjectiveSpace(Rationals(),2);
+&gt; C := Curve(P2, X^3*Y^2 + X^3*Z^2 - Z^5);
+&gt; Genus(C);
+1
+&gt; pt := C![1,0,1];
+&gt; E,toE := EllipticCurve(C,pt);
+&gt; IsInvertible(toE);
+true Mapping from: CrvEll: E to Crv: C
+with equations :
+$.1^3
+-3*$.1*$.2*$.3 - 9*$.2*$.3^2
+$.1^3 + 3*$.1^2*$.3
+and inverse
+-3*X^2*Z + 3*X*Z^2
+-3*X^2*Y
+X^2*Z - 2*X*Z^2 + Z^3
+&gt; Inverse(toE);
+&gt;&gt; Inverse(toE);
+          ^
+Runtime error in 'Inverse': Map has no inverse
+</PRE>
+<HR>
+<H5><A NAME = "14619">g * f : MapSch,MapSch -&gt; MapSch</A></H5>
+<BLOCKQUOTE>
+The composition g<IMG SRC="open.gif" ALT="" WIDTH=7 HEIGHT=7> f, but note the convention for order of composition:
+the order of mapping is that g acts first and is followed by f.
+Strictly speaking, one might want to see evaluation of points done on
+the left to make sense of this, (this can be done using <TT>p @ f</TT> instead of
+<TT>f(p)</TT>).
+Since one would usually assign a new identifier to this composition, this
+is not a large problem.
+Only simple error checking is done --- domain--codomain matching and that
+the composition doesn't have so many zero components that it is
+projectively illegal.
+<P>
+Where the expansion of such compositions could be expensive, 
+the resulting map will be stored as a composition. The equivalent 
+expanded map can be created by 
+<P>
+<P>
+<P>
+<PRE>
+&gt; gf := g*f;
+&gt; dp := DefiningPolynomials(gf);
+&gt; dpi := InverseDefiningPolynomials(gf);
+&gt; m := map&lt;D -&gt; C | dp, dpi&gt;; 
+</PRE>
+<P>
+where D is the domain of g and C is the codomain of f. 
+The composition will act differently to the expanded map - it will be undefined 
+at all the places each factor is undefined.
+</BLOCKQUOTE>
+<H5><A NAME = "14620">Components(f) : Map -&gt; [Map]</A></H5>
+<BLOCKQUOTE>
+The maps composed to form f.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14621">Example <TT>Scheme_hom-spaces (H118E37)</TT></A></H3>
+As part of its generic map machinery, Magma has a structure for the set
+of all maps between two given schemes.
+There is also a structure for the group of all automorphisms of a scheme
+which is discussed in Section <A  HREF = "text1336.htm#14669">Automorphisms</A>.
+Using this space one can realise the effect of a map on Hom spaces.
+We will make two Hom spaces having a common codomain.
+<P>
+<P>
+<PRE>
+&gt; k := Rationals();
+&gt; P&lt;x,y,z,t&gt; := ProjectiveSpace(k,3);
+&gt; A := Scheme(P,Minors(M,2))
+&gt;           where M is Matrix(CoordinateRing(P),2,3,[x,y,z,y,z,t]);
+&gt; B := Scheme(P,x*t - y*z);
+&gt; F&lt;r,s,u,v&gt; := RuledSurface(k,0,0);
+&gt; HomAF := Maps(A,F);
+&gt; HomBF := Maps(B,F);
+&gt; HomAF;
+Set of all maps from A to F
+</PRE>
+Given a map A -&gt; B we make the map from <TT>HomBF</TT> to
+<TT>HomAF</TT> given by composition. Although A lies inside B, we choose
+a map A -&gt; B which isn't this inclusion.
+<P>
+<P>
+<PRE>
+&gt; i := map&lt; A -&gt; B | [y,x,t,z] &gt;;
+&gt; ii := map&lt; HomBF -&gt; HomAF | g :-&gt; i * g &gt;;
+</PRE>
+The map ii of Hom spaces realises the composition of maps with i.
+We test this on a single map f: B -&gt; F.
+<P>
+<P>
+<PRE>
+&gt; f := map&lt; B -&gt; F | [x,y,z,t] &gt;;
+&gt; Expand(ii(f)) eq Expand(i*f);
+true
+</PRE>
+<HR>
+<H5><A NAME = "14622">Restriction(f,X,Y) : MapSch,Sch,Sch -&gt; MapSch</A></H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+The restriction of the map of schemes f to the scheme X in its
+domain. The codomain of the new map is considered to be the scheme Y
+which must either contain the codomain of f, or lie in that codomain
+but contain the scheme f(X).
+<P>
+By default the program checks these subscheme relationships; this may be 
+time-consuming, and can be skipped by setting the optional parameter 
+<TT>Check</TT> to <TT>false</TT>. 
+</BLOCKQUOTE>
+<H5><A NAME = "14623">Expand(phi) : MapSch -&gt; MapSch</A></H5>
+<BLOCKQUOTE>
+Given a map &phi; between schemes stored in factored form, return the map in
+expanded form. Note that if &phi; is a composite of maps, each with many
+alternative defining polynomials, then computing the expansion can be very
+expensive. In other situations computing the expansion of &phi; can cause huge
+(intermediate) expressions and therefore be very expensive as well.
+<P>
+Due to the automatic simplification in map creation, the base scheme of the
+returned map might be smaller than the base scheme of &phi;.
+</BLOCKQUOTE>
+<H5><A NAME = "14624">Extend(phi) : MapSch -&gt; MapSch</A></H5>
+<BLOCKQUOTE>
+Given a map &phi; between schemes, returns an expanded map with extra
+alternative equations in order to reduce the base scheme as far as possible,
+i.e. so that the open complement of the base scheme is the maximal domain of
+definition of the rational map represented by &phi;.
+This routine is potentially very expensive because it requires Groebner basis
+computations on several affine graph ideals of &phi;.
+</BLOCKQUOTE>
+<H5><A NAME = "14625">Prune(phi) : MapSch -&gt; MapSch</A></H5>
+<BLOCKQUOTE>
+Given a map &phi; between schemes in expanded form, removes alternative
+equations that do not reduce the base scheme of &phi;. If &phi; has a known
+inverse, this is returned unaltered.
+</BLOCKQUOTE>
+<H5><A NAME = "14626">Normalization(phi) : MapSch -&gt; MapSch</A></H5>
+<H5>Normalisation(phi) : MapSch -&gt; MapSch</H5>
+<BLOCKQUOTE>
+The map created from &phi; by removing common factors from the defining 
+polynomial.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14627">Example <TT>Scheme_map_creation-comp_alt (H118E38)</TT></A></H3>
+It is shown below how to convert a map between schemes into a proper morphism.
+<P>
+<P>
+<PRE>
+&gt; P2&lt;x,y,z&gt;:=ProjectiveSpace(Rationals(),2);
+&gt; C:=Curve(P2,x^3+y^3-2*z^3);
+&gt; E,phicomp:=EllipticCurve(C,Place(C![1,1,1]));
+&gt; Puvw&lt;u,v,w&gt;:=Ambient(E);
+</PRE>
+We get &phi; as <TT>phicomp</TT> in expanded form.
+<P>
+<P>
+<PRE>
+&gt; phi:=Expand(phicomp);
+&gt; phi;
+Mapping from: Crv: C to CrvEll: E
+with equations : 
+3*x^2*y - 3*x^2*z - 3*x*y^2 + 9*x*y*z - 6*x*z^2 - 6*y^2*z + 15*y*z^2 - 9*z^3
+-9*x^2*y + 27*x*y^2 - 54*x*y*z + 18*x*z^2 + 45*y^2*z - 81*y*z^2 + 27*z^3
+y^3 - 3*y^2*z + 3*y*z^2 - z^3
+</PRE>
+But &phi; still has a base scheme.
+<P>
+<P>
+<PRE>
+&gt; Degree(BaseScheme(phi));
+6
+</PRE>
+So we extend &phi; to <TT>phiext</TT> defined on C entirely.
+<P>
+<P>
+<PRE>
+&gt; phiext:=Extend(phi);
+&gt; phiext;
+Mapping from: Crv: C to CrvEll: E
+with equations : 
+3*x^2*y - 3*x^2*z - 3*x*y^2 + 9*x*y*z - 6*x*z^2 - 6*y^2*z + 15*y*z^2 - 9*z^3
+-9*x^2*y + 27*x*y^2 - 54*x*y*z + 18*x*z^2 + 45*y^2*z - 81*y*z^2 + 27*z^3
+y^3 - 3*y^2*z + 3*y*z^2 - z^3
+and alternative equations :
+3*x^3 + 6*x^2*z - 6*x*y*z + 9*x*z^2 + 3*y^3 - 15*y*z^2
+-18*x^2*z + 54*x*y*z - 27*x*z^2 + 99*y*z^2
+x*z^2 + 2*y^2*z - 3*y*z^2
+</PRE>
+And there is no base scheme anymore!
+<P>
+<P>
+<PRE>
+&gt; Degree(BaseScheme(phiext));
+0
+</PRE>
+This map is invertible.
+<P>
+<P>
+<PRE>
+&gt; bl,phii:=IsInvertible(phiext);
+&gt; assert bl;
+&gt; phii;
+Mapping from: CrvEll: E to Crv: C
+with equations : 
+1/6*u^3 - 13/2*u^2*w - 2*u*v*w + 21/2*u*w^2 - 1/6*v^2*w + 3*v*w^2 + 27*w^3
+u^2*w - 30*u*w^2 - 3*v*w^2 + 36*w^3
+u^2*w - 3*u*w^2 - 18*w^3
+and inverse
+3*x^2*y - 3*x^2*z - 3*x*y^2 + 9*x*y*z - 6*x*z^2 - 6*y^2*z + 15*y*z^2 - 9*z^3
+-9*x^2*y + 27*x*y^2 - 54*x*y*z + 18*x*z^2 + 45*y^2*z - 81*y*z^2 + 27*z^3
+y^3 - 3*y^2*z + 3*y*z^2 - z^3
+and alternative inverse equations :
+3*x^3 + 6*x^2*z - 6*x*y*z + 9*x*z^2 + 3*y^3 - 15*y*z^2
+-18*x^2*z + 54*x*y*z - 27*x*z^2 + 99*y*z^2
+x*z^2 + 2*y^2*z - 3*y*z^2
+</PRE>
+But the inverse still has a base scheme.
+<P>
+<P>
+<PRE>
+&gt; Degree(BaseScheme(phii));
+6
+</PRE>
+So extend <TT>phii</TT>.
+<P>
+<P>
+<PRE>
+&gt; phiiext:=Extend(phii);
+</PRE>
+No base scheme left!
+<P>
+<P>
+<PRE>
+&gt; Degree(BaseScheme(phiiext));
+0
+</PRE>
+Note that the inverse -- <TT>phiext</TT> -- is still retained. 
+So <TT>phiiext</TT> now really is a morphism.
+<P>
+<P>
+<PRE>
+&gt; phiiext;
+Mapping from: CrvEll: E to Crv: C
+with equations : 
+1/6*u^3 - 13/2*u^2*w - 2*u*v*w + 21/2*u*w^2 - 1/6*v^2*w + 3*v*w^2 + 27*w^3
+u^2*w - 30*u*w^2 - 3*v*w^2 + 36*w^3
+u^2*w - 3*u*w^2 - 18*w^3
+and inverse
+3*x^2*y - 3*x^2*z - 3*x*y^2 + 9*x*y*z - 6*x*z^2 - 6*y^2*z + 15*y*z^2 - 9*z^3
+-9*x^2*y + 27*x*y^2 - 54*x*y*z + 18*x*z^2 + 45*y^2*z - 81*y*z^2 + 27*z^3
+y^3 - 3*y^2*z + 3*y*z^2 - z^3
+and alternative equations :
+-1/234*u^3 + 7/26*u^2*w + 5/117*u*v*w - 57/26*u*w^2 + 1/702*v^2*w - 6/13*v*w^2 -
+    27/13*w^3
+-1/39*u^2*w + 1/117*u*v*w + 21/13*u*w^2 - 1/351*v^2*w + 2/39*v*w^2 - 54/13*w^3
+u*w^2 - 1/351*v^2*w + 4/39*v*w^2 + 18/13*w^3
+
+-729/26*u^3 + 3/13*u^2*v + 32805/26*u^2*w + 17/13*u*v^2 + 4293/13*u*v*w - 
+    19683/26*u*w^2 + 4/39*v^3 + 537/26*v^2*w - 1377/13*v*w^2 + 19683/13*w^3
+-27/13*u^2*v + 9/13*u*v^2 + 1233/13*u*v*w + 4/39*v^3 + 132/13*v^2*w - 
+    1215/13*v*w^2
+u*v^2 + 4/39*v^3 - 9/13*v^2*w + 756/13*v*w^2
+and alternative inverse equations :
+3*x^3 + 6*x^2*z - 6*x*y*z + 9*x*z^2 + 3*y^3 - 15*y*z^2
+-18*x^2*z + 54*x*y*z - 27*x*z^2 + 99*y*z^2
+x*z^2 + 2*y^2*z - 3*y*z^2
+</PRE>
+<HR>
+<H4><A NAME = "14628">Basic Attributes</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+
+
+<H5><A NAME = "14629">Trivial Attributes</A></H5>
+
+<P>
+<P>
+<P>
+<P>
+
+
+<H5><A NAME = "14630">Domain(f) : MapSch -&gt; Sch</A></H5>
+<BLOCKQUOTE>
+The domain of the map of schemes f.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14631">Codomain(f) : MapSch -&gt; Sch</A></H5>
+<BLOCKQUOTE>
+The codomain of the map of schemes f.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14632">DefiningPolynomials(f) : MapSch -&gt; SeqEnum</A></H5>
+<H5>DefiningEquations(f) : MapSch -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+The sequence of functions used to define the map of schemes f.
+<P>
+If f is stored as an unexpanded composition then it will be expanded
+and the defining equations of the expansion returned.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14633">FactoredDefiningPolynomials(f) : MapSch -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+If the map of schemes 
+f was created by composition (and not expanded) return the 
+sequence of sequences of the defining equations of the maps which 
+were composed to form f otherwise return <TT>DefiningPolynomials</TT> of f.
+</BLOCKQUOTE>
+<H5><A NAME = "14634">InverseDefiningPolynomials(f) : MapSch -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The sequence of functions used to define the inverse of
+the map of schemes f.
+<P>
+If f is stored as an unexpanded composition then it will be expanded
+and the inverse defining equations of the expansion returned.
+</BLOCKQUOTE>
+<H5><A NAME = "14635">FactoredInverseDefiningPolynomials(f) : MapSch -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+If the map of schemes 
+f was created by composition (and not expanded) and has an inverse
+return the sequence of sequences of inverse defining equations of the 
+maps which were composed to form f otherwise return 
+<TT>InverseDefiningPolynomials</TT> of f.
+</BLOCKQUOTE>
+<H5><A NAME = "14636">AllDefiningPolynomials(f) : MapSch -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The polynomials of all definitions of the map of schemes 
+f.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14637">AllInverseDefiningPolynomials(f) : MapSch -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The polynomials of all definitions of the inverse of the map of schemes 
+f if f has a known
+inverse.
+</BLOCKQUOTE>
+<H5><A NAME = "14638">AlgebraMap(f) : MapSch -&gt; Map</A></H5>
+<BLOCKQUOTE>
+The underlying map of polynomial rings determining the map of schemes f.
+Thus if F is the sequence of defining equations of f and x is the
+first variable of the codomain then <TT>F[1]</TT> will be the image of x
+under <TT>AlgebraMap(f)</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "14639">FunctionDegree(f) : MapSch -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The degree of the homogeneous polynomials which define the
+map f of projective schemes. If there are alternative defining
+polynomials, returns the minimum value over the different sets
+of defining polynomials.
+<P>
+<P>
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14640">Basic Tests</A></H5>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+
+
+<H5><A NAME = "14641">f eq g : MapSch, MapSch -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the maps of schemes
+f and g have the same domain and codomain and define
+the same rational map.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14642">IsRegular(f) : MapSch -&gt; BoolElt</A></H5>
+<H5>IsPolynomial(f) : MapSch -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the map of schemes f is defined at all points of its domain.
+<P>
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14643">IsIsomorphism(f) : MapSch -&gt; BoolElt, IsoSch</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the map of schemes f: X -&gt; Y
+has inverse defining equations or if they may be easily computed (e.g. the projective
+closure of the map has inverse defining equations).
+If so, return a map g: X -&gt; Y which is of the recognised
+isomorphism type as a second value.
+<P>
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14644">IsDominant(f) : MapSch -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the closure of the image of the map of schemes f is
+the whole of its codomain.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14645">IsLinear(f) : MapSch -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the map of schemes f is a regular map defined by
+linear polynomials.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14646">IsAffineLinear(f) : MapSch -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the map of schemes f is a map between affine spaces
+defined by polynomials of degree at most 1.
+<P>
+<P>
+<P>
+<P>
+</BLOCKQUOTE>
+<H4><A NAME = "14647">Maps and Points</A></H4>
+
+<P>
+<P>
+Given a map f: X -&gt; Y of schemes and point p of X
+outside of the base scheme of f, then the image f(p) is a point of Y.
+Moreover, given an extension K of the base rings of X and Y, there
+is a map of point sets f(K): X(K) -&gt; Y(K).
+This isn't often needed, but should be used as in the example below,
+when very many point images are required. 
+Note that it will ensure that all points are returned in the same determined
+point set.
+Maps also behave well with respect to sets and sequences of points.
+<P>
+<P>
+
+
+<P>
+<P>
+<H5><A NAME = "14648">f(p) : MapSch,Pt -&gt; Pt</A></H5>
+<BLOCKQUOTE>
+The point f(p) if the point p is in a point set
+of the domain of the map of schemes f and doesn't lie in the
+base scheme of f. An error results if p is in the base scheme
+(except in the curve case described below).
+Sets and sequences of points are handled in the same way.
+If the domain of the map is a curve C with a function field
+(see Algebraic Curves chapter) and p is in the base scheme of f,
+then now (from V2.17), magma tries to compute the image of p
+by working with the function field places over p without having
+to extend f via <TT>Extend</TT>. If p is non-singular then there
+is only one place above it and the image will exist if the codomain is
+projective. If there
+are several places over p, the image will be computed and returned
+when the image of all of the places is the same and is defined over
+p's point set base ring (that must be a field).
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14649">Pullback(f, p) : MapSch, Pt -&gt; Any</A></H5>
+<BLOCKQUOTE>
+The preimage of a point p under the map of schemes f.
+When f is an isomorphism of schemes with an inverse g, 
+the returned result is the point g(p). Otherwise the pullback is 
+returned as a subscheme of the domain of f. This is identical to 
+<TT>Pullback(f,S)</TT>, where S is the one-point scheme containing p.
+<P>
+When a scheme is returned, it will contain the 
+base scheme of f (which won't map to p under f), but this can be
+remedied using the (potentially expensive) function call 
+<TT>Difference(Pullback(f,p), BaseScheme(f))</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "14650">p @@ f : Pt,MapSch -&gt; Any</A></H5>
+<BLOCKQUOTE>
+This is the same as <TT>Pullback(f,p)</TT> <I>except</I>
+when f is an isogeny between elliptic curves.
+in which case one rational point in the preimage 
+is returned (if none exist, an error results).
+</BLOCKQUOTE>
+<H5><A NAME = "14651">f(K) : MapSch,Rng -&gt; Map</A></H5>
+<H5>f(m) : MapSch,Map -&gt; Map</H5>
+<BLOCKQUOTE>
+The map induced by the map of schemes f: X -&gt; Y
+on point sets X(K) -&gt; Y(K).
+If m is a ring map from the base ring of X and u is the
+map of base rings from Y to X then f(m) will be the map
+of point sets X(m) -&gt; Y(m(u)).
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14652">Example <TT>Scheme_maps-point-image (H118E39)</TT></A></H3>
+Mapping a single point is easy.
+<P>
+<P>
+<PRE>
+&gt; P1&lt;s,t&gt; := ProjectiveSpace(Rationals(),1);
+&gt; P3&lt;w,x,y,z&gt; := ProjectiveSpace(Rationals(),3);
+&gt; f := map&lt; P1 -&gt; P3 | [s^4,s^3*t,s*t^3,t^4] &gt;;
+&gt; p := P1 ! [2,1];
+&gt; f(p);
+(16 : 8 : 2 : 1)
+</PRE>
+If many points need to be mapped from a fixed point set, a small overhead can
+be avoided by working with the map of point sets directly.
+<P>
+<P>
+<PRE>
+&gt; K := QuadraticField(5);
+&gt; g := f(K);
+&gt; ims := [];
+&gt; for i in [1..100] do
+&gt; Append(~ims, g(P1 ! [i,1]));
+&gt; end for;
+</PRE>
+This example could also have been handled in one step using a sequence
+constructor.
+<P>
+<P>
+<PRE>
+&gt; pts := [ P1 ! [i,1] : i in [1..100] ];
+&gt; f(pts) eq ims;
+true
+</PRE>
+An example where the projection from an elliptic curve to the projective
+line contains the origin in its base scheme but the image under the extension
+of the projection is computed by using the
+place machinery without having to globally extend the map.
+<P>
+<P>
+<PRE>
+&gt; P2&lt;X,Y,Z&gt; := ProjectiveSpace(Rationals(),2);
+&gt; E := Curve(P2,Y^2*Z-X^3-X*Z^2);
+&gt; p := E![0,0,1];
+&gt; f := map&lt;E-&gt;P1|[X,Y]&gt;;
+&gt; p in BaseScheme(f);
+true (0 : 0 : 1)
+&gt; f(p);
+(0 : 1)
+</PRE>
+<HR>
+<H4><A NAME = "14653">Maps and Schemes</A></H4>
+
+<P>
+<P>
+The natural operation for maps on schemes is <I>pullback</I>, that is,
+compute the preimage. This is rather trivial.
+On the other hand, computing the image of schemes under a map requires a
+Gr&ouml;bner basis calculation so is much harder.
+If the map has an inverse this image calculation is automatically replaced
+by the more simple pullback using the inverse map.
+<P>
+Note that, strictly speaking, the image algorithm computes the closure
+of the image of the map. We still call it the image, though, and don't
+worry that there may be some points of the image that are not the
+set-theoretic image of any point of the domain.
+<P>
+Over a field, the equations of the image of a map in a particular
+degree can be computed using linear algebra, so a distinct intrinsic 
+is provided for this.
+<P>
+Other schemes related to a map are also discussed here.
+
+
+<P>
+<P>
+<P>
+<P>
+<H5><A NAME = "14654">Pullback(f, X) : MapSch, Sch -&gt; Sch</A></H5>
+<H5>X @@ f : Sch, MapSch -&gt; Sch</H5>
+<BLOCKQUOTE>
+The scheme in the domain of the map of schemes f given by the pullback of the
+equations defining the subscheme X of the codomain of f. The result will
+contain the base scheme of f (which won't map onto X under f) but this
+can be remedied using the (potentially expensive) function call
+<TT>Difference(Pullback(f,X), BaseScheme(f))</TT>.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14655">Image(f) : MapSch -&gt; Sch</A></H5>
+<H5>f(X) : Sch, MapSch -&gt; Sch</H5>
+<BLOCKQUOTE>
+Let X be a subscheme of the domain of the map of schemes f such that, if U
+is the open complement of the base scheme of f, X &cap;U is Zariski-dense
+in X. This intrinsic returns the scheme-theoretic closure of f(X &cap;U) in the codomain
+of f, which we refer to simple as the image f(X).
+For the first signature the image of the entire domain is returned.
+Moreover, it is stored with the map f so can be called again later
+without any recomputation.
+Note that if the domain of f is projective multi-graded, then X is
+saturated before the computation to ensure the correct result.
+For computational efficiency, we do not check that X &cap;U is indeed
+Zariski-dense in X.
+</BLOCKQUOTE>
+<H5><A NAME = "14656">Image(f,X,d) : MapSch,Sch,RngIntElt -&gt; []</A></H5>
+<BLOCKQUOTE>
+A basis of the polynomials of degree d in the codomain of the map of
+schemes f which contain the image f(X). The scheme X must be
+a subscheme of the domain of f and d must be a positive integer.
+<P>
+For best results for projective schemes, remove the contribution of 
+the irrelevant ideal corresponding to the zero point from X 
+(normalize the equations of the scheme).
+<P>
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14657">Example <TT>Scheme_map-image1 (H118E40)</TT></A></H3>
+Consider the embedding of the projective line in 3-space as a quartic.
+It can be defined as the image of a map determined by a 4-dimensional
+subspace of the degree 4 monomials on the line, for instance: see
+<A  HREF = "text1320.htm#bib_hartshorne">[Har77]</A> Chapter II, Example 7.8.6 or the later section here on
+linear systems.
+<P>
+<P>
+<PRE>
+&gt; P1&lt;s,t&gt; := ProjectiveSpace(Rationals(),1);
+&gt; P3&lt;w,x,y,z&gt; := ProjectiveSpace(Rationals(),3);
+&gt; f := map&lt; P1 -&gt; P3 | [s^4,s^3*t,s*t^3,t^4] &gt;;
+&gt; Image(f);
+Scheme over Rational Field defined by
+-w^2*y + x^3
+w*y^2 - x^2*z
+-x*z^2 + y^3
+-w*z + x*y
+&gt; IsNonsingular(Image(f));
+true
+&gt; f(p) in Image(f) where p is P1 ! [2,1];
+true (16 : 8 : 2 : 1)
+</PRE>
+If the Gr&ouml;bner basis computation is too expensive, or if a partial solution
+for the image computation would be acceptable, the function <TT>Image(f,C,d)</TT>
+described above and illustrated in the next example
+calculates those hypersurfaces of degree d containing f(C).
+Given a bound on d, the equations of the image could also be calculated
+using this function.
+<HR>
+<H3><A NAME = "14658">Example <TT>Scheme_map-image2 (H118E41)</TT></A></H3>
+A situation where one is really interested in the equations of the image
+in a particular degree occurs in the case of canonical curves.
+Usually the ideal is
+generated in degree 2, but for trigonal curves the degree 2 generators
+only cut out a surface scroll on which the curve is cut out by a relative
+equation of degree 3.
+<P>
+Here we simply assert that the curve C has genus 5 and that the
+map f is the canonical map of the curve C.
+Chapter <A  HREF = "text1356.htm#14904">ALGEBRAIC CURVES</A> describes functions that determine both invariants.
+<P>
+<P>
+<PRE>
+&gt; k := Rationals();
+&gt; P2&lt;X,Y,Z&gt; := ProjectiveSpace(k,2);
+&gt; P4&lt;a,b,c,d,e&gt; := ProjectiveSpace(k,4);
+&gt; C := Curve(P2, X^5 + X*Y^3*Z + Z^5);
+&gt; f := map&lt; P2 -&gt; P4 | [Y*Z, X*Y, Z^2, X*Z, X^2] &gt;;
+&gt; S := Image(f,C,2);
+&gt; S;
+Scheme over Rational Field defined by
+a*d - b*c
+a*e - b*d
+c*e - d^2
+&gt; Dimension(S);
+2
+&gt; f(C);
+Curve over Rational Field defined by
+-d^2 + c*e,
+-b*d + a*e,
+-b*c + a*d,
+a*b^2 + c^2*d + e^3,
+a^2*b + c^3 + d*e^2
+</PRE>
+In this case both image computations are fast so the timing difference
+between them is tiny. But pushing the genus a little higher soon makes
+the point.
+<P>
+It is easy to see that S is a scroll: its equations are the rank 2 minors
+of the matrix
+<P>
+(matrix(
+    a &amp; c &amp; d	cr
+    b &amp; d &amp; e
+)
+).
+<HR>
+<H5><A NAME = "14659">BaseScheme(f) : MapSch -&gt; Sch</A></H5>
+<BLOCKQUOTE>
+The subscheme of the domain X of the map of schemes
+f where the map is `naively' not defined. When f is expanded, this is
+equal to the intersection of the base schemes of each of the alternate
+sets of defining polynomials/rational functions. For a single set of defining
+polynomials/rational functions, the base scheme is defined by the union of 
+subschemes of X where a denominator of a defining rational function vanishes when
+the codomain is affine, and by the subset of points of X which are mapped by the
+given defining polynomials into a null point (with coordinates on which all polynomials
+in an irrelevant ideal vanish) when the codomain is projective.
+<P>
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14660">BasePoints(f) : MapSch -&gt; SetEnum</A></H5>
+<H5>BasePoints(f,L) : MapSch,Fld -&gt; SetEnum</H5>
+<BLOCKQUOTE>
+If the base scheme of the map of schemes
+f is finite, this returns a sequence containing
+those points defined over the base ring which lie in it.
+Otherwise an error is reported.
+If a second argument L is included which is an extension field of the
+base field then base points defined over L are returned.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14661">Example <TT>Scheme_map-base-points (H118E42)</TT></A></H3>
+We find the base points of a map, although we have to extend the field
+before we find them all.
+<P>
+<P>
+<PRE>
+&gt; k := GF(7);
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(k,2);
+&gt; p := x^2 + y^2;                            
+&gt; f := map&lt; P -&gt; P | [p*x,p*y,z^2*(z-x)] &gt;;
+&gt; BasePoints(f);
+
+&gt; Degree(BaseScheme(f)); 
+6
+&gt; HasPointsOverExtension(BaseScheme(f));   
+true
+</PRE>
+Clearly we are not seeing all the points of indeterminacy of f.
+We clumsily extend the base field until we do see enough points.
+Of course, it is clear that the problem is the polynomial p, so a degree
+2 extension will be enough.
+<P>
+<P>
+<PRE>
+&gt; BasePoints(f,ext&lt;k|2&gt;);
+{ (1 : $.1^36 : 1), ($.1^12 : 1 : 0), ($.1^36 : 1 : 0), (1 : $.1^12 : 1) }
+&gt; HasPointsOverExtension(BaseScheme(f),ext&lt;k|2&gt;);
+false
+</PRE>
+<HR>
+<H3><A NAME = "14662">Example <TT>Scheme_scroll-map-base-points (H118E43)</TT></A></H3>
+In this example we make an elementary transformation of scrolls.
+<P>
+<P>
+<PRE>
+&gt; Q := Rationals();
+&gt; F&lt;u,v,x,y&gt; := RuledSurface(Q,2);
+&gt; G&lt;a,b,r,s&gt; := RuledSurface(Q,3);
+&gt; F;
+Rational Scroll of dimension 2
+Variables : u, v, x, y
+Gradings : 
+1       1       -2      0
+0       0       1       1
+&gt; phi := map&lt; F -&gt; G | [u,v,x,y*u] &gt;;
+</PRE>
+Next we find the base points of the map &phi; by hand.
+<P>
+<P>
+<PRE>
+&gt; Scheme(F,[u,v]) join Scheme(F,[x,u*y]);        
+Scheme over Rational Field defined by
+u*x
+v*x
+u*y
+&gt; RationalPoints($1);
+{ (0 : 1 : 0 : 1) }
+</PRE>
+The map &phi; is the elementary transformation in the point (0:1:0:1)
+of F. That is, it is the blowup of this point followed by the contraction
+of the birational transform of the fibre through this point.
+<HR>
+<H4><A NAME = "14663">Maps and Closure</A></H4>
+
+
+
+<P>
+<P>
+<P>
+<P>
+<H5><A NAME = "14664">ProjectiveClosure(f) : MapSch -&gt; MapSch</A></H5>
+<BLOCKQUOTE>
+The map induced by the map of schemes f between the projective
+closure of its domain and codomain. If either domain or codomain is already
+projective, then it remains unchanged in the new map.
+In particular, if both domain and codomain are already projective, then
+the returned map is simply f itself.
+</BLOCKQUOTE>
+<H5><A NAME = "14665">MakeProjectiveClosureMap(A, P, S) : Aff,Prj,SeqEnum -&gt;</A></H5>
+<H5>MakePCMap(A, P, S) : Aff, Prj, SeqEnum -&gt;</H5>
+<H5>MakeProjectiveClosureMap(m) : Map -&gt;</H5>
+<H5>MakePCMap(m) : Map -&gt;</H5>
+<BLOCKQUOTE>
+If A is an affine space and P a projective space and if S is a
+sequence of polynomials on A defining a map from A to P
+(or if m is such a map) then this map is set as the projective
+closure map of A.
+There is very little functionality for projective closure maps
+which are not the standard ones, so this intrinsic is usually used
+in cases where no relationship between A and P yet exists
+but the user would like A to behave as a standard patch on P so
+that the closure of a scheme in A is a scheme in P.
+</BLOCKQUOTE>
+<H5><A NAME = "14666">RestrictionToPatch(f,j) : MapSch,RngIntElt -&gt; MapSch</A></H5>
+<BLOCKQUOTE>
+The restriction of the map f,
+a map of schemes from an affine scheme to a projective scheme,
+to a rational map from its domain to the jth standard affine patch
+of its codomain.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14667">RestrictionToPatch(f,i,j) : MapSch,RngIntElt,RngIntElt -&gt; MapSch</A></H5>
+<BLOCKQUOTE>
+The restriction of the map f,
+a map between two projective schemes, to a rational
+map from the ith standard affine patch of its domain to the jth patch
+of its codomain.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14668">Example <TT>Scheme_map-patches (H118E44)</TT></A></H3>
+The application of closure and patching functions is straightforward.
+To compute the restriction of a map f to the ith patch of the domain
+and jth patch of the codomain, essentially set the dim + 2 - ith coordinate
+function to 1 and divide by the dim + 2 - jth defining equation of f.
+<P>
+<P>
+<PRE>
+&gt; P&lt;w,x,y,z&gt; := ProjectiveSpace(Rationals(),3);
+&gt; f := map&lt; P -&gt; P | [1/w,1/x,1/y,1/z] &gt;;
+&gt; f12 := RestrictionToPatch(f,1,2);
+&gt; f12;
+Map of affine spaces defined by [ $.3/$.1, $.3/$.2, $.3 ]
+</PRE>
+The functions are inevitably rational so cannot be expressed in
+any coordinates that might already exist on the affine patches.
+Instead they are expressed in terms of the generators of the function fields.
+<P>
+<P>
+<PRE>
+&gt; ProjectiveClosure(f12);
+Map of projective spaces defined by [ x*y*z, w*y*z, w*x*z, w*x*y ]
+&gt; ProjectiveClosure(f12) eq f;
+true
+</PRE>
+However, as seen in the final line above,
+the relationship between a map and its closure is maintained.
+<HR>
+<H4><A NAME = "14669">Automorphisms</A></H4>
+
+<P>
+<P>
+Automorphisms of schemes defined over a field may be constructed.
+The main cases where there is significant functionality is for
+automorphisms of affine and projective spaces and curves.
+Recall that for projective spaces the only regular automorphisms are the
+linear maps. However there are many more rational automorphisms, often
+called <I>Cremona transformations</I>. In the case of the projective plane,
+these form a group generated by linear automorphisms together with a single
+quadratic transformation. In higher dimensions, the structure of this group is
+unknown.
+<P>
+Affine spaces have much more complicated automorphism groups.
+Decomposition results are known in the case of the affine plane over certain
+fields (the complex numbers for instance), but otherwise no general
+statements are known.
+More information and references can be found in
+<A  HREF = "text1320.htm#bib_vdessen">[vdE00]</A>, especially in the opening essay.
+<P>
+Although automorphisms can be computed, groups of automorphisms cannot
+be computed except in a very few cases. For the case of curves, see the
+<TT>Algebraic Curves</TT> chapter.
+For ambients, there is currently a function <TT>AutomorphismGroup</TT>
+which returns a group together with a map matching group elements with
+the automorphism they represent only in the case of linear automorphisms
+of projective spaces defined over a finite field.
+<P>
+<P>
+<P>
+
+
+<P>
+<P>
+<H5><A NAME = "14670">Automorphism(X,F) : Sch,SeqEnum -&gt; MapAutSch</A></H5>
+<BLOCKQUOTE>
+The automorphism of the scheme X determined by the sequence of polynomials
+F defined on X. This function uses a Gr&ouml;bner basis calculation.
+If the inverse functions are already known then one can use the
+<TT>map&lt; | &gt;</TT> constructor and then a type change or the <TT>iso&lt; | &gt;</TT> 
+constructor. This is illustrated
+in Example <A  HREF = "text1336.htm#14674">H118E45</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "14671">IdentityAutomorphism(X) : Sch -&gt; MapAutSch</A></H5>
+<H5>IdentityMap(X) : Sch -&gt; MapAutSch</H5>
+<BLOCKQUOTE>
+The identity map X -&gt; X on the scheme X.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14672">IsEndomorphism(f) : MapSch -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the domain and range of the maps of schemes 
+f are equal.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14673">IsAutomorphism(f) : MapSch -&gt; BoolElt,AutSch</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the maps of schemes 
+f is an automorphism of its domain.
+In this case f is returned as an automorphism as the second value.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14674">Example <TT>Scheme_automorphism-construction (H118E45)</TT></A></H3>
+<P>
+In this example we show how to make an automorphism from equations,
+and also how to include the equations of the inverse map if they
+are already known.
+The automorphism is the hyperelliptic involution on a hyperelliptic
+curve, although we don't use the machinery of hyperelliptic curves here.
+<P>
+<P>
+<PRE>
+&gt; A&lt;u,v&gt; := AffineSpace(Rationals(),2);
+&gt; f := v^5 + 2*v^3 + 5;
+&gt; C := Curve(A,u^2 - f);
+&gt; phi := Automorphism(C,[-u,v]);
+&gt; Type(phi);
+MapAutSch
+&gt; phi;
+Mapping from: Crv: C to Crv: C
+with equations : 
+-u
+v
+and inverse
+-u
+v
+</PRE>
+In this case we clearly know the inverse map in advance.
+We can make an automorphism of C as follows.
+<P>
+<P>
+<PRE>
+&gt; psi := map&lt; C -&gt; C | [-u,v],[-u,v] &gt;;
+&gt; psi eq phi;                          
+true
+&gt; Type(psi);
+MapSch
+</PRE>
+The map &psi; is fine, but it is not of the same type as &phi;.
+We make the type change, if desired, as follows.
+<P>
+<P>
+<PRE>
+&gt; bool,psi1 := IsAutomorphism(psi);
+&gt; bool;
+true
+&gt; Type(psi1);
+MapAutSch
+</PRE>
+<P>
+<HR>
+<H3><A NAME = "14675">Example <TT>Scheme_aut-aff-jac (H118E46)</TT></A></H3>
+A standard Gr&ouml;bner basis exercise is to test particular examples of
+the Jacobian conjecture. This states that a polynomial map of the plane
+is invertible if (and only if) its jacobian determinant is everywhere nonzero.
+The problem here is to calculate the conjectured inverse polynomial map.
+<P>
+<P>
+<PRE>
+&gt; A&lt;u,v&gt; := AffineSpace(Rationals(),2);
+&gt; f := u^3 + 3*u^2*v^2 + 3*u^2 + 3*u*v^4 + 6*u*v^2 + v^6 + 3*v^4 + v + 3;
+&gt; g := u + v^2 + 1;
+&gt; J := JacobianMatrix([f,g]);
+&gt; Determinant(J);
+-1
+&gt; m := map&lt; A -&gt; A | [f,g] &gt;;
+&gt; m;
+Mapping from: Aff: A to Aff: A
+with equations : 
+u^3 + 3*u^2*v^2 + 3*u^2 + 3*u*v^4 + 6*u*v^2 + v^6 + 3*v^4 + v + 3
+u + v^2 + 1
+&gt; IsAutomorphism(m);
+true
+&gt; m;
+Mapping from: Aff: A to Aff: A
+with equations : 
+u^3 + 3*u^2*v^2 + 3*u^2 + 3*u*v^4 + 6*u*v^2 + v^6 + 3*v^4 + v + 3
+u + v^2 + 1
+and inverse
+-u^2 + 2*u*v^3 - 6*u*v + 10*u - v^6 + 6*v^4 - 10*v^3 - 9*v^2 + 31*v - 26
+u - v^3 + 3*v - 5
+&gt; Type(m);
+MapSch
+&gt; Inverse(m);
+Mapping from: Aff: A to Aff: A
+with equations : 
+-u^2 + 2*u*v^3 - 6*u*v + 10*u - v^6 + 6*v^4 - 10*v^3 - 9*v^2 + 31*v - 26
+u - v^3 + 3*v - 5
+and inverse
+u^3 + 3*u^2*v^2 + 3*u^2 + 3*u*v^4 + 6*u*v^2 + v^6 + 3*v^4 + v + 3
+u + v^2 + 1
+</PRE>
+The automorphism test returns two values.
+The first, <TT>true</TT>, confirms that the map m is an automorphism.
+In doing this test, Magma computes the inverse and stores it with m.
+The second is the same map m, now with its inverse computed,
+but with the type of an automorphism.
+<P>
+<P>
+<PRE>
+&gt; _,maut := IsAutomorphism(m);
+&gt; maut;
+Mapping from: Aff: A to Aff: A
+with equations : 
+u^3 + 3*u^2*v^2 + 3*u^2 + 3*u*v^4 + 6*u*v^2 + v^6 + 3*v^4 + v + 3
+u + v^2 + 1
+and inverse
+-u^2 + 2*u*v^3 - 6*u*v + 10*u - v^6 + 6*v^4 - 10*v^3 - 9*v^2 + 31*v - 26
+u - v^3 + 3*v - 5
+&gt; Type(maut);
+MapAutSch
+</PRE>
+<HR>
+<H5><A NAME = "14676">Affine Automorphisms</A></H5>
+
+<P>
+<P>
+The first constructor below checks that the proposed map is indeed an
+automorphism by computing an inverse for the map determined by the
+arguments. It is a potentially expensive test.
+The other constructors are all either clearly automorphisms or else
+require only very simple tests.
+<P>
+<P>
+
+
+<P>
+<P>
+<P>
+<P>
+<H5><A NAME = "14677">Automorphism(A,F) : Sch,SeqEnum -&gt; MapSch</A></H5>
+<BLOCKQUOTE>
+The automorphism of the affine space A determined by the sequence
+of functions F defined on A.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14678">Automorphism(A,M) : Sch,Mtrx -&gt; MapIsoSch</A></H5>
+<BLOCKQUOTE>
+The linear automorphism of the affine space A determined by the
+entries of the matrix of base ring elements M acting from the right on
+points.
+</BLOCKQUOTE>
+<H5><A NAME = "14679">Translation(A,p) : Sch, Pt -&gt; MapSch</A></H5>
+<BLOCKQUOTE>
+The translation map of the affine space A taking the rational
+point p to the origin.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14680">PermutationAutomorphism(A, g) : Sch,GrpPermElt -&gt; MapIsoSch</A></H5>
+<H5>Automorphism(A, g) : Sch, GrpPermElt -&gt; MapIsoSch</H5>
+<BLOCKQUOTE>
+The automorphism of the affine space A that permutes its coordinates
+according to the permutation g.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14681">Example <TT>Scheme_aut-aff-perm (H118E47)</TT></A></H3>
+Permutations are easy to create as elements of the symmetric group.
+The symmetric group used must act on the set of n points, where n
+is the dimension of the affine space, even if it is only intended to
+permute a few of the coordinates.
+<P>
+<P>
+<PRE>
+&gt; A := AffineSpace(Rationals(),5);
+&gt; g := SymmetricGroup(5) ! (1,2,3);
+&gt; f := PermutationAutomorphism(A,g);
+&gt; p := A ! [1,2,3,4,5];
+&gt; f(p);
+(2, 3, 1, 4, 5)
+</PRE>
+<HR>
+<H5><A NAME = "14682">Automorphism(A,p) : Sch, RngMPolElt -&gt; IsoSch</A></H5>
+<BLOCKQUOTE>
+The automorphism which takes the first coordinate x of the 
+affine space A to x + p.
+The polynomial p must be a function on A which does not involve x.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14683">AffineDecomposition(f) : MapSch -&gt; MapSch,MapSch</A></H5>
+<BLOCKQUOTE>
+If f is an affine linear endomorphism, that is, an automorphism of some
+affine space defined by polynomials of degree at most 1,
+this returns a linear endomorphism
+ell and a translation t such that, in Magma notation,
+<TT>f eq l * t</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14684">Example <TT>Scheme_decompose-automorphism (H118E48)</TT></A></H3>
+In this example we make an affine linear map by composing a linear
+map and a translation. Then we promptly decompose it into these
+components.
+<P>
+<P>
+<PRE>
+&gt; A&lt;x,y,z&gt; := AffineSpace(Rationals(),3);
+&gt; f := Automorphism(A,2*y+3*z) * Translation(A,A ! [2,3,5]);
+&gt; l,t := AffineDecomposition(f);
+&gt; l,t;
+Mapping from: Aff: A to Aff: A
+with equations : 
+x + 2*y + 3*z
+y
+z
+and inverse
+x - 2*y - 3*z
+y
+z
+Mapping from: Aff: A to Aff: A
+with equations : 
+x - 2
+y - 3
+z - 5
+and inverse
+x + 2
+y + 3
+z + 5
+&gt; f eq l * t;
+true
+</PRE>
+Note that the composition <TT>l * t</TT> in Magma means that the map
+ell is applied first followed by t.
+<P>
+<P>
+<PRE>
+&gt; p := A ! [1,2,3];
+&gt; f(p);
+(12, -1, -2)
+&gt; t(l(p));
+(12, -1, -2)
+</PRE>
+<HR>
+<H5><A NAME = "14685">NagataAutomorphism(A) : Aff -&gt; MapSch</A></H5>
+<BLOCKQUOTE>
+This intrinsic returns the Nagata automorphism in a standard form:
+<P>
+(u, v, w) |-&gt; ( - u<sup>2</sup>w<sup>3</sup> - 2uv<sup>2</sup>w<sup>2</sup> - 2uvw + u - v<sup>4</sup>w - 2v<sup>3</sup>, uw<sup>2</sup> + v<sup>2</sup>w + v, w).
+<P>
+Recall that this is an automorphism of affine 3-space A which is not
+known to be tame, that is, admits no known factorisation into automorphisms
+of the types listed above.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14686">Projectivity(A,M) : Aff,Mtrx -&gt; MapAutSch</A></H5>
+<BLOCKQUOTE>
+The restriction to the affine space
+A of the linear automorphism of its projective closure
+determined by the matrix M. Note that this map is not usually regular on A
+but it is an isomorphism where it is defined.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14687">Example <TT>Scheme_projectivity (H118E49)</TT></A></H3>
+Most projectivities on an affine space are not regular maps.
+By definition, the equations which define them are naturally rational
+polynomials. That is the reason for naming the variables in the 
+field of fractions of the coordinate ring of A in the following code.
+<P>
+<P>
+<PRE>
+&gt; k := FiniteField(23);
+&gt; A&lt;x,y,z&gt; := AffineSpace(k,3);              
+&gt; M := Matrix(k,4,4,[1,2,3,-4,2,3,5,6,3,4,5,9,4,5,6,0]);
+&gt; phi := Projectivity(A,M);
+&gt; KA&lt;u,v,w&gt; := Parent(x/y);
+&gt; phi;
+Mapping from: Aff: A to Aff: A
+with equations : 
+(6*u + 12*v + 18*w + 22)/(u + 7*v + 13*w)
+(12*u + 18*v + 7*w + 13)/(u + 7*v + 13*w)
+(18*u + v + 7*w + 8)/(u + 7*v + 13*w)
+and inverse
+(11*u + 15*v + 5)/(u + 20*w + 2)
+(9*u + 16*v + w + 12)/(u + 20*w + 2)
+(12*u + 15*v + 3*w + 16)/(u + 20*w + 2)
+</PRE>
+Notice that the inverse of &phi; has also been computed.
+In fact, &phi; has been returned as an automorphism even though
+it is not regular.
+<P>
+<P>
+<PRE>
+&gt; Type(phi);
+MapAutSch
+&gt; IsRegular(phi);
+false
+</PRE>
+<HR>
+<H5><A NAME = "14688">Projective Automorphisms</A></H5>
+
+<P>
+<P>
+As in the case of affine spaces, a version of the automorphism constructor
+is provided which takes a sequence of polynomials as second argument.
+It is included mainly for completeness whereas the other constructors
+are more appropriate for constructing automorphisms in the contexts in which
+they often arise.
+<P>
+Projective automorphisms (which are regular) are always linear so they have an
+associated matrix with respect to the basis of monomials.
+A function is provided to retrieve this matrix, and conversely automorphisms
+may be created using matrices.
+In fact, if the projective space is defined over a finite field, then
+the automorphism group can be computed (as a group in Magma) and its
+elements can be realised as matrices.
+<P>
+Also included are functions for creating a nonregular birational automorphism
+of projective space, the standard <I>quadratic transformation</I>.
+When working in the plane, this together with linear automorphisms
+generates the group of birational automorphisms.
+An example of factorising a birational automorphism in this group is given.
+<P>
+<P>
+
+
+<P>
+<P>
+<P>
+<P>
+<H5><A NAME = "14689">Automorphism(P,F) : Prj, SeqEnum -&gt; MapSch</A></H5>
+<BLOCKQUOTE>
+The automorphism of the projective space P determined by the sequence
+of polynomials F defined on P.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14690">Matrix(f) : MapSch -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+The matrix corresponding to the linear automorphism f
+of a projective space.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14691">Automorphism(P,M) : Sch,Mtrx -&gt; MapSch</A></H5>
+<BLOCKQUOTE>
+The linear automorphism of the projective space
+P determined by the entries of the matrix
+of base ring elements M acting on the left of coordinates.
+</BLOCKQUOTE>
+<H5><A NAME = "14692">Aut(P) : Prj -&gt; PowAutSch</A></H5>
+<BLOCKQUOTE>
+The parent of automorphisms of the projective space P.
+</BLOCKQUOTE>
+<H5><A NAME = "14693">AutomorphismGroup(P) : Prj -&gt; GrpMat,Map</A></H5>
+<BLOCKQUOTE>
+The automorphism group of the projective space P together with a map
+from this group to the set of automorphisms of P, that is, the parent
+of such automorphisms.
+The space P must be defined over a finite field for this intrinsic.
+Note that currently the group returned is a general
+linear group rather than the projectivised version. This will be
+changed in the future, but in any case does not create much confusion.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14694">Example <TT>Scheme_projective-automorphism-group (H118E50)</TT></A></H3>
+When a projective space is defined over a finite field, then its
+automorphism group can be realised as a group of matrices in a
+natural way.
+First we see how to use standard intrinsics to realise the correspondence
+between matrices and linear automorphisms of projective space.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(GF(5),2);      
+&gt; phi := Automorphism(P,[x+y,y,z]);
+&gt; M := Matrix(phi);
+&gt; M;
+[1 0 0]
+[1 1 0]
+[0 0 1]
+&gt; Automorphism(P,M) eq phi;
+true
+</PRE>
+Since P is a projective space defined over a finite field, we can
+actually work with a group which is isomorphic to its automorphism group.
+The map m computed below maps matrices to automorphisms and conversely
+its inverse constructs a matrix from an automorphism.
+<P>
+<P>
+<PRE>
+&gt; G,m := AutomorphismGroup(P);     
+&gt; G;
+GL(3, GF(5))
+&gt; m;
+Mapping from: GrpMat: G to Parent structure for automorphisms of P
+&gt; phi eq m(Transpose(M));
+true
+&gt; Transpose(phi @@ m);
+[1 0 0]
+[1 1 0]
+[0 0 1]
+</PRE>
+The parent of automorphisms is also an object in Magma. It can be
+created using <TT>Aut(P)</TT>.
+<P>
+<P>
+<PRE>
+&gt; Aut(P);
+Set of all automorphisms of P
+&gt; Aut(P) eq Codomain(m);
+true
+</PRE>
+<HR>
+<H5><A NAME = "14695">TranslationOfSimplex(P,Q) : Prj, [Pt] -&gt; MapSch</A></H5>
+<BLOCKQUOTE>
+The unique automorphism of the n-dimensional projective space P taking the
+n + 2 standard simplex points (1:0 ... :0), ... and (1:1 ... :1)
+to the points of the sequence Q.
+The sequence Q must comprise n + 2 linearly independent rational points
+of P.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14696">Translation(P,Q) : Prj, [Pt] -&gt; MapSch</A></H5>
+<BLOCKQUOTE>
+This function returns an automorphism which translates the standard
+coordinate points to the points of the sequence Q.
+The sequence Q must comprise n + 1 linearly independent rational points
+of the projective space P where n is the dimension of P.
+This intrinsic puts no condition on the usual final point
+(1:1 ... :1) of the standard simplex.
+In other words, it creates the automorphism of P by the matrix having
+the coordinates of the n + 1 points of Q as its columns.
+This automorphism is not uniquely determined since (PGL)(n, k) is
+n + 2 transitive.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14697">Translation(P,p,q) : Prj, Pt, Pt -&gt; MapSch</A></H5>
+<BLOCKQUOTE>
+A choice of linear automorphism of the projective space P which takes
+the rational point p to the rational point q.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14698">Translation(X,p) : Sch, Pt -&gt; MapSch</A></H5>
+<BLOCKQUOTE>
+A choice of linear automorphism of the projective space P taking the
+point (0: ... :0:1) to the rational point p.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14699">Example <TT>Scheme_translation (H118E51)</TT></A></H3>
+The intrinsic <TT>Translation(X,p)</TT> works in both the affine and
+the projective context.
+For an affine scheme, it makes the translation which moves the point
+p to the origin.
+<P>
+<P>
+<PRE>
+&gt; A&lt;u,v&gt; := AffineSpace(Rationals(),2);
+&gt; Translation(A,A![1,2]);
+Mapping from: Aff: A to Aff: A
+with equations : 
+u - 1
+v - 2
+and inverse
+u + 1
+v + 2
+</PRE>
+In the projective case, the resulting translation moves the point p
+to the image of the origin on the first affine patch. When the point p
+lies on the first affine patch, then the translation is the obvious one.
+But when it doesn't a permutation of the coordinates is made first.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(Integers(),2);
+&gt; p := P ! [3,2,1];
+&gt; f := Translation(P,p);
+&gt; f;
+Mapping from: Prj: P to Prj: P
+with equations : 
+-x + 3*z
+-y + 2*z
+z
+and inverse
+-x + 3*z
+-y + 2*z
+z
+&gt; f(p);
+(0 : 0 : 1)
+&gt; p := P ! [0,1,0];
+&gt; f := Translation(P,p);
+&gt; f(p);
+(0 : 0 : 1)
+&gt; f;
+Mapping from: Prj: P to Prj: P
+with equations : 
+-x
+-z
+y
+and inverse
+x
+-z
+y
+</PRE>
+<HR>
+<H5><A NAME = "14700">QuadraticTransformation(P) : Prj -&gt; MapSch</A></H5>
+<H5>QuadraticTransformation(P,Q) : Prj,SeqEnum -&gt; MapSch</H5>
+<BLOCKQUOTE>
+The first function is the
+standard quadratic transformation of projective space P taking its
+coordinates to their reciprocals, that is (x:y: ... ) |-&gt; (1/x:1/y: ... ).
+The second conjugates the standard map with a translation of the points
+of Q to the standard basis vectors.
+The sequence Q must comprise n + 1 linearly independent rational points
+of P where n is the dimension of P.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14701">QuadraticTransformation(X) : Sch -&gt; Sch, MapIsoSch</A></H5>
+<H5>QuadraticTransformation(X,Q) : Sch, [Pt] -&gt; Sch, MapIsoSch</H5>
+<BLOCKQUOTE>
+The <I>birational</I> pullback of the projective scheme X by the
+quadratic transformation. In the first intrinsic the transformation used is
+<TT>QuadraticTransformation(P)</TT> while in the second, the transformation
+is <TT>QuadraticTransformation(P,Q)</TT> where P is the ambient projective
+space of X. Thus Q must comprise n + 1 linearly independent rational points
+of P where n is the dimension of P.
+Exceptional components in the total pullback of X are removed.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14702">Example <TT>Scheme_cremona-factorisation (H118E52)</TT></A></H3>
+This example shows how to factorise a simple Cremona transformation.
+(The reader who knows something about this will note that in this example
+we take no account of the N&ouml;ther--Fano inequalities nor do we analyse
+infinitely near points. In fact, we are rather lucky to be able to
+complete the factorisation.)
+<P>
+<P>
+<PRE>
+&gt; k := RationalField();
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(k, 2);
+&gt; funs := [ 2/3*x^2*y^2 + 2/3*x^2*y*z + x*y^2*z + x*y*z^2,
+&gt;     1/3*x^2*y^2 + 4/3*x^2*y*z + x^2*z^2 + 1/2*x*y^2*z + 1/2*x*y*z^2,
+&gt;     2/9*x^2*y^2 + 2/3*x^2*y*z + 2/3*x*y^2*z + x*y*z^2 + 1/2*y^2*z^2 ];
+&gt; g := map&lt; P -&gt; P | funs &gt;;
+&gt; FunctionDegree(g);
+4
+&gt; RationalPoints(BaseScheme(g));
+{@ (3/4 : -1 : 1), (0 : 1 : 0), (0 : 0 : 1), (-3/2 : -1 : 1), (1 : 0 : 0) @}
+</PRE>
+Our aim is to precompose g with quadratic transformations which will
+reduce the degree of its defining polynomials, currently 4.
+When the function degree is reduced to 1 the factorisation is complete
+since the inverse sequence of quadratic transformations will comprise
+a factorisation of g up to a translation.
+(Draw the diagram of maps!)
+That will be done at the end.
+First a quadratic transformation in the three coordinate points is made
+since these points are the simplest appearing in the list of base points.
+(The complete mathematical theory works hard to make the choice of map here
+the right one: clearly no hard work has been done here in making the
+choice of coordinate points.)
+<P>
+<P>
+<PRE>
+&gt; std_quad := QuadraticTransformation(P);
+&gt; g1 := std_quad * g;
+&gt; // (Expand and) extend the map to its maximal domain:
+&gt; g1:=Extend(g1);
+&gt; FunctionDegree(g1);
+2
+&gt; S := BaseScheme(g1);
+&gt; RationalPoints(S);
+{@ (4/3 : -1 : 1), (-2/3 : -1 : 1), (-2/3 : 0 : 1) @}
+&gt; HasPointsOverExtension(S);
+false
+</PRE>
+Good! With only three non-collinear points of indeterminacy (the final
+line makes sure there aren't further points defined over some extension
+of the base ring) we are only one step away from completing the factorisation.
+We make a quadratic transformation in these three noncollinear points.
+<P>
+<P>
+<PRE>
+&gt; tr := Translation(P,[ p : p in $2 ]);
+&gt; quad := std_quad * tr;
+&gt; g2 := quad * g1;
+&gt; g2:=Extend(g2);
+&gt; FunctionDegree(g2);
+1
+</PRE>
+So g is seen to be the composition of linear translations and standard
+quadratic transformations: g<sub>2</sub> is itself a linear translation.
+This sequence of maps is reconstructed in reverse order to get g.
+All the maps should be inverted, but note that the quadratic transformations
+are selfinverse so that this is rather easy.
+Of course, composing the maps in the order they were discovered
+above produces the birational inverse of g.
+<P>
+<P>
+<PRE>
+&gt; f3 := f2 * g2
+&gt;     where f2 is f1 * std_quad
+&gt;     where f1 is std_quad * Inverse(tr);
+&gt; Expand(f3) eq g;
+true
+</PRE>
+<HR>
+<H4><A NAME = "14703">Scheme Graph Maps</A></H4>
+
+<P>
+<P>
+In Magma V2.16, we have introduced an alternative to the usual <TT>MapSch</TT>
+for maps between <I>ordinary projective</I> schemes:
+a new type <TT>MapSchGrph</TT>, which we refer to as graph maps. These are objects
+whose defining data is the closure of the graph of a rational map, without explicit
+defining or inverse polynomials. This is a fairly traditional way to consider maps
+in algebraic geometry and the main motivation for their introduction is for
+divisor maps of invertible sheaves. These are naturally constructed in graph form
+and the further derivation of explicit defining polynomials can be quite
+time-consuming and lead to extremely high degree, ugly results.
+<P>
+As well as being more naturally constructible in certain situations, graph maps
+have advantages over <TT>MapSch</TT>s in a number of contexts.
+<P>
+<DL COMPACT class='compact'>
+<DT>1</DT><DD>A graph maps is automatically maximally defined, so <TT>Extend</TT> and
+alternative equations are unnecessary.
+<P>
+<DT>2</DT><DD>Computation of images of subschemes of the domain or of the inverse of
+a map go, in one way or another, through the graph of the map, so it is more efficient
+to already have it in graph form.
+<P>
+<DT>3</DT><DD>For an invertible graph map, separate inverse equations are not required.
+It is only necessary to record that it is invertible and consider the "reverse" of
+the graph.
+<P>
+<P>
+</DL>
+If f: X -&gt; Y is a rational map, the closure of its graph G naturally
+lies in X x Y. For computational ease, we take G as lying in the product
+projective space of the ambients of X and Y, Functionally, it is defined by a 
+bihomogeneous ideal in a polynomial ring with n + m + 2 variables, where n (resp. m)
+is the dimension of the ambient of X (resp. Y). There is a primitive basic
+user constructor described below. Graph maps are more naturally constructed and
+returned by specialised functions.
+<P>
+<P>
+<P>
+Graph maps have most of the functionality of <TT>MapSch</TT> maps including
+<TT>IsInvertible</TT> and <TT>Expand</TT>. Rather than repeat the list of all of
+the relevant intrinsics, we note here that the major functionality not
+currently available for them is
+<P>
+<DL COMPACT class='compact'>
+<DT>1</DT><DD>No defining or inverse defining polynomials.
+<P>
+<DT>2</DT><DD>No pointset map construction: it is not possible to ask for the image or 
+preimage under a graph map of a point in a pointset over a proper extension of the 
+base field. Neither are there images and preimages of rational functions.
+<P>
+<DT>3</DT><DD>Restriction to affine patchs of the domain or codomain is not possible
+(graph maps are only between projective schemes). However, restriction to a
+closed subscheme of the domain or codomain via <TT>Restriction</TT> is allowable
+as usual. 
+<P>
+<DT>4</DT><DD>Any specialised <TT>MapSch</TT> functionality only available for maps between 
+particular scheme types, like maps between curves.
+<P>
+<P>
+</DL>
+Graph maps can be composed in the usual way for maps, but can not be mixed with
+<TT>MapSch</TT> maps in composition.
+<P>
+A further minor restriction has been built in for implementational efficiency.
+It is assumed for the domain X of a graph map that there is no coordinate
+hyperplane that contains some <I>but not all</I> of the irreducible components of X.
+In particular, there is no problem if X is irreducible.
+<P>
+A graph map f may be converted into normal <TT>MapSch</TT> with an intrinsic given
+below. If f is known invertible, this also computes inverse defining polynomials.
+It  should be noted that for maps between complicated schemes, this often produces a
+<TT>MapSch</TT> with extremely high degree defining polynomials and a large base scheme 
+where it is not defined. In such cases, the original <TT>MapSchGrph</TT> can be a 
+functionally much more efficient representation.
+
+
+<H5><A NAME = "14704">SchemeGraphMap(X, Y, I) : Sch, Sch, RngMPol -&gt; MapSchGrph</A></H5>
+
+<PRE>    Saturated: BoolElt                  Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The schemes X and Y are ordinary projective schemes with ambients P<sup>m</sup> and
+P<sup>n</sup> respectively. I is an ideal in an n + m + 2 variable polynomial
+ring R that should have the grevlex ordering. I should define the
+closure of the graph of a rational map from X to Y if R is
+identified with the coordinate ring of the product projective space of
+P<sup>m</sup> and P<sup>n</sup> such that the first m + 1 variables correspond to
+the variables of the coordinate ring of P<sup>m</sup> in the same order and
+the last n + 1 variables correspond to those of P<sup>n</sup> in the same order.
+<P>
+I should thus be bihomogeneous in the first m + 1 and second n + 1
+variables and be large enough to define the graph of the map, though
+it doesn't have to be the maximal defining ideal. For example, if
+a map is explicitly given by defining polynomials [F<sub>0</sub>(x), ..., F<sub>n</sub>(x)]
+where we use x<sub>i</sub> and y<sub>i</sub> to denote the variables of R corresponding
+to the domain and codomain variables, then the ideal generated by
+ y<sub>i</sub>F<sub>j</sub>(x) - y<sub>j</sub>F<sub>i</sub>(x)     forall 0 &le;i, j &le;n 
+and the defining equations for X will define the graph if the defining
+polynomials give an everywhere defined map. We give an
+explicit example below. If there is a non-empty base scheme, it will be
+necessary to saturate the above ideal by one of the F<sub>i</sub>(x) that doesn't
+vanish on any component of the domain. It is then "domain" saturated.
+<P>
+A defining ideal like the above that <I>hasn't</I> been saturated by an F<sub>i</sub>(x)
+is usually not maximal and for
+functional purposes has to be saturated by an appropriate domain
+variable using <TT>ColonIdeal</TT>. This is performed internally. If the
+user already knows that I is domain saturated, he can set the
+parameter <TT>Saturated</TT> (default <TT>false</TT>) to <TT>true</TT> to avoid this.
+<P>
+This is a simple convenience function that performs practically no
+checks on the validity of the input data.
+</BLOCKQUOTE>
+<H5><A NAME = "14705"></A><A NAME = "sch:gr_mp_to_sch_mp">SchemeGraphMapToSchemeMap</A>(f) : MapSchGrph -&gt; MapSch</H5>
+<BLOCKQUOTE>
+Converts the graph map f into a usual scheme map. As noted in the introduction,
+if f is a map between fairly complex schemes, this can be quite a computationally
+heavy procedure and can produce very large degree, non-sparse defining polynomials
+and the <TT>MapSch</TT> produced can have a large base scheme, even if f is
+defined everywhere on its domain. If f is known invertible (see below), inverse 
+definingpolynomials are also added to the result.
+</BLOCKQUOTE>
+<H5><A NAME = "14706">IsInvertible(f) : MapSchGrph -&gt; BoolElt, MapSchGrph</A></H5>
+<BLOCKQUOTE>
+As for the <TT>MapSch</TT> version, returns whether f is birationally invertible
+and, if so, also returns the inverse map. This records that f is known invertible
+internally, as the inverse map just has the graph reversed (also the graph ideal
+may need to be saturated with respect to a codomain variable, which will be
+performed here if it is determined that the map is invertible) so no inverse
+equations are added. The <TT>HasKnownInverse</TT> intrinsic for <TT>MapSch</TT>s, which
+returns whether the map has already been determined to be invertible, is also
+available.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14707">Example <TT>Scheme_graph_maps (H118E53)</TT></A></H3>
+Let X be an elliptic curve, given as an intersection of quadrics in P<sup>3</sup>.
+Here we start with a map from X into P<sup>4</sup>, given by cubics, that is
+birational onto its image. We show how to convert this into a graph map,
+take restrictions, check for invertibility and various other things.
+<P>
+<P>
+<PRE>
+&gt; P3&lt;x,y,z,t&gt; := ProjectiveSpace(Rationals(),3);
+&gt; X := Scheme(P3,[x*t-y*z, x^2+y^2-4*z^2+7*t^2]);
+&gt; P4&lt;a,b,c,d,e&gt; := ProjectiveSpace(Rationals(),4);
+&gt; mp_seq := [x^3,y^3,z^3,t^3,y*z*t]; // polys defining a map to P^4
+&gt; mp := map&lt;X-&gt;P4|mp_seq&gt;;
+&gt; // Will now define the graph map
+&gt; R&lt;x1,x2,x3,x4,y1,y2,y3,y4,y5&gt; := PolynomialRing(Rationals(),9,"grevlex");
+&gt; hm := hom&lt;CoordinateRing(P3) -&gt; R |[R.i : i in [1..4]]&gt;; // usual map
+&gt; grI := ideal&lt;R|[(R.(i+4))*hm(mp_seq[j])-(R.(j+4))*hm(mp_seq[i]):
+&gt;   i in [j+1..5] , j in [1..5]] cat [hm(b) : b in Basis(Ideal(X))]&gt;;
+&gt; gr_mp := SchemeGraphMap(X,P4,grI); // the graph map
+&gt; // check that gr_mp does give mp
+&gt; mp eq SchemeGraphMapToSchemeMap(gr_mp);
+true
+&gt; Y := gr_mp(X);
+&gt; Y eq mp(X);
+true
+&gt; // take restrictions to the image
+&gt; gr_mp1 := Restriction(gr_mp,X,Y);
+&gt; mp1 := Restriction(mp,X,Y);
+&gt; // check that gr_mp1 still gives mp1
+&gt; mp1 eq SchemeGraphMapToSchemeMap(gr_mp1);
+true
+&gt; boo := IsInvertible(gr_mp1);
+&gt; boo;
+true
+&gt; // find the image and preimage of a point
+&gt; pt := X![2,0,1,0];
+&gt; ipt := gr_mp1(X![2,0,1,0]);
+&gt; iminv := ipt @@ gr_mp1;
+&gt; Dimension(iminv); Degree(iminv);
+0
+2
+&gt; // the preimage is just pt doubled
+&gt; Support(iminv);
+{ (2 : 0 : 1 : 0) }
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1337.htm">[Next]</A><A  HREF = "text1335.htm">[Prev]</A> <A  HREF = "text1337.htm">[Right]</A> <A  HREF = "text1335.htm">[Left]</A> <A  HREF = "text1321.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

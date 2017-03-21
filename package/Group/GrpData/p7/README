@@ -1,0 +1,58 @@
+/* examples showing access to p^7 library */
+
+AttachSpec ("spec");
+
+SetEchoInput(true);
+
+/* gives a little output identifying parents etc */
+SetVerbose ("Orderp7", 1);
+
+/* number of groups of order 19^7 */
+NumberOfGroupsp7(19);
+
+/* run over all 3-groups */
+L := Groupsp7 (3: Process := false);
+"Number of groups is ", #L;
+
+/* run over all 2-generator 7-groups */
+L := Groupsp7 (7: Rank := 2);
+"Number of groups is ", L;
+
+/* list 2-generator maximal class 3-groups which are metabelian */ 
+f := func < G | DerivedLength (G) eq 2>;
+L := Groupsp7 (3: Rank := 2, Process := false, Class := 6, Select := f);
+
+"Number of groups is ", #L; 
+
+/* 3-generator p-class 5 groups with centre of order p^2 */
+
+f := function (G)
+   p := FactoredOrder (G)[1][1];
+   return #Centre (G) eq p^2;
+end function;
+
+p := 3;
+L := Groupsp7 (p: Rank := 3, Process := false, Class := 5, Select := f);
+
+/* this is needed only if you wish to access 
+   individual functions for Children* and GrandChildren* */
+
+load "import.m";
+
+/* metabelian grandchildren of group #21 */
+p := 7;
+f := func< G | DerivedLength (G) eq 2>;
+L := GrandChildren21 (p: Select := f);
+
+/* 2 parents for these grandchildren: we record # from 
+   each parent which passes selection criteria */
+L;
+
+f := function (G)
+   p := FactoredOrder (G)[1][1];
+   return #DerivedGroup (G) eq p^3 and Exponent (G) gt p;
+end function;
+
+/* explore children of #5 */
+L := Children5 (p: Select := f, Process := false);
+"Number of groups is ", #L;

@@ -1,0 +1,44 @@
+"Source: Text/Geometry/HypGeomMot.text";
+"Line: 1442";
+"Date: Wed Jun  8 14:02:19 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/HypGeomMot.text, line: 1442
+// Example: H132E15 ()
+print "Example: H132E15";
+ei := GetEchoInput();
+SetEchoInput(true);
+H := HypergeometricData([* 1,2,3,3,6, -5,-5,-5 *]); H;
+Weight(H);
+POS := [x/5 : x in GammaList(H) | x ge 0];
+NEG := [x/5 : x in GammaList(H) | x le 0];
+J:=JacobiMotive(POS,NEG); J; // weight 5
+p := 11; // check 5th powers for beta value
+EulerFactor(H,1/p^5/MValue(H),p); // weight 3-2
+EulerFactor(TateTwist(J,2),p); // weight 5-2*2
+[EulerFactor(H,u/p^5/MValue(H),p) : u in [1..p-1]];
+[EulerFactor(JacketMotive(POS,NEG,u,1/5,2),p) : u in [1..p-1]];
+p := 31;
+&and[EulerFactor(H,u/p^5/MValue(H),p) eq
+     EulerFactor(JacketMotive(POS,NEG,u,1/5,2),p) : u in [1..p-1]];
+assert $1;
+p := 7; // again take a prime that is 1 mod 6
+d := 6;
+D := Divisors(d);
+POS := [[x/e : x in GammaList(H) | x ge 0] : e in D];
+NEG := [[-x/e : x in GammaList(H) | x le 0] : e in D];
+A, B := CyclotomicData(H);
+for e in D do e,Multiplicity(A cat B,e); end for;
+EulerFactor(H,p^2/MValue(H),p);
+f1 := EulerFactor(JacobiMotive(POS[1],NEG[1] : Weight:=2),p);
+f2 := EulerFactor(JacobiMotive(POS[2],NEG[2] : Weight:=2),p);
+f1 * f2;
+function ef(t0,v) ans:=PolynomialRing(Integers())!1;
+  for i in [1..#D] do
+    e := D[i]; if Gcd(v,e) ne e then continue; end if;
+    w := Weight(H)+1-Multiplicity(A cat B,e);
+    J := JacobiMotive(POS[i],NEG[i] : Kummer:=[t0,1/e], Weight:=w);
+    ans := ans*EulerFactor(J,p); end for;
+  return ans; end function;
+for i in [1..100] do v:=Random([1..12]); t0:=Random([1..p-1]);
+  assert EulerFactor(H,t0*p^v/MValue(H),p) eq ef(t0,v); end for;
+SetEchoInput(ei);

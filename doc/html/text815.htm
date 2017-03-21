@@ -1,0 +1,1112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Subgroups of Finite Index</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text816.htm">[Next]</A><A  HREF = "text814.htm">[Prev]</A> <A  HREF = "text816.htm">[Right]</A> <A  HREF = "text814.htm">[Left]</A> <A  HREF = "text808.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "9315">Subgroups of Finite Index</A></H3>
+
+<P>
+<P>
+The functions in this section are concerned with the construction of subgroups
+of finite index. We first describe a method for computing all subgroups whose
+index does not exceed some (modest) integer bound. The next family of functions
+are concerned with constructing new subgroups of finite index from one or more
+known ones.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text815.htm#9316">Low Index Subgroups</A>
+<LI> <A  HREF = "text815.htm#9330">Subgroup Constructions</A>
+<LI> <A  HREF = "text815.htm#9344">Properties of Group and Subgroups</A>
+</UL>
+<H4><A NAME = "9316">Low Index Subgroups</A></H4>
+
+
+
+<P>
+<P>
+<P>
+The function <A  HREF = "text815.htm#GrpFP_1:LowIndexSubgroups">LowIndexSubgroups</A> constructs all conjugacy
+classes of subgroups of G satisfying the following two conditions:
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>The index of each subgroup is in the range defined by R;
+<DT>(ii)</DT><DD>If the parameter <TT>Subgroup</TT> defines a subgroup H, then 
+at least one subgroup in each conjugacy class contains the subgroup H.
+<P>
+<P>
+</DL>
+The subgroups are returned as a sequence of subgroups G, unless otherwise 
+specified by the parameter <TT>GeneratingSets</TT> (see below). The sequence is
+sorted by increasing index of the subgroups in G.
+<P>
+The subgroups are constructed using an algorithm due to 
+Sims <A  HREF = "text807.htm#bib_sims_fpgroups">[Sim94, sect. 5.6]</A>.
+This algorithm constructs the 
+coset tables by using a backtrack algorithm. At a given position in the coset 
+table, coset definitions are made systematically.  Once a new definition has 
+been made, the group relations are traced in an attempt to deduce further 
+entries or to infer that this partial table will not extend to a table 
+corresponding to a new class of subgroups. When either it cannot define a 
+new entry, or when a complete table has been constructed, the algorithm 
+backtracks to try the next possibility (this may introduce a new row, 
+increasing the index). This algorithm may also be run as a process in
+such a way that the subgroups are returned one at a time, thereby
+allowing the user to analyze each subgroup as soon as it is found.
+<P>
+var ColumnMajor: BoolElt                Default: <TT>false</TT>
+If <TT>ColumnMajor</TT> is set <TT>false</TT> (<I>default</I>), then the location 
+for a new definition in the coset table is determined by searching
+the table in row major order for undefined entries. If <TT>ColumnMajor</TT> 
+is set <TT>true</TT>, then the position for a new definition is determined
+by searching the table in column major order.  If the presentation for G 
+contains explicit relators expressing the fact that certain of the generators 
+have large order, then the presentation should be organized so that these 
+generators appear first and the column major order should be selected for
+new coset definition. This strategy often leads to greatly improved 
+performance.
+<P>
+var GeneratingSets: BoolElt             Default: <TT>false</TT>
+The conjugacy classes of subgroups are returned in the form of a sequence 
+of sets of words, where the i-th set is a generating set for a
+representative subgroup from the i-th conjugacy class of subgroups 
+satisfying the given conditions. This is a much more compact representation 
+than returning the subgroups as a sequence of actual <I>subgroups</I>
+of G and should be used when a very large number of subgroups is expected, 
+as there may be insufficient space to store each of them as a subgroup.
+<P>
+<P>
+var Limit: RngIntElt                    Default: &infin;
+Terminate after finding n conjugacy classes of subgroups satisfying 
+the designated conditions. 
+<P>
+<P>
+var Long: [ RngIntElt ]                 Default: []
+This option enables the user to designate certain of the defining
+relators for G as <I>long relators</I>. The relators of G
+are numbered from 1 to r, in the order they 
+appear in the <A  HREF = "text811.htm#GrpFP_1:quo">quo</A>- or <A  HREF = "text811.htm#GrpFP_1:Group">Group</A>-constructors.
+The value L of 
+<TT>Long</TT> is a subset of the integer set { 1, ..., r}. Magma
+interprets the relators whose numbers appear in L as long relators.
+A relator designated as long 
+is not used during the construction of a coset table.  Rather, it is 
+applied once a complete table has been found. There is some evidence
+to suggest that better performance is achieved in those groups having 
+one or more very long relators by deferring application of these 
+relators until such time as a complete coset table has been obtained.  
+<P>
+var Print: RngIntElt                    Default: 0
+A description of each class of subgroups may be printed immediately after 
+it is constructed.  The value n assigned to the <TT>Print</TT> parameter 
+specifies just what information is to be printed, according to the following 
+rules:
+<DL COMPACT class='compact'>
+<DT>n = 0</DT><DD>:  No printing (<I>default</I>).
+<DT>n = 1</DT><DD>:  For each class, print a heading and a set of generators for 
+the class representative.
+<DT>n = 2</DT><DD>:  The information printed for n = 1, together with the
+permutation representation of G on the right cosets of the class
+representative.
+<DT>n = 3</DT><DD>:  The information printed for n = 2, together with 
+generators for the normalizer N of the class representative, and a system of 
+right coset representatives for N in G.
+<P>
+</DL>
+var Subgroup: GrpFP                     Default: sub&lt; G | &gt;
+By specifying a value H  for <TT>Subgroup</TT>, only subgroups containing H
+will be constructed.
+<P>
+var TimeLimit: RngIntElt                Default: 0  (no limit)
+A time limit in seconds.  A value of 0 (default) means no limit.
+<H5><A NAME = "9317"></A><A NAME = "GrpFP_1:LowIndexSubgroups">LowIndexSubgroups</A>(G, R : parameters) : GrpFP, RngIntElt -&gt; [ GrpFP ]</H5>
+<H5>LowIndexSubgroups(G, R : parameters) : GrpFP, RngIntElt -&gt; [ { GrpFPElt } ]</H5>
+<H5>LowIndexSubgroups(G, R: parameters) : GrpFP, &lt;RngIntElt, RngIntElt&gt; -&gt; [ GrpFP ]</H5>
+<H5>LowIndexSubgroups(G, R: parameters) : GrpFP, &lt;RngIntElt, RngIntElt&gt; -&gt; [ { GrpFPElt } ]</H5>
+<BLOCKQUOTE>
+Given a finitely presented group G (possibly the free group), and an 
+expression R defining a positive integer range (see below), determine 
+the conjugacy classes of subgroups of G whose indices lie in the range 
+specified by R. The subgroups are generated by systematically 
+building all coset tables consistent with the defining relations for G
+and which satisfy the range condition R. The argument R is one of the 
+following:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>An integer n representing the range [1, n]; 
+<DT>(b)</DT><DD>A tuple &lt;a, b&gt; representing the range [a, b];
+<P>
+<P>
+</DL>
+The generation of subgroups can be controlled by a set of parameters
+described below. The returned sequence contains the subgroups found and is
+sorted in order of increasing index in G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9318">Example <TT>GrpFP_1_Lix1 (H75E58)</TT></A></H3>
+(Peter Lorimer) The two graphs known as Tutte's 8-cage and the 
+Conder graph may be constructed as the Cayley graphs of two conjugacy 
+classes of subgroups having index 10 in the finitely presented group
+<PRE>
+     &lt; q, r, s, h, a | h^3 = a^2 = p^2 = 1, p^h = p, p^a = q, q^h = r, r^a = s,
+    h^s = h^(-1), r^h = pqr, sr = pqrs, pq = qp, pr = rp, ps = sp, qr = rq, qs = sq&gt;.
+</PRE>We use the low index function to construct these subgroups.
+<P>
+<P>
+<PRE>
+&gt; G&lt;p, q, r, s, h, a&gt; := Group&lt;p, q, r, s, h, a | 
+&gt;                          h^3 = a^2 = p^2 = 1, p^h = p, p^a = q,
+&gt;                          q^h = r, r^a = s, h^s = h^-1, r^h = p * q * r,
+&gt;                          s * r = p * q * r * s, p * q = q * p,
+&gt;                          p * r = r * p, p * s = s * p, q * r = r * q,
+&gt;                          q * s = s * q&gt;;
+&gt; LowIndexSubgroups(G, &lt;10, 10&gt;);
+[
+       Finitely presented group on 6 generators
+       Index in group G is 10 = 2 * 5
+       Generators as words in group G
+              $.1 = p
+              $.2 = s
+              $.3 = h
+              $.4 = q^-2
+              $.5 = a * h^-1 * a * r^-1
+              $.6 = a * h * a * h^-1 * a * q^-1,
+
+
+       Finitely presented group on 6 generators
+       Index in group G is 10 = 2 * 5
+       Generators as words in group G
+              $.1 = p
+              $.2 = s
+              $.3 = h
+              $.4 = q^-2
+              $.5 = a * h^-1 * a * r^-1
+              $.6 = a * h * a * h^-1 * a
+]
+</PRE>
+<HR>
+<H3><A NAME = "9319">Example <TT>GrpFP_1_Lix2 (H75E59)</TT></A></H3>
+A fairly surprising application for the low index subgroup algorithm is the
+enumeration of the conjugacy classes of a finite fp-group. In this example,
+we consider the group
+G simeq (PGL)<sub>2</sub>(9) =
+        &lt; a, b | a<sup>2</sup>, b<sup>3</sup>, (ab)<sup>8</sup>, [a, b]<sup>5</sup>, [a, (ba)<sup>3</sup>b<sup> - 1</sup>]<sup>2</sup> &gt;.
+<P>
+<P>
+<PRE>
+&gt; G&lt;a,b&gt; := Group&lt; a,b | a^2, b^3, (a*b)^8, (a,b)^5,
+&gt;                        (a,(b*a)^3*b^-1)^2  &gt;;
+&gt; Order(G);
+720
+</PRE>
+In an infinite fp-group, finding all classes of subgroups up to an index of
+720 by applying the low index subgroup algorithm, would be extremely hard. In
+the case of the finite group G, however, we succeed.
+<P>
+<P>
+<PRE>
+&gt; time sgG := LowIndexSubgroups(G, Order(G));
+Time: 31.859
+&gt; #sgG;
+26
+</PRE>
+We get a list of 26 representatives of the conjugacy classes of subgroups.
+For every representative, its index in G and a set of generating words are
+known. We just have a look at two of them.
+<P>
+<P>
+<PRE>
+&gt; sgG[10];
+Finitely presented group on 2 generators
+Index in group G is 60 = 2^2 * 3 * 5
+Generators as words in group G
+    $.1 = b
+    $.2 = a * b * a * b * a * b^-1 * a * b * a * b * a * b^-1 * a
+       * b^-1 * a
+&gt; sgG[21];
+Finitely presented group on 1 generator
+Index in group G is 180 = 2^2 * 3^2 * 5
+Generators as words in group G
+    $.1 = (b * a)^2
+</PRE>
+<HR>
+<H5><A NAME = "9320"></A><A NAME = "GrpFP_1:LowIndexProcess">LowIndexProcess</A>(G, R : parameters) : GrpFP, RngIntElt -&gt; Process(Lix)</H5>
+<H5>LowIndexProcess(G, R: parameters) : GrpFP, &lt; RngIntElt, RngIntElt &gt; -&gt; Process(Lix)</H5>
+
+<PRE>    ColumnMajor: BoolElt                Default: <TT>false</TT></PRE>
+
+<PRE>    GeneratingSets: BoolElt             Default: <TT>false</TT></PRE>
+
+<PRE>    Long: [ RngIntElt ]                 Default: []</PRE>
+
+<PRE>    Print: RngIntElt                    Default: 0</PRE>
+
+<PRE>    Subgroup: GrpFP                     Default: sub&lt; G | &gt;</PRE>
+
+<PRE>    TimeLimit: RngIntElt                Default: 0  (no limit)</PRE>
+<BLOCKQUOTE>
+Create a low index subgroups <I>process</I>.  This process may be used to 
+create the conjugacy classes of proper subgroups one at time, with control
+being handed back to the Magma language processor each time a new class of 
+subgroups is found. This function returns a process which is used by the 
+function <A  HREF = "text815.htm#GrpFP_1:NextSubgroup">NextSubgroup</A> to actually produce the subgroups.
+<P>
+The arguments and parameters have the same interpretation as for the function
+<A  HREF = "text815.htm#GrpFP_1:LowIndexSubgroups">LowIndexSubgroups</A>, except that <TT>Limit</TT> is not available
+(since the same effect can be achieved by limiting the number of calls
+to <A  HREF = "text815.htm#GrpFP_1:NextSubgroup">NextSubgroup</A>).
+<P>
+Setting a time limit for a process P limits the total amount of time spent
+in calls to <A  HREF = "text815.htm#GrpFP_1:NextSubgroup">NextSubgroup</A>.  If the time limit is exceeded in
+a call to <A  HREF = "text815.htm#GrpFP_1:NextSubgroup">NextSubgroup</A>, this call is aborted and P becomes
+invalid. Further attempts to access P will cause a runtime error.  The
+function <A  HREF = "text815.htm#GrpFP_1:IsValid_LIX">IsValid</A> can be used to check whether a process is
+valid in order to avoid runtime errors in loops or user written functions.
+</BLOCKQUOTE>
+<H5><A NAME = "9321"></A><A NAME = "GrpFP_1:NextSubgroup">NextSubgroup</A>(~P) : GrpFPLixProc -&gt;</H5>
+<H5>NextSubgroup(~P, ~G) : GrpFPLixProc, GrpFP -&gt;</H5>
+<BLOCKQUOTE>
+Given a low index subgroups process P, construct the next conjugacy class 
+of proper subgroups. The process P must have been previously created 
+using the function <A  HREF = "text815.htm#GrpFP_1:LowIndexProcess">LowIndexProcess</A> and must be valid. Calling
+<TT>NextSubgroup</TT> for an empty process has no effect.
+</BLOCKQUOTE>
+<H5><A NAME = "9322">ExtractGroup(P) : GrpFPLixProc -&gt; GrpFP</A></H5>
+<BLOCKQUOTE>
+Extract a representative subgroup for the conjugacy class currently defined 
+by the low index process P. The subgroup extracted will be the one found
+by the previous invocation of <A  HREF = "text815.htm#GrpFP_1:NextSubgroup">NextSubgroup</A>, or the first
+subgroup if <A  HREF = "text815.htm#GrpFP_1:NextSubgroup">NextSubgroup</A> has never been invoked on this
+process. Note that <TT>ExtractGroup</TT> will not search for a new subgroup.
+If P is empty or invalid, a runtime error will result.
+</BLOCKQUOTE>
+<H5><A NAME = "9323">ExtractGenerators(P) : GrpFPLixProc -&gt; { GrpFPElt }</A></H5>
+<BLOCKQUOTE>
+Extract a generating set for the representative subgroup of the conjugacy 
+class currently defined by the low index process P. The subgroup extracted 
+will be the one found by the previous invocation of
+<A  HREF = "text815.htm#GrpFP_1:NextSubgroup">NextSubgroup</A>, 
+or the first subgroup if <A  HREF = "text815.htm#GrpFP_1:NextSubgroup">NextSubgroup</A> has never been invoked
+on this process. Note that <TT>ExtractGenerators</TT> will not search for a new
+subgroup.
+If P is empty or invalid, a runtime error will result.
+</BLOCKQUOTE>
+<H5><A NAME = "9324">IsEmpty(P) : GrpFPLixProc -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if the low index process P has already found all conjugacy
+classes of subgroups. If <TT>IsEmpty</TT> is called immediately following
+the creation of the low index process, then it will return the value
+<TT>false</TT> if there are no subgroups satisfying the specified conditions
+or advance P to the first such subgroup otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "9325"></A><A NAME = "GrpFP_1:IsValid_LIX">IsValid</A>(P) : GrpFPLixProc -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if the low index process P is valid, that is, no limit has
+been exceeded. If <TT>IsValid</TT> is called immediately following
+the creation of the low index process, then it will return the value
+<TT>false</TT> if no subgroups satisfying the specified conditions can be found
+within the specified time or advance P to the first such subgroup otherwise.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9326">Example <TT>GrpFP_1_Lix3 (H75E60)</TT></A></H3>
+We determine all conjugacy classes of subgroups having index at most
+15 in the triangle group &lt;a, b | a<sup>2</sup>, b<sup>3</sup>, (ab)^ 7 &gt;.
+<P>
+<P>
+<PRE>
+&gt; G&lt;a, b&gt; := Group&lt; a, b | a^2, b^3, (a*b)^7 &gt;;
+&gt; L := LowIndexSubgroups(G, 15: Print := 1);
+
+Subgroup class 1        Index 7 Length 7        Subgroup generators :-
+{ a, b * a * b^-1, b^-1 * a * b * a * b^-1 * a * b }
+
+
+Subgroup class 2        Index 7 Length 7        Subgroup generators :-
+{ a, b^-1 * a * b^-1 * a * b * a * b, b * a * b^-1 }
+
+Subgroup class 3        Index 15        Length 15       Subgroup generators :-
+{ a, b^-1 * a * b * a * b^-1 * a * b * a * b^-1 * a * b, b * a * b^-1 }
+
+
+Subgroup class 4        Index 15        Length 15       Subgroup generators :-
+{ a, b * a * b^-1, b^-1 * a * b^-1 * a * b * a * b^-1 * a * b * a * b }
+
+
+Subgroup class 5        Index 14        Length 14       Subgroup generators :-
+{ a, b^-1 * a * b * a * b^-1 * a * b * a * b * a * b^-1 * a * b, b * a * b^-1 }
+
+
+Subgroup class 6        Index 14        Length 7        Subgroup generators :-
+{ a, b^-1 * a * b * a * b^-1 * a * b * a * b^-1 * a * b * a * b^-1 * a * b, b * 
+a * b * a * b^-1 }
+
+
+Subgroup class 7        Index 14        Length 14       Subgroup generators :-
+{ a, b^-1 * a * b * a * b^-1 * a * b^-1 * a * b * a * b * a * b^-1 * a * b, b * 
+a * b * a * b^-1 }
+
+
+Subgroup class 8        Index 14        Length 7        Subgroup generators :-
+{ a, b * a * b * a * b^-1 * a * b^-1 * a * b * a * b * a * b^-1 * a * b^-1, b^-1
+ * a * b * a * b }
+
+
+Subgroup class 9        Index 15        Length 15       Subgroup generators :-
+{ a, b * a * b * a * b^-1 * a * b^-1, b^-1 * a * b^-1 * a * b * a * b }
+
+
+Subgroup class 10       Index 9 Length 9        Subgroup generators :-
+{ a, b * a * b * a * b * a * b^-1 }
+
+Subgroup class 11       Index 14        Length 7        Subgroup generators :-
+{ a, b * a * b * a * b * a * b^-1 * a * b, b * a * b^-1 * a * b * a * b^-1 }
+
+Subgroup class 12       Index 14        Length 7        Subgroup generators :-
+{ a, b * a * b * a * b^-1 * a * b * a * b, b * a * b^-1 * a * b * a * b^-1 }
+
+Subgroup class 13       Index 14        Length 7        Subgroup generators :-
+{ a, b^-1 * a * b * a * b^-1 * a * b, b * a * b * a * b * a * b^-1 * a * b^-1 }
+
+
+Subgroup class 14       Index 14        Length 7        Subgroup generators :-
+{ a, b * a * b * a * b^-1 * a * b * a * b, b^-1 * a * b * a * b^-1 * a * b }
+
+
+Subgroup class 15       Index 14        Length 14       Subgroup generators :-
+{ a, b^-1 * a * b * a * b * a * b^-1 * a * b, b * a * b * a * b * a * b^-1 * a *
+ b^-1 }
+
+Subgroup class 16       Index 8 Length 8        Subgroup generators :-
+{ b, a * b * a * b * a * b^-1 * a }
+</PRE>
+<HR>
+<H3><A NAME = "9327">Example <TT>GrpFP_1_Lix4 (H75E61)</TT></A></H3>
+In this example we illustrate the use of the low index subgroup 
+process by using it to determine whether the simple group PSL(2, 8) is a
+homomorphic image of the triangle group &lt; x, y | x<sup>2</sup>, y<sup>3</sup>, (xy)<sup>7</sup> &gt;.
+<P>
+<P>
+<PRE>
+&gt; F&lt;x, y&gt; := FreeGroup(2);
+&gt; G&lt;x, y&gt; := quo&lt; F | x^2, y^3, (x*y)^7 &gt;;
+&gt; LP := LowIndexProcess(G, 30);
+&gt; i := 0;
+&gt; while i le 100 and not IsEmpty(LP) do
+&gt;    H := ExtractGroup(LP);
+&gt;    NextSubgroup(~LP);
+&gt;    P := CosetImage(G, H);
+&gt;    if Order(P) eq 504 and IsSimple(P) then
+&gt;       	print "The group G has L(2, 8) as a homomorphic image.";
+&gt;        print "It is afforded by the subgroup:-", H;
+&gt;       	break;
+&gt;    end if;
+&gt;    i +:= 1;
+&gt; end while;
+The group G has L(2, 8) as a homomorphic image.
+It is afforded by the subgroup:- 
+Finitely presented group H on 4 generators
+Index in group G is 28 = 2^2 * 7
+Generators as words in group G
+       H.1 = x
+       H.2 = y * x * y^-1
+       H.3 = y^-1 * x * y * x * y^-1 * x * y * x * y^-1 * x * y * x * y^-1 *
+       x * y * x * y
+       H.4 = y^-1 * x * y * x * y^-1 * x * y^-1 * x * y * x * y^-1 * x * y * 
+       x * y * x * y^-1 * x * y
+</PRE>
+<HR>
+<H3><A NAME = "9328">Example <TT>GrpFP_1_Lix5 (H75E62)</TT></A></H3>
+This example shows how the low index subgroup machinery may be 
+used as part of a function trying to prove that a group is infinite:
+<P>
+<P>
+<PRE>
+&gt; function MyIsInfinite(G)
+&gt; 
+&gt;  // ...
+&gt; 
+&gt;  // Low index subgroup approach: check whether an obviously
+&gt;  //    infinite subgroup can be found in reasonable time.
+&gt;  P := LowIndexProcess(G, 30 : TimeLimit := 5);
+&gt;  while IsValid(P) and not IsEmpty(P) do
+&gt;     H := ExtractGroup(P);
+&gt;     NextSubgroup(~P); 
+&gt;     if 0 in AbelianQuotientInvariants(H) then
+&gt;        print "The group G has subgroup:-", H;
+&gt;        print "whose abelian quotient is infinite";
+&gt;        print "Hence G is infinite.";
+&gt;        return true;
+&gt;     end if;
+&gt;  end while;
+&gt;  print "Low index approach fails; trying other methods...";
+&gt; 
+&gt;  // ...
+&gt; 
+&gt; end function;
+</PRE>
+We try the code fragment on the group
+&lt; x, z | z<sup>3</sup> x z<sup>3</sup> x<sup> - 1</sup>, z<sup>5</sup> x<sup>2</sup> z<sup>2</sup> x<sup>2</sup> &gt;.
+<P>
+<P>
+<PRE>
+&gt; G&lt;x, z&gt; := Group&lt;x,z | z^3*x*z^3*x^-1, z^5*x^2*z^2*x^2 &gt;;
+&gt; MyIsInfinite(G);
+The group G has subgroup:- 
+Finitely presented group H on 4 generators
+Index in group G is 4 = 2^2
+Generators as words in group G
+    H.1 = x
+    H.2 = z * x * z
+    H.3 = z^3
+    H.4 = z * x^-1 * z * x * z^-1
+whose abelian quotient has structure [ 2, 6, 0 ]
+Hence G is infinite.
+true
+</PRE>
+<HR>
+<H5><A NAME = "9329">LowIndexNormalSubgroups(G, n: parameters) : GrpFP, RngIntElt -&gt; [ Rec ]</A></H5>
+<BLOCKQUOTE>
+The normal subgroups of finitely presented group G up to index n,
+n &le;100 000. The subgroups are returned as a sequence of records 
+(ordered by subgroup index) where the ith record contains fields
+<P>
+<P>
+<TT>Group</TT>: A presentation of the ith normal subgroup.
+<P>
+<P>
+<TT>Index</TT>: The index of the ith normal subgroup in G.
+<P>
+<P>
+<TT>Supegroups</TT>: The set of positions in the sequence of the groups which are
+supergroups of the ith group.
+<P>
+<P>
+<PRE>
+     PrintLevel: RingIntElt              Default: 0
+</PRE>
+This parameter may be set to 0, 1 or 2. At 0, the function prints no diagnostic
+output.
+At level 1, it outputs details of each normal subgroup being tested for
+further normal subgroups.
+Level 2 gives details of each test being performed on each normal subgroup.
+<P>
+<P>
+<PRE>
+     Simplify: MonStgElt                 Default: "No"
+</PRE>
+The possible values are <TT>"No"</TT>, <TT>"Yes"</TT> and <TT>"LengthLimit"</TT>. This determines the
+parameter values passed to the <TT>Rewrite(G,H)</TT> function,
+when this function is used.
+The value <TT>"No"</TT> sets parameter <TT>Simplify:=false</TT>. The value <TT>"Yes"</TT>
+sets parameter <TT>Simplify:=true</TT>. The value <TT>"LengthLimit"</TT> sets parameter
+<TT>LengthLimit:=Index(G,H)</TT>.
+</BLOCKQUOTE>
+<H4><A NAME = "9330">Subgroup Constructions</A></H4>
+
+<P>
+<P>
+<P>
+Most operations described in this subsection require a closed coset table
+for at least one subgroup of an fp-group. If a closed coset table is needed and
+has not been computed, a coset enumeration will be invoked. If the coset
+enumeration does not produce a closed coset table, a runtime error is reported.
+<P>
+<P>
+Experienced users can control the behaviour of such indirectly invoked coset
+enumeration with a set of global parameters. These global parameters can be
+changed using the function <A  HREF = "text814.htm#GrpFP_1:SetGlobalTCParameters">SetGlobalTCParameters</A>. For a
+detailed description of the available parameters and their meanings, we refer
+to Chapter <A  HREF = "text823.htm#9460">FINITELY PRESENTED GROUPS: ADVANCED</A>.
+<P>
+
+
+<H5><A NAME = "9331">H ^ u : GrpFP, GrpFPElt -&gt; GrpFP</A></H5>
+<H5>Conjugate(H, u): GrpFP, GrpFPElt -&gt; GrpFP</H5>
+<BLOCKQUOTE>
+Given an fp-group H and a word u in an fp-group K, such that
+H and K are subgroups of some common fp-group G and words in terms
+of the generators of G are known for the generators of both H and K,
+construct the subgroup of G obtained by conjugating H by u.
+</BLOCKQUOTE>
+<H5><A NAME = "9332"></A>H <A NAME = "GrpFP_1:meet">meet</A> K : GrpFP, GrpFP -&gt; GrpFP</H5>
+<BLOCKQUOTE>
+Given subgroups H and K, both of finite index in some fp-group G,
+return the subgroup which is the intersection of H and K.
+<P>
+<P>
+This function requires closed coset tables for both, H and K in G.
+</BLOCKQUOTE>
+<H5><A NAME = "9333"></A><A NAME = "GrpFP_1:Core">Core</A>(G, H) : GrpFP, GrpFP -&gt; GrpFP</H5>
+<BLOCKQUOTE>
+Given a subgroup H of finite index in the fp-group G, construct
+the core of H in G.
+<P>
+<P>
+This function requires a closed coset table for H in G.
+</BLOCKQUOTE>
+<H5><A NAME = "9334"></A><A NAME = "GrpFP_1:GeneratingWords">GeneratingWords</A>(G, H) : GrpFP, GrpFP -&gt; { GrpFPElt }</H5>
+<BLOCKQUOTE>
+Given a subgroup H of the fp-group G, this function returns a set of
+words in the generators of G, generating H as a subgroup of G (assuming
+such words are known or can be constructed).  Note that the returned
+generating set does
+not necessarily correspond to the internal generators of H. In particular,
+generating words obtained using the function <TT>GeneratingWords</TT> cannot
+be used to coerce elements from H to G.
+</BLOCKQUOTE>
+<H5><A NAME = "9335"></A><A NAME = "GrpFP_1:MaximalOvergroup">MaximalOvergroup</A>(G, H) : GrpFP, GrpFP -&gt; GrpFP</H5>
+<BLOCKQUOTE>
+Given a subgroup H of finite index in the fp-group G, construct a
+maximal overgroup of H in G. A <I>maximal overgroup</I> of H is
+a maximal subgroup of G that contains H. If H is already maximal,
+the group G is returned.
+<P>
+<P>
+This function requires a closed coset table for H in G.
+</BLOCKQUOTE>
+<H5><A NAME = "9336"></A><A NAME = "GrpFP_1:MinimalOvergroup">MinimalOvergroup</A>(G, H) : GrpFP, GrpFP -&gt; GrpFP</H5>
+<BLOCKQUOTE>
+Given a subgroup H of finite index in the fp-group G, construct a
+minimal overgroup of H in G. A <I>minimal overgroup</I> of a
+subgroup H is a subgroup K of G such that K contains H
+as a maximal subgroup. If H is already maximal in G, the group G
+is returned.
+<P>
+<P>
+This function requires a closed coset table for H in G.
+</BLOCKQUOTE>
+<H5><A NAME = "9337">H ^ G : GrpFP, GrpFP -&gt; GrpFP</A></H5>
+<H5><A NAME = "GrpFP_1:NormalClosure">NormalClosure</A>(G, H) : GrpFP, GrpFP -&gt; GrpFP</H5>
+<BLOCKQUOTE>
+Given a subgroup H of finite index in the fp-group G, construct
+the normal closure of H in G.
+<P>
+<P>
+This function requires a closed coset table for H in G.
+</BLOCKQUOTE>
+<H5><A NAME = "9338"></A><A NAME = "GrpFP_1:Normaliser">Normaliser</A>(G, H) : GrpFP, GrpFP -&gt; GrpFP</H5>
+<H5>Normalizer(G, H) : GrpFP, GrpFP -&gt; GrpFP</H5>
+<BLOCKQUOTE>
+Given a subgroup H of finite index in the fp-group G, construct
+the normaliser of H in G. For a sample application of this function, see
+Example <A  HREF = "text814.htm#9307">H75E55</A>.
+<P>
+<P>
+This function requires a closed coset table for H in G.
+</BLOCKQUOTE>
+<H5><A NAME = "9339"></A><A NAME = "GrpFP_1:SchreierGenerators">SchreierGenerators</A>(G, H : parameters) : GrpFP, GrpFP -&gt; { GrpFPElt }</H5>
+
+<PRE>    Simplify: BoolElt                   Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a subgroup H of finite index in the fp-group G, return the
+Schreier generators for H as a set of words in G.
+<P>
+If the parameter <TT>Simplify</TT> is set to <TT>true</TT> (default), a heuristic
+method of eliminating redundant Schreier generators is applied. To switch this
+feature off, set <TT>Simplify</TT> to <TT>false</TT>.
+<P>
+<P>
+This function requires a closed coset table for H in G.
+</BLOCKQUOTE>
+<H5><A NAME = "9340"></A><A NAME = "GrpFP_1:SchreierSystem">SchreierSystem</A>(G, H) : GrpFP, GrpFP -&gt; {@ GrpFPElt  @}, Map</H5>
+<H5><A NAME = "GrpFP_1:Transversal">Transversal</A>(G, H) : GrpFP, GrpFP -&gt; {@ GrpFPElt  @}, Map</H5>
+<BLOCKQUOTE>
+Given a subgroup H of finite index in the fp-group G, construct a
+(right) Schreier system of coset representatives for H in G. The
+function returns
+<P>
+(a) the Schreier system as a set of words in G;
+<P>
+(b) the corresponding Schreier coset function.
+<P>
+<P>
+This function requires a closed coset table for H in G.
+</BLOCKQUOTE>
+<H5><A NAME = "9341"></A><A NAME = "GrpFP_1:Transversal_3">Transversal</A>(G, H, K) : GrpFP, GrpFP, GrpFP -&gt; {@ GrpFPElt  @}, Map</H5>
+<BLOCKQUOTE>
+Given subgroups H and K, both of finite index in the fp-group G,
+return an indexed set of words which comprise a set of representatives for the
+double cosets HuK of H and K in G, as well as a map from G
+to the representatives. It should be noted that this
+function is evaluated by first constructing the right cosets of H in 
+G and then computing the orbits of the cosets under the action of the 
+generators of the subgroup K.
+<P>
+<P>
+This function requires a closed coset table for H in G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9342">Example <TT>GrpFP_1_SubgroupConstructions (H75E63)</TT></A></H3>
+We illustrate some of the subgroup constructions by using 
+<P>
+them to construct subgroups of small index in the two-dimensional space 
+group p4g which has the presentation
+  &lt; r, s | r<sup>2</sup>, s<sup>4</sup>, (r, s)<sup>2</sup> &gt;.
+<P>
+<P>
+<PRE>
+&gt; p4g&lt;r, s&gt; := Group&lt; r, s | r^2 = s^4 = (r*s^-1*r*s)^2 = 1 &gt;;
+&gt; p4g;
+Finitely presented group p4g on 2 generators
+Relations
+    r^2 = Id(p4g)
+    s^4 = Id(p4g)
+    (r * s^-1 * r * s)^2 = Id(p4g)
+</PRE>
+We define two subgroups of p4g and compute their indices in p4g.
+<P>
+<P>
+<PRE>
+&gt; h := sub&lt; p4g | (s^-1*r)^4, s*r &gt;;
+&gt; k := sub&lt; p4g | (s^-1*r)^2, (s*r)^2 &gt;;
+&gt; Index(p4g, h);
+8
+&gt; Index(p4g, k);
+8
+</PRE>
+We construct the normal closure of h in p4g.
+<P>
+<P>
+<PRE>
+&gt; n := NormalClosure(p4g, h);
+&gt; n;
+Finitely presented group n on 6 generators
+Index in group p4g is 2
+Generators as words in group p4g
+    n.1 = (s^-1 * r)^4
+    n.2 = s * r
+    n.3 = r * s
+    n.4 = r^-1 * s * r^2
+    n.5 = s^2 * r * s^-1
+    n.6 = r * s
+</PRE>
+Next, we construct a subgroup of p4g containing h as maximal subgroup ... <PRE>
+&gt; m := MinimalOvergroup(p4g, h);
+&gt; m;
+Finitely presented group m on 3 generators
+Index in group p4g is 4 = 2^2
+Generators as words in group p4g
+    m.1 = (s^-1 * r)^4
+    m.2 = s * r
+    m.3 = (r * s)^2
+</PRE> ... and a maximal subgroup of p4g containing k.
+<P>
+<P>
+<PRE>
+&gt; n := MaximalOvergroup(p4g, k);
+&gt; n;
+Finitely presented group n on 4 generators
+Index in group p4g is 2
+Generators as words in group p4g
+    n.1 = (s^-1 * r)^2
+    n.2 = (s * r)^2
+    n.3 = r
+    n.4 = s^2
+</PRE>
+Finally, we construct a transversal in p4g for the normaliser of h in
+p4g ... <PRE>
+&gt; T := Transversal(p4g, Normaliser(p4g, h));
+&gt; T;
+{@ Id(p4g), r, s^-1, r * s @}
+</PRE> ... compute the intersection of h and the conjugate of h by
+r ... <PRE>
+&gt; l := h meet h^r;
+&gt; l;
+Finitely presented group l
+Index in group p4g is 32 = 2^5
+Subgroup of group p4g defined by coset table
+</PRE> ... and construct the core of h in p4g.
+<P>
+<P>
+<PRE>
+&gt; c := Core(p4g, h);
+&gt; c;
+Finitely presented group c
+Index in group p4g is 32 = 2^5
+Subgroup of group p4g defined by coset table
+</PRE>
+Note, that the two subgroups l and c constructed last are defined as
+finite index subgroups of p4g by a coset table and that there are no
+generators known for them. Generators can be obtained e.g. by using the
+function <A  HREF = "text815.htm#GrpFP_1:GeneratingWords">GeneratingWords</A>. We show this for the subgroup l.
+<P>
+<P>
+<PRE>
+&gt; GeneratingWords(p4g, l);
+{ (s * r)^4, (s^-1 * r)^4 }
+</PRE>
+Once computed, these generators are memorised. Compare the result of printing
+l to the output obtained above.
+<P>
+<P>
+<PRE>
+&gt; l;
+Finitely presented group l on 2 generators
+Index in group p4g is 32 = 2^5
+Generators as words in group p4g
+    l.1 = (s * r)^4
+    l.2 = (s^-1 * r)^4
+</PRE>
+<HR>
+<H3><A NAME = "9343">Example <TT>GrpFP_1_SchreierGenerators (H75E64)</TT></A></H3>
+Consider the group G given by the presentation
+&lt; x, y | x<sup>2</sup>, y<sup>3</sup>, (xy)<sup>7</sup> &gt;.
+<P>
+<P>
+<PRE>
+&gt; G&lt;x,y&gt; := Group&lt; x,y | x^2, y^3, (x*y)^7 &gt;;
+</PRE>
+We construct the subgroups of index less than or equal to 7 using the low
+index algorithm.
+<P>
+<P>
+<PRE>
+&gt; L := LowIndexSubgroups(G, 7);
+&gt; L;
+[
+    Finitely presented group on 2 generators
+    Index in group G is 1
+    Generators as words in group G
+        $.1 = x
+        $.2 = y,
+
+    Finitely presented group on 3 generators
+    Index in group G is 7
+    Generators as words in group G
+        $.1 = x
+        $.2 = y * x * y^-1
+        $.3 = y^-1 * x * y^-1 * x * y * x * y,
+
+    Finitely presented group on 3 generators
+    Index in group G is 7
+    Generators as words in group G
+        $.1 = x
+        $.2 = y * x * y^-1
+        $.3 = y^-1 * x * y * x * y^-1 * x * y
+]
+</PRE>
+We define a subgroup as the core of one of the subgroups of index 7. The
+function <A  HREF = "text815.htm#GrpFP_1:Core">Core</A> returns a subgroup of G defined by a coset
+table.
+<P>
+<P>
+<PRE>
+&gt; H := Core(G, L[2]);
+&gt; H;
+Finitely presented group H
+Index in group G is 168 = 2^3 * 3 * 7
+Subgroup of group G defined by coset table
+</PRE>
+A set of generators for H can be obtained e.g. with the function
+<A  HREF = "text815.htm#GrpFP_1:SchreierGenerators">SchreierGenerators</A>.
+<P>
+<P>
+<PRE>
+&gt; sgH := SchreierGenerators(G, H);
+&gt; #sgH;
+6
+</PRE>
+By default, <A  HREF = "text815.htm#GrpFP_1:SchreierGenerators">SchreierGenerators</A> returns a reduced generating
+set. The unreduced set of Schreier generators can be obtained by setting the
+value of the parameter <TT>Simplify</TT> to <TT>false</TT>.
+<P>
+<P>
+<PRE>
+&gt; sgHu := SchreierGenerators(G, H : Simplify := false);
+&gt; #sgHu;
+85
+</PRE>
+<HR>
+<H4><A NAME = "9344">Properties of Group and Subgroups</A></H4>
+
+<P>
+<P>
+The operations described in this subsection all require a closed coset table
+for at least one subgroup of an fp-group. If a closed coset table is needed and
+has not been computed, a coset enumeration will be invoked. If the coset
+enumeration does not produce a closed coset table, a runtime error is reported.
+<P>
+<P>
+Experienced users can control the behaviour of such indirectly invoked coset
+enumeration with a set of global parameters. These global parameters can be
+changed using the function <A  HREF = "text814.htm#GrpFP_1:SetGlobalTCParameters">SetGlobalTCParameters</A>. For a
+detailed description of the available parameters and their meanings, we refer
+to Chapter <A  HREF = "text823.htm#9460">FINITELY PRESENTED GROUPS: ADVANCED</A>.
+
+
+<H5><A NAME = "9345"></A>u <A NAME = "GrpFP_1:in">in</A> H : GrpFPElt, GrpFP -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Given an fp-group H and a word u in an fp-group K, such that
+H and K are subgroups of some common fp-group G, H is of finite
+index in G, and words for the generators of K in terms of the generators
+of G are known, return <TT>true</TT> if u is an element of H and <TT>false</TT>
+otherwise.
+<P>
+<P>
+This function requires a closed coset table for H in G.
+</BLOCKQUOTE>
+<H5><A NAME = "9346"></A>u <A NAME = "GrpFP_1:notin">notin</A> H : GrpFPElt, GrpFP -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Given an fp-group H and a word u in an fp-group K, such that
+H and K are subgroups of some common fp-group G, H is of finite
+index in G, and words for the generators of K in terms of the generators
+of G are known, return <TT>true</TT> if u is not an element of H and <TT>false</TT>
+otherwise.
+<P>
+<P>
+This function requires a closed coset table for H in G.
+</BLOCKQUOTE>
+<H5><A NAME = "9347"></A>H <A NAME = "GrpFP_1:eq">eq</A> K : GrpFP, GrpFP -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Given subgroups H and K, both of finite index in the fp-group G,
+return <TT>true</TT> if H and K are equal and <TT>false</TT> otherwise.
+<P>
+<P>
+This function may require closed coset tables for both, H and K in G.
+</BLOCKQUOTE>
+<H5><A NAME = "9348"></A>H <A NAME = "GrpFP_1:ne">ne</A> K : GrpFP, GrpFP -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Given subgroups H and K, both of finite index in the fp-group G,
+return <TT>true</TT> if H and K are not equal and <TT>false</TT> otherwise.
+<P>
+<P>
+This function may require closed coset tables for both, H and K in G.
+</BLOCKQUOTE>
+<H5><A NAME = "9349"></A>H <A NAME = "GrpFP_1:subset">subset</A> K : GrpFP, GrpFP -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Given subgroups H and K, both of finite index in the fp-group G,
+return <TT>true</TT> if H is contained in K and <TT>false</TT> otherwise.
+<P>
+<P>
+This function requires a closed coset table for K in G.
+</BLOCKQUOTE>
+<H5><A NAME = "9350"></A>H <A NAME = "GrpFP_1:notsubset">notsubset</A> K : GrpFP, GrpFP -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Given subgroups H and K, both of finite index in the fp-group G,
+return <TT>true</TT> if H is not contained in K and <TT>false</TT> otherwise.
+<P>
+<P>
+This function requires a closed coset table for K in G.
+</BLOCKQUOTE>
+<H5><A NAME = "9351"></A><A NAME = "GrpFP_1:IsConjugate">IsConjugate</A>(G, H, K) : GrpFP, GrpFP, GrpFP -&gt; BoolElt, GrpFPElt</H5>
+<BLOCKQUOTE>
+Given subgroups H and K, both of finite index in the fp-group G,
+return <TT>true</TT> if H and K are conjugate subgroups of G and <TT>false</TT> otherwise.
+If H and K are conjugate in G, a conjugating element is returned as
+second return value.
+<P>
+<P>
+This function requires a closed coset table for both, H and K in G.
+</BLOCKQUOTE>
+<H5><A NAME = "9352"></A><A NAME = "GrpFP_1:IsNormal">IsNormal</A>(G, H) : GrpFP, GrpFP -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Given a subgroup H of finite index in the fp-group G, return
+<TT>true</TT> if H is a normal subgroup of G and <TT>false</TT> otherwise.
+<P>
+<P>
+This function requires a closed coset table for H in G.
+</BLOCKQUOTE>
+<H5><A NAME = "9353"></A><A NAME = "GrpFP_1:IsMaximal">IsMaximal</A>(G, H) : GrpFP, GrpFP -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Given a subgroup H of finite index in the fp-group G, return
+<TT>true</TT> if H is a maximal subgroup of G and <TT>false</TT> otherwise.
+<P>
+<P>
+This function requires a closed coset table for H in G.
+</BLOCKQUOTE>
+<H5><A NAME = "9354"></A><A NAME = "GrpFP_1:IsSelfNormalizing">IsSelfNormalizing</A>(G, H) : GrpFP, GrpFP -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Given a subgroup H of finite index in the fp-group G, return
+<TT>true</TT> if H is a self-normalizing subgroup of G and <TT>false</TT> otherwise.
+For a sample application of this function, see Example
+<A  HREF = "text814.htm#9307">H75E55</A>.
+<P>
+<P>
+This function requires a closed coset table for H in G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9355">Example <TT>GrpFP_1_SubgroupOps (H75E65)</TT></A></H3>
+We illustrate some of the subgroup predicates by applying 
+them to some subgroups of the two-dimensional space 
+group p4g = &lt; r, s | r<sup>2</sup>, s<sup>4</sup>, (r, s)<sup>2</sup> &gt; from Example
+<A  HREF = "text815.htm#9342">H75E63</A>.
+<P>
+<P>
+<PRE>
+&gt; p4g&lt;r, s&gt; := Group&lt; r, s | r^2 = s^4 = (r*s^-1*r*s)^2 = 1 &gt;;
+&gt; h := sub&lt; p4g | (s^-1*r)^4, s*r &gt;;
+&gt; k := sub&lt; p4g | (s^-1*r)^2, (s*r)^2 &gt;;
+</PRE>
+h and k have the same index in p4g ... <PRE>
+&gt; Index(p4g, h);
+8
+&gt; Index(p4g, k);
+8
+</PRE> ... but they are not equal.
+<P>
+<P>
+<PRE>
+&gt; h eq k;
+false
+</PRE>
+We check for normality of h and k in p4g.
+<P>
+<P>
+<PRE>
+&gt; IsNormal(p4g, h);
+false
+&gt; IsNormal(p4g, k);
+true
+</PRE>
+We construct the normal closure of h in p4g.
+<P>
+<P>
+<PRE>
+&gt; n := NormalClosure(p4g, h);
+</PRE>
+We see that it is maximal ... <PRE>
+&gt; IsMaximal(p4g, n);
+true
+</PRE> ... and that it contains k.
+<P>
+<P>
+<PRE>
+&gt; k subset n;
+true
+</PRE>
+We define another subgroup of p4g.
+<P>
+<P>
+<PRE>
+&gt; l := sub&lt; p4g | (s*r)^4, s^-1*r &gt;;
+</PRE>
+In fact, it is conjugate to h.
+<P>
+<P>
+<PRE>
+&gt; IsConjugate(p4g, h, l);
+true r^-1
+</PRE>
+I.e. l = h^(r<sup> - 1</sup>). The intersection of h and h^(r<sup> - 1</sup>) already yields
+the core of h in p4g.
+<P>
+<P>
+<PRE>
+&gt; h meet l eq Core(p4g, h);
+true
+</PRE>
+<HR>
+<H3><A NAME = "9356">Example <TT>GrpFP_1_BuildSubgroups (H75E66)</TT></A></H3>
+The constructions of the previous section together with the
+Boolean function <A  HREF = "text815.htm#GrpFP_1:IsMaximal">IsMaximal</A> may be used to locate large maximal
+subgroups in a finite group. Consider the Hall-Janko group J<sub>2</sub>, which may be
+defined by the presentation
+    &lt;a, b, c | a^3, b^3, c^3, abab^{-1}a^{-1}b^{-1}, (ca)^5, (cb)^5,
+  (cb^{-1}cb)^2, a^{-1}baca^{-1}bac^{-1}a^{-1}b^{-1}ac^{-1},
+  aba^{-1}caba^{-1}c^{-1}ab^{-1}a^{-1}c^{-1}&gt;.
+We examine subgroups generated by pairs of randomly chosen short words.
+Whenever we obtain a proper subgroup, if it is not already maximal we 
+replace it by a maximal subgroup that contains it.
+<P>
+<P>
+<PRE>
+&gt; J2&lt;a, b, c&gt; := Group&lt;a, b, c | a^3, b^3, c^3, a*b*a*b^-1*a^-1*b^-1, (c*a)^5,
+&gt;                                   (c*b)^5, (c*b^-1*c*b)^2,
+&gt;                                   a^-1*b*a*c*a^-1*b*a*c^-1*a^-1*b^-1*a*c^-1,
+&gt;                                   a*b*a^-1*c*a*b*a^-1*c^-1*a*b^-1*a^-1*c^-1&gt;;
+&gt; 
+&gt; Seen := { 0, 1 };
+&gt; Found := { };
+&gt; Sgs := [ ];
+&gt; for i := 1 to 30 do
+&gt;     u := Random(J2, 1, 1);
+&gt;     v := Random(J2, 3, 5);
+&gt;     H := sub&lt; J2 | u, v &gt;;
+&gt;     Indx := Index(J2, H);
+&gt;     if Indx notin Seen then
+&gt;        Include(~Seen, Indx);
+&gt;          if not IsMaximal(J2, H) then 
+&gt;            H := MaximalOvergroup(J2, H);
+&gt;         end if; 
+&gt;        if Indx notin Found then
+&gt;            Include(~Sgs, H);  
+&gt;            Include(~Seen, Indx); 
+&gt;            Include(~Found, Indx); 
+&gt;        end if;
+&gt;    end if;
+&gt; end for;
+&gt; Sgs;
+
+[
+      Finitely presented group on 3 generators
+      Index in group J2 is 315 = 3^2 * 5 * 7
+      Generators as words in group J2
+             $.1 = b^-1
+             $.2 = a^-2 * c * a^-1
+             $.3 = c,
+
+
+      Finitely presented group on 3 generators
+      Index in group J2 is 1008 = 2^4 * 3^2 * 7
+      Generators as words in group J2
+             $.1 = b^-1
+             $.2 = c^-1 * a^-1 * c^-1 * b
+             $.3 = a * c * b * c^-1 * a^-1 * c * b * c^-1,
+
+
+      Finitely presented group on 3 generators
+      Index in group J2 is 100 = 2^2 * 5^2
+      Generators as words in group J2
+             $.1 = c
+             $.2 = (b * a^-1)^2
+             $.3 = a * b^-1
+]
+</PRE>
+Thus after taking 30 2-generator random subgroups, we have obtained 
+three maximal subgroups, including the two largest maximal subgroups.
+<HR>
+<H5><A NAME = "9357"></A><A NAME = "GrpFP_1:IsLarge">IsLarge</A>(G, L, U:parameters) : GrpFP, RngIntElt, RngIntElt -&gt; BoolElt, GrpFP</H5>
+<BLOCKQUOTE>
+Attempt to show that G has a subgroup with homomorphic image the free
+group of rank 2. If successful return <TT>true</TT>, plus a subgroup witness to this
+property. If not successful, return <TT>false</TT>. Note that <TT>false</TT> does not imply
+that G doesn't have the stated property, just that no such subgroup has
+been found. The witness group returned has a finite index subgroup with
+the free group of rank 2 as a homomorphic image. The algorithm will consider
+subgroups of G with index h having L&le;h&le;U.
+<P>
+We attempt to decide if G is large by calculating the (multivariable) 
+Alexander polynomial of those subgroups H of G having index h in the
+given range, and also subgroups of H having index up to 2h in G.
+<P>
+<P>
+<PRE>
+     Simplify: BoolElt                   Default: <TT>true</TT>
+</PRE>
+Controls simplification of subgroup presentations.
+<P>
+<P>
+<PRE>
+     MaxExponent: RngIntElt              Default: 100000
+</PRE>
+If the abelian torsion of subgroup H is greater than <TT>MaxExponent</TT>
+we do not rewrite to obtain a presentation of H.
+<P>
+<P>
+<PRE>
+     TimeLimit: RngIntElt                Default: 10
+</PRE>
+If, in computing low index 
+subgroups of a finite index subgroup H of G, the low-index subgroup 
+calculation takes more than <TT>TimeLimit</TT> in seconds, then abort without
+trying to find more subgroups of H.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text816.htm">[Next]</A><A  HREF = "text814.htm">[Prev]</A> <A  HREF = "text816.htm">[Right]</A> <A  HREF = "text814.htm">[Left]</A> <A  HREF = "text808.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

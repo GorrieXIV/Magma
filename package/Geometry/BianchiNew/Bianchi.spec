@@ -1,0 +1,11 @@
+compute.m
+cohomology.m
+cuspidal.m
+defs.m
+hackobj.m
+hecke.m
+setlevel.m
+setup.m 
+sharbly.m
+srd_reduce.m
+subspace.m

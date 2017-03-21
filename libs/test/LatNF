@@ -1,0 +1,306 @@
+
+K<s5>:=QuadraticField(5);
+L:=NumberFieldLattice(K,3);
+v:=L.1;
+assert 2*v in L;
+assert s5*v in L;
+assert not Vector(v)/2 in L;
+assert InnerProduct(s5*v,s5*v) eq 5;
+assert v+v eq 2*v;
+
+G:=DiagonalMatrix([K | (s5-1)/2,1,1]);
+L2:=NumberFieldLattice(K,3 : Gram:=G);
+assert InnerProduct(L2.1,L2.1) eq (s5-1)/2;
+assert not IsTotallyPositiveDefinite(L2);
+assert L2 eq NumberFieldLattice(K,3 : Gram:=G); // should be guaranteed
+
+phi:=(1-s5)/2;
+Vs:=[L.2+phi*L.3,L.2-phi*L.3,L.1+phi*L.2];
+L3:=NumberFieldLattice([Vector(v) : v in Vs]);
+assert IsIdentical(L3,sub<L|Vs>); // should always work, same basis
+assert #AutomorphismGroup(L3 : Check) eq 120;
+assert #AutomorphismGroup(L3 : Check,NaturalAction) eq 120;
+assert not v in L3; // no complaints, v is in ambient
+assert L3!L3.1 eq L3.1;
+assert Norm(Determinant(L3)) eq Norm(-2*s5+6); // note this has norm 16
+// (L meet L3) and (L3 meet L) often differ in this regard
+assert Norm(Determinant(L meet L3)/Determinant(L3 meet L)) eq 1;
+
+assert #Sphere(L,K!1) eq 6;
+assert #Sphere(L,(5-s5)/2) eq 24;
+assert Set(Vs) subset Sphere(L,(5-s5)/2);
+assert #Sphere(L,K!3) eq 32;
+assert #Sphere(L3,K!1) eq 0;
+assert #Sphere(L3,(5-s5)/2) eq 12;
+assert Set(ChangeUniverse(Vs,L3)) subset Sphere(L3,(5-s5)/2);
+assert #Sphere(L3,K!3) eq 20;
+
+A:=AutomorphismGroup(L3 : Check);
+assert #Stabilizer(A,L3!Vs[1]) eq 10;
+assert #Orbit(A,L3!Vs[3]) eq 12;
+assert #Orbit(A,ChangeUniverse({Vs[1],Vs[2],-Vs[3]},L3)) eq 20;
+assert #Stabilizer(A,ChangeUniverse({Vs[1],Vs[2],-Vs[3]},L3)^(A.2)) eq 6;
+
+////////////////////////////////////////////////////////////////////////
+
+K<s37>:=QuadraticField(37);
+L:=NumberFieldLattice(K,3);
+
+phi:=(1+s37)/2;
+Vs:=[L.2+phi*L.3,L.2-phi*L.3,L.1+phi*L.2];
+L3:=NumberFieldLattice([Vector(v) : v in Vs]);
+assert IsIdentical(L3,sub<L|Vs>); // should always work, same basis
+assert IsSublattice(sub<L3|[]>,L3);
+S:=sub<L3|[L3.1]>;
+O:=OrthogonalComplement(L3,S); // S+O is a sublattice of index 101
+assert 101*L3.2 in (S+O);
+assert 101*L3.3 in (S+O);
+assert IsSublattice(S+O,L3);
+assert S+O ne L3;
+
+G:=DiagonalMatrix([K | (s37-1)/2,1,1]); // needs to be over F, not R
+L2:=NumberFieldLattice(K,3 : Gram:=G);
+
+F:=FieldOfFractions(MaximalOrder(K));
+v1:=Vector([K | F.1,2*F.1+3*F.2,-F.1+4*F.2]);
+v2:=Vector([K | F.1/2,F.1/3-3*F.2/2,F.1+F.2]);
+L4:=NumberFieldLattice([v1,v2]);
+assert Norm(Determinant(L+L4)) eq 1/36^2;
+_:=DirectSum(L4,L2); // test
+S:=sub<L4|[L4.1+L4.2]>;
+O:=OrthogonalComplement(L4,S);
+assert InnerProduct(L4!S.1,L4!O.1) eq 0;
+_:=OrthogonalComplement(L4,L4.2);
+assert Dimension(OrthogonalComplement(L4,L4)) eq 0;
+assert L4 eq OrthogonalComplement(L4,sub<L4|[]>);
+
+L5:=NumberFieldLattice([v1,v2] : InnerProduct:=G);
+T:=Matrix(3,3,[s37,1,0, -1,2+s37,3, 0,-1,1]);
+assert Determinant(T)^2*Determinant(L) eq Determinant(T*L);
+
+A:=Matrix(3,3,[1,s37,s37^2, 0,1,1+s37, 0,0,1]);
+B:=Matrix(3,3,[1,(1+s37)/2,-1, 0,1,2+3*s37, 0,0,1]);
+T:=A*Transpose(B); // T is integral
+L6:=NumberFieldLattice(Basis(L) : Gram:=T*Transpose(T));
+assert IsIsometric(L,L6);
+
+A:=Matrix(3,3,[1,s37,s37^2/2, 0,1,1+s37, 0,0,1]);
+B:=Matrix(3,3,[1,(1+s37)/3,-1, 0,1,2+3*s37/4, 0,0,1]);
+T:=A*Transpose(B);
+L7:=NumberFieldLattice(Basis(L) : Gram:=T*Transpose(T));
+assert not IsIsometric(L,L7); // T is not integral
+
+assert v1 in sub<L5|[v1]>;
+assert v2 in sub<L5|[v2]>;
+assert IsIdentical(L5,sub<L5|[v1,v2]>);
+// assert IsIsometric(L5,sub<L5|[v1+v2,2*v1+v2]>); // nontrivial enum
+O:=OrthogonalComplement(L5,sub<L5|[v1+v2]>);
+assert IsSublattice(O,L5);
+S:=sub<L6|[L6.1+L6.2+L6.3,L6.1-L6.3]>;
+assert IsSublattice(S,L6);
+O:=OrthogonalComplement(L6,S);
+assert Rank(O) eq 1;
+assert InnerProduct(L6!O.1,L6!S.1) eq 0;
+assert InnerProduct(L6!O.1,L6!S.2) eq 0;
+S:=sub<L7|[L7.1+L7.2+L7.3,L7.1-L7.3]>;
+assert IsSublattice(S,L7);
+O:=OrthogonalComplement(L7,S);
+assert Rank(O) eq 1;
+assert InnerProduct(L7!O.1,L7!S.1) eq 0;
+assert InnerProduct(L7!O.1,L7!S.2) eq 0;
+
+K<u>:=QuadraticField(-5);
+L:=NumberFieldLattice(K,2);
+S:=NumberFieldLattice([Vector([2,1+u])]);
+O:=OrthogonalComplement(L,S);
+assert not IsFree(O);
+D:=DirectSum(O,O);
+_:=SimpleLattice(D);
+
+////////////////////////////////////////////////////////////////////////
+
+K<u>:=QuadraticField(257);
+O:=Integers(K); 
+v1:=Vector([K|1,0,0]);
+v2:=Vector([K|0,u,0]);
+G:=Matrix(2,2,[K|1,0,0,2]);
+IP:=Matrix(3,3,[K|1,0,0, 0,2/u^2,0, 0,0,1]);
+L:=NumberFieldLattice([v1,v2] : Gram:=G,InnerProduct:=IP);
+G[2][2]:=1; // make Gram and IP noncoherent
+try L:=NumberFieldLattice([v1,v2] : Gram:=G,InnerProduct:=IP); assert false;
+catch e; end try;
+assert Rank(NumberFieldLattice([v1,v2,v1+v2])) eq 2;
+p2:=Factorization(2*O)[1][1];
+L:=NumberFieldLattice([v1,v2,v1+v2] : Ideals:=[p2,(2*O)/p2,2*O]);
+assert Determinant(L) eq 4*u^2;
+assert Norm(Discriminant(L)) eq 16*u^4;
+assert IsFree(L);
+assert IsSimple(L); // should automatically make it this
+G:=Matrix(3,3,[K|1,0,1, 0,2,2, 1,2,3]);
+Js:=[p2,(2*O)/p2,2*O];
+L:=NumberFieldLattice([v1,v2,v1+v2] : Gram:=G,InnerProduct:=IP,Ideals:=Js);
+S:=sub<L|[2*v1,2*v2,2*v1+2*v2]>;
+O:=OrthogonalComplement(L,S);
+assert O`IP eq IP;
+assert Rank(O) eq 0;
+
+G[2][2]:=1;
+try L:=NumberFieldLattice([v1,v2,v1+v2] : Gram:=G,InnerProduct:=IP,Ideals:=Js);
+assert false; catch e; end try;
+L:=NumberFieldLattice([v1,v2] : Ideals:=Js[1..2]);
+assert IsFree(L); _:=SimpleLattice(L);
+// assert IsIsometric(MakeSimple(L),L); // too lengthy
+L:=NumberFieldLattice([v1,v2] : Ideals:=Js[2..3]);
+assert not IsFree(L);
+assert IsFree(DirectSum([L,L,L]));
+S:=sub<L|[2*v1,2*v2,2*v1+2*v2]>;
+
+G[2][2]:=2;
+L:=NumberFieldLattice([v1,v2,v1+v2] : Gram:=G,Ideals:=Js); // no IP
+S:=sub<L|[2*v1,2*v2,2*v1+2*v2]>;
+assert S subset L;
+assert Rank(OrthogonalComplement(L,S)) eq 0;
+
+K:=QuadraticField(5);
+O:=Integers(K);
+Vs:=[Vector([K|2,0,1]),Vector([K|0,1,2])];
+Js:=[1*O,2*O];
+G:=DiagonalMatrix([K|4,1]);
+L:=NumberFieldLattice(Vs : Gram:=G,Ideals:=Js);
+assert #AutomorphismGroup(L : Check) eq 8;
+assert #AutomorphismGroup(L : Check,NaturalAction) eq 8;
+
+K<u>:=QuadraticField(257);
+O:=Integers(K); 
+v1:=Vector([K|1,0,0]);
+v2:=Vector([K|0,u,0]);
+G:=Matrix(2,2,[K|1,0,0,2]);
+IP:=Matrix(3,3,[K|1,0,0, 0,2/u^2,0, 0,0,1]);
+L:=NumberFieldLattice([v1,v2] : Gram:=G,InnerProduct:=IP);
+
+K<u>:=QuadraticField(257);
+O:=Integers(K); 
+v1:=Vector([K|1,0,0]);
+v2:=Vector([K|0,u,0]);
+G:=Matrix(2,2,[K|1,0,0,2]);
+IP:=Matrix(3,3,[K|1,0,0, 0,2/u^2,0, 0,0,1]);
+L:=NumberFieldLattice([v1,v2] : Gram:=G,InnerProduct:=IP);
+G2:=Matrix(1,1,[K|3]);
+M:=NumberFieldLattice([Vector(v1+v2)/2] : Gram:=G2/4,InnerProduct:=IP);
+assert IsSublattice(L,L+M);
+assert IsSublattice(L meet M,L);
+L:=NumberFieldLattice([v1,v2] : Gram:=G);
+M:=NumberFieldLattice([Vector(v1+v2)/2] : Gram:=G2/4);
+assert IsSublattice(L,L+M); // no IP
+assert IsSublattice(L meet M,L);
+L:=NumberFieldLattice([v1,v2] : Gram:=G);
+M:=NumberFieldLattice([Vector(v1+v2)/2] : Gram:=G2/3); // noncoherent
+try _:=L+M; assert false; catch e; end try;
+try _:=L meet M; assert false; catch e; end try;
+
+K<u>:=QuadraticField(257);
+O:=Integers(K);
+v1:=Vector([K|1,0,0]);
+v2:=Vector([K|0,u,0]);
+G:=Matrix(2,2,[K|1,0,0,2]);
+IP:=Matrix(3,3,[K|1,0,0, 0,2/u^2,0, 0,0,1]);
+L:=NumberFieldLattice([v1,v2] : Gram:=G,InnerProduct:=IP);
+T:=Matrix(3,[&+[Random([-9..9])*K.1^i : i in [1..2]] : j in [1..9]]);
+assert ((L*T)*(T^(-1))) eq L;
+L:=NumberFieldLattice([v1,v2] : Gram:=G); // needs IP
+try _:=L*T; assert false; catch e; end try;
+L:=NumberFieldLattice([v1,v2] : Gram:=G,InnerProduct:=IP);
+T:=DiagonalMatrix([K|1,-1]); T[1][2]:=u;
+M:=NumberFieldLattice(Basis(L) : Gram:=T*G*Transpose(T));
+b,T:=IsIsometric(L,M); assert b;
+assert Norm(T*L.1) eq Norm(M.1);
+assert Norm(T*L.2) eq Norm(M.2);
+T:=Matrix(2,2,[u-1,5,51,u+1]);
+M:=NumberFieldLattice(Basis(L) : Gram:=T*G*Transpose(T));
+b,T:=IsIsometric(L,M); assert b;
+assert Norm(T*L.1) eq Norm(M.1);
+assert Norm(T*L.2) eq Norm(M.2);
+assert Norm(T^(-1)*L.1) ne Norm(M.1);
+assert Vector(L.1)/2 in L/2;
+
+// natact isisom with G
+L:=NumberFieldLattice([v1,v2] : Gram:=G);
+T:=Matrix(2,2,[u-1,5,51,u+1]);
+M:=NumberFieldLattice(Basis(L) : Gram:=T*G*Transpose(T));
+b,T:=IsIsometric(L,M : NaturalAction); assert b;
+assert Norm((L.1)*T) eq Norm(M.1);
+
+// natact isisom with G and ideals
+K<u>:=QuadraticField(257);
+O:=Integers(K);
+v1:=Vector([K|1,0,0]);
+v2:=Vector([K|0,u,0]);
+I:=[1*O,2*O];
+G:=Matrix(2,2,[K|1,0,0,2]);
+L:=NumberFieldLattice([v1,v2] : Gram:=G,Ideals:=I);
+T:=Matrix(2,2,[u-1,5,51,u+1]);
+M:=NumberFieldLattice(PseudoBasis(L) : Gram:=T*G*Transpose(T),Ideals:=I);
+b,U:=IsIsometric(T*L,M : NaturalAction); assert b;
+assert T*L*U^(-1) eq L;
+_:=OrthogonalComplement(L,L!v1); // feasible, OC with ideals
+_:=OrthogonalComplement(L,L!(2*v2)); // feasible, OC with ideals
+_:=OrthogonalComplement(L,L!(v1+2*v2)); // feasible, OC with ideals
+
+// check Sphere with ideals
+
+K:=QuadraticField(5);
+O:=Integers(K);
+Vs:=[Vector([K|2,0,1]),Vector([K|0,1,2])];
+Js:=[1*O,2*O];
+G:=DiagonalMatrix([K|4,1]);
+L:=NumberFieldLattice(Vs : Gram:=G,Ideals:=Js);
+assert #Sphere(L,K!4) eq 4;
+assert #Sphere(L,K!8) eq 4;
+assert #Sphere(L,K!20 : Negatives:=false) eq 6;
+
+// Q(sqrt(15))
+
+K:=QuadraticField(15);
+p3:=Factorization(15*Integers(K))[1][1];
+L:=NumberFieldLattice(Module([p3]));
+D:=DirectSum(L,L);
+M:=SimpleLattice(D);
+assert IsIsometric(D,M);
+assert IsIsometric(D,M : NaturalAction);
+assert #AutomorphismGroup(M : Check) eq 8;
+assert #Sphere(M,K!15) eq 4;
+assert #Sphere(M,6*(4+K.1)) eq 4;
+
+////////////////////////////////////////////////////////////////////////
+
+K<u>:=QuadraticField(5);
+O:=Integers(K);
+Js:=[1*O,2*O,1*O/2];
+G:=DiagonalMatrix([4,1,u]);
+L:=NumberFieldLattice(Rows(IdentityMatrix(K,3)) : Gram:=G,Ideals:=Js);
+assert IsLorentzian(L);
+assert #AutomorphismGroup(L,L![0,0,1/2]) eq 8;
+v:=L![0,0,1/2];
+C:=OrthogonalComplement(L,v);
+S:=sub<L|[Vector([K|1,0,0]),Vector([K|0,2,0])]>;
+assert IsIsometric(C,S);
+
+A,B:=AutomorphismGroup(L,L![1,0,2]);
+assert #A eq 2;
+assert #B eq 4;
+assert IsIsometric(L,L![1,0,2],L![0,2,2]);
+assert IsIsometric(L,L![1,0,2],L![0,2,2]); // hopefully runs second code
+
+////////////////////////////////////////////////////////////////////////
+
+// iterated extension
+
+K<s5>:=QuadraticField(5);
+L<u>:=NumberField(Polynomial([-s5-3,0,1]));
+O:=Integers(L);
+LAT:=NumberFieldLattice(Rows(IdentityMatrix(L,3)) : Ideals:=[1*O,2*O,1*O/2]);
+assert #Sphere(LAT,1) eq 4;
+
+LAT:=NumberFieldLattice(Rows(IdentityMatrix(L,3)) : Ideals:=[1*O,1*O,1*O]);
+assert #AutomorphismGroup(LAT) eq 48;
+

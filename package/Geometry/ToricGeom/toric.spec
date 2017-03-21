@@ -1,0 +1,28 @@
+utilities
+{
+    +utilities.spec
+}
+lattice
+{
+    +lattice.spec
+}
+polyhedron
+{
+    +polyhedron.spec
+}    
+cone
+{
+    +cone.spec
+}    
+fan
+{
+    +fan.spec
+}
+variety
+{
+    +variety.spec
+}
+geometry
+{
+    +geometry.spec
+}

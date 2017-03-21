@@ -1,0 +1,209 @@
+/*
+  $Id: test_NF 41439 2012-12-05 03:44:58Z don $
+*/
+TRIALS := 350;
+":Construction - Dickson type";
+D := DicksonNearfield(3^2,2);
+K := D`gf;
+x := Element(D,K.1);
+x;
+Parent(x);
+
+":Simple arithmetic";
+x^2;
+Identity(D);
+assert x ne Identity(D);
+assert x eq x;
+Zero(D);
+Parent(Zero(D));
+assert not IsZero(D!1);
+assert not IsZero(x);
+assert IsZero(Zero(D));
+
+K<z> := GF(3,4);
+x := Element(D,z^61);
+y := Element(D,z^54);
+assert x + y eq Element(D,z^61+z^54);
+assert x - y eq Element(D,z^61-z^54);
+x*y;
+x/y;
+x^y;
+
+
+":Sets and sequences";
+J := {@ D | Random(D) : i in [1..6] @};
+Jseq := Setseq(J);
+Jset := Seqset(Jseq);
+Universe(J);
+
+n := Order(x);
+if IsEven(n) then 
+  m := n div 2; 
+  x^m eq D!(-1);
+else
+  x^n eq Identity(D);
+end if;
+
+U,psi := UnitGroup(D);
+X := [ psi(g) : g in U];
+assert x in X;
+
+
+":Construction - Zassenhaus type";
+N := ZassenhausNearfield(5);
+K<z> := N`gf;
+x := Element(N,K.1);
+x;
+Parent(x);
+
+":Simple arithmetic";
+x^2;
+Identity(N);
+assert x ne Identity(N);
+assert x eq x;
+Zero(N);
+Parent(Zero(N));
+assert not IsZero(N!1);
+assert not IsZero(x);
+assert IsZero(Zero(N));
+
+x := Element(N,z^61);
+y := Element(N,z^54);
+assert x + y eq Element(N,z^61+z^54);
+assert x - y eq Element(N,z^61-z^54);
+x*y;
+x/y;
+x^y;
+
+
+
+test_assoc := procedure(N)
+  ":Associativity";
+  K := N`gf;
+  print N;
+  for x_ in K do
+    x := Element(N,x_);
+    for y_ in K do
+      y := Element(N,y_);
+      for z_ in K do
+        z := Element(N,z_);
+        if (x*y)*z ne x*(y*z) then
+          error "failed at", x,y,z;
+        end if;
+      end for;
+    end for;
+  end for;
+  print "passed";
+end procedure;
+
+test_rand := procedure(N,limit)
+  ":Associativity";
+  print N;
+  for ndx := 1 to limit do
+    x := Random(N);
+    y := Random(N);
+    z := Random(N);
+    if (x*y)*z ne x*(y*z) then
+      error "failed at", x,y,z;
+    end if;
+  end for;
+  print "passed";
+end procedure;
+
+test_right_dist := procedure(N,limit)
+  ":Right distributive law";
+  print N;
+  for ndx := 1 to limit do
+    x := Random(N);
+    y := Random(N);
+    z := Random(N);
+    if (x+y)*z ne x*z+y*z then
+      error "failed at", x,y,z;
+    end if;
+  end for;
+  print "passed";
+end procedure;
+
+test_units := procedure(N,limit)
+  ":Units";
+  print N;
+  U,f := UnitGroup(N);
+  for ndx := 1 to limit do
+    x := Random(N);
+    y := Random(U);
+    if not IsZero(x) and x ne f(x@@f) then
+      error "failed at", x, "in N";
+    end if;
+    if y ne f(y)@@f then
+      error "failed at", y, "in U";
+    end if;
+  end for;
+  print "passed";
+end procedure;
+  
+
+test_U := procedure(N)
+  ":Unit group";
+  print N;
+  U,f := UnitGroup(N);
+  v := N`v;
+  q := N`q;
+  m := (q^v-1) div v;
+  t := m div (q-1);
+  assert m eq Order(U.1);
+  assert (U.2)^v eq (U.1)^t;
+  assert (U.1)^(U.2) eq (U.1)^q;
+end procedure;
+
+
+test_aut := procedure(N,limit)
+  ":Automorphisms";
+  print N;
+  A, psi := AutomorphismGroup(N);
+  for n := 1 to limit do
+    a := Random(A);
+    b := Random(A);
+    x := Random(N);
+    y := Random(N);
+    assert psi(<a,psi(<b,x>)>) eq psi(<a*b,x>);
+    assert psi(<a,x>)*psi(<a,y>) eq psi(<a,x*y>);
+  end for;
+end procedure;
+
+N := DicksonNearfield(3^2,4);
+test_rand(N,TRIALS);
+test_right_dist(N,TRIALS);
+test_units(N,TRIALS);
+test_aut(N,TRIALS);
+
+N := ZassenhausNearfield(5);
+test_rand(N,TRIALS);
+test_right_dist(N,TRIALS);
+test_units(N,TRIALS);
+
+":Isomorphism";
+N1 := DicksonNearfield(5,4);
+N2 := DicksonNearfield(5,4 : Variant := 3);
+assert not IsIsomorphic(N1,N2);
+
+N1 := DicksonNearfield(3^2,16);
+N2 := DicksonNearfield(3^2,16 : Variant := 3);
+flag, f := IsIsomorphic(N1,N2);
+
+for n := 1 to 100 do
+  x1 := Random(N1);
+  y1 := Random(N1);
+  assert f(x1)*f(y1) eq f(x1*y1);
+  assert (f(x1))@@f eq x1;
+end for;
+
+for n := 1 to 100 do
+  x2 := Random(N2);
+  y2 := Random(N2);
+  assert (x2@@f)*(y2@@f) eq (x2*y2)@@f;
+  assert f(x2@@f) eq x2;
+end for;
+
+
+
+

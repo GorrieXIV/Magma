@@ -1,0 +1,5 @@
+174,1
+A,CrvEll,1,FormalLog
+S,FormalLog,"Returns the formal logarithm on E as a power series log(T), where the parameter T is the function -x/y on E. Also returns a point P(T) whose coordinates are Laurent series x(T) and y(T)",0,1,0,0,0,0,0,0,0,334,,286,372,-38,-38,-38,-38
+S,FormalGroupLaw,"A polynomial in 2 variables T1 + T2 + ... expressing the formal group law associated to addition on E, up to precision 'prec' (up to terms of total degree 'prec'). This formal group law is with respect to the variable -x/y (where x and y are the standard affine coordinates on E)",0,2,0,0,0,0,0,0,0,148,,0,0,334,,63,-38,-38,-38,-38,-38
+S,FormalGroupHomomorphism,"A power series in one variable (to precision 'prec') giving a homomorphism between formal groups, associated to the given isogeny phi. (The corresponding formal groups can be obtained by calling FormalGroupLaw for the domain and codomain of phi; they use the parameter T = -x/y on each elliptic curve)",0,2,0,0,0,0,0,0,0,148,,0,0,376,,286,-38,-38,-38,-38,-38

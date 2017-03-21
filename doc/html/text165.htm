@@ -1,0 +1,569 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Factorization</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text166.htm">[Next]</A><A  HREF = "text164.htm">[Prev]</A> <A  HREF = "text166.htm">[Right]</A> <A  HREF = "text164.htm">[Left]</A> <A  HREF = "text155.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "1263">Factorization</A></H3>
+
+<P>
+<P>
+This section contains a  description of most of the machinery provided 
+in Magma for the factorization of integers. An account of the Number Field
+Sieve is deferred until later in the chapter.
+<P>
+In the first subsection the general-purpose <TT>Factorization</TT>
+function is described. It employs a combination of methods in an
+attempt to find the complete prime factorization of a given integer.
+Some control is possible over each of the methods, but in general
+default choices for the parameters would give good results for a wide
+range of arguments.
+<P>
+In the second subsection we describe functions that enable access to each of
+the factorization methods available in Magma. The user has control over
+parameters for these methods.
+<P>
+Factorization functions in Magma return a
+<I>factorization sequence</I>.  This is a sequence of two-element tuples
+[ &lt;p<sub>1</sub>, k<sub>1</sub>&gt;, ..., &lt;p<sub>r</sub>, k<sub>r</sub>&gt;], with p<sub>1</sub>&lt;p<sub>2</sub>&lt; ... &lt;p<sub>r</sub> distinct prime
+numbers and k<sub>i</sub> positive, which is used to represent integers in factored 
+form: n is the product over i
+of p<sub>i</sub><sup>k<sub>i</sub></sup>. Although such sequences are printed like ordinary
+sequences, they form a separate category <TT>RngIntEltFact</TT>.
+Operations on such factorization sequences are described
+in the next online help node.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text165.htm#1264">General Factorization</A>
+<LI> <A  HREF = "text165.htm#1267">Storing Potential Factors</A>
+<LI> <A  HREF = "text165.htm#1271">Specific Factorization Algorithms</A>
+<LI> <A  HREF = "text165.htm#1283">Factorization Related Functions</A>
+</UL>
+<H4><A NAME = "1264">General Factorization</A></H4>
+
+<P>
+<P>
+The general <TT>Factorization</TT> function is designed to give close
+to optimal performance for the factorization of integers that may
+be encountered in the course of daily computations. The strategy employed
+is as follows (the next subsection gives a more detailed description
+of the individual methods). First of all a compositeness test is used
+to ensure that
+the argument is composite; if not the primality proving algorithm is
+invoked (unless a flag is set to avoid this --- see below). See the
+previous node for compositeness testing and primality proving.
+This operation is repeated for any non-trivial factor (and cofactor)
+found along the way.
+Before any of the general factorization techniques is employed, it is
+checked whether |n| is of the special form b<sup>k</sup>&#8723; 1, in which case an
+intelligent database look-up is used which is likely to be
+successful if b and k are not too large. This is equivalent to
+the <TT>Cunningham</TT> function on b, k, &#8723; 1, described in the
+next node.
+In the first true stage of factorization <I>trial division</I> is used to find
+powers of 2 and other small primes (by default up to 10000).
+After this it is checked whether the remaining composite number is
+the power of a positive integer; if so the appropriate root is used
+henceforth. After this <I>Pollard's &rho; method</I> is applied (using
+8191 iterations by default). The bound on trial division factors and
+the number of iterations for &rho; can be set by the optional
+parameters <TT>TrialDivisionLimit</TT> and <TT>PollardRhoLimit</TT>.
+It is possible, from this point
+on, that several composite factors still need factorization. The
+description below applies to each of these.
+<P>
+The final two algorithms deployed are usually indicated by ECM
+(for Elliptic Curve Method) and MPQS (for Multiple Polynomial
+Quadratic Sieve). By default, ECM (which is likely to find `smaller'
+factors if they exist) is used with parameters that depend on the
+size of the remaining (composite) factors. After that, if a composite
+factor of at least 25 digits remains, MPQS is used; it is the best method
+available for factoring integers of more than about 40 decimal digits
+especially for products of two primes of roughly equal size.
+If the remaining composite
+is smaller than 25 digits, ECM is again invoked, now in an indefinite loop
+until a factor is found. The latter will also occur if the user, via
+a flag <TT>MPQSLimit</TT> indicates that MPQS should not be applied
+to numbers of the given size, and
+provided the user has not limited the number of ECM trials by setting
+the <TT>ECMLimit</TT>. Thus, unless both <TT>MPQSLimit</TT> and <TT>ECMLimit</TT>
+are set as optional parameters by the users, the algorithm will continue
+until the complete factorization has been completed.
+<P>
+Besides the limiting parameters just mentioned it also possible to
+avoid the use of primality proofs and receive probable primes,
+with a flag similar to that used on <TT>IsPrime</TT>; see the previous node.
+<P>
+A verbose flag can be set to obtain informative printing on progress
+in the various stages of factorization. Specific flags for ECM and
+MPQS may be used as well; they are described in the next subsection.
+
+
+<H5><A NAME = "1265">SetVerbose("Factorization", v) : MonStgElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+(Procedure.)
+Set the verbose printing level for all of the factorization algorithms
+to be v.  Currently the legal values for v are <TT>true</TT>, <TT>false</TT>, 0  or
+1 (<TT>false</TT> is the same as 0, and <TT>true</TT> is the same as 1).
+If the level is 1, information is printed at each stage of the algorithm
+as a number is factored.
+</BLOCKQUOTE>
+<H5><A NAME = "1266">Factorization(n) : RngIntElt -&gt; RngIntEltFact, RngIntElt, SeqEnum</A></H5>
+<H5>Factorisation(n) : RngIntElt -&gt; RngIntEltFact, RngIntElt, SeqEnum</H5>
+<H5>Factorization(n: parameters) : RngIntElt -&gt; RngIntEltFact, RngIntElt, SeqEnum</H5>
+<H5>Factorisation(n: parameters) : RngIntElt -&gt; RngIntEltFact, RngIntElt, SeqEnum</H5>
+<BLOCKQUOTE>
+A combination of algorithms (Cunningham, trial division, SQUFOF, 
+Pollard &rho;, ECM and MPQS) is used to attempt to find the 
+complete factorization of |n|, where n is a non-zero integer.
+A factorization sequence is returned, representing the
+completely factored part of |n| (which is usually all of |n|).
+The second return value is 1 or (-1), reflecting the sign of n.
+If the factorization could not be completed, a third sequence is returned,
+containing composite factors that could not be decomposed with the
+given values of the parameters; this can only happen if both <TT>ECMLimit</TT>
+and <TT>MPQSLimit</TT> have been set. (Note that the third variable will
+remain unassigned if the full factorization is found.)
+<P>
+When a very large prime (more than 200 decimal digits say),
+appears in the factorization, proving
+its primality may dominate the running time.
+<P>
+There are 6 optional parameters.
+<P>
+<P>
+<PRE>
+     Proof: BoolElt                      Default: <TT>true</TT>
+</PRE>
+<P>
+<PRE>
+     Bases: RngIntElt                    Default: 20
+</PRE>
+The parameter <TT>Proof</TT> (<TT>Proof := true</TT> by default) can be
+set to false to indicate that the first sequence may contain
+probable primes (see also the previous node),
+in which case the parameter <TT>Bases</TT> indicates the number of
+tests used by Miller-Rabin (<TT>Bases := 20</TT> by default).
+<P>
+<P>
+<PRE>
+     TrialDivisionLimit: RngIntElt       Default: 10000
+</PRE>
+The parameter <TT>TrialDivisionLimit</TT> can be used to specify an upper bound
+for the primes used in the trial division stage (default <TT>TrialDivisionLimit := 10000</TT>).
+<P>
+<P>
+<PRE>
+     SQUFOFLimit: RngIntElt              Default: 24
+</PRE>
+The parameter <TT>SQUFOFLimit</TT> can be used specify the maximum number 
+of decimal digits for an integer to which SQUFOF should be applied; 
+this is Shank's square form factorization method (default <TT>SQUFOFLimit := 24</TT>). 
+<P>
+<P>
+<PRE>
+     PollardRhoLimit: RngIntElt          Default: 8191
+</PRE>
+The parameter <TT>PollardRhoLimit</TT> can be used to specify an upper bound
+on the number of iterations in the &rho; method (default
+<TT>PollardRhoLimit := 8191</TT>).
+<P>
+<P>
+<PRE>
+     ECMLimit: RngIntElt                 Default: 
+</PRE>
+This optional parameter can be used to limit the number of curves
+used by the ECM part of the factorization attempt. Setting
+<TT>ECMLimit := 0</TT> prevents the use of ECM.
+The default value depends on the size of the input, and ranges from
+2 for n with less than 37 digits to around 500 for n with 80 digits.
+The smoothness is incremented in each step to grow by default from 500
+to 600 (for 37 digits and less), and from 500
+to about 10000 for n having 80 digits.
+For the indefinite case of ECM (which applies when MPQS is disallowed)
+the initial smoothness is 500, the number of curves is infinite
+and the smoothness is incremented by 100 in each step.
+<P>
+<P>
+<PRE>
+     MPQSLimit: RngIntElt                Default: &infin;
+</PRE>
+The parameter <TT>MPQSLimit</TT> can be used specify the maximum number of 
+decimal digits for an integer to which MPQS should still be applied;
+MPQS will not be invoked on integers having less than (or sometimes equal)
+25 decimal digits. Setting the parameter to anything less than 25 will
+therefore prevent MPQS from being used. Unless <TT>ECMLimit</TT> has been
+set, this will imply that ECM will be applied until the full factorization
+has been obtained.
+<P>
+Note that progress can be monitored by use of <TT>Verbose("Factorization", true)</TT>.
+</BLOCKQUOTE>
+<H4><A NAME = "1267">Storing Potential Factors</A></H4>
+
+<P>
+<P>
+As of V2.14 (October 2007), Magma now internally stores a list of
+factors found by the ECM and MPQS algorithms.  Subsequently, when either
+of those algorithms are to be invoked by the <TT>Factorization</TT> function,
+the integers in the list are first tried to see whether factors can
+be easily found.  One may also give prime factors to Magma to store
+in this list via the following procedure.
+
+
+<H5><A NAME = "1268">StoreFactor(n) : RngIntElt -&gt;</A></H5>
+<H5>StoreFactor(S) : [ RngIntElt ] -&gt;</H5>
+<BLOCKQUOTE>
+(Procedure.)  Store the single integer n or the integers in the
+set/sequence S in the list of factors to be tried by the <TT>Factorization</TT> function.  Each integer must be a positive <I>prime</I>.
+</BLOCKQUOTE>
+<H5><A NAME = "1269">GetStoredFactors() : -&gt; [ RngIntElt ]</A></H5>
+<BLOCKQUOTE>
+Return a sequence containing the currently stored integers.
+</BLOCKQUOTE>
+<H5><A NAME = "1270">ClearStoredFactors() : -&gt;</A></H5>
+<BLOCKQUOTE>
+Clear the list of stored integer factors.
+</BLOCKQUOTE>
+<H4><A NAME = "1271">Specific Factorization Algorithms</A></H4>
+
+<P>
+<P>
+In this node we discuss how various 
+factorization algorithms can be accessed individually. Generally
+these function should not be used for ordinary factorization
+(for that use <TT>Factorization</TT> discussed in the previous node), but they can be used for experimentation, or to
+build a personal factorization function with control over each of
+the methods used. 
+<P>
+On some functions a little preprocessing is done to ensure that
+the argument is composite, that powers of 2 (and sometimes 3)
+are taken out and that the integer to be factored is not the power
+of an integer.
+<P>
+For each of these functions the <TT>Proof</TT> (default <TT>true</TT>) and
+<TT>Bases</TT> parameters can be used to indicate that primality of
+prime factors need not be rigorously proved, and how many bases
+should be used in the compositeness test, as discussed in the node on <TT>IsPrime</TT>.
+
+
+<H5><A NAME = "1272">SetVerbose("Cunningham", b) : MonStgElt, BoolElt -&gt;</A></H5>
+<H5>SetVerbose("ECM", b) : MonStgElt, Elt -&gt;</H5>
+<H5>SetVerbose("MPQS", b) : MonStgElt, Elt -&gt;</H5>
+<BLOCKQUOTE>
+Using this procedure to set either of the verbose flags <TT>"Cunningham"</TT>,
+<TT>"ECM"</TT> or <TT>"MPQS"</TT>, (which
+are <TT>false</TT> by default) enables the user to obtain progress information
+on attempts to factor integers using the `Cunningham' method,
+ECM or MPQS.
+</BLOCKQUOTE>
+<H5><A NAME = "1273">Cunningham(b, k, c) : RngIntElt, RngIntElt, RngIntElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+This function attempts to factor n=b<sup>k</sup> + c, where c&isin;{&#8723; 1} and
+b and k are not too big. This function uses R. Brent's factor
+algorithm <A  HREF = "text154.htm#bib_brentTeriele">[BtR92]</A>,
+which employs a combination of table-lookups and attempts
+at `algebraic' factorization (Aurifeuillian techniques). An error results
+if the tables, containing most of the known factors for numbers of this
+form (including the `Cunningham tables'), cannot be located by the system.
+The function will always return the complete prime factorization 
+(in the form of a factorization sequence) of the
+number n (but it may take very long before it completes);
+it should be pointed out, however,
+that the primes appearing in the factorization
+are only <I>probable primes</I> and a rigorous primality
+prover has not been applied.
+</BLOCKQUOTE>
+<H5><A NAME = "1274">AssertAttribute(RngInt, "CunninghamStorageLimit", l) : Cat, MonStgElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+This attribute is used to change the number of Cunningham factorizations which
+are stored in Magma.  Normally, Magma stores a certain number of
+factorizations computed by the <TT>Cunningham</TT> intrinsic function so
+that commonly needed factorizations can be recalled quickly.  When the
+stored list fills up, the factorization least recently accessed is removed
+from the list.  Setting this attribute to zero ensures that no storage
+is done.  The default value is 20.
+</BLOCKQUOTE>
+<H5><A NAME = "1275">TrialDivision(n) : RngIntElt -&gt; RngIntEltFact, [ RngIntElt ]</A></H5>
+<H5>TrialDivision(n, B) : RngIntElt, RngIntElt -&gt; RngIntEltFact, [ RngIntElt ]</H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Bases: RngIntElt                    Default: 20</PRE>
+<BLOCKQUOTE>
+The integer n not=0 is subjected to trial division by primes up to a certain
+bound B (the sign of n is ignored).  If only the argument n is
+given, B is taken to be 10000.  The function returns a factorization
+sequence and a sequence containing an unfactored composite that
+remains.
+</BLOCKQUOTE>
+<H5><A NAME = "1276">PollardRho(n) : RngIntElt -&gt; RngIntEltFact, [ RngIntElt ]</A></H5>
+<H5>PollardRho(n, c, s, k) : RngIntElt, RngIntElt, RngIntElt, RngIntElt -&gt; RngIntEltFact, [ RngIntElt ]</H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Bases: RngIntElt                    Default: 20</PRE>
+<BLOCKQUOTE>
+The &rho;-method of Pollard is invoked by this function to find the factorization
+of an integer n&gt;1. For this method a quadratic function x<sup>2</sup> + c is iterated
+k times, with starting value x=s. If only n is used as argument to the
+function, the default values c=1, s=1, and k=8191 are selected.
+A speed-up to the original algorithm, due to R.P.
+Brent <A  HREF = "text154.htm#bib_brent80">[Bre80]</A>,
+is implemented.
+The function returns two values: a factorization sequence and a sequence
+containing unfactored composite factors.
+</BLOCKQUOTE>
+<H5><A NAME = "1277">pMinus1(n, B1) : RngIntElt, RngIntElt -&gt; RngIntElt</A></H5>
+
+<PRE>    x0: RngIntElt                       Default: </PRE>
+
+<PRE>    B2: RngIntElt                       Default: </PRE>
+
+<PRE>    k: RngIntElt                        Default: </PRE>
+<BLOCKQUOTE>
+Given an integer n&gt;1, an attempt to find a factor is made
+using Paul Zimmermann's GMP-ECM implementation of Pollard's p - 1
+method.  If a factor f with 1&lt;f&lt;n is found, then f is returned;
+otherwise 0 is returned.
+<P>
+The Step 1 bound B<sub>1</sub> is given as the second argument <TT>B1</TT>.
+By default, the Step 2 bound B<sub>2</sub> is optimally chosen, but may be
+given with the parameter <TT>B2</TT> instead.
+By default, an optimal number of blocks is chosen for Step 2, but
+this may be overridden via the parameter <TT>k</TT> (see the function <TT>ECM</TT>).
+The base x<sub>0</sub> is chosen randomly by default, but
+may instead be supplied via the parameter <TT>x0</TT>.
+<P>
+This method will return a prime factor p of n if p - 1 has all its
+prime factors less than or equal to the Step 1 bound B<sub>1</sub>, except for
+one factor which may be less than or equal to the Step 2 bound B<sub>2</sub>.
+</BLOCKQUOTE>
+<H5><A NAME = "1278">pPlus1(n, B1) : RngIntElt, RngIntElt -&gt; RngIntElt</A></H5>
+
+<PRE>    x0: RngIntElt                       Default: </PRE>
+
+<PRE>    B2: RngIntElt                       Default: </PRE>
+
+<PRE>    k: RngIntElt                        Default: </PRE>
+<BLOCKQUOTE>
+Given an integer n&gt;1, an attempt to find a factor is made
+using Paul Zimmermann's GMP-ECM implementation of Williams' p + 1
+method.  If a factor f with 1&lt;f&lt;n is found, then f is returned;
+otherwise 0 is returned.
+<P>
+The Step 1 bound B<sub>1</sub> is given as the second argument <TT>B1</TT>.
+By default, the Step 2 bound B<sub>2</sub> is optimally chosen, but may be
+given with the parameter <TT>B2</TT> instead.
+By default, an optimal number of blocks is chosen for Step 2, but
+this may be overridden via the parameter <TT>k</TT> (see the function <TT>ECM</TT>).
+The base x<sub>0</sub> is chosen randomly by default, but
+may instead be supplied via the parameter <TT>x0</TT>.
+<P>
+This method may return a prime factor p of n if p + 1 has all its
+prime factors less than or equal to the Step 1 bound B<sub>1</sub>, except for
+one factor which may be less than or equal to the Step 2 bound B<sub>2</sub>.
+A base x<sub>0</sub> is used, and not all bases will succeed: only half of the
+bases work (namely those where the Jacobi symbol of x<sub>0</sub><sup>2</sup> - 4 and p is
+-1.)  Unfortunately, since p is usually not known in advance, there
+is no way to ensure that this holds. However, if the base is chosen
+randomly, there is a probability of about 1/2 that it will give a
+Jacobi symbol of -1 (so that the factor p would be found assuming
+that p + 1 is smooth enough).  A rule of thumb is to run <TT>pPlus1</TT>
+three times with different random bases.
+</BLOCKQUOTE>
+<H5><A NAME = "1279">SQUFOF(n) : RngIntElt -&gt; RngIntEltFact, [ RngIntElt ]</A></H5>
+<H5>SQUFOF(n, k) : RngIntElt, RngIntElt -&gt; RngIntEltFact, [ RngIntElt ]</H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Bases: RngIntElt                    Default: 20</PRE>
+<BLOCKQUOTE>
+This is a fast implementation of Shanks's square form
+factorization method that will only work for integers n&gt;1 less than
+2<sup>2b - 2</sup>, where b is the number of bits in a long (which is
+either 32 or 64).
+The argument k may be used to specify the maximum number of iterations
+used to find the square; by default it is 200000.
+The expected number of iterations is O(N<sup>1/4</sup>).
+</BLOCKQUOTE>
+<H5><A NAME = "1280">ECM(n, B1) : RngIntElt, RngIntElt -&gt; RngIntElt, RngIntElt</A></H5>
+
+<PRE>    Sigma: RngIntElt                    Default: </PRE>
+
+<PRE>    x0: RngIntElt                       Default: </PRE>
+
+<PRE>    B2: RngIntElt                       Default: </PRE>
+
+<PRE>    k: RngIntElt                        Default: 2</PRE>
+<BLOCKQUOTE>
+Given an integer n&gt;1, an attempt is made to find a factor using the 
+GMP-ECM implementation of the Elliptic Curve Method (ECM).  If a factor 
+f with 1&lt;f&lt;n is found, then f is returned together with the 
+corresponding successful &sigma; seed; otherwise 0 is returned.
+<P>
+The Step 1 bound B<sub>1</sub> is given as the second argument <TT>B1</TT>.
+By default, the Step 2 bound B<sub>2</sub> is optimally chosen,
+but may be given with the parameter <TT>B2</TT> instead.
+<P>
+The elliptic curve used is defined by Suyama's parametrization and is
+determined by a parameter &sigma;.  By default, &sigma; is chosen
+randomly with 0 &lt; &sigma; &lt; 2<sup>32</sup>, but an alternative positive integer
+may be supplied instead via the parameter <TT>Sigma</TT>.  Let u =
+&sigma;<sup>2</sup> - 5, v = 4&sigma; and a = (v - u)<sup>3</sup>(3u + v)/(4u<sup>3</sup>v) - 2.  The
+starting point used is (x<sub>0</sub>:1), where by default x<sub>0</sub>=u<sup>3</sup>/v<sup>3</sup>, but
+x<sub>0</sub> may instead be supplied via the parameter <TT>x0</TT>.  Finally, the
+curve used is by<sup>2</sup> = x<sup>3</sup> + ax<sup>2</sup> + x, where b = x<sub>0</sub><sup>3</sup> + ax<sub>0</sub><sup>2</sup> + x<sub>0</sub>.
+<P>
+<P>
+Step 1 uses very
+little memory, but Step 2 may use a large amount of memory, especially for
+large B<sub>2</sub>, since its efficient algorithms use some large tables.
+To reduce the memory usage of Step 2, one may increase the parameter <TT>k</TT>,
+which controls the number of "blocks" used.
+Multiplying the default value of k by 4 will
+decrease the memory usage by a factor of 2.
+For example, with B<sub>2</sub>=10<sup>10</sup> and
+a 155-digit number n, Step 2 requires about 96MB with the default k=2, but
+only 42MB with k=8. Increasing k does, however, slightly increase the
+time required for Step 2.
+</BLOCKQUOTE>
+<H5><A NAME = "1281">ECMSteps(n, L, U) : RngIntElt, RngIntElt, RngIntElt -&gt; RngIntElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given an integer n&gt;1, an attempt to find a factor of n is made by repeated
+calls to {ECM}.  The initial B<sub>1</sub> bound is taken to be L, and subsequently
+B<sub>1</sub> is replaced with B<sub>1</sub> + &lfloor;&#8730;B<sub>1</sub> &rfloor; at each step.
+If a factor is found at any point, then this is returned with the 
+corresponding successful &sigma; seed; otherwise, if B<sub>1</sub> becomes
+greater than the upper bound U, then 0 is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "1282"></A><A NAME = "RngInt:MPQS">MPQS</A>(n) : RngIntElt -&gt; RngIntEltFact, [ RngIntElt ]</H5>
+<H5>MPQS(n, D) : RngIntElt, MonStgElt -&gt; SeqEnum, RngIntElt</H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Bases: RngIntElt                    Default: 20</PRE>
+<BLOCKQUOTE>
+This function can be used to drive Arjen Lenstra's implementation of the
+multiple polynomial quadratic sieve MPQS. Given an integer n&gt;5.10<sup>24</sup>
+an attempt is made to find the prime factorization of n using MPQS.
+The name of a directory (which should not yet exist) may be specified as a string
+D where files used by MPQS will be stored. By default, the directory
+indicated by the environment variable <TT>MAGMA_QS_DIR</TT> will be used, and
+if that has not been set, the directory <TT>/tmp</TT>.
+It is possible to assist the master running the main Magma job
+by generating relations on other machines (slaves),
+starting an auxiliary process on
+such machine, in the directory D, by typing <TT>magma -q D machine</TT>
+where <TT>machine</TT> is the name of the machine.
+The function returns two values: a factorization sequence and a sequence
+containing unfactored composite factors.
+</BLOCKQUOTE>
+<H4><A NAME = "1283">Factorization Related Functions</A></H4>
+
+
+
+<H5><A NAME = "1284">ECMOrder(p, s) : RngIntElt, RngIntElt -&gt; RngIntElt</A></H5>
+<H5>ECMFactoredOrder(p, s) : RngIntElt, RngIntElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Suppose p is a prime factor found by the ECM algorithm and such that the
+&sigma; value determining the successful curve was s.  These
+functions compute the order of the corresponding elliptic curve.  The
+first function returns the order as an integer, while the second function
+returns the factorization of the order.  In general, this order will
+have been smooth with respect to the relevant bounds for the ECM
+algorithm to have worked, and these functions allow one to examine
+how small the prime divisors of the curve order really are.
+</BLOCKQUOTE>
+<H5><A NAME = "1285">PrimeBasis(n) : RngIntElt -&gt; [RngIntElt]</A></H5>
+<H5>PrimeDivisors(n) : RngIntElt -&gt; [RngIntElt]</H5>
+<BLOCKQUOTE>
+A sequence containing the distinct prime divisors of the positive integer |n|,
+given in increasing order.
+</BLOCKQUOTE>
+<H5><A NAME = "1286">Divisors(n) : RngIntElt -&gt; [ RngIntElt ]</A></H5>
+<H5>Divisors(f) : RngIntEltFact -&gt; [ RngIntElt ]</H5>
+<BLOCKQUOTE>
+Returns a sequence containing all divisors of the positive
+integer, including 1 and the integer itself, given in increasing order.
+The argument given must be either the integer n itself, or a factorization
+sequence f representing it.
+</BLOCKQUOTE>
+<H5><A NAME = "1287">CoprimeBasis(S) : [ RngIntElt ] -&gt; [ RngIntElt ]</A></H5>
+<H5>CoprimeBasis(S) : { RngIntElt } -&gt; [ RngIntElt ]</H5>
+<BLOCKQUOTE>
+Given a set or sequence S of integers, return a
+coprime basis of S in the form of a factorization 
+sequence Q whose integer value is the same as the product of the elements of
+S but Q has coprime bases (i.e., the first components of tuples from
+Q are coprime).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "1288">Example <TT>RngInt_Perfect (H18E7)</TT></A></H3>
+In this example we use the <TT>Divisors</TT> function together with the
+<TT>&amp;+</TT> reduction of sequences to find the first few perfect numbers,
+that is, numbers n such that the sum of the divisors less than n equals
+n.
+<P>
+<P>
+<PRE>
+&gt; { x : x in [2..1000] | &amp;+Divisors(x) eq 2*x };
+{ 6, 28, 496 }
+&gt; f := Factorization(496);
+&gt; f;
+[ &lt;2, 4&gt;, &lt;31, 1&gt; ]
+&gt; Divisors(f);
+[ 1, 2, 4, 8, 16, 31, 62, 124, 248, 496 ]
+</PRE>
+<HR>
+<H5><A NAME = "1289">PartialFactorization(S) : [ RngIntElt ] -&gt; [ RngIntEltFact ]</A></H5>
+<BLOCKQUOTE>
+Given a sequence of non-zero integers S, return, for each integer S[i],
+two factorization lists F<sub>i</sub> and G<sub>i</sub>, such that 
+S[i] = <TT>Facint</TT>(F<sub>i</sub>) * <TT>Facint</TT>(G<sub>i</sub>).
+All the divisors in F<sub>i</sub> are square factors, and, for any i and j,
+the divisors in G<sub>i</sub> and G<sub>j</sub> are either equal
+or are pairwise coprime.
+In other terms,  <TT>PartialFactorization(S)</TT> provides a partial
+decomposition of the integers in S in square and coprime factors.
+The interesting fact is that this factorization uses only gcd and 
+    exact integer division.
+This algorithm is due to J.E. Cremona.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "1290">Example <TT>RngInt_PartialFact (H18E8)</TT></A></H3>
+A partial factorization is shown.
+<P>
+<P>
+<PRE>
+&gt; PartialFactorization([1380, 675, 3408, 654]);
+[
+  [
+    [ &lt;2, 2&gt; ],
+    [ &lt;115, 1&gt;, &lt;3, 1&gt; ]
+  ],
+  [
+    [ &lt;5, 2&gt;, &lt;3, 2&gt; ],
+    [ &lt;3, 1&gt; ]
+  ],
+  [
+    [ &lt;2, 4&gt; ],
+    [ &lt;71, 1&gt;, &lt;3, 1&gt; ]
+  ],
+  [
+    [],
+    [ &lt;218, 1&gt;, &lt;3, 1&gt; ]
+  ]
+]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text166.htm">[Next]</A><A  HREF = "text164.htm">[Prev]</A> <A  HREF = "text166.htm">[Right]</A> <A  HREF = "text164.htm">[Left]</A> <A  HREF = "text155.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

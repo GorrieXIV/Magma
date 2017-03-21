@@ -1,0 +1,686 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>The Weight Distribution</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1840.htm">[Next]</A><A  HREF = "text1838.htm">[Prev]</A> <A  HREF = "text1840.htm">[Right]</A> <A  HREF = "text1838.htm">[Left]</A> <A  HREF = "text1831.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "20435">The Weight Distribution</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1839.htm#20436">The Minimum Weight</A>
+<LI> <A  HREF = "text1839.htm#20447">The Weight Distribution</A>
+<LI> <A  HREF = "text1839.htm#20453">The Weight Enumerator</A>
+<LI> <A  HREF = "text1839.htm#20459">The MacWilliams Transform</A>
+<LI> <A  HREF = "text1839.htm#20463">Words</A>
+<LI> <A  HREF = "text1839.htm#20470">Covering Radius and Diameter</A>
+</UL>
+<H4><A NAME = "20436">The Minimum Weight</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+In the case of a linear code, the minimum weight and distance are equivalent.  
+It is clear that is substantially easier to determine the minimum weight of 
+a (possibly non-linear) code than its minimum distance.  The general principle 
+underlying the minimum weight algorithm in Magma is the embedding of 
+low-weight information vectors into the code space, in the hope that 
+they will map onto low weight codewords.
+<P>
+Let C be a [n, k] linear code over a finite field
+and G be its generator matrix.  The minimum
+weight algorithm proceeds as follows:  Starting with r = 1, all linear 
+combinations of r rows of G are enumerated.  By taking the minimum 
+weight of each such combination, an upper bound, d<sub>upper</sub>, on the minimum 
+weight of C is obtained.  A strictly increasing function, d<sub>lower</sub>(r), 
+finds a lower bound on the minimum weight of the non-enumerated vectors
+for each computational step (the precise form of this function depends
+upon the algorithm being used).  The algorithm terminates when 
+d<sub>lower</sub>(r) &ge;d<sub>upper</sub>, at which point the actual minimum weight is
+equal to d<sub>upper</sub>.
+<P>
+The algorithm is used for non-cyclic codes, and is due to
+A.E. Brouwer and K.H. Zimmermann <A  HREF = "text1830.htm#bib_zimm1">[BFK+98]</A>.  
+The key idea is to construct as many different generator matrices for the 
+same code as possible, each having a different information set and such 
+that the information sets are as disjoint as possible.
+By maximizing the number of information sets, d<sub>lower</sub>(r) can be made
+increasingly accurate.  Each information set will provide a different
+embedding of information vectors into the code, and thus the probability
+of a low-weight information vector mapping onto a low-weight codeword is
+increased.
+<P>
+A well known improvement attributed to Brouwer 
+exists for cyclic codes, requiring the enumeration fo only one information set.
+A generalisation of this improvement has been made by G. White to quasicyclic
+codes, and any codes whose known automorphisms have large cycles.
+Functionality is included in this section for inputting partial knowledge 
+of the automorphism group to take advantage of this improvement.
+<P>
+Information sets are discarded if their ranks are too low to contribute
+to the lower bound calculation. The user may also specify a lower bound,
+<TT>RankLowerBound</TT>, on the rank of information sets initially created.
+
+
+<H5><A NAME = "20437"></A><A NAME = "CodeFld:MinimumWeight">MinimumWeight</A>(C: parameters) : Code -&gt; RngIntElt</H5>
+<H5>MinimumDistance(C: parameters) : Code -&gt; RngIntElt</H5>
+
+<PRE>    Method: MonStgElt                   Default: "Auto"</PRE>
+
+<PRE>    RankLowerBound: RngIntElt           Default: 0</PRE>
+
+<PRE>    MaximumTime: RngReSubElt            Default: &infin;</PRE>
+
+<PRE>    Nthreads: RngIntElt                 Default: 1</PRE>
+<BLOCKQUOTE>
+Determine the minimum weight of the words belonging to the code C, which
+is also the minimum distance between any two codewords. The parameter 
+<TT>RankLowerBound</TT> sets a minimum rank on the information sets used
+in the calculation, while the parameter <TT>MaximumTime</TT> sets a time
+limit (in seconds of "user time") after which the calculation is aborted.
+<P>
+If the base field is GF(2) and the parameter <TT>Nthreads</TT> is set to a
+positive integer n, then
+n threads will be used in the computation, if POSIX threads are
+enabled.  One can alternatively use the procedure
+<A  HREF = "text49.htm#Env:SetNthreads">SetNthreads</A> to set the global number of threads to a value
+n so that n threads are always used by default in this algorithm
+unless overridden by the <TT>Nthreads</TT> parameter.
+<P>
+Sometimes a brute force calculation of the entire weight distribution
+can be a faster way to get the minimum weight for small codes. When the
+parameter <TT>Method</TT> is set to the default <TT>"Auto"</TT> then the method
+is internally chosen. The user can specify which method they want using
+setting it to either <TT>"Distribution"</TT> or <TT>"Zimmerman"</TT>.
+<P>
+By setting the verbose flag <TT>"Code"</TT>, information about the progress of the 
+computation can be printed.  An example to demonstrate the interpretation 
+of the verbose output follows:
+<P>
+<P>
+<P>
+<PRE>
+&gt; SetVerbose("Code", true);
+&gt; SetSeed(1);                                  
+&gt; MinimumWeight(RandomLinearCode(GF(2),85,26));
+Linear Code over GF(2) of length 85 with 26 generators. Is not cyclic
+Lower Bound: 1, Upper Bound: 60
+Constructed 4 distinct generator matrices
+Relative Ranks:  26  26  26   7 
+Starting search for low weight codewords...
+Enumerating using 1 generator at a time:
+     New codeword identified of weight 32, time 0.000
+     New codeword identified of weight 28, time 0.000
+     New codeword identified of weight 27, time 0.000
+     New codeword identified of weight 25, time 0.000
+     Discarding non-contributing rank 7 matrix
+     New Relative Ranks:  26  26  26 
+   Completed Matrix  1:  lower =  4, upper = 25. Time so far: 0.000
+     New codeword identified of weight 23, time 0.000
+   Completed Matrix  2:  lower =  5, upper = 23. Time so far: 0.000
+   Completed Matrix  3:  lower =  6, upper = 23. Time so far: 0.000
+Enumerating using 2 generators at a time:
+     New codeword identified of weight 20, time 0.000
+   Completed Matrix  1:  lower =  7, upper = 20. Time so far: 0.000
+   Completed Matrix  2:  lower =  8, upper = 20. Time so far: 0.000
+   Completed Matrix  3:  lower =  9, upper = 20. Time so far: 0.000
+Enumerating using 3 generators at a time:
+     New codeword identified of weight 19, time 0.000
+   Completed Matrix  1:  lower = 10, upper = 19. Time so far: 0.000
+   Completed Matrix  2:  lower = 11, upper = 19. Time so far: 0.000
+   Completed Matrix  3:  lower = 12, upper = 19. Time so far: 0.000
+Enumerating using 4 generators at a time:
+     New codeword identified of weight 18, time 0.000
+   Completed Matrix  1:  lower = 13, upper = 18. Time so far: 0.000
+     New codeword identified of weight 17, time 0.000
+   Completed Matrix  2:  lower = 14, upper = 17. Time so far: 0.010
+   Completed Matrix  3:  lower = 15, upper = 17. Time so far: 0.010
+Termination predicted with 5 generators at matrix 2
+Enumerating using 5 generators at a time:
+   Completed Matrix  1:  lower = 16, upper = 17. Time so far: 0.020
+   Completed Matrix  2:  lower = 17, upper = 17. Time so far: 0.030
+Final Results: lower = 17, upper = 17, Total time: 0.030
+17
+</PRE>
+<P>
+<P>
+Verbose output can be invaluable on long minimum weight calculations.  
+<P>
+The algorithm constructs different (equivalent) generator matrices,
+each of which have pivots in different column positions of the code, called
+its <I>information set</I>.
+A generator matrix's <I>relative rank</I> is the size of its information
+set independent from the previously constructed matrices.
+<P>
+The algorithm proceeds by enumerating all combinations derived from r
+generators, for each successive r.   Once r exceeds the difference
+between the actual rank of a matrix (i.e., the dimension), and its relative
+rank, then the lower bound on the minimum weight will increment by 1
+for that step.
+<P>
+The upper bound on the minimum weight is determined by the minimum weight of 
+codewords that are enumerated. Once these bounds meet the computation is
+complete.
+</BLOCKQUOTE>
+<H5><A NAME = "20438">MinimumWeightBounds(C) : Code -&gt; RngIntElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Return the currently known lower and upper bounds on the 
+minimum weight of code C.
+</BLOCKQUOTE>
+<H5><A NAME = "20439">ResetMinimumWeightBounds(C) : Code -&gt;</A></H5>
+<BLOCKQUOTE>
+Undefine the minimum weight of the code C if it is known, and reset 
+any known bounds on its value.
+</BLOCKQUOTE>
+<H5><A NAME = "20440">VerifyMinimumDistanceLowerBound(C, d) : Code, RngIntElt -&gt; BoolElt, RngIntElt, BoolElt</A></H5>
+
+<PRE>    RankLowerBound: RngIntElt           Default: 0</PRE>
+
+<PRE>    MaximumTime: RngIntElt              Default: &infin;</PRE>
+<BLOCKQUOTE>
+The minimum weight algorithm is executed until it determines whether 
+or not d is a lower bound for the minimum weight of the code C. (See the 
+description of the function <TT>MinimumWeight</TT> for information on 
+the parameters <TT>RankLowerBound</TT> and <TT>MaximumTime</TT> and on the
+verbose output). Three values are returned. The first of these
+is a boolean value, taking the value <TT>true</TT> if and only if d 
+is verified to be a lower bound for the minimum weight of C, 
+(<TT>false</TT> if the calculation is aborted due to time restrictions).
+The second return value is the best available lower bound 
+for the minimum weight of C, and the third is a boolean which 
+is <TT>true</TT> if this value is the actual minimum weight of C.
+</BLOCKQUOTE>
+<H5><A NAME = "20441">VerifyMinimumDistanceUpperBound(C, d) : Code, RngIntElt -&gt; BoolElt, RngIntElt, BoolElt</A></H5>
+<H5>VerifyMinimumWeightUpperBound(C, d: parameters) : Code, RngIntElt -&gt; BoolElt, RngIntElt, BoolElt</H5>
+
+<PRE>    RankLowerBound: RngIntElt           Default: 0</PRE>
+
+<PRE>    MaximumTime: RngIntElt              Default: &infin;</PRE>
+<BLOCKQUOTE>
+The minimum weight algorithm is executed until it determines whether 
+or not d is an upper bound for the minimum weight of the code C. (See the 
+description of the function <TT>MinimumWeight</TT> for information on 
+the parameters <TT>RankLowerBound</TT> and <TT>MaximumTime</TT> and on the
+verbose output). Three values are returned. The first of these
+is a boolean value, taking the value <TT>true</TT> if and only if d 
+is verified to be an upper bound for the minimum weight of C, 
+(<TT>false</TT> if the calculation is aborted due to time restrictions).
+The second return value is the best available upper bound 
+for the minimum weight of C, and the third is a boolean which 
+is <TT>true</TT> if this value is the actual minimum weight of C.
+</BLOCKQUOTE>
+<H5><A NAME = "20442">MinimumWord(C) : Code -&gt; ModTupFldElt</A></H5>
+<BLOCKQUOTE>
+Return one word of the code C having minimum weight.
+</BLOCKQUOTE>
+<H5><A NAME = "20443">MinimumWords(C) : Code -&gt; { ModTupFldElt }</A></H5>
+
+<PRE>    NumWords: RngIntElt                 Default: </PRE>
+
+<PRE>    Method: MonStgElt                   Default: "Auto"</PRE>
+
+<PRE>    RankLowerBound: RngIntElt           Default: &infin;</PRE>
+
+<PRE>    MaximumTime: RngReSubElt            Default: &infin;</PRE>
+<BLOCKQUOTE>
+Given a linear code C, return the set of all words of C having
+minimum weight. If <TT>NumWords</TT> is set to a non-negative integer, then
+the algorithm will terminate after that total of words have been
+found.
+Similarly, if <TT>MaximumTime</TT> then the algorithm will abort
+if the specified time limit expires.
+<P>
+A variation of the Zimmermann minimum weight algorithm is generally
+used to collect the minimum words, although in some cases (such as small codes)
+a brute force enumeration may be used.
+When the
+parameter <TT>Method</TT> is set to the default <TT>"Auto"</TT> then the method
+is internally chosen. The user can specify which method they want using
+setting it to either <TT>"Distribution"</TT> or <TT>"Zimmerman"</TT>.
+<P>
+By setting the verbose flag <TT>"Code"</TT>, information about the progress of the 
+computation can be printed.  
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20444">Example <TT>CodeFld_VerifyLower (H158E19)</TT></A></H3>
+The function <TT>BKLC(K, n, k)</TT> returns the best known linear [n, k]-code 
+over the field K. We use this function to construct the [77, 34, 16] best
+known linear code and confirm a lower bound on its minimum weight (which is 
+not as good as its actual minimum weight).
+We check to see whether the minimum weight of this code is at least 11 
+and in doing so we will actually get a slightly better bound, though it 
+will be still less than the true minimum weight. 
+Since the function <TT>BLKC</TT> will set the true minimum weight, it is first
+necessary to reset the bounds so that the minimum weight data
+is lost.
+<P>
+<P>
+<P>
+<PRE>
+&gt; a := BKLC(GF(2),77,34);
+&gt; a:Minimal;
+[77, 34, 16] Linear Code over GF(2)
+&gt; ResetMinimumWeightBounds(a);
+&gt; MinimumWeightBounds(a);
+1 44
+&gt; a:Minimal;
+[77, 34] Linear Code over GF(2)
+&gt; SetVerbose("Code",true);
+&gt; IsLB, d_lower, IsMinWeight := VerifyMinimumWeightLowerBound(a, 11);
+Linear Code over GF(2) of length 77 with 34 generators. Is not cyclic
+Lower Bound: 1, Upper Bound: 44
+Using congruence d mod 4 = 0
+Constructed 3 distinct generator matrices
+Relative Ranks:  34  34   6 
+Starting search for low weight codewords...
+     Discarding non-contributing rank 6 matrix
+Enumerating using 1 generator at a time:
+     New codeword identified of weight 20, time 0.000
+     New codeword identified of weight 16, time 0.000
+   Completed Matrix  1:  lower =  4, upper = 16. Time so far: 0.000
+   Completed Matrix  2:  lower =  4, upper = 16. Time so far: 0.000
+Enumerating using 2 generators at a time:
+   Completed Matrix  1:  lower =  8, upper = 16. Time so far: 0.000
+   Completed Matrix  2:  lower =  8, upper = 16. Time so far: 0.000
+Enumerating using 3 generators at a time:
+   Completed Matrix  1:  lower =  8, upper = 16. Time so far: 0.000
+   Completed Matrix  2:  lower =  8, upper = 16. Time so far: 0.000
+Enumerating using 4 generators at a time:
+   Completed Matrix  1:  lower = 12, upper = 16. Time so far: 0.010
+Final Results: lower = 12, upper = 16, Total time: 0.010
+&gt; IsLB;
+true
+&gt; d_lower, IsMinWeight;
+12 false
+</PRE>
+<HR>
+<H5><A NAME = "20445">IncludeAutomorphism(~C, p) : Code, GrpPermElt -&gt;</A></H5>
+<H5>IncludeAutomorphism(~C, G) : Code, GrpPerm -&gt;</H5>
+<BLOCKQUOTE>
+Given some automorphism p or group of automorphisms G of the code C, which can
+either be a permutation of the columns or a full monomial permutation
+of the code.
+Then include these automorphism in the known automorphisms subgroup.
+Automorphisms with long cycles that can aid the minimum weight
+calculation should be added in this way.
+</BLOCKQUOTE>
+<H5><A NAME = "20446">KnownAutomorphismSubgroup(C) : Code -&gt; GrpPerm</A></H5>
+<BLOCKQUOTE>
+Return the maximally known subgroup of the full group of automorphisms
+of the code C.
+</BLOCKQUOTE>
+<H4><A NAME = "20447">The Weight Distribution</A></H4>
+
+
+
+<H5><A NAME = "20448">WeightDistribution(C) : Code -&gt; [ &lt;RngIntElt, RngIntElt&gt; ]</A></H5>
+<BLOCKQUOTE>
+Determine the weight distribution for the code C. The
+distribution is returned in the form of a sequence of tuples,
+where the i-th tuple contains the i-th weight, w<sub>i</sub> say, 
+and the number of codewords having weight w<sub>i</sub>.
+</BLOCKQUOTE>
+<H5><A NAME = "20449">WeightDistribution(C, u) : Code, ModTupFldElt -&gt; [ &lt;RngIntElt, RngIntElt&gt; ]</A></H5>
+<BLOCKQUOTE>
+Determine the weight distribution of the coset C + u of the
+linear code C. The distribution is returned in the form of a 
+sequence of tuples, where the i-th tuple contains the i-th 
+weight, w<sub>i</sub> say, and the number of codewords having weight
+w<sub>i</sub>.
+</BLOCKQUOTE>
+<H5><A NAME = "20450">DualWeightDistribution(C) : Code -&gt; [ &lt;RngIntElt, RngIntElt&gt; ]</A></H5>
+<BLOCKQUOTE>
+The weight distribution of the dual code of C (see <TT>WeightDistribution</TT>).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20451">Example <TT>CodeFld_WeightDistribution (H158E20)</TT></A></H3>
+<P>
+We construct the second order Reed--Muller code of length 64, and calculate
+the its weight distribution and that of its dual code.
+<P>
+<P>
+<P>
+<PRE>
+&gt; R := ReedMullerCode(2, 6);
+&gt; #R;
+4194304
+&gt; WeightDistribution(R);
+[ &lt;0, 1&gt;, &lt;16, 2604&gt;, &lt;24, 291648&gt;, &lt;28, 888832&gt;, &lt;32, 1828134&gt;, &lt;36, 888832&gt;, 
+&lt;40, 291648&gt;, &lt;48, 2604&gt;, &lt;64, 1&gt; ]
+&gt; D := Dual(R);
+&gt; #D;
+4398046511104
+&gt; time WeightDistribution(D);
+[ &lt;0, 1&gt;, &lt;8, 11160&gt;, &lt;12, 1749888&gt;, &lt;14, 22855680&gt;, &lt;16, 232081500&gt;, &lt;18, 
+1717223424&gt;, &lt;20, 9366150528&gt;, &lt;22, 38269550592&gt;, &lt;24, 119637587496&gt;, &lt;26, 
+286573658112&gt;, &lt;28, 533982211840&gt;, &lt;30, 771854598144&gt;, &lt;32, 874731154374&gt;,
+&lt;34, 771854598144&gt;, &lt;36, 533982211840&gt;, &lt;38, 286573658112&gt;, &lt;40,
+119637587496&gt;, &lt;42, 38269550592&gt;, &lt;44, 9366150528&gt;, &lt;46, 1717223424&gt;,
+&lt;48, 232081500&gt;, &lt;50, 22855680&gt;, &lt;52, 1749888&gt;, &lt;56, 11160&gt;, &lt;64, 1&gt; ]
+</PRE>
+<HR>
+<H5><A NAME = "20452">PartialWeightDistribution(C, ub) : Code, RngIntElt -&gt; [ &lt;RngIntElt, RngIntElt&gt; ]</A></H5>
+<BLOCKQUOTE>
+Return the weight distribution of the code C up to the specified upper
+bound. This function uses the minimum weight collection to collect word sets.
+</BLOCKQUOTE>
+<H4><A NAME = "20453">The Weight Enumerator</A></H4>
+
+
+
+<H5><A NAME = "20454">WeightEnumerator(C): Code -&gt; RngMPolElt</A></H5>
+<BLOCKQUOTE>
+The (Hamming) weight enumerator W<sub>C</sub>(x, y) for the linear code C.
+The weight enumerator is the sum over u in C of (x<sup>n - wt(u)</sup>y<sup>wt(u)</sup>)
+</BLOCKQUOTE>
+<H5><A NAME = "20455">WeightEnumerator(C, u): Code, ModTupFldElt -&gt; RngMPolElt</A></H5>
+<BLOCKQUOTE>
+The (Hamming) weight enumerator W<sub>C + u</sub>(x, y) for the coset C + u.
+</BLOCKQUOTE>
+<H5><A NAME = "20456">CompleteWeightEnumerator(C): Code -&gt; RngMPolElt</A></H5>
+<BLOCKQUOTE>
+The complete weight enumerator (W)<sub>C</sub>(z<sub>0</sub>, ..., z<sub>q - 1</sub>)
+for the linear code C where q is the size of the alphabet K of C.
+Let the q elements of K be denoted by
+&omega;<sub>0</sub>, ..., &omega;<sub>q - 1</sub>.  If K is a prime field, we let
+&omega;<sub>i</sub> be i (i.e. take the natural representation of each number).
+If K is a non-prime field, we let &omega;<sub>0</sub> be the zero element of K
+and let &omega;<sub>i</sub> be &alpha;<sup>i - 1</sup> for i = 1 ... q - 1 where &alpha;
+is the primitive element of K.  Now for a codeword u of C, let
+s<sub>i</sub>(u) be the number of components of u equal to &omega;<sub>i</sub>.
+The complete weight enumerator is the
+sum over u in C of ((z<sub>0</sub>)<sup>s<sub>0</sub>(u)</sup> ... (z<sub>q - 1</sub>)<sup>s<sub>q - 1</sub>(u)</sup>)
+</BLOCKQUOTE>
+<H5><A NAME = "20457">CompleteWeightEnumerator(C, u): Code, ModTupFldElt -&gt; RngMPolElt</A></H5>
+<BLOCKQUOTE>
+The complete weight enumerator (W)<sub>C + u</sub>(z<sub>0</sub>, ..., z<sub>q - 1</sub>)
+for the coset C + u.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20458">Example <TT>CodeFld_WeightEnumerator (H158E21)</TT></A></H3>
+We construct the cyclic ternary code of length 11 with generator 
+polynomial t<sup>5</sup> + t<sup>4</sup> + 2t<sup>3</sup> + t<sup>2</sup> + 2 and calculate both its weight 
+enumerator and its complete weight enumerator.  To ensure the polynomials
+print out nicely, we assign names to the polynomial ring indeterminates 
+in each case.  These names will persist if further calls to 
+<TT>WeightEnumerator</TT> and <TT>CompleteWeightEnumerator</TT> over the same 
+alphabet are made.
+<P>
+<P>
+<P>
+<PRE>
+&gt; R&lt;t&gt; := PolynomialRing(GF(3));
+&gt; C := CyclicCode(11, t^5 + t^4 + 2*t^3 + t^2 + 2);
+&gt; W&lt;x, y&gt; := WeightEnumerator(C);        
+&gt; W;
+x^11 + 132*x^6*y^5 + 132*x^5*y^6 + 330*x^3*y^8 + 110*x^2*y^9 + 24*y^11
+&gt; CW&lt;u, v, w&gt; := CompleteWeightEnumerator(C);
+&gt; CW;
+u^11 + 11*u^6*v^5 + 55*u^6*v^3*w^2 + 55*u^6*v^2*w^3 + 11*u^6*w^5 + 
+      11*u^5*v^6 + 110*u^5*v^3*w^3 + 11*u^5*w^6 + 55*u^3*v^6*w^2 + 
+      110*u^3*v^5*w^3 + 110*u^3*v^3*w^5 + 55*u^3*v^2*w^6 + 55*u^2*v^6*w^3 + 
+      55*u^2*v^3*w^6 + v^11 + 11*v^6*w^5 + 11*v^5*w^6 + w^11
+</PRE>
+<P>
+The vector u = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1) does not lie in the code C and can
+be taken as a coset leader. We determine the weight enumerator of the coset
+containing u.
+<P>
+<P>
+<P>
+<PRE>
+&gt; u := AmbientSpace(C)![0,0,0,0,0,0,0,0,0,0,1];
+&gt; Wu := WeightEnumerator(C, u);
+&gt; Wu;
+x^10*y + 30*x^7*y^4 + 66*x^6*y^5 + 108*x^5*y^6 + 180*x^4*y^7 + 165*x^3*y^8 + 
+    135*x^2*y^9 + 32*x*y^10 + 12*y^11
+</PRE>
+<HR>
+<H4><A NAME = "20459">The MacWilliams Transform</A></H4>
+
+
+
+<H5><A NAME = "20460">MacWilliamsTransform(n, k, q, W) : RngIntElt, RngIntElt, RngIntElt, [ &lt;RngIntElt, RngIntElt&gt; ] -&gt; [ &lt;RngIntElt, RngIntElt&gt; ]</A></H5>
+<BLOCKQUOTE>
+Let C be a hypothetical [n, k] linear code over a finite field of
+cardinality q.  Let W be the weight distribution of C (in the
+form as returned by the function <TT>WeightDistribution</TT>).  This
+function applies the MacWilliams transform to W to obtain the weight
+distribution W' of the dual code of C.  The transform is a
+combinatorial algorithm based on n, k, q and W alone.  Thus C
+itself need not exist---the function simply works with the sequence
+of integer pairs supplied by the user.  Furthermore, if W is not 
+the weight distribution of an actual code, the result W' will be 
+meaningless and even negative weights may be returned.
+</BLOCKQUOTE>
+<H5><A NAME = "20461">MacWilliamsTransform(n, k, K, W) : RngIntElt, RngIntElt, FldFin, RngMPol -&gt; RngMPol</A></H5>
+<BLOCKQUOTE>
+Let C be a hypothetical [n, k] linear code over a finite field
+K.  Let W be the complete weight enumerator of C (in the form as
+returned by the function <TT>CompleteWeightEnumerator</TT>).  This
+function applies the MacWilliams transform to W to obtain the
+complete weight enumerator W' of the dual code of C.  The transform
+is a combinatorial algorithm based on K, n, k, and W alone.
+Thus C itself need not exist---the function simply manipulates the
+given polynomial.  Furthermore, if W is not the weight distribution
+of an actual code, the weight enumerator W' will be meaningless.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20462">Example <TT>CodeFld_MacWilliams (H158E22)</TT></A></H3>
+<P>
+Let us suppose there exists a [31, 11] code C over F<sub>2</sub> that
+has complete weight enumerator 
+u<sup>31</sup> + 186u<sup>20</sup>v<sup>11</sup> + 310u<sup>19</sup>v<sup>12</sup> + 527u<sup>16</sup>v<sup>15</sup> + 527u<sup>15</sup>v<sup>16</sup> + 
+    310u<sup>12</sup>v<sup>19</sup> + 186u<sup>11</sup>v<sup>20</sup> + v<sup>31</sup>
+We compute the weight distribution and the complete weight enumerator
+of the dual of the hypothetical code C. 
+<P>
+<P>
+<P>
+<PRE>
+&gt; W := [ &lt;0, 1&gt;, &lt;11, 186&gt;, &lt;12, 310&gt;, &lt;15, 527&gt;, &lt;16, 527&gt;, 
+&gt;        &lt;19, 310&gt;, &lt;20, 186&gt;, &lt;31, 1&gt; ];
+&gt;  MacWilliamsTransform(31, 11, 2, W);
+[ &lt;0, 1&gt;, &lt;6, 806&gt;, &lt;8, 7905&gt;, &lt;10, 41602&gt;, &lt;12, 142600&gt;, &lt;14, 
+251100&gt;, &lt;16, 301971&gt;, &lt;18, 195300&gt;, &lt;20, 85560&gt;, &lt;22, 18910&gt;, &lt;24, 
+2635&gt;, &lt;26, 186&gt; ]
+&gt; R&lt;u, v&gt; := PolynomialRing(Integers(), 2);
+&gt; CWE := u^31 + 186*u^20*v^11 + 310*u^19*v^12 + 527*u^16*v^15 + 527*u^15*v^16 + 
+&gt;          310*u^12*v^19 + 186*u^11*v^20 + v^31;
+&gt; MacWilliamsTransform(31, 11, GF(2), CWE);
+u^31 + 806*u^25*v^6 + 7905*u^23*v^8 + 41602*u^21*v^10 + 142600*u^19*v^12 + 
+      251100*u^17*v^14 + 301971*u^15*v^16 + 195300*u^13*v^18 + 85560*u^11*v^20 + 
+      18910*u^9*v^22 + 2635*u^7*v^24 + 186*u^5*v^26
+</PRE>
+<HR>
+<H4><A NAME = "20463">Words</A></H4>
+
+<P>
+<P>
+The functions in this section only apply to codes over finite fields.
+
+
+<H5><A NAME = "20464">Words(C, w: parameters) : Code, RngIntElt -&gt; { ModTupFldElt }</A></H5>
+
+<PRE>    NumWords: RngIntElt                 Default: </PRE>
+
+<PRE>    Method: MonStgElt                   Default: "Auto"</PRE>
+
+<PRE>    RankLowerBound: RngIntElt           Default: &infin;</PRE>
+
+<PRE>    MaximumTime: RngReSubElt            Default: &infin;</PRE>
+<BLOCKQUOTE>
+Given a linear code C, return the set of all words of C having
+weight w. If <TT>NumWords</TT> is set to a non-negative integer c, then
+the algorithm will terminate after that total of words have been
+found.
+Similarly, if <TT>MaximumTime</TT> then the algorithm will abort
+if the specified time limit expires.
+<P>
+There are two methods for collecting words, one based on the 
+Zimmermann minimum weight algorithm, and a brute force type calculation.
+When the
+parameter <TT>Method</TT> is set to the default <TT>"Auto"</TT> then the method
+is internally chosen. The user can specify which method they want using
+setting it to either <TT>"Distribution"</TT> or <TT>"Zimmerman"</TT>.
+<P>
+By setting the verbose flag <TT>"Code"</TT>, information about the progress of the 
+computation can be printed.  
+</BLOCKQUOTE>
+<H5><A NAME = "20465">NumberOfWords(C, w) : Code, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a linear code C, return the number of words of C having
+weight w.
+</BLOCKQUOTE>
+<H5><A NAME = "20466">WordsOfBoundedWeight(C, l, u: parameters) : Code, RngIntElt, RngIntElt -&gt; { ModTupFldElt }</A></H5>
+
+<PRE>    Cutoff: RngIntElt                   Default: &infin;</PRE>
+
+<PRE>    StoreWords: BoolElt                 Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a linear code C, return the set of all words of C having
+weight between l and u, inclusive.
+If <TT>Cutoff</TT> is set to a non-negative integer c, then
+the algorithm will terminate after a total of c words have been
+found.
+<P>
+If <TT>StoreWords</TT> is true then any words of a <I>single weight</I>
+generated will be stored 
+internally.
+</BLOCKQUOTE>
+<H5><A NAME = "20467">ConstantWords(C, i) : Code, RngIntElt -&gt; { ModTupFldElt }</A></H5>
+<BLOCKQUOTE>
+Given a linear code C, return the set of all words of C which
+have weight i and which consist of zeros and ones alone.
+</BLOCKQUOTE>
+<H5><A NAME = "20468">NumberOfConstantWords(C, i) : Code, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a linear code C, return the number of words of C which
+have weight i and which consist of zeros and ones alone.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20469">Example <TT>CodeFld_Words (H158E23)</TT></A></H3>
+We construct the words of weight 11 and also the constant (zero-one) 
+words of weight 11 in the length 23 cyclic code over GF(3) 
+that is defined by the generator polynomial
+x<sup>11</sup> + x<sup>10</sup> + x<sup>9</sup> + 2x<sup>8</sup> + 2x<sup>7</sup> + x<sup>5</sup> + x<sup>3</sup> + 2.
+<P>
+<P>
+<P>
+<PRE>
+&gt; R&lt;x&gt; := PolynomialRing(GF(3));
+&gt; f := x^11 + x^10 + x^9 + 2*x^8 + 2*x^7 + x^5 + x^3 + 2;
+&gt; C := CyclicCode(23, f);
+&gt; C;
+[23, 12, 8] BCH code (d = 5, b = 1) over GF(3)
+Generator matrix:
+[1 0 0 0 0 0 0 0 0 0 0 0 2 0 0 1 0 1 0 2 2 1 1]
+[0 1 0 0 0 0 0 0 0 0 0 0 1 2 0 2 1 2 1 1 0 1 0]
+[0 0 1 0 0 0 0 0 0 0 0 0 0 1 2 0 2 1 2 1 1 0 1]
+[0 0 0 1 0 0 0 0 0 0 0 0 1 0 1 1 0 1 1 0 2 0 2]
+[0 0 0 0 1 0 0 0 0 0 0 0 2 1 0 2 1 1 1 0 2 0 1]
+[0 0 0 0 0 1 0 0 0 0 0 0 1 2 1 2 2 0 1 2 1 1 2]
+[0 0 0 0 0 0 1 0 0 0 0 0 2 1 2 2 2 0 0 0 1 2 2]
+[0 0 0 0 0 0 0 1 0 0 0 0 2 2 1 0 2 0 0 2 2 2 0]
+[0 0 0 0 0 0 0 0 1 0 0 0 0 2 2 1 0 2 0 0 2 2 2]
+[0 0 0 0 0 0 0 0 0 1 0 0 2 0 2 0 1 1 2 2 2 0 0]
+[0 0 0 0 0 0 0 0 0 0 1 0 0 2 0 2 0 1 1 2 2 2 0]
+[0 0 0 0 0 0 0 0 0 0 0 1 0 0 2 0 2 0 1 1 2 2 2]
+&gt; time WeightDistribution(C);
+[ &lt;0, 1&gt;, &lt;8, 1518&gt;, &lt;9, 2530&gt;, &lt;11, 30912&gt;, &lt;12, 30912&gt;, &lt;14, 151800&gt;, &lt;15, 
+91080&gt;, &lt;17, 148764&gt;, &lt;18, 49588&gt;, &lt;20, 21252&gt;, &lt;21, 3036&gt;, &lt;23, 48&gt; ]
+Time: 0.030
+</PRE>
+<P>
+Note that the minimum distance is 8.  We calculate all words of weight 
+11 and the constant words of weight 11.
+<P>
+<P>
+<P>
+<PRE>
+1518
+&gt; time W11 := Words(C, 11);
+Time: 0.350
+&gt; #W11;
+30912
+&gt; ZOW11 := ConstantWords(C, 11);
+&gt; #ZOW11;
+23
+&gt; ZOW11 subset W11;
+true
+</PRE>
+<HR>
+<H4><A NAME = "20470">Covering Radius and Diameter</A></H4>
+
+
+
+<H5><A NAME = "20471">CosetDistanceDistribution(C) : Code -&gt; [ &lt;RngIntElt, RngIntElt&gt; ]</A></H5>
+<BLOCKQUOTE>
+Given a linear code C, determine the coset distance
+distribution of C, relative to C. The distance between
+C and a coset D of C is the Hamming weight of a
+vector of minimum weight in D. The distribution is returned as a
+sequence of pairs comprising a distance d and the number of
+cosets that are distance d from C.
+</BLOCKQUOTE>
+<H5><A NAME = "20472">CoveringRadius(C) : Code -&gt;  RngIntElt</A></H5>
+<BLOCKQUOTE>
+The covering radius of the linear code C.
+</BLOCKQUOTE>
+<H5><A NAME = "20473">Diameter(C) : Code -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The diameter of the code C (the largest weight of the codewords of C).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20474">Example <TT>CodeFld_CoveringRadius (H158E24)</TT></A></H3>
+<P>
+We construct the second order Reed--Muller code of length 32, and calculate
+its coset distance distribution.
+<P>
+<P>
+<P>
+<PRE>
+&gt; R := ReedMullerCode(2, 5);
+&gt; R:Minimal;
+[32, 16, 8] Reed-Muller Code (r = 2, m = 5) over GF(2)
+&gt; CD := CosetDistanceDistribution(R);
+&gt; CD;
+[ &lt;0, 1&gt;, &lt;1, 32&gt;, &lt;2, 496&gt;, &lt;3, 4960&gt;, &lt;4, 17515&gt;, &lt;5, 27776&gt;, &lt;6, 14756&gt; ]
+</PRE>
+<P>
+From the dimension of the code we know C has 2<sup>16</sup> cosets. The coset 
+distance distribution tells us that there are 32 cosets at distance
+1 from C, 496 cosets are distance 2, etc. We confirm that all cosets
+are represented in the distribution.
+<P>
+<P>
+<P>
+<PRE>
+&gt; &amp;+ [ t[2] : t in CD ];
+65536
+&gt; CoveringRadius(R);                                                          
+6
+&gt; Diameter(R);                                                                
+32
+&gt; WeightDistribution(R);
+[ &lt;0, 1&gt;, &lt;8, 620&gt;, &lt;12, 13888&gt;, &lt;16, 36518&gt;, &lt;20, 13888&gt;, &lt;24, 620&gt;, &lt;32, 1&gt; ]
+</PRE>
+<P>
+The covering radius gives the maximum distance of any coset from the code, and,
+from the coset distance distribution, we see that this maximum distance is
+indeed 6. We can confirm the value (32) for the diameter by examining the
+weight distribution and seeing that 32 is the largest weight of a codeword.
+<HR>
+<PRE></PRE> <A  HREF = "text1840.htm">[Next]</A><A  HREF = "text1838.htm">[Prev]</A> <A  HREF = "text1840.htm">[Right]</A> <A  HREF = "text1838.htm">[Left]</A> <A  HREF = "text1831.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

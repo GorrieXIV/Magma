@@ -1,0 +1,7 @@
+174,1
+S,IntegralQuarticPoints,"Returns the sequence of integral points on the quartic curve y^2 = ax^4 + bx^3 +cx^2 + dx + e, where Q = [a,b,c,d,e] and P is a rational point not equal to [0,1,0]",2,0,1,82,0,148,1,1,82,0,267,2,0,0,0,0,0,0,0,82,,0,0,82,,82,-38,-38,-38,-38,-38
+S,IntegralQuarticPoints,"Returns the sequence of integral points on the quartic curve y^2 = ax^4 + bx^3 +cx^2 + dx + e, where Q = [a,b,c,d,e] and P is a rational point not equal to [0,1,0]",2,0,1,82,0,148,1,1,82,0,148,2,0,0,0,0,0,0,0,82,,0,0,82,,82,-38,-38,-38,-38,-38
+S,IntegralQuarticPoints,"Returns the sequence of integral points on the quartic curve y^2 = ax^4 + bx^3 + cx^2 + dx + e, where Q = [a,b,c,d,e] and e is a square",1,0,1,82,0,148,1,0,0,0,0,0,0,0,82,,82,-38,-38,-38,-38,-38
+S,SIntegralQuarticPoints,"Returns the sequence of S-integral points on the quartic curve y^2 = ax^4 + bx^3 + cx^2 + dx + e, where Q = [a,b,c,d,e] with square a, and where S is a sequence of primes",2,0,1,82,0,148,1,1,82,0,148,2,0,0,0,0,0,0,0,82,,0,0,82,,82,-38,-38,-38,-38,-38
+S,SIntegralLjunggrenPoints,"Returns the sequence of S-integral points on the Ljunggren curve a*y^2 = b*x^4 + cx^2 + d, where Q = [a,b,c,d], and S is a sequence of primes",2,0,1,82,0,148,1,1,82,0,148,2,0,0,0,0,0,0,0,82,,0,0,82,,82,-38,-38,-38,-38,-38
+S,SIntegralDesbovesPoints,"Returns the sequence of S-integral points to the Desboves curve a*y^3 + b*x^3 + c*x*y + d = 0, where C = [a,b,c,d], and S is a sequence of primes",2,0,1,82,0,148,1,1,82,0,148,2,0,0,0,0,0,0,0,82,,0,0,82,,82,-38,-38,-38,-38,-38

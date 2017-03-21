@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Invariants of the Symmetric Group</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1271.htm">[Next]</A><A  HREF = "text1293.htm">[Prev]</A> <A  HREF = "text1271.htm">[Right]</A> <A  HREF = "text1293.htm">[Left]</A> <A  HREF = "text1272.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "14063">Invariants of the Symmetric Group</A></H3>
+
+<P>
+<P>
+Magma includes basic functions for working with symmetric polynomials,
+which are invariants of the symmetric group.
+
+
+<H5><A NAME = "14064">ElementarySymmetricPolynomial(P, k) : RngMPol, RngIntElt -&gt; RngMPolElt</A></H5>
+<BLOCKQUOTE>
+Given a polynomial ring P of rank n, and an integer k with
+1 &le;k &le;n, return the k-th elementary symmetric polynomial
+of P.
+</BLOCKQUOTE>
+<H5><A NAME = "14065">IsSymmetric(f) : RngMPolElt -&gt; BoolElt, RngMPolElt</A></H5>
+<H5>IsSymmetric(f, S) : RngMPolElt, RngMPol -&gt; BoolElt, RngMPolElt</H5>
+<BLOCKQUOTE>
+Given a polynomial f from a polynomial ring P of rank n, return
+whether f is a symmetric polynomial of P (i.e., is symmetric in
+all the n variables of P).  If the answer is true, a polynomial
+g from a new polynomial ring of rank n is returned such that
+f = g(e<sub>1</sub>, ..., e<sub>n</sub>), where e<sub>i</sub> is the i-th elementary symmetric
+polynomial of P.  If g is desired to be a member of a particular
+polynomial ring S of rank n (to obtain predetermined names of variables,
+for example), then S may also be passed.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14066">Example <TT>RngInvar_IsSymmetric (H116E24)</TT></A></H3>
+We create a symmetric polynomial from Q[a, b, c, d] and express
+it in terms of the elementary symmetric polynomials.
+<P>
+<P>
+<PRE>
+&gt; P&lt;a, b, c, d&gt; := PolynomialRing(RationalField(), 4, "grevlex");
+&gt; f :=
+&gt; a^2*b^2*c*d + a^2*b*c^2*d + a*b^2*c^2*d + a^2*b*c*d^2 + a*b^2*c*d^2 +
+&gt;     a*b*c^2*d^2 - a^2*b^2*c - a^2*b*c^2 - a*b^2*c^2 - a^2*b^2*d -
+&gt;     3*a^2*b*c*d - 3*a*b^2*c*d - a^2*c^2*d - 3*a*b*c^2*d - b^2*c^2*d -
+&gt;     a^2*b*d^2 - a*b^2*d^2 - a^2*c*d^2 - 3*a*b*c*d^2 - b^2*c*d^2 -
+&gt;     a*c^2*d^2 - b*c^2*d^2 + a + b + c + d;
+&gt; // Check orbit under Sym(4) has size one:
+&gt; #(f^Sym(4));
+1
+&gt; Q&lt;e1, e2, e3, e4&gt; := PolynomialRing(RationalField(), 4);
+&gt; l, E := IsSymmetric(f, Q);
+&gt; l;
+true
+&gt; E;
+e1 - e2*e3 + e2*e4
+</PRE>
+In the following example, we use a rational function field to define 
+parameters a and b which occur as coefficients of the symmetric
+polynomial f.
+<P>
+<P>
+<PRE>
+&gt; F&lt;a,b&gt; := FunctionField(RationalField(), 2);
+&gt; P&lt;x1,x2,x3,x4,x5&gt; := PolynomialRing(F, 5, "grevlex");
+&gt; y1 := x1^4 + x1^2*a + x1*b;
+&gt; y2 := x2^4 + x2^2*a + x2*b;
+&gt; y3 := x3^4 + x3^2*a + x3*b;
+&gt; y4 := x4^4 + x4^2*a + x4*b;
+&gt; y5 := x5^4 + x5^2*a + x5*b;
+&gt; f := y1*y2 + y1*y3 + y1*y4 + y1*y5 + y2*y3 + y2*y4 +  
+&gt;      y2*y5 + y3*y4 + y3*y5 + y4*y5;
+&gt; Q&lt;e1,e2,e3,e4,e5&gt; := PolynomialRing(F,  5);
+&gt; l,E := IsSymmetric(f, Q);
+&gt; l, E;
+true b*e1^3*e2 - 2*a*e1^3*e3 - 4*e1^3*e5 + a*e1^2*e2^2 +
+    4*e1^2*e2*e4 + 2*e1^2*e3^2 - b*e1^2*e3 + 2*a*e1^2*e4 -
+    4*e1*e2^2*e3 - 3*b*e1*e2^2 + 4*a*e1*e2*e3 + 8*e1*e2*e5 +
+    a*b*e1*e2 - 8*e1*e3*e4 - 2*a^2*e1*e3 + b*e1*e4 - 6*a*e1*e5 +
+    e2^4 - 2*a*e2^3 - 4*e2^2*e4 + a^2*e2^2 + 4*e2*e3^2 +
+    5*b*e2*e3 + 2*a*e2*e4 + b^2*e2 - 3*a*e3^2 - 4*e3*e5 -
+    3*a*b*e3 + 6*e4^2 + 2*a^2*e4 - 5*b*e5
+</PRE>
+<PRE></PRE> <A  HREF = "text1271.htm">[Next]</A><A  HREF = "text1293.htm">[Prev]</A> <A  HREF = "text1271.htm">[Right]</A> <A  HREF = "text1293.htm">[Left]</A> <A  HREF = "text1272.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

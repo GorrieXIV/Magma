@@ -1,0 +1,309 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Basic Operations</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text899.htm">[Next]</A><A  HREF = "text897.htm">[Prev]</A> <A  HREF = "text899.htm">[Right]</A> <A  HREF = "text897.htm">[Left]</A> <A  HREF = "text895.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "10164">Basic Operations</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text898.htm#10165">Accessing Monoid Information</A>
+<LI> <A  HREF = "text898.htm#10174">Properties of a Rewrite Monoid</A>
+<LI> <A  HREF = "text898.htm#10181">Construction of a Word</A>
+<LI> <A  HREF = "text898.htm#10185">Arithmetic with Words</A>
+</UL>
+<H4><A NAME = "10165">Accessing Monoid Information</A></H4>
+
+<P>
+<P>
+The functions in this section provide access to basic information stored for a
+rewrite monoid M.
+
+
+<H5><A NAME = "10166">M . i : MonRWS, RngIntElt -&gt; MonRWSElt</A></H5>
+<BLOCKQUOTE>
+The i-th defining generator for M.
+</BLOCKQUOTE>
+<H5><A NAME = "10167">Generators(M) : MonRWS -&gt; [ MonRWSElt]</A></H5>
+<BLOCKQUOTE>
+A sequence containing the defining generators for M.
+</BLOCKQUOTE>
+<H5><A NAME = "10168">NumberOfGenerators(M) : MonRWS -&gt; RngIntElt</A></H5>
+<H5>Ngens(M) : MonRWS -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The number of defining generators for M.
+</BLOCKQUOTE>
+<H5><A NAME = "10169"></A><A NAME = "MonRWS:Relations">Relations</A>(M) : MonRWS -&gt; [MonFPRel]</H5>
+<BLOCKQUOTE>
+A sequence containing the defining relations for M. The relations
+will be given between elements of the free monoid of which M is a
+quotient. In these relations the (image of the) left hand side (in M) 
+will always be greater than the (image of the) right hand side (in M)
+in the ordering on words used to construct M.
+</BLOCKQUOTE>
+<H5><A NAME = "10170">NumberOfRelations(M) : MonRWS -&gt; RngIntElt</A></H5>
+<H5>Nrels(M) : MonRWS -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The number of relations in M.
+</BLOCKQUOTE>
+<H5><A NAME = "10171">Ordering(M) : MonRWS -&gt; String</A></H5>
+<BLOCKQUOTE>
+The ordering of M.
+</BLOCKQUOTE>
+<H5><A NAME = "10172">Parent(w) : MonRWSElt -&gt; MonRWS</A></H5>
+<BLOCKQUOTE>
+The parent monoid M for the word w.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "10173">Example <TT>MonRWS_BasicAccess (H83E5)</TT></A></H3>
+We illustrate the access operations using the following 
+presentation of S<sub>4</sub>.
+<P>
+<P>
+<PRE>
+&gt; FM&lt;a,b&gt; := FreeMonoid(2);
+&gt; Q := quo&lt; FM | a^2=1, b^3=1, (a*b)^4=1 &gt;;
+&gt; M&lt;x,y&gt; := RWSMonoid(Q);
+&gt; print M;
+A confluent rewrite monoid.
+Generator Ordering = [ a, b ]
+Ordering = ShortLex.
+The reduction machine has 12 states.
+    a^2 = Id(FM)
+    b^3 = Id(FM)
+    b * a * b * a * b = a * b^2 * a
+    b^2 * a * b^2 = a * b * a * b * a
+    b * a * b^2 * a * b * a = a * b * a * b^2 * a * b
+
+&gt; print Order(M);
+24
+&gt; print M.1;
+x
+&gt; print M.1*M.2;
+x * y
+&gt; print Generators(M);
+[ x, y ]
+&gt; print Ngens(M);
+2
+&gt; print Relations(M);
+[ a^2 = Id(FM), b^3 = Id(FM), b * a * b * a * b = a * b^2 * a, b^2 * a * b^2 = a
+* b * a * b * a, b * a * b^2 * a * b * a = a * b * a * b^2 * a * b ]
+&gt; print Nrels(M);
+5
+&gt; print Ordering(M);
+ShortLex
+</PRE>
+<HR>
+<H4><A NAME = "10174">Properties of a Rewrite Monoid</A></H4>
+
+
+
+<H5><A NAME = "10175">IsConfluent(M) : MonRWS -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if M is confluent, <TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "10176">IsFinite(M) : MonRWS -&gt; BoolElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a confluent monoid M return <TT>true</TT> if M has finite order
+and <TT>false</TT> otherwise. If M does have finite order also return 
+the order of M.
+</BLOCKQUOTE>
+<H5><A NAME = "10177">Order(M) : MonRWS -&gt; RngIntElt</A></H5>
+<H5># M : MonRWS -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Given a monoid M defined by a confluent presentation, this function
+returns the cardinality of M.  If the order of M is known
+to be infinite &infin; is returned.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "10178">Example <TT>MonRWS_order-finite (H83E6)</TT></A></H3>
+We construct a threefold cover of A<sub>6</sub>.
+<P>
+<P>
+<PRE>
+&gt; FM&lt;a,b&gt; := FreeMonoid(2);
+&gt; Q := quo&lt; FM | a^3=1, b^3=1, (a*b)^4=1, (a*b^2)^5 = 1 &gt;;
+&gt; M := RWSMonoid(Q);
+&gt; print Order(M);
+1080
+&gt; IsConfluent(M);
+true
+</PRE>
+<HR>
+<H3><A NAME = "10179">Example <TT>MonRWS_order-infinite (H83E7)</TT></A></H3>
+We construct the 2-generator free abelian group and compute
+its order. The result <TT>Infinity</TT> indicates that the group has 
+infinite order. 
+<P>
+<P>
+<P>
+<PRE>
+&gt; FM&lt;a,A,b,B&gt; := FreeMonoid(4);
+&gt; Q := quo&lt; FM | a*A=1, A*a=1, b*B=1, B*b=1, B*a*b=a&gt;;
+&gt; M := RWSMonoid(Q);
+&gt; Order(M);
+Infinity
+</PRE>
+<HR>
+<H3><A NAME = "10180">Example <TT>MonRWS_order (H83E8)</TT></A></H3>
+We construct the Weyl group E<sub>8</sub> and test whether or not
+it has finite order.
+<P>
+<P>
+<PRE>
+&gt; FM&lt;a,b,c,d,e,f,g,h&gt; := FreeMonoid(8);
+&gt; Q := quo&lt; FM | a^2=1, b^2=1, c^2=1, d^2=1, e^2=1, f^2=1, g^2=1, 
+&gt;         h^2=1, b*a*b=a*b*a, c*a=a*c, d*a=a*d, e*a=a*e, f*a=a*f, 
+&gt;         g*a=a*g, h*a=a*h, c*b*c=b*c*b, d*b=b*d, e*b=b*e, f*b=b*f, 
+&gt;         g*b=b*g, h*b=b*h, d*c*d=c*d*c, e*c*e=c*e*c, f*c=c*f, 
+&gt;         g*c=c*g, h*c=c*h, e*d=d*e, f*d=d*f, g*d=d*g, h*d=d*h,
+&gt;         f*e*f=e*f*e, g*e=e*g, h*e=e*h, g*f*g=f*g*f, h*f=f*h,
+&gt;         h*g*h=g*h*g&gt;;
+&gt; M := RWSMonoid(Q);
+&gt; print IsFinite(M);
+true
+&gt; isf, ord := IsFinite(M);
+&gt; print isf, ord;
+true 696729600
+</PRE>
+<HR>
+<H4><A NAME = "10181">Construction of a Word</A></H4>
+
+
+
+<H5><A NAME = "10182">Identity(M) : MonRWS -&gt; MonRWSElt</A></H5>
+<H5>Id(M) : MonRWS -&gt; MonRWSElt</H5>
+<H5>M ! 1 : MonRWS, RngIntElt -&gt; MonRWSElt</H5>
+<BLOCKQUOTE>
+Construct the identity word in M.
+</BLOCKQUOTE>
+<H5><A NAME = "10183">M ! [ i<sub>1</sub>, ..., i<sub>s</sub> ] : MonRWS, [ RngIntElt ] -&gt; MonRWSElt</A></H5>
+<BLOCKQUOTE>
+Given a rewrite monoid M defined on r generators and a sequence
+[i<sub>1</sub>, ..., i<sub>s</sub>] of integers lying in the range [1, r],
+construct the word M.i<sub>1</sub> * M.i<sub>2</sub> * ... * M.i<sub>s</sub>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "10184">Example <TT>MonRWS_Words (H83E9)</TT></A></H3>
+We construct the Fibonacci group F(2, 7), and it's identity.
+<P>
+<P>
+<PRE>
+&gt; FM&lt;a,A,b,B,c,C,d,D,e,E,f,F,g,G&gt; := FreeMonoid(14);
+&gt; Q := quo&lt; FM | a*A=1, A*a=1, b*B=1, B*b=1, c*C=1, C*c=1, 
+&gt;                d*D=1, D*d=1, e*E=1, E*e=1, f*F=1, F*f=1, g*G=1, G*g=1,
+&gt;                a*b=c, b*c=d, c*d=e, d*e=f, e*f=g, f*g=a, g*a=b&gt;;
+&gt; M := RWSMonoid(Q : TidyInt := 1000);
+&gt; print Id(M);
+Id(M)
+&gt; print M!1;
+Id(M)
+&gt; Order(M);
+29
+</PRE>
+<HR>
+<H4><A NAME = "10185">Arithmetic with Words</A></H4>
+
+<P>
+<P>
+Having constructed a rewrite monoid M one can perform arithmetic with words
+in M. Assuming we have u, v &isin;M then the product u * v will be computed
+as follows:
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>The product w = u * v is formed as a product in the appropriate 
+free monoid.
+<P>
+<P>
+<DT>(ii)</DT><DD>The word w is reduced using the reduction machine associated 
+with M.
+<P>
+<P>
+</DL>
+If M is confluent, then w will be the unique minimal word that represents
+u * v under the ordering of M. If M is not confluent, then there are
+some pairs of words which are equal in M, but which reduce to distinct words,
+and hence w will not be a unique normal form. Note that:
+<P>
+<P>
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>Reduction of w can cause an increase in the length of w. At
+present there is an internal limit on the length of a word -- if this limit
+is exceeded during reduction an error will be raised. Hence any word operation
+involving reduction can fail.
+<DT>(ii)</DT><DD>The implementation is designed more with speed of execution in 
+mind than with minimizing space requirements; thus, the reduction machine is
+always used to carry out word reduction, which can be space-consuming,
+particularly when the number of generators is large.</DL>
+
+
+<H5><A NAME = "10186">u * v : MonRWSElt, MonRWSElt -&gt; MonRWSElt</A></H5>
+<BLOCKQUOTE>
+Product of the words w and v.
+</BLOCKQUOTE>
+<H5><A NAME = "10187">u ^ n : MonRWSElt, RngIntElt -&gt; MonRWSElt</A></H5>
+<BLOCKQUOTE>
+The n-th power of the word w, where n is a positive or zero integer.
+</BLOCKQUOTE>
+<H5><A NAME = "10188">u eq v : MonRWSElt, MonRWSElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given words w and v belonging to the same monoid, return true 
+if w and v reduce to the same normal form, false otherwise. If M is
+confluent this tests for equality. If M is non-confluent 
+then two words which are the same may not reduce to the same normal form.
+</BLOCKQUOTE>
+<H5><A NAME = "10189">u ne v : MonRWSElt, MonRWSElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given words w and v belonging to the same monoid, return false 
+if w and v reduce to the same normal form, true otherwise. If M is
+confluent this tests for non-equality. If M is non-confluent 
+then two words which are the same may reduce to different normal forms.
+</BLOCKQUOTE>
+<H5><A NAME = "10190">IsId(w) : MonRWSElt -&gt; BoolElt</A></H5>
+<H5>IsIdentity(w) : MonRWSElt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the word w is the identity word.
+</BLOCKQUOTE>
+<H5><A NAME = "10191"># u : MonRWSElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The length of the word w.
+</BLOCKQUOTE>
+<H5><A NAME = "10192">ElementToSequence(u) : MonRWSElt -&gt; [ RngIntElt ]</A></H5>
+<H5>Eltseq(u) : MonRWSElt -&gt; [ RngIntElt ]</H5>
+<BLOCKQUOTE>
+The sequence Q obtained by decomposing the element u of a rewrite monoid
+into its constituent generators. Suppose u is a word in the rewrite
+monoid M. If u = M.i<sub>1</sub> ... M.i<sub>m</sub>, then Q[j] = i<sub>j</sub>, for
+j = 1, ..., m.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "10193">Example <TT>MonRWS_Arithmetic (H83E10)</TT></A></H3>
+We illustrate the word operations by applying them to elements of the Fibonacci 
+monoid FM(2, 5).
+<P>
+<P>
+<PRE>
+&gt; FM&lt;a,b,c,d,e&gt; := FreeMonoid(5);
+&gt; Q:=quo&lt; FM | a*b=c, b*c=d, c*d=e, d*e=a, e*a=b &gt;;
+&gt; M&lt;a,b,c,d,e&gt; := RWSMonoid(Q);
+&gt; a*b*c*d;
+b^2
+&gt; (c*d)^4 eq a;
+true
+&gt; IsIdentity(a^0);
+true
+&gt; IsIdentity(b^2*e);
+false
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text899.htm">[Next]</A><A  HREF = "text897.htm">[Prev]</A> <A  HREF = "text899.htm">[Right]</A> <A  HREF = "text897.htm">[Left]</A> <A  HREF = "text895.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

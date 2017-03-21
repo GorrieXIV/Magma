@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Accessor Functions</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1348.htm">[Next]</A><A  HREF = "text1346.htm">[Prev]</A> <A  HREF = "text1348.htm">[Right]</A> <A  HREF = "text1346.htm">[Left]</A> <A  HREF = "text1344.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "14861">Accessor Functions</A></H3>
+
+<P>
+<P>
+<P>
+The following functions provide an interface to conveniently extract the basic data 
+from a coherent sheaf.
+
+
+<H5><A NAME = "14862">Module(S) : ShfCoh -&gt; ModMPol</A></H5>
+<BLOCKQUOTE>
+Returns the graded module that was used to define sheaf S.
+</BLOCKQUOTE>
+<H5><A NAME = "14863">Scheme(S) : ShfCoh -&gt; Sch</A></H5>
+<BLOCKQUOTE>
+Returns the ordinary projective scheme X on which the sheaf S is defined.
+</BLOCKQUOTE>
+<H5><A NAME = "14864">FullModule(S) : ShfCoh -&gt; ModMPol</A></H5>
+<BLOCKQUOTE>
+Computes and returns the maximal module M<sub>max</sub> giving sheaf S. The nth
+graded piece of M<sub>max</sub> is equal to the global sections of the Serre twist 
+S(n) as a finite dimensional vector space over k, the base field of the 
+scheme X of S. Thus M<sub>max</sub> isomorphic to direct-sum <sub>n &isin;Z</sub> H<sup>0</sup>(X, S(n)) as in 
+<A  HREF = "text1343.htm#bib_hartshorne">[Har77]</A>. Here, it is implicitly assumed that the exact support of 
+S on X has no irreducible components of dimension 0 and that there are no 
+embedded associated prime places of dimension 0. More concretely, if M is 
+a defining module for S with a possible non-zero finite torsion module for 
+the redundant maximal ideal having been divided out, then no (homogeneous) 
+associated prime of M has dimension 1. This assumption means that the 
+terms in the above direct sum are 0 for n ll 0 or equivalently that 
+M<sub>max</sub> is a finitely-generated module.
+<P>
+As mentioned in the introduction, a further assumption, which isn't checked,
+for the computation of M<sub>max</sub> is that S is equidimensional. That is, M
+has no embedded associated primes (except possibly the redundant ideal)
+and the irreducible components of
+its exact support have the same non-zero dimension. It may be possible to
+avoid this assumption with more complex (and computationally heavy) code
+that works with an equidimensional decomposition of the defining module, but
+it suffices for many cases of interest (e.g., torsion-free sheaves
+on a variety or equidimensional scheme).
+<P>
+<P>
+<P>
+The method used is basically the computation of the double dual of the defining
+module over an appropriate polynomial algebra A.  A possible approach is to 
+take A as the exact "supporting" algebra k[x<sub>0</sub>, ..., x<sub>n</sub>]/I where the 
+polynomial ring is the coordinate ring of the ambient of X and I is the 
+exact annihilator of M. This would involve stronger assumptions on the support 
+of S and the computation of the dualising module for this A. We choose 
+instead to work with A as a <I>Noether normalisation</I> of the above A, 
+which means that A is a simple polynomial ring and is its own dualising 
+module (up to a shift in grading). Then M is re-expressed as a module over 
+this A, M<sub>max</sub> is computed as a module over A and finally is recovered 
+as a module over k[x<sub>0</sub>, ..., x<sub>n</sub>] by keeping track of the multiplication 
+maps by the x<sub>i</sub> variables which don't occur in A.
+<P>
+The module M<sub>max</sub> is stored so that it is only computed once.
+</BLOCKQUOTE>
+<H5><A NAME = "14865">GlobalSectionSubmodule(S) : ShfCoh -&gt; ModMPol</A></H5>
+<BLOCKQUOTE>
+Given a sheaf S, this function returns the submodule of the maximal module 
+M<sub>max</sub> generated in degrees &ge;0, that is direct-sum <sub>n &ge;0</sub> H<sup>0</sup>(X, S(n)).
+</BLOCKQUOTE>
+<H5><A NAME = "14866">SaturateSheaf(~S) : ShfCoh -&gt;</A></H5>
+<BLOCKQUOTE>
+Procedure to compute and store (but not return) the maximal module M<sub>max</sub> of
+the sheaf S.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14867">Example <TT>Sheaf_access_exs (H119E2)</TT></A></H3>
+The classic example of a natural module which is unsaturated (non-maximal)
+defining a sheaf is the coordinate ring R of a non-projectively normal
+non-singular projective variety X. The ring R defines the structure sheaf 
+as usual, but not maximally. By definition, R isn't integrally closed. Its integral
+closure R<sub>1</sub> is an extension ring, inheriting its natural grading and
+agreeing with R in all but finitely many graded parts. In fact, R<sub>1</sub> 
+considered as an R-module is precisely the maximal graded module of the
+structure sheaf!
+<P>
+Such a situation can very commonly arise when a non-singular variety is 
+projected down isomorphically into a subspace of its ambient projective 
+space. The projected down image X is then not even linearly-normal: the 
+degree one graded part of its coordinate ring is missing coordinates that
+were eliminated in the projection. These must reoccur in the graded 
+R-module that is computed as the maximal module of the structure sheaf.
+<P>
+In the following example, X is taken as the non-singular projection into
+P<sup>3</sup> of a degree 4 rational normal curve (which naturally lives in P<sup>4</sup>).
+We can see the difference between the maximal module of the structure sheaf
+and the coordinate ring using Hilbert series. In fact, they just differ 
+by dimension 1 in the 1-graded part, corresponding to that missing coordinate!
+<P>
+<P>
+<P>
+<PRE>
+&gt; P3&lt;x,y,z,t&gt; := ProjectiveSpace(Rationals(),3);
+&gt; X := Scheme(P3,[
+&gt; y^3 - y*z^2 - 2*y^2*t - 2*x*z*t - 3*y*z*t + z^2*t - y*t^2 + 2*z*t^2 + 2*t^3,
+&gt; x^2*z + x*z^2 + y*z^2 + 3*x*z*t + 2*y*z*t - z^2*t + y*t^2 - 2*z*t^2 - 2*t^3,
+&gt; y^2*z - y*z^2 + y^2*t - x*z*t - 4*y*z*t + z^2*t - 3*y*t^2 + 2*z*t^2 + 2*t^3,
+&gt; x*y - x*z - x*t + y*t]);
+&gt; OX := StructureSheaf(X);
+&gt; M1 := Module(OX);
+&gt; M2 := FullModule(OX);
+&gt; h1 := HilbertSeries(M1); h1;
+(-t^3 + 2*t^2 + 2*t + 1)/(t^2 - 2*t + 1)
+&gt; h2 := HilbertSeries(M2); h2;
+(3*t + 1)/(t^2 - 2*t + 1)
+&gt; h2-h1;
+t
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1348.htm">[Next]</A><A  HREF = "text1346.htm">[Prev]</A> <A  HREF = "text1348.htm">[Right]</A> <A  HREF = "text1346.htm">[Left]</A> <A  HREF = "text1344.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

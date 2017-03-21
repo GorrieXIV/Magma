@@ -1,0 +1,316 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Rational Points on Conics</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1421.htm">[Next]</A><A  HREF = "text1419.htm">[Prev]</A> <A  HREF = "text1421.htm">[Right]</A> <A  HREF = "text1419.htm">[Left]</A> <A  HREF = "text1415.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16045">Rational Points on Conics</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+This section contains functions for deciding solubility and
+finding points on conics over the following base fields: the
+rationals, finite fields, number fields, and rational function fields in
+odd characteristic.
+<P>
+A point on a conic C is given as a point in the pointset C(K) where
+K is the base ring of the conic, unless that base ring is the integers
+in which case the returned point belongs to the pointset C(Q).
+<P>
+Over the rationals (or integers), the algorithm used to find rational points
+is due to D. Simon <A  HREF = "text1414.htm#bib_simon">[Sim05]</A>.
+Simon's algorithm works with the symmetric matrix of the defining polynomial
+of the conic. It computes transformations reducing the determinant of the
+matrix by each of the primes which divide the discriminant of the conic
+until it has absolute value 1. After this it does an indefinite LLL which
+reduces the matrix to a unimodular integral diagonal matrix, which is equivalent
+to the conic x<sup>2</sup> + y<sup>2</sup> - z<sup>2</sup> = 0, and then the Pythagorean parametrisation
+of this can be pulled back to the original conic.
+<P>
+The existence of a point on a conic C/Q is determined entirely
+by local solubility conditions, which are encapsulated in a solubility
+certificate.  
+The algorithm of Simon works prime-by-prime, determining local solubility
+as it goes through its calculation of square roots modulo primes.
+In theory the existence of a point can be determined using Legendre
+symbols instead of computing these square roots. This is not
+implemented because the running time is dominated by the time
+needed to factorise the discriminant.
+<P>
+Over number fields the algorithm for finding points is as follows.
+One first reduces to diagonal form, which is done with care to ensure that
+one can factor the coefficients (assuming that one can factor the discriminant
+of the original conic).  The algorithm for diagonal conics is a variant
+of Lagrange's method (which was once the standard method for solving
+diagonal conics over Q).  It involves a series of reduction steps in
+each of which the conic is replaced by a simpler conic.  Reduction is achieved
+by finding a short vector in a suitable lattice sitting inside two copies
+of the base field.  (This lattice is defined by congruence conditions
+arising from local solutions of the conic.)
+<P>
+After several reduction steps
+one is often able to find a solution via an easy search.  In other
+cases, one is unable to reduce further and must call <TT>NormEquation</TT>
+to solve the reduced conic.  (This is still vastly superior to calling
+<TT>NormEquation</TT> on the original conic.)  The basic reduction loop
+is enhanced with several tricks; in particular, when it is not too large
+the class group of the base field may be used to reduce much
+further than would otherwise be feasible.
+<P>
+Over rational function fields the algorithm for solving conics is due to
+Cremona and van Hoeij  <A  HREF = "text1414.htm#bib_cremona_van_Hoeij">[CR06]</A>. The implementation
+was contributed by John Cremona and David Roberts.
+<P>
+Over finite fields the algorithm used for finding a point (x : y : 1)
+on a conic is to solve for y at random values of x.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1420.htm#16046">Finding Points</A>
+<LI> <A  HREF = "text1420.htm#16052">Point Reduction</A>
+</UL>
+<H4><A NAME = "16046">Finding Points</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+The main function is <TT>HasRationalPoint</TT>, which also returns a point
+when one exists. This (and also <TT>RationalPoint</TT>) works over various
+kinds of fields; the other functions work only over the rationals (or integers)
+and finite fields.
+<P>
+When a point is found it is also cached for later use.
+
+
+<H5><A NAME = "16047">HasRationalPoint(C) : CrvCon -&gt; BoolElt, Pt</A></H5>
+<BLOCKQUOTE>
+The conic C should be defined over the integers, rationals, a finite field,
+a number field, or a rational function field over a finite field of odd
+characteristic.
+The function returns <TT>true</TT> if and only if there exists a point on the
+conic C, and if so also returns one such point.
+</BLOCKQUOTE>
+<H5><A NAME = "16048">RationalPoint(C) : CrvCon -&gt; Pt</A></H5>
+<BLOCKQUOTE>
+The conic C should be defined over the integers, rationals, a finite field,
+a number field, or a rational function field over a finite field of odd characteristic.
+If there exists a rational point on C over its base ring then a
+representative such point is returned; otherwise an error results.
+</BLOCKQUOTE>
+<H5><A NAME = "16049">Random(C : parameters) : CrvCon -&gt; Pt</A></H5>
+
+<PRE>    Bound: RngIntElt                    Default: 10^9</PRE>
+
+<PRE>    Reduce: BoolElt                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Returns a randomly selected rational point of the conic C.
+Such a solution is obtained by choosing random integers up to
+the bound specified by the parameter <TT>Bound</TT>, followed by
+evaluation at a parametrisation of C, then by point reduction
+if the parameter <TT>Reduce</TT> is set to <TT>true</TT>.
+(See Section <A  HREF = "text1420.htm#16052">Point Reduction</A>
+for more information about point reduction.)
+</BLOCKQUOTE>
+<H5><A NAME = "16050">Points(C : parameters) : CrvCon -&gt; SetIndx</A></H5>
+<H5>RationalPoints(C : parameters) : CrvCon -&gt; SetIndx</H5>
+
+<PRE>    Bound: RngIntElt                    Default: </PRE>
+<BLOCKQUOTE>
+Given a conic over the rationals or a finite field, returns an
+indexed set of the rational points of the conic.  If the
+curve is defined over the rationals then a positive value for the
+parameter <TT>Bound</TT> <I>must</I> be given;
+this function then returns those points
+whose integral coordinates, on the reduced Legendre model,
+are bounded by the value of <TT>Bound</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16051">Example <TT>CrvCon_rational-point-enum (H125E7)</TT></A></H3>
+We define three conics in Legendre form, having the same prime divisors
+in their discriminants, which differ only by a sign change (twisting by
+Sqrt( - 1)) of one of the coefficients.
+<P>
+<P>
+<PRE>
+&gt; P2&lt;x,y,z&gt; := ProjectiveSpace(Rationals(), 2);
+&gt; C1 := Conic(P2, 23*x^2 + 19*y^2 - 71*z^2);
+&gt; RationalPoints(C1 : Bound := 32);
+{@ @}
+&gt; C2 := Conic(P2, 23*x^2 - 19*y^2 + 71*z^2);
+&gt; RationalPoints(C2 : Bound := 32);
+{@ @}
+&gt; C3 := Conic(P2, 23*x^2 - 17*y^2 - 71*z^2);
+&gt; RationalPoints(C3 : Bound := 32);
+{@ (-31 : 36 : 1), (-31 : -36 : 1), (31 : 36 : 1), (31 : -36 : 1),
+(-8/3 : 7/3 : 1), (-8/3 : -7/3 : 1), (8/3 : 7/3 : 1), (8/3 : -7/3 : 1),
+(-28/15 : 11/15 : 1), (-28/15 : -11/15 : 1), (28/15 : 11/15 : 1),
+(28/15 : -11/15 : 1) @}
+</PRE>
+This naive search yields no points on the first two curves and
+numerous points on the third one.  A guess that there are no
+points on either of the first two curves is proved by a call
+to <TT>BadPrimes</TT>, which finds that 19 and 23 are ramified
+primes for the first curve and 23 and 71 are ramified
+primes for the second.
+<P>
+<P>
+<PRE>
+&gt; BadPrimes(C1);
+[ 19, 23 ]
+&gt; BadPrimes(C2);
+[ 23, 71 ]
+&gt; BadPrimes(C3);
+[]
+</PRE>
+The fact that there are no ramified primes for the third curve is equivalent
+to a <TT>true</TT> return value from the function <TT>HasRationalPoint</TT>.
+As we will see in Section <A  HREF = "text1421.htm#16057">Isomorphisms</A>, an alternative approach
+which is guaranteed to find points on the third curve would be to
+construct a rational parametrisation.
+<HR>
+<H4><A NAME = "16052">Point Reduction</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+If a conic C/Q in Legendre form ax<sup>2</sup> + by<sup>2</sup> + cz<sup>2</sup>=0 has a point,
+then Holzer's theorem tells us that there exists a point (x:y:z)
+satisfying
+<P>
+|x| &le;Sqrt(|bc|),  
+|y| &le;Sqrt(|ac|),  
+|z| &le;Sqrt(|ab|),
+<P>
+with x, y, and z in Z, or equivalently max(|ax<sup>2</sup>|, |by<sup>2</sup>|, |cz<sup>2</sup>|)
+&le;|abc|.  Such a point is said to be Holzer-reduced.
+There exist constructive algorithms to find a Holzer-reduced point
+from a given one;
+the current Magma implementation uses a variant of Mordell's
+reduction due to Cremona <A  HREF = "text1414.htm#bib_cremona_conic_sol">[CR03]</A>.
+
+
+<H5><A NAME = "16053">IsReduced(p) : Pt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the projective point p on a conic
+in reduced Legendre form satisfies Holzer's bounds.  If the curve is
+not a reduced Legendre model then the test is done after passing to
+this model.
+</BLOCKQUOTE>
+<H5><A NAME = "16054">Reduction(p) : Pt -&gt; Pt</A></H5>
+<BLOCKQUOTE>
+Returns a Holzer-reduced point derived from p.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16055">Example <TT>CrvCon_PointReduction (H125E8)</TT></A></H3>
+We provide a tiny example to illustrate reduction and reduction
+testing on conics.
+<P>
+<P>
+<PRE>
+&gt; P2&lt;x,y,z&gt; := ProjectiveSpace(Rationals(), 2);
+&gt; C1 := Conic(P2, x^2 + 3*x*y + 2*y^2 - 2*z^2);
+&gt; p := C1![0, 1, 1];
+&gt; IsReduced(p);
+false
+</PRE>
+The fact that this point is not reduced is due to the size of the
+coefficients on the reduced Legendre model.
+<P>
+<P>
+<PRE>
+&gt; C0, m := ReducedLegendreModel(C1);
+&gt; C0;
+Conic over Rational Field defined by
+X^2 - Y^2 - 2*Z^2
+&gt; m(p);
+(3/2 : 1/2 : 1)
+&gt; IsReduced(m(p));
+false
+&gt; Reduction(m(p));
+(-1 : 1 : 0)
+&gt; Reduction(m(p)) @@ m;
+(-2 : 1 : 0)
+&gt; IsReduced($1);
+true
+</PRE>
+<HR>
+<H3><A NAME = "16056">Example <TT>CrvCon_PointFinding (H125E9)</TT></A></H3>
+In this example we illustrate the intrinsics which apply to finding points
+on conics.
+<P>
+<P>
+<PRE>
+&gt; P2&lt;x,y,z&gt; := ProjectiveSpace(RationalField(), 2);
+&gt; f := 9220*x^2 + 97821*x*y + 498122*y^2 + 8007887*y*z - 3773857*z^2;
+&gt; C := Conic(P2, f);
+</PRE>
+We will now see that C has a reduced solution; indeed, we find two
+different reduced solutions. For comparison we also find a non-reduced
+solution.
+<P>
+<P>
+<PRE>
+&gt; HasRationalPoint(C);
+true (157010/741 : -19213/741 : 1)
+&gt; p := RationalPoint(C);
+&gt; p;
+(157010/741 : -19213/741 : 1)
+&gt; IsReduced(p);
+true
+&gt; q := Random(C : Reduce := true);
+&gt; q;
+(-221060094911776/6522127367379 : -49731359955013/6522127367379 : 1)
+&gt; IsReduced(q);
+true
+&gt; q := Random(C : Bound := 10^5);
+&gt; q;
+(4457174194952129/84200926607090 : -1038901067062816/42100463303545 : 1)
+&gt; IsReduced(q);
+false
+&gt; Reduction(q);
+(-221060094911776/6522127367379 : -49731359955013/6522127367379 : 1)
+&gt; IsReduced($1);
+true
+</PRE>
+To make a parametrisation of C one can use the intrinsic
+<TT>Parametrization</TT> to create a map of schemes from a line to C.
+<P>
+<P>
+<PRE>
+&gt; phi := Parametrization(C);
+&gt; P1&lt;u,v&gt; := Domain(phi);
+&gt; q0 := P1![0, 1];  q1 := P1![1, 1];  q2 := P1![1, 0];
+&gt; phi(q0);
+(7946776/559407 : -21332771/1118814 : 1)
+&gt; phi(q1);
+(26443817/1154900 : -5909829/288725 : 1)
+&gt; phi(q2);
+(157010/741 : -19213/741 : 1)
+&gt; C1, psi := ReducedLegendreModel(C);
+&gt; psi(phi(q0));
+(-1793715893111/4475256 : -22556441171843029/4475256 : 1)
+&gt; p0 := Reduction($1);
+&gt; p0;
+(1015829527/2964 : -59688728328467/2964 : 1)
+&gt; IsReduced(p0);
+true
+&gt; p0 @@ psi;
+(157010/741 : -19213/741 : 1)
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1421.htm">[Next]</A><A  HREF = "text1419.htm">[Prev]</A> <A  HREF = "text1421.htm">[Right]</A> <A  HREF = "text1419.htm">[Left]</A> <A  HREF = "text1415.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

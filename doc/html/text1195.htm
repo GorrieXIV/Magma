@@ -1,0 +1,336 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Constructing Representations</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1196.htm">[Next]</A><A  HREF = "text1194.htm">[Prev]</A> <A  HREF = "text1196.htm">[Right]</A> <A  HREF = "text1194.htm">[Left]</A> <A  HREF = "text1192.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "13301">Constructing Representations</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1195.htm#13302">Lie Algebras</A>
+<LI> <A  HREF = "text1195.htm#13314">Groups of Lie Type</A>
+</UL>
+<H4><A NAME = "13302">Lie Algebras</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+The functions described in this section are applicable only to almost
+reductive structure constant Lie algebras.
+<P>
+If L has of large dimension, the step that calculates the information
+needed to compute preimages for these representations can be quite time 
+consuming.  So if there is no requirement for preimages, this step may 
+be skipped by setting the optional argument <TT>ComputePreImage</TT> to <TT>false</TT>.
+
+
+<H5><A NAME = "13303">TrivialRepresentation(L) : AlgLie -&gt; Map</A></H5>
+<BLOCKQUOTE>
+The one-dimensional trivial representation of the Lie
+algebra L over its base  ring. 
+</BLOCKQUOTE>
+<H5><A NAME = "13304">AdjointRepresentation(L) : AlgLie -&gt; Map</A></H5>
+
+<PRE>    ComputePreImage: BoolElt            Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+The adjoint representation of the Lie algebra L acting on itself.
+</BLOCKQUOTE>
+<H5><A NAME = "13305">StandardRepresentation(L) : AlgLie -&gt; Map</A></H5>
+
+<PRE>    ComputePreImage: BoolElt            Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+The standard representation of the semisimple Lie algebra L over its base 
+ring.  This is the smallest dimensional faithful representation of G 
+(with a few small exceptions).  The Killing form of L must be 
+nondegenerate.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13306">Example <TT>LieReps_StandardRepresentation (H110E2)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; R := RootDatum("A2");
+&gt; #CoisogenyGroup(R);
+3
+&gt; L := LieAlgebra(R, GF(2));
+&gt; h := StandardRepresentation(L);
+&gt; h(L.1);
+[0 0 1]
+[0 0 0]
+[0 0 0]
+&gt; L := LieAlgebra(R, GF(3));
+&gt; h := StandardRepresentation(L);
+
+&gt;&gt; h := StandardRepresentation(L);
+                              ^
+Runtime error in 'StandardRepresentation': Cannot compute the standard
+representation in characteristic  3
+</PRE>
+The coisogeny group of a simply connected root datum always has order one,
+so we can compute the standard representation in this case.
+<P>
+<P>
+<PRE>
+&gt; R := RootDatum("A2" : Isogeny:="SC");
+&gt; L := LieAlgebra(R, GF(3));
+&gt; h := StandardRepresentation(L);
+</PRE>
+<HR>
+<H5><A NAME = "13307">HighestWeightRepresentation(L, w) : AlgLie, [ ] -&gt; UserProgram</A></H5>
+<BLOCKQUOTE>
+The representation of the Lie algebra L with highest weight w
+(given either as a vector or as a sequence representing a vector).
+The result is a function, which for an element of L gives the 
+corresponding matrix.
+The algorithm used is described in <A  HREF = "text1191.htm#bib_wdg-lie-hwrep">[dG01]</A>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13308">Example <TT>LieReps_HighestWeight (H110E3)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; L:= LieAlgebra("G2", RationalField());
+&gt; DimensionOfHighestWeightModule(RootDatum(L), [1,0]);
+7
+&gt; rho:= HighestWeightRepresentation(L, [1,0]);
+&gt; e, f, h := ChevalleyBasis(L);
+&gt; rho(e[1]+f[1]);
+[ 0  1  0  0  0  0  0]
+[ 1  0  0  0  0  0  0]
+[ 0  0  0 -2  0  0  0]
+[ 0  0 -1  0 -1  0  0]
+[ 0  0  0 -2  0  0  0]
+[ 0  0  0  0  0  0  1]
+[ 0  0  0  0  0  1  0]
+&gt; Codomain(rho);
+Full Matrix Lie Algebra of degree 7 over Rational Field
+&gt; N := sub&lt;Codomain(rho) | [ rho(x) : x in e ]&gt;;
+&gt; Dimension(N);
+6
+&gt; IsSolvable(N);
+true
+</PRE>
+<HR>
+<H5><A NAME = "13309">HighestWeightModule(L, w) : AlgLie, SeqEnum -&gt; ModTupAlg</A></H5>
+<BLOCKQUOTE>
+Given a semisimple Lie algebra L corresponding to a root 
+datum of rank r and a sequence w of non-negative
+integers of length r, this returns the irreducible L-module with
+highest weight w. The object returned is a left module over L.
+The algorithm used is described in <A  HREF = "text1191.htm#bib_wdg-lie-hwrep">[dG01]</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "13310">TensorProduct(Q) : SeqEnum -&gt; ModAlg, Map</A></H5>
+<BLOCKQUOTE>
+Given a sequence Q of left-modules over a Lie algebra, this 
+function returns the module M that is the tensor product of 
+the elements of Q. It also returns a map &phi; from the Cartesian 
+product P of the modules in Q to M as the second return 
+value. If t is a tuple whose i-th component is an element 
+from the i-th module in Q then &phi; maps t to the element 
+of M that corresponds to the tensor product of the elements of t.
+</BLOCKQUOTE>
+<H5><A NAME = "13311">SymmetricPower(V, n) : ModAlg, RngIntElt -&gt; ModAlg, Map</A></H5>
+<BLOCKQUOTE>
+Given a left-module V over a Lie algebra, and an
+integer n&ge;2,  
+this function returns the module M that is the n-th symmetric power
+of V. It also returns a map f from the n-fold
+Cartesian product of V to M. This map is multilinear and symmetric,
+i.e., if two of its arguments are interchanged then the image remains
+the same. Furthermore, f has the universal property, i.e., 
+any multilinear symmetric map from the n-fold Cartesian product into a vector
+space W can be written as the composition of f with a map from
+M into W.
+<P>
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "13312">ExteriorPower(V, n) : ModAlg, RngIntElt -&gt; ModAlg, Map</A></H5>
+<BLOCKQUOTE>
+Given a left-module V over a Lie algebra, and an
+integer 2&le;n &le;dim(V),  
+this function returns the module M that is the n-th exterior power
+of V. It also returns a map f from the n-fold
+Cartesian product of V to M. This map is multilinear and antisymmetric,
+i.e., if two of its arguments are interchanged then the image is 
+multiplied by -1. Furthermore, f has the universal property, i.e., 
+any multilinear antisymmetric map from the n-fold Cartesian product 
+into a vector space W can be written as the composition of f with a map 
+from M into W.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13313">Example <TT>LieReps_LieModules (H110E4)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; L:= LieAlgebra("G2", Rationals());
+&gt; V1:= HighestWeightModule(L, [1,0]);
+&gt; V2:= HighestWeightModule(L, [0,1]);
+&gt; T,f:= TensorProduct([V1,V2]);
+&gt; HighestWeightsAndVectors(T);
+[
+    (1 1),
+    (2 0),
+    (1 0)
+]
+[
+    [
+        T: (1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+            0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+            0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+    ],
+    [
+        T: (0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 3 0 0 0 0 0 0 0 0 0 0 0 0 -3 0 0 0 0 0
+            0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+            0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+    ],
+    [
+        T: (0 0 0 0 0 0 1 2 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 -1 0 0
+            0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 -3 0 0 0 0 0 0 0 0 0 0
+            0 0 -3 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+    ]
+]
+&gt; DecomposeTensorProduct(RootDatum(L), [1,0], [0,1]);
+[
+    (1 1),
+    (2 0),
+    (1 0)
+]
+[ 1, 1, 1 ]
+&gt; f(&lt;V1.2,V2.3&gt;);
+T: (0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+    0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+</PRE>
+So we see that the tensor product T decomposes as a direct sum of three
+submodules. This information can also be computed by using 
+<TT>DecomposeTensorProduct</TT>. However, in the former case,
+the corresponding highest-weight vectors are also given.
+<P>
+<P>
+<P>
+<PRE>
+&gt; E,h:= ExteriorPower(V1, 3);
+&gt; h(&lt;V1.1,V1.3,V1.4&gt;);
+E: (0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+&gt; h(&lt;V1.1,V1.4,V1.3&gt;);
+E: (0 0 0 0 0 -1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+&gt; DecomposeExteriorPower( RootDatum(L), 3, [1,0] );
+[
+    (2 0),
+    (1 0),
+    (0 0)
+]
+[ 1, 1, 1 ]
+&gt; HighestWeightsAndVectors(E);
+[
+    (2 0),
+    (1 0),
+    (0 0)
+]
+[
+    [
+        E: (1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+        0)
+    ],
+    [
+        E: (0 0 0 1 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+        0)
+    ],
+    [
+        E: (0 0 0 0 0 0 0 0 0 0 0 1 2 0 0 0 0 0 2 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 
+        0)
+    ]
+]
+</PRE>
+<HR>
+<H4><A NAME = "13314">Groups of Lie Type</A></H4>
+
+
+
+<H5><A NAME = "13315">TrivialRepresentation(G) : GrpLie -&gt; Map</A></H5>
+<BLOCKQUOTE>
+The one-dimensional trivial representation of the group of
+Lie type G over its base ring.  
+</BLOCKQUOTE>
+<H5><A NAME = "13316">StandardRepresentation(G) : GrpLie -&gt; Map</A></H5>
+<BLOCKQUOTE>
+The standard (projective) representation of the semisimple group of
+Lie type G over an extension its base ring.  
+In other words, the smallest dimension highest-weight representation.  
+For the classical groups, this is the natural representation.
+If this is a projective representation rather than a linear representation, 
+a warning is given.
+This is constructed from the corresponding Lie algebra representation, using the algorithm in <A  HREF = "text1191.htm#bib_CohenMurrayTaylor">[CMT04]</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "13317">AdjointRepresentation(G) : GrpLie -&gt; Map, AlgLie</A></H5>
+<BLOCKQUOTE>
+The adjoint (projective) representation of the group of Lie type G over 
+an extension of its base ring, ie. the representation given by the action 
+of G on its Lie algebra.
+The Lie algebra itself is the second returned value.
+This is constructed from the corresponding Lie algebra representation, using the algorithm in <A  HREF = "text1191.htm#bib_CohenMurrayTaylor">[CMT04]</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "13318">LieAlgebra(G) : GrpLie -&gt; AlgLie, Map</A></H5>
+<BLOCKQUOTE>
+The Lie algebra of the group of Lie type G, together with the adjoint representation.
+If this is a projective representation rather than a linear representation, 
+a warning is given.
+</BLOCKQUOTE>
+<H5><A NAME = "13319">HighestWeightRepresentation(G, v) : GrpLie, . -&gt; Map</A></H5>
+<BLOCKQUOTE>
+The highest weight (projective) representation with highest weight v of 
+the group of Lie type G over an extension of its base ring.
+If this is a projective representation rather than a linear representation, 
+a warning is given.
+This is constructed from the corresponding Lie algebra representation, using the algorithm in <A  HREF = "text1191.htm#bib_CohenMurrayTaylor">[CMT04]</A>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13320">Example <TT>LieReps_StandardRepresentation (H110E5)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; G := GroupOfLieType("A2", Rationals() : Isogeny := "SC");
+&gt; rho := StandardRepresentation(G);
+&gt; rho(elt&lt; G | 1 &gt;);
+[ 0 -1  0]
+[ 1  0  0]
+[ 0  0  1]
+&gt; rho(elt&lt;G | &lt;2,1/2&gt; &gt;);
+[  1   0   0]
+[  0   1   0]
+[  0 1/2   1]
+&gt; rho(elt&lt; G | VectorSpace(Rationals(),2)![3,5] &gt;);
+[  3   0   0]
+[  0 5/3   0]
+[  0   0 1/5]
+&gt;
+&gt; G := GroupOfLieType("A2", Rationals());
+&gt; Invariants(CoisogenyGroup(G));
+[ 3 ]
+&gt; rho := StandardRepresentation(G);
+Warning: Projective representation
+&gt; BaseRing(Codomain(rho));
+Algebraically closed field with no variables
+&gt; rho(elt&lt; G | VectorSpace(Rationals(),2)![3,1] &gt;);
+[r1  0  0]
+[ 0 r2  0]
+[ 0  0 r2]
+&gt; rho(elt&lt; G | VectorSpace(Rationals(),2)![3,1] &gt;)^3;
+[  9   0   0]
+[  0 1/3   0]
+[  0   0 1/3]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1196.htm">[Next]</A><A  HREF = "text1194.htm">[Prev]</A> <A  HREF = "text1196.htm">[Right]</A> <A  HREF = "text1194.htm">[Left]</A> <A  HREF = "text1192.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

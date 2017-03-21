@@ -1,0 +1,3 @@
+174,1
+S,TwoSelmerGroup,"The 2-Selmer group of an elliptic curve defined over a rational function field, as an abstract group, and map from this group to the standard etale algebra. The Fast option uses less precision in some of the local calculations (possibly too little!)",1,0,1,334,0,-3,1,0,0,0,0,0,0,0,334,,107,175,-38,-38,-38,-38
+S,TwoDescent,"Given a curve E over a function field, this represents the nontrivial elements in TwoSelmerGroup(E) as hyperelliptic curves C : y^2 = quartic(x). Returns a sequence containing these curves, and a list containing the corresponding maps C -> E",1,0,1,334,0,-3,1,0,0,0,0,0,0,0,334,,82,168,-38,-38,-38,-38

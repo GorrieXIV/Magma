@@ -1,0 +1,242 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Recognition of *-Algebras</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1005.htm">[Next]</A><A  HREF = "text1003.htm">[Prev]</A> <A  HREF = "text1005.htm">[Right]</A> <A  HREF = "text1003.htm">[Left]</A> <A  HREF = "text1000.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "11323">Recognition of *-Algebras</A></H3>
+
+<P>
+<P>
+<P>
+In this section we describe methods that facilitate
+structural examinations of *-algebras.
+<I>All of the functions in this section require that
+the base ring of the given algebra is a finite field
+of odd order.</I> The functions are implementations of
+the methods described in <A  HREF = "text999.htm#bib_BrooksbankWilson1">[BW11a, Sections 4.2 and 4.3]</A>.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1004.htm#11324">Recognition of Simple *-Algebras</A>
+<LI> <A  HREF = "text1004.htm#11328">Recognition of Arbitrary *-Algebras</A>
+</UL>
+<H4><A NAME = "11324">Recognition of Simple *-Algebras</A></H4>
+
+<P>
+<P>
+<P>
+If A is a simple *-algebra, then we 
+<I>constructively recognise</I> A by finding 
+an explicit inverse isomorphisms between A and the 
+standard copy of the simple *-algebra which is
+isomorphic to A. The latter is the output of the 
+function <TT>SimpleStarAlgebra</TT> with the 
+appropriate input parameters.
+
+
+<H5><A NAME = "11325">RecogniseClassicalSSA(A) : AlgMat -&gt; BoolElt, AlgMat, Map, Map</A></H5>
+<BLOCKQUOTE>
+Given a matrix *-algebra A, this function first decides 
+whether or not A is a simple *-algebra of classical type. 
+If it is, the standard *-algebra, T, corresponding 
+to A, a *-isomorphism from A to T, and its 
+inverse from T to A are returned.
+</BLOCKQUOTE>
+<H5><A NAME = "11326">RecogniseExchangeSSA(A) : AlgMat -&gt; BoolElt, AlgMat, Map, Map</A></H5>
+<BLOCKQUOTE>
+Given a matrix *-algebra A, this function first decides
+whether or not A is a simple *-algebra of exchange type. 
+If it is, the standard *-algebra, T, corresponding 
+to A, a *-isomorphism from A to T, and its 
+inverse from T to A are returned. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11327">Example <TT>AlgInv_RecogniseClassicalSSA (H92E7)</TT></A></H3>
+We build a particular simple *-algebra of symplectic 
+type and recognise it constructively.
+<P>
+<P>
+<PRE>
+&gt; MA := MatrixAlgebra(GF(7), 4);
+&gt; F := MA![0,1,3,4,6,0,0,1,4,0,0,2,3,6,5,0];
+&gt; F;
+[0 1 3 4]
+[6 0 0 1]
+[4 0 0 2]
+[3 6 5 0]
+&gt; A := AdjointAlgebra([F]);
+&gt; isit, T, f, g := RecogniseClassicalSSA(A);
+&gt; isit;
+true;
+</PRE>
+A quick check that f is, as claimed, 
+a *-isomorphism.
+<P>
+<P>
+<PRE>
+&gt; (A.1 + A.2)@f eq (A.1@f) + (A.2@f);
+true
+&gt; (A.1 * A.2)@f eq (A.1@f) * (A.2@f);
+true
+&gt; (A.2@Star(A))@f eq (A.2@f)@Star(T);
+true
+</PRE>
+<HR>
+<H4><A NAME = "11328">Recognition of Arbitrary *-Algebras</A></H4>
+
+<P>
+<P>
+<P>
+If A is an arbitrary *-algebra, then we 
+constructively recognise A as follows:
+<P>
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>Find a decomposition A=J direct-sum T, 
+where J is the Jacobson radical of A and T is 
+a *-invariant semisimple complement to J in A;
+<P>
+<DT>(ii)</DT><DD>Find a decomposition 
+T=I<sub>1</sub> direct-sum ... direct-sum I<sub>t</sub> 
+of T into minimal *-ideals; and
+<P>
+<DT>(iii)</DT><DD>For each j&isin;{1, ..., t} 
+constructively recognise the simple *-algebra I<sub>j</sub>.</DL>
+
+
+<H5><A NAME = "11329">RecogniseStarAlgebra(A) : AlgMat -&gt; BoolElt</A></H5>
+<H5>RecogniseStarAlgebra(A) : AlgGrp -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Constructively recognise the *-algebra A given as
+a matrix *-algebra or a group algebra. 
+<P>
+<P>
+There are several functions available that permit easy 
+access to structural information about 
+a *-algebra that has been constructively
+recognised. (In fact all of these functions also
+initiate a constructive recognition of the input
+*-algebra if the recognition has not already been 
+carried out.) For all of the access functions A can
+be either a matrix *-algebra or a group algebra.
+</BLOCKQUOTE>
+<H5><A NAME = "11330">IsSimpleStarAlgebra(A) : AlgMat -&gt; BoolElt</A></H5>
+<H5>IsSimpleStarAlgebra(A) : AlgGrp -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if A is a simple *-algebra.
+</BLOCKQUOTE>
+<H5><A NAME = "11331">SimpleParameters(A) : AlgMat -&gt; SeqEnum</A></H5>
+<H5>SimpleParameters(A) : AlgGrp -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Given a *-algebra A, this function returns the parameters that 
+determine (up to *-isomorphism) the minimal *-ideals of the 
+semisimple quotient A/J, where J is the Jacobson radical of A.
+The parameters are returned in the form of a sequence.
+</BLOCKQUOTE>
+<H5><A NAME = "11332">NormGroup(A) : AlgMat -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a *-algebra A, this function returns the group of unitary 
+elements of A, namely the group consisting of all units in A 
+satisfying the condition x<sup> * </sup>=x<sup> - 1</sup>. The function is based on methods 
+described in <A  HREF = "text999.htm#bib_BrooksbankWilson1">[BW11a, Section 5]</A>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11333">Example <TT>AlgInv_Nonisomorphism1 (H92E8)</TT></A></H3>
+Our first example illustrates how the *-algebra machinery
+may be used to distinguish between group algebras over
+(GF)(5) for the dihedral and quaternion groups of 
+order 8. Those group algebras are isomorphic 
+as algebras, but the example shows that they are 
+nonisomorphic as *-algebras.
+<P>
+<P>
+<PRE>
+&gt; K := GF(5);
+&gt; G1 := SmallGroup(8, 3);
+&gt; G2 := SmallGroup(8, 4);
+&gt; A1 := GroupAlgebraAsStarAlgebra(K, G1);
+&gt; A2 := GroupAlgebraAsStarAlgebra(K, G2);
+&gt; J1, T1 := TaftDecomposition(A1);
+&gt; J2, T2 := TaftDecomposition(A2);
+&gt; Dimension(J1); Dimension(J2);
+0
+0
+</PRE>
+Thus (as we know from Maschke's theorem) 
+both (GF)(5)[D<sub>8</sub>] and 
+(GF)(5)[Q<sub>8</sub>] are semisimple. We now
+recognise them as *-algebras and examine their
+minimal *-ideals.
+<P>
+<P>
+<PRE>
+&gt; RecogniseStarAlgebra(A1);
+true
+&gt; RecogniseStarAlgebra(A2);
+true
+&gt; SimpleParameters(A1);
+[ &lt;"orthogonalcircle", 1, 5&gt;, &lt;"orthogonalcircle", 1, 5&gt;,
+&lt;"orthogonalcircle", 1, 5&gt;, &lt;"orthogonalcircle", 1, 5&gt;, 
+&lt;"orthogonalplus", 2, 5&gt; ]
+&gt; SimpleParameters(A2);
+[ &lt;"orthogonalcircle", 1, 5&gt;, &lt;"orthogonalcircle", 1, 5&gt;,
+&lt;"orthogonalcircle", 1, 5&gt;, &lt;"orthogonalcircle", 1, 5&gt;, 
+&lt;"symplectic", 2, 5&gt;
+]
+</PRE>
+Both group algebras decompose into four 1-dimensional
+*-ideals, and one 4-dimensional *-ideal. However,
+the latter has type <TT>"orthogonalplus"</TT> for 
+(GF)(5)[D<sub>8</sub>], but type <TT>"symplectic"</TT> for
+(GF)(5)[Q<sub>8</sub>].
+<HR>
+<H3><A NAME = "11334">Example <TT>AlgInv_Nonisomorphism2 (H92E9)</TT></A></H3>
+Our second example shows how to use *-algebra functions
+to distinguish between two 
+p-groups of class 2 and order 43<sup>6</sup>.
+The first group is a Sylow 43-subgroup of 
+(GL)(3, 43<sup>2</sup>).
+<P>
+<P>
+<PRE>
+&gt; P1 := ClassicalSylow(GL(3, 43^2), 43);
+&gt; Forms1 := PGroupToForms(P1);
+&gt; A1 := AdjointAlgebra(Forms1);
+&gt; RecogniseStarAlgebra(A1);
+true
+&gt; SimpleParameters(A1);
+[ &lt;"symplectic", 2, 1849&gt; ]
+</PRE>
+The second group is constructed as a subgroup of
+(GL)(3, (GF)(43)[x]/(x<sup>2</sup>)).
+<P>
+<P>
+<PRE>
+&gt; R&lt;x&gt; := PolynomialRing(GF(43));
+&gt; S, f := quo&lt; R | x^2 &gt;;
+&gt; G := GL(3, S);
+&gt; Ua := G![1,1,0,0,1,0,0,0,1];
+&gt; Wa := G![1,0,0,0,1,1,0,0,1];
+&gt; Ub := G![1,x@f,0,0,1,0,0,0,1];
+&gt; Wb := G![1,0,0,0,1,x@f,0,0,1];
+&gt; P2 := sub&lt; G | [ Ua, Wa, Ub, Wb ] &gt;;
+&gt; Forms2 := PGroupToForms(P2);
+&gt; A2 := AdjointAlgebra(Forms2);
+&gt; RecogniseStarAlgebra(A2);
+true
+&gt; SimpleParameters(A2);
+[ &lt;"symplectic", 2, 43&gt; ]
+</PRE>
+Since A<sub>1</sub> and A<sub>2</sub> are non-isomorphic *-algebras,
+it follows that P<sub>1</sub> and P<sub>2</sub> are non-isomorphic groups.
+<HR>
+<PRE></PRE> <A  HREF = "text1005.htm">[Next]</A><A  HREF = "text1003.htm">[Prev]</A> <A  HREF = "text1005.htm">[Right]</A> <A  HREF = "text1003.htm">[Left]</A> <A  HREF = "text1000.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

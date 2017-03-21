@@ -1,0 +1,654 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Divisors</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1340.htm">[Next]</A><A  HREF = "text1338.htm">[Prev]</A> <A  HREF = "text1340.htm">[Right]</A> <A  HREF = "text1338.htm">[Left]</A> <A  HREF = "text1321.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "14771">Divisors</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+This section contains functionality for working with divisors
+on varieties (integral schemes defined over a field) of dimension greater
+than one. Currently, divisors
+can only be created on projective schemes X and there is also
+a restriction that X is ordinary projective for many of the
+less formal intrinsics that rely on the coherent sheaf code.
+In a number of places it is also required that a divisor D
+is Cartier (always true if X is non-singular), which can be we
+explicitly checked in general using the <TT>IsCartier</TT> intrinsic.
+There are also a number of intrinsics
+that are specific to surfaces.
+<P>
+The scheme X may be singular but is assumed to be a <I>normal</I> variety.
+In the absence of normality, problems may occur at along the non-normal
+locus L. In particular, any codimension 1 irreducible components of
+L will function badly as divisor components. Even when L is of
+codimension &ge;2 in X, we may get strange behaviour at points of L.
+For example, a locally-principal (Cartier) effective divisor passing
+through a non-normal point p may become non-Cartier at p when
+its defining ideal I is replaced by the "pure codimension 1" component
+of I. This replacement is carried out as a matter of course in certain
+places where we need to kill off higher-codimensional components of the
+defining ideal of an effective divisor that would affect a computation.
+<P>
+Integral divisors are represented as differences of effective divisors,
+which are represented as subschemes of the scheme
+they live on. Factorisation into multiples of irreducibles
+can also be performed and the result is stored once calculated.
+It is also possible to work with
+<B>Q</B>-divisors. These are represented internally as
+factorisations with rational multiplicity of components.
+<P>
+The package of divisor functions is at and early stage and
+a number of the intrinsics are not as general as they could be
+and/or could be made more efficient. However, it is useful
+functionality that seems worth exporting now. There is much
+further work still to be done.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1339.htm#14772">Divisor Groups</A>
+<LI> <A  HREF = "text1339.htm#14776">Creation Of Divisors</A>
+<LI> <A  HREF = "text1339.htm#14788">Ideals and Factorisations</A>
+<LI> <A  HREF = "text1339.htm#14801">Basic Divisor Predicates</A>
+<LI> <A  HREF = "text1339.htm#14808">Arithmetic of Divisors</A>
+<LI> <A  HREF = "text1339.htm#14812">Further Divisor Properties</A>
+<LI> <A  HREF = "text1339.htm#14829">Riemann-Roch Spaces</A>
+</UL>
+<H4><A NAME = "14772">Divisor Groups</A></H4>
+
+<P>
+<P>
+<P>
+As for curves, there is a divisor group object associated to
+a variety X, which is the parent of all divisors on X.
+It is of type <TT>DivSch</TT>.
+
+
+<H5><A NAME = "14773">DivisorGroup(X) : Sch -&gt; DivSch</A></H5>
+<BLOCKQUOTE>
+The divisor group of variety X.
+</BLOCKQUOTE>
+<H5><A NAME = "14774">Variety(G) : DivSch -&gt; Sch</A></H5>
+<BLOCKQUOTE>
+The variety of the divisor group G.
+</BLOCKQUOTE>
+<H5><A NAME = "14775">G1 eq G2: DivSch, DivSch -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the divisor groups G1 and G2 are for the same variety.
+</BLOCKQUOTE>
+<H4><A NAME = "14776">Creation Of Divisors</A></H4>
+
+<P>
+<P>
+<P>
+Divisors are of type <TT>DivSchElt</TT>.
+Internally, an integral, effective divisor D on variety X is stored as an
+ideal which defines D as a subscheme of X. A general divisor
+is represented internally in partially factored form as a list of 
+pairs of ideals and rational multiplicities [&lt; I<sub>i</sub>, m<sub>i</sub> &gt;]
+which represents the <B>Q</B>-rational (integral, if all m<sub>i</sub> are integers)
+divisor &sum;<sub>i</sub> m<sub>i</sub> * D(I<sub>i</sub>), where D(I<sub>i</sub>) is the effective divisor on X
+defined by the ideal I<sub>i</sub>. An integral, effective divisor may also have 
+a factorisation stored. The internal factorisation can change over time
+with the I<sub>i</sub> being decomposed into products of larger ideals. When
+the I<sub>i</sub> are all prime ideals, we say that the factorisation is a
+prime factorisation of D.
+<P>
+This section contains the basic creation functions for divisors.
+
+
+<H5><A NAME = "14777">Divisor(X,f) : Sch, FldFunFracSchElt -&gt; DivSchElt</A></H5>
+<H5>Divisor(X,f) : Sch, FldFunRatMElt -&gt; DivSchElt</H5>
+<H5>Divisor(X,f) : Sch, RngMPolElt -&gt; DivSchElt</H5>
+<BLOCKQUOTE>
+These create the integral divisor on X defined by a single global element f.
+In the first two cases, f is an element of the function field (or
+the field of fractions of the coordinate ring of) the projective ambient
+of X. The divisor is non-effective (unless it is zero): the divisor
+of zeroes of f minus its divisor of poles. In the last case
+f should be a homogeneous polynomial in the coordinate ring of the
+ambient and the divisor is the effective divisor defined by the
+subscheme of X whose ideal is generated by the ideal of X and f.
+</BLOCKQUOTE>
+<H5><A NAME = "14778">Divisor(X,Q) : Sch, SeqEnum -&gt; DivSchElt</A></H5>
+<H5>Divisor(X,Y) : Sch, Sch -&gt; DivSchElt</H5>
+<H5>Divisor(X,I) : Sch, RngMPol -&gt; DivSchElt</H5>
+
+<PRE>    CheckSaturated: BoolElt             Default: <TT>false</TT></PRE>
+
+<PRE>    CheckDimension: BoolElt             Default: <TT>false</TT></PRE>
+
+<PRE>    UseCodimensionOnePart: BoolElt      Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+These three intrinsics define an integral, effective divisor on projective variety X
+defined by an ideal or subscheme. For the first, Q is a sequence of elements
+in the coordinate ring of X and it is equivalent to passing the ideal
+generated by the ideal of X and Q. For the second, Y is a subscheme
+of X that should define an effective divisor on X. For the third, I is
+an ideal in the coordinate ring of the ambient of X, whose saturation J should
+contain the ideal of X. The effective divisor is given by the closed subscheme
+of X whose ideal is J.
+<P>
+The parameter <TT>CheckSaturated</TT> can be set to <TT>true</TT> in the third case if it is known that I is
+already saturated or in the second case if it is known that the ideal of Y is
+already saturated. The parameter <TT>CheckDimension</TT> can be set to <TT>true</TT> in any of the cases if it is
+known that the subscheme defining the divisor is of pure codimension 1 in X. Otherwise
+this condition is checked with the following exception. In the third case, if parameter
+<TT>UseCodimensionOnePart</TT> is set to <TT>true</TT> the non-codimension 1 part of the ideal
+is ignored in creating the divisor.
+</BLOCKQUOTE>
+<H5><A NAME = "14779">HyperplaneSectionDivisor(X) : Sch -&gt; DivSchElt</A></H5>
+<BLOCKQUOTE>
+Creates a divisor given by a hyperplane section of projective variety X.
+</BLOCKQUOTE>
+<H5><A NAME = "14780">ZeroDivisor(X) : Sch -&gt; DivSchElt</A></H5>
+<BLOCKQUOTE>
+The zero divisor on variety X.
+</BLOCKQUOTE>
+<H5><A NAME = "14781">CanonicalDivisor(X) : Sch -&gt; DivSchElt</A></H5>
+<BLOCKQUOTE>
+A canonical divisor on variety X which must be ordinary projective and should
+be a Gorenstein scheme for this to give a correct result. It uses the canonical
+sheaf on X and the next intrinsic.
+</BLOCKQUOTE>
+<H5><A NAME = "14782">SheafToDivisor(S) : ShfCoh -&gt; DivSchElt</A></H5>
+<BLOCKQUOTE>
+The argument S is a coherent sheaf that should be invertible (locally free, rank 1) on a variety X.
+Then S is isomorphic to L(D) for a (Cartier) divisor D
+(defined up to rational equivalence) on X. Returns such a divisor D which is effective if
+possible.
+</BLOCKQUOTE>
+<H5><A NAME = "14783">RoundDownDivisor(D) : DivSchElt -&gt; DivSchElt</A></H5>
+<BLOCKQUOTE>
+For an integral divisor D just returns D. For a non-integral (<B>Q</B>-rational)
+divisor with a factorisation into sum of rational multiples of prime components,
+returns the divisor of the integer multiple sum of primes given by rounding down
+all of the original rational coefficients.
+</BLOCKQUOTE>
+<H5><A NAME = "14784">RoundUpDivisor(D) : DivSchElt -&gt; DivSchElt</A></H5>
+<BLOCKQUOTE>
+For an integral divisor D just returns D. For a non-integral (<B>Q</B>-rational)
+divisor with a factorisation into sum of rational multiples of prime components,
+returns the divisor of the integer multiple sum of primes given by rounding up
+all of the original rational coefficients.
+</BLOCKQUOTE>
+<H5><A NAME = "14785">FractionalPart(D) : DivSchElt -&gt; DivSchElt</A></H5>
+<BLOCKQUOTE>
+Returns D - <TT>RoundDownDivisor</TT>(D).
+</BLOCKQUOTE>
+<H5><A NAME = "14786">IntegralMultiple(D) : DivSchElt -&gt; DivSchElt,RngIntElt</A></H5>
+<BLOCKQUOTE>
+Finds a positive integer N such that E=N * D is an integral
+divisor. Returns E and N. Doesn't attempt to find the
+smallest possible N by analysing the full prime factorisation
+of D.
+</BLOCKQUOTE>
+<H5><A NAME = "14787">EffectiveHypersurfaceTwist(D) : DivSchElt -&gt; DivSchElt, RngMPolElt</A></H5>
+<BLOCKQUOTE>
+The divisor D should be an integral divisor on an ordinary projective variety X.
+Let H denotes a hyperplane divisor of X.
+Returns an effective divisor D<sub>1</sub> linearly equivalent to D + rH for
+some r &ge;0. In fact, it also returns a non-zero homogeneous polynomial
+F of degree r in the coordinate ring of the ambient of X such that
+D<sub>1</sub> = D + (F) where (F) ~rH is the divisor of vanishing of F on X.
+The D<sub>1</sub> returned will have an effective ideal factorisation (i.e., all
+multiplicities m<sub>i</sub> in the stored factorisation will be positive integers).
+If D already has an effective ideal factorisation, D itself is
+returned with F=1.
+</BLOCKQUOTE>
+<H4><A NAME = "14788">Ideals and Factorisations</A></H4>
+
+<P>
+<P>
+<P>
+Divisors are stored in ideal or factored form as described in the introduction
+to the last section. This section contains functions related to these
+representing structures.
+
+
+<H5><A NAME = "14789">Ideal(D) : DivSchElt -&gt; RngMPol</A></H5>
+<BLOCKQUOTE>
+Returns the defining ideal for an effective, integral divisor D.
+</BLOCKQUOTE>
+<H5><A NAME = "14790">Support(D) : DivSchElt -&gt; Sch</A></H5>
+<BLOCKQUOTE>
+The subscheme of the variety of effective <B>Q</B>-divisor D that
+gives its support.
+</BLOCKQUOTE>
+<H5><A NAME = "14791">IdealOfSupport(D) : DivSchElt -&gt; RngMPol</A></H5>
+<BLOCKQUOTE>
+The ideal in the coordinate ring of the ambient of the variety of the
+effective <B>Q</B>-divisor D that defines it's support.
+</BLOCKQUOTE>
+<H5><A NAME = "14792">SignDecomposition(D) : DivSchElt -&gt; DivSchElt, DivSchElt</A></H5>
+<BLOCKQUOTE>
+The decomposition of D into two effective divisors A and B
+such that D=A - B. A and B are returned. Note that they are
+not guaranteed to be relatively prime for this intrinsic.
+</BLOCKQUOTE>
+<H5><A NAME = "14793">IdealFactorisation(D) : DivSchElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Returns the current stored factorisation of D as a sequence of
+pairs of ideals and rational multiplicities.
+</BLOCKQUOTE>
+<H5><A NAME = "14794">CombineIdealFactorisation(~D) : DivSchElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Simplify the current ideal factorisation of D by combining terms
+with the same ideal.
+</BLOCKQUOTE>
+<H5><A NAME = "14795">ComputeReducedFactorisation(~D) : DivSchElt -&gt;</A></H5>
+<H5>ReducedFactorisation(D) : DivSchElt -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Replace the ideal factorisation of D with an equivalent reduced
+factorisation where all ideals occurring are primary. The first
+intrinsic just does the replacement internally. The second
+intrinsic also returns the result.
+</BLOCKQUOTE>
+<H5><A NAME = "14796">ComputePrimeFactorisation(~D) : DivSchElt -&gt;</A></H5>
+<H5>PrimeFactorisation(D) : DivSchElt -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Replace the ideal factorisation of D with an equivalent prime
+factorisation where all ideals occurring are prime. The first
+intrinsic just does the replacement internally. The second
+intrinsic also returns the result.
+</BLOCKQUOTE>
+<H5><A NAME = "14797">Multiplicity(D,E) : DivSchElt, DivSchElt -&gt; FldRatElt</A></H5>
+<BLOCKQUOTE>
+The multiplicity of prime divisor E in divisor D. The ideal
+factorisation of D is replaced by a factor representing
+E to the multiplicity along with factors which are the original
+ideal factors of D with the maximum powers of E divided out.
+This refactorisation comes from the computation which
+iteratively calculates the colon ideal by E of the original factors.
+</BLOCKQUOTE>
+<H5><A NAME = "14798">MultiplicityFast(D,E) : DivSchElt, DivSchElt -&gt; FldRatElt</A></H5>
+<BLOCKQUOTE>
+This is a fast version of <TT>Multiplicity</TT> that can be applied when
+the variety X of D and E is affine or ordinary projective
+and E is known to be Cartier. It is usually faster than the
+general version, not having to compute colon ideals, but has the
+drawback of not refactorising the ideal factorisation of D
+into a power of E and remainders. As a fast version, it also
+does not check that E is prime whereas the usual multiplicity
+intrinsic does.
+</BLOCKQUOTE>
+<H5><A NAME = "14799">Multiplicities(D,P) : DivSchElt, SeqEnum[DivSchElt] -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+This is a fast (usually) variant of <TT>Multiplicity</TT> for working
+with divisors that are all supported on a known set of prime divisors.
+The argument D is a divisor on variety X and P should be a sequence of prime
+divisors containing <I>all</I> of the primes that D is supported on.
+Returns the sequence of multiplicities of p in D for p&isin;P.
+X must be ordinary projective here.
+<P>
+The method used to is reduce to the dimension 1 case for X by cutting
+with random hyperplanes and then use magma's divisor and
+place functionality for curves to compute the result. We have to be
+careful in choosing hyperplanes such that at each stage of reducing the
+dimension by 1: the cut X is purely of dimension one less than before;
+all of the cut divisors p are purely of dimension one less than before
+and have no component lying in the singular locus of cut X; no
+components of a pair of cut p coincide.
+<P>
+The reason for requiring that all prime factors in the support of D
+lie in P is that other factors of D outside of P could end up
+coinciding with a factor p in P on repeated cutting by hyperplanes.
+This would lead to a multiplicity for p that is too large. This actually occurs
+in the example below.
+<P>
+This intrinsic is particularly useful when X lies in a fairly small dimensional
+ambient and the user is interested in computing multiplicities of a number of
+divisors that are supported on a fixed set of prime divisors and can have
+quite high multiplicities with respect to these.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14800">Example <TT>Scheme_sch-div-mults (H118E63)</TT></A></H3>
+We take a (singular but normal) degree 3 Del Pezzo surface S in (P)<sup>3</sup>
+and 3 lines on it that form a hyperplane section H as our initial set of P.
+We let D be the hypersurface divisor with equation the cube of the
+equation of H multiplied by the square of a different linear form that vanishes
+on the third line but not the other two. The expected multiplicities are thus
+[3, 3, 5]. However, not including the second prime divisor of the second
+linear form leads to the wrong result! The chosen 
+cutting merges the ignored prime divisor of the support with the third line
+and leads to a value for the third multiplicity that is too high. When we include
+the final divisor of the support of D in our set P, we get the correct result.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z,t&gt; := ProjectiveSpace(Rationals(),3);
+&gt; F := x^3+y^3+z^3+3*y^2*t+3*y*z*t+3*z^2*t+3*y*t^2+3*z*t^2+t^3;
+&gt; S := Surface(P,F);
+&gt; R := CoordinateRing(P);
+&gt; Ils := [ideal&lt;R|[u,x+y+z+t-u]&gt; : u in [x,y,z]]; //ideals of the three lines
+&gt; P := [Divisor(S,I) : I in Ils];
+&gt; g1 := x+y+z+t; // hyperplane = the sum of the lines
+&gt; g2 := x+y+t;   // hyperplane through only the 3rd line
+&gt; D := Divisor(S,g1^3*g2^2);
+&gt; Multiplicities(D,P);
+[3,3,9]
+&gt; // wrong! we need to include the extra prime divisor of the support.
+&gt; D1 := Divisor(S,g2);
+&gt; PrimeFactorisation(D1);
+[
+    &lt;Ideal of Polynomial ring of rank 4 over Rational Field
+    Order: Graded Reverse Lexicographical
+    Variables: x, y, z, t
+    Homogeneous, Dimension 2, Radical, Prime
+    Groebner basis:
+    [
+        z^2 + 3*y*t + 3*z*t + 3*t^2,
+        x + y + t
+    ], 1&gt;,
+    &lt;Ideal of Polynomial ring of rank 4 over Rational Field
+    Order: Graded Reverse Lexicographical
+    Variables: x, y, z, t
+    Homogeneous, Dimension 2, Radical, Prime
+    Groebner basis:
+    [
+        x + y + t,
+        z
+    ], 1&gt;
+]
+&gt; P4 := Divisor(S,$1[1][1]);
+&gt; Multiplicities(D,P cat [P4]); //this gives the correct result!
+[ 3, 3, 5, 2 ]
+</PRE>
+<HR>
+<H4><A NAME = "14801">Basic Divisor Predicates</A></H4>
+
+
+
+<H5><A NAME = "14802">IsZeroDivisor(D) : DivSchElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns whether D is the zero divisor.
+</BLOCKQUOTE>
+<H5><A NAME = "14803">IsIntegral(D) : DivSchElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns whether D is an integral divisor. If
+this isn't immediately obvious from the current
+factorisation, will convert to a prime factorisation and try to
+combine terms.
+</BLOCKQUOTE>
+<H5><A NAME = "14804">IsEffective(D) : DivSchElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns whether D is an effective divisor. If
+this isn't immediately obvious from the current
+factorisation, will convert to a prime factorisation and try to
+combine terms.
+</BLOCKQUOTE>
+<H5><A NAME = "14805">IsPrime(D) : DivSchElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns whether D is a prime divisor.
+</BLOCKQUOTE>
+<H5><A NAME = "14806">IsFactorisationPrime(D) : DivSchElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns whether the current factorisation of D is a prime
+factorisation (i.e. all ideals occurring are prime).
+</BLOCKQUOTE>
+<H5><A NAME = "14807">IsDivisible(D) : DivSchElt -&gt; BoolElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns whether D is integral and divisible as an integral
+divisor by an integer n &gt; 1. If so, also returns the maximum
+such n.
+</BLOCKQUOTE>
+<H4><A NAME = "14808">Arithmetic of Divisors</A></H4>
+
+
+
+<H5><A NAME = "14809">D1 + D2 : DivSchElt, DivSchElt  -&gt;  DivSchElt</A></H5>
+<H5>D1 + D2 : DivSchElt, DivTorElt  -&gt;  DivSchElt</H5>
+<H5>D1 + D2 : DivTorElt, DivTorElt  -&gt;  DivSchElt</H5>
+<H5>D1 - D2 : DivSchElt, DivSchElt  -&gt;  DivSchElt</H5>
+<H5>D1 - D2 : DivSchElt, DivTorElt  -&gt;  DivSchElt</H5>
+<H5>D1 - D2 : DivTorElt, DivSchElt  -&gt;  DivSchElt</H5>
+<H5>- D : DivSchElt  -&gt;  DivSchElt</H5>
+<BLOCKQUOTE>
+Addition, subtraction and unitary minus on divisors.
+For addition and subtraction, one argument may be a
+toric divisor whose toric variety is the
+variety of the scheme divisor.
+</BLOCKQUOTE>
+<H5><A NAME = "14810">n * D : RngIntElt, DivSchElt -&gt; DivSchElt</A></H5>
+<H5>r * D : FldRatElt, DivSchElt -&gt; DivSchElt</H5>
+<BLOCKQUOTE>
+Multiplication of a divisor D by an integer n or
+rational number r. Note that the multiplication by r
+is the only current primitive method for constructing
+non-integral divisors.
+</BLOCKQUOTE>
+<H5><A NAME = "14811">D1 eq D2 : DivSchElt, DivSchElt  -&gt;  BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns whether divisors D1 and D2 lie on the
+same variety and are equal.
+</BLOCKQUOTE>
+<H4><A NAME = "14812">Further Divisor Properties</A></H4>
+
+<P>
+<P>
+<P>
+More complicated predicates on divisors.
+
+
+<H5><A NAME = "14813">IsCanonical(D) : DivSchElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns whether D is a canonical divisor by testing whether
+its associated sheaf is isomorphic to the canonical sheaf.
+The variety of D must be ordinary projective here and should
+be Gorenstein.
+</BLOCKQUOTE>
+<H5><A NAME = "14814">IsAnticanonical(D) : DivSchElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns whether D is an anticanonical divisor by testing whether
+its associated sheaf is isomorphic to the dual of the canonical sheaf.
+The variety of D must be ordinary projective here and should
+be Gorenstein.
+</BLOCKQUOTE>
+<H5><A NAME = "14815">IsCanonicalWithTwist(D) : DivSchElt -&gt; BoolElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns whether D is the sum of a hypersurface divisor of degree d and
+a canonical divisor by testing whether
+its associated sheaf is isomorphic to a twist of the canonical sheaf. If so,
+also returns d.
+The variety of D must be ordinary projective here and should
+be Gorenstein.
+</BLOCKQUOTE>
+<H5><A NAME = "14816">IsPrincipal(D) : DivSchElt -&gt; BoolElt, FldFunFracSchElt</A></H5>
+<BLOCKQUOTE>
+Returns whether D with variety X is a principal divisor and, if so,
+also returns an element f of the function field of the
+ambient of X such that D = div(f). X should be ordinary projective
+and D a Cartier divisor here. Uses the Riemann-Roch space of D.
+</BLOCKQUOTE>
+<H5><A NAME = "14817">IsCartier(D) : DivSchElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns whether D is a Cartier divisor on its variety X. This is equivalent
+to D being <I>locally</I>-principal. That is, X can be covered by Zariski-open
+subsets U<sub>i</sub> such that the restriction of D to each U<sub>i</sub> is equal to the
+restriction of div(f<sub>i</sub>) to U<sub>i</sub> for some f<sub>i</sub>. X must be ordinary projective
+here.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14818">Example <TT>Scheme_divs-cartier-ex (H118E64)</TT></A></H3>
+Many divisors are automatically Cartier. If X is non-singular, all
+divisors are. If X is ordinary projective, the easiest divisors to
+construct are the hypersurface divisors defined by a
+homogeneous form that doesn't vanish on all of X. These are also
+all Cartier whether X is singular or not. 
+<P>
+On the other hand, on an anticanonically-embedded degenerate
+Del Pezzo surface, a line that passes through a singular
+point is usually not Cartier. We give an example
+of a degenerate degree 4 Del Pezzo
+with 2 A<sub>1</sub> singularities where we verify this for a 
+particular line using <TT>IsCartier</TT>.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z,t,u&gt; := ProjectiveSpace(RationalField(), 4);
+&gt; S := Surface(P,[z^2-z*t-y*u, y*z-x*t-z*t-y*u]);
+&gt; p := S![0,0,0,0,1];
+&gt; IsSingular(p);
+true (0 : 0 : 0 : 0 : 1) 
+&gt; l := Scheme(P,[y,z-t,x+z]); // l is a line thorugh p
+&gt; l subset S; // and l lies in S
+true
+&gt; D := Divisor(S,Ideal(l));
+&gt; IsCartier(D);
+false
+</PRE>
+<HR>
+<H5><A NAME = "14819">IsLinearlyEquivalent(D,E) : DivSchElt, DivSchElt  -&gt; BoolElt, FldFunFracSchElt</A></H5>
+<BLOCKQUOTE>
+Returns whether two divisors D and E on variety X are linearly equivalent
+and, if so, also returns an element f of the function field of the
+ambient of X such that D = E + (div)(f). Uses <TT>IsPrincipal</TT> for the
+difference between the two divisors, so X must be ordinary projective.
+</BLOCKQUOTE>
+<H5><A NAME = "14820">BaseLocus(D) : DivSchElt -&gt; Sch</A></H5>
+<H5>IsBasePointFree(D) : DivSchElt -&gt; BoolElt</H5>
+<H5>IsMobile(D) : DivSchElt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+The first intrinsic computes the base locus of the linear system |[D]|
+(i.e. the reduced intersection of all effective divisors in the linear
+system) where [D] is the round down of D . This uses the Riemann-Roch
+space of [D], which means that this divisor has to be Cartier and
+the variety X of D has to be ordinary projective.
+<P>
+The second intrinsic returns whether this base locus is empty and the
+third whether it is of codimension at least two in X (i.e. there are
+no common divisor components to the full linear system). X and D
+obviously have to satisfy the same conditions.
+</BLOCKQUOTE>
+<H5><A NAME = "14821">IntersectionNumber(D1,D2) : DivSchElt, DivSchElt-&gt; FldRatElt</A></H5>
+<BLOCKQUOTE>
+The arguments D1 and D2 are divisors on a variety X which must be of dimension 2.
+One of the two divisors is assumed to be Cartier. Computes the intersection
+pairing number D1.D2.
+</BLOCKQUOTE>
+<H5><A NAME = "14822">SelfIntersection(D) : DivSchElt -&gt; FldRatElt</A></H5>
+<BLOCKQUOTE>
+The intersection number of D with itself where the divisor D on X must satisfy the
+conditions for the last intrinsic.
+</BLOCKQUOTE>
+<H5><A NAME = "14823">Degree(D) : DivSchElt -&gt; FldRatElt</A></H5>
+<H5>Degree(D,H) : DivSchElt, DivSchElt-&gt; FldRatElt</H5>
+<BLOCKQUOTE>
+The argument D (resp. D and H) lies on a variety X of dimension 2. The
+first computes the intersection number of D with respect to a
+hyperplane divisor. The second computes the intersection number
+of D with H (so is just equivalent to <TT>IntersectionNumber(D,H)</TT>).
+</BLOCKQUOTE>
+<H5><A NAME = "14824">IsNef(D) : DivSchElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+The argument D should be a <B>Q</B>-Cartier divisor on a projective surface X. Currently,
+it also has to be effective. Returns whether D is a nef divisor: i.e.
+whether it has non-negative intersection with all effective divisors
+on X.
+</BLOCKQUOTE>
+<H5><A NAME = "14825">IsNefAndBig(D) : DivSchElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+The divisor D on X is as above. The divisor D must be effective. Returns whether D is
+a nef divisor <I>and</I> has positive self-intersection.
+</BLOCKQUOTE>
+<H5><A NAME = "14826">NegativePrimeDivisors(D) : DivSchElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The divisor D on X again should satisfy the same conditions as in <TT>IsNef</TT>.
+Returns a sequence of prime divisor components of D which have
+negative intersection with D.
+</BLOCKQUOTE>
+<H5><A NAME = "14827">ZariskiDecomposition(D) : DivSchElt -&gt; DivSchElt, DivSchElt</A></H5>
+<BLOCKQUOTE>
+The divisor D on X again should satisfy the same conditions as in <TT>IsNef</TT>.
+Returns a pair of <B>Q</B>-divisors P and N such that D=P + N, P is nef
+and N has negative-definite support (i.e. the intersection pairing on
+its prime components is negative definite).
+</BLOCKQUOTE>
+<H5><A NAME = "14828">Reduction(D,p) : DivSchElt, Any -&gt; DivSchElt</A></H5>
+
+<PRE>    parent: Sch                         Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The variety X of the divisor D should be an ordinary projective scheme defined over
+K, the rational field or a number field. If K is 
+the rationals then argument p should be a rational prime and 
+if K is a number field, p should be a place or a prime ideal
+in an order of K.
+<P>
+Computes and returns D<sub>p</sub>, the reduction mod p of D, which is
+a divisor on X<sub>p</sub>, the reduction of the flat closure of X as
+defined by the intrinsic (<A  HREF = "text1335.htm#sch-red-mod-p">Reduction</A>). Note that it is
+not checked whether X<sub>p</sub> is normal or even a variety over k<sub>p</sub> 
+(the residue class field of p). The reduction is carried out 
+on the components in the current ideal factorisation of D in
+the same way the reduction of X itself is computed.
+<P>
+If the reduction of X has already been computed as Y, say, and the 
+user wishes the result D<sub>p</sub> to be a divisor on Y, this can be
+achieved by setting the parameter <TT>parent</TT> equal to Y.
+</BLOCKQUOTE>
+<H4><A NAME = "14829">Riemann-Roch Spaces</A></H4>
+
+<P>
+<P>
+<P>
+This section contains functions to compute and work with Riemann-Roch
+spaces for a divisor D. It is always assumed that X, the variety of D,
+is an ordinary projective space here. The Riemann-Roch space is the
+finite-dimensional subspace of the vector space (over the basefield) of
+rational functions on X consisting of zero and all f &ne;0 such that
+D + div(f) is an effective divisor. Thus, the Riemann-Roch space of D
+is the same as the Riemann-Roch space of [D], <TT>RoundDownDivisor(D)</TT>.
+Because the sheaf code is used (or a slight variant for non-effective divisors),
+it is also required that [D] is Cartier for all relevant intrinsics.
+
+
+<H5><A NAME = "14830">Sheaf(D) : DivSchElt -&gt; ShfCoh</A></H5>
+<BLOCKQUOTE>
+The invertible sheaf corresponding to the divisor class of divisor D.
+If D is not integral, its round down [D] is used. This divisor must
+be Cartier and its variety X must be ordinary projective. Is effectively
+the same function as in the Sheaf package when D is effective and uses
+a slight variant otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "14831">RiemannRochBasis(D) : DivSchElt -&gt; SeqEnum</A></H5>
+<H5>RiemannRochSpace(D) : DivSchElt -&gt; ModTupFld, Map</H5>
+<BLOCKQUOTE>
+The first returns a basis of the Riemann-Roch space of the round down
+[D] of divisor D (as a sequence of elements in the function field
+F of the ambient of D's variety, X). The second returns the
+Riemann-Roch space as an abstract vector space V over the base field
+along with a map from V to F. The variety X must be ordinary projective
+and [D] Cartier. If D is effective, this is the same as using
+the coherent sheaf function that computes the associated invertible sheaf
+and Riemann-Roch basis. If D is non-effective a slight variant is used.
+</BLOCKQUOTE>
+<H5><A NAME = "14832">RiemannRochCoordinates(f,D) : Any, DivSchElt -&gt; BoolElt, SeqEnum</A></H5>
+<BLOCKQUOTE>
+Returns whether f can be coerced into the function field of the ambient
+of D's variety X and whether f then lies in the Riemann-Roch space
+of D. If so also returns the coordinates of f with respect to the
+basis of the Riemann-Roch space returned by <TT>RiemannRochBasis(D)</TT>.
+As usual, X must be ordinary projective and [D], the round down
+of D, must be Cartier.
+</BLOCKQUOTE>
+<H5><A NAME = "14833">IsLinearSystemNonEmpty(D) : DivSchElt -&gt; BoolElt, DivSchElt</A></H5>
+<BLOCKQUOTE>
+Returns whether there is an effective divisor linearly equivalent to D
+and, if so, returns such a divisor. Uses the Riemann-Roch space of D.
+The conditions on D and X, its variety, are as for the preceding
+intrinsics.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text1340.htm">[Next]</A><A  HREF = "text1338.htm">[Prev]</A> <A  HREF = "text1340.htm">[Right]</A> <A  HREF = "text1338.htm">[Left]</A> <A  HREF = "text1321.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

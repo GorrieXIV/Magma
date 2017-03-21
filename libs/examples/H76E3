@@ -1,0 +1,51 @@
+"Source: Text/Group/GrpFP_2.text";
+"Line: 1504";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Group/GrpFP_2.text, line: 1504
+// Example: H76E3 ()
+print "Example: H76E3";
+ei := GetEchoInput();
+SetEchoInput(true);
+HN<x, a, b, c, d, e, f, g> := 
+    Group< x, a, b, c, d, e, f, g |
+             x^2, a^2, b^2, c^2, d^2, e^2, f^2, g^2,
+             (x, a), (x, g),
+             (b*c)^3, (b*d)^2, (b*e)^2, (b*f)^2, (b*g)^2,
+             (c*d)^3, (c*e)^2, (c*f)^2, (c*g)^2,
+             (d*e)^3, (d*f)^2, (d*g)^2,
+             (e*f)^3, (e*g)^2,
+             (f*g)^3,
+             (b, x*b*x), (a, e*d*c*b), (a, f)*d*c*b*d*c*d,
+             (a*g)^5, (c*d*e*f, x*b*x), (b, x*c*d*e*f*x),
+             (c*d*e*f, x*c*d*e*f*x) 
+          >;
+H := sub<HN | x,b,c,d,e,f,g >; 
+P := CosetEnumerationProcess(HN, H : CosetLimit := 1200000, Print := true);
+StartEnumeration(~P);
+HasValidCosetTable(P);
+assert $1;
+HasClosedCosetTable(P);
+assert not $1;
+ct := CosetTable(P);
+Domain(ct) : Minimal;
+Codomain(ct);
+row := 1;
+while forall(col){ gen : gen in {x, a, b, c, d, e, f, g}
+                       | ct(<row, gen>) ne 0 } do
+   row +:= 1;
+end while;
+row;
+assert $1 eq 41881;
+col;
+SetProcessParameters(~P : Strategy := "Hard",
+                          Workspace := 0);
+CanContinueEnumeration(P);
+assert $1;
+ContinueEnumeration(~P);
+HasClosedCosetTable(P);
+assert $1;
+ct := CosetTable(P);
+Domain(ct) : Minimal;
+Codomain(ct);
+SetEchoInput(ei);

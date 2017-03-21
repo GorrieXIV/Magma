@@ -1,0 +1,1038 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Reduction of Matrices and Lattices</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text313.htm">[Next]</A><A  HREF = "text311.htm">[Prev]</A> <A  HREF = "text313.htm">[Right]</A> <A  HREF = "text311.htm">[Left]</A> <A  HREF = "text305.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "2946">Reduction of Matrices and Lattices</A></H3>
+
+<P>
+<P>
+<P>
+The functions in this section perform reduction of lattice bases.
+For each reduction algorithm there are three functions:
+a function which takes a basis matrix, a function which takes a Gram matrix
+and a function which takes a lattice.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text312.htm#2947">LLL Reduction</A>
+<LI> <A  HREF = "text312.htm#2958">Pair Reduction</A>
+<LI> <A  HREF = "text312.htm#2962">Seysen Reduction</A>
+<LI> <A  HREF = "text312.htm#2967">HKZ Reduction</A>
+<LI> <A  HREF = "text312.htm#2974">BKZ Reduction</A>
+<LI> <A  HREF = "text312.htm#2978">Recovering a Short Basis from Short Lattice Vectors</A>
+</UL>
+<H4><A NAME = "2947">LLL Reduction</A></H4>
+
+<P>
+<P>
+The Lenstra-Lenstra-Lov&aacute;sz algorithm <A  HREF = "text304.htm#bib_LLL">[LLL82]</A> was first described in 1982
+and was immediately used by the authors to provide a polynomial-time algorithm
+for factoring integer polynomials, for solving simultaneous diophantine
+equations and for solving the integer programming problem.
+It very quickly received much attention
+and in the last 25 years has found an incredible range of applications, 
+in such areas as
+computer algebra, cryptography, optimisation, algorithmic number theory, 
+group theory, etc.  However, the original LLL algorithm is mainly of 
+theoretical interest, since, although it has polynomial time complexity,
+it remains quite slow in practice. Rather, floating-point variants are used,
+where the underlying Gram-Schmidt orthogonalisation is performed with 
+floating-point arithmetic instead of rational arithmetic (which produces
+huge numerators and denominators). Most of these floating-point variants 
+are heuristic, but here we use the provable Nguyen-Stehl&eacute; 
+algorithm <A  HREF = "text304.htm#bib_NguyenStehle09">[NS09]</A> (see also <A  HREF = "text304.htm#bib_Stehle09">[Ste09]</A> for
+more details about the implementation).
+<P>
+Let &delta; &isin;(1/4, 1] and &eta; &isin;[1/2, Sqrt(&delta;)).
+An ordered set of d linearly independent 
+vectors b<sub>1</sub>, b<sub>2</sub>, ..., b<sub>d</sub> &isin;R<sup>n</sup> is said to be
+(&delta;, &eta;)-LLL-reduced if 
+the two following conditions are satisfied:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>For any i&gt;j, we have |&mu;<sub>i, j</sub>| &le;&eta;,
+<DT>(b)</DT><DD>For any i&lt;d, we
+have &delta; |b<sub>i</sub><sup> * </sup>|<sup>2</sup> &le;|b<sub>i + 1</sub><sup> * </sup> + &mu;<sub>i + 1, i</sub> b<sub>i + 1</sub><sup> * </sup>|<sup>2</sup>,
+<P>
+<P>
+<P>
+</DL>
+where &mu;<sub>i, j</sub> = (b<sub>i</sub>, b<sub>j</sub><sup> * </sup>)/|b<sub>j</sub><sup> * </sup>|<sup>2</sup> and b<sub>i</sub><sup> * </sup> is the i-th
+vector of the Gram-Schmidt orthogonalisation of (b<sub>1</sub>, b<sub>2</sub>, ..., b<sub>d</sub>).
+LLL-reduction classically refers to the case where
+&eta;=1/2 and &delta;=3/4 since it was
+the choice of parameters originally made in <A  HREF = "text304.htm#bib_LLL">[LLL82]</A>, but the closer
+that &eta; and &delta; are to 1/2 and 1, respectively,
+the more reduced the lattice 
+basis should be. In the classical LLL algorithm, the polynomial-time 
+complexity is guaranteed as long as &delta;&lt;1, whereas the floating-point LLL 
+additionally requires that &eta;&gt;1/2. 
+<P>
+A (&delta;, &eta;)-LLL-reduced basis (b<sub>1</sub>, b<sub>2</sub>, ..., b<sub>d</sub>) of a
+lattice L has the following useful properties:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>|b<sub>1</sub>| &le;(&delta; - &eta;<sup>2</sup>)<sup> - (d - 1)/4</sup> (det L)<sup>1/d</sup>,
+<DT>(b)</DT><DD>|b<sub>1</sub>| &le;(&delta; - &eta;<sup>2</sup>)<sup> - (d - 1)/2</sup> 
+min_(b &isin;L \{0})|b|,
+<DT>(c)</DT><DD>&prod;<sub>i=1</sub><sup>d</sup> |b<sub>i</sub>| &le;(&delta; - &eta;<sup>2</sup>)<sup> - d(d - 1)/4</sup> (det L),
+<DT>(d)</DT><DD>For any j&lt;i, |b<sub>j</sub><sup> * </sup>| &le;(&delta; - &eta;<sup>2</sup>)<sup>(j - i)/2</sup> |b<sub>i</sub><sup> * </sup>|.
+<P>
+<P>
+<P>
+</DL>
+The default Magma parameters are &delta;=0.75 and &eta;=0.501, so 
+that (&delta; - &eta;<sup>2</sup>)<sup> - 1/4</sup>&lt;1.190 and (&delta; - &eta;<sup>2</sup>)<sup> - 1/2</sup>&lt;1.416.
+The four previous bounds can be reached, but in practice one usually obtains
+better bases.
+It is possible to obtain lattice bases satisfying these four conditions without
+being LLL-reduced, by using the so-called Siegel condition <A  HREF = "text304.htm#bib_Akhavi">[Akh02]</A>; this 
+useful variant, though available, is not the default one. 
+<P>
+Internally, the LLL routine may use up to eight different LLL variants, one of 
+them being de Weger's exact integer method <A  HREF = "text304.htm#bib_deWeger">[dW87]</A>, and
+the seven others relying upon diverse kinds of
+floating-point arithmetic. All but one of these variants are heuristic and 
+implement diverse ideas from <A  HREF = "text304.htm#bib_SchnorrEuchner">[SE94]</A>, Victor Shoup's 
+NTL <A  HREF = "text304.htm#bib_NTL">[Sho]</A> and <A  HREF = "text304.htm#bib_NguyenStehle06">[NS06]</A>. The heuristic variants
+possibly loop forever, but when that happens it is hopefully detected
+and a more reliable variant is used. For a given input, the LLL routine 
+tries to find out which variant should be the fastest, and may eventually 
+call other variants before the end of the execution: either because it 
+deems that the current variant loops forever or that a faster variant 
+could be used with the thus-far reduced basis. This machinery remains 
+unknown to the user (except when the LLL verbose mode is activated) and 
+makes the Magma LLL routine the fastest currently available, with the 
+additional advantage of being fairly reliable.
+<P>
+The floating-point variants essentially differ on the two following points:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>whether or not the matrix basis computations are performed with the 
+help of a complete knowledge of the Gram matrix of the vectors (the matrix
+of the pairwise inner products),
+<DT>(b)</DT><DD>the underlying floating-point arithmetic.
+<P>
+<P>
+<P>
+</DL>
+In theory, to get a provable variant, one needs the Gram matrix and
+arbitrary precision floating-point numbers (as provided by the 
+MPFR-based <A  HREF = "text304.htm#bib_MPFR">[Pro]</A> Magma real numbers). In practice, to get an efficient 
+variant, it is not desirable not to maintain the exact knowledge of the 
+Gram matrix (maintaining the Gram matrix represents asymptotically a large 
+constant fraction of the total computational cost), while it is desirable to 
+use the machine processor floating-point arithmetic (for instance, C doubles).
+Three of the seven variants use the Gram matrix, while the four others do not.
+In each group (either the three or the remaining four), one variant relies
+on arbitrary precision floating-point arithmetic, another on C doubles
+and another on what we call doubles with extended exponent. 
+These last variants are important because they are almost as fast
+as the variants based on C doubles, and can be used for much wider families
+of inputs: when the initial basis is made of integers larger than
+approximately 500 bits, overflows can occur with the C doubles.
+To be precise, a "double with extended exponent" is a C double with a 
+C integer, the last one being the extended exponent. So far, we have
+described six variants. The seventh does not rely on the Gram matrix 
+and is based on an idea similar to "doubles with extended exponents". 
+The difference is that for a given vector of dimension n, instead of 
+having n pairs of doubles and integers, one has n doubles and only 
+one integer: the extended exponent is "factorised". This variant is 
+quite often the one to use in practice, because it is reasonably efficient 
+and not too unreliable.
+<P>
+<I>Important warning.</I>  By default, the <TT>LLL</TT> routine is entirely
+reliable. This implies the default provable variant can be <I>much</I> 
+slower than the heuristic one. By setting <TT>Proof</TT> to <TT>false</TT>, 
+a significant run-time improvement can be gained without taking much 
+risk: even in that case, the <TT>LLL</TT> routine remains more reliable than 
+any other implementation based on floating-point arithmetic. For any
+application where guaranteed LLL-reduction is not needed, we recommend 
+setting <TT>Proof</TT> to <TT>false</TT>. 
+<P>
+<I>Recommended usage.</I>  The formal description of the function <TT>LLL</TT>
+below explains all the parameters in detail, but we first note here some
+common situations which arise.
+The desired variant of LLL is often not the default one. 
+Since the LLL algorithm is used in many different contexts and with 
+different output requirements, 
+it seems impossible to define a natural default variant, and
+so using the LLL routine efficiently
+often requires some tuning. Here we consider three main-stream situations.
+<DL COMPACT class='compact'>
+<DT>-</DT><DD>It may be desired to obtain the main LLL inequalities (see the 
+introduction of this subsection), without paying much attention to 
+the &delta; and &eta; reduction parameters. In this case one should 
+activate the <TT>Fast</TT> parameter, possibly 
+with the verbose mode to know afterwards which parameters have been used.
+<DT>-</DT><DD>It may be desired to have the main LLL inequalities for a given
+pair of parameters (&delta;, &eta;). In this case one should set the parameters
+<TT>Delta</TT> and <TT>Eta</TT>
+to the desired values, and set <TT>SwappingCondition</TT> to <TT>"Siegel"</TT>. 
+<DT>-</DT><DD>It may be desired to compute a very well LLL-reduced basis. 
+In this case one should set <TT>Delta</TT> to 0.9999, <TT>Eta</TT> to 0.5001,
+and possibly also activate the <TT>DeepInsertion</TT> option.
+<P>
+<P>
+</DL>
+In any case, if you want to be absolutely sure of the quality of the output,
+you need to keep the <TT>Proof</TT> option activated. 
+
+
+<HR>
+<H3><A NAME = "2948">Example <TT>Lat_LLLUsage (H30E7)</TT></A></H3>
+This example is meant to show the differences between the three main 
+recommended usages above. Assume that we are interested in the lattice 
+generated by the rows of the matrix B defined as follows. 
+<P>
+<P>
+<PRE>
+&gt; R:=RealField(5);
+&gt; B:=RMatrixSpace(IntegerRing(), 50, 51) ! 0;
+&gt; for i := 1 to 50 do B[i][1] := RandomBits(10000); end for; 
+&gt; for i := 1 to 50 do B[i][i+1] := 1; end for;
+</PRE>
+The matrix B is made of 100 vectors of length 101. Each entry of the
+first column is approximately 10000 bits long. Suppose first that 
+we use the default variant.
+<P>
+<P>
+<PRE>
+&gt; time C:=LLL(B:Proof:=false); 
+Time: 11.300
+&gt; R!(Norm (C[1]));   
+5.1959E121
+</PRE>
+The output basis is (0.75, 0.501)-reduced. Suppose now 
+that we only wanted to have a basis that satisfies the main LLL 
+properties with &delta;=0.75 and &eta;=0.501. Then we could have used the 
+Siegel swapping condition.
+<P>
+<P>
+<PRE>
+&gt; time C:=LLL(B:Proof:=false, SwapCondition:="Siegel"); 
+Time: 10.740
+&gt; R!(Norm (C[1]));   
+6.6311E122
+</PRE>
+Notice that the quality of the output is quite often worse with the Siegel
+condition than with the Lov&aacute;sz condition, but the main LLL properties are
+satisfied anyway. Suppose now that we want a very well reduced basis. Then
+we fix &delta; and &eta; close to 1 and 0.5 respectively.
+<P>
+<P>
+<PRE>
+&gt; time C:=LLL(B:Proof:=false, Delta:=0.9999, Eta:=0.5001); 
+Time: 19.220
+&gt; R!(Norm (C[1]));   
+1.8056E121
+</PRE>
+This is of course more expensive, but the first output vector is 
+significantly shorter. 
+Finally, suppose that we only wanted to "shorten" the entries of the input
+basis, very efficiently and without any particular preference for the reduction
+factors &delta; and &eta;. Then we could have used the <TT>Fast</TT>
+option, that tries to choose such parameters in order to optimize the 
+running-time.
+<P>
+<P>
+<PRE>
+&gt; time C:=LLL(B:Proof:=false, Fast:=1); 
+Time: 8.500
+&gt; R!(Norm (C[1]));   
+6.2746E121
+</PRE>
+By activating the verbose mode, one can know for which parameters the 
+output basis is reduced. 
+<P>
+<P>
+<PRE>
+&gt; SetVerbose ("LLL", 1);
+&gt; C:=LLL(B:Proof:=false, Fast:=1); 
+[...]
+The output basis is (0.830,0.670)-reduced
+</PRE>
+<HR>
+<H5><A NAME = "2949"></A><A NAME = "Lat:LLL">LLL</A>(X) : ModMatRngElt -&gt; ModMatRngElt, AlgMatElt, RngIntElt</H5>
+<H5>LLL(X) : AlgMatElt -&gt; AlgMatElt, AlgMatElt, RngIntElt</H5>
+
+<PRE>    Al: MonStgElt                       Default: "New"</PRE>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Method: MonStgElt                   Default: "FP"</PRE>
+
+<PRE>    Delta: RngElt                       Default: 0.75</PRE>
+
+<PRE>    Eta: RngElt                         Default: 0.501</PRE>
+
+<PRE>    InitialSort: BoolElt                Default: <TT>false</TT></PRE>
+
+<PRE>    FinalSort: BoolElt                  Default: <TT>false</TT></PRE>
+
+<PRE>    StepLimit: RngIntElt                Default: 0</PRE>
+
+<PRE>    TimeLimit: RngElt                   Default: 0.0</PRE>
+
+<PRE>    NormLimit: RngIntElt                Default: </PRE>
+
+<PRE>    UseGram: BoolElt                    Default: <TT>false</TT></PRE>
+
+<PRE>    DeepInsertions: BoolElt             Default: <TT>false</TT></PRE>
+
+<PRE>    EarlyReduction: BoolElt             Default: <TT>false</TT></PRE>
+
+<PRE>    SwapCondition: MonStgElt            Default: "Lovasz"</PRE>
+
+<PRE>    Fast: RngIntElt                     Default: 0</PRE>
+
+<PRE>    Weight: SeqEnum                     Default: [0, ...,0]</PRE>
+<BLOCKQUOTE>
+Given a matrix X belonging to the matrix module S=Hom<sub>R</sub>(M, N) or
+the matrix algebra S=M<sub>n</sub>(R), where R is a subring of the real field,
+compute a matrix Y whose non-zero rows are a LLL-reduced basis
+for the Z-lattice
+spanned by the rows of X (which need not be Z-linearly independent).
+The LLL function returns three values:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>A LLL-reduced matrix Y in S whose rows span the same
+    lattice (Z-module) as that spanned by the rows of X.
+<DT>(b)</DT><DD>A unimodular matrix T in the matrix ring over Z whose degree
+    is the number of rows of X such that TX=Y;
+<DT>(c)</DT><DD>The rank of X.
+<P>
+<P>
+<P>
+</DL>
+Note that the returned transformation matrix T is <I>always</I> over
+the ring of integers Z, even if R is not Z.
+<P>
+The input matrix X does not need to have linearly independent rows: this
+function performs a floating-point variant of what is usually known as 
+the MLLL algorithm of M. Pohst <A  HREF = "text304.htm#bib_MLLL">[Poh87]</A>.  
+By default the rows of the returned matrix Y are sorted so that all the zero
+rows are at the bottom. The non-zero vectors are sorted so that they form 
+a LLL-reduced basis (except when <TT>FinalSort</TT> is <TT>true</TT>; see below). 
+<P>
+A detailed description of the parameters now follows.
+See the discussion and the example above this function for recommended
+parameters for common cases.
+<P>
+By default, the <TT>Proof</TT> option is set to <TT>true</TT>. It means that
+the result is guaranteed. It is possible, and usually faster,
+to switch off this option: it will perform the same calculations,
+without checking that the output is indeed reduced by using the 
+L<sup>2</sup> algorithm. For the vast majority of cases, we recommend setting
+<TT>Proof</TT> to <TT>false</TT>.
+<P>
+By default the &delta; and &eta; constants used in the LLL 
+conditions are set respectively to 0.75 and 0.501
+(except when <TT>Method</TT> is <TT>"Integral"</TT>, see below). The 
+closer &delta; and &eta; are to 1 and 0.5, respectively, the shorter
+the output basis will be. In the original description of the LLL algorithm,
+&delta; is 0.75 and &eta; is 0.5. Making &delta;
+and &eta; vary can have a significant influence on the running time.
+If <TT>Method</TT> is <TT>"Integral"</TT>, then by default &eta; is set 
+to 0.5 and &delta; to 0.99. With this value of <TT>Method</TT>, the 
+parameter &delta; can be chosen arbitrarily in (0.25, 1],
+but when &delta; is 1, the running time may increase dramatically.
+If <TT>Method</TT> is not <TT>"Integral"</TT>, then &delta; may be 
+chosen arbitrarily in (0.25, 1), and &eta; may be chosen arbitrarily 
+in (0.5, Sqrt(&delta;)). Notice that the parameters &delta; and &eta; 
+used internally will be slightly larger and smaller than the
+given ones, respectively, to take floating-point inaccuracies into account
+and to
+ensure that the output basis will indeed be reduced for the expected 
+parameters. In all cases, the output basis will be (&delta;, &eta;)-LLL reduced.
+<P>
+For matrices over Z or Q, there are two main methods for handling
+the Gram-Schmidt orthogonalisation variables used in the algorithm:
+the Nguyen-Stehl&eacute; floating-point method (called L<sup>2</sup>)
+and the exact integral method described by de Weger in <A  HREF = "text304.htm#bib_deWeger">[dW87]</A>.
+The Nguyen-Stehl&eacute; algorithm is implemented as described 
+in the article, along with a few faster heuristic variants. When <TT>Method</TT> 
+is <TT>"FP"</TT>, these faster variants will be tried first,
+and when they are considered as misbehaving, they will be followed
+by the proved variant automatically. When <TT>Method</TT> is <TT>"L2"</TT>,
+the provable L<sup>2</sup> algorithm is used directly. Finally, when 
+<TT>Method</TT> is <TT>"Integral"</TT>, the De Weger integral method is used.
+In this case, the <TT>DeepInsertions</TT>, <TT>EarlyReduction</TT>, 
+<TT>Siegel</TT> <TT>SwapCondition</TT>, <TT>NormLimit</TT>, <TT>Fast</TT> and 
+<TT>Weight</TT> options
+are unavailable (the code is older and has not been updated for these).
+Furthermore, the default value for <TT>Eta</TT> is then 0.5.   
+The default <TT>FP</TT> method is nearly always <I>very</I>
+much faster than the other two methods.
+<P>
+By default, it is possible (though it happens very infrequently) that
+the returned basis is not of the expected quality. In order to be sure
+that the output is indeed correct, <TT>Method</TT> can be set to
+either <TT>"Integral"</TT> or <TT>"L2"</TT>. 
+<P>
+<P>
+The parameter <TT>InitialSort</TT> specifies whether the vectors should
+be sorted by length before the LLL reduction. When <TT>FinalSort</TT>
+is <TT>true</TT>, the vectors are sorted by increasing length (and 
+alphabetical order in case of equality) after the LLL reduction
+(this parameter was called <TT>Sort</TT> before V2.13). The resulting
+vectors may therefore not be strictly LLL-reduced, because of the permutation
+of the rows.
+<P>
+The parameter <TT>UseGram</TT> specifies that for the floating-point
+methods (<TT>L2</TT> and <TT>FP</TT>) the computation should be
+performed by computing the Gram matrix F, using the <TT>LLLGram</TT>
+algorithm below, and by updating the basis matrix correspondingly.
+Magma will automatically do this internally for the floating-point
+method if it deems that it is more efficient to do so, so this parameter
+just allows one to stipulate that this method should or should not be used.
+For the integral method, using the Gram matrix never improves
+the computation, so the value of this parameter is simply ignored in
+this case.
+<P>
+Setting the parameter <TT>StepLimit</TT> to a positive integer s will cause
+the function to terminate after s steps of the main loop. 
+Setting the parameter <TT>TimeLimit</TT> to a positive real number t will
+cause the function to terminate after the algorithm has been executed 
+for t seconds (process user) time. Similarly, setting the parameter
+<TT>NormLimit</TT> to a non-negative integer N will cause the algorithm to
+terminate after a vector of norm less or equal to N has been found.
+In such cases, the current reduced basis is
+returned, together with the appropriate transformation matrix and an upper
+bound for the rank of the matrix.  Nothing precise can then be said exactly
+about the reduced basis (it will not be LLL-reduced in general of course)
+but will at least be reduced to a certain extent.
+<P>
+When the value of the parameter <TT>DeepInsertions</TT> is <TT>true</TT>,
+Schnorr-Euchner's deep insertion algorithm is used <A  HREF = "text304.htm#bib_SchnorrEuchner">[SE94]</A>. It 
+usually provides better bases, but can take significantly more time. In 
+practice, one may first LLL-reduce the basis and then use the deep insertion
+algorithm on the computed basis. 
+<P>
+When the parameter <TT>EarlyReduction</TT> is <TT>true</TT> and when
+any of the two floating-point methods are used, 
+some early reduction steps are inserted inside the execution of the
+LLL algorithm. This sometimes makes the entries of the basis smaller very 
+quickly. It occurs in particular for lattice bases built from minimal 
+polynomial or integer relation detection problems. The speed-up
+is sometimes dramatic, especially if the reduction in length makes it possible
+to use C integers for the basis matrix (instead of multiprecision integers) 
+or C doubles for the floating-point calculations (instead of 
+multiprecision floating-point numbers or doubles with additional exponent).
+<P>
+The parameter <TT>SwapCondition</TT> can be set either 
+to <TT>"Lovasz"</TT> (default)
+or to <TT>"Siegel"</TT>. When its value is <TT>"Lovasz"</TT>, the classical Lov&aacute;sz 
+swapping condition is used, whereas otherwise the 
+so-called <I>Siegel</I> condition is used. The Lov&aacute;sz condition
+tests whether the 
+inequality |b<sub>i</sub><sup> * </sup> + &mu;<sub>i, i - 1</sub>b<sub>i - 1</sub><sup> * </sup>|<sup>2</sup> &ge;&delta; |b<sub>i - 1</sub><sup> * </sup>|<sup>2</sup>
+is satisfied or not, whereas in the Siegel case the
+inequality |b<sub>i</sub><sup> * </sup>|<sup>2</sup> &ge;(&delta; - &eta;<sup>2</sup>) |b<sub>i - 1</sub><sup> * </sup>|<sup>2</sup>  is
+used (see <A  HREF = "text304.htm#bib_Akhavi">[Akh02]</A> for more details). 
+In the Siegel case, the execution may be significantly
+faster. Though the output basis may not be LLL-reduced, the classical LLL
+inequalities (see the introduction of this subsection) will be fulfilled.
+<P>
+When the option <TT>Fast</TT> is set to 1 or 2, all the other parameters may be
+changed internally to end the execution as fast as possible. Even if the
+other parameters are not set to the default values, they may be ignored.
+This includes the parameters <TT>Delta</TT>, <TT>Eta</TT> and <TT>SwapCondition</TT>, 
+so that the output basis may not be LLL-reduced. However, if the verbose 
+mode is activated, the chosen values of these parameters will be printed, so 
+that the classical LLL inequalities (see the introduction of this subsection) 
+may be used afterwards. When <TT>Fast</TT> is set to 2, the chosen parameters
+are such that the classical LLL inequalities will be at least as strong
+as for the default parameters <TT>Delta</TT> and <TT>Eta</TT>.
+<P>
+If <TT>Weight</TT> is the list of integers [x<sub>1</sub>, ..., x<sub>n</sub>] 
+(where n is the degree of the lattice), then the LLL
+algorithm uses a weighted Euclidean inner product: the inner product
+of the vectors (v<sub>1</sub>, v<sub>2</sub>, ..., v<sub>n</sub>) and (w<sub>1</sub>, w<sub>2</sub>, ..., w<sub>n</sub>) 
+is defined to be &sum;<sub>i=1</sub><sup>n</sup> (v<sub>i</sub> .w<sub>i</sub> .2<sup>2x<sub>i</sub></sup>).
+<P>
+By default, the <TT>Al</TT> parameter is set to <TT>New</TT>.
+If it is set to <TT>Old</TT>, then the former Magma LLL is used (prior
+to V2.13); notice that in this case, the execution is not guaranteed
+to finish and that the output basis may not be reduced for the given LLL 
+parameters.
+This variant is not maintained anymore.
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<I>Note 1</I>: If the input basis has many zero entries, then try to place them 
+in the last columns; this will slightly improve the running time. 
+<P>
+<P>
+<I>Note 2</I>: If the elementary divisors of the input matrix are fairly
+small, relative to the size of the matrix and the size of its entries, then
+it may be very much quicker to reduce the matrix to Hermite form first (using
+the function <TT>HermiteForm</TT>) and then to LLL-reduce this matrix.
+This case can arise: for example, when one has a "very messy" matrix for 
+which it is known that the lattice described by it has a relatively short 
+basis.
+<P>
+<P>
+<I>Note 3</I>: Sometimes, the <TT>EarlyReduction</TT> variant can significantly 
+decrease the running time.
+<P>
+Since V2.21 (2014), Magma also supports an analogue for LLL-reduction
+for matrices over K[x].  The algorithm is similar to that described
+in <A  HREF = "text304.htm#bib_Paulus98latticebasis">[Pau98]</A>.  Note that unlike the integer case,
+the LLL-reduction of a matrix in the K[x] case is always unique,
+with the rows sorted by degree.
+</BLOCKQUOTE>
+<H5><A NAME = "2950"></A><A NAME = "Lat:BasisReduction">BasisReduction</A>(X) : ModMatRngElt -&gt; ModMatRngElt, AlgMatElt, RngIntElt</H5>
+<H5>BasisReduction(X) : AlgMatElt -&gt; AlgMatElt, AlgMatElt, RngIntElt</H5>
+<BLOCKQUOTE>
+This is a shortcut for <TT>LLL(X:Proof:=false)</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "2951">LLLGram(F) : ModMatRngElt -&gt; ModMatRngElt, AlgMatElt, RngIntElt</A></H5>
+<H5>LLLGram(F) : AlgMatElt -&gt; AlgMatElt, AlgMatElt, RngIntElt</H5>
+
+<PRE>    Isotropic: BoolElt                  Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a symmetric matrix F belonging to the
+the matrix module S=Hom<sub>R</sub>(M, M) or the matrix algebra S=M<sub>n</sub>(R),
+where R is a subring of the real field,
+so that F=XX<sup>tr</sup> for some matrix X over the real field,
+compute a matrix G which is the Gram matrix corresponding to
+a LLL-reduced form of the matrix X.
+The rows of the corresponding generator matrix X need not be Z-linearly
+independent in which case F will be singular.
+This function returns three values:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>A LLL-reduced Gram matrix G in S of the Gram matrix F;
+<DT>(b)</DT><DD>A unimodular matrix T in the matrix ring over Z whose degree
+is the number of rows of F such that G=TFT<sup>tr</sup>.
+<DT>(c)</DT><DD>The rank of F (which equals the dimension of the lattice generated
+by X).
+<P>
+<P>
+<P>
+</DL>
+The options available are the same as for the <TT>LLL</TT> routine, except of 
+course the <TT>UseGram</TT> option that has no sense here. The 
+<TT>Weight</TT> parameter should not be used either. The routine can be 
+used with any symmetric matrix (possibly not definite nor positive): Simon's 
+indefinite LLL variant (which puts absolute values on the Lov&aacute;sz condition) 
+is used (see <A  HREF = "text304.htm#bib_Simon">[Sim05]</A>). 
+<P>
+When the option <TT>Isotropic</TT> is true, some attempt to deal with
+isotropic vectors is made. (This is only relevant when working on
+an indefinite Gram matrix). In particular, if the determinant is
+squarefree, hyperbolic planes are split off iteratively.
+</BLOCKQUOTE>
+<H5><A NAME = "2952">LLLBasisMatrix(L) : Lat -&gt; ModMatElt, AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Given a lattice L with basis matrix B, return <I>the LLL basis matrix</I>
+B' of L, together with the transformation matrix T such that B'=TB.
+The LLL basis matrix B' is simply defined to be a LLL-reduced form of B;
+it is stored in L when computed and subsequently used
+internally by many lattice functions.
+The LLL basis matrix will be created automatically internally as needed
+with &delta;=0.999 by default (note that this is different from the
+usual default of 0.75);
+by the use of parameters to this function one can ensure that
+the LLL basis matrix is created in a way which is different to
+the default.
+The parameters (not listed here again) are the same as for the function
+<TT>LLL</TT> (q.v.), except that the limit parameters are illegal.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "2953">LLLGramMatrix(L) : Lat -&gt; AlgMatElt, AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Given a lattice L with Gram matrix F, return the <I>LLL Gram matrix</I>
+F' of L, together with the transformation matrix T such that
+F'=TFT<sup>tr</sup>.  F' is simply defined to be B'(B')<sup>tr</sup>, where
+B' is the LLL basis matrix of L---see the function <TT>LLLBasisMatrix</TT>.
+The parameters (not listed here again) are the same as for the function
+<TT>LLL</TT> (q.v.), except that the limit parameters are illegal.
+</BLOCKQUOTE>
+<H5><A NAME = "2954">LLL(L) : Lat -&gt; Lat, AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Given a lattice L with basis matrix B, return a new lattice L' with
+basis matrix B' and a transformation matrix T so that L' is equal
+to L but B' is LLL-reduced and B'=TB.  Note that the inner product
+used in the LLL computation is that given by the inner product matrix of
+L (so, for example, the resulting basis may not be LLL-reduced with respect
+to the standard Euclidean norm).
+The LLL basis matrix of L is used, so calling this function with
+argument L is completely equivalent
+(ignoring the second return value) to the invocation
+<TT>LatticeWithBasis(LLLBasisMatrix(L), InnerProductMatrix(L))</TT>.
+The parameters (not listed here again) are the same as for the function
+<TT>LLL</TT> (q.v.), except that the limit parameters are illegal.
+The <A  HREF = "text312.htm#Lat:BasisReduction">BasisReduction</A> shortcut to turn off the <TT>Proof</TT> option is
+also available.
+</BLOCKQUOTE>
+<H5><A NAME = "2955">BasisReduction(L) : Lat -&gt; Lat, AlgMatElt</A></H5>
+<BLOCKQUOTE>
+This is a shortcut for <TT>LLL(L:Proof:=false)</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "2956">SetVerbose("LLL", v) : MonStgElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+(Procedure.)
+Set the verbose printing level for the LLL algorithm to
+be v.  Currently the legal values for v are <TT>true</TT>, <TT>false</TT>, 0, 1, 2 and 3
+(<TT>false</TT> is the same as 0, and <TT>true</TT> is the same as 1).
+The three non-zero levels notify when the maximum LLL-reduced rank of the
+LLL algorithm increases, level 2 also prints the norms of the
+reduced vectors at such points, and level 3 additionally 
+gives some current status information every 15 seconds.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2957">Example <TT>Lat_LLLXGCD (H30E8)</TT></A></H3>
+We demonstrate how the LLL algorithm can be used to find very good
+multipliers for the extended GCD of a sequence of integers.
+Given a sequence Q=[x<sub>1</sub>, ..., x<sub>n</sub>] of integers we wish to find the GCD g
+of Q and integers m<sub>i</sub> for 1&le;i &le;m
+such that g=m<sub>1</sub>.x<sub>1</sub> + ... + m<sub>n</sub>.x<sub>m</sub>.
+<P>
+For this example we set Q to a sequence of n=10 integers of varying bit
+lengths (to make the problem a bit harder).
+<P>
+<P>
+<PRE>
+&gt; Q := [ 67015143, 248934363018, 109210, 25590011055, 74631449,
+&gt;        10230248, 709487, 68965012139, 972065, 864972271 ];
+&gt; n := #Q;
+&gt; n;
+10
+</PRE>
+We next choose a scale factor S large enough and then create the
+n x (n + 1) matrix X=[I<sub>n</sub> | C] where C is the column vector
+whose i-th entry is S.Q[i].
+<P>
+<P>
+<PRE>
+&gt; S := 100;
+&gt; X := RMatrixSpace(IntegerRing(), n, n + 1) ! 0;
+&gt; for i := 1 to n do X[i][i + 1] := 1; end for;
+&gt; for i := 1 to n do X[i][1] := S * Q[i]; end for;
+&gt; X;
+[6701514300     1 0 0 0 0 0 0 0 0 0]
+[24893436301800 0 1 0 0 0 0 0 0 0 0]
+[10921000       0 0 1 0 0 0 0 0 0 0]
+[2559001105500  0 0 0 1 0 0 0 0 0 0]
+[7463144900     0 0 0 0 1 0 0 0 0 0]
+[1023024800     0 0 0 0 0 1 0 0 0 0]
+[70948700       0 0 0 0 0 0 1 0 0 0]
+[6896501213900  0 0 0 0 0 0 0 1 0 0]
+[97206500       0 0 0 0 0 0 0 0 1 0]
+[86497227100    0 0 0 0 0 0 0 0 0 1]
+</PRE>
+Finally, we compute a LLL-reduced form L of X.
+<P>
+<P>
+<PRE>
+&gt; L := LLL(X);
+&gt; L;
+[   0    0    1    0  -15   -6    3    1    2   -3   -3]
+[   0   -3    5   -3  -11   -1    0    8  -14    4    3]
+[   0   -5   -2    2   -2   14    8   -6    8    1   -4]
+[   0    6    1   -3  -10   -3  -14    5    0    8    8]
+[   0   -1   -2    0   -2  -13    8    6    8   10   -2]
+[   0   -9   -3  -11    5    7   -1    1    9  -11   -2]
+[   0   16    0    3    3    9   -3    0   -1   -4  -11]
+[   0   -6    1  -16    4   -1    6   -6   -5    7   -7]
+[   0    9   -3  -10    7   -3    1   -7    8    0   18]
+[-100   -3   -1   13   -1   -4    2    3    4    5   -1]
+</PRE>
+Notice that the large weighting on the first column forces the LLL algorithm
+to produce as many vectors as possible at the top of the matrix with a
+zero entry in the first column (since such vectors will have shorter
+norms than any vector with a non-zero entry in the first column).
+Thus the GCD of the entries in Q is the entry in the bottom left corner
+of L divided by S, so this must be 1 or -1.  The last n entries
+of the last row of L gives a sequence of multipliers M
+for the extended GCD algorithm.  Also, taking the last n entries of each of
+the first n - 1 rows of L gives independent null-relations for the
+entries of Q (i.e., the kernel of the corresponding column matrix).
+We check that M gives a correct sequence of multipliers.
+<P>
+<P>
+<PRE>
+&gt; M := Eltseq(L[10])[2 .. n+1]; M;
+[ 3, 1, -13, 1, 4, -2, -3, -4, -5, 1 ]
+&gt; &amp;+[Q[i]*M[i]: i in [1 .. n]]; 
+-1
+</PRE>
+<HR>
+<H4><A NAME = "2958">Pair Reduction</A></H4>
+
+
+
+<H5><A NAME = "2959">PairReduce(X) : ModMatRngElt -&gt; ModMatRngElt, AlgMatElt</A></H5>
+<H5>PairReduce(X) : AlgMatElt -&gt; AlgMatElt, AlgMatElt</H5>
+<BLOCKQUOTE>
+Given a matrix X belonging to the
+the matrix module S=Hom<sub>R</sub>(M, N) or the matrix algebra S=M<sub>n</sub>(R),
+where R is Z or Q, compute a matrix Y whose rows form a pairwise
+reduced basis for the Z-lattice spanned by the rows of X. 
+Being pairwise reduced (i.e., 2|(v, w)| &le;min(|v|, |w|)
+for all pairs of
+basis vectors) is a much simpler criterion than being LLL-reduced,
+but often yields sufficiently good results very quickly. It can also be used
+as a preprocessing for LLL or in alternation with LLL to obtain better bases.
+The rows of X need not be Z-linearly independent.
+This function returns two values:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>The pairwise reduced matrix Y row-equivalent to X as a
+matrix in S;
+<DT>(b)</DT><DD>A unimodular matrix T in the matrix ring over Z whose degree
+is the number of rows of X such that TX=Y.
+ </DL>
+</BLOCKQUOTE>
+<H5><A NAME = "2960">PairReduceGram(F) : ModMatRngElt -&gt; ModMatRngElt, AlgMatElt, RngIntElt</A></H5>
+<H5>PairReduceGram(F) : AlgMatElt -&gt; AlgMatElt, AlgMatElt, RngIntElt</H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a symmetric positive semidefinite matrix F belonging to the
+the matrix module S=Hom<sub>R</sub>(M, M) or the matrix algebra S=M<sub>n</sub>(R),
+where R is Z or Q,
+so that F=XX<sup>tr</sup> for some matrix X over the real field,
+compute a matrix G which is the Gram matrix corresponding to
+a pairwise reduced form of the matrix X.
+The rows of the corresponding matrix X need not be Z-linearly independent.
+This function returns two values:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>The pairwise reduced Gram matrix G of F as a matrix in S;
+<DT>(b)</DT><DD>A unimodular matrix T in the matrix ring over Z whose degree
+is the number of rows of F which gives the corresponding transformation:
+G=TFT<sup>tr</sup>.
+<P>
+</DL>
+The matrix F must be a symmetric positive semidefinite matrix;
+if it is not the results are unpredictable.
+By default, Magma does not check this since it may be expensive in higher
+dimensions and in many applications will be known a priori.
+The checking can be invoked by setting <TT>Check := true</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "2961">PairReduce(L) : Lat -&gt; Lat, AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Given a lattice L with basis matrix B, return a new lattice L' with
+basis matrix B' and a transformation matrix T so that L' is equal
+to L but B' is pairwise reduced and B'=TB.  Note that the inner product
+used in the pairwise reduction computation is that given by the inner product
+matrix of L (so, for example, the resulting basis may not be pairwise reduced
+with respect to the standard Euclidean norm).
+</BLOCKQUOTE>
+<H4><A NAME = "2962">Seysen Reduction</A></H4>
+
+
+
+<H5><A NAME = "2963">Seysen(X) : ModMatRngElt -&gt; ModMatRngElt, AlgMatElt</A></H5>
+<H5>Seysen(X) : AlgMatElt -&gt; AlgMatElt, AlgMatElt</H5>
+<BLOCKQUOTE>
+Given a matrix X belonging to the
+the matrix module S=Hom<sub>R</sub>(M, N) or the matrix algebra S=M<sub>n</sub>(R),
+where R is Z or Q, compute a matrix Y whose
+rows form a Seysen-reduced basis for the Z-lattice spanned by the rows
+of X. The rows of X need not be Z-linearly independent.
+The Seysen-reduced matrix Y is such that the entries of the corresponding
+Gram matrix G=YY<sup>tr</sup> and its inverse G<sup> - 1</sup> are simultaneously reduced.
+This function returns two values:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>The Seysen-reduced matrix Y corresponding to X as a
+matrix in S;
+<DT>(b)</DT><DD>A unimodular matrix T in the matrix ring over Z whose degree
+is the number of rows of X such that TX=Y.
+ </DL>
+</BLOCKQUOTE>
+<H5><A NAME = "2964">SeysenGram(F) : ModMatRngElt -&gt; ModMatRngElt, AlgMatElt, RngIntElt</A></H5>
+<H5>SeysenGram(F) : AlgMatElt -&gt; AlgMatElt, AlgMatElt, RngIntElt</H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a symmetric positive semidefinite matrix F belonging to the
+the matrix module S=Hom<sub>R</sub>(M, M) or the matrix algebra S=M<sub>n</sub>(R),
+where R is Z or Q,
+so that F=XX<sup>tr</sup> for some matrix X over the real field,
+compute a matrix G which is the Gram matrix corresponding to
+a Seysen-reduced form of the matrix X.
+The rows of the corresponding matrix X need not be Z-linearly independent.
+The Seysen-reduced Gram matrix G is such that the entries of G
+and its inverse G<sup> - 1</sup> are simultaneously reduced.
+This function returns two values:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>The Seysen-reduced Gram matrix G of F as a matrix in S;
+<DT>(b)</DT><DD>A unimodular matrix T in the matrix ring over Z whose degree
+is the number of rows of F which gives the corresponding transformation:
+G=TFT<sup>tr</sup>.
+<P>
+</DL>
+The matrix F must be a symmetric positive semidefinite matrix;
+if it is not the results are unpredictable.
+By default, Magma does not check this since it may be expensive in higher
+dimensions and in many applications will be known a priori.
+The checking can be invoked by setting <TT>Check := true</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "2965">Seysen(L) : Lat -&gt; Lat, AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Given a lattice L with basis matrix B, return a new lattice L' with
+basis matrix B' and a transformation matrix T so that L' is equal
+to L but B' is Seysen-reduced and B'=TB.  Note that the inner product
+used in the Seysen-reduction computation is that given by the inner product
+matrix of L (so, for example, the resulting basis may not be Seysen-reduced
+with respect to the standard Euclidean norm).  The effect of the reduction
+is that the basis of L' and the dual basis of L' will be simultaneously
+reduced.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2966">Example <TT>Lat_Seysen (H30E9)</TT></A></H3>
+We demonstrate how the function <TT>Seysen</TT> can be used on the Gram
+matrix of the Leech lattice to obtain a gram matrix S for the lattice
+so that both S and S<sup> - 1</sup> are simultaneously reduced.
+Note that all three reduction methods yield a basis of vectors of minimal 
+length, but the Seysen reduction also has a dual basis of vectors of norm 4.
+This is of interest in representation theory, for example, as the entries of
+the inverse of the Gram matrix control the size of the entries in a
+representation on the lattice.
+<P>
+<P>
+<PRE>
+&gt; F := GramMatrix(Lattice("Lambda", 24));
+&gt; [ F[i][i] : i in [1..24] ];
+[ 8, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 ]
+&gt; [ (F^-1)[i][i] : i in [1..24] ];
+[ 72, 8, 12, 8, 10, 4, 4, 8, 8, 4, 4, 8, 4, 4, 4, 4, 4, 4, 4, 4, 8, 4, 4, 8 ]
+&gt; L := LLLGram(F);
+&gt; P := PairReduceGram(F);
+&gt; S := SeysenGram(F);
+&gt; [ L[i][i] : i in [1..24] ];      
+[ 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 ]
+&gt; [ P[i][i] : i in [1..24] ];      
+[ 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 ]
+&gt; [ S[i][i] : i in [1..24] ];      
+[ 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 ]
+&gt; [ (L^-1)[i][i] : i in [1..24] ];
+[ 6, 4, 8, 4, 32, 4, 4, 8, 18, 4, 4, 8, 8, 8, 12, 4, 6, 4, 20, 4, 8, 4, 14, 4 ]
+&gt; [ (P^-1)[i][i] : i in [1..24] ];
+[ 72, 40, 12, 8, 10, 4, 4, 8, 8, 4, 4, 8, 4, 4, 4, 4, 4, 4, 4, 4, 8, 4, 4, 8 ]
+&gt; [ (S^-1)[i][i] : i in [1..24] ];
+[ 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 ]
+</PRE>
+<HR>
+<H4><A NAME = "2967">HKZ Reduction</A></H4>
+
+<P>
+<P>
+An ordered set of d linearly independent 
+vectors b<sub>1</sub>, b<sub>2</sub>, ..., b<sub>d</sub> &isin;R<sup>n</sup> is said to be
+Hermite-Korkine-Zolotarev-reduced (HKZ-reduced for short) if the 
+three following conditions are satisfied:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>For any i&gt;j, we have |&mu;<sub>i, j</sub>| &le;0.501,
+<DT>(b)</DT><DD>The vector b<sub>1</sub> is a shortest non-zero vector in the lattice
+spanned by b<sub>1</sub>, b<sub>2</sub>, ..., b<sub>d</sub>,
+<DT>(c)</DT><DD>The vectors b<sub>2</sub> - &mu;<sub>2, 1</sub> b<sub>1</sub>, ..., b<sub>d</sub> - &mu;<sub>d, 1</sub> b<sub>1</sub> 
+are themselves HKZ-reduced,
+<P>
+<P>
+<P>
+</DL>
+where &mu;<sub>i, j</sub>=(b<sub>i</sub>, b<sub>j</sub><sup> * </sup>)/|b<sub>j</sub><sup> * </sup>|<sup>2</sup> and b<sub>i</sub><sup> * </sup> is the i-th
+vector of the Gram-Schmidt orthogonalisation of (b<sub>1</sub>, b<sub>2</sub>, ..., b<sub>d</sub>).
+
+
+<H5><A NAME = "2968"></A><A NAME = "Lat:HKZ">HKZ</A>(X) : ModMatRngElt -&gt; ModMatRngElt, AlgMatElt</H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Unique: BoolElt                     Default: <TT>false</TT></PRE>
+
+<PRE>    Prune: SeqEnum                      Default: [ ...,[1.0, ...,1.0], ... ]</PRE>
+<BLOCKQUOTE>
+Given a matrix X over a subring of the real field, compute a
+matrix Y whose non-zero rows are an HKZ-reduced basis for the
+Z-lattice spanned by the rows of X (which need not be
+Z-linearly independent).  The HKZ function returns an HKZ-reduced
+matrix Y whose rows span the same lattice (Z-module) as that
+spanned by the rows of X, and a unimodular matrix T in the matrix
+ring over Z whose degree is the number of rows of X such
+that TX=Y. 
+<P>
+Although the implementation relies on floating-point arithmetic, the
+result can be guaranteed to be correct.  By default, the <TT>Proof</TT>
+option is set to <TT>true</TT>, thus guaranteeing the output. The
+run-time might be improved by switching off this option.  
+<P>
+A given lattice may have many HKZ-reduced bases. If the <TT>Unique</TT>
+option is turned on, a uniquely determined HKZ-reduced basis is
+computed. This basis is chosen so that: for any i&gt;j, we
+have &mu;<sub>i, j</sub> &isin;[ - 1/2, 1/2); for any i, the first non-zero
+coordinate of the vector b<sub>i</sub><sup> * </sup> is positive; and for any i, the
+vector b<sub>i</sub><sup> * </sup> is the shortest among possible vectors for the
+lexicographical order.  
+<P>
+The implementation solves the Shortest Vector Problem for lattices of
+dimensions 1 to d, where d is the number of rows of the input
+matrix X. The latter instances of the Shortest Vector Problem are
+solved with the same enumeration algorithm as is used for computing
+the minimum of a lattice, which can be expressed as a search within a
+large tree.  The i-th table of the <TT>Prune</TT> optional parameter is
+used to prune the i-dimensional enumeration. The default value is:
+<P>
+<P>
+[[1.0: j  in [1..i]]: i  in  [1..NumberOfRows(X)]].
+<P>
+<P>
+<P>
+<P>
+See the introduction of
+Section <A  HREF = "text313.htm#2980">Minima and Element Enumeration</A> for more details on the <TT>Prune</TT>
+option.
+</BLOCKQUOTE>
+<H5><A NAME = "2969">HKZGram(F) : ModMatRngElt -&gt; ModMatRngElt, AlgMatElt</A></H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Prune: SeqEnum                      Default: [ ...,[1.0, ...,1.0], ... ]</PRE>
+<BLOCKQUOTE>
+Given a symmetric positive semidefinite matrix F over a subring
+of the real field so that F=XX<sup>tr</sup> for some matrix X over the
+real field, compute a matrix G which is the Gram matrix
+corresponding to an HKZ-reduced form of the matrix X.
+The function returns the HKZ-reduced Gram matrix G of F, 
+and a unimodular matrix T in the matrix ring over Z whose degree
+is the number of rows of F which gives the corresponding transformation:
+G=TFT<sup>tr</sup>.
+</BLOCKQUOTE>
+<H5><A NAME = "2970">HKZ(L) : Lat -&gt; Lat, AlgMatElt</A></H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Prune: SeqEnum                      Default: [ ...,[1.0, ...,1.0], ... ]</PRE>
+<BLOCKQUOTE>
+Given a lattice L with basis matrix B, return a new lattice L' with
+basis matrix B' and a transformation matrix T so that L' is equal
+to L but B' is HKZ-reduced and B'=TB.  
+</BLOCKQUOTE>
+<H5><A NAME = "2971">SetVerbose("HKZ", v) : MonStgElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+(Procedure.)
+Set the verbose printing level for the HKZ algorithm to
+be v.  Currently the legal values for v are <TT>true</TT>, <TT>false</TT>, 0 and 1
+(<TT>false</TT> is the same as 0, and <TT>true</TT> is the same as 1). More 
+information on the progress of the computation can be obtained by
+setting the <TT>"Enum"</TT> verbose on.
+</BLOCKQUOTE>
+<H5><A NAME = "2972"></A><A NAME = "Lat:GaussReduce">GaussReduce</A>(X) : ModMatRngElt -&gt; ModMatRngElt, AlgMatElt</H5>
+<H5>GaussReduceGram(F) : ModMatRngElt -&gt; ModMatRngElt, AlgMatElt</H5>
+<H5>GaussReduce(L) : Lat -&gt; Lat, AlgMatElt</H5>
+<BLOCKQUOTE>
+Restrictions of the <TT>HKZ</TT> functions to lattices of rank 2.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2973">Example <TT>Lat_HKZ (H30E10)</TT></A></H3>
+HKZ-reduced bases are much harder to compute than LLL-reduced bases,
+but provide a significantly more powerful representation of the
+spanned lattice. For example, computing all short lattice vectors is
+more efficient if one starts from an HKZ-reduced basis. 
+<P>
+<P>
+<PRE>
+&gt; d:=60;
+&gt; B:=RMatrixSpace(IntegerRing(), d, d)!0;
+&gt; for i,j in [1..d] do B[i][j]:=Random(100*d); end for;
+&gt; time C1 := LLL(B);
+Time: 0.020
+&gt; time C2 := HKZ(B);
+Time: 1.380
+&gt; m := Norm(C2[1]);
+&gt; time _:=ShortVectors(Lattice(C1), 11/10*m);
+Time: 1.750
+&gt; time _:=ShortVectors(Lattice(C2), 11/10*m);
+Time: 0.850
+&gt; time _:=ShortVectors(Lattice(C1), 3/2*m);
+Time: 73.800
+&gt; time _:=ShortVectors(Lattice(C2), 3/2*m);
+Time: 32.220
+</PRE>
+<HR>
+<H4><A NAME = "2974">BKZ Reduction</A></H4>
+
+<P>
+<P>
+<P>
+The notion of block Korkine-Zolotareff reduction (BKZ) allows one to
+interpolate between LLL and HKZ. In particular, one gives a size parameter n,
+and at step i the HKZ-reduction of the projected sublattice on the vectors
+[i..(i + n - 1)] is computed. In practise, one achieves most of the possible
+reduction from (say) taking n=20.
+
+
+<H5><A NAME = "2975">BKZ(M,n) : Mtrx, RngIntElt -&gt; Mtrx, AlgMatElt,RngIntElt</A></H5>
+
+<PRE>    Delta: FldReElt                     Default: 0.75</PRE>
+<BLOCKQUOTE>
+Given a basis matrix M and a parameter n, return a BKZ-reduction.
+</BLOCKQUOTE>
+<H5><A NAME = "2976">BKZ(L,n) : Lat, RngIntElt -&gt; Lat, AlgMatElt</A></H5>
+<BLOCKQUOTE>
+As above, but with a lattice (over the integers, rationals, or reals) as input.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2977">Example <TT>Lat_bkz-example (H30E11)</TT></A></H3>
+<P>
+We create a 48-dimensional lattice, then take a random transformation of it.
+Then <TT>LLL</TT> is applied, but this does not give a great basis (at least
+with the chosen <TT>Delta</TT> value). Finally <TT>BKZ</TT> is used to make
+the basis a bit better.
+<P>
+<P>
+<P>
+<PRE>
+&gt; L := Lattice(LatticeDatabase(),"Bhurw12");
+&gt; L := LLL(L : Delta:=0.999);
+&gt; Max(Diagonal(GramMatrix(L)));
+12
+&gt; R := RandomSLnZ(48,96,384);
+&gt; M := R*GramMatrix(L)*Transpose(R);
+&gt; A := LLLGram(M : Delta:=0.75);
+&gt; Max(Diagonal(A));
+46
+&gt; LAT := BKZ(LatticeWithGram(A),20);
+&gt; Max(Diagonal(GramMatrix(LAT)));
+14
+</PRE>
+<HR>
+<H4><A NAME = "2978">Recovering a Short Basis from Short Lattice Vectors</A></H4>
+
+
+
+<H5><A NAME = "2979">ReconstructLatticeBasis(S, B) : ModMatRngElt, ModMatRngElt -&gt; ModMatRngEltLat</A></H5>
+<BLOCKQUOTE>
+Given a basis S of a finite index sublattice of the
+lattice L spanned by the rows of the integral matrix B, return a
+matrix C whose rows span L and are not much longer than those
+of S. Specifically, the algorithm described in Lemma 7.1
+of <A  HREF = "text304.htm#bib_MiGo">[MG02]</A> is implemented, and the rows of the output matrix satisfy the
+following properties: 
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>For any i, |c<sub>i</sub>| &le;i<sup>1/2</sup> |s<sub>i</sub>|,
+<DT>(b)</DT><DD>For any i, |c<sub>i</sub><sup> * </sup>| &le;|s<sub>i</sub><sup> * </sup>|, 
+<P>
+<P>
+<P>
+</DL>
+where c<sub>i</sub><sup> * </sup> (respectively s<sub>i</sub><sup> * </sup>) denotes the i-th vector of the
+Gram-Schmidt orthogonalisation of (c<sub>1</sub>, c<sub>2</sub>, ..., c<sub>d</sub>)
+(respectively (s<sub>1</sub>, s<sub>2</sub>, ..., s<sub>d</sub>)) .
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text313.htm">[Next]</A><A  HREF = "text311.htm">[Prev]</A> <A  HREF = "text313.htm">[Right]</A> <A  HREF = "text311.htm">[Left]</A> <A  HREF = "text305.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

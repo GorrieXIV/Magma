@@ -1,0 +1,295 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Ring and Field Extensions</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1304.htm">[Next]</A><A  HREF = "text1302.htm">[Prev]</A> <A  HREF = "text1304.htm">[Right]</A> <A  HREF = "text1302.htm">[Left]</A> <A  HREF = "text1297.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "14175">Ring and Field Extensions</A></H3>
+
+<P>
+<P>
+<P>
+The first differential ring and field extensions we consider are
+the ones induced by a differential operator.
+Given a differential operator
+   L = a<sub>n</sub>D<sup>n</sup> + a<sub>n - 1</sub>D<sup>n - 1</sup> + ... + a<sub>1</sub>D + a<sub>0</sub>,   a<sub>n</sub>not=0 
+in a differential operator ring F[D] with coefficients in 
+a differential field F,
+we construct a ring or field extension of degree n over F,
+whose indeterminates play the role of a formal solution of
+L(y)=0 and its derivatives.
+<P>
+Given a differential field F, it is also possible to construct
+differential extensions of the form F[X]/f(X), where f(X) is an 
+irreducible polynomial over F.
+
+
+<H5><A NAME = "14176">DifferentialRingExtension(L) : RngDiffOpElt -&gt; RngDiff</A></H5>
+<BLOCKQUOTE>
+Constructs a differential ring extension of the base ring of 
+the differential operator L, 
+by adding a formal solution of L and its formal derivatives
+as indeterminates.
+<P>
+Let P denote the new differential ring, and F the coefficient ring of L.
+The ring F is a differential field.
+If n is the degree of L, the underlying ring of P is a 
+multivariate polynomial ring of degree n over F.
+We thus have P=F[Y<sub>1</sub>, Y<sub>2</sub>, ..., Y<sub>n</sub>], with indeterminates 
+Y<sub>1</sub>, Y<sub>2</sub>, ..., Y<sub>n</sub>.
+If L is written as a<sub>n</sub>D<sup>n</sup> + a<sub>n - 1</sub>D<sup>n - 1</sup> + ... + a<sub>1</sub>D + a<sub>0</sub>&isin;F[D], then 
+the derivation of P is induced by the differential operator L as follows:
+&delta;<sub>P</sub>(Y<sub>i</sub>)=Y<sub>i + 1</sub>, for i&lt;n and  
+ a<sub>n</sub>&delta;<sub>P</sub>(Y<sub>n</sub>)= - a<sub>n - 1</sub>Y<sub>n - 1</sub> - ... - a<sub>2</sub> Y<sub>2</sub> - a<sub>1</sub>Y<sub>1</sub>.
+With this construction Y<sub>1</sub> mimics a solution of L(y)=0, 
+and all the others are its derivatives.
+</BLOCKQUOTE>
+<H5><A NAME = "14177">DifferentialFieldExtension(L) : RngDiffOpElt -&gt; RngDiff</A></H5>
+<BLOCKQUOTE>
+Constructs a differential field extension of the base ring of 
+the differential operator L, 
+by adding a formal solution of L and its formal derivatives
+as indeterminates.
+<P>
+The construction of the new differential field is completely analogous to the 
+differential ring created by <TT>DifferentialRingExtension(L)</TT>.
+The only difference is that 
+now a differential field M=F(Y<sub>1</sub>, Y<sub>2</sub>, ..., Y<sub>n</sub>), with n indeterminates 
+Y<sub>1</sub>, Y<sub>2</sub>, ..., Y<sub>n</sub> is created.
+The action of the derivation of M on Y<sub>1</sub>, Y<sub>2</sub>, ..., Y<sub>n</sub> is
+as described in <TT>DifferentialRingExtension(L)</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14178">Example <TT>RngDiff_diff-ring-ext-operator (H117E24)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; F&lt;z&gt; := RationalDifferentialField(Rationals());
+&gt; R&lt;D&gt; := DifferentialOperatorRing(F);
+&gt; L := z^2*D^2-z*D+1;
+&gt; P&lt;Y1,Y2&gt; := DifferentialRingExtension(L);
+&gt; P;
+Differential Ring Extension over F
+with derivation given by Mapping from: Polynomial ring of rank 2 over F to 
+Polynomial ring of rank 2 over F given by a rule [no inverse]
+&gt; Derivative(Y1);
+Y2
+&gt; Derivative(Y2);
+-1/z^2*Y1 + 1/z*Y2
+</PRE>
+<HR>
+<H3><A NAME = "14179">Example <TT>RngDiff_diff-field-ext-operator (H117E25)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; F&lt;z&gt; := RationalDifferentialField(Rationals());
+&gt; R&lt;D&gt; := DifferentialOperatorRing(F);
+&gt; L := z^2*D^2-1;
+&gt; M&lt;Y,DY&gt; := DifferentialFieldExtension(L);
+&gt; IsDifferentialField(M);
+true
+&gt; Derivative(Y);
+DY
+&gt; Derivative(DY);
+-1/z^2*Y
+</PRE>
+<HR>
+<H5><A NAME = "14180">ext&lt; F | f &gt; : RngDiff, RngUPolElt -&gt; RngDiff</A></H5>
+<BLOCKQUOTE>
+The differential field extension F(&alpha;) of the differential field 
+F, where
+&alpha; is a root of the irreducible polynomial f over F.
+The angle bracket notation may be used to assign the root &alpha;
+to an identifier.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14181">Example <TT>RngDiff_diff-field-ext-ext (H117E26)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; F&lt;z&gt; := RationalDifferentialField(Rationals());
+&gt; _&lt;X&gt; := PolynomialRing(F);
+&gt; M&lt;alpha&gt; := ext&lt; F | X^2-z &gt;;
+&gt; M;
+Differential Ring Extension over F by $.1^2 - z
+with derivation given by (1) d(z)
+&gt; alpha^2;
+z
+</PRE>
+The differential of M is the differential (d)z of the differential
+space of F lifted
+to the space of differentials of M.
+<HR>
+<H5><A NAME = "14182">ExponentialFieldExtension(F, f) : RngDiff, RngDiffElt -&gt; RngDiff</A></H5>
+<BLOCKQUOTE>
+Returns the differential field F(E) as an extension of F, 
+such that the derivation of E is f.E.
+The parent of f must be F.
+</BLOCKQUOTE>
+<H5><A NAME = "14183">LogarithmicFieldExtension(F, f) : RngDiff, RngDiffElt -&gt; RngDiff</A></H5>
+<BLOCKQUOTE>
+Returns the differential field F(L) as an extension of F, 
+such that the derivation of L is F(L)!f.
+The parent of f must be F.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14184">Example <TT>RngDiff_diff-field-ext-exp-log (H117E27)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; F&lt;z&gt; := RationalDifferentialField(Rationals());
+&gt; K&lt;E&gt; := ExponentialFieldExtension(F, z);
+&gt; K;
+Differential Ring Extension over F
+with derivation given by Mapping from: Multivariate Rational function field of 
+rank 1 over F to Multivariate Rational function field of rank 1 over F given by 
+a rule [no inverse]
+&gt; Derivative(E);
+z*E
+&gt; _&lt;L&gt; := LogarithmicFieldExtension(F, 1/z);
+&gt; Derivative(L);
+1/z
+&gt; Parent($1) eq Parent(L);
+true
+</PRE>
+<HR>
+<H5><A NAME = "14185">PurelyRamifiedExtension(f) : RngUPolElt[RngDiff] -&gt; RngDiff, Map</A></H5>
+<BLOCKQUOTE>
+Creates a purely ramified field extension M of the differential field F with 
+respect to the purely ramified polynomial f&isin;F[X].
+By definition, such a polynomial f is of the form X<sup>n</sup> - a.(F.1) for some
+constant element a in F and positive integer n.
+The returned extension field M is of the same type as F.
+The allowed differential fields are algebraic differential fields and 
+differential Laurent series rings.
+When F is a differential Laurent series ring, its derivation is required to be
+weakly of the form c * (F.1) * d/d(F.1) for some constant c.
+The relative precision of M is then n times the relative precision of F.
+The second argument returned is the embedding map of F into M.
+The inverse map acts on elements for which it is defined.
+Otherwise it returns 0.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14186">Example <TT>RngDiff_diff-field-purely-ramified-ext-ADF (H117E28)</TT></A></H3>
+A purely ramified extension of an 
+algebraic differential field is constructed in this example.
+<P>
+<P>
+<PRE>
+&gt; F&lt;z&gt; := RationalDifferentialField(Rationals());
+&gt; _&lt;X&gt; := PolynomialRing(F);
+&gt; Fext&lt;v&gt;, mp := PurelyRamifiedExtension(X^2-5*z);
+&gt; IsAlgebraicDifferentialField(Fext);
+true
+&gt; mp(z) eq 1/5*v^2;
+true
+&gt; Parent(mp(z)) eq Fext;
+true
+&gt; Derivation(Fext)(mp(z));
+1
+&gt; Derivation(Fext)(v);
+1/2/z*v
+&gt; Derivation(Fext)(v^2) eq Fext!5;
+true
+&gt; Inverse(mp)(v^2);
+5*z;
+</PRE>
+<HR>
+<H3><A NAME = "14187">Example <TT>RngDiff_diff-field-purely-ramified-ext-DLSR-1 (H117E29)</TT></A></H3>
+A differential Laurent series ring with a derivation without an order
+term is considered in this example.
+<P>
+<P>
+<PRE>
+&gt; S&lt;t&gt;:=DifferentialLaurentSeriesRing(Rationals());
+&gt; _&lt;T&gt;:=PolynomialRing(S);
+&gt; pol := T^4-5*t;
+&gt; Sext&lt;r&gt;,mp := PurelyRamifiedExtension(pol);
+&gt; IsDifferentialLaurentSeriesRing(Sext);
+true
+&gt; BaseRing(Sext) eq S and ConstantField(Sext) eq ConstantField(S);
+true
+&gt; RelativePrecision(Sext);
+80
+&gt; RelativePrecisionOfDerivation(Sext);
+Infinity
+&gt; Derivation(S)(t);
+t
+&gt; mp(t);
+1/5*r^4
+&gt; Derivation(Sext)(mp(t));
+1/5*r^4
+&gt; mp(Derivation(S)(t));
+1/5*r^4
+&gt; x := 4+6*t+O(t^6);
+&gt; mp(x);
+4 + 6/5*r^4 + O(r^24)
+&gt; Derivation(Sext)(mp(x));
+6/5*r^4 + O(r^24)
+&gt; mp(Derivation(S)(x));
+6/5*r^4 + O(r^24)
+&gt; Inverse(mp)(r^4-r^8);
+5*t - 25*t^2
+&gt; Inverse(mp)(r^4+O(r^5));
+5*t + O(t^2)
+&gt; Derivation(Sext)(r);
+1/4*r
+</PRE>
+<HR>
+<H3><A NAME = "14188">Example <TT>RngDiff_diff-field-purely-ramified-ext-DLSR-2 (H117E30)</TT></A></H3>
+The ring in this example has an order term in its derivation.
+Therefore, taking a derivative of an element x is of influence on the
+relative precision of the image of x.
+<P>
+<P>
+<P>
+<PRE>
+&gt; F&lt;z&gt; := RationalDifferentialField(Rationals());
+&gt; FF&lt;z&gt;:=ChangeDerivation(RationalDifferentialField(Rationals()),z);
+&gt; RR&lt;DD&gt;:=DifferentialOperatorRing(FF);
+&gt; RS&lt;DS&gt;, mpRRtoRS :=Completion(RR,Zeros(z)[1]);
+&gt; S&lt;t&gt;:=BaseRing(RS);
+&gt; IsDifferentialLaurentSeriesRing(S);
+true
+&gt; _&lt;T&gt; := PolynomialRing(S);
+&gt; E&lt;r&gt;, mp := PurelyRamifiedExtension(T^3-5*t);
+&gt; IsDifferentialLaurentSeriesRing(E);
+true
+&gt; RelativePrecision(E);
+60
+&gt; RelativePrecisionOfDerivation(E);
+60
+&gt; Derivation(E)(r);
+1/3*r + O(r^61);
+&gt; mp(t);
+1/5*r^3
+&gt; Derivation(S)(t);
+t + O(t^21)
+&gt; Derivation(E)(mp(t));
+1/5*r^3 + O(r^63)
+&gt; mp(Derivation(S)(t));
+1/5*r^3 + O(r^63)
+&gt; x:=t^(-2) +7+t^3 +O(t^15);
+&gt; Derivation(S)(x);
+-2*t^-2 + 3*t^3 + O(t^15)
+&gt; Derivation(E)(mp(x));
+-50*r^-6 + 3/125*r^9 + O(r^45)
+&gt; mp(Derivation(S)(x));
+-50*r^-6 + 3/125*r^9 + O(r^45)
+&gt; y := 2*t+O(t^25);
+&gt; Derivation(S)(y);
+2*t + O(t^21)
+&gt; Derivation(E)(mp(y)) eq mp(Derivation(S)(y));
+true
+&gt; Derivation(E)(mp(y));
+2/5*r^3 + O(r^63)
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1304.htm">[Next]</A><A  HREF = "text1302.htm">[Prev]</A> <A  HREF = "text1304.htm">[Right]</A> <A  HREF = "text1302.htm">[Left]</A> <A  HREF = "text1297.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,16 @@
+{
+  g1model_def.m
+  g1trans_def.m
+  3descent-testeq.m
+  5descent-testeq.m
+  g1invariants.m
+  g1minimisation.m
+  g1reduction.m
+  g1reduction_nf.m
+  g1testequiv.m
+  hessepolynomials.m
+  reducequadrics.m
+  g1locallysoluble.m
+  higher-minimisation.m
+  addcovers.m
+}

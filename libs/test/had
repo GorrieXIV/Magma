@@ -1,0 +1,298 @@
+
+////////////////////////////////////////////
+////////   testing hadamard matrices 
+
+procedure hadamard_ok(H, L)
+
+    assert IsHadamardEquivalent(H, L);
+    assert IsIsomorphic(HadamardAutomorphismGroup(H),
+    HadamardAutomorphismGroup(L));
+
+    nbr := 5;
+    for k in [1..nbr] do
+	i := Random(1, NumberOfRows(H));
+	j := i;
+	while j eq i do
+	    j := Random(1, NumberOfRows(H));
+	end while;
+	
+	N := SwapColumns(H, i, j);
+	assert IsHadamardEquivalent(H, N);
+	assert IsIsomorphic(
+	HadamardAutomorphismGroup(H),
+	HadamardAutomorphismGroup(N));
+	
+	N := SwapRows(H, i, j);
+	assert IsHadamardEquivalent(H, N);
+	assert IsIsomorphic(
+	HadamardAutomorphismGroup(H),
+	HadamardAutomorphismGroup(N));
+	
+	N[i] := -N[i];
+	assert IsHadamardEquivalent(H, N);
+	assert IsIsomorphic(
+	HadamardAutomorphismGroup(H),
+	HadamardAutomorphismGroup(N));
+	N[j] := -N[j];
+	assert IsHadamardEquivalent(H, N);
+	assert IsIsomorphic(
+	HadamardAutomorphismGroup(H),
+	HadamardAutomorphismGroup(N));
+	
+	N := Transpose(N);
+	N[i] := -N[i];
+	assert IsHadamardEquivalent(H, N);
+	assert IsIsomorphic(
+	HadamardAutomorphismGroup(H),
+	HadamardAutomorphismGroup(N));
+	N[j] := -N[j];
+	assert IsHadamardEquivalent(H, N);
+	assert IsIsomorphic(
+	HadamardAutomorphismGroup(H),
+	HadamardAutomorphismGroup(N));
+	
+    end for;
+
+    H := Matrix(NumberOfRows(H), NumberOfColumns(H),
+    [ GF(3) | x : x in  Eltseq(H) ]);
+    L := Matrix(NumberOfRows(L), NumberOfColumns(L),
+    [ GF(3) | x : x in  Eltseq(L) ]);
+    assert IsMonomialIsomorphic(H, L);
+    assert IsIsomorphic(MonomialAutomorphismGroup(H),
+    MonomialAutomorphismGroup(L));
+
+    print "hadamard to general";
+    for k in [1..nbr] do
+	i := Random(1, NumberOfRows(H));
+	j := i;
+	while j eq i do
+	    j := Random(1, NumberOfRows(H));
+	end while;
+	
+	N := SwapColumns(H, i, j);
+	assert IsIsomorphic(H, N);
+	assert IsIsomorphic(
+	AutomorphismGroup(H),
+	AutomorphismGroup(N));
+	
+	N := SwapRows(H, i, j);
+	assert IsIsomorphic(H, N);
+	assert IsIsomorphic(
+	AutomorphismGroup(H),
+	AutomorphismGroup(N));
+	
+	N[i] := -N[i];
+	assert IsMonomialIsomorphic(H, N);
+	assert IsIsomorphic(
+	MonomialAutomorphismGroup(H),
+	MonomialAutomorphismGroup(N));
+	N[j] := -N[j];
+	assert IsMonomialIsomorphic(H, N);
+	assert IsIsomorphic(
+	MonomialAutomorphismGroup(H),
+	MonomialAutomorphismGroup(N));
+	
+	N := Transpose(N);
+	N[i] := -N[i];
+	assert IsMonomialIsomorphic(H, N);
+	assert IsIsomorphic(
+	MonomialAutomorphismGroup(H),
+	MonomialAutomorphismGroup(N));
+	N[j] := -N[j];
+	assert IsMonomialIsomorphic(H, N);
+	assert IsIsomorphic(
+	MonomialAutomorphismGroup(H),
+	MonomialAutomorphismGroup(N));
+	
+    end for;
+
+end procedure;
+
+
+R:=MatrixRing(Integers(),4);
+H1:=R![
+1,1,1,1,
+1,1,-1,-1,
+1,-1,-1,1,
+1,-1,1,-1
+];
+H2:=R![
+-1,-1,-1,-1,
+1,1,-1,-1,
+1,-1,-1,1,
+1,-1,1,-1
+];
+
+assert IsHadamard(H1);
+assert IsHadamard(H2);
+assert IsHadamardEquivalent(H1,H2);
+H := KroneckerProduct(H1, H2);
+assert IsHadamard(H);
+L := KroneckerProduct(H2, H1);
+assert IsHadamard(L);
+hadamard_ok(H, L);
+
+
+R:=MatrixRing(Integers(),3);
+A := R![
+1, 1, 1,
+1, 1, 1,
+1, 1, 1
+];
+B := R![
+1, -1, -1,
+-1, 1, -1,
+-1, -1, 1
+];
+C := B;
+D := B;
+
+H1 := HorizontalJoin([ A, B, C, D]);
+H2 := HorizontalJoin([ -B, A, -D, C]);
+H3 := HorizontalJoin([ -C, D, A, -B]);
+H4 := HorizontalJoin([ -D, -C, B, A]);
+H := VerticalJoin([H1, H2, H3, H4]);
+assert IsHadamard(H);
+
+L := Transpose(H);
+assert IsHadamard(L);
+hadamard_ok(H, L);
+
+
+////////////////////////////////////////////
+////////   testing general matrices 
+
+
+
+procedure matrix_ok(K, M)
+
+    for i in [1..NumberOfRows(M)-1] do
+	for j in [i+1..NumberOfRows(M)] do
+	    
+	    N := SwapRows(M, i, j);
+	    assert IsIsomorphic(M, N);
+	    assert IsIsomorphic(
+	    AutomorphismGroup(M),
+	    AutomorphismGroup(N));
+	    assert IsMonomialIsomorphic(M, N);
+	    assert IsIsomorphic(
+	    MonomialAutomorphismGroup(M),
+	    MonomialAutomorphismGroup(N));
+
+	    a := 0;
+	    while a eq 0 do
+		a := Random(K);
+	    end while;
+	    
+	    N[i] := a * N[i];
+	    assert IsMonomialIsomorphic(M, N);
+	    assert IsIsomorphic(
+	    MonomialAutomorphismGroup(M),
+	    MonomialAutomorphismGroup(N));
+	    N[j] := a * N[j];
+	    assert IsMonomialIsomorphic(M, N);
+	    assert IsIsomorphic(
+	    MonomialAutomorphismGroup(M),
+	    MonomialAutomorphismGroup(N));
+	    
+	    P := Transpose(N);
+	    N := Transpose(N);
+	    if i le Ncols(M) then
+		N[i] := a * P[i];
+		assert IsMonomialIsomorphic(N, P);
+		assert IsIsomorphic(
+		MonomialAutomorphismGroup(N),
+		MonomialAutomorphismGroup(P));
+	    end if;
+	    if j le Ncols(M) then
+		N[j] := a * P[j];
+		assert IsMonomialIsomorphic(N, P);
+		assert IsIsomorphic(
+		MonomialAutomorphismGroup(N),
+		MonomialAutomorphismGroup(P));
+	    end if;
+	    
+	end for;
+    end for;
+
+    for i in [1..NumberOfColumns(M)-1] do
+	for j in [i+1..NumberOfColumns(M)] do
+	    
+	    N := SwapColumns(M, i, j);
+	    assert IsIsomorphic(M, N);
+	    assert IsIsomorphic(
+	    AutomorphismGroup(M),
+	    AutomorphismGroup(N));
+	    assert IsMonomialIsomorphic(M, N);
+	    assert IsIsomorphic(
+	    MonomialAutomorphismGroup(M),
+	    MonomialAutomorphismGroup(N));
+
+	    a := 0;
+	    while a eq 0 do
+		a := Random(K);
+	    end while;
+
+	    if i le Nrows(M) then
+		N[i] := a * N[i];
+		assert IsMonomialIsomorphic(M, N);
+		assert IsIsomorphic(
+		MonomialAutomorphismGroup(M),
+		MonomialAutomorphismGroup(N));
+	    end if;
+	    if j le Nrows(M) then
+		N[j] := a * N[j];
+		assert IsMonomialIsomorphic(M, N);
+		assert IsIsomorphic(
+		MonomialAutomorphismGroup(M),
+		MonomialAutomorphismGroup(N));
+	    end if;
+	    
+	    P := Transpose(N);
+	    N := Transpose(N);
+	    N[i] := a * P[i];
+	    assert IsMonomialIsomorphic(N, P);
+	    assert IsIsomorphic(
+	    MonomialAutomorphismGroup(N),
+	    MonomialAutomorphismGroup(P));
+	    N[j] := a * P[j];
+	    assert IsMonomialIsomorphic(N, P);
+	    assert IsIsomorphic(
+	    MonomialAutomorphismGroup(N),
+	    MonomialAutomorphismGroup(P));
+	    
+	end for;
+    end for;
+
+end procedure;
+
+K := GF(5);
+S := [ K |
+3, 0, 4, 3,
+2, 4, 3, 0,
+0, 1, 2, 0
+];
+M := Matrix(3, 4, S);
+matrix_ok(K, M);
+
+K := GF(3);
+S := [ K |
+0, 0, 1, 0,
+0, 1, 0, 0,
+0, 2, 2, 1
+];
+M := Matrix(3, 4, S);
+matrix_ok(K, M);
+
+r := 3;
+c := 4;
+for q in [ 3, 4, 5, 7 ] do
+    K := GF(q);
+    S := [];
+    for i in [1..r*c] do
+	Append(~S, Random(K));
+    end for;
+    M := Matrix(r, c, S);
+    M;
+    matrix_ok(K, M);
+end for;

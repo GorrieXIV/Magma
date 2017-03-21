@@ -1,0 +1,2 @@
+174,1
+S,ParametrizeQuadric,Given a quadric projective hypersurface X in P^3 and projective plane P2 over the same base field k which is a number field. Returns 'false' if X is not parametrizable over k; otherwise return 'true' and a parametrization. Parameter Point may be used to specify a point in X(k). A point must be specified if k is not the rational field,0,2,0,0,0,0,0,0,0,379,,0,0,380,,36,376,-38,-38,-38,-38

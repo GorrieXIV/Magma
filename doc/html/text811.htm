@@ -1,0 +1,716 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Construction of an FP-Group</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text812.htm">[Next]</A><A  HREF = "text810.htm">[Prev]</A> <A  HREF = "text812.htm">[Right]</A> <A  HREF = "text810.htm">[Left]</A> <A  HREF = "text808.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "9132">Construction of an FP-Group</A></H3>
+
+<P>
+<P>
+An fp-group is normally constructed either by giving a presentation
+in terms of generators and relations or it is defined to be a subgroup
+or quotient group of an existing fp-group. However, fp-groups may be
+also created from finite permutation and matrix groups. Finally, Magma
+has separate types for a number of families of fp-groups that satisfy
+a condition such as being polycyclic. Again functions are provided
+to convert a member of one of these families into a general fp-group.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text811.htm#9133">The Quotient Group Constructor</A>
+<LI> <A  HREF = "text811.htm#9139">The FP-Group Constructor</A>
+<LI> <A  HREF = "text811.htm#9144">Construction from a Finite Permutation or Matrix Group</A>
+<LI> <A  HREF = "text811.htm#9149">Construction of the Standard Presentation for a Coxeter Group</A>
+<LI> <A  HREF = "text811.htm#9152">Conversion from a Special Form of FP-Group</A>
+<LI> <A  HREF = "text811.htm#9155">Construction of a Standard Group</A>
+<LI> <A  HREF = "text811.htm#9165">Construction of Extensions</A>
+<LI> <A  HREF = "text811.htm#9173">Accessing the Defining Generators  and Relations</A>
+</UL>
+<H4><A NAME = "9133">The Quotient Group Constructor</A></H4>
+
+<P>
+<P>
+A group with non-trivial relations is constructed as a quotient of an
+existing group, usually a free group. For convenience, the necessary
+free group may be constructed in-line.
+
+
+<H5><A NAME = "9134"></A><A NAME = "GrpFP_1:quo">quo</A>&lt; F | R &gt; : GrpFP, List -&gt; GrpFP, Hom(Grp)</H5>
+<BLOCKQUOTE>
+Given an fp-group F, and a set of relations R in the generators of F, 
+construct the quotient G of F by the normal subgroup of F defined by 
+R. The group G is defined by means of a presentation which consists
+of the relations for F (if any), together with the additional relations
+defined by the list R.
+<P>
+The expression defining F may be either simply the name of a previously
+constructed group, or an expression defining an fp-group.
+<P>
+If R is a list then each term of the list is either a <I>word</I>, a 
+<I>relation</I>, a <I>relation list</I> or a <I>subgroup</I> of F.
+<P>
+<P>
+A <I>word</I> is interpreted as a relator.
+<P>
+<P>
+A <I>relation</I> consists of a pair of words, separated by `='.
+(See above.)
+<P>
+<P>
+A <I>relation list</I> consists of a list of words, where each pair
+of adjacent words is separated by `=':
+  w<sub>1</sub> = w<sub>2</sub> = ... = w<sub>r</sub>.
+This is interpreted as the set of relations 
+      w<sub>1</sub> = w<sub>r</sub>, ..., w<sub>r - 1</sub> = w<sub>r</sub>.
+Note that the relation list construct is only meaningful in the
+context of the <TT>quo</TT>-constructor.
+<P>
+<P>
+A <I>subgroup</I> H appearing in the list R contributes its generators
+to the relation set for G, i.e. each generator of H is interpreted
+as a relator for G.
+<P>
+The group F may be referred to by the special symbol $ in any word 
+appearing to the right of the `<TT>|</TT>' symbol in the <TT>quo</TT>-constructor.
+Also, in the context of the <TT>quo</TT>-constructor, the identity element
+(empty word) may be represented by the digit <TT>1</TT>.
+<P>
+<P>
+The function returns:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>The quotient group G;
+<DT>(b)</DT><DD>The natural homomorphism &phi; : F -&gt; G.
+<P>
+<P>
+</DL>
+This function may require the computation of a coset table. Experienced users
+can control the behaviour of a possibly invoked coset enumeration with a set of
+global parameters. These global parameters can be changed using the function
+<A  HREF = "text814.htm#GrpFP_1:SetGlobalTCParameters">SetGlobalTCParameters</A>. For a detailed description of the
+available parameters and their meanings, we refer to Chapter <A  HREF = "text823.htm#9460">FINITELY PRESENTED GROUPS: ADVANCED</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "9135">G / H : GrpFP, GrpFP -&gt; GrpFP</A></H5>
+<BLOCKQUOTE>
+Given a subgroup H of the group G, construct the quotient of G
+by the normal closure N of H. The quotient is formed by taking
+the presentation for G and including the generating words of H as
+additional relators.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9136">Example <TT>GrpFP_1_Symmetric1 (H75E5)</TT></A></H3>
+The symmetric group of degree 4 may be represented as a
+two generator group with presentation
+&lt; a, b    |    a<sup>2</sup>, b<sup>3</sup>, (ab)<sup>4</sup> &gt;.
+Giving the relations as a list of relators, the presentation would be
+specified as:
+<P>
+<P>
+<PRE>
+&gt;  F&lt;a, b&gt; := FreeGroup(2);
+&gt;  G&lt;x, y&gt;, phi := quo&lt; F | a^2, b^3, (a*b)^4 &gt;;
+</PRE>
+Alternatively, giving the relations as a relations list, the
+presentation would be specified as:
+<P>
+<P>
+<PRE>
+&gt;  F&lt;a, b&gt; := FreeGroup(2);
+&gt;  G&lt;x, y&gt;, phi :=  quo&lt; F | a^2 = b^3 = (a*b)^4 = 1&gt;;
+</PRE>
+Finally, giving the relations in the form of a set of relations, this
+presentation would be specified as:
+<P>
+<P>
+<PRE>
+&gt;  F&lt;a, b&gt; := FreeGroup(2);
+&gt;  rels := { a^2, b^3, (a*b)^4 };
+&gt;  G&lt;x, y&gt;, phi :=  quo&lt; F | rels &gt;;
+</PRE>
+<HR>
+<H3><A NAME = "9137">Example <TT>GrpFP_1_Symmetric2 (H75E6)</TT></A></H3>
+A group may be defined using the <A  HREF = "text811.htm#GrpFP_1:quo">quo</A>-constructor without
+first assigning a free group. The $ symbol is used to reference the group
+whose quotient is being formed.
+<P>
+<P>
+<PRE>
+&gt; S4&lt;x, y&gt; := quo&lt; FreeGroup(2) | $.1^2, $.2^3, ($.1*$.2)^4 &gt;;
+&gt; S4;
+Finitely presented group S4 on 2 generators
+Relations
+      x^2 = Id(S4)
+      y^3 = Id(S4)
+      (x * y)^4 = Id(S4)
+</PRE>
+<HR>
+<H3><A NAME = "9138">Example <TT>GrpFP_1_Modular (H75E7)</TT></A></H3>
+We illustrate the use of the <A  HREF = "text811.htm#GrpFP_1:quo">quo</A>-constructor in defining 
+the quotient of a group other than a free group.
+<P>
+<P>
+<PRE>
+&gt; F&lt;x, y&gt; := Group&lt; x, y | x^2 = y^3 = (x*y)^7 = 1 &gt;;
+&gt; F;
+Finitely presented group F on 2 generators
+Relations
+      x^2 = Id(F)
+      y^3 = Id(F)
+      (x * y)^7 = Id(F)
+&gt; G&lt;a, b&gt; := quo&lt; F | (x, y)^8 &gt;;
+&gt; G;
+Finitely presented group G on 2 generators
+Relations
+      a^2 = Id(G)
+      b^3 = Id(G)
+      (a * b)^7 = Id(G)
+      (a, b)^8 = Id(G)
+&gt; Order(G);
+10752
+</PRE>
+<HR>
+<H4><A NAME = "9139">The FP-Group Constructor</A></H4>
+
+<P>
+<P>
+For convenience, a constructor is provided which allows the user to
+define an fp-group in a single step.
+
+
+<H5><A NAME = "9140"></A><A NAME = "GrpFP_1:Group">Group</A>&lt; X | R &gt; : List(Var), List(GrpFPRel) -&gt; GrpFP, Hom(Grp)</H5>
+<BLOCKQUOTE>
+Given a list X of variables x<sub>1</sub>, ..., x<sub>r</sub>, and a list of relations 
+R  over these generators, first construct the free group F on the 
+generators x<sub>1</sub>, ..., x<sub>r</sub> and then construct the quotient of F 
+corresponding to the normal subgroup of F defined by the relations R.
+<P>
+The syntax for the relations R is the same as for the
+<A  HREF = "text811.htm#GrpFP_1:quo">quo</A>-constructor. 
+The function returns:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>The quotient group G;
+<DT>(b)</DT><DD>The natural homomorphism &phi; : F -&gt; G.</DL>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9141">Example <TT>GrpFP_1_Tetrahedral (H75E8)</TT></A></H3>
+We illustrate the <A  HREF = "text811.htm#GrpFP_1:Group">Group</A>-constructor by defining the binary
+tetrahedral group in terms of the presentation 
+&lt; r, s  |  r<sup>3</sup> = s<sup>3</sup> = (rs)<sup>2</sup> &gt;:
+<P>
+<P>
+<P>
+<PRE>
+&gt; G&lt;r, s&gt; := Group&lt; r, s | r^3 = s^3 = (r*s)^2 &gt;;
+</PRE>
+<HR>
+<H3><A NAME = "9142">Example <TT>GrpFP_1_ThreeInvols (H75E9)</TT></A></H3>
+Again, using the <A  HREF = "text811.htm#GrpFP_1:Group">Group</A>-constructor, the group
+&lt; r, s, t  |  r<sup>2</sup>, s<sup>2</sup>, t<sup>2</sup>, rst = str = trs &gt; would be specified as:
+<P>
+<P>
+<PRE>
+&gt; G&lt;r, s, t&gt; := Group&lt;r, s, t | r^2, s^2, t^2, r*s*t = s*t*r = t*r*s&gt;;
+</PRE>
+<HR>
+<H3><A NAME = "9143">Example <TT>GrpFP_1_Coxeter (H75E10)</TT></A></H3>
+In our final example we illustrate the use of functions to 
+represent parametrised families of groups. In the notation of Coxeter,
+the symbol (l, m | n, k) denotes the family of groups having presentation
+&lt; a, b | a<sup>l</sup>, b<sup>m</sup>, (a * b)<sup>n</sup>, (a * b<sup> - 1</sup>)<sup>k</sup> &gt;.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Glmnk := func&lt; l, m, n, k | Group&lt; a, b | a^l, b^m, (a*b)^n, (a*b^-1)^k &gt; &gt;;
+&gt; G&lt;a, b&gt; := Glmnk(3, 3, 4, 4);
+&gt; G;
+Finitely presented group G on 2 generators
+Relations
+      a^3 = Id(G)
+      b^3 = Id(G)
+      (a * b)^4 = Id(G)
+      (a * b^-1)^4 = Id(G)
+&gt; Order(G);
+168
+&gt; G&lt;a, b&gt; := Glmnk(2, 3, 4, 5);
+&gt; G;
+Finitely presented group G on 2 generators
+Relations
+    a^2 = Id(G)
+    b^3 = Id(G)
+    (a * b)^4 = Id(G)
+    (a * b^-1)^5 = Id(G)
+&gt; Order(G);
+1
+</PRE>
+Thus (2, 3 | 4, 5 ) is the trivial group.
+<HR>
+<H4><A NAME = "9144">Construction from a Finite Permutation or Matrix Group</A></H4>
+
+
+
+<H5><A NAME = "9145"></A><A NAME = "GrpFP_1:FPGroup">FPGroup</A>(G) : GrpPerm -&gt; GrpFP, Hom(Grp)</H5>
+<H5>FPGroup(G) : GrpMat -&gt; GrpFP, Hom(Grp)</H5>
+<BLOCKQUOTE>
+Given a finite group G in category <A  HREF = "text630.htm#GrpPerm"> <TT>GrpPerm</TT></A> or <A  HREF = "text654.htm#GrpMat"> <TT>GrpMat</TT></A>, this
+function returns a finitely presented group F, isomorphic to G, together
+with the isomorphism &phi;: F -&gt; G. The generators of F correspond
+to the generators of G, so this function can be used to obtain a set of
+defining relations for the given generating set of G.
+<P>
+<P>
+It should be noted that this  function is only practical for groups of
+order at most a few million. In the case of much larger permutation
+groups, an isomorphic fp-group can be constructed using the function
+<A  HREF = "text811.htm#GrpFP_1:FPGroupStrong">FPGroupStrong</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "9146"></A><A NAME = "GrpFP_1:FPGroupStrong">FPGroupStrong</A>(G) : GrpPerm -&gt; GrpFP, Hom(Grp)</H5>
+<H5>PGroupStrong(G) : GrpMat -&gt; GrpFP, Hom(Grp)</H5>
+<BLOCKQUOTE>
+Given a finite group G in category <A  HREF = "text630.htm#GrpPerm"> <TT>GrpPerm</TT></A> or <A  HREF = "text654.htm#GrpMat"> <TT>GrpMat</TT></A>, this
+function returns a finitely presented group F, isomorphic to G, together
+with the isomorphism &phi;:F -&gt; G. The generators of F correspond
+to a set of strong generators of G. If no strong generating set is known
+for G, one will be constructed.
+<P>
+<P>
+For a detailed description of this function, in particular for a list of
+available parameters, we refer to Chapter <A  HREF = "text629.htm#6871">PERMUTATION GROUPS</A> and Chapter
+<A  HREF = "text653.htm#7392">MATRIX GROUPS OVER GENERAL RINGS</A>, respectively.
+</BLOCKQUOTE>
+<H5><A NAME = "9147">FPGroupStrong(G, N) : GrpPerm, GrpPerm -&gt; GrpFP, Hom(Grp)</A></H5>
+<BLOCKQUOTE>
+Given a permutation group G and a normal subgroup N of G, this
+function returns a finitely presented group F, isomorphic to G/N, together
+with a homomorphism &phi;:G -&gt; F.
+<P>
+<P>
+For a detailed description of this function, we refer to Chapter
+<A  HREF = "text629.htm#6871">PERMUTATION GROUPS</A>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9148">Example <TT>GrpFP_1_FPGroup1 (H75E11)</TT></A></H3>
+We start with defining the alternating group G simeq A<sub>5</sub> as a permutation
+group.
+<P>
+<P>
+<PRE>
+&gt; G := AlternatingGroup(5);
+&gt; G;
+Permutation group G acting on a set of cardinality 5
+Order = 60 = 2^2 * 3 * 5
+    (3, 4, 5)
+    (1, 2, 3)
+</PRE>
+Now we create an fp-group F isomorphic to G, using the function
+<A  HREF = "text811.htm#GrpFP_1:FPGroup">FPGroup</A>. The presentation is
+constructed by computing a set of defining relations for the generators
+of G, i.e. the generators of the returned fp-group correspond to
+the generators of G. This defines a homomorphism from F to G,
+which the function <A  HREF = "text811.htm#GrpFP_1:FPGroup">FPGroup</A> returns as second return value.
+<P>
+<P>
+<PRE>
+&gt; F&lt;x,y&gt;, f := FPGroup(G);
+&gt; F;
+Finitely presented group F on 2 generators
+Relations
+    x^3 = Id(F)
+    y^3 = Id(F)
+    (x^-1 * y * x * y)^2 = Id(F)
+    (x * y^-1 * x * y)^2 = Id(F)
+&gt; f;
+Mapping from: GrpFP: F to GrpPerm: G
+&gt; f(x);
+(3, 4, 5)
+&gt; f(y);
+(1, 2, 3)
+</PRE>
+Using the function <A  HREF = "text811.htm#GrpFP_1:FPGroupStrong">FPGroupStrong</A>, we now create another
+fp-group Fs, isomorphic to G, whose generators correspond to a set of
+strong generators of G.
+<P>
+<P>
+<PRE>
+&gt; Fs&lt;[z]&gt;, fs := FPGroupStrong(G);
+&gt; Fs;
+Finitely presented group Fs on 3 generators
+Relations
+    z[1]^-3 = Id(Fs)
+    (z[1]^-1 * z[3]^-1)^2 = Id(Fs)
+    z[3]^-3 = Id(Fs)
+    z[1]^-1 * z[2]^-1 * z[1] * z[3]^-1 * z[2] = Id(Fs)
+    z[2]^-3 = Id(Fs)
+    (z[3]^-1 * z[2]^-1)^2 = Id(Fs)
+&gt; fs;
+Mapping from: GrpFP: Fs to GrpPerm: G
+</PRE>
+Applying the isomorphism fs, we have a look at the strong generating set
+constructed for G.
+<P>
+<P>
+<PRE>
+&gt; [ fs(z[i]) : i in [1..#z] ];
+[
+    (3, 4, 5),
+    (1, 2, 3),
+    (2, 3, 4)
+]
+</PRE>
+<HR>
+<H4><A NAME = "9149">Construction of the Standard Presentation for a Coxeter Group</A></H4>
+
+<P>
+<P>
+<P>
+There is a special Magma category <A  HREF = "text1102.htm#GrpPermCox"> <TT>GrpPermCox</TT></A>, a subcategory of
+<A  HREF = "text630.htm#GrpPerm"> <TT>GrpPerm</TT></A>, for finite Coxeter groups. Here, we describe a function to
+create from a Coxeter group W a finitely presented group F, isomorphic to
+W, which is given by the standard Coxeter group presentation.
+We refer to Chapter <A  HREF = "text1101.htm#12331">COXETER GROUPS</A>.
+
+
+<H5><A NAME = "9150"></A><A NAME = "GrpFP_1:CoxeterGroup_conv">CoxeterGroup</A>(GrpFP, W) : Cat, GrpFPCox -&gt; GrpFP, Map</H5>
+<H5><A NAME = "GrpFP_1:CoxeterGroup_conv">CoxeterGroup</A>(GrpFP, W) : Cat, GrpPermCox -&gt; GrpFP, Map</H5>
+<BLOCKQUOTE>
+Given a finite Coxeter group W in the category <A  HREF = "text1102.htm#GrpFPCox"> <TT>GrpFPCox</TT></A> or
+<A  HREF = "text1102.htm#GrpPermCox"> <TT>GrpPermCox</TT></A>, construct a
+finitely presented group F isomorphic to W, given by a standard Coxeter
+presentation. The isomorphism from W to F is returned as second return
+value. The first argument to this function must be the category <TT>GrpFP</TT>.
+<P>
+<P>
+<PRE>
+     Local: BoolElt                      Default: <TT>false</TT>
+</PRE>
+If the parameter <TT>Local</TT> is set to <TT>true</TT>, F is the appropriate
+subgroup of the FP version of the overgroup of W.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9151">Example <TT>GrpFP_1_FPCoxeterGroups (H75E12)</TT></A></H3>
+We construct a Coxeter group W of Cartan type C5 and create an isomorphic
+fp-group F. We can use the isomorphism from W to F to map words in the
+generators of F to permutation group elements and vice versa.
+<P>
+<P>
+<PRE>
+&gt; W := CoxeterGroup("C5");
+&gt; F&lt;[s]&gt;, h := CoxeterGroup(GrpFP, W);
+&gt; F;
+Finitely presented group F on 5 generators
+Relations
+    s[3]^2 = Id(F)
+    s[2] * s[4] = s[4] * s[2]
+    s[1]^2 = Id(F)
+    s[1] * s[2] * s[1] = s[2] * s[1] * s[2]
+    s[2] * s[5] = s[5] * s[2]
+    s[4]^2 = Id(F)
+    s[1] * s[3] = s[3] * s[1]
+    s[3] * s[4] * s[3] = s[4] * s[3] * s[4]
+    s[2]^2 = Id(F)
+    s[1] * s[4] = s[4] * s[1]
+    s[5]^2 = Id(F)
+    (s[4] * s[5])^2 = (s[5] * s[4])^2
+    s[3] * s[5] = s[5] * s[3]
+    s[1] * s[5] = s[5] * s[1]
+    s[2] * s[3] * s[2] = s[3] * s[2] * s[3]
+&gt; h;
+Mapping from: GrpCox: W to GrpFP: F given by a rule
+&gt; h(W.1*W.2);
+s[1] * s[2]
+&gt; (s[1]*s[2]*s[3]*s[4]) @@ h;      
+(1, 39, 4, 3, 2)(5, 13, 19, 23, 25)(6, 36, 35, 8, 7)(9, 16, 21, 
+    24, 17)(10, 33, 32, 31, 11)(12, 18, 22, 15, 20)(14, 29, 28, 
+    27, 26)(30, 38, 44, 48, 50)(34, 41, 46, 49, 42)(37, 43, 47, 
+    40, 45)
+</PRE>
+<HR>
+<H4><A NAME = "9152">Conversion from a Special Form of FP-Group</A></H4>
+
+<P>
+<P>
+Groups that satisfy certain properties, such as being abelian or 
+polycyclic, are known to possess presentations with respect to
+which the word problem is soluble. Specialised categories have been
+constructed in Magma for several of these, e.g. the categories <A  HREF = "text832.htm#GrpGPC"> <TT>GrpGPC</TT></A>,
+<A  HREF = "text707.htm#GrpPC"> <TT>GrpPC</TT></A> and <A  HREF = "text787.htm#GrpAb"> <TT>GrpAb</TT></A>. The functions described
+in this section allow a group created in one of the special presentation 
+categories to be recast as an fp-group.
+
+
+<H5><A NAME = "9153">FPGroup(G) : GrpPC  -&gt; GrpFP, Hom(Grp)</A></H5>
+<H5>FPGroup(G) : GrpGPC -&gt; GrpFP, Hom(Grp)</H5>
+<H5>FPGroup(G) : GrpAb  -&gt; GrpFP, Hom(Grp)</H5>
+<BLOCKQUOTE>
+Given a group G, defined either by a polycyclic group presentation
+(types <TT>GrpPC</TT> and <TT>GrpGPC</TT>) or an abelian group presentation
+(type <TT>GrpAb</TT>), return a group H isomorphic to G, together 
+with the isomorphism &phi;:G -&gt; H. The generators for H 
+will correspond to the generators of G. The effect of this function
+is to convert a presentation in a special form into a general
+fp-group presentation.  
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9154">Example <TT>GrpFP_1_FPGroup2 (H75E13)</TT></A></H3>
+We illustrate the cast from special forms of fp-groups to the category
+<TT>GrpFP</TT> by converting a polycyclic group.
+<P>
+<P>
+<PRE>
+&gt; G := DihedralGroup(GrpGPC, 0);
+&gt; G;
+GrpGPC : G of infinite order on 2 PC-generators
+PC-Relations:
+    G.1^2 = Id(G), 
+    G.2^G.1 = G.-2
+&gt; F := FPGroup(G);
+&gt; F;
+Finitely presented group F on 2 generators
+Relations
+    F.1^2 = Id(F)
+    F.2^F.1 = F.2^-1
+    F.1^-1 * F.2^-1 * F.1 = F.2
+</PRE>
+<HR>
+<H4><A NAME = "9155">Construction of a Standard Group</A></H4>
+
+<P>
+<P>
+A number of functions are provided which construct presentations for various
+standard groups.
+
+
+<H5><A NAME = "9156">AbelianGroup(GrpFP, [n<sub>1</sub>,...,n<sub>r</sub>]): Cat, [ RngIntElt ] -&gt; GrpFP</A></H5>
+<BLOCKQUOTE>
+Construct the abelian group defined by the sequence [n<sub>1</sub>, ..., n<sub>r</sub>] 
+of non-negative integers as an fp-group. The function returns the direct product 
+of cyclic groups C<sub>n<sub>1</sub></sub> x C<sub>n<sub>2</sub></sub> x ... x C<sub>n<sub>r</sub></sub>,
+where C<sub>0</sub> is interpreted as an infinite cyclic group.
+</BLOCKQUOTE>
+<H5><A NAME = "9157">AlternatingGroup(GrpFP, n) : Cat, RngIntElt -&gt; GrpFP</A></H5>
+<H5>Alt(GrpFP, n) : Cat, RngIntElt -&gt; GrpFP</H5>
+<BLOCKQUOTE>
+Construct the alternating group of degree n as an fp-group, where the 
+generators correspond to the permutations (3, 4, ... , n) and (1, 2, 3),
+for n odd, or (1, 2)(3, 4, ..., n) and (1, 2, 3), for n even.
+</BLOCKQUOTE>
+<H5><A NAME = "9158">BraidGroup(GrpFP, n) : Cat, RngIntElt -&gt; GrpFP</A></H5>
+<BLOCKQUOTE>
+Construct the braid group on n strings (n - 1 Artin generators) as an
+fp-group.
+</BLOCKQUOTE>
+<H5><A NAME = "9159">CoxeterGroup(GrpFP, t) : Cat, MonStgElt -&gt; GrpFP</A></H5>
+<BLOCKQUOTE>
+Construct the Coxeter group of Cartan type t as a finitely presented group,
+given by the standard Coxeter presentation. The Cartan type t is passed to
+this function as a string; we refer to Chapter <A  HREF = "text1089.htm#12115">ROOT DATA</A> for details.
+<P>
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "9160">CyclicGroup(GrpFP, n) : Cat, RngIntElt -&gt; GrpFP</A></H5>
+<BLOCKQUOTE>
+Construct the cyclic group of order n as an fp-group.
+</BLOCKQUOTE>
+<H5><A NAME = "9161">DihedralGroup(GrpFP, n) : Cat, RngIntElt -&gt; GrpFP</A></H5>
+<BLOCKQUOTE>
+For n &gt; 2, return the dihedral group of order 2n as an fp-group. For n=0,
+return the infinite dihedral group as an fp-group.
+</BLOCKQUOTE>
+<H5><A NAME = "9162">ExtraSpecialGroup(GrpFP, p, n : parameters) : Cat, RngIntElt, RngIntElt -&gt; GrpFP</A></H5>
+<BLOCKQUOTE>
+Given a small prime p and a small positive integer n, construct an
+extra-special group G of order p<sup>2n + 1</sup> in the category <TT>GrpFP</TT>.
+The isomorphism type of G can be selected using the parameter <TT>Type</TT>.
+<P>
+<P>
+<PRE>
+     Type: MonStgElt                     Default: "+"
+</PRE>
+Possible values for this parameter are "+" (default) and "-".
+<P>
+<P>
+If <TT>Type</TT> is set to "+", the function returns for p = 2 the central
+product of n copies of the dihedral group of order 8, and for p &gt; 2
+it returns the unique extra-special group of order p<sup>2n + 1</sup> and exponent p.
+<P>
+<P>
+If <TT>Type</TT> is set to "-", the function returns for p = 2 the central
+product of a quaternion group of order 8 and n - 1 copies of the dihedral
+group of order 8, and for p &gt; 2 it returns the unique extra-special group
+of order p<sup>2n + 1</sup> and exponent p<sup>2</sup>. 
+</BLOCKQUOTE>
+<H5><A NAME = "9163">SymmetricGroup(GrpFP, n) : Cat, RngIntElt -&gt; GrpFP</A></H5>
+<H5>Sym(GrpFP, n) : Cat, RngIntElt -&gt; GrpFP</H5>
+<BLOCKQUOTE>
+Construct the symmetric group of degree n as an fp-group, where the 
+generators correspond to the permutations (1, 2, ..., n) and (1, 2).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9164">Example <TT>GrpFP_1_StandardGroups (H75E14)</TT></A></H3>
+We create the symmetric group Sym(8) as an fp-group:
+<P>
+<P>
+<PRE>
+&gt; S8 := SymmetricGroup(GrpFP, 8);
+&gt; S8;
+Finitely presented group S8 on 2 generators
+Relations
+      S8.1^8 = Id(S8)
+      S8.2^2 = Id(S8)
+      (S8.1 * S8.2)^7 = Id(S8)
+      (S8.1^-1 * S8.2 * S8.1 * S8.2)^3 = Id(S8)
+      (S8.2 * S8.1^-2 * S8.2 * S8.1^2)^2 = Id(S8)
+      (S8.2 * S8.1^-3 * S8.2 * S8.1^3)^2 = Id(S8)
+      (S8.2 * S8.1^-4 * S8.2 * S8.1^4)^2 = Id(S8)
+</PRE>
+<P>
+<P>
+We create the Coxeter group of Cartan type F4 as an fp-group:
+<P>
+<P>
+<PRE>
+&gt; F := CoxeterGroup(GrpFP, "F4");
+&gt; F;
+Finitely presented group F on 4 generators
+Relations
+    (F.2 * F.3)^2 = (F.3 * F.2)^2
+    F.1^2 = Id(F)
+    F.1 * F.3 = F.3 * F.1
+    F.2 * F.4 = F.4 * F.2
+    F.1 * F.2 * F.1 = F.2 * F.1 * F.2
+    F.2^2 = Id(F)
+    F.3^2 = Id(F)
+    F.3 * F.4 * F.3 = F.4 * F.3 * F.4
+    F.4^2 = Id(F)
+    F.1 * F.4 = F.4 * F.1
+</PRE>
+<HR>
+<H4><A NAME = "9165">Construction of Extensions</A></H4>
+
+
+
+<H5><A NAME = "9166">Darstellungsgruppe(G) : GrpFP -&gt; GrpFP</A></H5>
+<BLOCKQUOTE>
+Given an fp-group G, construct a maximal central
+extension tilde G of G. The group tilde G is created as
+an fp-group.
+</BLOCKQUOTE>
+<H5><A NAME = "9167">DirectProduct(G, H) : GrpFP, GrpFP -&gt; GrpFP</A></H5>
+<BLOCKQUOTE>
+Given two fp-groups G and H, construct the direct product of
+G and H.
+</BLOCKQUOTE>
+<H5><A NAME = "9168">DirectProduct(Q) : [ GrpFP ] -&gt; GrpFP</A></H5>
+<BLOCKQUOTE>
+Given a sequence Q of r fp-groups, construct the direct product
+Q[1] x ... x Q[r].
+</BLOCKQUOTE>
+<H5><A NAME = "9169">FreeProduct(G, H) : GrpFP, GrpFP -&gt; GrpFP</A></H5>
+<BLOCKQUOTE>
+Given two fp-groups G and H, construct the free product of G
+and H.
+</BLOCKQUOTE>
+<H5><A NAME = "9170">FreeProduct(Q) : [ GrpFP ] -&gt; GrpFP</A></H5>
+<BLOCKQUOTE>
+Given a sequence Q of r fp-groups, construct the free product
+of the groups Q[1], ..., Q[r].
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9171">Example <TT>GrpFP_1_ControlExtn (H75E15)</TT></A></H3>
+We construct a maximal central extension of the following group of
+order 36.
+<P>
+<P>
+<PRE>
+&gt; G&lt;x1, x2&gt; := Group&lt;x1, x2 | x1^4,(x1*x2^-1)^2,x2^4,(x1*x2)^3&gt;;
+&gt; G;
+
+Finitely presented group G on 2 generators
+Relations
+       x1^4 = Id(G)
+       (x1 * x2^-1)^2 = Id(G)
+       x2^4 = Id(G)
+       (x1 * x2)^3 = Id(G)
+
+&gt; D := Darstellungsgruppe(G);
+&gt; D;
+
+Finitely presented group D on 4 generators
+Relations
+       D.1^4 * D.3^-1 * D.4^2 = Id(D)
+       D.1 * D.2^-1 * D.1 * D.2^-1 * D.4 = Id(D)
+       D.2^4 = Id(D)
+       D.1 * D.2 * D.1 * D.2 * D.1 * D.2 * D.4 = Id(D)
+       (D.1, D.3) = Id(D)
+       (D.2, D.3) = Id(D)
+       (D.1, D.4) = Id(D)
+       (D.2, D.4) = Id(D)
+       (D.3, D.4) = Id(D)
+
+&gt; Index(D, sub&lt; D | &gt;);
+108
+</PRE>
+Thus, a maximal central extension of G has order 108
+<HR>
+<H3><A NAME = "9172">Example <TT>GrpFP_1_DirectProduct (H75E16)</TT></A></H3>
+We create the direct product of the alternating group of
+degree 5 and the cyclic group of order 2.
+<P>
+<P>
+<PRE>
+&gt; A5 := Group&lt;a, b | a^2, b^3, (a*b)^5 &gt;;
+&gt; Z2 := quo&lt; FreeGroup(1) | $.1^2 &gt;;
+&gt; G := DirectProduct(A5, Z2);
+&gt; G;
+
+Finitely presented group G on 3 generators
+Relations
+      G.1^2 = Id(G)
+      G.2^3 = Id(G)
+      (G.1 * G.2)^5 = Id(G)
+      G.3^2 = Id(G)
+      G.1 * G.3 = G.3 * G.1
+      G.2 * G.3 = G.3 * G.2
+</PRE>
+<HR>
+<H4><A NAME = "9173">Accessing the Defining Generators  and Relations</A></H4>
+
+<P>
+<P>
+The functions in this group provide access to basic information stored for a
+finitely-presented group G.
+
+
+<H5><A NAME = "9174">G . i : GrpFP, RngIntElt -&gt; GrpFPElt</A></H5>
+<BLOCKQUOTE>
+The i-th defining generator for G.  A negative subscript indicates that the
+inverse of the generator is to be created. The generator <TT>G.0</TT> is <TT>Identity(G)</TT>, the
+empty word in G.
+</BLOCKQUOTE>
+<H5><A NAME = "9175">Generators(G) : GrpFP -&gt; { GrpFPElt }</A></H5>
+<BLOCKQUOTE>
+A set containing the generators for the group G.
+</BLOCKQUOTE>
+<H5><A NAME = "9176">NumberOfGenerators(G) : GrpFP -&gt; RngIntElt</A></H5>
+<H5>Ngens(G) : GrpFP -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The number of generators for the group G.
+</BLOCKQUOTE>
+<H5><A NAME = "9177">PresentationLength(G) : GrpFP -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The total length of the relators for G.
+</BLOCKQUOTE>
+<H5><A NAME = "9178">Relations(G) : GrpFP -&gt; [ GrpFPRel ]</A></H5>
+<BLOCKQUOTE>
+A sequence containing the defining relations for G.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text812.htm">[Next]</A><A  HREF = "text810.htm">[Prev]</A> <A  HREF = "text812.htm">[Right]</A> <A  HREF = "text810.htm">[Left]</A> <A  HREF = "text808.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

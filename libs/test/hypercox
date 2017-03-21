@@ -1,0 +1,52 @@
+/*
+Tests for HyperbolicCoxeterGraph, moved here from Hyperbolic.m
+*/
+
+
+// copy'n'paste from LieThry/Cartan.m 
+// can't import without knowing the absolute path
+IsIsomorphicLabelPreserving := function( G, H )
+  EG := EdgeSet( G );    EH := EdgeSet( H );
+  VG := VertexSet( G );  VH := VertexSet( H );
+  sameLabels := func< e, f |
+    ( not IsLabelled(e) and not IsLabelled(f) ) or
+    ( IsLabelled(e) and IsLabelled(f) and Label(e) eq Label(f) ) >;
+  image := (Category(G) eq GrphUnd)
+    select func< e, iso | EH!{ iso(v) : v in EndVertices(e) } >
+    else   func< e, iso | EH![ iso(v) : v in EndVertices(e) ] >;
+  isLabelPreserving := func< iso |
+    forall{ e : e in EG | sameLabels( e, image( e, iso ) ) } >;
+
+  // find a isomorphism, not preserving labels
+  isIso, iso := IsIsomorphic( G, H );
+  if isIso then
+    A, AVH := AutomorphismGroup( H );
+    
+    // compostion of an isomorphism and an automorphism 
+    compose := func< iso, a |
+      hom< VG -> VH | v :-> Image( a, AVH, iso(v) ) >  >;
+
+    for a in A do
+      compIso := compose( iso, a );
+      if isLabelPreserving( compIso ) then
+        VHs := Vertices( H );
+        ims := [ Position( VHs, compIso(VG.i) ) : i in [1..#VG] ];
+        return true, ims;
+      end if;
+    end for;
+    return false, _;
+  else
+    return false, _;
+  end if;
+end function;
+
+SetEchoInput(true);
+
+for i in [1..72] do 
+  assert IsCoxeterHyperbolic(HyperbolicCoxeterGraph(i));
+end for;
+
+for i in [1..72], j in [i+1..72] do
+  assert not IsIsomorphicLabelPreserving(HyperbolicCoxeterGraph(i), 
+                                  HyperbolicCoxeterGraph(j));
+end for;

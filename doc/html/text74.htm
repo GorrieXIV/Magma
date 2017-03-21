@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Recursion and the Profiler</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text76.htm">[Next]</A><A  HREF = "text73.htm">[Prev]</A> [_____] <A  HREF = "text73.htm">[Left]</A> <A  HREF = "text70.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "579">Recursion and the Profiler</A></H3>
+
+<P>
+<P>
+<P>
+Recursive calls can cause some difficulty with profiler results.  The profiler
+takes care to ensure that double-counting does not occur, but this can lead to
+unintuitive results, as the following example shows.
+
+
+<HR>
+<H3><A NAME = "580">Example <TT>Prof_profiler-recursion (H6E3)</TT></A></H3>
+In the following example, <TT>recursive</TT> is a recursive function which simply
+stays in a loop for half a second, and then recurses if not in the base case.
+Thus, the total running time should be approximately (n + 1) / 2
+seconds, where n is the parameter to the function.
+<P>
+<P>
+<P>
+<PRE>
+&gt; procedure delay(s)
+&gt;     t := Cputime();
+&gt;     repeat
+&gt;       _ := 1+1;
+&gt;     until Cputime(t) gt s;
+&gt; end procedure;
+&gt;
+&gt; procedure recursive(n)
+&gt;     if n ne 0 then
+&gt;       recursive(n - 1);
+&gt;     end if;
+&gt;
+&gt;     delay(0.5);
+&gt; end procedure;
+&gt;
+&gt; SetProfile(true);
+&gt; recursive(1);
+&gt; SetProfile(false);
+&gt; G := ProfileGraph();
+</PRE>
+<P>
+Printing the profile results by total time yield no surprises:
+<P>
+<P>
+<P>
+<PRE>
+&gt; ProfilePrintByTotalTime(G);
+Index Name                                                     Time    Count
+1     &lt;main&gt;                                                   1.020   1
+2     recursive                                                1.020   2
+5     delay                                                    1.020   2
+8     Cputime(&lt;FldReElt&gt; T) -&gt; FldReElt                        0.130   14880
+7     +(&lt;RngIntElt&gt; x, &lt;RngIntElt&gt; y) -&gt; RngIntElt             0.020   14880
+9     gt(&lt;FldReElt&gt; x, &lt;FldReElt&gt; y) -&gt; BoolElt                0.020   14880
+3     ne(&lt;RngIntElt&gt; x, &lt;RngIntElt&gt; y) -&gt; BoolElt              0.000   2
+4     -(&lt;RngIntElt&gt; x, &lt;RngIntElt&gt; y) -&gt; RngIntElt             0.000   1
+6     Cputime() -&gt; FldReElt                                    0.000   2
+10    SetProfile(&lt;BoolElt&gt; v)                                  0.000   1
+</PRE>
+<P>
+However, printing the children of <TT>recursive</TT>, and displaying the results
+in percentages, does yield a surprise:
+<P>
+<P>
+<P>
+<PRE>
+&gt; ProfilePrintChildrenByTime(G, 2 : Percentage);
+Function: recursive
+Function Time: 1.020
+Function Count: 2
+
+Index Name                                                     Time    Count
+5     delay                                                    100.00  33.33
+2     recursive (*)                                            50.00   16.67
+3     ne(&lt;RngIntElt&gt; x, &lt;RngIntElt&gt; y) -&gt; BoolElt              0.00    33.33
+4     -(&lt;RngIntElt&gt; x, &lt;RngIntElt&gt; y) -&gt; RngIntElt             0.00    16.67
+* A recursive call is made through this child
+</PRE>
+<P>
+At first glance, this doesn't appear to make sense, as the sum of the time
+column is 150%!  The reason for this behavior is because some time is "double
+counted": the total time for the first call to <TT>recursive</TT> includes the
+time for the recursive call, which is also counted separately.  In more detail:
+<P>
+<P>
+<P>
+<PRE>
+&gt; V := Vertices(G);
+&gt; E := Edges(G);
+&gt; Label(V!1)`Name;
+&lt;main&gt;
+&gt; Label(V!2)`Name;
+recursive
+&gt; Label(E![1,2])`Time;
+1.019999999999999795718
+&gt; Label(E![2,2])`Time;
+0.51000000000000000888
+&gt; Label(V!2)`Time;
+1.019999999999999795718
+</PRE>
+<P>
+As can seen in the above, the total time for <TT>recursive</TT> is approximately
+one second, as expected.  The double-counting of the recursive call can be seen
+in the values of <TT>Time</TT> for the edges <TT>[1,2]</TT> and <TT>[2,2]</TT>.
+<PRE></PRE> <A  HREF = "text76.htm">[Next]</A><A  HREF = "text73.htm">[Prev]</A> [_____] <A  HREF = "text73.htm">[Left]</A> <A  HREF = "text70.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

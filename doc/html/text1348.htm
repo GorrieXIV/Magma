@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Basic Constructions</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1349.htm">[Next]</A><A  HREF = "text1347.htm">[Prev]</A> <A  HREF = "text1349.htm">[Right]</A> <A  HREF = "text1347.htm">[Left]</A> <A  HREF = "text1344.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "14868">Basic Constructions</A></H3>
+
+<P>
+<P>
+<P>
+The following functions give some basic constructions on sheaves.
+
+
+<H5><A NAME = "14869">TensorProduct(S, T) : ShfCoh, ShfCoh -&gt; ShfCoh</A></H5>
+
+<PRE>    Maximize: BoolElt                   Default: <TT>false</TT></PRE>
+<H5>TensorPower(S, n) : ShfCoh, RngIntElt -&gt; ShfCoh</H5>
+
+<PRE>    Maximize: BoolElt                   Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+The first intrinsic gives the tensor product (over OX) of two sheaves on
+the same scheme X. The second gives the nth tensor power of S if n &gt; 0,
+the ( - n)th tensor power of the dual (see below) of S if n &lt; 0 and the
+structure sheaf OX if n=0.
+<P>
+Defining modules for these constructions are taken as the appropriate tensor 
+products of modules for the constituent sheaves when the parameter 
+<TT>Maximize</TT> is <TT>false</TT>. The user should note that this is the archetypal 
+case where the module constructed to define the resulting sheaf can be far 
+from maximal, even when the defining modules of S and T are maximal. 
+The rank of the presentation of the tensor power of a module rises rapidly 
+with n.  Thus, it is usually a good idea to set <TT>Maximize</TT> to <TT>true</TT>, 
+which means that the maximal module of the result is computed and also used 
+as its defining module.
+</BLOCKQUOTE>
+<H5><A NAME = "14870">Dual(S) : ShfCoh -&gt; ShfCoh</A></H5>
+<BLOCKQUOTE>
+For the sheaf S on a scheme X, the function returns the dual sheaf 
+(Hom)<sub>OX</sub>(S, OX).
+</BLOCKQUOTE>
+<H5><A NAME = "14871"></A><A NAME = "shf:shfhoms">SheafHoms</A>(S, T) : ShfCoh, ShfCoh -&gt; ShfCoh, Map</H5>
+<BLOCKQUOTE>
+For S and T sheaves on the same scheme X, the function returns the 
+sheaf H = (Hom)<sub>OX</sub>(S, T). The module defining H is 
+(Hom)(M<sub>max</sub>, N<sub>max</sub>), where M<sub>max</sub> and N<sub>max</sub> 
+are the maximal modules of S and T.  This module, M<sub>H</sub>, is the maximal 
+module of H.
+<P>
+Also returned is a map that takes a homogeneous element of M<sub>H</sub>
+(which can be recovered with <TT>Module(H)</TT> or <TT>FullModule(H)</TT>) of
+degree d to the sheaf homomorphism of degree d that it represents
+(see the next section for information about sheaf homomorphisms). All
+sheaf homomorphisms can be obtained this way.
+</BLOCKQUOTE>
+<H5><A NAME = "14872">DirectSum(S, T) : ShfCoh, ShfCoh -&gt; ShfCoh</A></H5>
+<BLOCKQUOTE>
+For S and T sheaves on the same scheme X, this function returns 
+the sheaf direct sum S direct-sum T.
+</BLOCKQUOTE>
+<H5><A NAME = "14873">Restriction(S, Y) : ShfCoh, Sch -&gt; ShfCoh</A></H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a sheaf S on a scheme X and a subscheme Y of X, the function 
+returns the restriction of S to Y.  A check that Y is a subscheme of 
+X will be performed only if the parameter <TT>Check</TT> is <TT>true</TT> 
+(the default).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14874">Example <TT>Sheaf_cons_exs (H119E3)</TT></A></H3>
+We look at the well-known example of a ruling L on a (singular) projective
+quadric cone X in P<sup>3</sup>. We find the associated invertible sheaf O<sub>X</sub>(L)
+using the <TT>DivisorToSheaf</TT> intrinsic. The tensor square of this sheaf
+is O<sub>X</sub>(2L) which is just isomorphic to the O<sub>X</sub>(1) Serre twist of the
+structure sheaf, as 2L is a hyperplane section. We verify this by getting
+the tensor and inspection. Of course we need to saturate the result, illustrating
+that the basic tensor power of maximal modules usually does not result in
+a maximal module.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z,t&gt; := ProjectiveSpace(Rationals(),3);
+&gt; R := CoordinateRing(P);
+&gt; X := Scheme(P,x*y-z^2); // singular projective quadric
+&gt; IL := ideal&lt;R|z,y&gt;;     // line y=z=0 on X
+&gt; OL := DivisorToSheaf(X,IL); // associated sheaf O(L)
+</PRE>
+We first make sure that OL is saturated.
+<P>
+<P>
+<PRE>
+&gt; SaturateSheaf(~OL);
+&gt; Module(OL);
+Graded Module R^2/&lt;relations&gt;
+Relations:
+[ y, -z],
+[ z, -x]
+&gt; O2L := TensorProduct(OL,OL); // or TensorPower(OL,2)
+&gt; Module(O2L);
+Graded Module R^4/&lt;relations&gt;
+Relations:
+[ y,  0, -z,  0],
+[ 0,  y,  0, -z],
+[ z,  0, -x,  0],
+[ 0,  z,  0, -x],
+[ y, -z,  0,  0],
+[ z, -x,  0,  0],
+[ 0,  0,  y, -z],
+[ 0,  0,  z, -x]
+</PRE>
+Finally, we get the maximum module -- just that of OX(1)!
+<P>
+<P>
+<PRE>
+&gt; FullModule(O2L); 
+Reduced Module R^1/&lt;relations&gt; with grading [-1]
+Relations:
+[x*y - z^2]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1349.htm">[Next]</A><A  HREF = "text1347.htm">[Prev]</A> <A  HREF = "text1349.htm">[Right]</A> <A  HREF = "text1347.htm">[Left]</A> <A  HREF = "text1344.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

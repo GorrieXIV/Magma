@@ -1,0 +1,53 @@
+// Example 1
+k := Rationals();
+P2<x,y,z> := ProjectiveSpace(k,2);
+X := P2;
+p := X ! [1,2,3];
+F1<u,v,s,t> := ToricVariety(k,[[1,1,0,-1],[0,0,1,1]],[1,1]);
+phi0 := map< F1 -> P2 | [u*t,v*t,s], [x,y,z,1] >;
+transl := Translation(P2,p);
+phi := phi0 * Inverse(transl);
+E := Scheme(F1,t);
+assert Cluster(p) eq phi(E);
+
+// Example 2
+k := Rationals();
+P2<x,y,z> := ProjectiveSpace(k,2);
+X := P2;
+f := x*y - z^2;
+g := x^2 + 2*y^2 + 5*z^2;
+Z := Scheme(P2,[f,g]);
+assert Degree(Z) eq 4 and IsIrreducible(Z);
+P5<[a]> := ProjectiveSpace(k,5);
+F<u,v,a,b,c> := ToricVariety(k,[[1,1,0,0,0],[0,0,1,1,1]],[1,1]);
+compmap := hom< CoordinateRing(P2) -> CoordinateRing(F) | [a,b,c] >;
+XX1 := Scheme(F,u*compmap(g) - v*compmap(f));
+pr := map< F -> P2 | [a,b,c] >;
+psi := Restriction(pr,XX1,X);
+LL := LinearSystem(F,[1,1]);
+psi0 := map< F -> P5 | Sections(LL) >;
+Z,f := BinomialToricEmbedding(Image(psi0));
+assert Z eq Ambient(Z);
+
+// Example 3 - uses ToricVarietyMap constructor to be sure
+// the map makes sense (homogeneity is checked properly there)
+// and then the usual magma scheme maps to allow the
+// computation of image in given bi-degree on the codomain.
+F<u,v,w,x,y> := RationalScroll(Rationals(),2,[1,3]);
+G<a,b,c,r,s> := RationalScroll(Rationals(),2,[1,2]);
+eqns := [ u,v,w,x,u*y ];
+f := ToricVarietyMap(F,G,eqns);
+g := map< F -> G | eqns >;
+X := Scheme(F,x^2 + u*v*x*y + v^4*y^2);
+Y := Image(g,X,[2,2]);
+assert IsIrreducible(Y);
+assert Dimension(Y) eq 2;
+
+// Example 4: Veronese using toric divisor machinery.
+k := Rationals();
+P2<x,y,z> := ProjectiveSpace(k,2);
+D := Divisor(P2,x^2 + 3*y*z);
+P5 := ProjectiveSpace(k,5);
+RR := RiemannRochBasis(D);
+f := ToricVarietyMap(P2,P5,RR);
+assert #RiemannRochBasis(2*D+CanonicalDivisor(P2)) eq 3;

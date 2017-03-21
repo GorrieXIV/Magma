@@ -1,0 +1,521 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>User-Defined Types</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text29.htm">[Next]</A><A  HREF = "text26.htm">[Prev]</A> [_____] <A  HREF = "text26.htm">[Left]</A> <A  HREF = "text21.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "197">User-Defined Types</A></H3>
+
+<P>
+<P>
+Since Magma V2.19, types may be defined by users within packages.
+This facility allows the user to declare new type names and create 
+objects with such types and then supply some basic primitives and
+intrinsic functions for such objects.
+<P>
+The new types are known as <I>user-defined types</I>.  The way these are
+typically used is that after declaring such a type T, the user
+supplies package intrinsics to: (1) create objects of type T
+and set relevant attributes to define the objects; (2) perform
+some basic primitives which are common to all objects in Magma;
+(3) perform non-trivial computations on objects of type T.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text27.htm#198">Declaring User-Defined Types</A>
+<LI> <A  HREF = "text27.htm#203">Creating an Object</A>
+<LI> <A  HREF = "text27.htm#205">Special Intrinsics Provided by the User</A>
+<LI> <A  HREF = "text27.htm#206">Examples</A>
+</UL>
+<H4><A NAME = "198">Declaring User-Defined Types</A></H4>
+
+<P>
+<P>
+<P>
+The following declarations are used to declare user-defined types.
+They <B>may only be placed in package files</B>, i.e., files that
+are included either by using <TT>Attach</TT> or a spec file (see above).
+Declarations may appear in any package file and at any place
+within the file at the top level (not in a function, etc.).  
+In particular, it is not required that the declaration of a type 
+appears before package code which refers to the type (as long as 
+the type is declared before running the code).
+Examples below will illustrate how the basic declarations are used.
+
+
+<H5><A NAME = "199">declare type T;</A></H5>
+<BLOCKQUOTE>
+Declare the given type name T (without quotes) to be a user-defined type.
+</BLOCKQUOTE>
+<H5><A NAME = "200">declare type T: P<sub>1</sub>, ..., P<sub>n</sub>;</A></H5>
+<BLOCKQUOTE>
+Declare the given type name T (without quotes) to
+be a user-defined type, and also declare T to inherit
+from the user types P<sub>1</sub>, ..., P<sub>n</sub>
+(which must be declared separately).  As a result,
+<TT>ISA(T, P<sub>i</sub>)</TT> will be true for each i and
+when intrinsic signatures are scanned at a function
+call, an object of type T will match an argument of a
+signature with type P<sub>i</sub> for any i.
+<P>
+NB: currently one may not inherit from existing
+Magma internal types or virtual types (categories).
+It is hoped that this restriction will be removed in
+the future.
+</BLOCKQUOTE>
+<H5><A NAME = "201">declare type T[E];</A></H5>
+<BLOCKQUOTE>
+Declare the given type names T and E (both without quotes) to be
+user-defined types.  This form also specifies that E is the <I>element type</I>
+corresponding to T; i.e., if an object x has an element of type T
+for its parent, then x must have type E.  This relationship is needed
+for the construction of sets and sequences which have objects of type
+T as a universe.  The type E may also be declared separately,
+but this is not necessary.
+</BLOCKQUOTE>
+<H5><A NAME = "202">declare type T[E]: P<sub>1</sub>, ..., P<sub>n</sub>;</A></H5>
+<BLOCKQUOTE>
+This is a combination of the previous kinds two declarations:
+T and E are declared as user-defined types while E is also declared
+to be the element type of T, and T is declared to inherit from
+user-defined types P<sub>1</sub>, ..., P<sub>n</sub>.
+</BLOCKQUOTE>
+<H4><A NAME = "203">Creating an Object</A></H4>
+
+
+
+<H5><A NAME = "204">New(T) : Type -&gt; T</A></H5>
+<BLOCKQUOTE>
+Create an empty object of type T, where T is a user-defined type.
+Typically, after setting X to the result of this function, the user
+should set attributes in X to define relevant properties of the object
+which are characteristic of objects of type T.
+</BLOCKQUOTE>
+<H4><A NAME = "205">Special Intrinsics Provided by the User</A></H4>
+
+<P>
+<P>
+<P>
+Let T be a user-defined type.
+Besides the declaration of T, the following special intrinsics
+are mostly required to be defined for type T (the requirements
+are specified for each kind of intrinsic).
+These intrinsics allow
+the internal Magma functions to perform
+some fundamental operations on objects of type T.
+Note that the special intrinsics need not be
+in one file or in the same file as the declaration.
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<PRE>
+intrinsic Print(X::T)
+{Print X}
+    // Code: Print X with no new line, via printf
+end intrinsic;
+
+
+intrinsic Print(X::T, L::MonStgElt)
+{Print X at level L}
+    // Code: Print X at level L with no new line, via printf
+end intrinsic;
+</PRE>
+<P>
+Exactly one of these intrinsics must be provided by the user for type T.
+Each is a procedure rather than a function (i.e., nothing is returned),
+and should contain one or more print statements.  The procedure is called
+automatically by Magma whenever the object X of type T
+is to be printed.
+A new line should <I>not</I> occur at the end of the last (or only)
+line of printing: one should use <TT>printf</TT> (see examples below).
+<P>
+When the second form of the intrinsic is provided, it allows X to be
+printed differently depending on the print level L, which is a string
+equal to one of <TT>"Default", "Minimal", "Maximal", "Magma"</TT>.
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<PRE>
+intrinsic Parent(X::T) -&gt; .
+{Parent of X}
+    // Code: Return the parent of X
+end intrinsic;
+</PRE>
+<P>
+This intrinsic is only needed when T is an element type, so
+objects of type T have parents.
+It should be a user-provided package function, which takes an
+object X of type T (user-defined), and returns the parent of X,
+assuming it has one.  In such a case, typically the attribute <TT>Parent</TT>
+will be defined for X and so <TT>X`Parent</TT> should simply be returned.
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<PRE>
+intrinsic 'in'(e::., X::T) -&gt; BoolElt
+{Return whether e is in X}
+    // Code: Return whether e is in X
+end intrinsic;
+</PRE>
+<P>
+This intrinsic is only needed when objects of type T (user-defined)
+have elements, and should be a user-provided package function, which
+takes any object e and an object X of type T (user-defined),
+and returns whether e is an element of X.
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<PRE>
+intrinsic IsCoercible(X::T, y::.) -&gt; BoolElt, .
+{Return whether y is coercible into X and the result if so}
+    // Code: do tests on the type of y to see whether coercible
+
+    // On failure, do:
+    //    return false, "Illegal coercion"; // Or more particular message
+
+    // Assumed coercible now; set x to result of coercion into X
+    return true, x;
+end intrinsic;
+</PRE>
+<P>
+Assuming that objects of type T (user-defined) have elements (and so
+coercion into such objects makes sense), this must be a user-provided
+package function, which takes an object X of type T (user-defined)
+and an object Y of any type.  If Y is coercible into X, the
+function should return <TT>true</TT> and the result of the coercion (whose
+parent should be X).  Otherwise, the function should return <TT>false</TT> and
+a string giving the reason for failure.
+If this package intrinsic is provided, then the coercion operation <TT>X!y</TT>
+will also automatically work for an object X of type T (i.e., the internal
+coercion code in Magma will automatically call this function).
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<PRE>
+intrinsic SubConstructor(X::T, t::.) -&gt; T
+{Return the substructure of X generated by elements of the tuple t}
+    // This corresponds to the constructor call sub&lt;X | r1, r2, ..., rn&gt;
+    // t is ALWAYS a tuple of the form &lt;r1, r2, ..., rn&gt;
+    // Code: do tests on the elements in t to see whether valid and then
+    //       set S to the substructure of T generated by r1, r2, ..., rn
+    // Use standard require statements for error checking
+    // Possibly use "t := Flat(t);" to make it easy to loop over t if
+    //     any of the ri are sequences
+    return S;
+end intrinsic;
+</PRE>
+<P>
+Assuming that objects of type T (user-defined) have elements, this must
+be a user-provided package function, which takes an object X of type
+T (user-defined) and a tuple t.   The user call <TT>sub&lt;X | r1, r2,
+..., rn&gt;</TT> (where X has type T) will cause this intrinsic to be called
+with X and the tuple t=&lt; <TT>r1</TT>, ... <TT>,rn</TT> &gt;.
+The function should create the substructure S of X generated by <TT>r1</TT>, ... <TT>,rn</TT> and return S alone (the inclusion map from X
+to S is automatically handled by Magma via coercion).
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<PRE>
+intrinsic Hash(X::T) -&gt; RngIntElt
+{Return a hash value for the object x (should be between 0 and 2^31-1)}
+   // Code: determine a hash value for the given object
+   // NOTE: Objects X and Y of type T for which X eq Y is true
+   //       MUST have the same hash value
+   return hash;
+end intrinsic;
+</PRE>
+<P>
+Providing this intrinsic can greatly speed the checking of equality of
+objects of type T, and in particular if you wish to work with sets of
+reasonable cardinality (more than 1000 elements) it should be made available.
+The requirement is that if X and Y are equal, then their hashes should
+be the same, regardless of their internal representation.
+
+
+<H4><A NAME = "206">Examples</A></H4>
+
+<P>
+<P>
+Some basic examples illustrating the general use of user-defined types are
+given here.  Non-trivial examples can also be found in much of
+the standard Magma package code (one can search for <TT>"declare
+type"</TT> in the package <TT>.m</TT> files to see several typical uses).
+
+
+<HR>
+<H3><A NAME = "207">Example <TT>Func_MyRat (H2E16)</TT></A></H3>
+In this first simple example, we create a user-defined type <TT>MyRat</TT>
+which is used for a primitive representation of rational numbers.
+Of course, a serious version would keep the numerators &amp; denominators
+always reduced, but for simplicity we skip such details.
+We define the operations <TT>+</TT> and <TT>*</TT> here; one would
+typically add other operations like <TT>-</TT>, <TT>eq</TT> and <TT>IsZero</TT>, etc.
+<P>
+<P>
+<PRE>
+declare type MyRat;
+
+declare attributes MyRat: Numer, Denom;
+
+
+intrinsic MyRational(n::RngIntElt, d::RngIntElt) -&gt; MyRat
+{Create n/d}
+
+    require d ne 0: "Denominator must be non-zero";
+    r := New(MyRat);
+    r`Numer := n;
+    r`Denom := d;
+    return r;
+end intrinsic;
+
+
+intrinsic Print(r::MyRat)
+{Print r}
+
+    n := r`Numer;
+    d := r`Denom;
+    g := GCD(n, d);
+    if d lt 0 then g := -g; end if;
+    printf "
+end intrinsic;
+
+
+intrinsic '+'(r::MyRat, s::MyRat) -&gt; MyRat
+{Return r + s}
+
+    rn := r`Numer;
+    rd := r`Denom;
+    sn := s`Numer;
+    sd := s`Denom;
+    return MyRational(rn*sd + sn*rd, rd*sd);
+end intrinsic;
+
+
+intrinsic '*'(r::MyRat, s::MyRat) -&gt; MyRat
+{Return r * s}
+
+    rn := r`Numer;
+    rd := r`Denom;
+    sn := s`Numer;
+    sd := s`Denom;
+    return MyRational(rn*sn, rd*sd);
+end intrinsic;
+</PRE>
+Assuming the above code is placed in a file <TT>MyRat.m</TT>, one could
+attach it in Magma and then do some simple operations, as follows.
+<P>
+<P>
+<PRE>
+&gt; Attach("myrat.m");
+&gt; r := MyRational(3, -9);
+&gt; r;
+-1/3
+&gt; s := MyRational(4, 7); 
+&gt; s;
+&gt; r+s;
+5/21
+&gt; r*s;
+-4/21
+</PRE>
+<HR>
+<H3><A NAME = "208">Example <TT>Func_UserTypes2 (H2E17)</TT></A></H3>
+In this example, we define a type <TT>DirProd</TT>
+for direct products of rings,
+and a corresponding element type <TT>DirProdElt</TT> for their elements.
+Objects of type <TT>DirProd</TT> contain a tuple <TT>Rings</TT> with
+the rings making up the direct product, while objects of
+type <TT>DirProdElt</TT> contain a tuple <TT>Element</TT> with
+the elements of the corresponding rings, and also a reference to
+the parent direct product object.
+<P>
+<P>
+<PRE>
+
+/* Declare types and attributes */
+
+
+
+// Note that we declare DirProdElt as element type of DirProd:
+declare type DirProd[DirProdElt];
+declare attributes DirProd: Rings;
+declare attributes DirProdElt: Elements, Parent;
+
+
+
+/* Special intrinsics for DirProd */
+
+
+
+intrinsic DirectProduct(Rings::Tup) -&gt; DirProd
+{Create the direct product of given rings (a tuple)}
+
+    require forall{R: R in Rings | ISA(Type(R), Rng)}:
+        "Tuple entries are not all rings";
+    D := New(DirProd);
+    D`Rings := Rings;
+    return D;
+end intrinsic;
+
+
+
+intrinsic Print(D::DirProd)
+{Print D}
+
+    Rings := D`Rings;
+    printf "Direct product of 
+end intrinsic;
+
+
+
+function CreateElement(D, Elements)
+    // Create DirProdElt with parent D and given Elements
+    x := New(DirProdElt);
+    x`Elements := Elements;
+    x`Parent := D;
+    return x;
+end function;
+
+
+
+intrinsic IsCoercible(D::DirProd, x::.) -&gt; BoolElt, .
+{Return whether x is coercible into D and the result if so}
+
+    Rings := D`Rings;
+    n := #Rings;
+    if Type(x) ne Tup then
+        return false, "Coercion RHS must be a tuple";
+    end if;
+    if #x ne n then
+        return false, "Wrong length of tuple for coercion";
+    end if;
+    Elements := &lt;&gt;;
+    for i := 1 to n do
+        l, t := IsCoercible(Rings[i], x[i]);
+        if not l then
+            return false, Sprintf("Tuple entry 
+        end if;
+        Append(~Elements, t);
+    end for;
+
+    y := CreateElement(D, Elements);
+    return true, y;
+end intrinsic;
+
+
+
+/* Special intrinsics for DirProdElt */
+
+
+
+intrinsic Print(x::DirProdElt)
+{Print x}
+
+    printf "
+end intrinsic;
+
+
+
+intrinsic Parent(x::DirProdElt) -&gt; DirProd
+{Parent of x}
+
+    return x`Parent;
+end intrinsic;
+
+
+
+intrinsic '+'(x::DirProdElt, y::DirProdElt) -&gt; DirProdElt
+{Return x + y}
+
+    D := Parent(x);
+    require D cmpeq Parent(y): "Incompatible arguments";
+
+    Ex := x`Elements;
+    Ey := y`Elements;
+    return CreateElement(D, &lt;Ex[i] + Ey[i]: i in [1 .. #Ex]&gt;);
+end intrinsic;
+
+
+
+intrinsic '*'(x::DirProdElt, y::DirProdElt) -&gt; DirProdElt
+{Return x * y}
+
+    D := Parent(x);
+    require D cmpeq Parent(y): "Incompatible arguments";
+
+    Ex := x`Elements;
+    Ey := y`Elements;
+    return CreateElement(D, &lt;Ex[i] * Ey[i]: i in [1 .. #Ex]&gt;);
+end intrinsic;
+
+
+
+</PRE>
+A sample Magma session using the above package is as follows.
+We create elements x, y of a direct product D and do simple
+operations on x, y.  One would of course add other intrinsic
+functions for basic operations on the elements.
+<P>
+<P>
+<PRE>
+&gt; Attach("DirProd.m");
+&gt; Z := IntegerRing();
+&gt; Q := RationalField();
+&gt; F8&lt;a&gt; := GF(2^3);
+&gt; F9&lt;b&gt; := GF(3^2);
+&gt; D := DirectProduct(&lt;Z, Q, F8, F9&gt;);
+&gt; x := D!&lt;1, 2/3, a, b&gt;;
+&gt; y := D!&lt;2, 3/4, a+1, b+1&gt;;
+&gt; x;
+&lt;1, 2/3, a, b&gt;
+&gt; Parent(x);
+Direct product of &lt;Integer Ring, Rational Field, Finite field of
+size 2^3, Finite field of size 3^2&gt;
+&gt; y;
+&lt;2, 3/4, a^3, b^2&gt;
+&gt; x+y;
+&lt;3, 17/12, 1, b^3&gt;
+&gt; x*y;
+&lt;2, 1/2, a^4, b^3&gt;
+&gt; D!x;
+&lt;1, 2/3, a, b&gt;
+&gt; S := [x, y]; S;
+[
+    &lt;1, 2/3, a, b&gt;,
+    &lt;2, 3/4, a^3, b^2&gt;
+]
+&gt; 
+&gt; &amp;+S;
+&lt;3, 17/12, 1, b^3&gt;
+</PRE>
+<PRE></PRE> <A  HREF = "text29.htm">[Next]</A><A  HREF = "text26.htm">[Prev]</A> [_____] <A  HREF = "text26.htm">[Left]</A> <A  HREF = "text21.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

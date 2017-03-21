@@ -1,0 +1,70 @@
+"Source: Text/Group/GrpAb.text";
+"Line: 2529";
+"Date: Wed Jun  8 13:55:26 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Group/GrpAb.text, line: 2529
+// Example: H74E15 ()
+print "Example: H74E15";
+ei := GetEchoInput();
+SetEchoInput(true);
+m :=  34384;
+Zm := Integers(m);
+U := {@ x : x in Zm | GCD(x, m) eq 1 @};
+G := GenericAbelianGroup(U : 
+       IdIntrinsic := "Id", 
+       AddIntrinsic := "*", 
+       InverseIntrinsic := "/");
+dummy := AbelianGroup(G);
+SetSeed(1, 18732);
+S := [];
+for j in [1..2] do
+    P := Random(G);
+    Include(~S, P);
+end for;
+GH1_Zm := sub< G | S>;
+SetSeed(1, 22855);
+S := [];
+for j in [1..5] do
+    P := Random(U);
+    Include(~S, P);
+end for;
+S;
+GH2_Zm := sub< G | S>;
+GH1_Zm;
+GH2_Zm;
+n := 6;
+Dk := -4*(10^n + 1);
+Q := QuadraticForms(Dk);   
+
+p := 2;
+S := {};
+while #S lt 10 do 
+   if KroneckerSymbol(Dk,p) eq 1 then
+      I := Reduction(PrimeForm(Q,p));
+      Include(~S, I);
+   end if; 
+   p := NextPrime(p);
+end while;
+
+GA_qf := GenericAbelianGroup(Q : UserGenerators := S,
+                                 ComputeStructure := true,
+                                 UseUserGenerators := true);  
+dummy := AbelianGroup(GA_qf);
+SetSeed(1, 29039);
+S := [];
+for j in [1..2] do
+    P := Random(GA_qf);
+    Include(~S, P);
+end for;
+GH1_qf := sub< GA_qf | S>;
+SetSeed(1, 29600);
+S := [];
+for j in [1..2] do
+    P := Random(Q);
+    Include(~S, P);
+end for;
+GH2_qf := sub< GA_qf | S>;
+h := hom<GH1_Zm -> GH2_Zm | GH2_Zm.1, GH2_Zm.2 >;
+h(GH1_Zm);
+h := Homomorphism(GH1_Zm, GH2_Zm, Generators(GH1_Zm), [GH2_Zm.1, GH2_Zm.2]);
+SetEchoInput(ei);

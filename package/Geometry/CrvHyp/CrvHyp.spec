@@ -1,0 +1,28 @@
+{
+  curve.m
+  height.m
+  is_hyper.m
+  jacobian.m
+  jac_count.m
+  kedlaya.m
+  kedlaya_char2.m
+  jac_isoms.m
+  jac_mutate.m
+  isomorphisms.m
+  models.m
+  transform.m
+  places.m
+  reduce.m
+  selmer_main.m
+  weilpairing.m
+  FamHECSeq.m
+  hyplser.m
+}
+Canonlift_char2
+{
+  +Canonlift_char2.spec
+}
+g3twists
+{
+  +g3.spec
+}

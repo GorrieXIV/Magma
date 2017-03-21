@@ -1,0 +1,37 @@
+"Source: Text/Geometry/Scheme.text";
+"Line: 8959";
+"Date: Wed Jun  8 17:42:16 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/Scheme.text, line: 8959
+// Example: H118E66 ()
+print "Example: H118E66";
+ei := GetEchoInput();
+SetEchoInput(true);
+SetVerbose("IsolatedPoints",1);
+XVARS := ["x"*IntegerToString(n) : n in [0..9]];
+YVARS := ["y"*IntegerToString(n) : n in [0..17]];
+P := PolynomialRing(Rationals(),28);
+AssignNames(~P,XVARS cat YVARS);
+_<t> := PolynomialRing(P);
+Y := &+[P.(i+11)*t^i : i in [0..17]]+t^18;
+X := &+[P.(i+1)*t^i : i in [0..9]]+(P.10)*t^10+t^12;
+Xpt := [GF(17)|10,3,7,15,6,7,4,6,9,14];
+pt := Xpt cat [0 : i in [11..28]];
+FF := GF(17); _<u> := PolynomialRing(FF);
+Xv := Polynomial([FF!Evaluate(c,pt) : c in Coefficients(X)]);
+Xv3 := Xv^3; Yv := u^18;
+for d:=17 to 0 by -1 do // ApproximateSquareRoot
+    Yv:=Yv+Coefficient(Xv3,d+18)/2*u^d; Xv3:=Xv^3-Yv^2; end for;
+Yv^2-Xv^3; // must be degree 7 or less
+pt := Xpt cat [Coefficient(Yv,d) : d in [0..17]];
+SYS := [Coefficient(X^3-Y^2,d) : d in [8..35]]; // 28 vars
+S := Scheme(AffineSpace(P),SYS);
+b, sol := IsolatedPointsLifter(S,pt : LiftingBound:=12, DegreeBound:=10);
+K := OptimisedRepresentation(Parent(sol[1]) : PartialFactorisation); K;
+Factorization(Discriminant(Integers(K)));
+mp := LinearElimination(S); // a few seconds to evaluate scheme maps
+rmp := // reduced map
+ map<ChangeRing(Domain(mp),GF(17))->ChangeRing(Codomain(mp),GF(17))
+    | DefiningEquations(mp),DefiningEquations(Inverse(mp)) : Check:=false>;
+PT := Inverse(rmp)(Codomain(rmp)!(pt));
+SetEchoInput(ei);

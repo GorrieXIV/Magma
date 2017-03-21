@@ -1,0 +1,696 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Local Geometry</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1361.htm">[Next]</A><A  HREF = "text1359.htm">[Prev]</A> <A  HREF = "text1361.htm">[Right]</A> <A  HREF = "text1359.htm">[Left]</A> <A  HREF = "text1356.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "14970">Local Geometry</A></H3>
+
+<P>
+<P>
+Here we discuss some basic functions providing analysis of a point p lying
+on a curve C.
+Firstly we describe how to create points on curves and their basic
+access functions. One should also refer to the comments in
+Section <A  HREF = "text1328.htm#14493">Rational Points and Point Sets</A>
+of the general
+schemes chapter about the point sets of point arguments of these functions
+where there is a fuller discussion of point sets.
+<P>
+Most functions usually have two arguments, a curve and
+a point on that curve. In fact, the point need not actually be in a point
+set of the curve since coercion will be attempted if it is not.
+Moreover, the curve argument is not strictly necessary either, since if
+the point does lie in a point set of the curve, it can be recovered
+automatically. So these functions also work with the curve argument
+omitted. However, omitting the curve argument should be thought of merely as a
+convenient shorthand and should be used with care --- it is very easy to use
+a point from some other space for which the function still makes sense
+but returns a misleading answer.
+<P>
+<P>
+<P>
+<P>
+<P>
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1360.htm#14971">Creation of Points on Curves</A>
+<LI> <A  HREF = "text1360.htm#14980">Operations at a Point</A>
+<LI> <A  HREF = "text1360.htm#14988">Singularity Analysis</A>
+<LI> <A  HREF = "text1360.htm#14996">Resolution of Singularities</A>
+<LI> <A  HREF = "text1360.htm#15000">Log Canonical Thresholds</A>
+<LI> <A  HREF = "text1360.htm#15007">Local Intersection Theory</A>
+</UL>
+<H4><A NAME = "14971">Creation of Points on Curves</A></H4>
+
+<P>
+<P>
+Points of a curve C, and indeed points of any scheme in Magma,
+lie in point sets associated to C rather than C itself.
+Each point set is the parent of points whose coordinates lie in a
+particular extension ring of the base ring of the curve.
+Thus, if k is the base ring of the curve C, points whose coordinates
+lie in k are elements of the "base ring point set" denoted C(k).
+If L is an extension ring of k (in the sense of admitting coercion
+from k or being the codomain of a ring homomorphism from k) then
+points with coordinates in L lie in the point set C(L).
+<P>
+Here we give the basic point creation methods and access functions.
+For more information, consult the discussion of points and point sets
+in Section <A  HREF = "text1328.htm#14493">Rational Points and Point Sets</A> of Chapter <A  HREF = "text1321.htm#14366">SCHEMES</A> on schemes.
+
+
+<H5><A NAME = "14972">C ! [a,...] : Crv,[RngElt] -&gt; Pt</A></H5>
+<BLOCKQUOTE>
+For a sequence of elements a, ... of the base ring of C, this
+creates the point of C with coordinates (a, ... ).
+The parent of the resulting point is the base point set of the curve C
+rather than C itself.
+</BLOCKQUOTE>
+<H5><A NAME = "14973">C(L) ! [a,...] : SetPt,[RngElt] -&gt; Pt</A></H5>
+<BLOCKQUOTE>
+For a sequence of elements a, ... of the extension ring L of the
+base ring of C, this function creates the point of C with coordinates 
+(a, ... ).  The parent of the resulting point is the point set C(L) 
+of the curve C rather than C itself.
+The phrase `extension ring' here means that either L admits automatic
+coercion from the base ring of C, or that L is the codomain of
+a ring homomorphism from that base ring.
+</BLOCKQUOTE>
+<H5><A NAME = "14974">Curve(p) : Pt -&gt; Crv</A></H5>
+<BLOCKQUOTE>
+The smallest scheme in the inclusion chain above the scheme on 
+which the point p lies which is a curve. If p lies on a curve then
+the curve will be returned.
+</BLOCKQUOTE>
+<H5><A NAME = "14975">Curve(P) : SetPt -&gt; Crv</A></H5>
+<BLOCKQUOTE>
+The smallest scheme in the inclusion chain above the scheme P is a point 
+set of which is a curve. If P is a point set of a curve then this
+curve will be returned.
+</BLOCKQUOTE>
+<H5><A NAME = "14976">Coordinates(p) : Pt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The sequence of ring elements corresponding to the coordinates of
+the point p.
+</BLOCKQUOTE>
+<H5><A NAME = "14977">p[i] : Pt, RngIntElt -&gt; RngElt</A></H5>
+<H5>Coordinate(p,i) : Pt,RngIntElt -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+The ith coordinate of the point p.
+</BLOCKQUOTE>
+<H5><A NAME = "14978">p eq q : Pt,Pt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the two points p and q lie in schemes contained in
+a common ambient space, have coordinates that can
+be compared (either by lying in the same ring, or by an automatic coercion)
+and these coordinates are equal.
+</BLOCKQUOTE>
+<H5><A NAME = "14979">FormalPoint(P) : Pt -&gt; Pt</A></H5>
+<BLOCKQUOTE>
+Given a non--singular point P in C(K), where C is a curve and 
+K is some extension of the field of definition of C, returns a point in
+<TT>C(LaurentSeriesRing(K))</TT>, such that specializing the variable to 0 yields
+P.
+<P>
+<P>
+<P>
+<P>
+</BLOCKQUOTE>
+<H4><A NAME = "14980">Operations at a Point</A></H4>
+
+<P>
+<P>
+Most of the functions in this section report an error if p does not lie 
+on C.  Functions having arguments C, p allow the omission of C
+as long as the parent of p is a point set of C. A few of the functions
+apply only to plane curves.
+
+
+<H5><A NAME = "14981">p in C : Pt,Sch -&gt; BoolElt</A></H5>
+<H5>S in C : SeqEnum,Sch -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the point p or the sequence of coordinates S
+lies on the curve C. That is, return <TT>true</TT> if and only if the coordinates
+of p satisfy the equation of C.
+</BLOCKQUOTE>
+<H5><A NAME = "14982">IsNonsingular(p) : Pt -&gt; BoolElt</A></H5>
+<H5>IsNonsingular(C,p) : Sch,Pt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if p is a nonsingular point of the curve C.
+</BLOCKQUOTE>
+<H5><A NAME = "14983">IsSingular(p) : Pt -&gt; BoolElt</A></H5>
+<H5>IsSingular(C,p) : Sch,Pt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the point p is a singular point on the curve C.
+</BLOCKQUOTE>
+<H5><A NAME = "14984">IsInflectionPoint(p) : Pt -&gt; BoolElt,RngIntElt</A></H5>
+<H5>IsInflectionPoint(C,p) : Sch,Pt -&gt; BoolElt,RngIntElt</H5>
+<H5>IsFlex(C,p) : Sch,Pt -&gt; BoolElt,RngIntElt</H5>
+<H5>IsFlex(p) : Pt -&gt; BoolElt,RngIntElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the point p is a flex of the plane curve C.
+An error is reported if p is a singular point of C.
+The second return value is the order of the flex, that is, the local
+intersection number at p of C with its tangent line at p.
+</BLOCKQUOTE>
+<H5><A NAME = "14985">TangentLine(p) : Pt -&gt; Crv</A></H5>
+<H5>TangentLine(C,p) : Crv,Pt -&gt; Crv</H5>
+<BLOCKQUOTE>
+The tangent line to the curve C at the point
+p embedded as a curve in the same space;
+an error if p is a singular point of C.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14986">TangentCone(p) : Pt -&gt; Sch</A></H5>
+<H5>TangentCone(C,p) : Sch,Pt -&gt; Sch</H5>
+<BLOCKQUOTE>
+The tangent cone to the curve C at the point p embedded
+in the same ambient space.
+</BLOCKQUOTE>
+<H5><A NAME = "14987">IsTangent(C,D,p) : Sch,Sch,Pt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the plane curves C and D are nonsingular
+and tangent at the point p.
+<P>
+<P>
+<P>
+</BLOCKQUOTE>
+<H4><A NAME = "14988">Singularity Analysis</A></H4>
+
+<P>
+<P>
+These functions report an error if p is not a singular point of C.
+Again, the arguments can be abbreviated to just the point if care is
+taken about its parent.
+<P>
+<P>
+
+
+<P>
+<P>
+<P>
+<H5><A NAME = "14989">Multiplicity(p) : Pt -&gt; RngIntElt</A></H5>
+<H5>Multiplicity(C,p) : Sch,Pt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The multiplicity of the curve C at the point p.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14990">IsDoublePoint(p) : Pt -&gt; BoolElt</A></H5>
+<H5>IsDoublePoint(C,p) : Crv,Pt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the point p is a double point of the
+curve C.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14991">IsOrdinarySingularity(p) : Pt -&gt; BoolElt</A></H5>
+<H5>IsOrdinarySingularity(C,p) : Sch,Pt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the point p is a singular point of the
+curve C with reduced tangent cone.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14992">IsNode(p) : Pt -&gt; BoolElt</A></H5>
+<H5>IsNode(C,p) : Sch,Pt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the point p is an ordinary double point of
+the curve C.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14993">IsCusp(p) : Pt -&gt; BoolElt</A></H5>
+<H5>IsCusp(C,p) : Crv,Pt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the point p is a nonordinary double point
+of the curve C.
+</BLOCKQUOTE>
+<H5><A NAME = "14994">IsAnalyticallyIrreducible(p) : Pt -&gt; BoolElt</A></H5>
+<H5>IsAnalyticallyIrreducible(C,p) : CrvPln,Pt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the plane curve C has exactly one place at the point
+p, or equivalently if the resolution of singularities is injective above p.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14995">Example <TT>Crv_curve-iscusp (H120E6)</TT></A></H3>
+Each of the two curves in this example has a double point at the
+origin. One of these is a node and one is a cusp.
+<P>
+<P>
+<PRE>
+&gt; A&lt;x,y&gt; := AffineSpace(Rationals(),2);
+&gt; C := Curve(A,x^2-y^3);
+&gt; p := Origin(A);
+&gt; IsCusp(C,p);
+true
+&gt; IsDoublePoint(C,p);
+true
+&gt; IsReduced(TangentCone(C,p));
+false
+&gt; D := Curve(A,x^2 - y^3 - y^2);
+&gt; IsAnalyticallyIrreducible(D,p);
+false
+&gt; IsNode(D,p);
+true
+</PRE>
+<HR>
+<H4><A NAME = "14996">Resolution of Singularities</A></H4>
+
+<P>
+<P>
+Again, all functions in this section only apply to plane curves.
+<P>
+<P>
+
+
+<H5><A NAME = "14997">Blowup(C) : CrvPln -&gt; CrvPln, CrvPln</A></H5>
+<BLOCKQUOTE>
+Given the affine
+plane curve C, return the two affine plane curves lying on the standard
+patches of the blowup of the affine plane at the origin.
+Note that the two curves returned are the <I>birational</I> transforms of C
+on the blowup patches.
+The patches are contained in the same affine space as the curve itself.
+If C does not contain the origin this returns an error message.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14998">Blowup(C,M) : CrvPln,Mtrx -&gt; CrvPln, RngIntElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+This returns the weighted blowup of the plane curve C
+at the origin defined by the 2 x 2
+matrix of integers M. Again, the birational transform of C is returned
+inside the ambient plane of C.
+An error is reported if M does not have determinant &#8723; 1.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14999">Example <TT>Crv_weighted-blowup (H120E7)</TT></A></H3>
+It often happens that one can replace a string of ordinary blowups used
+to resolve a curve singularity by a single weighted blowup.
+<P>
+<P>
+<PRE>
+&gt; A&lt;x,y&gt; := AffineSpace(Rationals(),2);
+&gt; C := Curve(A,y^2 - x^7);                   
+&gt; f := map&lt; A -&gt; A | [x^2*y,x^7*y^3] &gt;;
+&gt; C @@ f;
+Curve over Rational Field defined by
+x^14*y^7 - x^14*y^6
+&gt; M := Matrix(2,[2,1,7,3]);
+&gt; Blowup(C,M);
+Curve over Rational Field defined by
+-y + 1
+14 6
+</PRE>
+The blowup function takes the total pullback as the underlying map and then
+removes all copies of the x and y axes.  The pair of numbers displayed 
+in the final line is the multiplicity of these factors in the total pullback.
+The curve returned is the birational pullback of C on some patch of
+a rational surface arising by a number of blowups above the origin of A.
+It is clearly nonsingular --- it's linear! --- so this map
+resolves the singularity at the origin of C.
+<P>
+In fact, Magma has machinery for interpreting strings of blowups in
+terms of a graph, the <I>resolution graph</I>.
+<P>
+<P>
+<PRE>
+&gt; ResolutionGraph(C);
+The resolution graph on the Digraph
+Vertex  Neighbours
+
+1 ([ -2, 7, 4, 0 ])     2 ;
+2 ([ -1, 14, 8, 1 ])    3 ;
+3 ([ -3, 6, 3, 0 ])     4 ;
+4 ([ -2, 4, 2, 0 ])     5 ;
+5 ([ -2, 2, 1, 0 ])     ;
+</PRE>
+Consult Chapter <A  HREF = "text1372.htm#15305">RESOLUTION GRAPHS AND SPLICE DIAGRAMS</A> for the full interpretation of this graph. 
+Briefly, one should see this as representing a chain of five blowups
+which resolve the curve. Each vertex of the graph corresponds to one
+of the exceptional curves coming from these blowups.
+The curve extracted by the weighted blowup we saw above corresponds
+to vertex number 2. Indeed, we can see the multiplicity 14 in the
+total pullback as the second entry of the labelling sequence.
+(The multiplicity 6 which we saw above is the corresponding entry
+in exceptional curve 3.)
+The fourth entry of that sequence, 1, reports that the birational
+transform of C to the blownup surface intersects the exceptional
+curve with multiplicity 1.
+This is the only nonzero fourth entry of any vertex label, so we conclude
+that there is exactly one place above the singularity at the origin.
+This can be confirmed (more quickly!) by the divisor machinery
+which will be discussed in Section <A  HREF = "text1365.htm#15151">Divisors</A>.
+<P>
+<P>
+<PRE>
+&gt; Places(C ! Origin(A));
+[
+    Place at (0 : 0 : 1)
+]
+&gt; Degree($1[1]);
+1
+</PRE>
+<HR>
+<H4><A NAME = "15000">Log Canonical Thresholds</A></H4>
+
+<P>
+<P>
+<P>
+For background on log canonical singularities, see for example
+[Koll{&aacute;r 1997, Singularities of pairs] or [Koll{&aacute;r 1998,
+Birational geometry of algebraic varieties].
+<P>
+Let V be a variety with at worst log canonical singularities, P a point on V
+and D an effective Q-Cartier divisor on V. Then the
+<I>log canonical threshold</I> (lct) of the log pair (V, D) at P is the number
+<P>
+(lct)<sub>P</sub>(V, D) = sup{ &lambda; &isin;Q  |  (V, &lambda; D)
+                               (is log canonical at ) P} 
+                    &isin;Q &cup;{+&infin;}.
+<P>
+<P>
+We can also consider the lct of D along the whole of V: 
+eqalign(
+(lct)(V, D) &amp;= inf{ (lct)<sub>P</sub>(V, D)  |  P &isin;V } cr
+               &amp;= sup{ &lambda; &isin;Q  |  (V, &lambda; D)
+                              (is log canonical) }. cr
+)
+<P>
+
+
+<H5><A NAME = "15001">LogCanonicalThreshold(C) : Sch -&gt; FldRatElt, BoolElt</A></H5>
+<H5>LCT(C) : Sch -&gt; FldRatElt,BoolElt</H5>
+<BLOCKQUOTE>
+The log canonical threshold of the curve C computed at its singular
+k-points, where k is the base field of C.
+</BLOCKQUOTE>
+<H5><A NAME = "15002">LogCanonicalThresholdAtOrigin(C) : Sch -&gt; FldRatElt</A></H5>
+<BLOCKQUOTE>
+The local log canonical threshold of the affine curve C computed at the origin.
+</BLOCKQUOTE>
+<H5><A NAME = "15003">LogCanonicalThreshold(C, P) : Sch, Pt -&gt; FldRatElt</A></H5>
+<H5>LCT(C, P) : Sch, Pt -&gt; FldRatElt</H5>
+<BLOCKQUOTE>
+The local log canonical threshold of the curve C computed at the point P.
+</BLOCKQUOTE>
+<H5><A NAME = "15004">LogCanonicalThresholdOverExtension(C) : Sch -&gt; FldRatElt</A></H5>
+<BLOCKQUOTE>
+The log canonical threshold of the curve C computed at all singular
+points including those defined over some base field extension.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15005">Example <TT>Crv_lct-projective-plane (H120E8)</TT></A></H3>
+Consider a cubic curve C on the projective plane, then the
+singularities of C resemble one of the following examples:
+a smooth curve, e.g.,
+<P>
+<P>
+<PRE>
+&gt; P2&lt;x,y,z&gt; := ProjectiveSpace(Rationals(),2);
+&gt; A := Curve(P2,x^3-y^2*z-3*x*z^2);
+&gt; IsNonsingular(A);
+true
+</PRE>
+a curve with ordinary double points (i.e. nodes), e.g.,
+<P>
+<P>
+<PRE>
+&gt; B := Curve(P2,x^3-y^2*z-3*x*z^2+2*z^3);
+&gt; IsNodalCurve(B);
+true
+</PRE>
+a curve with one cuspidal point, e.g.,
+<P>
+<P>
+<PRE>
+&gt; C := Curve(P2,x^3-y^2*z);
+&gt; #SingularPoints(C) eq 1;
+true
+&gt; IsCusp(C,SingularPoints(C)[1]);
+true
+</PRE>
+a conic and a line that are tangent, e.g.,
+<P>
+<P>
+<PRE>
+&gt; D := Curve(P2,(x^2+(y-z)^2-z^2)*y);
+&gt; #PrimeComponents(D) eq 2;
+true
+&gt; TangentCone(PrimeComponents(D)[1],P2![0,0,1]) eq PrimeComponents(D)[2];
+true
+</PRE>
+three lines intersecting at one (Eckardt) point, e.g.
+<P>
+<P>
+<PRE>
+&gt; E := Curve(P2,x*y*(x-y));
+&gt; IsOrdinarySingularity(E,P2![0,0,1]);
+true
+&gt; Multiplicity(E,P2![0,0,1]);
+3
+</PRE>
+a curve whose support consists of two lines, e.g.,
+<P>
+<P>
+<PRE>
+&gt; F := Curve(P2,x^2*y);
+&gt; IsReduced(F);
+false
+&gt; #SingularPoints(ReducedSubscheme(F)) eq 1;
+true
+&gt; IsNodalCurve(Curve(ReducedSubscheme(F)));
+true
+</PRE>
+or a curve whose support consists of three lines, e.g.,
+<P>
+<P>
+<PRE>
+&gt; G := Curve(P2,x^3);
+&gt; IsReduced(G);
+false
+&gt; IsNonsingular(ReducedSubscheme(G));
+true
+</PRE>
+It is known that a curve is log canonical whenever its singularities
+are at worst nodal, thus (lct)((P)<sup>2</sup>, A) = (lct)((P)<sup>2</sup>, B) = 1.  
+For the remaining reduced curves we can resolve their singularities and 
+calculate their discrepancies to find their log canonical thresholds.
+<P>
+<P>
+<PRE>
+&gt; curves := [* A,B,C,D,E,F,G *];
+&gt; [LogCanonicalThreshold(curve) : curve in curves];
+</PRE>
+It follows that (lct)((P)<sup>2</sup>, - K_((P)<sup>2</sup>)) &le;((1) /(3)). 
+In fact, it is not hard to see that equality holds.
+<HR>
+<H3><A NAME = "15006">Example <TT>Crv_lct-over-ext (H120E9)</TT></A></H3>
+Here we exhibit a curve C over the rationals, Q, that has 
+singularities defined over a splitting field, k, where 
+(lct)(C) (over k) &lt; (lct)(C) (over Q).  
+We take a curve C in the projective plane P2 with
+one ordinary double point and two triple point singularities.
+Such a curve can be obtained by calling:
+<P>
+<P>
+<PRE>
+&gt; P2&lt;x,y,z&gt; := ProjectiveSpace(Rationals(),2);
+&gt; C := RandomPlaneCurve(6,[1,2],P2);
+</PRE>
+For this example we use the fixed curve C defined below.
+<P>
+<P>
+<PRE>
+&gt; f := x*y^5 + y^6 + x^5*z + x^2*y^3*z + 2095/3402*y^5*z + x^4*z^2 -
+&gt;      6244382419/8614788*x^3*y*z^2 -
+&gt;      28401292681/8614788*x^2*y^2*z^2 -
+&gt;      89017753225/25844364*x*y^3*z^2 -
+&gt;      243243649115/232599276*y^4*z^2 -
+&gt;      2798099890675/70354102*x^3*z^3 -
+&gt;      22754590185549/281416408*x^2*y*z^3 -
+&gt;      7190675316787/140708204*x*y^2*z^3 -
+&gt;      75304687887883/7598243016*y^3*z^3 +
+&gt;      17778098933653/140708204*x^2*z^4 +
+&gt;      6098447759659/35177051*x*y*z^4 +
+&gt;      24308031251845/422124612*y^2*z^4 -
+&gt;      4694415764252/35177051*x*z^5 - 
+&gt;      77497995284599/844249224*y*z^5 + 
+&gt;      6592790982389/140708204*z^6;
+&gt; C := Curve(P2,f);
+&gt; IsSingular(C);
+true
+&gt; LogCanonicalThreshold(C);
+1
+&gt; IsNodalCurve(C);
+false
+</PRE>
+Thus C must have singularities defined over some field extension.
+<P>
+<P>
+<PRE>
+&gt; HasSingularPointsOverExtension(C);
+true
+&gt; LogCanonicalThresholdOverExtension(C);
+2/3
+</PRE>
+<HR>
+<H4><A NAME = "15007">Local Intersection Theory</A></H4>
+
+<P>
+<P>
+The main function here for a single point uses a standard Euclidean algorithm to calculate local
+intersection numbers at points where two plane curves meet.
+It was taken from unpublished lecture notes of Franz Winkler, "Introduction
+to Commutative Algebra and Algebraic Geometry"; the same
+algorithm is in Fulton's book <A  HREF = "text1355.htm#bib_fulton">[Ful69]</A>.
+These numbers
+are also called <I>intersection multiplicities</I> in the literature.
+In the following sections there are functions for finding the intersection
+points of two curves.
+<P>
+There is now a variant that
+uses an algorithm of Jan Hilmar and Chris Smyth described in <A  HREF = "text1355.htm#bib_HilSmy10">[HS10]</A>.
+This computes all intersection points of the two curves as a
+set of Galois conjugacy classes and their intersection numbers in a single
+computation. The implementation, adapted into Magma from code contributed
+by Chris Smyth, returns the sequence of points along with the corresponding
+local intersection multiplicities.  
+
+
+<H5><A NAME = "15008">IsIntersection(C,D,p) : Sch,Sch,Pt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the point p lies on both curves C and D.
+</BLOCKQUOTE>
+<H5><A NAME = "15009">IsTransverse(C,D,p) : Sch,Sch,Pt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the point
+p is a nonsingular point of both plane curves C and D and
+the curves have distinct tangents there.
+</BLOCKQUOTE>
+<H5><A NAME = "15010">IntersectionNumber(C,D,p) : Sch,Sch,Pt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The local intersection number I<sub>p</sub>(C, D) of the plane curves
+C and D at the point p.
+This reports an error if C or D have a common component at p.
+</BLOCKQUOTE>
+<H5><A NAME = "15011">IntersectionNumbers(C,D) : CrvPln,CrvPln -&gt; List</A></H5>
+<H5>IntersectionNumbers(F,G) : RngMPolElt,RngMPolElt -&gt; List</H5>
+
+<PRE>    Global: BoolElt                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+These intrinsics use the algorithm of Hilmar and Smyth to compute in one go
+a list of all intersection places along with the
+corresponding local intersection multiplicities of two projective 
+plane curves C and D defined over k: a finite field, an algebraic field
+or the rationals <B>Q</B>. Here,
+intersection place means a point in P<sup>2</sup>(K), where P<sup>2</sup> is
+the ambient of C and D and K is a finite extension of k,
+which represents a Galois conjugacy class of ([K:k]) points in the
+intersection of C and D.
+<P>
+The first intrinsic takes C and D as arguments (which must have
+no common irreducible component) and returns the result as a list
+of pairs &lt; p, m &gt;, where p is an element of a pointset
+P<sup>2</sup>(K) giving a place in the intersection and m is the corresponding
+local intersection multiplicity.
+<P>
+The second intrinsic avoids the use of pointsets. It takes two homogeneous
+polynomials F and G which are relatively prime and lie in the same
+multivariate polynomial ring P = k[x, y, z]. They represent two
+plane curves in Proj(P) and the result is a list of intersection
+places of these curves with intersection multiplicity. The elements
+of the list are again pairs &lt; p, m &gt;, but here p is
+represented as in Hilmar and Smyth's paper <A  HREF = "text1355.htm#bib_HilSmy10">[HS10]</A>, p
+is a list of three elements of one of three types:
+<P>
+<DL COMPACT class='compact'>
+<DT>i)</DT><DD>[ * 1, 0, 0 * ]. Represents the plane projective point with these
+  homogeneous coordinates.
+<DT>ii)</DT><DD>[ * f(y), 1, 0 * ] with f(y) an irreducible polynomial in k[y].
+ Represents the conjugate points with homogeneous coordinates
+ [&alpha;, 1, 0] where &alpha; ranges over the roots of f.
+<DT>iii)</DT><DD>[ * h(x, y), g(y), 1 * ] with g(y) an irreducible polynomial in k[y]
+ and h(x, y) a polynomial in k[x, y] whose image in (k[y]/(g(y)))[x]
+ is irreducible. Represents the conjugate points with homogeneous coordinates
+ [&gamma;, &beta;, 1] where &beta; ranges over the roots of g and, for each &beta;,
+ &gamma; ranges over the roots of h(x, &beta;). 
+<P>
+</DL>
+The parameter <TT>Global</TT> applies to the polynomial version. If it takes its default
+value <TT>false</TT>, both the two-variable and one-variable polynomial rings used in the
+type ii) and iii) representations will be non-global versions with the y and x, y
+labelling of variables as shown. This may have the disadvantage that elements
+returned by <I>different</I> calls to the intrinsic cannot be directly compared
+because they lie in different rings. If <TT>Global</TT> is <TT>true</TT>, the global one- and
+two-variable polynomial rings are used but in this case the variables are not labelled
+by the intrinsic.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15012">Example <TT>Crv_local-intersection-example (H120E10)</TT></A></H3>
+The local intersection of two curves at a point where they
+share a common tangent is calculated.
+If the curves did not share a tangent, the intersection would be the
+product of multiplicities which it is not in this case.
+<P>
+<P>
+<PRE>
+&gt; A&lt;x,y&gt; := AffineSpace(Rationals(),2);
+&gt; C := Curve(A, y^2 - x^5);
+&gt; D := Curve(A, y - x^2);
+&gt; p := Origin(A);
+&gt; IntersectionNumber(C,D,p);
+4
+&gt; Multiplicity(C,p) * Multiplicity(D,p);
+2
+</PRE>
+These intersection numbers are often defined to be the length of a
+particular affine algebra. (See <A  HREF = "text1355.htm#bib_hartshorne">[Har77]</A> Chapter I, Exercise 5.4.)
+Below it is checked that this definition produces the same result 
+in this case.  Note that the algebra is not localised at p so the 
+length calculated is the sum of intersection numbers at all intersection 
+points. At the end one sees that the discrepancy of 1 is accounted for
+by a single transverse intersection away from the origin.
+<P>
+<P>
+<PRE>
+&gt; RA := CoordinateRing(A);
+&gt; I := ideal&lt; RA | DefiningPolynomial(C), DefiningPolynomial(D) &gt;;
+&gt; Dimension(RA/I);
+5
+&gt; IP := IntersectionPoints(C,D);
+&gt; IP;
+{@ (0, 0), (1, 1) @}
+&gt; IsTransverse(C,D,IP[1]);
+false
+&gt; IsTransverse(C,D,IP[2]);
+true
+</PRE>
+<HR>
+<H3><A NAME = "15013">Example <TT>Crv_crv:int-nmbrs (H120E11)</TT></A></H3>
+This example is taken from the paper of Hilmar and Smyth. We use the polynomial
+version for which the output is more explicit.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z&gt; := PolynomialRing(Rationals(),3,"grevlex");
+&gt; A := (y-z)*x^5+(y^2-y*z)*x^4+(y^3-y^2*z)*x^3+(-y^2*z^2+y*z^3)*x^2+
+&gt;   (-y^3*z^2+y^2*z^3)*x-y^4*z^2+y^3*z^3;
+&gt; B := (y^2-2*z^2)*x^2+(y^3-2*y*z^2)*x+y^4-y^2*z^2-2*z^4;
+&gt; c := IntersectionNumbers(A,B);
+&gt; c;
+[* &lt;[* x + y, y^2 + 1, 1 *], 1&gt;, &lt;[* x - y^3, y^4 + 1, 1 *], 1&gt;, 
+  &lt;[* y^2 + y + 1, 1, 0 *], 2&gt;, &lt;[* x^2 + x + 2, y - 1, 1 *], 1&gt;,
+  &lt;[* 1, 0, 0 *], 2&gt;, &lt;[* x^2 + x*y + 2, y^2 - 2, 1 *], 1&gt;, 
+  &lt;[* x^3 - y, y^2 - 2, 1 *], 1&gt;  *]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1361.htm">[Next]</A><A  HREF = "text1359.htm">[Prev]</A> <A  HREF = "text1361.htm">[Right]</A> <A  HREF = "text1359.htm">[Left]</A> <A  HREF = "text1356.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

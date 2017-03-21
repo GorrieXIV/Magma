@@ -1,0 +1,15 @@
+{
+    curve_resolution.m
+    surface_resolution.m
+    linear_relations.m
+    adjoints.m
+    classify.m
+    qf.m
+    quadratic.m
+    ruled.m
+    delpezzo_degrees.m
+    delpezzo.m
+    janka.m
+    rnc.m
+    scroll.m
+}

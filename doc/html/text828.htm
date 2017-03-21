@@ -1,0 +1,502 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Soluble Quotients</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text822.htm">[Next]</A><A  HREF = "text827.htm">[Prev]</A> <A  HREF = "text822.htm">[Right]</A> <A  HREF = "text827.htm">[Left]</A> <A  HREF = "text823.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "9559">Soluble Quotients</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text828.htm#9560">Introduction</A>
+<LI> <A  HREF = "text828.htm#9561">Construction</A>
+<LI> <A  HREF = "text828.htm#9562">Calculating the Relevant Primes</A>
+<LI> <A  HREF = "text828.htm#9563">The Functions</A>
+</UL>
+<H4><A NAME = "9560">Introduction</A></H4>
+
+<P>
+<P>
+This section presents
+a short overview towards the theory of the soluble quotient algorithm,
+the functions designed for computing soluble quotients and
+the functions designed for dealing with soluble quotient processes.
+
+
+<H4><A NAME = "9561">Construction</A></H4>
+
+<P>
+<P>
+For a finite group G, the property of being soluble means that the 
+derived series G = G<sup>(0)</sup> &gt; G<sup>(1)</sup> &gt; ... &gt; G<sup>(n)</sup> terminates with 
+G<sup>(n)</sup> = &lt; 1 &gt;. Each section G<sup>(i)</sup>/G<sup>(i + 1)</sup> is a
+finite abelian 
+group, hence it can be identified with a Z G/G<sup>(i)</sup>-module M, 
+where the action of G/G<sup>(i)</sup> on M is given by the conjugation 
+action on G<sup>(i)</sup>/G<sup>(i + 1)</sup>.
+<P>
+From module theory we see that there exists a series 
+M = M<sup>(0)</sup> &gt; M<sup>(1)</sup> &gt; ... &gt; M<sup>(r<sub>i</sub>)</sup>, where each section is an 
+irreducible GF(p)   G/G((i))-module for some prime p. Using these 
+series we obtain a refinement G = G<sub>(0)</sub> &gt; G<sub>(1)</sub> &gt; ... &gt; G<sub>(n)</sub> = 
+&lt; 1 &gt; of the commutator series with the properties:
+<P>
+<DL COMPACT class='compact'>
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>The series is normal,
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>Each section G<sub>(i)</sub>/G<sub>(i + 1)</sub> is elementary abelian of prime 
+	power order, and is irreducible as a G/G<sub>(i)</sub>-module.
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>If  G = H<sub>(0)</sub> &gt; H<sub>(1)</sub> &gt; ... &gt; H<sub>(t)</sub> = &lt; 1 &gt; is
+	another series with these properties, then n = t and there exists a 
+	permutation &pi; &isin;S<sub>n</sub> such that G<sub>(i)</sub>/G<sub>(i + 1)</sub> is 
+	isomorphic to H<sub>(i&pi;)</sub>/H<sub>(i&pi; + 1)</sub> (as GF(p) modules).
+<P>
+<P>
+<P>
+</DL>
+<B>Note:</B> A PC-presentation defined by a further refinement of this 
+series leads to a "conditioned" presentation. The converse is not always
+true, because the irreducibility of the sections is not required for a 
+conditioned presentation.
+<P>
+The soluble quotient algorithm uses these series to construct soluble 
+groups.
+Starting with the trivial group G/G<sub>(0)</sub>, it successively chooses
+irreducible G/G<sub>(i)</sub> modules M<sub>i</sub> and extensions 
+&zeta;<sub>i</sub> &isin;H<sup>2</sup>(G/G<sub>(i)</sub>, M<sub>i</sub>)
+ which give rise to exact sequences
+1 -&gt; M<sub>i</sub> -&gt; G/G<sub>(i + 1)</sub>=G/G<sub>(i)</sub>.M<sub>i</sub> -&gt; G/G<sub>(i)</sub> -&gt; 1.
+To describe the algorithmic approach, we consider the following 
+situation.
+Let G be a finite soluble group, M a normal elementary abelian 
+subgroup of G such that M is a H=G/M irreducible module. (The 
+action of H on M is identified with the conjugation action of G/M
+on the subgroup M.)
+Then the relations of the group G have the shape 
+g<sub>i</sub><sup>p<sub>i</sub></sup>=w<sub>i</sub>m<sub>i</sub>  (resp.) g<sub>j</sub><sup>g<sub>i</sub></sup>=w<sub>ij</sub>m<sub>ij</sub>, m<sub>i</sub>, m<sub>ij</sub>&isin;M
+where w<sub>i</sub>, w<sub>ij</sub> are the canonical representatives of H in G. 
+Then bar(g<sub>i</sub><sup>p<sub>i</sub></sup>)=bar(w<sub>i</sub>) resp. bar(g<sub>j</sub>)^(bar(g<sub>i</sub>))
+=bar(w<sub>ij</sub>) is a PC-presentation of H and the set of images 
+((g<sub>i</sub><sup>p<sub>i</sub> - 1</sup>, g<sub>i</sub>) -&gt; m<sub>i</sub>, (g<sub>j</sub>, g<sub>i</sub>) |-&gt; m<sub>ij</sub>) determines
+a unique element of the cocycle space C<sup>2</sup>(H, M).
+<P>
+According to the p-group situation, we call the system t= (m<sub>i</sub>, 
+m<sub>ij</sub>), the tail defining G = H.M<sub>t</sub> as an extension of M by H.
+<P>
+Not every choice of a system t = (m<sub>i</sub>, m<sub>ij</sub>) defines an 
+extension. To make sure that t corresponds to an element s of
+C<sup>2</sup>(G, M) it must satisfy a certain equation system, the so-called 
+consistency equations (see Vaughan-Lee). These are linear homogeneous
+equations in M, so the solution space can be determined.
+<P>
+For the construction of soluble quotients we also have to find the 
+epimorphism &epsilon;: F mapsur G. The existence of the epimorphism
+is obviously a restriction of the possible images G, and it can be 
+checked simultaneously with constructing G. Let G be an extension 
+G = H.M, where M is a H-module and H is a known soluble quotient 
+&delta;: F mapsur H. 
+Then &delta; is uniquely determined by the images &delta;(f<sub>i</sub>)=h<sub>i</sub>, 
+1&le;i &le;r, where {f<sub>1</sub>, ..., f<sub>r</sub>} is a generating set of F.
+We want to find a lift &epsilon; of &delta;, i.e. &epsilon; 
+(f)=&delta;(f)  (mod)   M for all f &isin;F. This means that 
+&epsilon;(f<sub>i</sub>)=h<sub>i</sub> x<sub>i</sub> for all i&le;r, where x<sub>i</sub> &isin;M are to 
+be determined. Since &epsilon; will be a homomorphism, we 
+require &epsilon;(r<sub>j</sub>(f<sub>1</sub>, ..., f<sub>r</sub>))=1<sub>G</sub> for the defining 
+relations r<sub>j</sub> of F. This leads to a linear equation system for
+the variables (x<sub>1</sub>, ..., x<sub>r</sub>)&isin;M<sup>r</sup>. We solve this equation system 
+together with the consistency equations, hence we find a subspace S of
+M<sup>r</sup> x H<sup>2</sup>(H, M) of those extensions for which the epimorphism
+&delta; has a lift. 
+Let us call an element of S an extended tail.
+<P>
+Let K be the minimal splitting field of M, i.e. the character field
+of the unique character of H which corresponds to M. Then M is 
+obviously a KH-module and S is also a K-space.
+The space S has a K-subspace S<sub>S</sub> of split extensions, i.e. the 
+projection of S<sub>S</sub> into H<sup>2</sup>(H, M) is only the trivial element.
+For any element t &isin;S/S<sub>S</sub> the corresponding map &epsilon;<sub>t</sub>:
+F -&gt; H.M<sub>t</sub> is necessarily surjective, hence defines a soluble 
+quotient.
+Let s<sub>1</sub>, s<sub>2</sub> be two elements of S/S<sub>S</sub> and let &epsilon;<sub>i</sub>: F
+mapsur H.M<sub>s<sub>i</sub></sub> =: G<sub>i</sub> denote the corresponding soluble quotients. 
+If s<sub>1</sub> and s<sub>2</sub> are  K-linear dependent, the groups G<sub>1</sub> and G<sub>2</sub>
+will be isomorphic. Unfortunately, the converse is not true, even 
+K-linear independent elements may lead to isomorphic groups. 
+Nevertheless, if s<sub>1</sub> and s<sub>2</sub> are independent, the kernels of the 
+epimorphisms will be different, hence one can iterate the lifting to 
+&epsilon;<sub>1, 2</sub>: F mapsur (G<sub>1</sub>).M<sub>s<sub>2</sub></sub> = (H.M<sub>s<sub>1</sub></sub>).M<sub>s<sub>2</sub></sub>
+ = H.(M direct-sum M)<sub>s<sub>1</sub>.s<sub>2</sub></sub>.
+(The last equality can be read as a definition of s<sub>1</sub>.s<sub>2</sub> in the
+righthand side term.)
+<P>
+The dimension a=dim<sub>K</sub>(S/S<sub>S</sub>) is therefore characterised as the maximal
+multiplicity 
+a = max {z &isin;Z^ + | exists &epsilon;:F mapsur H, M<sup>z</sup> }.
+S<sub>S</sub> itself also has a K-subspace S<sub>C</sub>, for which the map 
+&epsilon;<sub>s</sub>: F -&gt; H.M<sub>s</sub>, s&isin;S<sub>C</sub>
+ is not surjective. The K-dimension b=dim<sub>K</sub>(S<sub>S</sub>/S<sub>C</sub>)
+is again characterised as the maximal multiplicity 
+b=max{z&isin;Z^ + | exists&epsilon;:F mapsur H, M<sup>z</sup> }.
+Moreover, after taking a maximal extension &epsilon;:F mapsur 
+H.M<sup>b</sup>, M never has to be considered for split extensions again.
+
+
+<H4><A NAME = "9562">Calculating the Relevant Primes</A></H4>
+
+<P>
+<P>
+A crucial step in finding finite soluble quotients &epsilon;:
+F mapsur G is the calculation of the relevant primes, i.e. the prime 
+divisors of |G|.
+This is the most time consuming part of the algorithm, so it is crucial
+to apply it as efficiently as possible, and any other information about 
+possible prime divisors is very helpful. We do not explain this 
+calculation in detail.
+However, to use the functions and options provided by Magma  in a correct
+manner, we outline the idea of the calculation.
+<P>
+Let &epsilon;:F mapsur G be a finite soluble quotient and let 
+N denote the kernel of &epsilon;. If a module M allows 
+an extension bar(&epsilon;):F mapsur G.M, then M must be a 
+constituent of N/N<sup>prime</sup>, and the relevant primes are the prime 
+divisors of N/N<sup>prime</sup>. Again N/N<sup>prime</sup> can be viewed as an F/N-
+module, hence an H-module. Therefore it is a direct sum N/N<sup>prime</sup> isomorphic to M<sub>p<sub>1</sub></sub> direct-sum M<sub>p<sub>2</sub></sub> direct-sum ... direct-sum Z<sup>d</sup>, where the M<sub>p<sub>i</sub></sub>
+are finite modules of order a power of the prime p<sub>i</sub>. Let p not
+divide |H|.
+Then by Zassenhaus the extension H.M<sub>p</sub> must split. We consider an 
+irreducible module M in the head of M<sub>p</sub>, i.e. there is an
+H-epimorphism M<sub>p</sub> mapsur M. Then there is a valid soluble quotient
+&epsilon;: F mapsur H.M and the extension H.M splits.
+<P>
+Now
+there exists an 
+irreducible Z H- module L such that M is a GF(p)-modular 
+constituent of L/pL.
+Moreover, &Delta;: H -&gt; GL(L) is the corresponding representation
+of H and any &Delta;-module will have this property.
+<P>
+Now using the theory of space groups, one can construct homomorphisms
+&epsilon;<sub>1</sub>: F mapsur H.L and &epsilon;<sub>2</sub>: H.L mapsur H.M such
+that the composition is surjective. Hence p can be detected in 
+&Delta;.  Let P<sub>&Delta;</sub> denote the set of primes obtained from &Delta;.
+To find these primes, we have to know a set 
+D of representatives of the irreducible rational representations of 
+F/N, hence of H. 
+The set of prime divisors of K/K<sup>prime</sup> is a subset of 
+P= bigcup<sub>&Delta; &isin;D</sub> P<sub>&Delta;</sub> &cup;{p | p  (prime ), p | |G|}.
+We want to point out the following:
+<DL COMPACT class='compact'>
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>Usually the set of primes dividing |K/K<sup>prime</sup>| 
+      is a proper subset of P, because the primes dividing |G| may 
+	  or may not divide |K/K<sup>prime</sup>|.
+<P>
+<DT></DT><DD>Conversely, if p does not divide |G|, then there certainly 
+      exists a module M in characteristic p such that there is a 
+      soluble quotient F mapsur G.M, and the extension splits.
+<P>
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>The algorithm can also recognise infinite abelian sections. 
+      This
+      means that already &epsilon;<sub>1</sub>: F mapsur H.L is surjective.
+	  All primes are relevant and no maximal finite 
+      soluble quotient exists.
+<P>
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>Let &phi;:F mapsur H be a lift of &epsilon;:F mapsur G, 
+      i.e. G is a quotient of H: &phi;:H mapsur G. If the relevant
+      primes of G are known, these are also relevant primes of H, 
+      and only those representations &Delta; of H must be considered
+      for which ker&phi; not&sub;ker&Delta; is valid. </DL>
+
+
+<H4><A NAME = "9563">The Functions</A></H4>
+
+<P>
+<P>
+Magma provides two different ways to calculate finite soluble quotients:
+a main function for the whole calculation, and a process which gives 
+control over each individual step.
+<P>
+Let F be a finitely presented group. 
+
+
+<H5><A NAME = "9564">SolubleQuotient(F, n : parameters): GrpFP, RngIntElt -&gt; GrpPC, Map, SeqEnum, MonStgElt</A></H5>
+<H5>SolvableQuotient(F, n : parameters): GrpFP, RngIntElt -&gt; GrpPC, Map, SeqEnum, MonStgElt</H5>
+<H5>SolubleQuotient(F : parameters): GrpFP, RngIntElt -&gt; GrpPC, Map, SeqEnum, MonStgElt</H5>
+<H5>SolvableQuotient(F : parameters): GrpFP, RngIntElt -&gt; GrpPC, Map, SeqEnum, MonStgElt</H5>
+<H5>SolubleQuotient(F, P : parameters): GrpFP, Set -&gt; GrpPC, Map, SeqEnum, MonStgElt</H5>
+<H5>SolvableQuotient(F, P : parameters): GrpFP, Set -&gt; GrpPC, Map, SeqEnum, MonStgElt</H5>
+<BLOCKQUOTE>
+Find a soluble quotient &epsilon;:F mapsur G with a specified order.
+The argument n must be a nonnegative integer
+and P must be a set of primes.
+<P>
+The three forms reflect possible information about the order of an
+expected soluble quotient. In the first form the order of G is given 
+by n, if n is greater than zero. If n equals zero, nothing about 
+the order is known and the relevant primes will be calculated completely.
+<P>
+The second form, with no n argument, is equivalent to the first with
+n = 0.
+This is a standard argument, and usually it is the most efficient way 
+to calculate soluble quotients. 
+<P>
+Note that, if n&gt;0 is not the order of the maximal finite soluble
+quotient, it may happen that no group of order n can be found, 
+since an epimorphic image of size n may not be exhibited by the chosen
+series.
+<P>
+In the third form a set P of relevant primes is given. The algorithm 
+calculates the biggest quotient such that the order has prime divisors 
+only in P. The set P may have a zero as an element, this is just for 
+consistency reasons. It is equivalent to the first form with n equal 
+zero.
+<P>
+The returned values are the group G and the epimorphism &epsilon;:
+F mapsur G. The third returned value is a sequence describing the series
+and modules by which G has been constructed.
+<P>
+The fourth value is a string which explain the reason for termination.
+The following list gives the termination conditions.
+The algorithm terminates normally if:
+<DL COMPACT class='compact'>
+<DT>1.</DT><DD>A quotient of the given order has been constructed.
+<DT>2.</DT><DD>A maximal quotient (with respect to the conditions given on the
+	order) has been constructed.
+<P>
+</DL>
+ The algorithm will be aborted and returns a warning if:
+<DL COMPACT class='compact'>
+<DT>3.</DT><DD>A bound on the length of a series or subseries has been hit.
+<DT>4.</DT><DD>A limit on the size of the quotient or a section has been hit.
+<DT>5.</DT><DD>The algorithm detects a free abelian section.
+<P>
+</DL>
+With the following options one can define abort conditions corresponding
+to the third and fourth item. The idea of all these conditions is to
+control the occurrence of infinite soluble quotients.
+<P>
+<P>
+<PRE>
+     SeriesLength: RngIntElt             Default: 0
+</PRE>
+Limits the length of the chief series to r. For sag-series it
+is the nilpotent length of the series, for derived series it is
+the derived length. The default value of zero means no limit.
+<P>
+If the algorithm hits the limit, it gives a warning message and 
+returns the last soluble quotient.
+<P>
+<P>
+<PRE>
+     SubseriesLength: RngIntElt          Default: 0
+</PRE>
+Limits the length of a series in a section. If the sag-series is
+used, it is the length of the lower descending series. For the
+derived series, the limit is applied to the exponent of an 
+element of a section with maximal prime power order. For 
+example, if the limit is set to 3, the limit would be hit by a 
+section of type C<sub>8</sub>, but not by C<sub>2</sub><sup>3</sup> and not even by 
+C<sub>4</sub><sup>2</sup>.
+<P>
+<P>
+<PRE>
+     vapour QuotientSize: RngIntElt      Default: 0
+</PRE>
+If the value n is bigger than zero, the algorithm returns if
+a quotient of order bigger or equal to n has been found. A 
+warning message will be printed.
+<P>
+<P>
+<PRE>
+     vapour SectionSize: RngIntElt       Default: 0
+</PRE>
+If the value s is bigger than zero, the algorithm returns if
+the order of a section is bigger than or equal to s. A warning
+message will be printed.
+<P>
+<P>
+<P>
+<B>Note:</B> Since an additive bound on a group order is not as 
+meaningful as a multiplicative bound, the latter options are only useful
+as break conditions when the quotient gets too big for further 
+calculations. The return quotient which hits such a bound is somewhat
+randomly chosen, since only a change in the order of checking modules
+may lead to other quotients.
+<P>
+With the following options the strategy of the algorithm and some 
+subalgorithms can be chosen.
+<P>
+<P>
+<PRE>
+     vapour MSQ_Series: MonStgElt        Default: "sag"
+</PRE>
+Determines the series which is used for the construction of 
+soluble groups.
+<P>
+The default value is <TT>"sag"</TT>, since it is usually the most 
+efficient choice. Of course, there is a value <TT>"derived"</TT>, 
+exhibiting the derived series.
+<P>
+Another choice is <TT>"lowercentral"</TT>, choosing the lower central 
+series. This restricts the algorithm to finite nilpotent 
+quotients. The choice <TT>"pcentral"</TT> only exhibits p-groups as quotients.
+<P>
+The nilpotent resp. p-quotient algorithms are usually more 
+efficient, so these options may only be useful to obtain 
+additional information needed for a SQ-process.
+<P>
+<P>
+<PRE>
+     MSQ_PrimeSearchModus: RngIntElt     Default: 3
+</PRE>
+Defines at what status of the algorithm the relevant prime 
+search is called.
+<P>
+The possible choices reflect the different intentions of 
+constructing a soluble quotient; for the general situation, 
+(i.e. finding a finite soluble quotient without any information 
+about relevant primes and check its maximality) this option 
+makes only little difference in runtime behaviour.
+<P>
+<DL COMPACT class='compact'>
+<DT>0:</DT><DD>No calculation of relevant primes. This is the default value, 
+	if the second argument does not request a prime calculation,
+	e.g. if the order of the quotient or its relevant primes are known. 
+<DT>1:</DT><DD>The relevant primes will be calculated after the soluble 
+	quotient algorithm (with the given input) terminates normally. 
+	Possibly new relevant primes are returned in a message.
+	If, for example, the second argument is a set S (so no limit on
+	the exponent) and no new 
+	relevant primes have been found, the maximality of the soluble 
+	quotient is proved. 
+<DT>2:</DT><DD>As 1, but continues the algorithm when finding new relevant 
+	primes.
+<DT>3:</DT><DD>Perform the relevant prime calculation after a "main" step in
+	the series, i.e. after completing a nilpotent section in a 
+	sag-series resp. a commutator section for the derived series. 
+	This is the default value, if prime calculation is required by 
+	the second argument. It is a good choice if one wants to 
+	construct large finite quotients quickly.
+<P>
+<DT></DT><DD><B>Note:</B> This option can cause problems in case of a 
+	sag-series when infinite soluble quotients exist. For finite 
+	quotients, it seems to be the best choice.
+<DT>4:</DT><DD>Perform the relevant prime calculation after calculating an 
+	elementary abelian layer. This option is preferable, if the 
+	sag-series is used and an infinite soluble quotient is possible.
+<DT>5:</DT><DD>Perform the relevant prime calculation after each successful 
+	lift of a quotient. This option is preferable when infinite 
+	sections shall be detected as soon as possible (with respect to
+	the chosen series).
+<P>
+<P>
+<P>
+</DL>
+<PRE>
+     MSQ_ModulCalcModus: RngIntElt       Default: 0
+</PRE>
+In the construction of soluble quotients using a sag-series one can
+restrict the number of modules by using tensor products and skew 
+symmetric products. This can improve the performance in the case of big 
+soluble quotients, for small quotients the overhead may invalidate 
+the improvement.
+For other series this option has no meaning.
+The possible values are:
+<DL COMPACT class='compact'>
+<DT>0:</DT><DD>Do not apply this technique (default). 
+<DT>1:</DT><DD>Fast version, just apply those parts which can be calculated 
+	quickly.
+<DT>2:</DT><DD>Full version, this is only recommended for "big" soluble 
+	quotients, i.e. quotients with long descending series in nilpotent 
+	sections.
+<P>
+<P>
+</DL>
+<PRE>
+     MSQ_CollectorModus: RngIntElt       Default: 2
+</PRE>
+Defines the setup modus for the symbolic collector, i.e. the ratio 
+of precalculation to dynamic setup:
+<P>
+<DL COMPACT class='compact'>
+<DT>0:</DT><DD>Full precalculation, preferable for small soluble groups.
+<DT>1:</DT><DD>Partial precalculation (test version).
+<DT>2:</DT><DD>Dynamic setup (default).
+<P>
+</DL>
+The function also provides a general print option determining the amount
+of timings status information during the function call. Additionally 
+there are some verbose flags which determine the amount of information 
+given about various subalgorithms. If both a general print value and a 
+verbose flag are given, the verbose flag has higher preference. 
+<P>
+<P>
+<PRE>
+     Print: RngIntElt                    Default: 0
+</PRE>
+Determines what timing information and status messages are given 
+during the calculation (0 = no printing, 5 = maximal information).
+<P>
+<P>
+<PRE>
+     SetVerbose("MSQ_Messages", n):      Maximum: 2
+</PRE>
+If set to 1, the sizes of new soluble quotients are printed.
+<P>
+<P>
+<PRE>
+     SetVerbose("MSQ_PrimeSearch", n):   Maximum: 15
+</PRE>
+Bitflag for print levels during the calculation of relevant primes:
+<P>
+<DL COMPACT class='compact'>
+<DT>1:</DT><DD>Timings and statistics about the calculation of rational 
+	representations.
+<DT>2:</DT><DD>Timings for transforming rational into integral representations.
+<DT>4:</DT><DD>Timing for finding the relevant primes.
+<DT>8:</DT><DD>Printing of new relevant primes.
+<P>
+<P>
+</DL>
+<PRE>
+     SetVerbose("MSQ_RepsCheck", n):     Maximum: 3
+</PRE>
+<P>
+<DL COMPACT class='compact'>
+<DT>1:</DT><DD>Timing for checking extensions of modules.
+<DT>2:</DT><DD>Statistics about the modules to be checked.
+<P>
+<P>
+<P>
+</DL>
+<PRE>
+     SetVerbose("MSQ_RepsCalc", n):      Maximum: 3
+</PRE>
+<DL COMPACT class='compact'>
+<DT>1:</DT><DD>Timing information about the module calculation.
+<DT>2:</DT><DD>Statistics about the module calculation.
+<P>
+<P>
+</DL>
+<PRE>
+     SetVerbose("MSQ_Collector", n):     Maximum: 1
+</PRE>
+If set to 1, the timing for the setup of the symbolic collector is 
+printed.
+<P>
+<P>
+<PRE>
+     SetVerbose("MSQ_TraceFunc", n):     Maximum: 2
+</PRE>
+Give messages about the main function calls (1) resp. most function
+calls (2) in the Magma language during the algorithm.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text822.htm">[Next]</A><A  HREF = "text827.htm">[Prev]</A> <A  HREF = "text822.htm">[Right]</A> <A  HREF = "text827.htm">[Left]</A> <A  HREF = "text823.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

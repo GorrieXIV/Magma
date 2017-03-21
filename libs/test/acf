@@ -1,0 +1,307 @@
+////////////////////////////////////////////////////////////////////////////////
+
+/*
+Algebraically Closed Fields test.
+AKS 22/02/00.
+*/
+
+////////////////////////////////////////////////////////////////////////////////
+
+v := GetVerbose("ACF");
+ClearVerbose();
+SetVerbose("ACF", v);
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+EASY_BOUND := 100;
+Z := IntegerRing();
+
+quick := true;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function check_roots(f, A)
+    r := Roots(f, A);
+    for t in r do
+	assert IsZero(Evaluate(f, t[1]));
+    end for;
+    rr := Roots(f, A);
+    assert Set(r) eq Set(rr);
+    return r;
+end function;
+
+function deg_bound(f)
+    A := Parent(f);
+    I := Ideal(A);
+    n := Rank(I);
+    B := Basis(I);
+    f := Polynomial(f);
+    done := {};
+    vars := {v: v in [1 .. n] | Degree(f, v) gt 0};
+    while #done lt #vars do
+	for v in vars diff done do
+	    f := B[v];
+	    vars join:= {v: v in [1 .. n] | Degree(f, v) gt 0};
+	end for;
+	done join:= vars;
+    end while;
+    return &*[Z | Degree(B[v], v): v in vars];
+end function;
+
+function rand_univ(A, v, nr, dr)
+    d := Degree(A, v);
+    return &+[Random(-nr, nr)/Random(1, dr)*A.v^i: i in [0 .. d - 1]];
+end function;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure test_elts(A, split)
+    // Do operations which probably cause a split iff (split) true
+
+    seed, sindex := GetSeed();
+
+    n := Rank(A);
+
+    "test_elts:", A;
+    "split:", split;
+    T := Cputime();
+
+    assert IsZero(A ! 0);
+    assert IsOne(A ! 1);
+    assert IsMinusOne(A ! -1);
+
+    E := [0, 1, -1, 2, -2];
+    E cat:= [A.i: i in [1 .. n]];
+    if split then
+	E cat:= [&*[A.1 - A.j: j in [2 .. i]]: i in [n .. 2 by -1]];
+    end if;
+    E cat:= [A.i - A.j: j in [1 .. i - 1], i in [1 .. n]];
+
+    for xi := 1 to #E do
+	if xi mod 10 eq 0 then
+	    printf "Element %o/%o\n", xi, #E;
+	end if;
+	x := E[xi];
+	assert x + 0 eq x;
+	assert x * 0 eq 0;
+	assert x - x eq 0;
+	assert x^0 eq 1;
+
+	if not IsZero(x) then
+	    d := deg_bound(x);
+	    //printf "x: %o, d: %o\n", x, d;
+	    if d le EASY_BOUND then
+		assert x^-1 * x eq 1;
+
+		if split then
+		    M := MinimalPolynomial(x);
+		    assert Evaluate(M, x) eq 0;
+		end if;
+	    end if;
+	end if;
+
+	if Length(Polynomial(x)) gt 100 then
+	    continue;
+	end if;
+
+	for y in E do
+	    // Length(Polynomial(x)), Length(Polynomial(y));
+	    if Length(Polynomial(y)) gt 100 then
+		continue;
+	    end if;
+
+	    assert x + y eq y + x;
+	    assert x * y eq y * x;
+	    assert x * (x + y) eq x^2 + y*x;
+	    assert x^2 - y^2 eq (x - y)*(x + y);
+	    assert x - y eq -(y - x);
+	    //assert (x eq y) eq IsZero(x - y);
+
+	    /*
+	    if not IsZero(x) then
+		assert IsUnit(x);
+		xi := x^-1;
+		assert x * xi eq 1;
+		assert (y/x) * x eq y;
+	    end if;
+	    */
+
+	    /*
+	    i, sqrt := IsSquare(x);
+	    assert not i or sqrt^2 eq x;
+
+	    for e in [2 .. 5] do
+		if Cputime(T) ge T_limit then
+		    break;
+		end if;
+		xe := x^e;
+		assert Root(x^e, e)^e eq xe;
+	    end for;
+	    */
+	end for;
+    end for;
+    "Time:", Cputime(T);
+
+    "Final A:", A;
+    "";
+
+    SetSeed(seed, sindex);
+end procedure;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure test_acf(A, simplify, nr, dr)
+    n := Rank(A);
+
+    // Form random elements of maximal degree for each variable
+    U := [rand_univ(A, v, nr, dr): v in [1 .. n]];
+    // Form all products 
+    P := [<U[i], U[j], U[i] * U[j]>: j in [1 .. i], i in [1 .. #U]];
+
+    //"FIRST P:", P;
+
+    test_elts(A, false);
+    assert forall{t: t in P | t[1]*t[2] eq t[3]};
+    //"NEXT P:", P;
+
+    test_elts(A, true);
+    assert forall{t: t in P | t[1]*t[2] eq t[3]};
+    //"NEXT NEXT P:", P;
+
+    if simplify then
+	"SIMPLIFY";
+	time Simplify(A);
+	test_elts(A, true);
+	assert forall{t: t in P | t[1]*t[2] eq t[3]};
+
+	"PRUNE";
+	Prune(A);
+	test_elts(A, true);
+	assert forall{t: t in P | t[1]*t[2] eq t[3]};
+
+	"ABSOLUTE POLYNOMIAL";
+	time F := AbsolutePolynomial(A);
+	"Absolute polynomial:", F;
+
+	"ABSOLUTIZE";
+	time Absolutize(A);
+	assert forall{t: t in P | t[1]*t[2] eq t[3]};
+	//"SIMPLIFY P:", P;
+    end if;
+end procedure;
+
+////////////////////////////////////////////////////////////////////////////////
+
+P := 2*3*5;
+D := Divisors(P);
+A := AlgebraicClosure();
+S := [Sqrt(A!n): n in D];
+//test_acf(A, true, 10, 10);
+
+////////////////////////////////////////////////////////////////////////////////
+
+load "../galpols/galpols";
+
+SetVerbose("Invariants", 0);
+
+/*
+SetDelCheck(true);
+SetTrace(96996, true);
+SetMark(true);
+*/
+
+if quick then
+    drange := [2,3,4,5,7,9,11];
+    drange := [2,3,4,5];		// ~277 secs, magma
+    drange := [2,3,4];			// ~24 secs, magma
+    ilimit := 3;
+else
+    drange := [2 .. 11];
+    ilimit := 10^10;
+end if;
+
+for d in drange do
+    n := NumberOfTransitiveGroups(d);
+    for i := 1 to n do
+	f := PolynomialWithGaloisGroup(d, i);
+	G := GaloisGroup(f);
+	simplify := #G le 20;
+
+	"\n\n";
+	"********************************************************";
+	"********************************************************";
+	printf "d: %o, i: %o, f: %o, #G: %o\n", d, i, f, #G;
+	"********************************************************";
+	"********************************************************";
+	"";
+
+	A := AlgebraicClosure();
+	r := check_roots(f, A);
+
+	test_acf(A, simplify, 10, 10);
+
+	if Degree(f) le 10 then
+	    e := Evaluate(f, Parent(f).1 - 1);
+	    rr := check_roots(e, A);
+	    test_acf(A, simplify, 10, 10);
+	end if;
+	if i eq ilimit and d gt 5 then
+	    break;
+	end if;
+//break;
+    end for;
+//break;
+end for;
+
+//clear;
+//ShowActive();
+
+////////////////////////////////////////////////////////////////////////////////
+
+function cyc6(K, t)
+    P<a,b,c,d,e,f> := PolynomialRing(K, 6);
+    B := [
+    a + b + c + d + e + f,
+    a*b + b*c + c*d + d*e + e*f + f*a,
+    a*b*c + b*c*d + c*d*e + d*e*f + e*f*a + f*a*b,
+    a*b*c*d + b*c*d*e + c*d*e*f + d*e*f*a + e*f*a*b + f*a*b*c,
+    a*b*c*d*e + b*c*d*e*f + c*d*e*f*a + d*e*f*a*b + e*f*a*b*c + f*a*b*c*d,
+    a*b*c*d*e*f - t^6];
+    I := ideal<P | B>;
+    return I;
+end function;
+
+"Cyclic-6 Decomposition";
+Q := RationalField();
+I := cyc6(Q, 1);
+time D := PrimaryDecomposition(I);
+
+"Cyclic-6 Variety";
+A := AlgebraicClosure();
+time v := Variety(I, A);
+assert #Set(v) eq 156;
+time Simplify(A);
+assert #Set(v) eq 156;
+
+////////////////////////////////////////////////////////////////////////////////
+
+function cyc5(K, H)
+    P<x, y, z, t, u> := PolynomialRing(K, 5);
+    I := ideal<P |
+    x + y + z + t + u,
+    x*y + y*z + z*t + t*u + u*x,
+    x*y*z + y*z*t + z*t*u + t*u*x + u*x*y,
+    x*y*z*t + y*z*t*u + z*t*u*x + t*u*x*y + u*x*y*z,
+    x*y*z*t*u - H^5>;
+    return I;
+end function;
+
+for K in <Q, Z, GF(2)> do
+    "Cyclic-5 Decomposition over function field over", K;
+    F<t> := FunctionField(K);
+    I := cyc5(F, t);
+    A := AlgebraicClosure(F);
+    time v := Variety(I, A);
+    assert #v eq 70;
+end for;

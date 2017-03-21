@@ -1,0 +1,132 @@
+///////////////////////////////////////////////////////////////////////////
+// Date: 19/1/2011
+///////////////////////////////////////////////////////////////////////////
+// ---rank 2,#1
+// (y+z+1)^6*(x+1)/(x*y*z^2)+x-60
+// 
+// ---rank 2,#2
+// (x+y+z+1)^2/x+(x+y+z+1)^4/(y*z)-14
+// 
+// ---rank 2,#3
+// (x+1)*(y+z+1)^4/(x*y*z)+x-12
+// 
+// ---P^1 \times S_2
+// (1+x+y)^4/(x*y)-12+z+z^(-1)
+// 
+// ---P^1 \times S_1
+// (1+x+y)^6/(x*y^2)-60+z+z^(-1)
+///////////////////////////////////////////////////////////////////////////
+
+// newton_polytope - Given a rational function f, returns the Newton polytope.
+function newton_polytope(f)
+    // Create a lattice
+    L:=ToricLattice(Rank(Parent(f)));
+    // Extract the denoninator
+    monos:=Monomials(Denominator(f));
+    assert #monos eq 1;
+    den:=L ! Exponents(monos[1]);
+    // Now extract the numerators
+    pts:=[L | L ! Exponents(mono) - den : mono in Monomials(Numerator(f))];
+    // Finally, return the polytope
+    return Polytope(pts);
+end function;
+
+// Returns the toric variety Y given by taking the Cox data for X and
+// throwing away the quotient action.
+function strip_quotient(X)
+    return ToricVariety(CoordinateRing(X),IrrelevantComponents(X),Gradings(X));
+end function;
+
+// Returns true iff the polytope P can be realised as a Gorenstein polytope Q
+// along with a "quotient action". If true, also returns Q.
+function realisable_via_reflexive(P)
+    X:=ToricVariety(Rationals(),SpanningFan(P));
+    Y:=strip_quotient(X);
+    Q:=Polytope(Rays(Fan(Y)));
+    if NumberOfVertices(Q) ne #Rays(Fan(Y)) or not IsReflexive(Q) then
+        return false,_;
+    end if;
+    return true,Q;
+end function;
+
+// The list of Laurent polynomials to investigate
+R<x,y,z>:=RationalFunctionField(Rationals(),3);
+polys:=[
+    (y + z + 1)^6 * (x + 1) / (x * y * z^2) + x - 60,
+    (x + y + z + 1)^2 / x + (x + y + z + 1)^4 / (y * z) - 14,
+    (x + 1) * (y + z + 1)^4 / (x * y * z) + x - 12,
+    (1 + x + y)^4 / (x * y) - 12 + z + z^(-1),
+    (1 + x + y)^6 / (x * y^2) - 60 + z + z^(-1)
+];
+
+// For each polynomial, construct the polytope
+Ps:=[newton_polytope(f) : f in polys];
+assert &and[IsFano(P) : P in Ps];
+
+// Do they have the correct number of interior points?
+assert [NumberOfInteriorPoints(P) : P in Ps] eq [Integers() | 10, 4, 3, 3, 10];
+
+// Does the Cox data look passable?
+for i in [1..#Ps] do
+    X:=ToricVariety(Rationals(),SpanningFan(Ps[i]));
+    if i le 3 then
+        assert NumberOfGradings(X) eq 4;
+    else
+        assert NumberOfGradings(X) eq 2;
+    end if;
+    assert NumberOfQuotientGradings(X) eq 1;
+end for;
+
+// Compute the Ehrhart series and Hilbert series
+ehrs:=[ PowerSequence(Integers()) |
+    [ 1, 57, 302, 880, 1935, 3611, 6052, 9402, 13805, 19405, 26346, 34772,
+        44827, 56655, 70400, 86206, 104217, 124577, 147430, 172920, 201191 ],
+    [ 1, 41, 208, 594, 1291, 2391, 3986, 6168, 9029, 12661, 17156, 22606,
+        29103, 36739, 45606, 55796, 67401, 80513, 95224, 111626, 129811 ],
+    [ 1, 31, 151, 425, 917, 1691, 2811, 4341, 6345, 8887, 12031, 15841,
+        20381, 25715, 31907, 39021, 47121, 56271, 66535, 77977, 90661 ],
+    [ 1, 17, 77, 213, 457, 841, 1397, 2157, 3153, 4417, 5981, 7877, 10137,
+        12793, 15877, 19421, 23457, 28017, 33133, 38837, 45161 ],
+    [ 1, 30, 149, 430, 945, 1766, 2965, 4614, 6785, 9550, 12981, 17150,
+        22129, 27990, 34805, 42646, 51585, 61694, 73045, 85710, 99761 ] ];
+hilbs:=[ PowerSequence(Integers()) |
+    [ 1, 5, 15, 35, 69, 121, 195, 295, 425, 589, 791, 1035, 1325, 1665, 2059,
+        2511, 3025, 3605, 4255, 4979, 5781 ],
+    [ 1, 6, 20, 49, 99, 176, 286, 435, 629, 874, 1176, 1541, 1975, 2484, 3074,
+        3751, 4521, 5390, 6364, 7449, 8651 ],
+    [ 1, 7, 25, 63, 129, 231, 377, 575, 833, 1159, 1561, 2047, 2625, 3303,
+        4089, 4991, 6017, 7175, 8473, 9919, 11521 ],
+    [ 1, 9, 35, 91, 189, 341, 559, 855, 1241, 1729, 2331, 3059, 3925, 4941,
+        6119, 7471, 9009, 10745, 12691, 14859, 17261 ],
+    [ 1, 6, 20, 49, 99, 176, 286, 435, 629, 874, 1176, 1541, 1975, 2484, 3074,
+        3751,4521, 5390, 6364, 7449, 8651 ] ];
+for i in [1..#Ps] do
+    assert EhrhartCoefficients(Ps[i],20) eq ehrs[i];
+    X:=ToricVariety(Rationals(),SpanningFan(Ps[i]));
+    assert HilbertCoefficients(-CanonicalDivisor(X),20) eq hilbs[i];
+end for;
+
+// All but the second polytope "come from" a reflexive polytope
+for i in [1..#Ps] do
+    bool,Q:=realisable_via_reflexive(Ps[i]);
+    if i eq 2 then
+        assert bool eq false;
+    else
+        assert bool eq true;
+        assert NumberOfInteriorPoints(Q) eq 1;
+        Y:=ToricVariety(Rationals(),SpanningFan(Q));
+        assert NumberOfQuotientGradings(Y) eq 0;
+        if i le 3 then
+            assert NumberOfGradings(Y) eq 4;
+        else
+            assert NumberOfGradings(Y) eq 2;
+        end if;
+    end if;
+end for;
+
+// What's Q in that second case?
+X:=ToricVariety(Rationals(),SpanningFan(Ps[2]));
+Y:=strip_quotient(X);
+Q:=Polytope(Rays(Fan(Y)));
+assert NumberOfVertices(Q) eq 7;
+assert NumberOfInteriorPoints(Q) eq 2;

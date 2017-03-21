@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Schemes in Toric Varieties</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1402.htm">[Next]</A><A  HREF = "text1411.htm">[Prev]</A> <A  HREF = "text1402.htm">[Right]</A> <A  HREF = "text1411.htm">[Left]</A> <A  HREF = "text1403.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "15998">Schemes in Toric Varieties</A></H3>
+
+<P>
+<P>
+The polynomials of the Cox ring of a toric variety X provide
+homogeneous coordinates on X that can be used to define
+subschemes of X.
+These subschemes are true Magma schemes, and so the usual
+scheme machinery works for them. However, there is a substantial
+caveat to this for the first version of the toric geometry package:
+affine patches have not been installed systematically, and so
+scheme machinery that uses affine patches of schemes will not work.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1412.htm#15999">Construction of Subschemes</A>
+</UL>
+<H4><A NAME = "15999">Construction of Subschemes</A></H4>
+
+
+
+<H5><A NAME = "16000">Scheme(X,f) : TorVar,RngMPolElt -&gt; Sch</A></H5>
+<BLOCKQUOTE>
+The subscheme of the toric variety X defined by the
+polynomial f from the Cox ring of X.
+</BLOCKQUOTE>
+<H5><A NAME = "16001">Scheme(X,Q) : TorVar,[RngMPolElt] -&gt; Sch</A></H5>
+<BLOCKQUOTE>
+The subscheme of the toric variety X defined by the
+sequence Q of polynomials from the Cox ring of X.
+</BLOCKQUOTE>
+<H5><A NAME = "16002">BinomialToricEmbedding(Z) : Sch -&gt; Sch, TorMap</A></H5>
+<BLOCKQUOTE>
+Takes the binomial equations in the ideal of the scheme Z and constructs the toric variety given by the normalisation of the closure of the subtorus described by those binomials. Returns the pullback of Z and the normalisation map into the ambient of Z.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16003">Example <TT>Toric_toric-mmp-example1 (H124E24)</TT></A></H3>
+Toric varieties are the natural ambient space for many varieties.
+Here we review the example of a trigonal curve from the
+Schemes chapter (it is self-contained here).
+<P>
+First make a curve. (This curve is in fact trigonal---it admits
+a 3-to-1 cover of the projective line. Once you've had that
+thought, it's actually pretty clear: the defining equation is a cubic
+in y. But there's more to it than just being trigonal, as
+we will see.)
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(Rationals(),2);
+&gt; C := Curve(P,x^8 + x^4*y^3*z + z^8);
+&gt; Genus(C);
+8
+</PRE>
+This curve is of general type (that is, its genus is at least 2),
+so we can consider the canonical map: that will either be an
+embedding or a 2-to-1 map to a projective line.
+<P>
+We make the canonical map take its image in a toric variety.
+<P>
+<P>
+<PRE>
+&gt; eqns := Sections(CanonicalLinearSystem(C));
+&gt; X&lt;[a]&gt; := ProjectiveSpace(Rationals(),7);
+&gt; f := map&lt; P -&gt; X | eqns &gt;;
+&gt; V := f(C);
+&gt; V;
+Curve over Rational Field defined by
+a[1]^3 + a[2]^2*a[4] + a[1]*a[8]^2,
+a[1]^2*a[3] + a[2]^2*a[6] + a[3]*a[8]^2,
+a[1]^2*a[5] + a[2]*a[4]*a[6] + a[5]*a[8]^2,
+a[1]*a[4]*a[6] - a[2]^2*a[7],
+a[1]*a[6]^2 - a[2]^2*a[8],
+a[2]*a[6]^2 + a[1]^2*a[7] + a[7]*a[8]^2,
+a[4]*a[6]^2 + a[1]^2*a[8] + a[8]^3,
+a[2]*a[3] - a[1]*a[4],
+a[3]^2 - a[1]*a[5],
+a[3]*a[4] - a[1]*a[6],
+a[4]^2 - a[2]*a[6],
+a[2]*a[5] - a[1]*a[6],
+a[3]*a[5] - a[1]*a[7],
+a[4]*a[5] - a[2]*a[7],
+a[5]^2 - a[1]*a[8],
+a[3]*a[6] - a[2]*a[7],
+a[5]*a[6] - a[2]*a[8],
+a[3]*a[7] - a[1]*a[8],
+a[4]*a[7] - a[2]*a[8],
+a[5]*a[7] - a[3]*a[8],
+a[6]*a[7] - a[4]*a[8],
+a[7]^2 - a[5]*a[8]
+</PRE>
+All those binomial equations suggest that V lies on a
+toric variety embedded in X=P<sup>7</sup>.
+We can recover this toric variety and its map to X.
+<P>
+<P>
+<PRE>
+&gt; W,g := BinomialToricEmbedding(V);
+&gt; Y&lt;[b]&gt; := Domain(g);
+&gt; Y;
+Toric variety of dimension 2
+Variables: b[1], b[2], b[3], b[4]
+The components of the irrelevant ideal are:
+    (b[3], b[2]), (b[4], b[1])
+The 2 gradings are:
+    0, 1, 1, 0,
+    1, 0, 2, 1
+</PRE>
+It is a well-known consequence of (geometric) Riemann--Roch that
+trigonal curves lie on scrolls in their canonical embeddings.
+Exactly which scroll is an intrinsic property of the
+particular curve: the Maroni invariant of a trigonal curve
+can be realised as the twist that occurs in the scroll, in this
+case 2 (visible in the last line of output above).
+<P>
+This makes good sense: the scroll Y has a natural
+map to P<sup>1</sup>, and the equation of the curve W
+is a cubic in the fibre variables b[2], b[3] so
+defines a 3-to-1 cover of the base.
+<P>
+<P>
+<PRE>
+&gt; I := Saturation(DefiningIdeal(W),IrrelevantIdeal(Y));
+&gt; Basis(I);
+[
+     b[1]^8*b[2]^3 + b[1]*b[3]^3*b[4] + b[2]^3*b[4]^8
+]
+</PRE>
+The need for saturation is already visible in the
+equations of V: all those cubics are really
+multiples of a single cubic on the scroll by irrelevant
+ideals, but written in the coordinates of the projective space.
+<PRE></PRE> <A  HREF = "text1402.htm">[Next]</A><A  HREF = "text1411.htm">[Prev]</A> <A  HREF = "text1402.htm">[Right]</A> <A  HREF = "text1411.htm">[Left]</A> <A  HREF = "text1403.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

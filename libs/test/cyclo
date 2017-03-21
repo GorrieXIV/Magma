@@ -1,0 +1,70 @@
+/*
+Cyclotomic Fields test.
+AKS 9/1/97.
+*/
+
+
+procedure test_cyclo(n)
+    print "test_cyclo:", n;
+
+    K<w> := CyclotomicField(n);
+    d := Degree(K);
+    d1 := d - 1;
+
+    assert IsZero(K ! 0);
+    assert IsOne(K ! 1);
+    assert IsMinusOne(K ! -1);
+
+    for r in [10, 10^5, 10^20] do
+	ran1 := func<|Random(-r,r)>;
+	ran := func<|Random(-r,r)/Random(1,r)>;
+	for i := 0 to 8 do
+	    case i mod 3:
+	    when 0:
+		x := K![ran1(): i in [0 .. d1]];
+		y := K![ran1(): i in [0 .. d1]];
+		c := K!ran1();
+	    when 1:
+		x := K![ran(): i in [0 .. d1]];
+		y := K![ran1(): i in [0 .. d1]];
+		c := K!ran();
+	    when 2:
+		x := K![ran(): i in [0 .. d1]];
+		y := K![ran(): i in [0 .. d1]];
+		c := K!ran();
+	    end case;
+
+	    assert x + y eq y + x;
+	    assert x * y eq y * x;
+	    assert x * (x + y) eq x^2 + y*x;
+	    assert x + 0 eq x;
+	    assert x * 0 eq 0;
+	    assert x - x eq 0;
+	    assert x - y eq -(y - x);
+	    assert x^2 - y^2 eq (x - y)*(x + y);
+	    //print "XXX";
+	    //print x;
+	    //print y;
+	    //print (x + y)^2;
+	    //print x^2 + y^2 + 2*x*y;
+	    assert (x + y)^2 eq x^2 + y^2 + 2*x*y;
+
+	    //assert Norm(x) eq x * Conjugate(x);
+	    assert x^0 eq 1;
+
+	    if not IsZero(x) then
+		assert IsUnit(x);
+		assert (c*x)/x eq c;
+		xi := x^-1;
+		assert x * xi eq 1;
+		assert x/x eq 1;
+		assert (y/x) * x eq y;
+	    end if;
+	end for;
+    end for;
+end procedure;
+
+//for n in [2 .. 20] cat [21 .. 50 by 2] do
+for n in [2 .. 7] do //cat [21 /*.. 50 by 10*/] do
+    test_cyclo(n);
+end for;

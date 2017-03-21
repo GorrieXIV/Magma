@@ -1,0 +1,276 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Representation and Monomial  Orders</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1206.htm">[Next]</A><A  HREF = "text1204.htm">[Prev]</A> <A  HREF = "text1206.htm">[Right]</A> <A  HREF = "text1204.htm">[Left]</A> <A  HREF = "text1203.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "13440">Representation and Monomial  Orders</A></H3>
+
+<P>
+<P>
+<P>
+Let P be the polynomial ring R[x<sub>1</sub>, ..., x<sub>n</sub>] of rank n over a
+ring R.  A <I>monomial</I> (or <I>power product</I>) of P is a product of
+powers of the variables (or indeterminates) of P, that is, an expression
+of the form
+x<sub>1</sub><sup>e<sub>1</sub></sup> ... x<sub>n</sub><sup>e<sub>n</sub></sup> with e<sub>i</sub> &ge;0 for 1 &le;i &le;n.
+Multivariate polynomials in Magma are stored efficiently in distributive
+form, using arrays of coefficient-monomial pairs, where the coefficient
+is in the base ring R.  The word `term' will always refer to a
+coefficient multiplied by a monomial.
+<P>
+Monomial orders are of critical importance when dealing with Gr&ouml;bner
+bases.
+Let M be the set of all monomials of P.
+A <I>monomial ordering</I> on M is a total order &lt; on M such that
+1 &le;s for all s &isin;M, s &le;t implies su &le;tu for all
+s, t, u &isin;M, and M is a well-ordering (every non-empty subset of M
+possesses a minimal element w.r.t. &lt;).
+Monomial orders can be naturally specified in terms of
+<I>weight vectors</I>: a vector W from Q<sup>n</sup> with non-negative entries
+is called a weight vector
+since it weights a monomial s by the product s.W (defined to be the
+dot product of the exponent vector of s with W); any sequence of n
+linearly-independent weight vectors determines a monomial order on M
+(see the weight order below [subsection <A  HREF = "text1205.htm#13449">Weight: <TT>weight</TT></A>]).
+All monomial orderings can in fact be represented
+in terms of weight vectors.
+<P>
+Multivariate polynomial rings are constructed in
+Magma such that the monomials of any polynomial are sorted with respect
+to a specified monomial order, with the greatest monomial first.
+Gr&ouml;bner basis
+computations are dramatically affected by the choice of monomial order.
+Magma provides an extensive choice of monomial orders.
+Currently, the intrinsic functions <A  HREF = "text1206.htm#GB:PolynomialRing">PolynomialRing</A> (or
+<A  HREF = "text1206.htm#GB:PolynomialAlgebra">PolynomialAlgebra</A>), <A  HREF = "text1209.htm#GB:ChangeOrder">ChangeOrder</A> and
+<A  HREF = "text1221.htm#dpoly_ideal:VariableExtension">VariableExtension</A>
+expect a monomial order; it is specified by a string giving the name,
+optionally followed by extra arguments for that order.
+<P>
+We now describe each of the monomial orders available in Magma.
+We suppose that s and t are monomials from P which has rank n.
+Any order on the monomials is then fully defined by just specifying exactly
+when s &lt; t with respect to that order.  In the following,
+the argument(s) are described
+for an order as a list of expressions; that means that the expressions
+(without the parentheses) should be appended to any base arguments when
+any particular intrinsic function is called which expects a monomial order.
+See also <A  HREF = "text1202.htm#bib_CLO">[CLO96, Chap. 2, Para 2]</A> for more details about the first
+three orders.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1205.htm#13441">Lexicographical: <TT>lex</TT></A>
+<LI> <A  HREF = "text1205.htm#13442">Graded Lexicographical: <TT>glex</TT></A>
+<LI> <A  HREF = "text1205.htm#13443">Graded Reverse Lexicographical:  <TT>grevlex</TT></A>
+<LI> <A  HREF = "text1205.htm#13444">Graded Reverse Lexicographical  (Weighted): <TT>grevlexw</TT></A>
+<LI> <A  HREF = "text1205.htm#13445">Elimination (k): <TT>elim</TT></A>
+<LI> <A  HREF = "text1205.htm#13446">Elimination List: <TT>elim</TT></A>
+<LI> <A  HREF = "text1205.htm#13447">Inverse Block: <TT>invblock</TT></A>
+<LI> <A  HREF = "text1205.htm#13448">Univariate: <TT>univ</TT></A>
+<LI> <A  HREF = "text1205.htm#13449">Weight: <TT>weight</TT></A>
+</UL>
+<H4><A NAME = "13441">Lexicographical: <TT>lex</TT></A></H4>
+
+<P>
+<P>
+Definition: s &lt; t iff there exists 1 &le;i &le;n such that
+the first i - 1 exponents of s and t are equal but the i-th exponent
+of s is less than the i-th exponent of t.
+The order is specified by the argument (<TT>"lex"</TT>).
+<P>
+The order is called "lexicographical" since it orders the monomials
+as if they were words in a dictionary.  The i-th
+variable is greater than the (i + 1)-th variable for 1 &le;i &lt; n so
+the first variable is the greatest variable.
+A Gr&ouml;bner basis of an ideal with respect to the lexicographical order usually
+represents the most information about the ideal but can be hard to compute.
+
+
+<H4><A NAME = "13442">Graded Lexicographical: <TT>glex</TT></A></H4>
+
+<P>
+<P>
+Definition: s &lt; t iff the total degree of s is less than the total degree
+of t or the total degree of s is equal to the total degree of t and
+s &lt; t with respect to the lexicographical order.
+The order is specified by the argument (<TT>"glex"</TT>).
+<P>
+The order is called "graded lexicographical" since it first grades the
+monomials by total degree, and then decides ties by the lexicographical order.
+The i-th variable is greater than the (i + 1)-th variable for 1 &le;i &lt; n
+so the first variable is the greatest variable.
+This order is rarely used because the <TT>grevlex</TT> order below is usually
+a better degree order (i.e., yields smaller Gr&ouml;bner bases).
+
+
+<H4><A NAME = "13443">Graded Reverse Lexicographical:  <TT>grevlex</TT></A></H4>
+
+<P>
+<P>
+<P>
+Definition: s &lt; t iff the total degree of s is less than the total degree
+of t or the total degree of s is equal to the total degree of t and
+s &gt; t with respect to the lexicographical order applied to the
+exponents of s and t in reverse order.
+The order is specified by the argument (<TT>"grevlex"</TT>).
+<P>
+The order is called "graded reverse lexicographical" since it first grades
+the monomials by total degree, and then decides ties by the negation of the
+lexicographical order applied to the variables in reverse order.
+Again, the i-th variable is greater than the (i + 1)-th variable
+for 1 &le;i &lt; n so the first variable is the greatest variable.
+A Gr&ouml;bner basis of an ideal with respect to the graded reverse
+lexicographical order is usually the easiest to compute so it is recommended
+that this order be used when just any Gr&ouml;bner basis for an ideal is desired.
+
+
+<H4><A NAME = "13444">Graded Reverse Lexicographical  (Weighted): <TT>grevlexw</TT></A></H4>
+
+<P>
+<P>
+<P>
+Definition (given a sequence W of n positive integer weights):
+s &lt; t iff the total weighted degree d<sub>s</sub> of s w.r.t. W is less than the total degree
+d<sub>t</sub> of t w.r.t. W or d<sub>s</sub>=d<sub>t</sub> and
+s &gt; t with respect to the lexicographical order applied to the
+exponents of s and t in reverse order.
+The order is specified by the arguments (<TT>"grevlexw", W</TT>).
+<P>
+The order is called "graded reverse lexicographical (weighted)"
+since it first grades the monomials by weighted degree w.r.t. W,
+and then decides ties by the negation of the
+lexicographical order applied to the variables in reverse order.
+If W = [1, 1, ..., 1], then this order is equal to the <TT>grevlex</TT>
+order.
+Again, the i-th variable is greater than the (i + 1)-th variable
+for 1 &le;i &lt; n so the first variable is the greatest variable.
+<P>
+This order is similar to the <TT>grevlex</TT> order, but is
+useful if an ideal is homogeneous with respect to the grading
+given by W, since the Gr&ouml;bner basis of the ideal will tend to
+be smaller with this order.
+
+
+<H4><A NAME = "13445">Elimination (k): <TT>elim</TT></A></H4>
+
+<P>
+<P>
+Definition (given k with 1 &le;k &le;n - 1):
+s &lt; t iff s<sub>k</sub> &lt; t<sub>k</sub> with respect to the <TT>grevlex</TT> order or
+s<sub>k</sub> = t<sub>k</sub> and s<sub>k'</sub> &lt; t<sub>k'</sub> with respect to the <TT>grevlex</TT> order
+where m<sub>k</sub> denotes the monomial consisting of the first k exponents of
+m and m<sub>k'</sub> denotes the monomial consisting of the last n - k exponents
+of m (this order is thus the concatenation of two block <TT>grevlex</TT>
+orders).  The order is specified by the arguments (<TT>"elim", k</TT>).
+<P>
+The order is called "elimination" since the first k variables are
+"eliminated": if G is a Gr&ouml;bner basis of an ideal I of the polynomial
+ring K[x<sub>1</sub>, ..., x<sub>n</sub>] with respect to this order, then
+G &cap;K[x<sub>k + 1</sub>, ..., x<sub>n</sub>] is a Gr&ouml;bner basis of the k-th
+elimination ideal
+I &cap;K[x<sub>k + 1</sub>, ..., x<sub>n</sub>].  (It is usually easier to
+compute a Gr&ouml;bner basis with respect to this order for any k
+than with respect to the full lexicographical order.)
+Again, the i-th variable is greater than the (i + 1)-th variable
+for 1 &le;i &lt; n so the first variable is the greatest variable.
+
+
+<H4><A NAME = "13446">Elimination List: <TT>elim</TT></A></H4>
+
+<P>
+<P>
+Definition (given sequences U and V such that U and V contain
+distinct integers in the range 1 to n and the sum of the lengths
+of U and V is n and U and V are disjoint):
+s &lt; t iff s<sub>U</sub> &lt; t<sub>U</sub> with respect to the <TT>grevlex</TT> order or
+s<sub>U</sub> = t<sub>U</sub> and s<sub>V</sub> &lt; t<sub>V</sub> with respect to the <TT>grevlex</TT> order
+where m<sub>L</sub> denotes the monomial consisting of the exponents of m
+corresponding to the entries of L in order.
+The order is specified by the arguments (<TT>"elim", U, V</TT>).  V may be
+omitted if desired so the arguments are just (<TT>"elim", U</TT>); in this
+case V is chosen to be an appropriate sequence to complement U.
+<P>
+The order is called "elimination" since the variables in U are
+"eliminated".  The order of the elements in U and V are significant
+since the ordering on the variables makes U[1] greatest, then U[2],
+etc., then V[1], V[2], etc.
+
+
+<H4><A NAME = "13447">Inverse Block: <TT>invblock</TT></A></H4>
+
+<P>
+<P>
+Definition (given sequences U and V such that U and V contain
+distinct integers in the range 1 to n and the sum of the lengths
+of U and V is n and U and V are disjoint):
+s &lt; t iff s<sub>V</sub> &lt; t<sub>V</sub> with respect to the <TT>grevlex</TT> order or
+s<sub>V</sub> = t<sub>V</sub> and s<sub>U</sub> &lt; t<sub>U</sub> with respect to the <TT>grevlex</TT> order.
+The order is specified by the arguments (<TT>"invblock", U, V</TT>).  V may be
+omitted if desired so the arguments are just (<TT>"invblock", U</TT>); in this
+case V is chosen to be an appropriate sequence to complement U.
+<P>
+The order is called "inverse block" since it applies a block ordering
+on the exponents on V then U which inverts the lists supplied to
+the elimination list order.  Thus this is the same as the elimination
+order except that the lists U and V are swapped.  See
+<A  HREF = "text1202.htm#bib_BeckerWeispfenning">[BW93, p. 390]</A> for the motivation for this order.
+
+
+<H4><A NAME = "13448">Univariate: <TT>univ</TT></A></H4>
+
+<P>
+<P>
+Definition (given i with 1 &le;i &le;n):
+s &lt; t iff s<sub>L</sub> &lt; t<sub>L</sub> with respect to the <TT>grevlex</TT> order or
+s<sub>L</sub> = t<sub>L</sub> and the i-th exponent of s is less than the i-th
+exponent of t, where L is the sequence <TT>[1 .. n]</TT> with i deleted.
+The order is specified by the arguments (<TT>"univ", i</TT>).
+<P>
+The order is called "univariate" since when monomials are compared,
+any monomial not containing the i-th variable is greater than any
+monomial containing the i-th variable.
+Thus all variables but the i-th are "eliminated" so that
+a Gr&ouml;bner basis of a zero-dimensional ideal I with this ordering
+will contain the
+unique monic generator of the elimination ideal consisting of all
+the polynomials in I containing the i-th variable alone.
+The j-th variable is greater than the (j + 1)-th variable for 1 &le;j &lt; i
+and i &lt; j &le;n and the j-th variable is greater than the i-th variable
+for any j not= i.
+
+
+<H4><A NAME = "13449">Weight: <TT>weight</TT></A></H4>
+
+<P>
+<P>
+<P>
+Definition (given n weight vectors W<sub>1</sub>, ... W<sub>n</sub> from Q<sup>n</sup>):
+s &lt; t iff there exists 1 &le;i &le;n such that
+s.W<sub>j</sub> = t.W<sub>j</sub> for 1 &le;j &lt; i and s.W<sub>i</sub> &lt; t.W<sub>i</sub>.
+The order is specified by the arguments (<TT>"weight", Q</TT>) where Q
+is a sequence of n<sup>2</sup> non-negative integers or rationals describing the n
+weight vectors of length n (in row major order).
+<P>
+The n weight vectors must describe a vector space basis of Q<sup>n</sup> (i.e., be
+linearly-independent), since otherwise this would not yield a total ordering
+on the monomials.  The weight order allows one to specify any possible monomial
+order; any of the monomial orders mentioned above can be specified by an
+appropriate choice of weight vectors.  However, using the in-built versions
+of the specialized orders above is much faster than constructing versions
+of them based on weight vectors.  The next section contains an example
+in which a polynomial ring is constructed with a weight order for the
+monomials.
+
+
+<PRE></PRE> <A  HREF = "text1206.htm">[Next]</A><A  HREF = "text1204.htm">[Prev]</A> <A  HREF = "text1206.htm">[Right]</A> <A  HREF = "text1204.htm">[Left]</A> <A  HREF = "text1203.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

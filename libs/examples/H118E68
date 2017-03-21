@@ -1,0 +1,44 @@
+"Source: Text/Geometry/Scheme.text";
+"Line: 9116";
+"Date: Wed Jun  8 17:42:16 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/Scheme.text, line: 9116
+// Example: H118E68 ()
+print "Example: H118E68";
+ei := GetEchoInput();
+SetEchoInput(true);
+Q := Rationals();
+R<a2,c,b1,b2,c1,c2,c3,c4,d1,d2,d3,d4,d5,d6,d7,
+  e1,e2,e3,e4,e5,e6,e7,e8> := PolynomialRing(Q,(3-1)+2+4+7+8);
+_<t> := PolynomialRing(R);
+P3 := t^3 + a2*t + a2/(26/-27); // normalisation
+P2 := t^2 + b1*t + b2;
+P4 := t^4 + c1*t^3 + c2*t^2 + c3*t + c4;
+P7 := t^7 + d1*t^6 + d2*t^5 + d3*t^4 + d4*t^3 + d5*t^2 + d6*t + d7;
+P8 := t^8 + e1*t^7 + e2*t^6 + e3*t^5 + e4*t^4 +
+            e5*t^3 + e6*t^2 + e7*t + e8;
+Q := P3 * P2^2 * P4^4 - P7 * P8^2 - c;
+S := Scheme(AffineSpace(R),Coefficients(Q));
+SetVerbose("IsolatedPoints",1);
+v:=[GF(101) | 26, 1,  -26,21,  -19,-27,-22,8, // known point
+             -14,12,26,-3,-37,-43,-22,  44,-11,-13,-21,45,-45,32,46];
+b, pt := IsolatedPointsLifter
+          (S,v : DegreeList:=[4], LiftingBound:=15, OptimizeFieldRep);
+K := Parent(pt[1]);
+DefiningPolynomial(K);
+Factorization(Discriminant(Integers(K)));
+X := P3 * P2^2 * P4^4;
+f := Polynomial([Evaluate(e,Eltseq(pt)) : e in Coefficients(X)]);
+p := 269;
+P := Factorization(p * Integers(K))[1][1]; assert Norm(P) eq p;
+_, mp := ResidueClassField(P);
+fp := Polynomial([mp(c) : c in Coefficients(f)]);
+D := [[Degree(u[1]) : u in Factorization(fp-i)] : i in [1..p]];
+Sort(SetToSequence(Set([Sort(d) : d in D | &+d eq 23])));
+SetEchoInput(false);
+load m23; // G is M23
+SetEchoInput(true);
+C := [g : g in ConjugacyClasses(G) | Order(g[3]) ne 1];
+S := Set([CycleStructure(c[3]) : c in C]);
+Sort([Sort(&cat[[s[1] : i in [1..s[2]]] : s in T]) : T in S]);
+SetEchoInput(ei);

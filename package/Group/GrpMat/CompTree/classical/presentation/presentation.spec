@@ -1,0 +1,15 @@
+{
+   sp.m
+   f-sn.m
+   sl2q.m
+   centre.m
+   sl.m
+   su.m
+   even-su.m
+   odd-su.m
+   su-3.m
+   omega
+   {
+      +omega.spec
+   }
+}

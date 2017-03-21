@@ -1,0 +1,195 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Automorphisms</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1414.htm">[Next]</A><A  HREF = "text1421.htm">[Prev]</A> <A  HREF = "text1414.htm">[Right]</A> <A  HREF = "text1421.htm">[Left]</A> <A  HREF = "text1415.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16066">Automorphisms</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1422.htm#16067">Automorphisms of Rational Curves</A>
+<LI> <A  HREF = "text1422.htm#16069">Automorphisms of Conics</A>
+</UL>
+<H4><A NAME = "16067">Automorphisms of Rational Curves</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+Automorphisms of the projective line P<sup>1</sup> are well-known to be
+3-transitive --- for any three distinct points p<sub>0</sub>, p<sub>1</sub>, and
+p_&infin;, there exists an automorphism taking 0 = (0:1), 1 = (1:1),
+and &infin;= (1:0) to p<sub>0</sub>, p<sub>1</sub>, and p_&infin;.  Conversely, the
+images of 0, 1, and &infin; uniquely characterise an automorphism.
+We use this characterisation of isomorphisms to define automorphisms
+of rational curves as bijections of three element sequences of points
+over the base ring.
+
+
+<H5><A NAME = "16068">Automorphism(C, S, T) : CrvRat, SetIndx, SetIndx -&gt; MapIsoSch</A></H5>
+<BLOCKQUOTE>
+Given a rational curve C and two indexed sets S = { p<sub>0</sub>, p<sub>1</sub>,
+p_&infin;} and T = {q<sub>0</sub>, q<sub>1</sub>, q_&infin;}, each of distinct points
+over the base ring of C, returns the unique automorphism of C
+taking p<sub>0</sub>, p<sub>1</sub>, p_&infin; to q<sub>0</sub>, q<sub>1</sub>, q_&infin;.
+</BLOCKQUOTE>
+<H4><A NAME = "16069">Automorphisms of Conics</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+The automorphism group of a conic, and indeed the conics themselves,
+have a special relationship with quaternion algebras (see Lam <A  HREF = "text1414.htm#bib_Lam73">[Lam73]</A>
+or Vign&eacute;ras <A  HREF = "text1414.htm#bib_Vigneras80">[Vig80]</A>).  For the sake of exposition we focus
+on conics C/K defined by a Legendre equation
+<P>
+ax<sup>2</sup> + by<sup>2</sup> + cz<sup>2</sup> = 0
+<P>
+where abc &ne;0.
+We define a quaternion algebra A over K with anticommuting
+generators i, j, and k = c<sup> - 1</sup>ij satisfying relations
+<P>
+i<sup>2</sup> = - bc,   j<sup>2</sup> = - ac,   k<sup>2</sup> = - ab,
+<P>
+and setting I = ai, J = bj, and K = ck.  Then for any extension L/K
+we may identify the ambient projective pointset P<sup>2</sup>(L)
+with the projectivisation of the trace zero part
+<P>
+A<sub>L</sub><sup>0</sup> = { &alpha; &isin;A<sub>L</sub> | Tr(&alpha;) = 0 } = LI + LJ + LK
+<P>
+of the quaternion algebra A<sub>L</sub> = A tensor <sub>K</sub> L via (x:y:z) |-&gt; xI + yJ + zK.
+Under this map, the pointsets C(L) are identified with the norm
+zero elements
+<P>
+Nm(xI + yJ + zK) = abc(ax<sup>2</sup> + by<sup>2</sup> + cz<sup>2</sup>)=0
+<P>
+in P<sup>2</sup>(L). This allows us to identify the automorphism group
+Aut<sub>K</sub>(C) with the quotient unit group A<sup> * </sup>/K<sup> * </sup> acting on each
+A<sub>L</sub><sup>0</sup> by conjugation.
+<P>
+In the Magma implementation of this correspondence, the quaternion
+algebra A is computed and stored as an attribute of the curve C.
+Automorphisms of C can be created from any invertible element of
+the quaternion algebra.  We note that the isomorphism of two conics
+is equivalent to the isomorphism of their quaternion algebras, and
+that a rational parametrisation of a conic is equivalent to an
+isomorphism A isomorphic to &lt;Meta&gt;-<sub>2</sub>(K).
+<P>
+We note that while the advanced features of finding rational points
+(and hence finding parametrisations) and determining isomorphism
+only exist over Q, it is possible to represent the automorphism
+group and find automorphisms of the curve independently of these
+other problems.
+The current implementation works only in characteristic different
+from 2, as otherwise a Legendre model does not exist.
+
+
+<H5><A NAME = "16070">QuaternionAlgebra(C) : CrvCon-&gt; AlgQuat</A></H5>
+<BLOCKQUOTE>
+Returns the quaternion algebra in which automorphisms of the conic
+C can be represented.
+</BLOCKQUOTE>
+<H5><A NAME = "16071">Automorphism(C, a) : CrvCon, AlgQuatElt -&gt; MapIsoSch</A></H5>
+<BLOCKQUOTE>
+Given a conic C and a unit a of the quaternion algebra associated
+to C, returns the automorphism of C corresponding to a.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16072">Example <TT>CrvCon_ConicAutomorphisms (H125E13)</TT></A></H3>
+In this example we demonstrate how to use the quaternion algebra of a
+conic to construct nontrivial automorphisms of the curve when
+no rational points exist over the base ring.  (We use the printing
+level <TT>Minimal</TT> to produce human readable output for scheme maps.)
+<P>
+<P>
+<PRE>
+&gt; P2&lt;x,y,z&gt; := ProjectiveSpace(Rationals(), 2);
+&gt; C0 := Conic(P2, 2*x^2 + x*y + 5*y^2 - 37*z^2);
+&gt; HasRationalPoint(C0);
+false
+&gt; BadPrimes(C0);
+[ 3, 37 ]
+&gt; A := QuaternionAlgebra(C0);
+&gt; RamifiedPrimes(A);
+[ 3, 37 ]
+&gt; B := Basis(MaximalOrder(A));
+&gt; B;
+[ 1, 1/52*i + 1/4*j + 2/481*k, j, 1/2 + 1/148*k ]
+&gt; m1 := Automorphism(C0, A!B[2]);
+&gt; m1 : Minimal;
+(x : y : z) -&gt; (-5/8*x + 259/48*y - 37/3*z : 37/12*x + 69/8*y - 74/3*z :
+    x + 7/2*y - 61/6*z)
+&gt; m2 := Automorphism(C0, A!B[3]);
+&gt; m2 : Minimal;
+(x : y : z) -&gt; (x + 1/2*y : -y : z)
+&gt; m3 := Automorphism(C0, A!B[4]);
+&gt; m3 : Minimal;
+(x : y : z) -&gt; (-x - 1/2*y : 1/5*x - 9/10*y : z)
+&gt; [ Trace(B[2]), Trace(B[3]), Trace(B[4]) ];
+[ 0, 0, 1 ]
+&gt; m1 * m1 : Minimal;
+(x : y : z) -&gt; (x : y : z)
+&gt; m2 * m2 : Minimal;
+(x : y : z) -&gt; (x : y : z)
+&gt; m3 * m3 : Minimal;
+(x : y : z) -&gt; (9/10*x + 19/20*y : -19/50*x + 71/100*y : z)
+</PRE>
+The last example points out that <I>pure</I> quaternions &tau; in A<sub>0</sub>
+give rise to involutions --- a reflection of the projective plane about
+the point defined by &tau; in P<sup>2</sup>(K).
+<P>
+<P>
+<P>
+One of the strengths of the scheme model in Magma is the ability
+to work with points of a curve over any extension.  Provided that we have
+a rational point over some extension field L/K, we are able to
+apply automorphisms of the curve to generate an unbounded number
+of new points over that extension by means of the action of the
+automorphism group.  We demonstrate this by looking at quadratic twists
+of the curve to find a point over Q, which identifies a point on
+the original curve over a quadratic extension.
+<P>
+<P>
+<PRE>
+&gt; C1 := Conic(P2, 2*x^2 + x*y + 5*y^2 - z^2);
+&gt; HasRationalPoint(C1);
+false
+&gt; C2 := Conic(P2, 2*x^2 + x*y + 5*y^2 - 2*z^2);
+&gt; HasRationalPoint(C2);
+true
+&gt; RationalPoint(C2);
+(-1 : 0 : 1)
+</PRE>
+This gives rise to the obvious points (&#8723; 1 : 0 : Sqrt(74)/37) on
+the original curve.
+<P>
+<P>
+<PRE>
+&gt; P&lt;t&gt; := PolynomialRing(RationalField());
+&gt; L&lt;a&gt; := NumberField(t^2 - 74);
+&gt; p := C0(L)![1, 0, a/37];
+&gt; m1(p);
+(1/1880*(207*a + 3034) : 1/940*(-37*a + 2146) : 1)
+&gt; m2(p);
+(1/2*a : 0 : 1)
+&gt; m3(p);
+(-1/2*a : 1/10*a : 1)
+</PRE>
+We could alternatively have formed the base extension of the curve
+to the new field L and used the known point over L to find a
+parametrisation of the curve by the projective line.   This approach
+demonstrates that it is possible to work with points and curve
+automorphisms without passing to a new curve.
+<PRE></PRE> <A  HREF = "text1414.htm">[Next]</A><A  HREF = "text1421.htm">[Prev]</A> <A  HREF = "text1414.htm">[Right]</A> <A  HREF = "text1421.htm">[Left]</A> <A  HREF = "text1415.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

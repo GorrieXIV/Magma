@@ -1,0 +1,22 @@
+{
+    General
+    {
+	ChtrTable
+	{
+	    +ChtrTable.spec
+	}
+	SchurIndex
+	{
+	    +SchurIndex.spec
+	}
+	chtr.m 
+	chtr_table_test.m 
+	misc.m 
+	rat.m
+    }
+    GrpPC
+    {
+	chtr_degrees.m 
+	pgps.m
+    }
+}

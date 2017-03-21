@@ -1,0 +1,51 @@
+"Source: Text/RepThy/LieReps.text";
+"Line: 2275";
+"Date: Tue Jun  7 22:27:15 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/RepThy/LieReps.text, line: 2275
+// Example: H110E16 ()
+print "Example: H110E16";
+ei := GetEchoInput();
+SetEchoInput(true);
+signchange := function(pol, pwr)
+    //returns X^pwr * bar(pol)
+    deg := Degree(pol);
+    P := Parent(pol);
+    if (deg gt pwr) then return "Failed: Can't do sign change"; end if;
+    return (P.1)^(pwr-deg)*P!Reverse(Eltseq(pol));
+end function;
+testKL := function(x, w)
+    W := Parent(x);
+    rng<X> := PolynomialRing(Integers());
+    lenw := CoxeterLength(W, w);
+    lenx := CoxeterLength(W, x);
+    if (lenx gt lenw) then
+        return "Failed: l(x) > l(w) gives zero R and KL polynomials.";
+    end if;
+    /* Left hand side */
+    Pxw := KLPolynomial(x, w : Ring := rng);
+    lhs := signchange(Pxw, lenw - lenx);
+    if (Type(lhs) eq MonStgElt) then return lhs; end if;
+    lhs -:= Pxw;
+    /* Right hand side */
+    rhs := rng!0;
+    lvl := {w};
+    lvllen := lenw;
+    while (lvllen gt lenx and #lvl gt 0) do
+        for y in lvl do
+            rhs +:= RPolynomial(x,y : Ring := rng)*
+                        KLPolynomial(y, w : Ring := rng);
+        end for;
+        lvl := BruhatDescendants(lvl : z := x);
+        lvllen -:= 1;
+    end while;
+    /* Done */
+    printf "LHS: %o\n", lhs;
+    printf "RHS: %o\n", rhs;
+    return lhs eq rhs;
+end function;
+W := CoxeterGroup("D4");
+x := W.1*W.2*W.1;
+w := W.1*W.2*W.3*W.4*W.1*W.2;
+testKL(x,w);
+SetEchoInput(ei);

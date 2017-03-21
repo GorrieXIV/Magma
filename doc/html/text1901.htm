@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Weight Distribution and Minimum Weight</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1902.htm">[Next]</A><A  HREF = "text1900.htm">[Prev]</A> <A  HREF = "text1902.htm">[Right]</A> <A  HREF = "text1900.htm">[Left]</A> <A  HREF = "text1896.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "21174">Weight Distribution and Minimum Weight</A></H3>
+
+<P>
+<P>
+<P>
+The weight distribution of a quantum code Q consists of three separate
+distributions: 
+<P>
+<DL COMPACT class='compact'>
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>The weight distribution of the stabilizer code S.
+<P>
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>The weight distribution of the symplectic dual S<sup>perp</sup> of S.
+<P>
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>The weight distribution of the codewords in S<sup>perp</sup> \ S.
+Note that this set is not a linear space.
+<P>
+<P>
+<P>
+</DL>
+For a quantum code Q with stabilizer code S, the weights of the 
+undetectable errors are the weights of the codewords in 
+S<sup>perp</sup> \ S.
+<P>
+For a quantum code to be considered <I>pure</I>, its minimum
+weight must be less than or equal to the weight of its 
+stabilizer code.
+
+
+<H5><A NAME = "21175">WeightDistribution(Q) : CodeQuantum -&gt; SeqEnum, SeqEnum, SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a quantum code Q with stabiliser code S, return its weight 
+distribution. Recall that the quantum weight distribution comprises
+the weight distributions of S, S<sup>perp</sup> and S<sup>perp</sup> \ S.
+The function returns each distribution as a separate value. 
+Each weight distribution is returned in the form of a sequence of
+tuples consisting of a weight and the number of code words of that
+weight.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "21176">Example <TT>QECC_QuantWeightDist (H164E19)</TT></A></H3>
+Looking at a small quantum code from the database of best known codes.
+Its first weight distribution is of its stabilizer code S, the second
+of its normalizer code S<sup>perp</sup>, and the final weight distribution
+is of those non-zero codewords in S<sup>perp</sup> \ S.
+<P>
+<P>
+<PRE>
+&gt; F&lt;w&gt; := GF(4);
+&gt; Q := QECC(GF(4),6,3);
+&gt; Q;
+[[6, 3, 2]] Quantum code over GF(2^2), stabilised by:
+[  1   0   1   1   1   0]
+[  w   w   w   w   w   w]
+[  0   1   0   0   0   1]
+&gt; WD_S, WD_N, WD := WeightDistribution(Q);
+&gt; WD_S eq WeightDistribution(StabiliserCode(Q));
+true
+&gt; WD_N eq WeightDistribution(NormaliserCode(Q));
+true
+&gt; WD;
+[ &lt;2, 28&gt;, &lt;3, 56&gt;, &lt;4, 154&gt;, &lt;5, 168&gt;, &lt;6, 98&gt; ]
+</PRE>
+<HR>
+<H5><A NAME = "21177">MinimumWeight(Q) : CodeQuantum -&gt; RngIntElt</A></H5>
+
+<PRE>    Method: MonStgElt                   Default: "Auto"</PRE>
+
+<PRE>    RankLowerBound: RngIntElt           Default: 0</PRE>
+
+<PRE>    MaximumTime: RngReSubElt            Default: &infin;</PRE>
+<BLOCKQUOTE>
+For the quantum code Q with stabilizer code S, return the 
+minimum weight of Q, which is the minimum weight of the 
+codewords in S<sup>perp</sup> \ S. 
+For self-dual quantum codes (those of dimension 0), the minimum
+weight is defined to be the minimum weight of S.
+The default algorithm is based on the minimum weight algorithm for
+classical linear codes which is described in detail in section 
+<A  HREF = "text1839.htm#20436">The Minimum Weight</A>.  For a description of the algorithm and 
+its variable argument parameters please consult the full description provided 
+there.  The minimum weight may alternatively be calculated by finding
+the complete weight distribution. This algorithm may be selected  
+by setting the value of the variable argument <TT>Method</TT> to "<TT>Distribution</TT>".
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "21178">Example <TT>QECC_QuantMinWeight (H164E20)</TT></A></H3>
+The verbose output can be used in long minimum weight calculations to 
+estimate the remaining running time. The algorithm terminates once 
+the lower bound reaches the upper bound.  The example below finishes 
+in a very short period of time.
+<P>
+<P>
+<P>
+<PRE>
+&gt; F&lt;w&gt; := GF(4);
+&gt; V5 := VectorSpace(F, 5);
+&gt; gens := [V5| [0,0,1,w,w], [0,1,1,w,1], [0,0,1,0,w^2],
+&gt;              [0,0,1,w,1], [0,0,1,0,1], [1,w,1,w,w^2],
+&gt;              [1,1,1,w^2,w], [0,1,w,1,w^2] ];
+&gt; Q := QuantumQuasiCyclicCode(gens : LinearSpan := true);
+&gt; Q:Minimal;
+[[40, 30]] Quantum code over GF(2^2)
+&gt; SetVerbose("Code",true);
+&gt; MinimumWeight(Q);
+Quantum GF(2)-Additive code over GF(4) of length 40 with 70 generators.
+Lower Bound: 1, Upper Bound: 40
+Constructed 2 distinct generator matrices
+Total Ranks:     35  35
+Relative Ranks:  35   5
+Time Taken: 0.14
+Starting search for low weight codewords... (reset timings)
+Enumerating using 1 generator at a time:
+     New codeword identified of weight 6, time 0.00
+     New codeword identified of weight 4, time 0.00
+     Discarding non-contributing rank 5 matrix
+     New Total Ranks:     35
+     New Relative Ranks:  35
+   Completed Matrix  1:  lower =  2, upper =  4. Elapsed: 0.00s
+Termination predicted with 3 generators at matrix 1
+Enumerating using 2 generators at a time:
+   Completed Matrix  1:  lower =  3, upper =  4. Elapsed: 0.00s
+Termination predicted with 3 generators at matrix 1
+predicting enumerating (1820) 60725 vectors (0.000000
+Enumerating using 3 generators at a time:
+   Completed Matrix  1:  lower =  4, upper =  4. Elapsed: 0.03s
+Final Results: lower = 4, upper = 4, Total time: 0.03
+4
+</PRE>
+<HR>
+<H5><A NAME = "21179">IsPure(Q) : CodeQuantum -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if Q is a <I>pure</I> quantum code.
+That is, if the minimum weight of Q is less than or equal to
+the minimum weight of its stabiliser code.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "21180">Example <TT>QECC_QECC-IsPure (H164E21)</TT></A></H3>
+Many good codes are impure, the purity of best known
+quantum codes of length 15 are investigated.
+<P>
+<P>
+<PRE>
+&gt; F&lt;w&gt; := GF(4);
+&gt; n := 15;
+&gt; time {* IsPure(QECC(F, n, k)) : k in [1..n] *};
+{* false^^10, true^^5 *}
+Time: 0.410
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1902.htm">[Next]</A><A  HREF = "text1900.htm">[Prev]</A> <A  HREF = "text1902.htm">[Right]</A> <A  HREF = "text1900.htm">[Left]</A> <A  HREF = "text1896.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

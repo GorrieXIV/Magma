@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Intersections of Classical Groups</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text999.htm">[Next]</A><A  HREF = "text1004.htm">[Prev]</A> <A  HREF = "text999.htm">[Right]</A> <A  HREF = "text1004.htm">[Left]</A> <A  HREF = "text1000.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "11335">Intersections of Classical Groups</A></H3>
+
+<P>
+<P>
+<P>
+The main application of the *-algebra machinery is
+to the study of the group preserving each form in a 
+system of forms; the so-called <I>isometry group</I> of 
+the system. An essentially equivalent (but perhaps
+more familiar) problem is that of computing the 
+intersection of a set of classical groups defined
+on a common vector space. The main functions are
+implementations of the algorithms presented in
+<A  HREF = "text999.htm#bib_BrooksbankWilson1">[BW11a, Theorem 1.2]</A> and
+<A  HREF = "text999.htm#bib_BrooksbankWilson2">[BW11b, Theorem 1.1]</A>.
+
+
+<H5><A NAME = "11336">IsometryGroup(S : parameters) : SeqEnum -&gt; GrpMat</A></H5>
+
+<PRE>    Autos: SeqEnum                      Default: [0,..,0]</PRE>
+
+<PRE>    DisplayStructure: BoolElt           Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a sequence S containing a system of reflexive forms, 
+this function returns the group of isometries of the system. 
+In addition to allowing the individual forms to be degenerate,
+the function handles degenerate systems.  
+<P>
+The field automorphisms associated to the individual forms 
+are specified using the parameter <TT>Autos</TT>; the default 
+is that all forms in the system are bilinear over their 
+common base ring.  As well as finding generators for the 
+isometry group, the procedure determines the structure of 
+this group. The parameter <TT>DisplayStructure</TT> may be used 
+to display this structure.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11337">Example <TT>AlgInv_IsometryGroup (H92E10)</TT></A></H3>
+We compute the isometry group of the system of
+forms associated to a particular p-group.
+<P>
+<P>
+<PRE>
+&gt; G := ClassicalSylow(Sp (4, 5^2), 5);
+&gt; S := PGroupToForms(G);
+&gt; Parent(S[1]);
+Full Matrix Algebra of degree 6 over GF(5)
+&gt; I := IsometryGroup(S : DisplayStructure := true);
+   G
+   |   GL ( 1 , 5 ^ 1 )
+   *
+   |   5 ^ 4    (unipotent radical)
+   1
+&gt; #I;
+2500
+</PRE>
+<HR>
+<H5><A NAME = "11338">ClassicalIntersection(S) : SeqEnum -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a sequence S containing a number of classical groups,
+each one of which preserves (up to similarity) a unique 
+nondegenerate reflexive form on a common finite vector space V,
+this function returns the intersection of the groups. 
+It is not required that a classical group G in S be 
+the full group of isometries.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11339">Example <TT>AlgInv_ClassicalIntersection (H92E11)</TT></A></H3>
+In our final example we intersect two quasisimple
+classical groups. First we construct a
+symplectic group (Sp)(F<sub>1</sub>) for a particular
+skew-symmetric matrix F<sub>1</sub>.
+<P>
+<P>
+<PRE>
+&gt; K := GF(3);
+&gt; M := UpperTriangularMatrix
+&gt;        (K,[0,2,1,0,1,2,1,1,1,2,0,0,1,2,1,0,1,0,1,2,2]);
+&gt; F1 := M - Transpose(M);
+&gt; G1 := IsometryGroup(F1);
+</PRE>
+First check that G1 is a group of isometries.
+<P>
+<P>
+<PRE>
+&gt; forall{ g : g in Generators(G1) | g*F1*Transpose(g) eq F1 };
+true
+</PRE>
+Next we construct a quasisimple orthogonal group
+&Omega;^ - (F<sub>2</sub>) for a particular symmetric matrix
+F<sub>2</sub>.
+<P>
+<P>
+<PRE>
+&gt; F2 := SymmetricMatrix 
+&gt;         (K, [1,2,0,1,2,2,1,0,2,2,1,0,0,0,1,2,1,1,0,1,0]);
+&gt; C := TransformForm(F2, "orthogonalminus");
+&gt; G := OmegaMinus(6, 3);
+&gt; G2 := G^(C^-1);
+</PRE>
+First check that G2 is a group of isometries.
+<P>
+<P>
+<PRE>
+&gt; forall { g : g in Generators(G2) | g*F2*Transpose(g) eq F2 };
+true
+</PRE>
+Finally compute the intersection of G<sub>1</sub> and G<sub>2</sub> and
+ask for the order of this intersection group.
+<P>
+<P>
+<PRE>
+&gt; I := ClassicalIntersection([G1, G2]);
+&gt; #I;
+14
+</PRE>
+<PRE></PRE> <A  HREF = "text999.htm">[Next]</A><A  HREF = "text1004.htm">[Prev]</A> <A  HREF = "text999.htm">[Right]</A> <A  HREF = "text1004.htm">[Left]</A> <A  HREF = "text1000.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

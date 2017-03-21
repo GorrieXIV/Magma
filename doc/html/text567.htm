@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Changing Fields</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text568.htm">[Next]</A><A  HREF = "text566.htm">[Prev]</A> <A  HREF = "text568.htm">[Right]</A> <A  HREF = "text566.htm">[Left]</A> <A  HREF = "text561.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "6074">Changing Fields</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<H5><A NAME = "6075"></A><A NAME = "Minimize">Minimize</A>(A) : GalRep -&gt; GalRep</H5>
+
+<PRE>    To: GalRep                          Default: </PRE>
+<BLOCKQUOTE>
+Replace <TT>Group(A)</TT> by its smallest possible quotient through which all 
+components of A factor. If <TT>To</TT> is specified, instead replace 
+<TT>Group(A)</TT> by <TT>Group(To)</TT>, assuming the A factors through it.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6076">Example <TT>GalRep_galrep-minimize (H56E49)</TT></A></H3>
+We take an extension F of K=Q<sub>3</sub> with Galois group F<sub>5</sub>=C<sub>5</sub>:C<sub>4</sub> of order 20.
+It has five irreducible representations. Four of them are 1-dimensional, and
+so they actually factor through a smaller Galois group (C<sub>1</sub>, C<sub>2</sub> or C<sub>4</sub>).
+Minimize descends them to these Galois groups, although they are of course 
+still the same as representations of the absolute Galois group.
+<P>
+<P>
+<PRE>
+
+&gt; K:=pAdicField(3,20);
+&gt; R&lt;x&gt;:=PolynomialRing(K);
+&gt; list:=GaloisRepresentations(x^5-3);
+&gt; list;
+[
+1-dim trivial Galois representation 1 over Q3[20],
+1-dim unramified Galois representation (1,1,-1,-1,1) with G=F5, I=C5
+   over Q3[20],
+1-dim unramified Galois representation (1,-1,-zeta(4)_4,zeta(4)_4,1)
+   with G=F5, I=C5 over Q3[20],
+1-dim unramified Galois representation (1,-1,zeta(4)_4,-zeta(4)_4,1)
+   with G=F5, I=C5 over Q3[20],
+4-dim Galois representation (4,0,0,0,-1) with G=F5, I=C5, conductor 3^4
+   over Q3[20]
+]
+&gt; [Minimize(A): A in list];
+[
+1-dim trivial Galois representation 1 over Q3[20],
+1-dim unramified Galois representation (1,-1) with G=C2, I=C1 over Q3[20],
+1-dim unramified Galois representation (1,-1,-zeta(4)_4,zeta(4)_4)
+   with G=C4, I=C1 over Q3[20],
+1-dim unramified Galois representation (1,-1,zeta(4)_4,-zeta(4)_4)
+   with G=C4, I=C1 over Q3[20],
+4-dim Galois representation (4,0,0,0,-1) with G=F5, I=C5, conductor 3^4
+   over Q3[20]
+]
+&gt; forall{A: A in list | A eq Minimize(A)};
+true
+</PRE>
+<P>
+Finally, we illustrate how the parameter To may be used to descend a Galois
+representation to a specific Galois group, in this case the Galois group 
+Gal(F/K) isomorphic to C<sub>4</sub> of the degree 4 unramified extension of K.
+<P>
+<P>
+<PRE>
+
+&gt; F:=ext&lt;K|4&gt;;                    // Take F = degree 4 unr. ext. of K, and
+&gt; B:=PermutationCharacter(F,K);   // any B with BaseField(B)=K, Field(B)=F
+&gt; list[2];
+1-dim unramified Galois representation (1,1,-1,-1,1) with G=F5, I=C5 over Q3[20]
+&gt; Minimize(list[2]: To:=B);
+1-dim unramified Galois representation (1,1,-1,-1) with G=C4, I=C1 over Q3[20]
+&gt; Minimize(list[2]);
+1-dim unramified Galois representation (1,-1) with G=C2, I=C1 over Q3[20]
+</PRE>
+<P>
+<HR>
+<H5><A NAME = "6077">Restriction(A,L) : GalRep,FldPad -&gt; GalRep</A></H5>
+<H5>BaseChange(A,L) : GalRep,FldPad -&gt; GalRep</H5>
+<BLOCKQUOTE>
+Base change (restriction) of a Galois representation A over K over a finite 
+extension L/K.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6078">Example <TT>GalRep_galrep-basechange (H56E50)</TT></A></H3>
+We take a 2-dimensional irreducible representation of 
+Gal(Q<sub>2</sub>(&zeta;<sub>3</sub>, root 3 of 2)) isomorphic to S<sub>3</sub> and check that 
+its base change to Q<sub>2</sub>(&zeta;<sub>3</sub>) is reducible.
+<P>
+<P>
+<PRE>
+
+&gt; K:=pAdicField(2,20);
+&gt; R&lt;x&gt;:=PolynomialRing(K);
+&gt; A:=GaloisRepresentations(x^3-2)[3]; A;
+2-dim Galois representation (2,0,-1) with G=S3, I=C3, conductor 2^2 over Q2[20]
+&gt; L:=ext&lt;K|2&gt;;
+&gt; R:=Restriction(A,L); R;
+2-dim Galois representation (2,-1,-1) with G=C3, I=C3, conductor 2^2
+   over ext&lt;Q2[20]|2&gt;
+&gt; IsIrreducible(A),IsIrreducible(R);
+true false
+</PRE>
+<P>
+<HR>
+<H5><A NAME = "6079">Induction(A,K0) : GalRep,FldPad -&gt; GalRep</A></H5>
+<BLOCKQUOTE>
+Induction of a Galois representation A over K to a subfield K<sub>0</sub>&sub;K.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6080">Example <TT>GalRep_galrep-induction (H56E51)</TT></A></H3>
+<P>
+<P>
+<PRE>
+
+&gt; K0:=pAdicField(2,20);     // K0=Q2
+&gt; K:=ext&lt;K0|2&gt;;             // K=Q2(zeta_3)
+&gt; R&lt;x&gt;:=PolynomialRing(K);
+&gt; A:=GaloisRepresentations(x^3-102)[3];  
+&gt; A;                        // 1-dim character over K
+1-dim Galois representation (1,-zeta(3)_3-1,zeta(3)_3) with G=C3, I=C3,
+   conductor 2^1 over ext&lt;Q2[20]|2&gt;
+&gt; Induction(A,K0);          // Induced to K0
+2-dim Galois representation (2,0,-1) with G=S3, I=C3, conductor 2^2 over Q2[20]
+</PRE>
+<P>
+<HR>
+<PRE></PRE> <A  HREF = "text568.htm">[Next]</A><A  HREF = "text566.htm">[Prev]</A> <A  HREF = "text568.htm">[Right]</A> <A  HREF = "text566.htm">[Left]</A> <A  HREF = "text561.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

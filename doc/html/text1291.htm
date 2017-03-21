@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Attributes of Invariant Rings and Fields</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1292.htm">[Next]</A><A  HREF = "text1290.htm">[Prev]</A> <A  HREF = "text1292.htm">[Right]</A> <A  HREF = "text1290.htm">[Left]</A> <A  HREF = "text1272.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "14027">Attributes of Invariant Rings and Fields</A></H3>
+
+<P>
+<P>
+<P>
+In this section we list various attributes of invariant rings which can
+be examined and set by the user.  This allows low-level control of
+information stored in invariant rings or fields.  Note that when the user sets
+an attribute, only minimal testing can be done on the value so if an
+incorrect value is set, unpredictable results may occur.  Note also
+that if an attribute is not set, referring to it in an expression
+(using the ` operator)
+will <I>not</I> trigger the calculation of it (while intrinsic functions
+do); rather an error will ensue.  Use the <TT>assigned</TT> operator
+to test whether an attribute is set.
+
+
+<H5><A NAME = "14028">R`PrimaryInvariants</A></H5>
+<BLOCKQUOTE>
+The attribute for the primary invariants of invariant ring R=K[V]<sup>G</sup>.  If
+the attribute <TT>R`PrimaryInvariants</TT> is examined, either the current
+primary invariants of R are set so they are returned or an error results.
+If the attribute <TT>R`PrimaryInvariants</TT> is set by assignment,
+it must be sequence of n algebraically-independent invariants of G,
+where n is the rank of R.  Magma will not necessarily check
+that this condition is met since that may be very time-consuming.  If
+the attribute is already set, the new value must be the same as the old value.
+Note that this attribute is useful when it is desired to compute secondary
+invariants of R with respect to some specially constructed primary
+invariants which would not be constructed by the automatic algorithm
+in Magma.
+</BLOCKQUOTE>
+<H5><A NAME = "14029">R`SecondaryInvariants</A></H5>
+<BLOCKQUOTE>
+The attribute for the secondary invariants of invariant ring R=K[V]<sup>G</sup>.  If
+the attribute <TT>R`SecondaryInvariants</TT> is examined, either the current
+primary invariants of R are set so they are returned or an error results.
+If the attribute <TT>R`SecondaryInvariants</TT> is set by assignment to Q,
+primary invariants for R must already be defined, and Q must be
+sequence of secondary invariants with respect to the primary invariants
+of R.
+Magma will not necessarily check
+that this condition is met since that may be very time-consuming.  If
+the attribute is already set, the new value must be the same as the old value.
+</BLOCKQUOTE>
+<H5><A NAME = "14030">R`HilbertSeries</A></H5>
+<BLOCKQUOTE>
+The attribute for the Hilbert series of invariant ring R=K[V]<sup>G</sup>.  If
+the attribute <TT>R`HilbertSeries</TT> is examined, either the
+Hilbert series of R is computed so it is returned or an error results.
+If the attribute <TT>R`HilbertSeries</TT> is set by assignment to H,
+H must be rational function in the function field Z(t) and equal
+to the Hilbert series of R.
+Magma will not necessarily check
+that this condition is met since that may be very time-consuming.  If
+the attribute is already set, the new value must be the same as the old value.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14031">Example <TT>RngInvar_Attributes (H116E17)</TT></A></H3>
+We demonstrate elementary uses of attributes.
+<P>
+<P>
+<PRE>
+&gt; // Create group G and subgroup H of G and invariant rings
+&gt; // RG and RH of G and H respectively.
+&gt; G := CyclicGroup(4);
+&gt; H := sub&lt;G|G.1^2&gt;;
+&gt; RG := InvariantRing(G, GF(2));
+&gt; RH := InvariantRing(H, GF(2));
+&gt;
+&gt; // Create Hilbert Series S of RG and set it in RG.
+&gt; F&lt;t&gt; := FunctionField(IntegerRing());
+&gt; S := (t^3 + t^2 - t + 1)/(t^8 - 2*t^7 + 2*t^5 - 2*t^4 +
+&gt;     2*t^3 - 2*t + 1);
+&gt; RG`HilbertSeries := S;
+&gt;
+&gt; // Note RG has no primary invariants yet so let Magma compute them as PG.
+&gt; RG`PrimaryInvariants;         
+
+&gt;&gt; RG`PrimaryInvariants;
+     ^
+Runtime error in `: Attribute 'PrimaryInvariants' for this structure is valid 
+but not assigned
+&gt; PG := PrimaryInvariants(RG);
+&gt; PG;
+[
+    x1 + x2 + x3 + x4,
+    x1*x2 + x1*x4 + x2*x3 + x3*x4,
+    x1*x3 + x2*x4,
+    x1*x2*x3*x4
+]
+&gt;
+&gt; // Set primary invariants of RH to PG and compute secondary
+&gt; // invariants of RH with respect to PG.
+&gt; RH`PrimaryInvariants := PG;
+&gt; SecondaryInvariants(RH);
+[
+    1,
+    x2 + x4,
+    x2*x4,
+    x1*x2 + x1*x3 + x2^2 + x2*x4 + x3*x4 + x4^2,
+    x1^2*x2 + x1*x2*x3 + x1*x3*x4 + x2^3 + x3^2*x4 + x4^3,
+    x1^2*x2 + x1*x2^2 + x1*x2*x3 + x1*x2*x4 + x1*x3*x4 + x1*x4^2 
+        + x2^3 + x2^2*x3 + x2*x3*x4 + x3^2*x4 + x3*x4^2 + x4^3,
+    x1*x2*x4^2 + x2^2*x3*x4 + x2^2*x4^2,
+    x1^2*x2*x4^2 + x1*x2^2*x3*x4 + x1*x2^2*x4^2 + x1*x2*x3*x4^2 +
+        x2^3*x4^2 + x2^2*x3^2*x4 + x2^2*x3*x4^2 + x2^2*x4^3
+]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1292.htm">[Next]</A><A  HREF = "text1290.htm">[Prev]</A> <A  HREF = "text1292.htm">[Right]</A> <A  HREF = "text1290.htm">[Left]</A> <A  HREF = "text1272.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,315 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Accessing or Modifying Entries</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text270.htm">[Next]</A><A  HREF = "text268.htm">[Prev]</A> <A  HREF = "text270.htm">[Right]</A> <A  HREF = "text268.htm">[Left]</A> <A  HREF = "text265.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "2495">Accessing or Modifying Entries</A></H3>
+
+<P>
+<P>
+The following functions and procedures enable the user to access or 
+set individual entries of sparse matrices.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text269.htm#2501">Extracting and Inserting Blocks</A>
+<LI> <A  HREF = "text269.htm#2512">Row and Column Operations</A>
+</UL>
+<H5><A NAME = "2496">A[i] : MtrxSprs, RngIntElt -&gt; ModTupRngElt</A></H5>
+<BLOCKQUOTE>
+Given a sparse matrix A over a ring R having m rows and n columns,
+and an integer i such that 1 &le;i &le;m,
+return the i-th row of A, as a dense vector of length n
+(lying in R<sup>n</sup>).
+</BLOCKQUOTE>
+<H5><A NAME = "2497">A[i, j] : MtrxSprs, RngIntElt, RngIntElt -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+Given a sparse matrix A over a ring R having m rows and n columns,
+integers i and j such that 1 &le;i &le;m and 1 &le;j &le;n,
+return the (i, j)-th entry of A, as an element of the ring R.
+</BLOCKQUOTE>
+<H5><A NAME = "2498">A[i, j] := x : MtrxSprs, RngIntElt, RngIntElt, RngElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Given a sparse matrix A over a ring R having m rows and n columns,
+integers i and j such that 1 &le;i &le;m and 1 &le;j &le;n,
+and a ring element x coercible into R, modify the (i, j)-th entry 
+of A to be x.  Here i and j must be within the ranges given
+by the current dimensions of A; see <A  HREF = "text269.htm#Smat:SetEntry">SetEntry</A> below for a
+procedure to automatically extend A if necessary.
+</BLOCKQUOTE>
+<H5><A NAME = "2499"></A><A NAME = "Smat:SetEntry">SetEntry</A>(~A, i, j, x) : MtrxSprs, RngIntElt, RngIntElt, RngElt -&gt;</H5>
+<BLOCKQUOTE>
+(Procedure.)
+Given a sparse matrix A over a ring R, integers i, j&ge;1,
+and a ring element x coercible into R, modify the (i, j)-th entry 
+of A to be x.  The entry specified by i and j is allowed to
+be beyond the current dimensions of A; if so, A is automatically
+extended to have at least i rows and j columns.
+<P>
+This procedure will be commonly used in situations where the final
+size of the matrix is not known as an algorithm proceeds
+(e.g., in index-calculus methods).  One can create the 0 x 0
+sparse matrix over Z, say, and then call <TT>SetEntry</TT> to
+build up the matrix dynamically.
+See the example <A  HREF = "text278.htm#2572">H27E3</A> below, which uses this technique.
+<P>
+Note that extending the dimensions of A with a very large i or j
+will not in itself consume much memory, but if A then becomes dense
+or is passed to some algorithm, then the memory needed may of course be
+proportional to the dimensions of A.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2500">Example <TT>SMat_Indexing (H27E2)</TT></A></H3>
+This example demonstrates simple ways of accessing the entries of sparse
+matrices.
+<P>
+<P>
+<PRE>
+&gt; A := SparseMatrix(2, 3, [&lt;1,2,3&gt;, &lt;2,3,-1&gt;]);
+&gt; A;
+Sparse matrix with 2 rows and 3 columns over Integer Ring
+&gt; Matrix(A);
+[ 0  3  0]
+[ 0  0 -1]
+&gt; A[1];
+(0 3 0)
+&gt; A[1, 3]:=5;
+&gt; A[1];
+(0 3 5)
+</PRE>
+We next extend A using the procedure <TT>SetEntry</TT>.
+<P>
+<P>
+<PRE>
+&gt; SetEntry(~A, 1, 5, -7);
+&gt; A;
+Sparse matrix with 2 rows and 5 columns over Integer Ring
+&gt; Matrix(A);
+[ 0  3  5  0 -7]
+[ 0  0 -1  0  0]
+</PRE>
+A common situation is to start with the empty 0 x 0 matrix
+over Z and then to extend it dynamically.
+<P>
+<P>
+<PRE>
+&gt; A := SparseMatrix(); 
+&gt; A;
+Sparse matrix with 0 rows and 0 columns over Integer Ring
+&gt; SetEntry(~A, 1, 4, -2); 
+&gt; A;
+Sparse matrix with 1 row and 4 columns over Integer Ring
+&gt; SetEntry(~A, 2, 3, 8);
+&gt; A;
+Sparse matrix with 2 rows and 4 columns over Integer Ring
+&gt; Matrix(A);
+[ 0  0  0 -2]
+[ 0  0  8  0]
+&gt; SetEntry(~A, 200, 319, 1);
+&gt; SetEntry(~A, 200, 3876, 1);
+&gt; A;
+Sparse matrix with 200 rows and 3876 columns over Integer Ring
+&gt; Nrows(A);
+200
+&gt; Ncols(A);
+3876
+&gt; NNZEntries(A);
+4
+&gt; Density(A);
+0.000005159958720330237358101135190
+&gt; Support(A, 200);
+[ 319, 3876 ]
+</PRE>
+<HR>
+<H4><A NAME = "2501">Extracting and Inserting Blocks</A></H4>
+
+<P>
+<P>
+The following functions enable the extraction of certain rows, columns or 
+general submatrices, or the replacement of a block by another sparse matrix.
+
+
+<H5><A NAME = "2502">Submatrix(A, i, j, p, q) : MtrxSprs, RngIntElt, RngIntElt, RngIntElt, RngIntElt -&gt; MtrxSprs</A></H5>
+<H5>ExtractBlock(A, i, j, p, q) : MtrxSprs, RngIntElt, RngIntElt, RngIntElt, RngIntElt -&gt; MtrxSprs</H5>
+<BLOCKQUOTE>
+Given an m x n sparse matrix A and integers i, j, p and q such
+that 1&le;i &le;i + p &le;m + 1 and 1 &le;j &le;j + q &le;n + 1,
+return the p x q submatrix of A rooted at (i, j).  Either
+or both of p and q may be zero, while i may be m + 1 if p is zero
+and j may be n + 1 if q is zero.
+</BLOCKQUOTE>
+<H5><A NAME = "2503">SubmatrixRange(A, i, j, r, s) : MtrxSprs, RngIntElt, RngIntElt, RngIntElt, RngIntElt -&gt; MtrxSprs</A></H5>
+<H5>ExtractBlockRange(A, i, j, r, s) : MtrxSprs, RngIntElt, RngIntElt, RngIntElt, RngIntElt -&gt; MtrxSprs</H5>
+<BLOCKQUOTE>
+Given an m x n sparse matrix A and integers i, j, r and s such
+that 1&le;i, i - 1 &le;r &le;m, 1 &le;j, and j - 1 &le;s &le;n,
+return the r - i + 1 x s - j + 1 submatrix of A rooted at the (i, j)-th
+entry and extending to the (r, s)-th entry, inclusive.
+r may equal i - 1 or s may equal j - 1, in which case a sparse matrix with
+zero rows or zero columns, respectively, will be returned.
+</BLOCKQUOTE>
+<H5><A NAME = "2504">Submatrix(A, I, J) : MtrxSprs, [RngIntElt], [RngIntElt] -&gt; MtrxSprs</A></H5>
+<BLOCKQUOTE>
+Given an m x n sparse matrix A and integer sequences I and J,
+return the submatrix of A given by the row indices in I and the
+column indices in J.
+</BLOCKQUOTE>
+<H5><A NAME = "2505">InsertBlock(A, B, i, j) : MtrxSprs, MtrxSprs, RngIntElt, RngIntElt -&gt; MtrxSprs</A></H5>
+<H5>InsertBlock(~A, B, i, j) : MtrxSprs, MtrxSprs, RngIntElt, RngIntElt -&gt; MtrxSprs</H5>
+<BLOCKQUOTE>
+Given an m x n sparse matrix A over a ring R,
+a p x q sparse matrix B over R, and integers i and j such
+that 1&le;i &le;i + p &le;m + 1 and 1 &le;j &le;j + q &le;n + 1,
+insert B at position (i, j) in A.
+In the functional version (A is a value argument), this function returns
+the new sparse matrix and leaves A untouched, while in the procedural
+version (~A is a reference argument), A is modified
+in place so that the p x q submatrix of A rooted
+at (i, j) is now equal to B.
+</BLOCKQUOTE>
+<H5><A NAME = "2506">RowSubmatrix(A, i, k) : MtrxSprs, RngIntElt, RngIntElt -&gt; MtrxSprs</A></H5>
+<BLOCKQUOTE>
+Given an m x n sparse matrix A and integers i and k such
+that 1 &le;i &le;i + k &le;m + 1, return the k x n submatrix of
+X consisting of rows [i ... i + k - 1] inclusive. The integer
+k may be zero and i may also be m + 1 if k is zero, but
+the result will always have n columns.
+</BLOCKQUOTE>
+<H5><A NAME = "2507">RowSubmatrix(A, i) : MtrxSprs, RngIntElt -&gt; MtrxSprs</A></H5>
+<BLOCKQUOTE>
+Given an m x n sparse matrix A and an integer i such
+that 0 &le;i &le;m, return the i x n submatrix of
+X consisting of the first i rows.  The integer
+i may be 0, but the result will always have n columns.
+</BLOCKQUOTE>
+<H5><A NAME = "2508">RowSubmatrixRange(A, i, j) : MtrxSprs, RngIntElt, RngIntElt -&gt; MtrxSprs</A></H5>
+<BLOCKQUOTE>
+Given an m x n sparse matrix A and integers i and j such
+that 1 &le;i and i - 1 &le;j &le;m, return the j - i + 1 x n submatrix
+of X consisting of rows [i ... j] inclusive. The integer
+j may equal i - 1, in which case a sparse matrix with zero rows and n
+columns will be returned.
+</BLOCKQUOTE>
+<H5><A NAME = "2509">ColumnSubmatrix(A, i, k) : MtrxSprs, RngIntElt, RngIntElt -&gt; MtrxSprs</A></H5>
+<BLOCKQUOTE>
+Given an m x n sparse matrix A and integers i and k such
+that 1 &le;i &le;i + k &le;n + 1, return the m x k submatrix of
+X consisting of columns [i ... i + k - 1] inclusive. The integer
+k may be zero and i may also be n + 1 if k is zero, but
+the result will always have m rows.
+</BLOCKQUOTE>
+<H5><A NAME = "2510">ColumnSubmatrix(A, i) : MtrxSprs, RngIntElt -&gt; MtrxSprs</A></H5>
+<BLOCKQUOTE>
+Given an m x n sparse matrix A and an integer i such
+that 0 &le;i &le;n, return the m x i submatrix of
+X consisting of the first i columns. The integer
+i may be 0, but the result will always have m rows.
+</BLOCKQUOTE>
+<H5><A NAME = "2511">ColumnSubmatrixRange(A, i, j) : MtrxSprs, RngIntElt, RngIntElt -&gt; MtrxSprs</A></H5>
+<BLOCKQUOTE>
+Given an m x n sparse matrix A and integers i and j such
+that 1 &le;i and i - 1 &le;j &le;n, return the m x j - i + 1 submatrix
+of X consisting of columns [i ... j] inclusive. The integer
+j may equal i - 1, in which case a sparse matrix with zero columns and n
+rows will be returned.
+</BLOCKQUOTE>
+<H4><A NAME = "2512">Row and Column Operations</A></H4>
+
+<P>
+<P>
+The following functions and procedures provide elementary row or
+column operations on sparse matrices.   For each operation, there is a
+corresponding function which creates a new sparse matrix for the result
+(leaving the input sparse matrix unchanged), and a corresponding procedure
+which modifies the input sparse matrix in place.
+
+
+<H5><A NAME = "2513">SwapRows(A, i, j) : MtrxSprs, RngIntElt, RngIntElt -&gt; MtrxSprs</A></H5>
+<H5>SwapRows(~A, i, j) : MtrxSprs, RngIntElt, RngIntElt -&gt;</H5>
+<BLOCKQUOTE>
+Given an m x n sparse matrix A and integers i and j such that 1
+&le;i&le;m and 1 &le;j &le;m, swap the i-th and j-th rows of
+A.
+</BLOCKQUOTE>
+<H5><A NAME = "2514">SwapColumns(A, i, j) : MtrxSprs, RngIntElt, RngIntElt -&gt; MtrxSprs</A></H5>
+<H5>SwapColumns(~A, i, j) : MtrxSprs, RngIntElt, RngIntElt -&gt;</H5>
+<BLOCKQUOTE>
+Given an m x n sparse matrix A and integers i and j such that 1
+&le;i&le;n and 1 &le;j &le;n, swap the i-th and j-th columns of
+A.
+</BLOCKQUOTE>
+<H5><A NAME = "2515">ReverseRows(A) : MtrxSprs -&gt; MtrxSprs</A></H5>
+<H5>ReverseRows(~A) : MtrxSprs -&gt;</H5>
+<BLOCKQUOTE>
+Given a sparse matrix A, reverse all the rows of A.
+</BLOCKQUOTE>
+<H5><A NAME = "2516">ReverseColumns(A) : MtrxSprs -&gt; MtrxSprs</A></H5>
+<H5>ReverseColumns(~A) : MtrxSprs -&gt;</H5>
+<BLOCKQUOTE>
+Given a sparse matrix A, reverse all the columns of A.
+</BLOCKQUOTE>
+<H5><A NAME = "2517">AddRow(A, c, i, j) : MtrxSprs, RngElt, RngIntElt, RngIntElt -&gt; MtrxSprs</A></H5>
+<H5>AddRow(~A, c, i, j) : MtrxSprs, RngElt, RngIntElt, RngIntElt -&gt;</H5>
+<BLOCKQUOTE>
+Given an m x n sparse matrix A over a ring R, a ring element c
+coercible into R, and integers i and j such that 1
+&le;i&le;m and 1 &le;j &le;m, add c times row i of A
+to row j of A.
+</BLOCKQUOTE>
+<H5><A NAME = "2518">AddColumn(A, c, i, j) : MtrxSprs, RngElt, RngIntElt, RngIntElt -&gt; MtrxSprs</A></H5>
+<H5>AddColumn(~A, c, i, j) : MtrxSprs, RngElt, RngIntElt, RngIntElt -&gt;</H5>
+<BLOCKQUOTE>
+Given an m x n sparse matrix A over a ring R, a ring element c
+coercible into R, and integers i and j such that 1
+&le;i&le;n and 1 &le;j &le;n, add c times column i of A
+to column j.
+</BLOCKQUOTE>
+<H5><A NAME = "2519">MultiplyRow(A, c, i) : MtrxSprs, RngElt, RngIntElt -&gt; MtrxSprs</A></H5>
+<H5>MultiplyRow(~A, c, i) : MtrxSprs, RngElt, RngIntElt -&gt;</H5>
+<BLOCKQUOTE>
+Given an m x n sparse matrix A over a ring R, a ring element c
+coercible into R, and an integer i such that 1
+&le;i&le;m, multiply row i of A by c (on the left).
+</BLOCKQUOTE>
+<H5><A NAME = "2520">MultiplyColumn(A, c, i) : MtrxSprs, RngElt, RngIntElt -&gt; MtrxSprs</A></H5>
+<H5>MultiplyColumn(~A, c, i) : MtrxSprs, RngElt, RngIntElt -&gt;</H5>
+<BLOCKQUOTE>
+Given an m x n sparse matrix A over a ring R, a ring element c
+coercible into R, and an integer i such that 1
+&le;i&le;n, multiply column i of A by c (on the left).
+</BLOCKQUOTE>
+<H5><A NAME = "2521">RemoveRow(A, i) : MtrxSprs, RngIntElt -&gt; MtrxSprs</A></H5>
+<H5>RemoveRow(~A, i) : MtrxSprs, RngIntElt -&gt;</H5>
+<BLOCKQUOTE>
+Given an m x n sparse matrix A and an integer i such that 1 &le;i&le;m,
+remove row i from A (leaving an (m - 1) x n sparse matrix).
+</BLOCKQUOTE>
+<H5><A NAME = "2522">RemoveColumn(A, j) : MtrxSprs, RngIntElt -&gt; MtrxSprs</A></H5>
+<H5>RemoveColumn(~A, j) : MtrxSprs, RngIntElt -&gt;</H5>
+<BLOCKQUOTE>
+Given an m x n sparse matrix A and an integer j such that 1 &le;j&le;n,
+remove column j from A (leaving an m x (n - 1) sparse matrix).
+</BLOCKQUOTE>
+<H5><A NAME = "2523">RemoveRowColumn(A, i, j) : MtrxSprs, RngIntElt -&gt; MtrxSprs</A></H5>
+<H5>RemoveRowColumn(~A, i, j) : MtrxSprs, RngIntElt -&gt;</H5>
+<BLOCKQUOTE>
+Given an m x n sparse matrix A and integers i and j such that
+1 &le;i&le;m and 1 &le;j&le;n, remove row i and column j from
+A (leaving an (m - 1) x (n - 1) sparse matrix).
+</BLOCKQUOTE>
+<H5><A NAME = "2524">RemoveZeroRows(A) : MtrxSprs -&gt; MtrxSprs</A></H5>
+<H5>RemoveZeroRows(~A) : MtrxSprs -&gt;</H5>
+<BLOCKQUOTE>
+Given a sparse matrix A, remove all the zero rows of A.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text270.htm">[Next]</A><A  HREF = "text268.htm">[Prev]</A> <A  HREF = "text270.htm">[Right]</A> <A  HREF = "text268.htm">[Left]</A> <A  HREF = "text265.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

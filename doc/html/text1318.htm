@@ -1,0 +1,685 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Factorisation of Operators over Differential Laurent Series  Rings</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1296.htm">[Next]</A><A  HREF = "text1317.htm">[Prev]</A> <A  HREF = "text1296.htm">[Right]</A> <A  HREF = "text1317.htm">[Left]</A> <A  HREF = "text1297.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "14344">Factorisation of Operators over Differential Laurent Series  Rings</A></H3>
+
+<P>
+<P>
+<P>
+When factoring a non-trivial linear differential operator in
+P[&delta;] := k((t))[&delta;], 
+with constant field k, differential Laurent Series ring k((t)) in t,
+and derivation &delta;,
+one at least wants to compute two operators L and R in P such that
+f=L.R.
+It is important to distinguish the left and right hand operators (L and
+R) as such as multiplication generally is non-commutative.
+When considering differential operators in the operator ring
+P, it is common to consider &delta; to be t.d/dt.
+This specific form has the advantage that the degree of &delta;.t 
+in t remains one, since &delta;.t=t.&delta; + t.
+This specific derivation is called the <I>projective derivation</I> and we 
+consider this derivation in the rest of this section.
+In this sense powers of t are eigenvectors under the application
+of the derivation.
+<P>
+A possible approach for factoring a linear operator would be to compute
+all non-constant irreducible right hand factors and then use recursion on
+the appropriate left hand factors.
+However, this causes a problem as there may be infinitely many factorisations.
+For instance &delta;<sup>2</sup> - &delta; has infinitely many factorisations (parametrisations)
+(&delta; - c/(t + c))(&delta; - t/(t + c)) for any c&isin;P<sup>1</sup>(k).
+The approach we take to find right hand factors follows <A  HREF = "text1296.htm#bib_vH97">[vH97b]</A>, and
+chooses a canonical representative from a class of right hand factors.
+The obtained representatives can be used in the factorisation of linear
+differential operators over a rational function field, see <A  HREF = "text1296.htm#bib_vH97rational">[vH97a]</A>.
+<P>
+A non-trivial linear differential operator f in
+P acts on the solution space V of all differential 
+operators in the differential closure of k((t)).
+This action is bar(k)-linear and surjective on V.
+The kernel V(f) of this map has dimension equal to the order of 
+the operator. 
+The general solution space V can be split into a direct sum
+of smaller bar(k)-vector spaces V<sub>e</sub>.
+These are minimal such that f(V<sub>e</sub>)&sub;V<sub>e</sub> for every operator in P.
+Its kernel V<sub>e</sub>(f) consists of all solutions of f(y)=0 in V<sub>e</sub>.
+As a consequence the solution space of the operator then is
+V(f)= direct-sum <sub>e</sub> V<sub>e</sub>(f).
+For each of the e with non-trivial solution space of f,
+the idea now is to find an irreducible right hand factor of f in k((t))[&delta;] that 
+annihilates V<sub>e</sub>(f). 
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1318.htm#14345">Slope Valuation of an Operator</A>
+<LI> <A  HREF = "text1318.htm#14348">Coprime Index 1 and LCLM Factorisation</A>
+<LI> <A  HREF = "text1318.htm#14356">Right Hand Factors of Operators</A>
+</UL>
+<H4><A NAME = "14345">Slope Valuation of an Operator</A></H4>
+
+<P>
+<P>
+The Newton Polynomial of an operator f and its slopes
+contain useful information regarding its factorisation possibilities. 
+It was proved by Malgrange that an operator over a Laurent series
+ring is reducible if its Newton polygon has at least two slopes.
+When on the other hand the Newton polygon has one positive slope, and the 
+accompanying Newton polynomial has two relatively prime factors,
+then the operator is irreducible as well.
+It can be shown that an irreducible right hand factor has an irreducible
+Newton polynomial that divides the Newton polynomial of f.
+When an appropriate irreducible factor of the polynomial of f is taken,
+One can start building a right hand factor operator with coefficients
+of a certain precision that has exactly the irreducible factor as its
+Newton polynomial.
+Subsequently one can try to lift the coefficients to a better, possibly
+predescribed  precision.
+<P>
+Various measures for the precision are possible, for instance
+the absolute precision of the coefficients is common.
+Another valuation metric is or one related to the
+slope of the Newton polynomial.
+It is defined as follows.
+Assume that P:=k((t))[&delta;] has projective derivation t.d/dt, 
+Let s be a rational with numerator n and denominator d such
+that gcd(n, d)=1 and d&gt;0 hold.
+Then the <I>slope valuation</I>
+of a monomial ct<sup>i</sup>&delta;<sup>j</sup>, c&isin;k {0}, with respect to s is
+defined as V<sub>s</sub>(ct<sup>i</sup>&delta;<sup>j</sup>):=id - jn.
+The <I>slope valuation</I> of the operator L&isin;P with respect
+to s subsequently is defined as the minimum of the slope valuation of 
+each non-zero monomial in L w.r.t s.
+Commonly s is a slope of the Newton polynomial of L.
+If the operator is the zero operator, the slope valuation is defined
+to be infinite.
+
+
+<H5><A NAME = "14346">SlopeValuation(L,s) : RngDiffOpElt, RngElt -&gt; FldRatElt</A></H5>
+<BLOCKQUOTE>
+Returns the valuation of L, with respect to the rational slope s,
+when the derivation of L is projective.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14347">Example <TT>RngDiff_example-diff-op-slope-valuation (H117E65)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; S&lt;t&gt;:=DifferentialLaurentSeriesRing(Rationals());
+&gt; P&lt;D&gt;:=DifferentialOperatorRing(S);
+&gt; L:=t^(-2)*D^3+t^7;
+&gt; SlopeValuation(L,0);
+-2
+&gt; SlopeValuation(L,1/2);
+-7
+&gt; SlopeValuation(L,5); 
+-17
+&gt; L:=(0+O(t^6))*D;
+&gt; SlopeValuation(L,0);
+Infinity
+&gt; Valuation(0+O(t^6));
+6
+&gt; SlopeValuation(P!0,3);
+Infinity
+</PRE>
+<HR>
+<H4><A NAME = "14348">Coprime Index 1 and LCLM Factorisation</A></H4>
+
+<P>
+<P>
+<P>
+Coprime index 1 factorisation and LCLM factorisation are two factorisation
+methods that use similar factorisation machinery, but may result in
+different factorisations, see <A  HREF = "text1296.htm#bib_vH97">[vH97b]</A>.
+Given an operator f&isin;k((t))[&delta;],
+both compute a right hand factor with respect to each distinct irreducible
+factor of the Newton polynomial of f.
+A local lifting procedure with respect to the slope valuation metric is 
+performed to obtain the coefficients of the right hand factors up to a certain accuracy.
+In addition, no intermediate differential field extensions of k((t)) are used.
+<P>
+The coprime index 1 algorithm does not factor an operator f
+that has Newton polynomial of the form p<sup>n</sup>, n ge2, with slope s&gt;0.
+The sum of the degrees of the obtained right hand factors of f may be less
+than the degree of f itself.
+Their least common left divisor M divides f on the right (i.e. f=N * M)
+with a kernel of dimension less or equal to deg(f).
+The LCLM algorithm, on the other hand, produces a set of right hand factors of 
+a monic operator f whose LCLM is exactly f up to some precision.
+
+
+<P>
+<H5><A NAME = "14349">Factorisation(L) : RngDiffOpElt -&gt; SeqEnum, SeqEnum</A></H5>
+<H5>Factorization(L) : RngDiffOpElt -&gt; SeqEnum, SeqEnum</H5>
+
+<PRE>    Precision: RngIntElt                Default: -1</PRE>
+
+<PRE>    Algorithm: MonStgElt                Default: "Default"</PRE>
+<BLOCKQUOTE>
+Returns a sequence M of operator sequences [A, B] such that 
+L=A.B holds, and B does not have a non-trivial coprime index 1 or LCLM factorisation.
+As the algorithm sometimes cannot conclude if a right hand factor is irreducible,
+a second sequence entry N[i] states <TT>True</TT> if the right hand factor M[i][2] 
+is undisputedly irreducible.
+The optional argument for the precision is the accuracy up to which the 
+lifting procedure would be performed.
+The default accuracy is the relative precision of the basering of L. 
+The algorithms used can be eiher "LCLM" or "CoprimeIndexOne".
+The algorithms used are based on various algorithms in <A  HREF = "text1296.htm#bib_vH97">[vH97b]</A>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14350">Example <TT>RngDiff_example-diff-op-factorisation-LCLM-1 (H117E66)</TT></A></H3>
+The operator t<sup>2</sup>.d/dt<sup>2</sup> - t.d/dt with coefficients in Q 
+has infinitely many factorisations, since it can be written as 
+(t.d/dt - c/(t + c)).(t.d/dt - t/(t + c)) for any rational
+number c.
+The factorisation code chooses a canonical right hand factor.
+<P>
+<P>
+<PRE>
+&gt; S&lt;t&gt;:=DifferentialLaurentSeriesRing(Rationals());
+&gt; R&lt;D&gt;:=DifferentialOperatorRing(S);
+&gt; L := D^2 -D;
+&gt; factsL,blsL:=Factorisation(L:Algorithm:="LCLM");
+Ring precision as default precision taken.
+Performing coprime index 1 LCLM factorisation.
+The number of slopes of the Newton polynomial: 1
+&gt; (#factsL eq #blsL) and (#factsL eq 1); 
+true
+&gt; blsL;
+[ false ]
+&gt; factsL[1];
+[
+    1,
+    D^2 + -1*D
+]
+&gt; factsL,blsL:=Factorization(L:Algorithm:="CoprimeIndexOne");
+Ring precision as default precision taken.
+Performing coprime index 1 factorisation.
+&gt; (#factsL eq #blsL) and (#factsL eq 1); 
+true
+&gt; blsL;
+[ true ]
+&gt; factsL[1];
+[
+    D,
+    D + -1
+]
+</PRE>
+<HR>
+<H3><A NAME = "14351">Example <TT>RngDiff_example-diff-op-factorisation-LCLM-2 (H117E67)</TT></A></H3>
+This example corresponds to Example 3.46 in <A  HREF = "text1296.htm#bib_vdPS03">[vdPS03]</A>.
+<P>
+<P>
+<PRE>
+&gt; S&lt;t&gt;:=DifferentialLaurentSeriesRing(Rationals());
+&gt; R&lt;D&gt;:=DifferentialOperatorRing(S);
+&gt; L:=D*(D+1/t);
+&gt; L;
+D^2 + t^-1*D + -t^-1
+&gt; factsL,blsL:=Factorisation(L:Precision:=4);
+Performing coprime index 1 LCLM factorisation.
+&gt; blsL;
+[ true, true ]
+&gt; #factsL eq 2;
+true
+&gt; factsL[1];
+[
+    D + t^-1 + 1 - t + 3*t^2 + O(t^3),
+    D + -1 + t - 3*t^2 + 13*t^3 + O(t^4)
+]
+&gt; factsL[2];
+[
+    D,
+    D + t^-1
+]
+&gt; factsL:=Factorisation(L:Algorithm:="CoprimeIndexOne");
+Ring precision as default precision taken.
+Performing coprime index 1 factorisation.
+&gt; #factsL eq 2;
+true
+&gt; blsL;
+[ true, true ]
+&gt; [v[1]*v[2]:v in factsL];
+[
+    D^2 + (t^-1 + O(t^19))*D + -t^-1 + O(t^19),
+    D^2 + t^-1*D + -t^-1
+]
+</PRE>
+<HR>
+<H3><A NAME = "14352">Example <TT>RngDiff_example-diff-op-factorisation-LCLM-3 (H117E68)</TT></A></H3>
+This example corresponds to Example 3.49 in <A  HREF = "text1296.htm#bib_vdPS03">[vdPS03]</A>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; S&lt;t&gt;:=DifferentialLaurentSeriesRing(Rationals());
+&gt; R&lt;D&gt;:=DifferentialOperatorRing(S);
+&gt; L:=(D+1/t)*(D+1/t^2);
+&gt; L;
+D^2 + (t^-2 + t^-1)*D + t^-3 - 2*t^-2
+&gt; factsL, blsL:=Factorisation(L:Algorithm:="CoprimeIndexOne",Precision:=6);
+Performing coprime index 1 factorisation.
+&gt; blsL;
+[ true, true ]
+&gt; #factsL;
+2
+&gt; factsL[1];
+[
+    D + t^-2 + 2 + t - 3*t^2 - 8*t^3 + O(t^4),
+    D + t^-1 - 2 - t + 3*t^2 + 8*t^3 - 9*t^4 + O(t^5)
+]
+&gt; factsL[2];
+[
+    D + t^-1,
+    D + t^-2
+]
+&gt; [v[1]*v[2] :v in factsL];
+[
+    D^2 + (t^-2 + t^-1 + O(t^4))*D + t^-3 - 2*t^-2 + O(t^3),
+    D^2 + (t^-2 + t^-1)*D + t^-3 - 2*t^-2
+]
+</PRE>
+<HR>
+<H3><A NAME = "14353">Example <TT>RngDiff_example-diff-op-factorisation-LCLM-4 (H117E69)</TT></A></H3>
+This example shows that not all operators may be factored by the factorisation routine.
+Notice that the Newton polynomial of the operator is a square of a polynomial.
+<P>
+<P>
+<P>
+<PRE>
+&gt; S&lt;t&gt;:=DifferentialLaurentSeriesRing(Rationals());
+&gt; R&lt;D&gt;:=DifferentialOperatorRing(S);
+&gt; L:=(D+2/t)^2;
+&gt; np:=NewtonPolygon(L);
+&gt; faces:=Faces(np);
+&gt; #faces eq 1;
+true
+&gt; NewtonPolynomial(faces[1]);
+$.1^2 + 4*$.1 + 4
+&gt; factsL_lclm,blsL_lclm:=Factorisation(L);
+Ring precision as default precision taken.
+Performing coprime index 1 LCLM factorisation.
+&gt; factsL_lclm;
+[
+    [
+        1,
+        D^2 + 4*t^-1*D + 4*t^-2 - 2*t^-1
+    ]
+]
+&gt; blsL_lclm;
+[ false ]
+&gt; factsL_c1,blsL_c1:=Factorisation(L:Algorithm:="CoprimeIndexOne");
+Ring precision as default precision taken.
+Performing coprime index 1 factorisation.
+&gt; factsL_c1 eq factsL_lclm;
+true
+&gt; blsL_c1 eq blsL_lclm;
+true
+</PRE>
+<HR>
+<H3><A NAME = "14354">Example <TT>RngDiff_example-diff-op-factorisation-LCLM-5 (H117E70)</TT></A></H3>
+This example shows that one may not retrieve the factorisation as expected.
+<P>
+<P>
+<PRE>
+&gt; S&lt;t&gt;:=DifferentialLaurentSeriesRing(Rationals());
+&gt; R&lt;D&gt;:=DifferentialOperatorRing(S);
+&gt; L := (D+1/(t+1))*D;
+&gt; factsL_c1,blsL_c1:=Factorisation(L:Algorithm:="CoprimeIndexOne");
+Ring precision as default precision taken.
+Performing coprime index 1 factorisation.
+&gt; (#factsL_c1 eq 1) and (#blsL_c1 eq 1);
+true
+&gt; factsL_c1[1][2];
+D + O(t^20)
+&gt; factsL_lclm, blsL_lclm:=Factorisation(L:Algorithm:="LCLM");
+Ring precision as default precision taken.
+Performing coprime index 1 LCLM factorisation.
+The number of slopes of the Newton polynomial: 1
+&gt; (#factsL_lclm eq 1) and (#blsL_lclm eq 1);
+true
+&gt; factsL_c1[1][2], blsL_lclm[1];
+D + O(t^20)
+false
+&gt; M:=(D+1/(t-1))*D;
+&gt; factsM:=Factorisation(M:Algorithm:="CoprimeIndexOne");
+Ring precision as default precision taken.
+Performing coprime index 1 factorisation.
+&gt; # factsM eq 1;
+&gt; factsM[1][2]+O(t^4);
+D + -1 - 1/2*t - 5/12*t^2 - 3/8*t^3 + O(t^4)
+</PRE>
+<HR>
+<H3><A NAME = "14355">Example <TT>RngDiff_example-diff-op-factorisation-LCLM-6 (H117E71)</TT></A></H3>
+One may wish to adjust the default precision to retrieve
+enough terms in the coefficients in the factors.
+This example shows the effect on a rational slope 1/5
+on the number of terms in the series coefficients of the 
+factors obtained.
+<P>
+<P>
+<PRE>
+&gt; S&lt;t&gt;:=DifferentialLaurentSeriesRing(Rationals():Precision:=15);
+&gt; R&lt;D&gt;:=DifferentialOperatorRing(S);
+&gt; L:=(D^5+t^(-1))*D;
+&gt; np:=NewtonPolygon(L);
+&gt; Slopes(np);
+[ 0 , 1/5 ]
+&gt; factsL,blsL:=Factorisation(L:Algorithm:="LCLM");
+Ring precision as default precision taken.
+Performing coprime index 1 LCLM factorisation.
+&gt; blsL;
+[ true, true ]
+&gt; [v[2]:v in factsL];
+[
+    D,
+    D^5 + (-1 - t - 63*t^2 + O(t^3))*D^4 + (1 + 3*t + 253*t^2 + 
+    O(t^3))*D^3 + (-1 - 7*t - 825*t^2 + O(t^3))*D^2 + (1 + 15*t + 2545*t^2
+    + O(t^3))*D + t^-1 - 1 - 31*t - 7713*t^2 + O(t^3)
+]
+&gt; [v[1]*v[2]:v in factsL];
+[
+    D^6 + t^-1*D,
+    D^6 + O(t^3)*D^5 + O(t^3)*D^4 + O(t^3)*D^3 + O(t^3)*D^2 + (t^-1 + 
+    O(t^3))*D + O(t^2)
+]
+&gt; factsL:=Factorisation(L:Algorithm:="LCLM",Precision:=75);
+Performing coprime index 1 LCLM factorisation.
+&gt; [v[1]*v[2]:v in factsL];
+[
+    D^6 + t^-1*D,
+    D^6 + O(t^15)*D^5 + O(t^15)*D^4 + O(t^15)*D^3 + O(t^15)*D^2 + (t^-1 + 
+    O(t^15))*D + O(t^14)
+]
+</PRE>
+<HR>
+<H4><A NAME = "14356">Right Hand Factors of Operators</A></H4>
+
+<P>
+<P>
+<P>
+While resorting to field extensions can result in more complex and time
+consuming computations, they can be used for obtaining
+irreducible right hand factors over the original base field.
+<P>
+An effective algorithm to obtain a monic irreducible right hand factor
+of degree one tilde(L) of L&isin;k((t))[&delta;] in some 
+field extension tilde(k)((tilde(t)))[tilde(&delta;)]
+is presented in <A  HREF = "text1296.htm#bib_vH97">[vH97b, Para 5.1]</A>.
+Such a factor tilde(L)=tilde(&delta;) - r(tilde(t)) of L is called 
+a <I>Ricatti factor</I> of L.
+The operator mathop(LCLM)(tilde(&delta;) - &sigma;<sub>1</sub>(r), tilde(&delta;) - &sigma;<sub>2</sub>(r), ..., tilde(&delta;) - &sigma;<sub>m</sub>(r))
+where the &sigma;<sub>i</sub> are the Galois group elements of tilde(k)((tilde(t)))/k((t)),
+then is a monic and irreducible operator invariant under 
+the Galois action.
+Hence, it naturally reduces to a monic irreducible right hand factor of L.
+<P>
+Other right hand factors of L, that may be defined over a finite 
+field extensions of k((t)) are the so-called <I>semi-regular</I>
+parts of L. 
+Such an operator R<sub>e</sub>(L) is the monic right hand semi-regular 
+factor of the translation S<sub>e</sub>(L) 
+of L by e.
+Its degree is equal to the dimension of a non-trivial 
+bar(k)-linear vector space V<sub>e</sub>(L), and acts as zero on it.
+In other words S<sub> - e</sub>(R<sub>e</sub>) is a monic right hand factor of L,
+possibly defined over a field extension of k((t)).
+It can be shown that L is the least common left multiple of
+all such right hand factors.
+<P>
+The routine <TT>RightHandFactors</TT> returns right hand factors of 
+a given operator possibly by using temporary field extensions. 
+Each of these are canonical representatives of all right hand factors
+belonging the slopes of the Newton polynomial of the operator.
+Currently one of the 
+internal routines may fail when performing calculations for
+some specific right hand factor.
+In this case we cannot conclude it to be irreducible.
+
+
+<H5><A NAME = "14357">RightHandFactors(L) : RngDiffOpElt -&gt; SeqEnum, [BoolElt]</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: -1</PRE>
+<BLOCKQUOTE>
+The canonical list of monic right hand factors of L, 
+one per slope of the Newton polynomial of L.
+The i<sup>th</sup> entry in the second sequence returned is true if the
+i<sup>th</sup> right hand factor is undisputedly irreducible.
+The precision attribute relates to the absolute precision a 
+coefficient in a right hand factor should minimally have.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14358">Example <TT>RngDiff_example-diff-op-righthandfactors-1 (H117E72)</TT></A></H3>
+This example is Example 3.49 from <A  HREF = "text1296.htm#bib_vdPS03">[vdPS03]</A>.
+The same right hand factors as 
+in Example <A  HREF = "text1318.htm#14352">H117E68</A> 
+are obtained.
+<P>
+<P>
+<PRE>
+&gt; S&lt;t&gt;:=DifferentialLaurentSeriesRing(Rationals());
+&gt; RS&lt;DS&gt; := DifferentialOperatorRing(S);
+&gt; L:=DS^2+(1/t^2+1/t)*DS +(1/t^3-2/t^2);
+&gt; rhf, bl := RightHandFactors(L);
+Performing coprime index 1 LCLM factorisation.
+&gt; #rhf eq 2;
+true
+&gt; bl;
+[ true, true ]
+&gt; (Parent(rhf[1]) eq RS) and (Parent(rhf[2]) eq RS);
+true
+&gt; lhf,rem := EuclideanRightDivision(L, rhf[1]);
+&gt; rem;
+O(t^20)
+&gt; lhf*rhf[1];
+DS^2 + (t^-2 + t^-1 + O(t^22))*DS + t^-3 - 2*t^-2 + O(t^20)
+&gt; EuclideanRightDivision(L, rhf[2]);
+DS + t^-1
+0
+</PRE>
+<HR>
+<H3><A NAME = "14359">Example <TT>RngDiff_example-diff-op-righthandfactors-2 (H117E73)</TT></A></H3>
+This example corresponds to Example 3.52 in <A  HREF = "text1296.htm#bib_vdPS03">[vdPS03]</A>.
+The answer in the book is erroneous.
+<P>
+<P>
+<PRE>
+&gt; S&lt;t&gt;:=DifferentialLaurentSeriesRing(Rationals());
+&gt; RS&lt;DS&gt; := DifferentialOperatorRing(S);
+&gt; L:=DS^2-3/2*DS+(2*t-1)/(4*t);
+&gt; rhf, bl := RightHandFactors(L);
+Performing coprime index 1 LCLM factorisation.
+&gt; bl;
+[ true ]
+&gt; #rhf eq 1;
+true
+&gt; rhf[1] eq L;
+true
+</PRE>
+<HR>
+<H3><A NAME = "14360">Example <TT>RngDiff_example-diff-op-righthandfactors-3 (H117E74)</TT></A></H3>
+The operator in this example is the same as in
+Example <A  HREF = "text1318.htm#14353">H117E69</A>
+where the routine <TT>Factorisation</TT> was used.
+The operator did not factor there, but does 
+when using <TT>RightHandFactors</TT>.
+<P>
+<P>
+<PRE>
+&gt; S&lt;t&gt;:=DifferentialLaurentSeriesRing(Rationals());
+&gt; RS&lt;DS&gt; := DifferentialOperatorRing(S);
+&gt; L:=(DS+2/t)^2;
+&gt; rhf, bl := RightHandFactors(L);
+Performing coprime index 1 LCLM factorisation.
+Calculating semi-regular parts.
+Performing coprime index 1 LCLM factorisation.
+Performing coprime index 1 LCLM factorisation.
+Computing a first order Ricatti factor.
+Performing LCLM calculation on the Ricatti factor.
+&gt; rhf;
+[
+    DS + 2*t^-1
+]
+&gt; bl;
+[ true ]
+</PRE>
+<HR>
+<H3><A NAME = "14361">Example <TT>RngDiff_example-diff-op-righthandfactors-4 (H117E75)</TT></A></H3>
+This example corresponds to Example 3.53 in <A  HREF = "text1296.htm#bib_vdPS03">[vdPS03]</A>.
+<P>
+<P>
+<PRE>
+&gt; S&lt;t&gt;:=DifferentialLaurentSeriesRing(Rationals());
+&gt; RS&lt;DS&gt; := DifferentialOperatorRing(S);
+&gt; L:=DS^2 +(4+2*t-t^2-3*t^3)/(t^2)*DS+ (4+4*t-5*t^2-8*t^3-3*t^4+2*t^6)/(t^4);
+&gt; np:=NewtonPolygon(L);
+&gt; faces:=Faces(np);
+&gt; #faces eq 1;
+true
+&gt; _&lt;T&gt; := PolynomialRing(Rationals());
+&gt; NewtonPolynomial(faces[1]);
+T^2 + 4*T + 4
+&gt; factsL, blsL := Factorisation(L);
+Ring precision as default precision taken.
+Performing coprime index 1 LCLM factorisation.
+&gt; blsL;
+[ false ]
+&gt; (#factsL eq 1) and (factsL[1][2] eq L);
+true
+&gt; rhf, bl := RightHandFactors(L);
+Performing coprime index 1 LCLM factorisation.
+Calculating semi-regular parts.
+Performing coprime index 1 LCLM factorisation.
+Performing coprime index 1 LCLM factorisation.
+Performing coprime index 1 LCLM factorisation.
+Computing a first order Ricatti factor.
+Performing LCLM calculation on the Ricatti factor.
+&gt; Degree(rhf[1]);
+1
+&gt; bl;
+[ true ]
+&gt; Parent (rhf[1]) eq RS;
+true
+&gt; L - EuclideanRightDivision(L, rhf[1])*rhf[1];
+O(t^22)*DS + O(t^20)
+</PRE>
+<HR>
+<H3><A NAME = "14362">Example <TT>RngDiff_example-diff-op-righthandfactors-5 (H117E76)</TT></A></H3>
+A collection of operators having the same Newton
+polynomial (T<sup>2</sup> + 1)(T - 1)(T + 1).
+<P>
+<P>
+<PRE>
+&gt; S&lt;t&gt;:=DifferentialLaurentSeriesRing(Rationals());
+&gt; RS&lt;DS&gt; := DifferentialOperatorRing(S);
+&gt; L := DS^4-1/t^4;
+&gt; faces:=Faces(NewtonPolygon(L));
+&gt; faces;
+[ &lt;-1, 1, -4&gt; ]
+&gt; _&lt;T&gt; := PolynomialRing(Rationals());
+&gt; NewtonPolynomial(faces[1]);
+T^4 - 1
+&gt; rhf, bl := RightHandFactors(L);
+Performing coprime index 1 LCLM factorisation.
+&gt; bl;
+[ true, true, true ]
+&gt; [Degree(v) : v in rhf]; 
+[ 1, 1, 2 ]
+&gt;  L - EuclideanRightDivision(L, rhf[1])*rhf[1];
+O(t^23)*DS^3 + O(t^22)*DS^2 + O(t^21)*DS + O(t^20)
+&gt;  L - EuclideanRightDivision(L, rhf[2])*rhf[2];
+O(t^23)*DS^3 + O(t^22)*DS^2 + O(t^21)*DS + O(t^20)
+&gt;  L - EuclideanRightDivision(L, rhf[3])*rhf[3];
+O(t^23)*DS^3 + O(t^22)*DS^2 + O(t^21)*DS + O(t^20)
+&gt; M := DS^4-1;
+&gt; faces:=Faces(NewtonPolygon(M));
+&gt; faces;
+[ &lt;0, 1, 0&gt; ]
+&gt; NewtonPolynomial(faces[1]);
+T^4 - 1
+&gt; rhf, bl := RightHandFactors(M);
+Performing coprime index 1 LCLM factorisation.
+Calculating semi-regular parts.
+Performing coprime index 1 LCLM factorisation.
+Performing LCLM calculation on a semi-regular part.
+Calculating semi-regular parts.
+Performing coprime index 1 LCLM factorisation.
+Computing a first order Ricatti factor.
+Performing LCLM calculation on the Ricatti factor.
+&gt; rhf;
+[
+    DS^2 + 1,
+    DS + -1
+]
+&gt; bl;
+[ true, true ]
+</PRE>
+<HR>
+<H3><A NAME = "14363">Example <TT>RngDiff_example-diff-op-righthandfactors-5 (H117E77)</TT></A></H3>
+This is the main example of <A  HREF = "text1296.htm#bib_vH97">[vH97b]</A>.
+<P>
+<P>
+<PRE>
+&gt; S&lt;t&gt;:=DifferentialLaurentSeriesRing(Rationals());
+&gt; RS&lt;DS&gt; := DifferentialOperatorRing(S);
+&gt; L:=DS^9 + 2*t^-1*DS^8 + 3*t^-2*DS^7 + 2*t^-3*DS^6 + (t^-4 + 2*t^-2)*DS^5 + 
+&gt; (-3*t^-5 + 5*t^-4)*DS^3 + 3*t^-5*DS^2 + (2*t^-6 + 2*t^-5)*DS + 7*t^-5;
+&gt; facts := Factorisation(L);
+Ring precision as default precision taken.
+Performing coprime index 1 LCLM factorisation.
+&gt; [Degree(v[2]): v in facts];
+[ 1 2 2 4 ]
+&gt; isweaklyzero := [];
+&gt; vals :=[];
+&gt; for i in [1..4] do
+&gt;   _,rem := EuclideanRightDivision(L, facts[i][2]);
+&gt;   isweaklyzero[i] := IsWeaklyZero(rem);
+&gt;   vals[i] := [Valuation(v) : v in Eltseq(rem)];
+&gt; end for; 
+&gt; isweaklyzero;
+[ true, true, true, true ]
+&gt; [Minimum(v) : v in vals];
+[ 14 , 4 , 4 , 11]
+&gt; rhf, bl := RightHandFactors(L:Precision:=30); 
+Performing coprime index 1 LCLM factorisation.
+Calculating semi-regular parts.
+Performing coprime index 1 LCLM factorisation.
+Performing coprime index 1 LCLM factorisation.
+Performing coprime index 1 LCLM factorisation.
+Performing LCLM calculation on a semi-regular part.
+Computation of the LCLM failed.
+&gt; bl;
+[ true, true, true, false ]
+&gt; [Degree(v): v in rhf];
+[ 1 2 2 4 ]
+&gt; isweaklyzero := [];
+&gt; vals := [];
+&gt; for i in [1..4] do
+&gt;   [Degree(v): v in Eltseq(rhf[i])];
+&gt;   _,rem := EuclideanRightDivision(L, rhf[i]);
+&gt;   isweaklyzero[i] := IsWeaklyZero(rem);
+&gt;   vals[i] := [Valuation(v) : v in Eltseq(rem)];
+&gt; end for; 
+[ 35, 0 ]
+[ 35, 35, 0 ]
+[ 35, 35, 0 ]
+[ 31, 32, 33, 34, 0 ]
+&gt; isweaklyzero;
+[ true, true, true, true ]
+&gt; [ Minimum(v) : v in vals];
+[ 30, 30, 30, 27 ]
+</PRE>
+<PRE></PRE> <A  HREF = "text1296.htm">[Next]</A><A  HREF = "text1317.htm">[Prev]</A> <A  HREF = "text1296.htm">[Right]</A> <A  HREF = "text1317.htm">[Left]</A> <A  HREF = "text1297.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

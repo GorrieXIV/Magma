@@ -1,0 +1,38 @@
+"Source: Text/System/Func.text";
+"Line: 411";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/System/Func.text, line: 411
+// Example: H2E6 ()
+print "Example: H2E6";
+ei := GetEchoInput();
+SetEchoInput(true);
+function strongTest(primdiv, n)
+    return exists{ x : x in [2..n-1] | \
+      Modexp(x, n-1, n) eq 1 and
+      forall{ p : p in primdiv | Modexp(x, (n-1) div p, n) ne 1 }
+    };
+end function;
+forward primeDivisors;
+function isPrime(n)
+   if n in { 2, 3 } or
+      IsOdd(n) and
+      forall{ a : a in { Random(2, n-2): i in [1..3] } |
+         Modexp(a, n-1, n) eq 1 } and
+         strongTest( primeDivisors(n-1), n )
+   then
+      return true;
+   else
+      return false;
+   end if;
+end function;
+primeDivisors := function(n)
+   if isPrime(n) then 
+      return { n };
+   else
+      return func< d | primeDivisors(d) join primeDivisors(n div d) >
+         ( rep{ d : d in [2..Isqrt(n)] | n mod d eq 0 });
+   end if;
+end function;
+isPrime(1087);
+SetEchoInput(ei);

@@ -1,0 +1,3 @@
+174,1
+S,GetIntegerNewtonPolygon,"Given a sequence 'pts' of points in 'Z^2'. Return the subset of 'pts' which lies on the compact faces of the Minkowski sum of the convex hull of 'pts' and the positive quadrant, if 'OnlyVertices' is true only the vertices are returned",0,1,0,0,0,0,0,0,0,82,,82,-38,-38,-38,-38,-38
+S,GetMonoidNewtonPolygon,"Given a univariate polynomial 'poly' over a multivariate polynomial ring. Compute the vertices of the generalized Newton polygon. Here a vertex is of the form '<z,X>' where 'z' is an integer and 'X' is a monomial in the coefficient ring",0,1,0,0,0,0,0,0,0,312,,82,-38,-38,-38,-38,-38

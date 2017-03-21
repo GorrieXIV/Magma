@@ -1,0 +1,298 @@
+/*
+Test multivariate factorization over finite fields.
+AKS 19/03/98.
+*/
+
+
+if assigned big then
+    big := true;
+else
+    big := false;
+end if;
+
+SetAssertions(true);
+VERB := true;
+VERB := false;
+
+ClearVerbose();
+//SetVerbose("PolyFact", 1);
+
+procedure check_fact(f, F)
+    // Check factorization of f is F
+    p := &*[Parent(f) | t[1]^t[2]: t in F];
+    if p ne f/LeadingCoefficient(f) then
+	"check_fact FAILS";
+	"f:", f;
+	"F:", F;
+	"product:", p;
+	error "";
+    end if;
+end procedure;
+
+procedure test_fact_dual(f)
+    // Check Factorization of f * (f + 1) is combination of factorization of
+    // f and factorization of (f + 1)
+    if IsMinusOne(f) then
+	return;
+    end if;
+
+    if VERB then
+	"test_fact_dual:", f;
+	"Seed:", GetSeed();
+    end if;
+
+    T := Cputime();
+
+    //"Fact Parent:", Parent(f);
+    //"Fact f:", f;
+
+    F := Factorization(f);
+    //"f factorization:", F;
+    check_fact(f, F);
+    //"Fact Parent:", Parent(f);
+    //"Fact f:", f+1;
+    F1 := Factorization(f + 1);
+    check_fact(f + 1, F1);
+
+    //"Fact Parent:", Parent(f);
+    //"Fact f:", f*(f+1);
+    FF1 := Factorization(f * (f + 1));
+    check_fact(f * (f + 1), FF1);
+
+    if FF1 ne Sort(F cat F1) then
+	"test_fact_dual FAILS";
+	"f:", f;
+	"F:", F;
+	"F1:", F1;
+	"FF1:", FF1;
+	"sqf FF1:", SquarefreeFactorization(f*(f + 1));
+	Parent(f);
+	error "";
+    end if;
+    if VERB then
+	"FF1:", FF1;
+	"Time:", Cputime(T);
+    end if;
+end procedure;
+
+P<x,y,z> := PolynomialRing(GF(2), 3);
+
+procedure test_ranges(deg_range, n_range, q_range, p_range, loop_limit)
+    /*
+    Test factorization for polynomials with ranges:
+
+	deg_range:	total degree range
+	n_range:	number of variables range
+	q_range:	field size range
+	p_range:	number of polynomials in product range
+	loop_limit:	number of tests for each range
+    */
+
+    //printf "Range test; deg: %o, q: %o: p: %o\n",
+    //    deg_range, q_range, p_range, loop_limit;
+
+    for deg in deg_range do
+	if VERB then
+	    print "*****";
+	end if;
+	s, i := GetSeed();
+	printf "Degree: %o, Seed: (%o, %o)\n", deg, s, i;
+
+	for n in n_range do
+	    if VERB then
+		print "####";
+		print "n:", n;
+	    end if;
+	    for q in q_range do
+		if VERB then
+		    print "%%%%%";
+		    print "q:", q;
+		end if;
+
+		K<z> := GF(q);
+		P := PolynomialRing(K, n, "grevlex");
+		AssignNames(~P, [CodeToString(96 + i): i in [1 .. n]]);
+		//n := 3;
+		char_2 := Characteristic(K) eq 2;
+
+		G := Sym(n);
+
+		M := Reverse(
+		    &cat[[x: x in MonomialsOfDegree(P, d)]: d in [0 .. deg]]
+		);
+		m := #M;
+		seen := {P |};
+		C := CartesianPower(K, m);
+
+		if VERB then
+		    "Degree:", deg;
+		    "Number of monomials:", m;
+		    //"Cartesian product size:", #C;
+		end if;
+
+		rand := #K gt 1000 or #C gt 10000;
+
+		rand_subset := rand;
+		rand_subset_card := 10;
+
+		if deg ge 10^10 then
+		    SetVerbose("MultiFact", 1);
+		else
+		    SetVerbose("MultiFact", 0);
+		end if;
+
+		loop_count := 0;
+		rand_num := loop_limit;
+
+		if rand_subset then
+		    c := 0;
+		    while c lt rand_num do
+			f := &*[
+			    &+[
+				Random(K)*Random(M):
+				i in [1 .. rand_subset_card]
+			    ]: p in [1 .. p_range]
+			];
+			if f ne 0 and f notin seen then
+			    if not
+				(char_2 and IsOne(MonomialCoefficient(f, P!1)))
+			    then
+				test_fact_dual(f);
+			    end if;
+			    if #K lt 100 then
+				o := f^G;
+				seen join:= &join{{s * g}: g in o, s in K};
+			    end if;
+			    c +:= 1;
+			end if;
+		    end while;
+		elif rand then
+		    c := 0;
+		    while c lt rand_num do
+			t := Random(C);
+			f := &*[
+			    &+[t[i]*M[i]: i in [1 .. m]]:
+			    p in [1 .. p_range]
+			];
+			if f ne 0 and f notin seen then
+			    if not
+				(char_2 and IsOne(MonomialCoefficient(f, P!1)))
+			    then
+				test_fact_dual(f);
+			    end if;
+			    if #K lt 100 then
+				o := f^G;
+				seen join:= &join{{s * g}: g in o, s in K};
+			    end if;
+			    c +:= 1;
+			end if;
+		    end while;
+		else
+		    // Ignore p_range
+		    for t in C do
+			f := &+[t[i]*M[i]: i in [1 .. m]];
+			if f ne 0 and f notin seen then
+			    if not
+				(char_2 and IsOne(MonomialCoefficient(f, P!1)))
+			    then
+				test_fact_dual(f);
+			    end if;
+			    o := f^G;
+			    seen join:= &join{{s * g}: g in o, s in K};
+			end if;
+			loop_count +:= 1;
+			if loop_count eq loop_limit then
+			    break;
+			end if;
+		    end for;
+		end if;
+
+	    end for;
+	end for;
+    end for;
+end procedure;
+
+if big then
+    deg_range := [1 .. 20];
+    n_range := [2, 3, 4, 5];
+    q_range := [
+	2, 3, 4,
+	PreviousPrime(2^30), NextPrime(2^64)
+    ];
+    loop_limit := 10;
+else
+    deg_range := [1 .. 5] cat [10, 12];
+    n_range := [2 .. 4];
+    q_range := [
+	2, 3, 4,
+	PreviousPrime(2^30), NextPrime(2^64)
+    ];
+    q_range := [ 2, 3, 4 ];
+    loop_limit := 1;
+end if;
+
+test_ranges([1 .. 2], [2 .. 3], [2 .. 4], 4, loop_limit);
+test_ranges([1 .. 4], [2 .. 3], [2 .. 4], 2, loop_limit);
+test_ranges([1 .. 4], [2 .. 3], [PreviousPrime(2^30), NextPrime(2^64)], 1, 1);
+test_ranges(deg_range, n_range, q_range, 1, loop_limit);
+
+for q in [2 .. 5] do
+    print "Small tests q:", q;
+
+    P<x,y,z> := PolynomialRing(GF(q), 3);
+
+    test_fact_dual((x+y+z^2)*(x^2 + y*x + y^2 + z + 1)*(x+y^2+z^2));
+    test_fact_dual(((y + z)*x + y^2 + z^2 + 1)*(x^2 + x + y^2 + z^2 + y*z + 1));
+    test_fact_dual(((y + z)*x + 1)*(x + y^2 + z^2 + y*z + 1));
+    test_fact_dual(((y + z)*x + 1)*((y^2*z+1)*x + y^2 + z^2 + y*z + 1));
+    test_fact_dual(
+	((y + z)*x + 1)*((y+z)^2*(y+1)*x + y^2 + z^2 + y*z + 1)*((y+1)*x + z)
+    );
+
+    test_fact_dual(((y*(y+1)*x^3 + y+1)*(y*(y+1)*x^3+x+1)*(y^5+x+y)));
+    test_fact_dual((x^3+y)*(y^2+y+1));
+
+    test_fact_dual(x^2*y^2 + x^2*y*z + x*y^2*z + x*y*z^2 + x + y^4 + y^2*z^2);
+end for;
+
+"EC div poly fact";
+P<t> := PolynomialRing(GF(2));
+j13 := (t^2+5*t+13)*(t^4+7*t^3+20*t^2+19*t+1)^3/t;
+_<t> := Parent(j13);
+E := EllipticCurve([1,0,0,0,1/j13]);
+
+S := [
+    <10, [ <1, 2>, <12, 2>, <24, 1> ]>,
+    <11, [ <60, 1> ]>,
+    <12, [ <1, 3>, <4, 1>, <4, 4>, <8, 2>, <32, 1> ]>,
+    <13, [ <6, 1>, <78, 1> ]>,
+    <14, [ <1, 2>, <24, 2>, <48, 1> ]>,
+    <15, [ <4, 1>, <12, 1>, <96, 1> ]>,
+    <16, [ <1, 9>, <4, 4>, <16, 2>, <64, 1> ]>,
+    <17, [ <144, 1> ]>,
+    <18, [ <1, 2>, <4, 2>, <8, 1>, <36, 2>, <72, 1> ]>,
+    <19, [ <180, 1> ]>,
+    <20, [ <1, 3>, <4, 1>, <12, 4>, <24, 2>, <96, 1> ]>,
+    <21, [ <4, 1>, <24, 1>, <192, 1> ]>,
+    <22, [ <1, 2>, <60, 2>, <120, 1> ]>,
+    <23, [ <264, 1> ]>,
+    <24, [ <1, 5>, <4, 2>, <4, 8>, <8, 4>, <16, 1>, <32, 2>, <128, 1> ]>,
+    <25, [ <12, 1>, <300, 1> ]>
+];
+
+time for t in S do
+    t;
+    i, F := Explode(t);
+    D := DivisionPolynomial(E, i);
+    n := Numerator(D);
+    _<x> := Parent(n);
+    time L := Factorization(n);
+    assert [<Degree(t[1]), t[2]>: t in L] eq F;
+    assert &*[u[1]^u[2]: u in L] eq Normalize(n);
+end for;
+
+R3<[x]> := PolynomialRing(GF(3),4);
+f := x[1]^2 + 2*x[2]^2 + x[2]*x[3] + 2*x[2]*x[4]
+    + 2*x[3]^2 + x[3]*x[4] + 2*x[4]^2;
+assert IsIrreducible(f);
+

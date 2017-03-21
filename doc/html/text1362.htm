@@ -1,0 +1,234 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Maps and Curves</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1363.htm">[Next]</A><A  HREF = "text1361.htm">[Prev]</A> <A  HREF = "text1363.htm">[Right]</A> <A  HREF = "text1361.htm">[Left]</A> <A  HREF = "text1356.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "15039">Maps and Curves</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1362.htm#15040">Elementary Maps</A>
+<LI> <A  HREF = "text1362.htm#15046">Maps Induced by Morphisms</A>
+</UL>
+<H4><A NAME = "15040">Elementary Maps</A></H4>
+
+<P>
+<P>
+<P>
+The first group of functions create selfmaps of the affine plane.
+Such a map f can be used to move a curve around the plane
+simply by applying it to the curve.
+See Chapter <A  HREF = "text1321.htm#14366">SCHEMES</A> on schemes for more details about maps.
+
+
+<H5><A NAME = "15041">IdentityAutomorphism(A) : Sch -&gt; AutSch</A></H5>
+<H5>Translation(A,p) : Sch,Pt -&gt; AutSch</H5>
+<H5>FlipCoordinates(A) : Sch -&gt; AutSch</H5>
+<H5>Automorphism(A,q) : Sch,RngMPolElt -&gt; AutSch</H5>
+<BLOCKQUOTE>
+These are the basic automorphisms of the affine plane A taking (x, y) to
+(x, y), (x - a, y - b), (y, x) and (x + q(y), y) respectively, where
+p is the point (a, b) and q is a polynomial on A involving y only.
+</BLOCKQUOTE>
+<H5><A NAME = "15042">TranslationToInfinity(C,p) : Crv,Pt -&gt; Crv,AutSch</A></H5>
+<BLOCKQUOTE>
+The image of C under the change of coordinates which translates p to
+the point (0:1:0) in the projective plane and makes the tangent line
+there equal to the line at infinity.
+An error is reported if p is a singular point of C.
+The change of coordinates map is given so that other curves
+can be mapped by the same change of coordinates.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15043">Example <TT>Crv_translation-to-infinity (H120E16)</TT></A></H3>
+<P>
+In this example we show how one could begin to work out a Weierstrass
+equation for a Fermat cubic.
+First we define that cubic curve C in the projective plane and choose
+a point p on C.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(Rationals(),2);
+&gt; C := Curve(P,x^3 + y^3 + z^3);
+&gt; p := C ! [1,-1,0];
+&gt; IsFlex(C,p);
+true 3
+</PRE>
+<P>
+The point we have chosen is a flex --- the second return value of 3 is
+the local intersection number of the curve C with its tangent line at p.
+We use the intrinsic <TT>TranslationToInfinity</TT> to make an automorphism of P
+which takes the point p to the point (0:1:0) and takes the curve C
+to a curve which has tangent line z=0 at the image of p.
+<P>
+<P>
+<P>
+<PRE>
+&gt; C1,phi := TranslationToInfinity(C,p);
+&gt; phi(p);
+(0 : 1 : 0)
+&gt; C1;
+Curve over Rational Field defined by
+x^3 + 3*y^2*z - 3*y*z^2 + z^3
+</PRE>
+<P>
+This is almost in Weierstrass form already.
+It is a pleasant exercise to make coordinate changes which "absorb" some
+of the coefficients.  Alternatively, one can use the intrinsic 
+<TT>EllipticCurve</TT> to perform the entire transformation in one step.
+<HR>
+<H5><A NAME = "15044">EvaluateByPowerSeries(m, P) : MapSch, Pt -&gt; Pt</A></H5>
+<BLOCKQUOTE>
+Given a map m: C to D, and a nonsingular point P on C, where
+C is a curve, return m(P), evaluating m(P) using a power
+series expansion if necessary. This allows a rational map on C to be
+evaluated at nonsingular base points.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15045">Example <TT>Crv_maps-point_pow_eval (H120E17)</TT></A></H3>
+The following example shows a map evaluated at a point using
+power series methods.
+<P>
+<P>
+<PRE>
+&gt; P2&lt;X,Y,Z&gt;:=ProjectiveSpace(Rationals(),2);
+&gt; C:=Curve(P2,X^3+Y^3-2*Z^3);
+&gt; D:=Curve(P2,Y^2*Z-X^3+27*Z^3);
+&gt; phi:=map&lt;C-&gt;D|[-6*X^2-6*X*Z+6*Y^2+6*Y*Z,
+&gt;                9*X^2+18*X*Y+18*X*Z+9*Y^2+18*Y*Z+36*Z^2,
+&gt;                X^2-2*X*Z-Y^2+2*Y*Z
+&gt;               ]&gt;;
+&gt; P:=C![-1,1,0];
+&gt; P in BaseScheme(phi);
+true (-1 : 1 : 0)
+&gt; Q:=EvaluateByPowerSeries(phi,P);
+&gt; Q;
+(3 : 0 : 1)
+&gt; phi(P);
+&gt;&gt; phi(P);
+      ^
+Runtime error in map application: Image of map does not lie in the codomain
+&gt; pullbackQ:=Q@@phi;
+&gt; pullbackQ;
+Scheme over Rational Field defined by
+-9*X^2 + 9*Y^2,
+9*X^2 + 18*X*Y + 18*X*Z + 9*Y^2 + 18*Y*Z + 36*Z^2,
+X^3 + Y^3 - 2*Z^3
+&gt; IsSubscheme(BaseScheme(phi), pullbackQ);
+true
+&gt; P in pullbackQ;
+true (-1 : 1 : 0)
+&gt; Degree(BaseScheme(phi))+1 eq Degree(pullbackQ);
+true
+</PRE>
+<HR>
+<H4><A NAME = "15046">Maps Induced by Morphisms</A></H4>
+
+<P>
+<P>
+Given a non-constant map &phi;:D to C between curves, there are several induced
+maps between the function fields of C and D and the divisor groups
+(Div)(C) and (Div)(D). We refer to the contravariant maps &phi;<sup> * </sup>
+as <I>Pullback</I>s and to the covariant maps &phi;_ *, corresponding to the
+Norm between the function fields, as <I>Pushforward</I>s.
+Divisor groups and other function field related items are discussed in 
+Section <A  HREF = "text1364.htm#15091">Function Fields</A>.
+
+
+<H5><A NAME = "15047">Degree(m) : MapSch -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the degree of a non-constant dominant map m between curves.
+</BLOCKQUOTE>
+<H5><A NAME = "15048">RamificationDivisor(m) : MapSch -&gt; DivCrvElt</A></H5>
+<BLOCKQUOTE>
+Returns the ramification divisor of a non-constant dominant map m between
+irreducible curves.
+</BLOCKQUOTE>
+<H5><A NAME = "15049">Pullback(phi, X) : MapSch, FldFunFracSchElt -&gt; FldFunFracSchElt</A></H5>
+<H5>Pullback(phi, X) : MapSch, DiffCrvElt -&gt; DiffCrvElt</H5>
+<H5>Pullback(phi, X) : MapSch, DivCrvElt -&gt; DivCrvElt</H5>
+<H5>Pullback(phi, X) : MapSch, PlcCrvElt -&gt; DivCrvElt</H5>
+<BLOCKQUOTE>
+Given a map &phi;:D to C between curves and a function, differential, place or
+divisor X on C, this function returns the pullback of X along &phi;.
+</BLOCKQUOTE>
+<H5><A NAME = "15050">Pushforward(phi, X) : MapSch, FldFunFracSchElt -&gt; FldFunFracSchElt</A></H5>
+<H5>Pushforward(phi, X) : MapSch, PlcCrvElt -&gt; DivCrvElt</H5>
+<H5>Pushforward(phi, X) : MapSch, DivCrvElt -&gt; DivCrvElt</H5>
+<BLOCKQUOTE>
+Given a map &phi;:D to C between curves and a function, place or
+divisor X on C, this function returns the pushforward of X along &phi;.
+In older versions, the function applied to a place used to only work with the
+image of the point (or cluster) below the place for speed and would give an
+error when &phi; was undefined there. Now, if this is true, the function reverts
+to working entirely with places and should never fail.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15051">Example <TT>Crv_map-push-pull (H120E18)</TT></A></H3>
+As an illustration of these routines, consider the following example
+<P>
+<P>
+<PRE>
+&gt; Puvw&lt;u,v,w&gt;:=ProjectiveSpace(Rationals(),2);
+&gt; Pxyz&lt;x,y,z&gt;:=ProjectiveSpace(Rationals(),2);
+&gt; D:=Curve(Puvw,u^4+v^4-w^4);
+&gt; C:=Curve(Pxyz,x^4-y^4+y^2*z^2);
+&gt; phiAmb:=map&lt;Puvw-&gt;Pxyz|[y*z,z^2,x^2]&gt;;
+&gt; phi:=Restriction(phiAmb,D,C);
+&gt; KC:=FunctionField(C);
+&gt; KD:=FunctionField(D);
+&gt; Omega:=BasisOfHolomorphicDifferentials(C)[1];
+</PRE>
+Here we see a holomorphic differential pulls back to holomorphic.
+<P>
+<P>
+<PRE>
+&gt; IsEffective(Divisor(Pullback(phi,Omega)));
+true
+</PRE>
+Ramification divisors are actually quite easy to compute.
+<P>
+<P>
+<PRE>
+&gt; RamificationDivisor(phi) eq
+&gt;     Divisor(Pullback(phi,Omega))-Pullback(phi,Divisor(Omega));
+true
+</PRE>
+Verifying Riemann-Hurwitz:
+<P>
+<P>
+<PRE>
+&gt; 2*Genus(D)-2 eq Degree(phi)*(2*Genus(C)-2)+Degree(RamificationDivisor(phi)); 
+true
+</PRE>
+Pulling back and pushing forward is taking powers on the function field.
+<P>
+<P>
+<PRE>
+&gt; f:=KC.1;
+&gt; Pushforward(phi,Pullback(phi,f)) eq f^Degree(phi);
+true
+</PRE>
+<TT>Divisor</TT> and <TT>Pushforward</TT> commute.
+<P>
+<P>
+<PRE>
+&gt; g:=KD.1;
+&gt; Divisor(Pushforward(phi,g)) eq Pushforward(phi,Divisor(g));
+true
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1363.htm">[Next]</A><A  HREF = "text1361.htm">[Prev]</A> <A  HREF = "text1363.htm">[Right]</A> <A  HREF = "text1361.htm">[Left]</A> <A  HREF = "text1356.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

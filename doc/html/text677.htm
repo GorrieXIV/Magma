@@ -1,0 +1,1102 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Aschbacher Reduction</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text678.htm">[Next]</A><A  HREF = "text676.htm">[Prev]</A> <A  HREF = "text678.htm">[Right]</A> <A  HREF = "text676.htm">[Left]</A> <A  HREF = "text673.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "7757">Aschbacher Reduction</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text677.htm#7758">Introduction</A>
+<LI> <A  HREF = "text677.htm#7759">Primitivity</A>
+<LI> <A  HREF = "text677.htm#7766">Semilinearity</A>
+<LI> <A  HREF = "text677.htm#7773">Tensor Products</A>
+<LI> <A  HREF = "text677.htm#7779">Tensor-induced Groups</A>
+<LI> <A  HREF = "text677.htm#7785">Normalisers of Extraspecial r-groups and Symplectic 2-groups</A>
+<LI> <A  HREF = "text677.htm#7793">Writing Representations over  Subfields</A>
+<LI> <A  HREF = "text677.htm#7802">Decompositions with Respect to a  Normal Subgroup</A>
+</UL>
+<H4><A NAME = "7758">Introduction</A></H4>
+
+<P>
+<P>
+An on-going international research project seeks to develop algorithms to 
+explore the structure of groups having either large order or large degree.  
+The approach relies on the following theorem of Aschbacher 
+<A  HREF = "text672.htm#bib_asch-maximal-subgps">[Asc84]</A>:
+<P>
+<P>
+A matrix group
+G acting on the finite dimensional K[G]-module V over a finite field
+K satisfies at least one of the following conditions (which we have
+simplified slightly for brevity):
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>G acts reducibly on V;
+<DT>(ii)</DT><DD>G acts semilinearly over an extension field of K;
+<DT>(iii)</DT><DD>G acts imprimitively on V;
+<DT>(iv)</DT><DD>G preserves a nontrivial tensor-product decomposition of V;
+<DT>(v)</DT><DD>G has a normal subgroup N, acting absolutely irreducibly on
+V, which is an extraspecial p-group or 2-group of symplectic type;
+<DT>(vi)</DT><DD>G preserves a tensor-induced decomposition of V;
+<DT>(vii)</DT><DD>G acts (modulo scalars) linearly over a proper subfield of K;
+<DT>(viii)</DT><DD>G contains a classical group in its natural action over K;
+<DT>(ix)</DT><DD>G is almost simple modulo scalars.
+<P>
+<P>
+<P>
+</DL>
+The philosophy underpinning the research program is to attempt
+to decide that  G lies in at least one of the above categories, 
+and to calculate the associated isomorphism or decomposition explicitly.
+<P>
+Groups in Category (i) can be recognised easily by means of the Meataxe
+functions described in the chapter on R-modules. 
+<P>
+Groups which act irreducibly but not absolutely irreducibly on V
+fall theoretically into Category (ii), and furthermore act linearly over
+an extension field of K. In fact, absolute irreducibility can be tested 
+using the built-in Magma functions and, by redefining their field to be
+an extension field L of K and reducing, they can be rewritten as
+absolutely irreducible groups of smaller dimension, but over L instead of
+K. We can therefore concentrate on absolutely irreducible matrix groups.
+<P>
+The <TT>CompositionTree</TT> package currently includes functions 
+which seek to decide membership in all categories. 
+
+
+<H4><A NAME = "7759">Primitivity</A></H4>
+
+<P>
+<P>
+Let G be a subgroup of GL(d, q) and assume that
+G acts irreducibly on the underlying vector space V.
+Then G acts <I>imprimitively</I> on V if there is a non-trivial
+direct sum decomposition
+ V = V<sub>1</sub> direct-sum V<sub>2</sub> direct-sum ... direct-sum V<sub>r</sub> 
+where V<sub>1</sub>, ..., V<sub>r</sub> are permuted by G.
+In such a case, each block V<sub>i</sub> has the same dimension
+or size, and we have the <I>block system</I> {V<sub>1</sub>, ..., V<sub>r</sub>}.
+If no such system exists, then G is <I>primitive</I>.
+<P>
+Theoretical details of the algorithm used may be found in 
+Holt, Leedham-Green, O'Brien, and Rees <A  HREF = "text672.htm#bib_matg-primitivity">[HLGOR96b]</A>.
+<P>
+<TT>SetVerbose ("Smash", 1)</TT> will provide
+information on the progress of the algorithm.
+<P>
+
+
+<H5><A NAME = "7760">IsPrimitive(G: parameters) : GrpMat -&gt; BoolElt</A></H5>
+
+<PRE>    BlockSizes: [RngIntElt]             Default: []</PRE>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, this intrinsic
+returns <TT>true</TT> if G is primitive, <TT>false</TT> if G is
+not primitive, or <TT>"unknown"</TT> if no decision can be reached.
+<P>
+If <TT>BlockSizes</TT> is supplied, then the search is restricted to 
+systems of imprimitivity whose block sizes are given in the
+sequence <TT>BlockSizes</TT> only.  Otherwise all valid sizes will
+be considered. 
+</BLOCKQUOTE>
+<H5><A NAME = "7761">ImprimitiveBasis(G) : GrpMat -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field which is 
+imprimitive, this intrinsic returns the change-of-basis matrix 
+which exhibits the block structure for G.
+</BLOCKQUOTE>
+<H5><A NAME = "7762">Blocks(G) : GrpMat -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field which is 
+imprimitive, this intrinsic returns the blocks of imprimitivity of G. 
+</BLOCKQUOTE>
+<H5><A NAME = "7763">BlocksImage(G) : GrpMat -&gt; GrpPerm</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field which is 
+imprimitive, this intrinsic returns the group induced by the 
+action of G on the system of imprimitivity.
+</BLOCKQUOTE>
+<H5><A NAME = "7764">ImprimitiveAction(G, g) : GrpMat, GrpMatElt  -&gt; GrpPermElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field which is 
+imprimitive and an element g of G, this intrinsic returns 
+action of g on blocks of imprimitivity as a permutation.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7765">Example <TT>GrpMatFF_IsPrimitive (H65E2)</TT></A></H3>
+<P>
+We construct an imprimitive group by taking the wreath product of 
+GL(4, 7) with S<sub>3</sub>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; MG := GL (4, 7);
+&gt; PG := Sym (3);
+&gt; G := WreathProduct (MG, PG);
+&gt; 
+&gt; IsPrimitive (G);
+false
+</PRE>
+We investigate the block system for G.
+<P>
+<P>
+<PRE>
+&gt; B := Blocks (G);
+&gt; B;
+&gt; #B;
+3
+&gt; B[1];
+Vector space of degree 12, dimension 4 over GF(7)
+Generators:
+(0 0 0 0 1 0 0 0 0 0 0 0)
+(0 0 0 0 0 1 0 0 0 0 0 0)
+(0 0 0 0 0 0 1 0 0 0 0 0)
+(0 0 0 0 0 0 0 1 0 0 0 0)
+Echelonized basis:
+(0 0 0 0 1 0 0 0 0 0 0 0)
+(0 0 0 0 0 1 0 0 0 0 0 0)
+(0 0 0 0 0 0 1 0 0 0 0 0)
+(0 0 0 0 0 0 0 1 0 0 0 0)
+</PRE>
+Now we obtain a permutation representation of G in its action on the
+blocks.
+<P>
+<P>
+<PRE>
+&gt; P := BlocksImage (G);
+&gt; P;
+Permutation group P acting on a set of cardinality 3
+    (1, 2, 3)
+    (2, 3)
+&gt; g := G.4 * G.3;
+&gt; ImprimitiveAction (G, g);
+(1, 2)
+</PRE>
+<HR>
+<H4><A NAME = "7766">Semilinearity</A></H4>
+
+<P>
+<P>
+Let G be a subgroup of GL(d, q) and assume that
+G acts absolutely irreducibly on the underlying vector space V.
+Assume that a normal subgroup N  of G embeds in GL(d/e, q<sup>e</sup>), for e&gt;1,  
+and a d x d matrix C acts as multiplication by 
+a scalar &lambda; (a field generator of GF(q<sup>e</sup>))
+for that embedding. 
+<P>
+We say that G acts as a <I>semilinear</I> group of automorphisms on 
+the d/e-dimensional
+space if and only if, for each generator g of G, there is an integer
+i = i(g) such that Cg = gC<sup>i</sup>, that is, g corresponds to the
+field automorphism &lambda; -&gt; &lambda;<sup>i</sup>.
+If so, we have a map from G to the (cyclic) group
+(Aut)(GF(q<sup>e</sup>)), and C centralises the kernel of this map,
+which thus lies in GL(d, q<sup>e</sup>).
+<P>
+Theoretical details of the algorithm used may be found in 
+Holt, Leedham-Green, O'Brien and  Rees <A  HREF = "text672.htm#bib_decomps-modules">[HLGOR96a]</A>.
+<P>
+<TT>SetVerbose ("SemiLinear", 1)</TT> will provide
+information on the progress of the algorithm.
+
+
+<H5><A NAME = "7767">IsSemiLinear(G) : GrpMat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, this intrinsic
+returns <TT>true</TT> if G is semilinear, <TT>false</TT> if G is
+not semilinear, or <TT>"unknown"</TT> if no decision can be reached.
+</BLOCKQUOTE>
+<H5><A NAME = "7768">DegreeOfFieldExtension(G) : GrpMat -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Let G be a subgroup of K = GL(d, q).  The intrinsic returns the 
+degree e of the extension field of F<sub>q</sub> over which G is semilinear.
+</BLOCKQUOTE>
+<H5><A NAME = "7769">CentralisingMatrix(G) : GrpMat -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Let G be a semilinear subgroup of K = GL(d, q).  The intrinsic 
+returns the matrix C which centralises the normal subgroup of G 
+which acts linearly over the extension field of F<sub>q</sub>.
+</BLOCKQUOTE>
+<H5><A NAME = "7770">FrobeniusAutomorphisms(G) : GrpMat -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Let G be a semilinear subgroup of K = GL(d, q) and let C be
+the corresponding centralising matrix.  The intrinsic returns a 
+sequence S of positive integers, one for each generator g<sub>i</sub> of 
+G.  The element S[i] is the least positive integer such that
+g<sub>i</sub><sup> - 1</sup> C g<sub>i</sub> = C<sup>S[i]</sup>.
+</BLOCKQUOTE>
+<H5><A NAME = "7771">WriteOverLargerField(G) : GrpMat -&gt; GrpMat, GrpAb, SeqEnum</A></H5>
+<BLOCKQUOTE>
+Let G be a semilinear subgroup of GL(d, q) with extension
+degree e. This intrinsic returns:
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>The normal subgroup N of the matrix group G which 
+is the kernel of the map from G to C<sub>e</sub>; this subgroup acts 
+linearly over the extension field of K and is precisely the 
+centraliser of C in G.
+<DT>(ii)</DT><DD>A cyclic group E of order e which is isomorphic 
+to G/N. 
+<DT>(iii)</DT><DD>A sequence of images of the generators of G in E.</DL>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7772">Example <TT>GrpMatFF_Semilinearity (H65E3)</TT></A></H3>
+<P>
+We analyse a semilinear group.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P := GL(6,3);
+&gt; g1 := P![0,1,0,0,0,0,-1,0,0,0,0,0,
+&gt;          0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1];
+&gt; g2 := P![-1,0,0,0,1,0,0,-1,0,0,0,1,
+&gt;          -1,0,0,0,0,0,0,-1,0,0,0,0,0,0,-1,0,0,0,0,0,0,-1,0,0];
+&gt; g3 := P![1,0,0,0,0,0,0,-1,0,0,0,0,
+&gt;          0,0,1,0,0,0,0,0,0,-1,0,0,0,0,0,0,1,0,0,0,0,0,0,-1];
+&gt; G := sub &lt;P | g1, g2, g3 &gt;;
+&gt; 
+&gt; IsSemiLinear (G);
+true
+&gt; DegreeOfFieldExtension (G);
+2
+&gt; CentralisingMatrix (G);
+[2 2 0 0 0 0]
+[1 2 0 0 0 0]
+[0 0 2 2 0 0]
+[0 0 1 2 0 0]
+[0 0 0 0 2 2]
+[0 0 0 0 1 2]
+&gt; FrobeniusAutomorphisms (G);
+[ 1, 1, 3 ]
+&gt; K, E, phi := WriteOverLargerField (G);
+</PRE>
+<P>
+The group K is the kernel of the homomorphism from G into E.
+<P>
+<P>
+<P>
+<PRE>
+&gt; K.1;
+[0 1 0 0 0 0]
+[2 0 0 0 0 0]
+[0 0 1 0 0 0]
+[0 0 0 1 0 0]
+[0 0 0 0 1 0]
+[0 0 0 0 0 1]
+</PRE>
+<P>
+The return value E is the cyclic group of order e while 
+<TT>phi</TT> gives the sequence of images of G.i in E.
+<P>
+<P>
+<P>
+<PRE>
+&gt; E;
+Abelian Group isomorphic to Z/2
+Defined on 1 generator
+Relations:
+    2*E.1 = 0
+&gt; 
+&gt; phi;
+[ 0, 0, E.1 ]
+</PRE>
+<HR>
+<H4><A NAME = "7773">Tensor Products</A></H4>
+
+<P>
+<P>
+Let G be a subgroup of GL(d, K), where K = GF(q), 
+and let V be the natural K[G]-module.  We say that G preserves a
+tensor decomposition of V as U tensor W if there is 
+an isomorphism of V onto U tensor W such that the 
+induced image of G in GL(U tensor W)
+lies in GL(U) <IMG SRC="open.gif" ALT="" WIDTH=7 HEIGHT=7> GL(W).
+<P>
+Theoretical details of the algorithm used may be found in 
+Leedham-Green and O'Brien <A  HREF = "text672.htm#bib_tp-pg">[LGO97b]</A>, <A  HREF = "text672.htm#bib_recog-tensor">[LGO97a]</A>.
+<P>
+The verbose flag <TT>SetVerbose ("Tensor", 1)</TT> will provide
+information on the progress of the algorithm.
+
+
+<H5><A NAME = "7774">IsTensor(G: parameters) : GrpMat -&gt; BoolElt</A></H5>
+
+<PRE>    Factors: [SeqEnum]                  Default: []</PRE>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, this intrinsic
+returns <TT>true</TT> if G preserves a non-trivial tensor decomposition,   
+<TT>false</TT> if G is does not preserve a tensor decomposition,  or 
+<TT>"unknown"</TT> if no decision can be reached.
+<P>
+A sequence of valid dimensions for potential factors may be supplied 
+using the parameter <TT>Factors</TT>. Then for each element [u, w] of 
+the sequence <TT>Factors</TT>, the algorithm will search for decompositions 
+of V as U tensor W, where U must have dimension u and W must 
+have dimension w only.  If this parameter is not set, then all valid 
+factorisations will be considered. 
+</BLOCKQUOTE>
+<H5><A NAME = "7775">TensorBasis(G) : GrpMat -&gt; GrpMatElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field that admits
+a tensor decomposition, this intrinsic returns the change-of-basis 
+matrix which exhibits the tensor decomposition of G.
+</BLOCKQUOTE>
+<H5><A NAME = "7776">TensorFactors(G) : GrpMat -&gt; GrpMat, GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field that admits
+a tensor decomposition, this intrinsic returns two groups which are
+the tensor factors of G.
+</BLOCKQUOTE>
+<H5><A NAME = "7777">IsProportional(X, k) : Mtrx, RngIntElt -&gt; BoolElt, Tup</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field that admits
+a tensor decomposition, this intrinsic returns <TT>true</TT> if and only 
+if the matrix X is composed of k x k blocks which 
+differ only by scalars. If this is indeed the case, the tensor 
+decomposition of X is also returned. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7778">Example <TT>GrpMatFF_Tensor (H65E4)</TT></A></H3>
+We define a subgroup of GL(6, 3) which admits a non-trivial tensor 
+decomposition.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P := GL(6, 3);
+&gt; 
+&gt; g := P![ 0, 1, 1, 2, 1, 0, 2, 2, 1, 2, 1, 1, 1, 0, 2, 1, 2, 2, 1, 2, 2,
+&gt;          2, 2, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 2, 2 ];
+&gt; 
+&gt; h := P![ 1, 0, 2, 1, 1, 2, 0, 0, 2, 0, 0, 2, 2, 0, 1, 0, 2, 1, 2, 1, 2,
+&gt;          2, 1, 1, 0, 2, 0, 1, 0, 0, 0, 0, 0, 2, 1, 2 ];
+&gt; 
+&gt; G := sub&lt; P | g, h &gt;;
+&gt; IsTensor(G);
+true
+&gt; C := TensorBasis(G);
+</PRE>
+<P>
+So C is the change-of-basis matrix.  If we conjugate G.1 by C, 
+we obtain a visible Kronecker product.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G.1^C;
+[0 0 2 0 2 0]
+[0 0 2 2 2 2]
+[2 0 0 0 2 0]
+[2 2 0 0 2 2]
+[0 0 0 0 1 0]
+[0 0 0 0 1 1]
+&gt; 
+</PRE>
+<P>
+We use the function <TT>IsProportional</TT> to verify that G.1<sup>C</sup> 
+is a Kronecker product.
+<P>
+<P>
+<P>
+<PRE>
+&gt; IsProportional(G.1^C, 2);
+true
+&lt;
+ [2 0]
+ [2 2],
+
+ [0 1 1]
+ [1 0 1]
+ [0 0 2]
+&gt;
+</PRE>
+<P>
+Finally, we display the tensor factors. 
+<P>
+<P>
+<P>
+<PRE>
+&gt; A := TensorFactors(G);
+&gt; A[1];
+MatrixGroup(2, GF(3))
+Generators:
+    [1 2]
+    [2 2]
+
+
+    [2 0]
+    [2 2]
+&gt; A[2];
+MatrixGroup(3, GF(3))
+Generators:
+    [0 1 0]
+    [1 2 1]
+    [1 2 0]
+
+
+    [0 1 1]
+    [1 0 1]
+    [0 0 2]
+</PRE>
+<HR>
+<H4><A NAME = "7779">Tensor-induced Groups</A></H4>
+
+<P>
+<P>
+Let G be a
+subgroup of GL(d, K), where K = GF(q) and q = p<sup>e</sup>
+for some prime p, and let V be the natural K[G]-module.
+Assume that d has a proper factorisation as u<sup>r</sup>.
+We say that G is tensor-induced if 
+G preserves a decomposition of V as
+U<sub>1</sub> tensor U<sub>2</sub> tensor ... tensor U<sub>r</sub>
+where each U<sub>i</sub> has dimension u &gt; 1, r &gt; 1,
+and the set of U<sub>i</sub> is permuted by G.
+If G is tensor-induced, then there is a 
+homomorphism of G into the symmetric group S<sub>r</sub>.     
+<P>
+Theoretical details of the algorithm used may be found in 
+Leedham-Green and O'Brien <A  HREF = "text672.htm#bib_crlg-eaob">[LGO02]</A>.
+<P>
+<TT>SetVerbose ("TensorInduced", 1)</TT> will provide
+information on the progress of the algorithm.
+
+
+<H5><A NAME = "7780">IsTensorInduced(G : parameters) : GrpMat -&gt; BoolElt</A></H5>
+
+<PRE>    InducedDegree: RngIntElt            Default: "All"</PRE>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, return
+<TT>true</TT> if G is tensor-induced, <TT>false</TT> if G is 
+not tensor-induced, and <TT>"unknown"</TT> if no decision can 
+be reached.
+<P>
+If the value of the parameter <TT>InducedDegree</TT> is set to r, 
+then the algorithm will search for homomorphisms into the 
+symmetric group of degree r only. Otherwise is will consider all 
+valid degrees. 
+</BLOCKQUOTE>
+<H5><A NAME = "7781">TensorInducedBasis(G) : GrpMat -&gt; GrpMatElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field that
+is tensor-induced, this intrinsic returns the change-of-basis 
+matrix which exhibits that G is tensor-induced.
+</BLOCKQUOTE>
+<H5><A NAME = "7782">TensorInducedPermutations(G) : GrpMat -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field that
+is tensor-induced, this intrinsic returns a sequence whose 
+i-th entry is the homomorphic image of G.i in S<sub>r</sub>.
+</BLOCKQUOTE>
+<H5><A NAME = "7783">TensorInducedAction(G, g) : GrpMat, GrpMatElt -&gt; GrpPermElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field that
+is tensor-induced, this intrinsic returns the tensor-induced 
+action of the element g &isin;G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7784">Example <TT>GrpMatFF_TensorInduced (H65E5)</TT></A></H3>
+<P>
+We illustrate the use of the functions for determining if a matrix
+group is tensor-induced.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := GL(2, 3);
+&gt; S := Sym(3);
+&gt; G := TensorWreathProduct(G, S);
+&gt; IsTensorInduced(G);
+true
+</PRE>
+<P>
+We next recover the permutations.
+<P>
+<P>
+<P>
+<PRE>
+&gt; TensorInducedPermutations(G);
+[
+    Id(S),
+    Id(S),
+    (1, 2, 3),
+    (1, 2)
+]
+</PRE>
+<P>
+Hence G.1 and G.2 are in the kernel of the homomorphism from G to S.
+We extract the change-of-basis matrix C and then conjugate G.1 by C, 
+thereby obtaining a visible Kronecker product.
+<P>
+<P>
+<P>
+<PRE>
+&gt; C := TensorInducedBasis(G);
+&gt; x := G.1^C;
+&gt; x;
+[2 0 0 0 0 0 0 0]
+[0 2 0 0 0 0 0 0]
+[0 0 2 0 0 0 0 0]
+[0 0 0 2 0 0 0 0]
+[1 0 0 0 1 0 0 0]
+[0 1 0 0 0 1 0 0]
+[0 0 1 0 0 0 1 0]
+[0 0 0 1 0 0 0 1]
+</PRE>
+<P>
+Finally, we verify that x = G.1<sup>C</sup> is a Kronecker product for each of 
+2 and 4. 
+<P>
+<P>
+<P>
+<PRE>
+&gt; IsProportional(x, 2);
+true
+&lt;[2 0]
+[0 2], [1 0 0 0]
+[0 1 0 0]
+[2 0 2 0]
+[0 2 0 2]&gt;        
+&gt; IsProportional(x, 4);
+true
+&lt;[2 0 0 0]
+[0 2 0 0]
+[0 0 2 0]
+[0 0 0 2], [1 0]
+[2 2]&gt;                 
+</PRE>
+<HR>
+<H4><A NAME = "7785">Normalisers of Extraspecial r-groups and Symplectic 2-groups</A></H4>
+
+<P>
+<P>
+<P>
+Let G &le;GL(d, q), where d=r<sup>m</sup> for some prime r. 
+If G is contained in the normaliser of an r-group R, 
+of order either r<sup>2m + 1</sup> or 2<sup>2m + 2</sup>, then 
+either R is extraspecial (in the first case), or R is a 2-group
+of symplectic type (that is, a central product of an
+extraspecial 2-group with the cyclic group of order 4).
+<P>
+If d = r is an odd prime, we use the Monte Carlo algorithm  
+of Niemeyer <A  HREF = "text672.htm#bib_niemeyer-normalisers">[Nie05]</A> to decide whether or not 
+G normalises such a subgroup. Otherwise, the corresponding
+intrinsic <TT>IsExtraSpecialNormaliser</TT> searches for elements 
+of the normal subgroup, and can only reach a negative 
+conclusion in certain limited cases. 
+If it cannot reach a conclusion it returns <TT>"unknown"</TT>.
+
+
+<H5><A NAME = "7786">IsExtraSpecialNormaliser(G) : GrpMat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic
+returns <TT>true</TT> if G normalises an extraspecial r-group or 
+2-group of symplectic type, <TT>false</TT> if G is known
+not to normalise an extraspecial r-group or a 2-group of 
+symplectic type, or <TT>"unknown"</TT> if it cannot reach a conclusion. 
+<P>
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "7787">ExtraSpecialParameters(G) : GrpMat -&gt; [RngIntElt, RngIntElt]</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field that is known 
+to normalise an extraspecial r-group or 2-group of symplectic type, 
+this intrinsic returns a sequence of two integers, r and n, 
+where the extraspecial or symplectic subgroup R normalised by 
+G has order r<sup>n</sup>.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "7788">ExtraSpecialGroup(G) : GrpMat -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field that is known 
+to normalise an extraspecial r-group or 2-group of symplectic type, 
+this intrinsic returns the extraspecial or symplectic subgroup 
+normalised by G.
+</BLOCKQUOTE>
+<H5><A NAME = "7789">ExtraSpecialNormaliser(G) : GrpMat -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field that is known
+to normalise an extraspecial r-group or 2-group of symplectic type, 
+this intrinsic returns the action of the generators of G on its 
+normal extraspecial or symplectic subgroup as a sequence of matrices, 
+each of degree 2r, one for each generator of G.
+</BLOCKQUOTE>
+<H5><A NAME = "7790">ExtraSpecialAction(G, g) : GrpMat, GrpMatElt -&gt; GrpMatElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field that is known 
+to normalise an extraspecial r-group or 2-group of symplectic type, 
+this intrinsic returns a matrix of degree 2r describing the action 
+of element g on the extraspecial or symplectic group normalised by G.
+</BLOCKQUOTE>
+<H5><A NAME = "7791">ExtraSpecialBasis(G) : GrpMat -&gt; GrpMatElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, which is the
+odd prime degree case of G normalising an extraspecial r-group 
+or 2-group of symplectic type, this intrinsic returns the 
+change-of-basis matrix which conjugates the normal extraspecial 
+subgroup into a "nice" representation, generated by a diagonal 
+and a permutation matrix.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7792">Example <TT>GrpMatFF_ExtraSpecialNormaliser (H65E6)</TT></A></H3>
+For this example we construct a subgroup G of GL(7, 8) that normalises 
+an extraspecial r-group or 2-group of symplectic type.
+<P>
+<P>
+<P>
+<PRE>
+&gt; F:=GF(8);
+&gt; P:=GL(7,F);
+&gt; w := PrimitiveElement(F);
+&gt; g1:=P![
+&gt; w,0,w^2,w^5,0,w^3,w,w,1,w^6,w^3,0,w^4,w,w^2,w^6,w^4,1,w^3,w^3,w^5,
+&gt; w^6,w,w^3,1,w^5,0,w^4,1,w^6,w^3,w^6,w^3,w^2,w^2,w^3,w^6,w^6,w^4,1,w^2,w^4,
+&gt; w^5,w^4,w^2,w^6,1,w^5,w ];
+&gt; g2:=P![w^3,w^4,w^2,w^6,w,w,w^3,w^3,w^4,w,w,w^2,w^3,w^3,w,w^3,w^5,w,1,w^3,w,
+&gt; 0,w^2,w^6,w,w^5,1,w,w^6,0,w^3,0,w^4,w,w^5,w^3,w^3,1,w^3,w^5,w^5,w^3,
+&gt; w^4,w^6,w,w^6,w^4,w^4,0 ];
+&gt; g3:=P![w^5,w^6,w^2,w,w,w^4,w^6,w^6,w^6,w,w^6,w,1,w^3,w,w^6,w^2,w,w^6,w^3,w^6,
+&gt; w^2,w^6,w^6,w^3,w,w^6,w^5,0,w^4,w^6,w^6,w,w^2,0,w,w^3,w^5,w^2,w^3,w^4,w^6,
+&gt; 0,w^3,w,w^3,w^4,w^3,1];
+&gt; gens := [g1,g2,g3];
+&gt; G := sub&lt; P | gens &gt;;
+&gt; IsExtraSpecialNormaliser(G);
+true
+</PRE>
+<P>
+So G has the desired normaliser property.
+<P>
+<P>
+<P>
+<PRE>
+&gt; ExtraSpecialParameters (G);
+[ 7, 3 ]
+&gt; N:=ExtraSpecialNormaliser(G);
+&gt; N;
+[
+    [3 4]
+    [1 4],
+
+    [4 3]
+    [0 2],
+
+    [1 0]
+    [0 1]
+]
+</PRE>
+<HR>
+<H4><A NAME = "7793">Writing Representations over  Subfields</A></H4>
+
+<P>
+<P>
+The algorithm implemented by these functions is due to Glasby, 
+Leedham-Green and O'Brien <A  HREF = "text672.htm#bib_glasby-lg-obrien">[GLGO05]</A>. 
+We also provide access to an earlier 
+algorithm for the non-scalar case 
+developed by Glasby and Howlett <A  HREF = "text672.htm#bib_minimal-fields">[GH97]</A>. 
+
+
+<H5><A NAME = "7794">IsOverSmallerField(G : parameters) : GrpMat -&gt; BoolElt, GrpMat</A></H5>
+
+<PRE>    Scalars: BoolElt                    Default: <TT>false</TT></PRE>
+
+<PRE>    Algorithm: MonStgElt                Default: "GLO"</PRE>
+<BLOCKQUOTE>
+Given an absolutely irreducible matrix group G defined over a 
+finite field K, this intrinsic decides whether or not G has an 
+equivalent representation over a subfield of K. If so, it returns 
+<TT>true</TT> and the representation over the smallest possible subfield,
+otherwise it returns <TT>false</TT>.
+If the optional argument <TT>Scalars</TT> is <TT>true</TT> then decide whether 
+or G modulo scalars has an equivalent representation over 
+a subfield of K. 
+If the optional argument <TT>Algorithm</TT> is set to <TT>"GH"</TT>,
+then the non-scalar case uses the original Glasby and Howlett 
+algorithm. The default is the Glasby, Leedham-Green and O'Brien
+algorithm, specified by <TT>"GLO"</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "7795">IsOverSmallerField(G, k : parameters) : GrpMat -&gt; BoolElt, GrpMat</A></H5>
+
+<PRE>    Scalars: BoolElt                    Default: <TT>false</TT></PRE>
+
+<PRE>    Algorithm: MonStgElt                Default: "GLO"</PRE>
+<BLOCKQUOTE>
+Given an absolutely irreducible matrix group G defined over a 
+finite field K, and a positive integer k which is a proper
+divisor of the degree of K, this intrinsic decides whether or 
+not G has an equivalent representation over a proper subfield of 
+K having degree k over the prime field. If so, it returns <TT>true</TT> 
+and the representation over this subfield, else it returns <TT>false</TT>.
+If the optional argument <TT>Scalars</TT> is <TT>true</TT> then it decides 
+whether or not G modulo scalars has an equivalent representation 
+over a degree k subfield of K. If the optional argument 
+<TT>Algorithm</TT> is set to <TT>"GH"</TT>, then the non-scalar case 
+uses the original Glasby and Howlett algorithm.  The default is 
+the Glasby, Leedham-Green and O'Brien algorithm, specified by 
+<TT>"GLO"</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "7796">SmallerField(G) : GrpMat -&gt; FLdFin</A></H5>
+<BLOCKQUOTE>
+Given an absolutely irreducible matrix group G defined over a 
+finite field K, which can be written over a proper subfield of
+K (possibly modulo scalars), return the subfield.
+</BLOCKQUOTE>
+<H5><A NAME = "7797">SmallerFieldBasis(G) : GrpMat -&gt; GrpMatElt</A></H5>
+<BLOCKQUOTE>
+Given an absolutely irreducible matrix group G defined over a 
+finite field K, which can be written over a proper subfield of
+K (possibly modulo scalars), return the change of basis matrix 
+for G which rewrites G over the smaller field.
+</BLOCKQUOTE>
+<H5><A NAME = "7798">SmallerFieldImage(G, g) : GrpMat, GrpMatElt -&gt; GrpMatElt</A></H5>
+<BLOCKQUOTE>
+Given an absolutely irreducible matrix group G defined over a 
+finite field K, which can be written over a proper subfield of
+K (possibly modulo scalars), return the image of g &isin;G in 
+the group defined over the subfield.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7799">Example <TT>GrpMatFF_IsOverSmallerField (H65E7)</TT></A></H3>
+We define a subgroup of GL(3, 8) which can be written over GF(2).
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := GL (2, GF (3, 2));
+&gt; H := GL (2, GF (3, 8));
+&gt; K := sub &lt; H | G.1, G.2 &gt;;
+&gt; K;
+MatrixGroup(2, GF(3^8))
+Generators:
+    [ $.1^820        0]
+    [       0        1]
+
+
+    [       2        1]
+    [       2        0]
+&gt; flag, M := IsOverSmallerField (K);    
+&gt; flag;
+true
+&gt; M;
+MatrixGroup(2, GF(3^2))
+Generators:
+    [$.1^7 $.1^2]
+    [    1     2]
+
+
+    [$.1^7 $.1^6]
+    [$.1^2 $.1^5]
+&gt; F := GF(3, 4);
+&gt; G := MatrixGroup&lt;2, F | [ F.1^52, F.1^72, F.1^32, 0 ],
+&gt;                                [ 1, 0, F.1^20, 2 ] &gt;;
+&gt; flag, X := IsOverSmallerField (G);
+&gt; flag;
+false
+</PRE>
+<P>
+We now see if G has an equivalent representation modulo scalars. 
+<P>
+<P>
+<P>
+<PRE>
+&gt; flag, X := IsOverSmallerField (G: Scalars := true);
+&gt; flag;
+true
+&gt; X;
+MatrixGroup(2, GF(3))
+Generators:
+    [2 1]
+    [1 0]
+
+    [2 1]
+    [1 1]
+&gt; SmallerField (G);
+Finite field of size 3
+&gt; SmallerFieldBasis (G);
+[F.1^33 F.1^23]
+[F.1^43 F.1^63]
+&gt; g := G.1 * G.2^2; g;
+[F.1^52 F.1^72]
+[F.1^32      0]
+&gt; SmallerFieldImage (G, g);
+[1 2]
+[2 0]
+</PRE>
+<HR>
+<H5><A NAME = "7800">WriteOverSmallerField(G, F) : GrpMat, FldFin -&gt; GrpMat, Map</A></H5>
+<BLOCKQUOTE>
+Given a group G of d x d matrices over a finite field E
+having degree e and a subfield F of E having degree f, write
+the matrices of G as de/f by de/f matrices over F and return
+the group and the isomorphism.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7801">Example <TT>GrpMatFF_WriteOverSmallerField (H65E8)</TT></A></H3>
+<P>
+We define the group GL(2, 4) and then rewrite in over GF(2)
+as a degree 4 matrix group.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := GL(2, 4);
+&gt; H := WriteOverSmallerField(G, GF(2));
+&gt; H;
+MatrixGroup(4, GF(2))
+Generators:
+    [0 1 0 0]
+    [1 1 0 0]
+    [0 0 1 0]
+    [0 0 0 1]
+
+
+    [1 0 1 0]
+    [0 1 0 1]
+    [1 0 0 0]
+    [0 1 0 0]
+</PRE>
+<HR>
+<H4><A NAME = "7802">Decompositions with Respect to a  Normal Subgroup</A></H4>
+
+
+
+<H5><A NAME = "7803">SearchForDecomposition(G, S) : GrpMat, [GrpMatElt] -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field and a sequence
+S of elements of G, this intrinsic first constructs the normal
+closure N of S in G. It then seeks to decide whether or not G, 
+with respect to N, has a decomposition corresponding to one of the 
+categories (ii)--(vi) in the theorem of Aschbacher stated at the 
+beginning of this section.
+Theoretical details of the algorithms used may be found in 
+Holt, Leedham-Green, O'Brien, and Rees <A  HREF = "text672.htm#bib_decomps-modules">[HLGOR96a]</A>.
+<P>
+In summary, it tests for one of the following possibilities:
+<DL COMPACT class='compact'>
+<DT>(ii)</DT><DD>G acts semilinearly over an extension field L of K, and
+N acts linearly over L;
+<DT>(iii)</DT><DD>G acts imprimitively on V and N fixes each block of
+imprimitivity;
+<DT>(iv)</DT><DD>G preserves a tensor product decomposition U tensor W of V,
+where N acts as scalar matrices on U;
+<DT>(v)</DT><DD>N acts absolutely irreducibly on V and is an extraspecial
+p-group for some prime p, or a 2-group of symplectic type;
+<DT>(vi)</DT><DD>G preserves a tensor-induced decomposition
+V = tensor <sup>m</sup>U of V for some m&gt;1, where N acts 
+absolutely irreducibly on V and fixes each of the m factors.
+<P>
+</DL>
+If one of the listed decompositions is found, then the function
+<I>reports</I> the type found and returns <TT>true</TT>; if
+no decomposition is found with respect to N, then
+the function returns <TT>false</TT>.
+The answer provided by the function is conclusive for
+decompositions of types (ii)--(v), but a negative
+answer for (vi) is not necessarily conclusive.
+<P>
+Each test involves a decomposition of G with respect to 
+the normal subgroup N (which may sometimes be trivial or scalar).
+In (ii), N is the subgroup of G acting linearly over the
+extension field irreducibly on V.
+In (iii), N is the subgroup which fixes each of the
+subspaces in the imprimitive decomposition of V.
+In (iv), it is the subgroup acting as scalar matrices on
+one of the factors in the tensor-product decomposition.
+In (v), N is already described, and
+in (vi), it is the subgroup fixing each of the
+factors in the tensor-induced decomposition 
+(so N itself falls in Category (iv)).
+<P>
+If any one of these decompositions can be found, then it may be 
+possible to obtain an explicit representation of G/N and hence 
+reduce the study of G to a smaller problem. 
+For example, in Category (iii), G/N acts as 
+a permutation group on the subspaces in the imprimitive
+decomposition of V. Currently only limited facilities 
+are provided to construct G/N.
+<P>
+Information about the progress of the algorithm can be output
+by setting the verbose flag <TT>SetVerbose ("Smash", 1)</TT>.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "7804">Accessing the Decomposition  Information</A></H5>
+
+<P>
+<P>
+The access functions described in the sections 
+on  Primitivity Testing, Semilinearity,
+Tensor Products, Tensor Induction, and Normalisers 
+of extraspecial groups 
+may be used to extract information about 
+decompositions of type (ii), (iii), (iv), (v) and (vi).
+We illustrate such decompositions below.
+
+
+<HR>
+<H3><A NAME = "7805">Example <TT>GrpMatFF_Decompose (H65E9)</TT></A></H3>
+<P>
+We begin with an example where no decomposition exists.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := GL(4, 5);
+&gt; SearchForDecomposition (G, [G.1]);
+Smash: No decomposition found
+false
+</PRE>
+<P>
+The second example is of an imprimitive decomposition.
+<P>
+<P>
+<P>
+<PRE>
+&gt; M := GL (4, 7);
+&gt; P := Sym (3);
+&gt; G := WreathProduct (M, P);
+&gt; SearchForDecomposition (G, [G.1, G.2]);
+Smash: G is imprimitive
+true
+&gt; IsPrimitive (G);
+false
+&gt; BlocksImage (G);
+Permutation group acting on a set of cardinality 3
+    Id($)
+    Id($)
+    (1, 2, 3)
+    (1, 2)
+</PRE>
+<P>
+The third example admits a semilinear decomposition.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P := GL(6,3);
+&gt; g1 := P![0,1,0,0,0,0,-1,0,0,0,0,0,
+&gt;          0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,1];
+&gt; g2 := P![-1,0,0,0,1,0,0,-1,0,0,0,1,
+&gt;          -1,0,0,0,0,0,0,-1,0,0,0,0,0,0,-1,0,0,0,0,0,0,-1,0,0];
+&gt; g3 := P![1,0,0,0,0,0,0,-1,0,0,0,0,
+&gt;          0,0,1,0,0,0,0,0,0,-1,0,0,0,0,0,0,1,0,0,0,0,0,0,-1];
+&gt; G := sub &lt;P | g1, g2, g3 &gt;;
+&gt;
+&gt; SearchForDecomposition (G, [g1]);
+Smash: G is semilinear
+true
+&gt; IsSemiLinear (G);
+true
+&gt; DegreeOfFieldExtension (G);
+2
+&gt; CentralisingMatrix (G);
+[2 2 0 0 0 0]
+[1 2 0 0 0 0]
+[0 0 2 2 0 0]
+[0 0 1 2 0 0]
+[0 0 0 0 2 2]
+[0 0 0 0 1 2]
+&gt; FrobeniusAutomorphisms (G);
+[ 1, 1, 3 ]
+</PRE>
+<P>
+The fourth example admits a tensor product decomposition.
+<P>
+<P>
+<P>
+<PRE>
+&gt; F := GF(5);
+&gt; G := GL(5, F);
+&gt; H := GL(3, F);
+&gt; P := GL(15, F);
+&gt; A := MatrixAlgebra (F, 5);
+&gt; B := MatrixAlgebra (F, 3);
+&gt; g1 := A!G.1; g2 := A!G.2;  g3 := A!Identity(G);
+&gt; h1 := B!H.1; h2 := B!H.2; h3 := B!Identity(H);
+&gt; w := TensorProduct (g1, h3);
+&gt; x := TensorProduct (g2, h3);
+&gt; y := TensorProduct (g3, h1);
+&gt; z := TensorProduct (g3, h2);
+&gt; G := sub &lt; P | w, x, y, z&gt;;
+&gt; SearchForDecomposition (G, [G.1, G.2]);
+Smash: G is a tensor product
+true
+&gt; IsTensor (G);
+true
+&gt; TensorBasis (G);
+[1 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 1 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 1 0 0]
+[0 0 0 0 0 0 0 0 0 1 0 0 0 0 0]
+[4 0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 4 0 1 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 4 0 1 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 4 0 1]
+[0 0 0 0 0 0 0 0 0 4 0 1 0 0 0]
+[1 4 4 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 1 4 4 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 1 4 4 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 1 4 4]
+[0 0 0 0 0 0 0 0 0 1 4 4 0 0 0]
+</PRE>
+<P>
+Our fifth example is of a tensor-induced decomposition.
+<P>
+<P>
+<P>
+<PRE>
+&gt; M := GL (3, GF(2));
+&gt; P := Sym (3);
+&gt; G := TensorWreathProduct (M, P);
+&gt; SearchForDecomposition (G, [G.1]);
+Smash: G is tensor induced
+true
+&gt;
+&gt; IsTensorInduced (G);
+true
+&gt; TensorInducedPermutations (G);
+[ Id(P), Id(P), (1, 3, 2), (1, 3) ]
+</PRE>
+<P>
+Our final example is of a normaliser of a symplectic group.
+<P>
+<P>
+<P>
+<PRE>
+&gt; F := GF(5);
+&gt; P := GL(4,F);
+&gt; g1 := P![ 1,0,0,0,0,4,0,0,2,0,2,3,3,0,4,3];
+&gt; g2 := P![ 4,0,0,1,2,4,4,0,1,0,1,2,0,0,0,1];
+&gt; g3 := P![ 4,0,1,1,0,1,0,0,0,1,3,4,0,4,3,2];
+&gt; g4 := P![ 2,0,4,3,4,4,2,4,0,1,3,4,4,2,0,1];
+&gt; g5 := P![ 1,1,3,4,0,0,3,4,2,0,0,4,3,1,3,4];
+&gt; g6 := P![ 2,0,0,0,0,2,0,0,0,0,2,0,0,0,0,2];
+&gt; G := sub &lt; P | g1, g2, g3, g4, g5, g6 &gt;;
+&gt; SearchForDecomposition (G, [G.4]);
+Smash: G is normaliser of symplectic 2-group
+true
+&gt; IsExtraSpecialNormaliser (G);
+true
+&gt; ExtraSpecialParameters (G);
+[2, 6]
+&gt; g := G.1 * G.2;
+&gt; ExtraSpecialAction(G, g);
+[0 1 0 0]
+[1 1 0 0]
+[0 1 1 1]
+[1 1 1 0]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text678.htm">[Next]</A><A  HREF = "text676.htm">[Prev]</A> <A  HREF = "text678.htm">[Right]</A> <A  HREF = "text676.htm">[Left]</A> <A  HREF = "text673.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

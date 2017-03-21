@@ -1,0 +1,32 @@
+"Source: Text/Geometry/CrvHyp.text";
+"Line: 6933";
+"Date: Wed Jun  8 17:42:16 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/CrvHyp.text, line: 6933
+// Example: H131E46 ()
+print "Example: H131E46";
+ei := GetEchoInput();
+SetEchoInput(true);
+P<x> := PolynomialRing(RationalField());
+f := -8*x^5 - 14*x^4 + 28*x^3 - 30*x^2 + 6*x;
+C := HyperellipticCurve(f);
+J := Jacobian(C);
+pts := ReducedBasis(RationalPoints(J:Bound:=500)); pts;
+P1 := pts[1]; P2 := pts[2];
+C<I> := ComplexField(50);
+K<x> := PolynomialRing(C);
+f2 := Evaluate(f,x);
+div1 := [r[1] : r in Roots(Evaluate(ElementToSequence(P1)[1],x))];
+div1 := [<d1,Evaluate(ElementToSequence(P1)[2],d1)> : d1 in div1];
+div2 := [r[1] : r in Roots(Evaluate(ElementToSequence(P2)[1],x))];
+div2 := [<d1,Evaluate(ElementToSequence(P2)[2],d1)> : d1 in div2];
+A := AnalyticJacobian(f2);
+pt1 := &+[ToAnalyticJacobian(d[1],d[2],A) : d in div1];
+pt2 := &+[ToAnalyticJacobian(d[1],d[2],A) : d in div2];
+sum := FromAnalyticJacobian(pt1+pt2,A);
+sum;
+clst := Coefficients((x-sum[1][1])*(x-sum[2][1]));
+xpol := P![BestApproximation(Re(c),1000) : c in clst];
+xpol;
+P1+P2;
+SetEchoInput(ei);

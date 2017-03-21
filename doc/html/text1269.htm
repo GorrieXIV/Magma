@@ -1,0 +1,255 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Cohomology Of Coherent  Sheaves</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1253.htm">[Next]</A><A  HREF = "text1268.htm">[Prev]</A> <A  HREF = "text1253.htm">[Right]</A> <A  HREF = "text1268.htm">[Left]</A> <A  HREF = "text1254.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "13942">Cohomology Of Coherent  Sheaves</A></H3>
+
+<P>
+<P>
+<P>
+We have implemented functions to compute the dimensions of
+cohomology groups of coherent sheaves on ordinary projective
+space over an (exact) field. The sheaves are represented by
+graded modules over the coordinate ring of the ambient
+projective space. The sheaf may arise naturally as one
+supported on a particular closed subscheme (<I>eg</I>, the
+structure sheaf of a projective variety) but it is a matter
+of indifference whether the sheaf is considered as lying on
+the subscheme or the entire ambient space (equivalently,
+whether the representing module is considered as a module over
+the coordinate ring of the ambient or the quotient coordinate
+ring of the subscheme) because the cohomology groups are naturally
+isomorphic. We plan to add a fuller package of functionality for 
+coherent sheaves, but it is convenient to add the cohomology
+function now as the algorithm we use works equally efficiently
+(roughly speaking) when applied to any two graded modules that
+represent the same coherent sheaf.
+<P>
+The algorithm we have implemented is that of Decker, Eisenbud,
+Floystad and Schreyer which uses the Beilinson-Gelfand-Gelfand
+(BGG) correspondence to reduce the computation of the
+cohomology groups of the sheaf and its Serre twists to that
+of various graded free modules in the projective resolution
+of a module over a finite exterior (alternating) algebra.
+
+
+<H5><A NAME = "13943">CohomologyDimension(M,r,n) : ModMPolGrd, RngIntElt, RngIntElt -&gt; RngIntElt</A></H5>
+
+<PRE>    SetVerbose("Cohom", n):             Maximum: 1</PRE>
+<BLOCKQUOTE>
+M is a graded module over P = k[x<sub>0</sub>, .., x<sub>m</sub>] with k an exact field.
+Let tilde(M) be the corresponding coherent sheaf on Proj(P) = P<sup>m</sup><sub>k</sub>.
+The function returns the k-dimension of the cohomology group
+H<sup>r</sup>(P<sub>k</sub><sup>m</sup>, tilde(M)(n)) where tilde(M)(n) is the nth Serre twist
+of tilde(M). n can be any integer and r a non-negative integer.
+<P>
+The algorithm used is based on the BGG correspondence. Details can be
+found in <A  HREF = "text1253.htm#bib_EFS03">[EFS03]</A> or see <A  HREF = "text1253.htm#bib_DEcoh02">[DE02]</A> for a slightly more
+computational description. Let A be the finite exterior algebra
+with m + 1 generators, which is of dimension 2<sup>m + 1</sup> over k. The
+<I>Tate resolution</I> of tilde(M) is a doubly infinite exact
+sequence of graded free A-modules. Each cohomology group of a twist
+of tilde(M) is isomorphic as a k vector space to a particular graded
+piece of a particular term in the Tate resolution. In fact, we never need
+to explicitly compute the terms of the resolution of index &ge;reg(M)
+(the regularity of M) because they are pure graded of dimension given by
+the Hilbert polynomial of M.
+<P>
+The algorithm computes two consecutive terms in the Tate resolution
+at indices &ge;reg(M), and the A-homomorphism between them, from 
+two corresponding graded pieces of M and the linear maps between them
+coming from multiplication by the base variables. Then the resolution is
+extended backwards as far as necessary by computing the A-projective
+resolution of the kernel of this A-homomorphism. The projective
+resolution is efficiently determined by non-commutative Gr&ouml;bner basis
+computations. This uses the new Magma machinery for exterior algebras
+and their modules. The projective resolution information is cached so that
+repeated calls to the function for the same module M will require either
+no extra work or only an extension to the part of the resolution already
+computed.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13944">Example <TT>PMod_cohom (H115E17)</TT></A></H3>
+We consider a random surface X in a family of Enriques surfaces of
+degree 9 in P<sup>4</sup>. It is defined by 15 degree 5 polynomials and we
+work over F<sub>17</sub> to keep the input of reasonable size (it is still
+fairly large!).
+<P>
+The surface is non-singular with arithmetic genus (p<sub>a</sub>), geometric genus
+(g) and irregularity q all zero. These are related generally for a
+non-singular surface by g = p<sub>a</sub> + q and p<sub>a</sub> can be computed without
+cohomology machinery (from Hilbert polynomials). But cohomology of the
+structure sheaf of X and Serre duality is the easiest way to get g or q.
+<P>
+<P>
+<P>
+<PRE>
+&gt; R&lt;x,y,z,t,u&gt; := PolynomialRing(GF(17),5,"grevlex");
+&gt; I := ideal&lt;R |[
+&gt;  2*x^3*z*t + 5*x^2*y*z*t + 14*x^2*z^2*t + x^3*z*u + 5*x^2*y*z*u +
+&gt;   10*x^2*z^2*u + 8*x*y*z^2*u + 15*y^2*z^2*u + 4*x*z^3*u + 2*y*z^3*u +
+&gt;   9*x^3*t*u + 14*x^2*y*t*u + 16*x^2*z*t*u + 10*x*y*z*t*u + 10*x*z^2*t*u +
+&gt;   y*z^2*t*u + 13*x^3*u^2 + 14*x^2*y*u^2 + 11*x^2*z*u^2 + 15*x*y*z*u^2 +
+&gt;   10*y^2*z*u^2 + 8*x*z^2*u^2 + 8*y*z^2*u^2 + x^2*t*u^2 + 11*x*y*t*u^2 +
+&gt;   16*x*y*u^3 + 9*y^2*u^3 + 4*x*z*u^3 + 2*y*z*u^3 + 10*x*t*u^3 + y*t*u^3 +
+&gt;   8*x*u^4 + 8*y*u^4,
+&gt;  5*x^3*z*t + x^2*z^2*t + 5*x^3*z*u + 11*x^2*z^2*u + 15*x*y*z^2*u + 2*x*z^3*u
+&gt;   + 14*x^3*t*u + 5*x^2*z*t*u + x*z^2*t*u + 14*x^3*u^2 + 10*x*y*z*u^2 +
+&gt;   8*x*z^2*u^2 + 15*x^2*t*u^2 + 11*x^2*u^3 + 9*x*y*u^3 + 2*x*z*u^3 +
+&gt;   x*t*u^3 + 8*x*u^4,
+&gt;  14*x^3*z*t + x^2*y*z*t + 13*x^2*z^2*t + 7*x^2*z*t^2 + 3*x^3*z*u +
+&gt;   16*x^2*y*z*u + 4*x^2*z^2*u + 6*x^3*t*u + 16*x^2*y*t*u + 9*x^2*z*t*u +
+&gt;   9*x^2*t^2*u + 11*x^3*u^2 + x^2*y*u^2 + 14*x^2*z*u^2 + 2*x*z^2*u^2 +
+&gt;   11*y*z^2*u^2 + 6*z^3*u^2 + 4*x^2*t*u^2 + 4*x*z*t*u^2 + 14*y*z*t*u^2 +
+&gt;   6*z^2*t*u^2 + 15*x*t^2*u^2 + 10*z*t^2*u^2 + 3*x^2*u^3 + 11*x*z*u^3 +
+&gt;   16*y*z*u^3 + 4*z^2*u^3 + 16*x*t*u^3 + 3*y*t*u^3 + 14*z*t*u^3 + 6*t^2*u^3
+&gt;   + 13*x*u^4 + 7*y*u^4 + 16*z*u^4 + 11*t*u^4 + 10*u^5,
+&gt;  15*x^3*z^2 + 12*x^2*y*z^2 + 3*x^2*z^3 + 12*x^3*z*u + 8*x^2*y*z*u +
+&gt;   11*x^2*z^2*u + x^3*u^2 + 14*x^2*y*u^2 + 3*x^2*z*u^2 + 11*x^2*u^3,
+&gt;  12*x^3*z^2 + 16*x^2*z^3 + 8*x^3*z*u + x^2*z^2*u + 14*x^3*u^2 + 16*x^2*z*u^2
+&gt;   + x^2*u^3,
+&gt;  2*x^3*y*z + 5*x^2*y^2*z + 14*x^2*y*z^2 + 13*x^3*y*u + 12*x^2*y^2*u +
+&gt;   8*x^3*z*u + 4*x^2*y*z*u + 12*x^2*z^2*u + 3*x*y*z^2*u + 14*y^2*z^2*u +
+&gt;   15*x*z^3*u + 3*y*z^3*u + 15*x^2*y*t*u + 4*x^2*z*t*u + 15*x*y*z*t*u +
+&gt;   11*x*z^2*t*u + 10*y*z^2*t*u + 2*x^3*u^2 + 12*x^2*y*u^2 + 3*x^2*z*u^2 +
+&gt;   14*x*y*z*u^2 + 13*x*z^2*u^2 + 10*y*z^2*u^2 + x^2*t*u^2 + 15*x*y*t*u^2 +
+&gt;   16*y*z*t*u^2 + 12*x*y*u^3 + 3*y^2*u^3 + 15*x*z*u^3 + 4*y*z*u^3 +
+&gt;   11*x*t*u^3 + 6*y*t*u^3 + 13*x*u^4 + 14*y*u^4,
+&gt;  5*x^3*y*z + x^2*y*z^2 + 10*x^2*z^2*t + 4*x^4*u + 12*x^3*y*u + 5*x^3*z*u +
+&gt;   12*x^2*y*z*u + 14*x*y*z^2*u + 3*x*z^3*u + 15*x^3*t*u + 16*x^2*z*t*u +
+&gt;   10*x*z^2*t*u + 11*x^3*u^2 + 4*x^2*y*u^2 + 13*x^2*z*u^2 + 10*x*z^2*u^2 +
+&gt;   4*x^2*t*u^2 + 16*x*z*t*u^2 + 13*x^2*u^3 + 3*x*y*u^3 + 4*x*z*u^3 +
+&gt;   6*x*t*u^3 + 14*x*u^4,
+&gt;  10*x^2*z^3 + 8*x^2*z^2*u + 5*x^2*z*u^2 + 11*x^2*u^3,
+&gt;  16*x^3*z^2 + 12*x^2*y*z^2 + 7*x^2*z^3 + 9*x*y*z^3 + 2*y^2*z^3 + 13*x*z^4 +
+&gt;   15*y*z^4 + 13*x^3*z*t + 12*x^2*y*z*t + 7*x^2*z^2*t + 7*x*y*z^2*t +
+&gt;   7*x*z^3*t + 16*y*z^3*t + 4*x^3*z*u + 3*x^2*y*z*u + 6*x^2*z^2*u +
+&gt;   2*x*y*z^2*u + 7*y^2*z^2*u + 9*x*z^3*u + 9*y*z^3*u + 16*x^3*t*u +
+&gt;   3*x^2*y*t*u + 13*x^2*z*t*u + 6*x*y*z*t*u + x*y*z*u^2 + 8*y^2*z*u^2 +
+&gt;   13*x*z^2*u^2 + 15*y*z^2*u^2 + 6*x^2*t*u^2 + 7*x*z*t*u^2 + 16*y*z*t*u^2 +
+&gt;   9*x*z*u^3 + 9*y*z*u^3,
+&gt;  12*x^3*z^2 + 6*x^2*z^3 + 2*x*y*z^3 + 15*x*z^4 + 12*x^3*z*t + 11*x^2*z^2*t +
+&gt;   16*x*z^3*t + 3*x^3*z*u + 7*x*y*z^2*u + 9*x*z^3*u + 3*x^3*t*u +
+&gt;   3*x^2*z*t*u + 6*x^2*z*u^2 + 8*x*y*z*u^2 + 15*x*z^2*u^2 + 16*x^2*t*u^2 +
+&gt;   16*x*z*t*u^2 + 9*x*z*u^3,
+&gt;  x^3*y*z + 5*x^2*y^2*z + 10*x^2*y*z^2 + 8*x*y^2*z^2 + 15*y^3*z^2 + 4*x*y*z^3
+&gt;   + 2*y^2*z^3 + 13*x^3*y*t + 2*x^2*y^2*t + 9*x^3*z*t + 12*x^2*y*z*t +
+&gt;   10*x*y^2*z*t + 5*x^2*z^2*t + 7*x*y*z^2*t + 4*y^2*z^2*t + 2*x*z^3*t +
+&gt;   14*y*z^3*t + 2*x^2*y*t^2 + 13*x^2*z*t^2 + 2*x*y*z*t^2 + 6*x*z^2*t^2 +
+&gt;   7*y*z^2*t^2 + 13*x^3*y*u + 14*x^2*y^2*u + 11*x^2*y*z*u + 15*x*y^2*z*u +
+&gt;   10*y^3*z*u + 8*x*y*z^2*u + 8*y^2*z^2*u + 15*x^3*t*u + 6*x^2*y*t*u +
+&gt;   11*x*y^2*t*u + 14*x^2*z*t*u + 3*x*y*z*t*u + 4*x*z^2*t*u + 7*y*z^2*t*u +
+&gt;   16*x^2*t^2*u + 2*x*y*t^2*u + y*z*t^2*u + 16*x*y^2*u^2 + 9*y^3*u^2 +
+&gt;   4*x*y*z*u^2 + 2*y^2*z*u^2 + 15*x*y*t*u^2 + 15*y^2*t*u^2 + 2*x*z*t*u^2 +
+&gt;   13*y*z*t*u^2 + 6*x*t^2*u^2 + 11*y*t^2*u^2 + 8*x*y*u^3 + 8*y^2*u^3 +
+&gt;   4*x*t*u^3 + 3*y*t*u^3,
+&gt;  5*x^3*y*z + 11*x^2*y*z^2 + 15*x*y^2*z^2 + 2*x*y*z^3 + 13*x^4*t + 2*x^3*y*t +
+&gt;   7*x^3*z*t + 6*x^2*y*z*t + 16*x^2*z^2*t + 4*x*y*z^2*t + 14*x*z^3*t +
+&gt;   2*x^3*t^2 + 9*x^2*z*t^2 + 7*x*z^2*t^2 + 14*x^3*y*u + 5*x^3*z*u +
+&gt;   4*x^2*y*z*u + 10*x*y^2*z*u + 12*x^2*z^2*u + 8*x*y*z^2*u + 15*x*z^3*u +
+&gt;   6*y*z^3*u + 11*z^4*u + 16*x^3*t*u + 15*x^2*y*t*u + 13*x^2*z*t*u +
+&gt;   3*x*z^2*t*u + 3*y*z^2*t*u + 11*z^3*t*u + 13*x^2*t^2*u + 3*x*z*t^2*u +
+&gt;   7*z^2*t^2*u + 7*x^3*u^2 + 7*x^2*y*u^2 + 9*x*y^2*u^2 + x^2*z*u^2 +
+&gt;   2*x*y*z*u^2 + 6*x*z^2*u^2 + y*z^2*u^2 + 13*z^3*u^2 + 12*x^2*t*u^2 +
+&gt;   15*x*y*t*u^2 + 14*x*z*t*u^2 + 14*y*z*t*u^2 + 3*z^2*t*u^2 + 11*x*t^2*u^2
+&gt;   + 11*z*t^2*u^2 + 9*x^2*u^3 + 8*x*y*u^3 + 4*x*z*u^3 + 10*y*z*u^3 +
+&gt;   z^2*u^3 + 3*x*t*u^3 + 6*z*t*u^3 + 7*z*u^4,
+&gt;  4*x^4*z + 3*x^3*y*z + 10*x^3*z^2 + x^2*z^3 + 14*x*y*z^3 + 3*x*z^4 +
+&gt;   15*x^3*z*t + 8*x^2*z^2*t + 10*x*z^3*t + 14*x^3*y*u + 15*x^3*z*u +
+&gt;   11*x^2*z^2*u + 10*x*z^3*u + 16*x^2*z*t*u + 16*x*z^2*t*u + 6*x^3*u^2 +
+&gt;   14*x^2*z*u^2 + 3*x*y*z*u^2 + 4*x*z^2*u^2 + 6*x^2*t*u^2 + 6*x*z*t*u^2 +
+&gt;   15*x^2*u^3 + 14*x*z*u^3,
+&gt;  5*x^3*z^2 + 4*x^2*y*z^2 + 12*x^2*z^3 + 15*x*z^4 + 6*y*z^4 + 11*z^5 +
+&gt;   14*x^3*z*t + x^2*y*z*t + 7*x^2*z^2*t + 13*x*z^3*t + 3*y*z^3*t + 11*z^4*t
+&gt;   + 12*x^2*z*t^2 + 2*x*z^2*t^2 + 7*z^3*t^2 + 7*x^3*z*u + 13*x^2*y*z*u +
+&gt;   x^2*z^2*u + 6*x*z^3*u + y*z^3*u + 13*z^4*u + 6*x^3*t*u + 16*x^2*y*t*u +
+&gt;   9*x^2*z*t*u + x*z^2*t*u + 14*y*z^2*t*u + 3*z^3*t*u + 6*x^2*t^2*u +
+&gt;   11*z^2*t^2*u + 9*x^2*z*u^2 + 4*x*z^2*u^2 + 10*y*z^2*u^2 + z^3*u^2 +
+&gt;   15*x^2*t*u^2 + 6*z^2*t*u^2 + 7*z^2*u^3,
+&gt;  13*x^5 + 2*x^4*y + 7*x^4*z + 6*x^3*y*z + 16*x^3*z^2 + 4*x^2*y*z^2 +
+&gt;   14*x^2*z^3 + 2*x^4*t + 9*x^3*z*t + 7*x^2*z^2*t + 16*x^4*u + 15*x^3*y*u +
+&gt;   x^3*z*u + 11*x^2*z^2*u + 3*x*y*z^2*u + 14*x*z^3*u + 13*x^3*t*u +
+&gt;   3*x^2*z*t*u + 7*x*z^2*t*u + 14*x^3*u^2 + 15*x^2*y*u^2 + 6*x^2*z*u^2 +
+&gt;   14*x*y*z*u^2 + 10*x*z^2*u^2 + 11*x^2*t*u^2 + 11*x*z*t*u^2 + 3*x*z*u^3]&gt;;
+&gt; X := Scheme(Proj(R),I); // define the surface
+&gt; // The structure sheaf O_X of X is represented by graded module R/I
+&gt; O_X := GradedModule(I); // R/I
+</PRE>
+<P>
+We first compute the dimension of H<sup>0</sup>(O<sub>X</sub>). This is fairly uninteresting
+(it's just 1) but after this computation, the cached data will allow
+the following cohomology calls to execute practically instantaneously.
+<P>
+<P>
+<P>
+<PRE>
+&gt; CohomologyDimension(O_X,0,0);  // dim H^0(O_X)
+1
+&gt; // get the geometric genus and irregularity
+&gt; time CohomologyDimension(O_X,2,0); // dim H^2(O_X) = g
+0
+Time: 0.000
+&gt; time CohomologyDimension(O_X,1,0); // dim H^1(O_X) = q
+0
+Time: 0.000
+&gt; // =&gt; p_a(X)=0. Verify this.
+&gt; ArithmeticGenus(X);
+0
+</PRE>
+<P>
+We now compute a module representative of the canonical sheaf K<sub>X</sub>
+of X. We can just take Ext<sup>2</sup><sub>R</sub>(M, R( - 5)). Then we check again that
+H<sup>0</sup>(K<sub>X</sub>) = g is 0. Note that here the module representing K<sub>X</sub> is
+maximal so that H<sup>0</sup>(K<sub>X</sub>(n)) is just the dimension of its nth
+graded part for any n. However, in other cases (where X is again
+<I>not</I> arithmetically Cohen-Macaulay) the Ext computation
+for K<sub>X</sub> may not give the maximal representing module, so its 0th
+graded piece might have dimension less than g.
+<P>
+<P>
+<P>
+<PRE>
+&gt; K_X := Ext(2,O_X,RModule(R,[5]));
+&gt; K_X;
+Reduced Module R^6/&lt;relations&gt; with grading [1, 1, 1, 1, 1, 1]
+Quotient Relations:
+[12*z + 8*t + 7*u, 5*y + 7*z + 8*t + 6*u, 16*z + 4*u, 16*z + 7*u, 15*u,
+    7*u],
+[14*u, 8*u, 13*x + 2*y + 4*t + 14*u, 4*y + 8*t + 2*u, 16*t + 6*u, 3*u],
+[15*z + 9*t + 11*u, 2*y + 13*z + 8*t + 14*u, 7*t + 16*u, 8*x + 14*t + 6*
+    11*t + 15*u, 11*z + 14*t + 16*u],
+[12*z + 15*t + 6*u, 5*y + 7*z + 4*t + 9*u, t + u, 2*t + 2*u, 7*x + 4*t +
+    12*z + t + 2*u],
+[12*y + 10*z + 14*t + 14*u, 7*y + 15*z + 8*t, 4*u, 8*u, 16*u, 5*x + 15*z
+    + 9*u],
+[15*x, 15*x, 4*u, 8*u, 16*u, 0],
+[14*z + 15*t + 9*u, 3*y + 11*z + 7*t + 13*u, 0, 11*z + 6*u, 2*z + 14*u,
+    10*t + 4*u],
+[10*z + 14*t + 14*u, 4*x + 12*y + 15*z + 8*t, 0, 0, 0, 15*z + 16*t + 9*u
+[5*z + 16*t + 4*u, 12*y + 10*z + 15*t + 5*u, 0, 2*z + 15*u, 6*u, 15*z +
+    7*u],
+[13*z + t + 15*u, 4*y + 9*z + 16*t + 16*u, 0, 0, 0, 5*z + 11*t + 3*u]
+&gt; CohomologyDimension(K_X,0,0);
+0
+</PRE>
+<P>
+Finally, we verify some more cases of Serre duality which gives
+ dim  H<sup>r</sup>(O<sub>X</sub>(n)) = dim  H<sup>2 - r</sup>(K<sub>X</sub>( - n)).
+<P>
+<P>
+<P>
+<PRE>
+&gt; [CohomologyDimension(K_X,0,i) eq CohomologyDimension(O_X,2,-i) :
+&gt;    i in [-1..5]];
+[ true, true, true, true, true, true, true ]
+</PRE>
+<PRE></PRE> <A  HREF = "text1253.htm">[Next]</A><A  HREF = "text1268.htm">[Prev]</A> <A  HREF = "text1253.htm">[Right]</A> <A  HREF = "text1268.htm">[Left]</A> <A  HREF = "text1254.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

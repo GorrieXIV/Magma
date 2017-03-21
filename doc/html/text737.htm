@@ -1,0 +1,1854 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Group Recognition</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text738.htm">[Next]</A><A  HREF = "text736.htm">[Prev]</A> <A  HREF = "text738.htm">[Right]</A> <A  HREF = "text736.htm">[Left]</A> <A  HREF = "text734.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "8378">Group Recognition</A></H3>
+
+<P>
+<P>
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text737.htm#8379">Constructive Recognition  of Alternating Groups</A>
+<LI> <A  HREF = "text737.htm#8389">Determining the Type of a Finite  Group of Lie Type</A>
+<LI> <A  HREF = "text737.htm#8395">Classical Forms</A>
+<LI> <A  HREF = "text737.htm#8406">Recognizing Classical Groups in their Natural Representation</A>
+<LI> <A  HREF = "text737.htm#8414">Constructive Recognition of Linear  Groups</A>
+<LI> <A  HREF = "text737.htm#8424">Constructive Recognition of Symplectic Groups</A>
+<LI> <A  HREF = "text737.htm#8427">Constructive Recognition of Unitary Groups</A>
+<LI> <A  HREF = "text737.htm#8430">Constructive Recognition Of Classical Groups in Low Degree</A>
+<LI> <A  HREF = "text737.htm#8435">Constructive Recognition of Suzuki  Groups</A>
+<LI> <A  HREF = "text737.htm#8448">Constructive Recognition of Small  Ree Groups</A>
+<LI> <A  HREF = "text737.htm#8456">Constructive Recognition of Large  Ree Groups</A>
+</UL>
+<H4><A NAME = "8379">Constructive Recognition  of Alternating Groups</A></H4>
+
+<P>
+<P>
+
+
+<H5><A NAME = "8380">RecogniseAlternatingOrSymmetric(G : parameters) : Grp, RngIntElt -&gt; BoolElt, Map, Map, Map, Map, BoolElt</A></H5>
+
+<PRE>    N: RngIntElt                        Default: 0</PRE>
+
+<PRE>    Extension: BoolElt                  Default: <TT>false</TT></PRE>
+
+<PRE>    Epsilson: FldRElt                   Default: 0.01</PRE>
+
+<PRE>    Asymptotic: BoolElt                 Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The input group G is isomorphic to H, the alternating 
+or symmetric group for some n &ge;5.  
+Note that G can be either a matrix or permutation representation of H.
+<P>
+The algorithm used is that of <A  HREF = "text733.htm#bib_altsymrecogN">[JLNP13]</A>.
+Since this is Las Vegas,
+there is a small probability controlled by the optional parameter
+<TT>Epsilon</TT> that it returns <TT>false</TT> incorrectly. 
+<P>
+If the algorithm succeeds, then it returns <TT>true</TT>, 
+an isomorphism from G to H, an isomorphism from H to G, 
+the map from G to its word group, and the map from the word group to G. 
+The sixth value returned is <TT>true</TT> if H is the 
+symmetric group, otherwise false.
+<P>
+<P>
+The optional parameter <TT>N</TT> is an upper bound for the degree of H.
+If <TT>N</TT> is 0, then the maximal theoretically possible bound for the 
+degree is assumed; this is the degree of G if G is a permutation group, 
+and max(9, d + 2) or max(9, d + 1)
+if G is a matrix group of degree d, 
+depending on the characteristic of the field.
+If the optional parameter <TT>Extension</TT> is <TT>true</TT>, then G is isomorphic to 
+a central extension of H for some n &ge;5.
+Now the first two maps returned are an epimorphism 
+from G onto H with kernel Z(G) and a map from H to G that induces an
+isomorphism from H onto G/Z(G). 
+<P>
+If the optional parameter <TT>Asymptotic</TT> is <TT>true</TT>, then the 
+map from H to G 
+implements the asymptotically efficient algorithm of Beals 
+et al. <A  HREF = "text733.htm#bib_altsymrecog1">[BLGN+03]</A>.
+Otherwise, the algorithm employed for this map is 
+that of <A  HREF = "text733.htm#bib_bratus-pak">[BP00]</A>,
+which is usually faster for moderate degrees.
+<P>
+If the algorithm is not successful, then <TT>false</TT> is returned. 
+<P>
+The algorithm consists of two parts.
+The first part finds the degree of the alternating group and 
+constructs standard generators, cf. <A  HREF = "text733.htm#bib_altsymrecogN">[JLNP13]</A>.
+The second part verifies that these elements generate G, 
+and constructs isomorphisms
+between G and H, cf. <A  HREF = "text733.htm#bib_altsymrecog1">[BLGN+03]</A>.
+The implementation of the first part was developed by Sebastian Jambor.
+The implementation of the second part was developed by Jonathan Conder; 
+he also extended the 
+algorithm to work for both n &isin;{5, ..., 10} and central extensions. 
+</BLOCKQUOTE>
+<H5><A NAME = "8381">AlternatingOrSymmetricElementToWord(G, g): Grp, GrpElt -&gt; BoolElt, GrpSLPElt</A></H5>
+<BLOCKQUOTE>
+If g &isin;G and G has been recognised 
+by <TT>RecogniseAlternatingOrSymmetric</TT>, this function returns <TT>true</TT>
+and an element of the word group for G which evaluates to g. 
+Otherwise, it returns <TT>false</TT>. This facilitates membership testing in G. 
+<P>
+The implementation was developed by Jonathan Conder.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8382">Example <TT>GrpASim_RecogniseAltsym2 (H70E3)</TT></A></H3>
+We illustrate the use of these functions for a representation
+of A<sub>13</sub>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; A:= AlternatingGroup (13);
+&gt; H:= Stabiliser(A, {1,2});
+&gt; G := CosetImage (A, H);
+&gt; Degree (G);
+78
+&gt; success, bb_to_perm, perm_to_bb, bb_to_wg, wg_to_bb, is_sym := 
+&gt; RecogniseAlternatingOrSymmetric (G);
+&gt; 
+&gt; success;
+true
+&gt; is_sym;
+false
+&gt; 
+&gt;  x:= Sym(78)!(1, 35, 16, 28, 14, 26, 69, 5, 74)(2, 54,
+&gt;  67, 18, 51, 63, 6, 50, 77)(3, 33, 78, 12, 34, 29, 19, 15, 73)
+&gt;  (4, 52, 61, 24, 49, 60, 68, 38, 64)(7, 20, 71, 17,
+&gt;  32, 11, 72, 8, 36)(9, 76, 47, 31, 56, 62, 13, 53, 59)
+&gt;  (10, 70, 57, 23, 37, 22, 21, 27, 25)(30, 45, 46, 43, 42,
+&gt;  44, 40, 41, 75)(39, 55, 65)(48, 66, 58);
+&gt; 
+&gt; flag, w := AlternatingOrSymmetricElementToWord (G, x);
+&gt; "Is x in G?", flag;
+Is x in G? true
+&gt; Evaluate (w, [G.i: i in [1..Ngens (G)]]) eq x;
+true
+&gt; 
+&gt; perm_image:= bb_to_perm(x);
+&gt; perm_image;
+(1, 4, 9)(2, 6, 3, 5, 10, 7, 8, 11, 12)
+&gt; 
+&gt; y := Random (G);
+&gt; w := bb_to_wg (y);
+&gt; Evaluate (w, [G.i: i in [1..Ngens (G)]]) eq y;
+true
+</PRE>
+<HR>
+<H5><A NAME = "8383">RecogniseSymmetric(G, n: parameters) : Grp, RngIntElt -&gt;     BoolElt, Map, Map, Map, Map, BoolElt</A></H5>
+
+<PRE>    maxtries: RngIntElt                 Default: 100n + 5000</PRE>
+
+<PRE>    Extension: BoolElt                  Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The group G should be known to be isomorphic to the symmetric group
+S<sub>n</sub> for some n &ge;8. The Bratus-Pak algorithm  <A  HREF = "text733.htm#bib_bratus-pak">[BP00]</A>
+(implemented by Derek Holt)
+is used to define an isomorphism between G and S<sub>n</sub>.
+If successful,
+return <TT>true</TT>, homomorphism from G to S<sub>n</sub>, homomorphism from
+S<sub>n</sub> to G, the map from G to its word group and the
+map from the word group to G.
+<P>
+If the optional parameter <TT>Extension</TT> is set, then the group G
+should be known to be isomorphic either to S<sub>n</sub> or to a perfect central
+extension 2.S<sub>n</sub>. In that case, the first two maps returned will be
+a homomorphism from G to S<sub>n</sub> and a map from S<sub>n</sub> to G that induces
+a homomorphism onto G/Z(G). The sixth value returned will be <TT>true</TT>,
+if G isomorphic to 2.S<sub>n</sub> and <TT>false</TT>, if  G isomorphic to 2.A<sub>n</sub>.
+<P>
+If unsuccessful, <TT>false</TT> is returned. This will always occur if the input
+group is not isomorphic to S<sub>n</sub> (or 2.S<sub>n</sub> when <TT>Extension</TT> is set)
+with n &ge;8, and may occur occasionally
+even when G is isomorphic to S<sub>n</sub>. The optional parameter <TT>maxtries</TT>
+(default 100n + 5000) can be used to control the number of random elements
+chosen before giving up.
+</BLOCKQUOTE>
+<H5><A NAME = "8384">SymmetricElementToWord (G, g) : Grp, GrpElt -&gt; BoolElt, GrpSLPElt</A></H5>
+<BLOCKQUOTE>
+If g is an element of G which has been constructively recognised to
+be isomorphic to S<sub>n</sub> (or 2.S<sub>n</sub>), then return <TT>true</TT> and
+element of word group for G which evaluates to g.
+Otherwise return <TT>false</TT>.
+This facilitates membership testing in G.
+</BLOCKQUOTE>
+<H5><A NAME = "8385">RecogniseAlternating(G, n: parameters) : Grp, RngIntElt -&gt;    BoolElt, Map, Map, Map, Map, BoolElt</A></H5>
+
+<PRE>    maxtries: RngIntElt                 Default: 100n + 5000</PRE>
+
+<PRE>    Extension: BoolElt                  Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The group G should be known to be isomorphic to the alternating group
+A<sub>n</sub> for some n &ge;9. The Bratus-Pak algorithm  <A  HREF = "text733.htm#bib_bratus-pak">[BP00]</A> 
+(implemented by Derek Holt)
+is used to define an isomorphism between G and A<sub>n</sub>.
+If successful,
+return <TT>true</TT>, homomorphism from G to A<sub>n</sub>, homomorphism from
+A<sub>n</sub> to G, the map from G to its word group and the
+map from the word group to G.
+<P>
+If the optional parameter <TT>Extension</TT> is set, then the group G
+should be known to be isomorphic either to A<sub>n</sub> or to a perfect central
+extension 2.A<sub>n</sub>. In that case, the first two maps returned will be
+a homomorphism from G to A<sub>n</sub> and a map from A<sub>n</sub> to G that induces
+a homomorphism onto G/Z(G). The sixth value returned will be <TT>true</TT>,
+if G isomorphic to 2.A<sub>n</sub> and <TT>false</TT> otherwise.
+<P>
+If unsuccessful, <TT>false</TT> is returned. This will always occur if the input
+group is not isomorphic to A<sub>n</sub> (or 2.A<sub>n</sub> when <TT>Extension</TT> is set)
+with n &ge;9, and may occur occasionally
+even when G is isomorphic to A<sub>n</sub>. The optional parameter {tt maxtries}
+(default 100n + 5000) can be used to control the number of random elements
+chosen before giving up.
+</BLOCKQUOTE>
+<H5><A NAME = "8386">AlternatingElementToWord(G, g) : Grp, GrpElt -&gt; BoolElt, GrpSLPElt</A></H5>
+<BLOCKQUOTE>
+If g is an element of G which has been constructively recognised to
+be isomorphic to A<sub>n</sub> (or 2.A<sub>n</sub>), then return <TT>true</TT> and
+element of word group for G which evaluates to g.
+Otherwise return <TT>false</TT>.
+This facilitates membership testing in G.
+</BLOCKQUOTE>
+<H5><A NAME = "8387">GuessAltsymDegree(G: parameters) : Grp -&gt; BoolElt, MonStgElt, RngIntElt</A></H5>
+
+<PRE>    maxtries: RngIntElt                 Default: 5000</PRE>
+
+<PRE>    Extension: BoolElt                  Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The group G should be believed to be isomorphic to S<sub>n</sub> or A<sub>n</sub> for
+some n &gt; 6, or to 2.S<sub>n</sub> or 2.A<sub>n</sub> if the optional parameter
+<TT>Extension</TT> is set.
+This function attempts to determine n and whether G is
+symmetric or alternating. It does this by sampling orders of elements.
+It returns either <TT>false</TT>, if it is unable to make a decision after
+sampling <TT>maxtries</TT> elements (default 5000), or <TT>true</TT>, <I>type</I> and n,
+where <I>type</I> is "Symmetric" or "Alternating", and n is the degree. 
+If G is not isomorphic to S<sub>n</sub> or A<sub>n</sub> (or 2.S<sub>n</sub> or 2.A<sub>n</sub>
+when <TT>Extension</TT> is set) for n &gt; 6, then the output is
+meaningless - there is no guarantee that <TT>false</TT> will be returned. There is also
+a small probability of a wrong result or <TT>false</TT> being returned even when G is
+S<sub>n</sub> or A<sub>n</sub> with n &gt; 6. This function was written by Derek Holt.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8388">Example <TT>GrpASim_RecogniseAltsym2 (H70E4)</TT></A></H3>
+For a group G which is believed to be isomorphic to S<sub>n</sub> or A<sub>n</sub> for
+some unknown value of n &gt; 6, the function <TT>GuessAltsymDegree</TT> can be 
+used to try to guess  n, and then <TT>RecogniseSymmetric</TT> or 
+<TT>RecogniseAlternating</TT> can be used to confirm the guess.
+<P>
+<P>
+<PRE>
+&gt; G:= sub&lt; GL(10,5) |
+&gt; PermutationMatrix(GF(5),Sym(10)![2,3,4,5,6,7,8,9,1,10]), 
+&gt; PermutationMatrix(GF(5),Sym(10)![1,3,4,5,6,7,8,9,10,2]) &gt;;
+&gt; GuessAltsymDegree(G);
+true Alternating 10
+&gt; flag, m1, m2, m3, m4  := RecogniseAlternating(G,10);
+&gt; flag;
+true
+&gt; x:=Random(G); Order(x);
+8
+&gt; m1(x);
+(1, 2, 4, 9, 10, 8, 6, 3)(5, 7)
+&gt; m2(m1(x)) eq x;
+true
+&gt; m4(m3(x)) eq x;
+true
+&gt; flag, w := AlternatingElementToWord(G,x);
+&gt; flag;
+true
+&gt; m4(w) eq x;                                           
+true
+&gt; y := Random(Generic(G));                   
+&gt; flag, w := AlternatingElementToWord(G,y);    
+&gt; flag;
+false
+&gt; flag, m1, m2, m3, m4 := RecogniseAlternating(G,11);
+&gt; flag;
+false
+&gt; flag, m1, m2, m3, m4 := RecogniseSymmetric(G,10);  
+&gt; flag;
+false
+</PRE>
+<P>
+The nature of the <TT>GuessAltsymDegree</TT> function is that it assumes that
+its input is either an alternating or symmetric group and then tries to guess
+which one and the degree. As such, it is almost always correct when the input
+is an alternating or symmetric group, but will often return a bad guess when
+the input group is not of this form, as in the following example.
+<P>
+<P>
+<P>
+<PRE>
+&gt; GuessAltsymDegree(Sym(50));
+true Symmetric 50
+&gt; GuessAltsymDegree(Alt(73));
+true Alternating 73
+&gt; GuessAltsymDegree(PSL(5,5)); 
+true Alternating 82
+</PRE>
+<HR>
+<H4><A NAME = "8389">Determining the Type of a Finite  Group of Lie Type</A></H4>
+
+<P>
+<P>
+Given a finite quasisimple group of Lie type in any representation, the 
+functions in this section apply probabilistic algorithms to determine its 
+defining characteristic and type as a Lie group.
+
+
+<H5><A NAME = "8390">LieCharacteristic(G : parameters) : Grp -&gt; RngIntElt</A></H5>
+
+<PRE>    NumberRandom: RngIntElt             Default: 100</PRE>
+
+<PRE>    Verify: BoolElt                     Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a finite quasisimple permutation or matrix group G which 
+is of Lie type, determine its defining characteristic.
+The Monte Carlo algorithm implemented by this function is 
+that of Liebeck and O'Brien <A  HREF = "text733.htm#bib_liebeck-obrien">[LO07]</A>.
+Since it is Monte Carlo, there is a small probability of error.
+The number of random elements considered is <TT>NumberRandom</TT>.
+If <TT>Verify</TT> is <TT>true</TT>, then we first verify that
+G is perfect by applying <TT>IsProbablyPerfect</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8391">Example <TT>GrpASim_WriteOverSmallerField (H70E5)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; F := GF (4);
+&gt; w := PrimitiveElement (F);
+&gt; a := [
+&gt; 0,w^3,0,0,0,
+&gt; w^3,0,0,0,0,
+&gt; 0,0,0,w^3,0,
+&gt; 0,0,w^3,0,0,
+&gt; w^2,w^2,w^3,w^3,w^3];
+&gt; b := [
+&gt; 0,0,w^3,0,0,
+&gt; w^1,w^2,w^2,0,0,
+&gt; w^2,w^1,w^2,0,0,
+&gt; 0,0,0,0,w^3,
+&gt; w^2,w^2,w^2,w^3,w^3];
+&gt; G := sub &lt;GL(5, F) | a, b&gt;;
+&gt; LieCharacteristic(G);
+11
+</PRE>
+<HR>
+<H5><A NAME = "8392"></A><A NAME = "GrpMatFF:LieType">LieType</A>(G, p : parameters) : GrpMat, RngIntElt -&gt; BoolElt, Tup</H5>
+<H5><A NAME = "GrpPerm:LieType">LieType</A>(G, p : parameters) : GrpMat, RngIntElt -&gt; BoolElt, Tup</H5>
+
+<PRE>    NumberRandom: RngIntElt             Default: 100</PRE>
+<BLOCKQUOTE>
+If the matrix or permutation group G is nearly simple, 
+and its non-abelian composition factor 
+is isomorphic to a group of Lie type in characteristic p,
+then this function returns <TT>true</TT> and its standard Chevalley name.
+Otherwise it returns <TT>false</TT>.
+<P>
+The algorithm is that of Babai, Kantor, P&aacute;lfy and Seress 
+<A  HREF = "text733.htm#bib_BKPS">[BKPS02]</A>; this implementation was developed
+by Malle and O'Brien. 
+Since it is Monte Carlo, there is 
+a small probability of error.
+The number of random elements considered is <TT>NumberRandom</TT>.
+<P>
+The standard name is 
+a tuple that defines
+the isomorphism type of the composition factor.
+It is similar to that employed
+by <TT>CompositionFactors</TT>, described in 
+the Permutation Groups chapter. 
+<P>
+If the composition factor is a group of Lie type,
+then the tuple is &lt;s, n, q&gt; and it defines
+the adjoint Chevalley group of Lie series s
+and Lie rank n over GF (q). The tuple
+entries are valid arguments for <TT>ChevalleyGroup</TT>.
+<P>
+If the composition factor is an alternating group,
+and so lies in family 17, then the tuple is
+&lt;17, n, 0&gt; and it defines
+the alternating group of degree n.
+<P>
+If the composition factor is a sporadic group
+and so lies in family 18,
+then the tuple is &lt;18, n, s&gt;; the string
+s is its standard Atlas name and n is the
+number of the group in family 18.
+</BLOCKQUOTE>
+<H5><A NAME = "8393">SimpleGroupName(G : parameters): GrpMat -&gt; BoolElt, List</A></H5>
+<H5>SimpleGroupName(G : parameters): GrpPerm -&gt; BoolElt, List</H5>
+
+<PRE>    NumberRandom: RngIntElt             Default: 100</PRE>
+<BLOCKQUOTE>
+If the matrix or permutation group G is nearly simple, 
+this function returns <TT>true</TT> and a list of 
+possible names for its non-abelian
+simple composition factor; otherwise it returns <TT>false</TT>.
+Since it is Monte Carlo, there is a small probability of error.
+The number of random elements considered is <TT>NumberRandom</TT>.
+The list of standard names follows the convention described above.
+<P>
+The algorithm and implementation were developed 
+by Malle and O'Brien; it uses
+<TT>LieType</TT> and <TT>LieCharacteristic</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8394">Example <TT>GrpASim_IdentifySimple (H70E6)</TT></A></H3>
+<P>
+We create the classical group &Omega;(7, 5) in its natural representation 
+and apply <TT>SimpleGroupName</TT> to it.
+<P>
+<P>
+<P>
+<PRE>
+&gt; SetSeed(1);
+&gt; G := Omega(7, 5);
+&gt; flag, name := SimpleGroupName(G);
+&gt; name;
+[* &lt;B, 3, 5&gt; *]
+</PRE>
+<P>
+We create a certain 5-dimensional matrix group over GF(3) and determine
+which simple group it is.
+<P>
+<P>
+<P>
+<PRE>
+&gt; F := GF(3);
+&gt; P := GL(5,F);
+&gt; gens := [
+&gt; P![2,1,2,1,2,2,0,0,0,2,0,2,0,0,0,0,1,2,0,1,1,0,2,2,1],
+&gt; P![2,1,0,2,1,1,2,0,2,2,1,1,2,1,1,0,2,0,1,1,1,1,2,2,2]];
+&gt; G := sub &lt;P | gens&gt;;
+&gt; flag, name := SimpleGroupName(G);
+&gt; flag;
+true
+&gt; name;
+[* &lt;18, 1, M11&gt; *]
+</PRE>
+<P>
+&gt; /* naming an alternating group */
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := MatrixGroup&lt;4, GF(2) |
+&gt;    [ 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0 ],
+&gt;    [ 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0 ] &gt;;
+&gt; flag, name := SimpleGroupName(G);
+&gt; flag;
+true
+&gt; /* this is A5 */
+&gt; name; 
+[* &lt;17, 5, 0&gt; *]
+&gt; /* naming a classical group */
+&gt; F := GF(7^2);
+&gt; P := GL (6,F);
+&gt; w := PrimitiveElement (F);
+&gt; gens := [
+&gt; P![w^12,w^36,  0,  5,  2,  0,w^44,w^36,  0,  6,  2,  0,
+&gt; w^42,w^42,w^28,w^22,w^22,  3,  4,  3,  0,w^36,w^12,  0,
+&gt; 2,  3,  0,w^20,w^12,  0,w^14,w^14,  1,w^18,w^18, w^4],
+&gt;
+&gt; P![w^38,w^26,w^25,w^21, w^9,  3,w^21,w^45,w^33, w^4,w^28,
+&gt; 2,  6,  4, w^1, w^7,w^15,  4,  1,w^36,w^35, w^5,w^41,  5,
+&gt; w^31, w^7,w^43,w^36,w^12,  1,w^34,w^42,w^11,w^39,w^47,  2]
+&gt; ];
+&gt; G := sub &lt;P | gens&gt;;
+&gt; flag, name := LieType(G, 5);
+&gt; flag;
+true
+&gt; name;
+&lt;A, 1, 5&gt;
+&gt; /* so this is SL(2, 5) */ 
+</PRE>
+<HR>
+<H4><A NAME = "8395">Classical Forms</A></H4>
+
+<P>
+<P>
+Let  G  be an absolutely   irreducible  subgroup   of  GL(d, q).    
+The  following functions compute symplectic, unitary and orthogonal 
+forms of the underlying vector space V left invariant by the action 
+of G.
+<P>
+A <I>bilinear</I> form is a bilinear  function &kappa; from V x V -&gt; F.  It is G-invariant modulo scalars if for each g &isin;G  there   is a &mu;<sub>g</sub>    &isin;F such  that   &kappa;(vg, wg)  = &mu;<sub>g</sub>
+&kappa;(v, w) for all v, w &isin;V.
+<P>
+Now suppose that  a |-&gt; bar(a)  is an  automorphism  of F of
+order 2.  A <I>sesquilinear</I> form  is a biadditive function &kappa;
+from V x V -&gt; F  such that &kappa;(  au, bv) =  a bar(b)
+&kappa;(u, v) for all u, v &isin;V and a, b&isin;F. It is G-invariant
+modulo scalars if  for each g  &isin;G there is  a &mu;<sub>g</sub> &isin;F  such
+that &kappa;(vg, wg) = &mu;<sub>g</sub>  &kappa;(v, w) for all  v, w  &isin;V.
+<P>
+A  quadratic form is  a function &chi; : V -&gt; F such that
+<DL COMPACT class='compact'>
+<DT>(1)</DT><DD>&chi;(av) =  a<sup>2</sup> &chi;(v) for  all a&isin;F,  v&isin;V; and
+<DT>(2)</DT><DD>the form &kappa;, defined by
+&kappa;(u, v)  = &chi;( u +  v ) - &chi;(u)  - &chi;(v) for all u, v &isin;V,
+is bilinear.
+<P>
+<P>
+</DL>
+It is G-invariant if for each g &isin;G, &chi;(vg) = &chi;(v) for all
+v &isin;V.
+It is G-invariant modulo scalars  if for each g &isin;G
+there is a &mu;<sub>g</sub> &isin;F such that &chi;(vg) = &mu;<sub>g</sub> &chi;(v) for all
+v &isin;V.
+<P>
+A bilinear form which is G-invariant (modulo scalars)
+is represented by a matrix B such  that g * B * (g)<sup>tr</sup>
+= &mu;<sub>g</sub> B for all g&isin;G and  is unique up  to multiplication by an
+element of F. Assume F has an automorphism  a |-&gt; bar(a) of
+order  2; a  sesquilinear  form  is a  matrix  B  such that g   *
+B * bar(g)<sup>tr</sup> = &mu;<sub>g</sub>  B  for  all g&isin;G  and is unique  up  to
+multiplication by an element of F 
+(where bar(g)  denotes the  matrix  obtained from g  by replacing
+each entry g<sub>ij</sub> by bar(g<sub>ij</sub>)).
+A  quadratic form is represented
+by an  upper triangular  matrix Q such  that   the matrix g *   Q *
+g<sup>tr</sup>, normalized into an upper triangular matrix, equals &mu;<sub>g</sub> Q.
+<P>
+The functions below will exit with an error message if the input group
+G is reducible. They may also exit with error if G is not absolutely
+irreducible, or if <TT>Scalars</TT> is <TT>true</TT> and the derived subgroup [G, G]
+of G is not absolutely irreducible. They may however sometimes succeed in
+finding a fixed form when G is irreducible but not absolutely irreducible.
+
+
+<H5><A NAME = "8396"></A><A NAME = "GrpMat:ClassicalForms">ClassicalForms</A>(G: parameters): GrpMat  -&gt; Rec</H5>
+
+<PRE>    Scalars: BoolElt                    Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given as  input a matrix group G  acting   absolutely irreducibly  on the
+underlying vector space V over the  field F,
+<TT>ClassicalForms</TT> will try  to find a   classical form which is
+G-invariant or prove that no such form exists.
+If the optional
+argument <TT>Scalars</TT> is <TT>true</TT> then it will look for a form which is
+G-invariant modulo scalars. When <TT>Scalars</TT> is <TT>true</TT>,
+it is only guaranteed to succeed
+when [G, G] acts absolutely irreducibly on V.
+If it finds a fixed form, then
+it will stop and will not look for alternative fixed forms of different types.
+<P>
+The classical forms are: <I>symplectic</I> (non-degenerate, alternating
+bilinear), <I>unitary</I>  (non-degenerate sesquilinear)  or   <I>orthogonal</I> (a <I>symmetric bilinear  form</I> and a <I>quadratic</I>
+form).
+<P>
+The  function <TT>ClassicalForms</TT>  returns a record <TT>forms</TT> which
+contains  the  components   <TT>formType</TT>,  <TT>sign</TT>,
+<TT>bilinearForm</TT>, <TT>sesquilinearForm</TT>, <TT>quadraticForm</TT> 
+and <TT>scalars</TT>.  Depending
+on the entry <TT>formType</TT> the record components are set to indicate:
+<DL COMPACT class='compact'>
+<DT></DT><DD><TT>"unknown"</TT>:
+        it is not known whether G fixes a classical form.
+<DT></DT><DD><TT>"linear"</TT>:
+        it is known that G does not fix a classical form modulo scalars.
+<DT></DT><DD><TT>"symplectic"</TT>:
+        G fixes  a symplectic form  modulo scalars.  
+	The matrix of the form is stored in <TT>bilinearForm</TT> and the
+	scalars for each generator of G are stored in <TT>scalars</TT>.
+	In  characteristic two this also
+        implies that no quadratic form is fixed.
+<DT></DT><DD><TT>"unitary"</TT>:
+        G fixes a  unitary form (modulo scalars). The matrix of the
+	form is stored in <TT>sesquilinearForm</TT>. The  scalars for
+        each generator of G are stored in <TT>scalars</TT>. 
+<DT></DT><DD><TT>"orthogonalcircle"</TT>:
+<DT></DT><DD><TT>"orthogonalplus"</TT>:
+<DT></DT><DD><TT>"orthogonalminus"</TT>:
+        G  fixes an  orthogonal  form modulo scalars. The
+	matrix of the bilinear form is stored in
+        <TT>bilinearForm</TT> and the corresponding quadratic form in
+	<TT>quadraticForm</TT>. The  scalars for each generator of G are
+        stored in <TT>scalars</TT>. 
+	In the orthogonal case, <TT>sign</TT> is set to 0, 1, or -1 when
+	<TT>formType</TT> is <TT>"orthogonalcircle"</TT>,
+	<TT>"orthogonalplus"</TT>, or <TT>"orthogonalminus"</TT>, respectively.</DL>
+</BLOCKQUOTE>
+<H5><A NAME = "8397">SymplecticForm(G: parameters) : GrpMat -&gt; BoolElt, AlgMatElt [,SeqEnum]</A></H5>
+
+<PRE>    Scalars: BoolElt                    Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+If the absolutely irreducible  group G  preserves a symplectic 
+form (modulo scalars if the optional argument <TT>Scalars</TT> is <TT>true</TT>),
+this function  returns <TT>true</TT> and the matrix of the form.
+If it is known that G does not preserve such a form it returns
+<TT>false</TT>.  If it cannot decide (perhaps because the group
+does not act absolutely irreducibly), then it exits with an error message.
+If <TT>Scalars</TT> is <TT>true</TT>,
+then the list of scalars for the generators of G is also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "8398">SymmetricBilinearForm(G: parameters) : GrpMat -&gt; BoolElt, AlgMatElt, MonStgElt [,SeqEnum]</A></H5>
+
+<PRE>    Scalars: BoolElt                    Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+If the absolutely irreducible group G preserves an orthogonal form (modulo
+scalars if the optional argument <TT>Scalars</TT> is <TT>true</TT>),
+then this function returns
+<TT>true</TT>, the matrix of the symmetric bilinear form, and the type of the form
+(as in <A  HREF = "text737.htm#GrpMat:ClassicalForms">ClassicalForms</A>).
+If it is known that G does not preserve such a form,
+it returns <TT>false</TT>. 
+If it cannot decide, then it exits with an error message.
+If <TT>Scalars</TT> is <TT>true</TT>, then
+the list of scalars for the generators of G is also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "8399">QuadraticForm(G): GrpMat  -&gt; BoolElt, AlgMatElt, MonStgElt [,SeqEnum]</A></H5>
+
+<PRE>    Scalars: BoolElt                    Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+If the  absolutely  irreducible group G  preserves  a quadratic 
+form (modulo scalars if the optional argument <TT>Scalars</TT> is <TT>true</TT>),
+this function  returns  <TT>true</TT>, the matrix of the form in  upper triangular
+form, and the type of the form (as in <A  HREF = "text737.htm#GrpMat:ClassicalForms">ClassicalForms</A>).
+If it is known that G does not preserve such a form it returns <TT>false</TT>.
+If it cannot decide, then it exits with an error message.
+If <TT>Scalars</TT> is <TT>true</TT>, then
+the list of scalars for the generators of G is also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "8400">UnitaryForm(G) : GrpMat -&gt; BoolElt, AlgMatElt [,SeqEnum]</A></H5>
+
+<PRE>    Scalars: BoolElt                    Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+If the absolutely irreducible group G  preserves a unitary form 
+(non-degenerate sesquilinear)
+(modulo scalars if the optional argument <TT>Scalars</TT> is <TT>true</TT>), then
+this function returns <TT>true</TT> and the matrix of the form. If it is known
+that G does not preserve such a form, it returns false.
+If it cannot decide, then it exits with an error message.
+If <TT>Scalars</TT> is <TT>true</TT>, then the list of scalars for
+the generators of G  is also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "8401">FormType(G) : GrpMat -&gt; MonStgElt</A></H5>
+
+<PRE>    Scalars: BoolElt                    Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+If the absolutely irreducible group G  preserves a classical form 
+(modulo scalars if the optional argument <TT>Scalars</TT> is <TT>true</TT>),
+this function returns its type (see <A  HREF = "text737.htm#GrpMat:ClassicalForms">ClassicalForms</A>).
+Otherwise it returns <TT>"unknown"</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8402">Example <TT>GrpASim_ClassicalForms (H70E7)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; G := Omega( 9, 11 );
+&gt; ClassicalForms( G );
+rec&lt;recformat&lt;bilinearForm, quadraticForm, sesquilinearForm, bilinFlag, 
+sesquiFlag, scalars, formType, bc, n&gt; | bilinearForm := 
+[ 0  0  0  0  0  0  0  0  1]
+[ 0  0  0  0  0  0  0  1  0]
+[ 0  0  0  0  0  0  1  0  0]
+[ 0  0  0  0  0  1  0  0  0]
+[ 0  0  0  0  6  0  0  0  0]
+[ 0  0  0  1  0  0  0  0  0]
+[ 0  0  1  0  0  0  0  0  0]
+[ 0  1  0  0  0  0  0  0  0]
+[ 1  0  0  0  0  0  0  0  0], 
+quadraticForm := 
+[ 0  0  0  0  0  0  0  0  1]
+[ 0  0  0  0  0  0  0  1  0]
+[ 0  0  0  0  0  0  1  0  0]
+[ 0  0  0  0  0  1  0  0  0]
+[ 0  0  0  0  3  0  0  0  0]
+[ 0  0  0  0  0  0  0  0  0]
+[ 0  0  0  0  0  0  0  0  0]
+[ 0  0  0  0  0  0  0  0  0]
+[ 0  0  0  0  0  0  0  0  0], 
+sesquilinearForm := false, bilinFlag := true,  sesquiFlag := false, 
+scalars := [ 1, 1 ], formType := orthogonalcircle, sign := 0&gt;
+&gt; FormType( G );
+orthogonalcircle
+&gt; SymplecticForm( G );
+false
+</PRE>
+<HR>
+<H5><A NAME = "8403">TransformForm(form, type) : AlgMatElt, MonStgElt -&gt; GrpMatElt</A></H5>
+<BLOCKQUOTE>
+Return a matrix m such that G<sup>m</sup> lies
+in the classical group returned by the Magma function  <TT>GU</TT>, <TT>Sp</TT>,
+or <TT>GO(Plus/Minus)</TT>. 
+The argument <TT>form</TT> should be a classical form of type <TT>type</TT> fixed by an
+absolutely irreducible subgroup G of GL(d, q).
+It should be the bilinear or sesquilinear form fixed by G,
+except when G is orthogonal in characteristic 2, in which case it should
+be the quadratic form. The argument <TT>type</TT> should be as in the <TT>formType</TT>
+component of the record returned by <A  HREF = "text737.htm#GrpMat:ClassicalForms">ClassicalForms</A>;
+i.e. one of <TT>"symplectic"</TT>, <TT>"unitary"</TT>, <TT>"orthogonalcircle"</TT>, <TT>"orthogonalplus"</TT>, or <TT>"orthogonalminus"</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "8404">TransformForm(G) : GrpMat -&gt; GrpMatElt</A></H5>
+
+<PRE>    Scalars: BoolElt                    Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+This function calls <A  HREF = "text737.htm#GrpMat:ClassicalForms">ClassicalForms</A> to find a form fixed by
+the absolutely irreducible subgroup G of GL(d, q).
+If <TT>Scalars</TT> is <TT>true</TT>, then <A  HREF = "text737.htm#GrpMat:ClassicalForms">ClassicalForms</A> is called
+with <TT>Scalars</TT> set to <TT>true</TT>, so that a form fixed module scalars is
+found.
+If a form <TT>form</TT> of type <TT>type</TT> is fixed,
+then it returns <TT>TransformForm(form, type)</TT>.
+Otherwise it returns <TT>false</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "8405">SpinorNorm(g, form): GrpMatElt, AlgMatElt  -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The spinor norm of g with respect to the given form.  <TT>form</TT> must be the 
+matrix of an orthogonal form (ie, it must be symmetric and nonsingular), and 
+g an element of the general orthogonal group <TT>GO(Plus/Minus)</TT> fixing 
+that form.  Note that the form is ignored in even characteristic and in this
+case the function returns the Dickson invariant, namely the
+rank modulo 2 of g - I.
+</BLOCKQUOTE>
+<H4><A NAME = "8406">Recognizing Classical Groups in their Natural Representation</A></H4>
+
+<P>
+<P>
+Let   G be  an irreducible  subgroup   of GL(d, q). The  following
+algorithm  is designed to  test whether G contains the corresponding
+classical   group   &Omega; and   is    contained  in  &Delta;.
+Here &Omega; and &Delta; are defined as follows:
+<P>
+<DL COMPACT class='compact'>
+<DT></DT><DD>Case "linear":   &Delta; = GL(d, q),  &Omega; = SL( d, q)
+<DT></DT><DD>Case "symplectic":     &Delta; = GSp(d, q), &Omega; = Sp( d, q)
+<DT></DT><DD>Case "orthogonalplus": &Delta; = GO^ + (d, q), &Omega; = &Omega;^ + (d, q)
+<DT></DT><DD>Case "orthogonalminus": &Delta; = GO^ - (d, q), 
+                                 &Omega; = &Omega;^ - (d, q)
+<DT></DT><DD>Case "orthogonalcircle":&Delta; = GO<sup><IMG SRC="open.gif" ALT="" WIDTH=7 HEIGHT=7></sup>(d, q), 
+                                 &Omega; = &Omega;<sup><IMG SRC="open.gif" ALT="" WIDTH=7 HEIGHT=7></sup>(d, q) 
+<DT></DT><DD>Case "unitary":    &Delta; = GU(d, q),  &Omega; = SU(d, q)</DL>
+
+
+<H5><A NAME = "8407">RecognizeClassical( G : parameters): GrpMat  -&gt; BoolElt</A></H5>
+
+<PRE>    Case: MonStgElt                     Default: "unknown"</PRE>
+
+<PRE>    NumberOfElements: RngIntElt         Default: 25</PRE>
+
+<PRE>    SetVerbose("Classical", n):         Maximum: 3</PRE>
+<BLOCKQUOTE>
+<TT>RecognizeClassical</TT> takes as input 
+ a group  G, which is a  subgroup of  GL(d, q).
+<P>
+The parameter 
+<TT>Case</TT> is one of  <TT>"linear"</TT>, <TT>"symplectic"</TT>,
+<TT>"orthogonalplus"</TT>, <TT>"orthogonalminus"</TT>, <TT>"orthogonalcircle"</TT>, <TT>"unitary"</TT> or <TT>"unknown"</TT>;
+if <TT>Case</TT> is supplied, then the algorithm seeks to decide 
+for this case only.
+<P>
+The parameter 
+<TT>NumberOfElements</TT> is the number of random elements selected
+from G during the execution of the algorithm.  
+<P>  
+The output of <TT>RecognizeClassical</TT>  is either <TT>true</TT>,   <TT>false</TT> or <TT>"Does not apply"</TT>.   If  the algorithm returns <TT>true</TT>,
+then  we know   with  certainty that  G   contains &Omega;  and  is
+contained in  &Delta;.  Note that   the proof of  correctness of  the
+algorithm depends on the  finite  simple group classification.  If  it
+returns <TT>false</TT> then either G does  not contain &Omega;, or G
+is not contained in &Delta;, or G is not irreducible, or there is a
+small chance that G is  contained in &Delta; and contains &Omega;.
+More precisely, if the irreducible group G  is contained in &Delta;
+and really does  contain &Omega; then  the probability with which the
+algorithm    returns <TT>false</TT>  is   less  than &epsilon;, where
+&epsilon; is a real number between 0 and 1.  The smaller the value
+of  &epsilon;,  the larger   <TT>NumberOfElements</TT>  must  be. If  the
+algorithm returns <TT>"Does not apply"</TT> then it is not applicable  to
+the given group.
+<P>
+<P>  
+If   <TT>"Classical"</TT> is set    to  verbose then,    where <TT>RecognizeClassical</TT> returns <TT>true</TT>, it also prints the statement
+"Proved that the  group contains a  classical group of type <I>case</I> in
+n random selections", where n  is the number of selections needed.
+If it returns <TT>false</TT>, it prints a statement giving  some
+indication of why the algorithm reached this conclusion.
+<P> Theoretical details of the algorithms used may be found in 
+Niemeyer &amp; Praeger <A  HREF = "text733.htm#bib_niemeyer-praeger-97">[NP97]</A><A  HREF = "text733.htm#bib_niemeyer-praeger-98">[NP98]</A>
+<A  HREF = "text733.htm#bib_niemeyer-praeger-99">[NP99]</A> and Praeger <A  HREF = "text733.htm#bib_praeger-prim">[Pra99]</A>.
+Its approach is based on the SL-recognition algorithm (Neumann &amp;
+Praeger, <A  HREF = "text733.htm#bib_neumann-praeger-92">[NP92]</A>).
+This implementation also uses algorithms described in 
+Celler &amp; Leedham-Green <A  HREF = "text733.htm#bib_CLG_Order">[CLG97a]</A><A  HREF = "text733.htm#bib_CLG-recog">[CLG97b]</A> and Celler et al. 
+<A  HREF = "text733.htm#bib_randomelements">[CLGM+95]</A>.
+<P>
+For small fields (q &lt; 2<sup>16</sup>), the cost of this implementation for a
+given value of <TT>NumberOfElements</TT> is O( d<sup>3</sup> log d ) bit operations.
+</BLOCKQUOTE>
+<H5><A NAME = "8408"></A><A NAME = "IsLinearGroup">IsLinearGroup</A>(G) : GrpMat -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+This function tests  whether  the subgroup G of  GL(d, q) contains
+SL(d, q). If the function can establish this fact, it returns <TT>true</TT> and otherwise <TT>false</TT>. 
+Hence, if <TT>IsLinearGroup</TT> returns
+<TT>false</TT>,  there is a small chance  that  G nevertheless contains
+SL(d, q). See <TT>RecognizeClassical</TT> for more details.
+</BLOCKQUOTE>
+<H5><A NAME = "8409">IsSymplecticGroup(G) : GrpMat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+This function tests whether  the subgroup G of GSp(d, q)  contains
+Sp(d, q). If the function can establish this fact, it returns <TT>true</TT> and otherwise  <TT>false</TT>.  
+Hence, if  <TT>IsSymplecticGroup</TT>
+returns <TT>false</TT>, there is   a small chance that G   nevertheless
+contains Sp(d, q). See <TT>RecognizeClassical</TT> for more details.
+</BLOCKQUOTE>
+<H5><A NAME = "8410">IsOrthogonalGroup(G) : GrpMat -&gt;BoolElt</A></H5>
+<BLOCKQUOTE>
+This function  tests whether the  subgroup G  of GO<sup>&epsilon;</sup>(d, q)
+contains &Omega;<sup>&epsilon;</sup>(d, q). If  the function can establish this
+fact, it returns <TT>true</TT> and  otherwise <TT>false</TT>. 
+Hence, if <TT>IsOrthogonalGroup</TT>  returns <TT>false</TT>, there  is a small chance that
+G  nevertheless   contains  &Omega;<sup>&epsilon;</sup>(d, q).   See       <TT>RecognizeClassical</TT> for more details.
+</BLOCKQUOTE>
+<H5><A NAME = "8411">IsUnitaryGroup(G) : GrpMat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+This function tests whether the   subgroup G of GU(d, q)  contains
+SU(d, q). If the function can establish this fact, it returns <TT>true</TT>   and otherwise  <TT>false</TT>. 
+</BLOCKQUOTE>
+<H5><A NAME = "8412">ClassicalType(G) : GrpMat -&gt; MonStgElt</A></H5>
+<BLOCKQUOTE>
+If G is known to be a classical subgroup of GL(d, q) this function
+returns  the appropriate classical   type   as a  string,  i.e.
+<TT>"linear"</TT>, <TT>"symplectic"</TT>, <TT>"orthogonalplus"</TT>,
+<TT>"orthogonalminus"</TT>, <TT>"orthogonalcircle"</TT>,
+or <TT>"unitary"</TT>.   Otherwise  the  function returns <TT>false</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8413">Example <TT>GrpASim_RecognizeClassical (H70E8)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; G := SU (60, 9);
+&gt; SetVerbose( "Classical", true );
+&gt; RecognizeClassical( G );
+true
+&gt; IsLinearGroup( G );
+false
+&gt; IsUnitaryGroup( G );
+true
+&gt; IsSymplecticGroup( G );
+false
+&gt; IsOrthogonalGroup( G );
+false
+&gt; ClassicalType( G );
+unitary
+&gt; G := Sp (462, 3);
+&gt; time RecognizeClassical( G );
+true
+Time: 7.630
+</PRE>
+<HR>
+<H4><A NAME = "8414">Constructive Recognition of Linear  Groups</A></H4>
+
+<P>
+<P>
+The functions in this section recognise whether of not a given group G is
+a specified linear group T. If it is, then an isomorphism between G and
+T is returned.
+
+
+<H5><A NAME = "8415">RecognizeSL2(G) : GrpMat -&gt; BoolElt, Map, Map, Map, Map</A></H5>
+<H5>RecognizeSL2(G) : GrpPerm -&gt; BoolElt, Map, Map, Map, Map</H5>
+<H5>RecognizeSL2(G, q) : GrpMat, RngIntElt -&gt; BoolElt, Map, Map, Map, Map</H5>
+<H5>RecognizeSL2(G, q) : GrpPerm, RngIntElt -&gt; BoolElt, Map, Map, Map, Map</H5>
+<BLOCKQUOTE>
+If G, a matrix or permutation group, is isomorphic,
+possibly modulo scalars, to (P)SL(2, q),
+then homomorphisms between G and (P)SL(2, q) 
+are constructed.  The function returns a homomorphism from G to
+(P)SL(2, q), a homomorphism from (P)SL(2, q) to G, 
+the map from G to its word group, and the map from the word
+group to G.
+<P>
+If q, the cardinality of the defining field for G, is known, it
+<I>should</I> be supplied. Otherwise, the function <TT>SL2Characteristic</TT> 
+is used to determine q; if q is large, this calculation may be 
+<B>expensive</B>.  
+</BLOCKQUOTE>
+<H5><A NAME = "8416">SL2ElementToWord(G, g) : GrpMat, GrpMatElt -&gt; BoolElt, GrpSLPElt</A></H5>
+<H5>SL2ElementToWord(G, g) : GrpPerm, GrpPermElt -&gt; BoolElt, GrpSLPElt</H5>
+<BLOCKQUOTE>
+If g is an element of the matrix or permutation group 
+G which has been constructively recognised to
+have central quotient isomorphic to PSL(2, q), then return 
+<TT>true</TT> and element of word group for G which 
+evaluates to g, else <TT>false</TT>. 
+This facilitates membership testing in G.
+</BLOCKQUOTE>
+<H5><A NAME = "8417">SL2Characteristic(G : parameters) : GrpMat -&gt; RngIntElt, RngIntElt</A></H5>
+<H5>SL2Characteristic(G : parameters) : GrpPerm -&gt; RngIntElt, RngIntElt</H5>
+
+<PRE>    NumberRandom: RngIntElt             Default: 100</PRE>
+
+<PRE>    Verify: BoolElt                     Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Subject to the <I>assumption</I> that the group G has central 
+quotient (P)SL(2, q), determine its characteristic and field size. 
+The Monte Carlo algorithm implemented by this function is 
+that of Liebeck and O'Brien <A  HREF = "text733.htm#bib_liebeck-obrien">[LO07]</A>.
+Since it is Monte Carlo, there is a small probability of error.
+The number of random elements considered is <TT>NumberRandom</TT>.
+If <TT>Verify</TT> is <TT>true</TT>, then we first verify that
+G is perfect by applying <TT>IsProbablyPerfect</TT>.
+<P>
+The constructive recognition algorithms for SL(2, q) were developed 
+by Conder, Leedham-Green and O'Brien <A  HREF = "text733.htm#bib_conder-lg-obrien">[CLGO06]</A>.
+The algorithm used for other representations
+was developed by Brooksbank and O'Brien.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8418">Example <TT>GrpASim_RecognizeSL2-1 (H70E9)</TT></A></H3>
+<P>
+Our first example uses G = SL(2, 3<sup>2</sup>) in its natural representation.
+We first recognise the group and then express a random matrix of G as
+a word in the generators of G.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := SL(2, 3^2);
+&gt; flag, phi, tau, gamma, delta := RecogniseSL2(G, 3^2);
+&gt; g := G![1, 2, 0, 1];
+&gt; w := gamma(g);
+&gt; delta(w) eq g;
+true
+</PRE>
+<HR>
+<H3><A NAME = "8419">Example <TT>GrpASim_RecogniseSL2-2 (H70E10)</TT></A></H3>
+<P>
+We now consider a representation of a 2-dimensional linear group inside
+GL(6, GF(5<sup>7</sup>) ).
+<P>
+<P>
+<P>
+<PRE>
+&gt; K&lt;w&gt; := GF(5, 7);
+&gt; G := 
+&gt; MatrixGroup&lt;6, GF(5, 7) |
+&gt; [w^19035, w^14713, w^50617, w^14957, w^51504, w^48397, w^16317, w^3829,
+&gt;  w^35189, w^2473, w^19497, w^77192, w^46480, w^6772, w^29577, w^61815,
+&gt;  w^54313, w^16757, w^43765, w^64406, w^58788, w^30789, w^13579, w^66728,
+&gt;  w^7733, w^45434, w^42411, w^61613, w^12905, w^6889, w^50116, w^16117,
+&gt;  w^56717, w^25226, w^49940, w^36836 ],
+&gt; [w^63955, w^40568, w^45004, w^11642, w^39536, w^11836, w^52594, w^71166,
+&gt;  w^47015, w^74450, w^32373, w^37021, w^76381, w^18155, w^57943, w^31194,
+&gt;  w^62524, w^65864, w^11868, w^76867, w^26483, w^41335, w^64856, w^41125,
+&gt;  w^43990, w^40104, w^24842, w^3153, w^23777, w^60024, w^14454, w^68648,
+&gt;  w^43403, w^26710, w^39779, w^22074 ] &gt;;
+&gt;
+&gt; flag, phi, tau, gamma, delta := RecogniseSL2(G, 5^7);
+&gt; phi;
+Mapping from: GrpMat: G to SL(2, GF(5, 7)) given by a rule [no inverse]
+&gt; g := Random(G);
+&gt; h := phi (g);
+&gt; h;
+[w^40430   w^970]
+[ w^5607 w^11606]
+&gt; k := tau(h);
+&gt; w := gamma(k);
+&gt; m := delta(w);
+</PRE>
+<P>
+Recall that we are working modulo scalars.
+<P>
+<P>
+<P>
+<PRE>
+&gt; IsScalar(m * g^-1);
+true
+&gt; H := SL(2, 5^7);
+&gt; h := H![1,1,0,1];
+&gt; g := tau(h);
+&gt; Order(g);
+5
+</PRE>
+<P>
+We now test a random element of GL(6, GF(5<sup>7</sup>) ) for membership of our 
+group.
+<P>
+<P>
+<P>
+<PRE>
+&gt; g := Random(GL(6, 5^7));
+&gt; SL2ElementToWord(G, g);
+false
+</PRE>
+<HR>
+<H5><A NAME = "8420">RecogniseSL3(G) : GrpMat -&gt; BoolElt, Map, Map, Map, Map</A></H5>
+<H5>RecogniseSL3(G, q : parameters) : GrpMat, RngIntElt -&gt; BoolElt, Map, Map, Map, Map</H5>
+
+<PRE>    Verify: BoolElt                     Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+If G &le;GL(d, F), is isomorphic,
+possibly modulo scalars, to (P)SL(3, q), 
+then construct homomorphisms between
+G and (P)SL(3, q).
+Return homomorphism from G to (P)SL(3, q), homomorphism from
+(P)SL(3, q) to G, the map from G to its word group and the
+map from the word group to G.
+<P>
+If q, the cardinality of the defining field for G, is known, it
+<I>should</I> be supplied. Otherwise, it is computed
+using the functions <TT>LieCharacteristic</TT> and <TT>LieType</TT>.
+<P>
+If <TT>Verify</TT> is <TT>false</TT>, then assume G is isomorphic,
+possibly modulo scalars, to (P)SL(3, q). 
+</BLOCKQUOTE>
+<H5><A NAME = "8421">SL3ElementToWord (G, g) : GrpMat, GrpMatElt -&gt; BoolElt, GrpSLPElt</A></H5>
+<BLOCKQUOTE>
+If g is an element of G which has been constructively recognised to
+have central quotient isomorphic to PSL(3, q), then return 
+<TT>true</TT> and 
+element of word group for G which evaluates to g, else <TT>false</TT>. 
+This facilitates membership testing in G.
+<P>
+The constructive recognition algorithms for SL(3, q) were 
+developed by L&uuml;beck, Magaard, and O'Brien 
+<A  HREF = "text733.htm#bib_lubeck-magaard-obrien">[LMO07]</A>. Its current implementation,
+which is part of the <TT>CompositionTree</TT> package, was developed 
+by B&auml;&auml;rnhielm and O'Brien.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8422">Example <TT>GrpASim_RecogniseSL3 (H70E11)</TT></A></H3>
+We create SL(3, 5<sup>4</sup>) in its natural representation and recognise it. 
+We then form its symmetric square and apply the recognition machinery
+to that.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := SL(3, 5^4);
+&gt; flag, phi, tau, gamma, delta := RecogniseSL3(G);
+&gt; w := PrimitiveElement (GF(5^4));
+&gt; g := GL(3, 5^4)! [1,2,1,0,w,1,0,0,w^-1];
+&gt; w := gamma (g);
+&gt; delta (w) eq g;
+true
+&gt; G := ActionGroup(SymmetricSquare(GModule(G)));
+&gt; flag, phi, tau, gamma, delta := RecogniseSL3(G);
+&gt; phi;
+Mapping from: GL(6, GF(5, 4)) to SL(3, GF(5, 4)) given by a rule [no inverse]
+&gt; g := Random(G);
+&gt; h := phi(g);
+&gt; h;
+[$.1^40430   $.1^970]
+[ $.1^5607 $.1^11606]
+&gt; k := tau(h);
+&gt; w := gamma(k);
+&gt; m := delta(w);
+</PRE>
+<P>
+Recall that we are working modulo scalars. We conclude by testing 
+whether a random element of GL(6, 5<sup>4</sup>) is contained in our group.
+<P>
+<P>
+<P>
+<PRE>
+&gt; IsScalar(m * g^-1);
+true
+&gt; g := Random(GL(6, 5^4));
+&gt; SL3ElementToWord(G, g);
+false
+</PRE>
+<HR>
+<H5><A NAME = "8423">RecogniseSL(G, d, q) : Grp, RngIntElt, RngIntElt -&gt; BoolElt, Map, Map</A></H5>
+<H5>RecognizeSL(G, d, q) : Grp, RngIntElt, RngIntElt -&gt; BoolElt, Map, Map</H5>
+<BLOCKQUOTE>
+Use the Kantor-Seress algorithm to try to find an isomorphism between the
+finite group G (regarded as a black-box group) and SL(d, q) or
+PSL(d, q).  The first return value indicates whether the attempt was
+successful. If so, then the second and third return values are mutually inverse
+homomorphisms (modulo scalars if G isomorphic to (PSL)(d, q)) from G to
+SL(d, q) and from SL(d, q) to G.
+<P>
+<P>
+<I>Warning</I>: This function often returns <TT>false</TT> even when G is
+isomorphic to SL(d, q) or PSL(d, q), so it should be called repeatedly
+until it returns <TT>true</TT>!
+</BLOCKQUOTE>
+<H4><A NAME = "8424">Constructive Recognition of Symplectic Groups</A></H4>
+
+
+
+<H5><A NAME = "8425">RecogniseSpOdd(G, d, q) : Grp, RngIntElt, RngIntElt -&gt; BoolElt, Map, Map</A></H5>
+<H5>RecognizeSpOdd(G, d, q) : Grp, RngIntElt, RngIntElt -&gt; BoolElt, Map, Map</H5>
+<BLOCKQUOTE>
+Use the Kantor-Seress algorithm to try to find an isomorphism between the
+finite group G (regarded as a black-box group) and Sp(d, q) or
+PSp(d, q) for odd q. The first return value indicates whether the attempt was
+successful. If so, then the second and third return values are mutually inverse
+homomorphisms (modulo scalars if G isomorphic to (PSp)(d, q)) from G to
+Sp(d, q) and from Sp(d, q) to G.
+<P>
+<P>
+<I>Warning</I>: This function often returns <TT>false</TT> even when G is
+isomorphic to Sp(d, q) or PSp(d, q), so it should be called repeatedly
+until it returns <TT>true</TT>!
+</BLOCKQUOTE>
+<H5><A NAME = "8426">RecogniseSp4(G, q) : Grp, RngIntElt, RngIntElt -&gt; BoolElt, Map, Map, Map, Map, SeqEnum, SeqEnum</A></H5>
+<H5>RecognizeSp4(G, q) : Grp, RngIntElt, RngIntElt -&gt; BoolElt, Map, Map, Map, Map, SeqEnum, SeqEnum</H5>
+<BLOCKQUOTE>
+Use an algorithm of Peter Brooksbank to try to find an isomorphism between the
+finite group G (regarded as a black-box group) and Sp(4, q).
+The first return value indicates whether the attempt was
+successful. If so, then the second and third return values are mutually
+inverse homomorphisms from G to (P)Sp(d, q) and from (P)Sp(d, q) to G.
+The fourth and fifth return values are mutually inverse homomorphisms from G
+to the word group W of G and from W to G. The sixth and seventh return
+values are standard generators for G and straight-line programs for these 
+generators in the generators of G.
+</BLOCKQUOTE>
+<H4><A NAME = "8427">Constructive Recognition of Unitary Groups</A></H4>
+
+
+
+<H5><A NAME = "8428">RecogniseSU3(G, d, q) : Grp, RngIntElt, RngIntElt -&gt; BoolElt, Map, Map</A></H5>
+<H5>RecognizeSU3(G, d, q) : Grp, RngIntElt, RngIntElt -&gt; BoolElt, Map, Map</H5>
+<BLOCKQUOTE>
+Use an algorithm of Peter Brooksbank to try to find an isomorphism between the
+finite group G (regarded as a black-box group) and SU(3, q) or
+PSU(3, q) for q&gt;2. The first return value indicates whether the attempt was
+successful. If so, then the second and third return values are mutually inverse
+homomorphisms (modulo scalars if G isomorphic to (PSU)(3, q)) from G to
+SU(3, q) and from SU(3, q) to G.
+The third and fourth return values are mutually inverse homomorphisms from G
+to the word group W of G and from W to G.
+</BLOCKQUOTE>
+<H5><A NAME = "8429">RecogniseSU4(G, d, q) : Grp, RngIntElt, RngIntElt -&gt; BoolElt, Map, Map</A></H5>
+<H5>RecognizeSU4(G, d, q) : Grp, RngIntElt, RngIntElt -&gt; BoolElt, Map, Map</H5>
+<BLOCKQUOTE>
+Use an algorithm of Peter Brooksbank to try to find an isomorphism between the
+finite group G (regarded as a black-box group) and SU(4, q) or
+PSU(4, q). The first return value indicates whether the attempt was
+successful. If so, then the second and third return values are mutually inverse
+homomorphisms (modulo scalars if G isomorphic to (PSU)(4, q)) from G to
+SU(4, q) and from SU(4, q) to G.
+The third and fourth return values are mutually inverse homomorphisms from G
+to the word group W of G and from W to G.
+</BLOCKQUOTE>
+<H4><A NAME = "8430">Constructive Recognition Of Classical Groups in Low Degree</A></H4>
+
+<P>
+<P>
+<P>
+Let H be a classical group of degree d, and let H act 
+absolutely irreducibly on a defining characteristic 
+module W of dimension at most d<sup>2</sup>.  
+Magaard, O'Brien &amp; Seress <A  HREF = "text733.htm#bib_small_deg_reps">[MOAS08]</A> and Corr <A  HREF = "text733.htm#bib_corr-phd">[Cor13]</A> 
+describe algorithms which, given as input the representation 
+of H on W, construct a d-dimensional projective representation of H.
+Their implementations, prepared by Brian Corr and Eamonn O'Brien, are 
+described below.
+Note that the algorithms have various limitations in terms of type of group, 
+degree d,
+and defining field size;  if an algorithm does not apply to the input case, it
+returns <TT>false</TT>.
+
+
+<H5><A NAME = "8431">RecogniseSmallDegree(G) : GrpMat -&gt; BoolElt, GrpMat</A></H5>
+<H5>RecogniseSmallDegree(G, type, d, q) : GrpMat, MonStgElt, RngIntElt, RngIntElt -&gt; BoolElt, GrpMat</H5>
+<BLOCKQUOTE>
+If G is a defining characteristic absolutely irreducible representation of 
+a classical group H of degree d and G has degree in [d + 1, ..., d<sup>2</sup>], then 
+return <TT>true</TT> and H, otherwise <TT>false</TT>.
+<P>
+In the second signature, we supply the information that 
+H has degree d, defining field GF(q),
+and its type is one of <TT>SL, Sp, SU, Omega, Omega+, Omega-</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "8432">SmallDegreePreimage(G, g) : GrpMat, GrpMatElt -&gt; GrpMatElt</A></H5>
+<BLOCKQUOTE>
+G is a defining characteristic absolutely irreducible representation of a 
+classical group H of small degree, to which <TT>RecogniseSmallDegree</TT> has 
+been successfully applied; if g is in G, return <TT>true</TT> and a 
+preimage of g in H, otherwise <TT>false</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "8433">SmallDegreeImage(G, h) : GrpMat, GrpMatElt -&gt; GrpMatElt</A></H5>
+<BLOCKQUOTE>
+G is a defining characteristic absolutely irreducible representation of a 
+classical group H of small degree, to which <TT>RecogniseSmallDegree</TT> has 
+been successfully applied; if h is in H, return <TT>true</TT> and the 
+image of h in G, otherwise <TT>false</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8434">Example <TT>GrpASim_RecogniseSmallDegree (H70E12)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; G := SL(4, 9);
+&gt; M := GModule (G);
+&gt; M := SymmetricPower (M, 2);
+&gt; G := MatrixGroup (M);
+&gt; G := RandomConjugate (G);
+&gt; flag, H := RecogniseSmallDegree (G, "SL", 4, 9);
+&gt; flag;
+true
+&gt; H;
+MatrixGroup(4, GF(3^2))
+Generators:
+    [    0     1     0     0]
+    [    0     0     0     1]
+    [$.1^6     2     2   $.1]
+    [    2   $.1     0   $.1]
+
+
+    [    0     0     1     0]
+    [$.1^2 $.1^7     1 $.1^6]
+    [    1     2 $.1^6 $.1^6]
+    [  $.1     0 $.1^7     0]
+&gt; g := Random (G);
+&gt;  flag, h := SmallDegreePreimage (G, g);
+&gt; h;
+[$.1^6     0     0 $.1^2]
+[$.1^6     0 $.1^3     0]
+[$.1^2 $.1^5     2   $.1]
+[    0 $.1^3 $.1^5   $.1]
+&gt; h := Random (H);
+&gt; flag, g := SmallDegreeImage (G, h);
+&gt; flag;
+true
+&gt; g;
+[$.1^7     1 $.1^2 $.1^5]
+[$.1^3 $.1^5 $.1^7 $.1^2]
+[  $.1 $.1^2 $.1^5 $.1^2]
+[$.1^2   $.1 $.1^2     2]
+</PRE>
+<HR>
+<H4><A NAME = "8435">Constructive Recognition of Suzuki  Groups</A></H4>
+
+
+
+<H5><A NAME = "8436">Introduction</A></H5>
+
+<P>
+<P>
+<P>
+A description of the functionality for constructive recognition and 
+constructive membership testing of the Suzuki groups (Sz)(q), 
+with q = 2<sup>2m + 1</sup> for some m &gt; 0 follows. 
+<P>
+The main intrinsics of the package are <TT>RecogniseSz(G)</TT>
+which performs constructive recognition of G isomorphic to (Sz)(q),
+<TT>SzElementToWord(G, g)</TT> which returns a
+<TT>GrpSLPElt</TT> for g in the generators of G, and
+<TT>IsSuzukiGroup(G)</TT> which is a non-constructive test
+for isomorphism between G and (Sz)(q).
+<P>
+Informative printing can be obtained using one of a number of verbose flags:
+<P>
+<P>
+<P>
+<DL COMPACT class='compact'>
+<DT></DT><DD><TT>SuzukiGeneral</TT>, for the general routines.
+<DT></DT><DD><TT>SuzukiStandard</TT>, for the routines related to the standard copy.
+<DT></DT><DD><TT>SuzukiConjugate</TT>, for the routines related to conjugation.
+<DT></DT><DD><TT>SuzukiTensor</TT>, for the routines related to tensor decomposition.
+<DT></DT><DD><TT>SuzukiMembership</TT>, for the routines related to membership testing.
+<DT></DT><DD><TT>SuzukiCrossChar</TT>, for the routines related to cross-characteristic
+representations.
+<DT></DT><DD><TT>SuzukiTrick</TT>, for the routines related to the double coset trick.
+<DT></DT><DD><TT>SuzukiNewTrick</TT>, for the routines related to the stabiliser trick.
+<P>
+<P>
+<P>
+</DL>
+For each of the flags, the verbose level takes any value up to 10, with 
+higher values resulting in more output.
+
+
+<H5><A NAME = "8437">Recognition Functions</A></H5>
+
+
+
+<H5><A NAME = "8438">IsSuzukiGroup(G) : GrpMat -&gt; BoolElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G, this function determines (non-constructively) 
+whether or not G is isomorphic to (Sz)(q). The corresponding 
+finite field cardinality q is also returned.
+<P>
+If the group G is defined over a field of odd characteristic or has 
+degree greater than 4, the Monte Carlo algorithm of <A  HREF = "text737.htm#GrpMatFF:LieType">LieType</A> 
+is used. If G has degree 4 and is over a field of characteristic 2,
+then a fast Las Vegas algorithm is used, described in <A  HREF = "text733.htm#bib_baarnhielm05">[Baccent127aaccent127a06]</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "8439">RecogniseSz(G : parameters) : GrpMat -&gt; BoolElt, Map, Map, Map, Map</A></H5>
+<H5>RecognizeSz(G : parameters) : GrpMat -&gt; BoolElt, Map, Map, Map, Map</H5>
+
+<PRE>    Verify: BoolElt                     Default: <TT>true</TT></PRE>
+
+<PRE>    FieldSize: RngIntElt                Default: </PRE>
+
+<PRE>    Optimise: BoolElt                   Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Let G be a group that is absolutely irreducible and is defined over a
+minimal field.  This function constructively recognises G as a Suzuki group. 
+If G is isomorphic to (Sz)(q), where q is the size of the defining 
+field of G, then return: 
+<DL COMPACT class='compact'>
+<DT></DT><DD>Isomorphism from G to (Sz)(q).
+<DT></DT><DD>Isomorphism from (Sz)(q) to G.
+<DT></DT><DD>Map from G to the word group of G.
+<DT></DT><DD>Map from the word group of G to G.
+<P>
+</DL>
+The isomorphisms are composed of maps that are defined by rules, so
+<TT>Function</TT> should be used on each component to avoid
+unnecessary built-in membership testing.
+The word group is the <TT>GrpSLP</TT> group which is the parent of the
+elements returned by <TT>SzElementToWord</TT>. In general this is not
+the same as <TT>WordGroup(G)</TT>, but is created from it using
+<TT>AddRedundantGenerators</TT>.
+<P>
+If <TT>Verify</TT> is true, then it is checked if G is isomorphic to
+(Sz)(q), using <TT>IsSuzukiGroup</TT>. 
+In that case, <TT>FieldSize</TT> must be set to the correct value of q.
+Constructive recognition of 2.(Sz)(8) is also handled.
+<P>
+If <TT>Optimise</TT> is true, then the third map returns element in an
+optimised word group (using <TT>AddRedundantGenerators</TT>). Then each
+invocation of the map will be faster, but the initialisation will take
+longer.
+<P>
+The algorithms used for constructive recognition are
+described in <A  HREF = "text733.htm#bib_baarnhielm05">[Baccent127aaccent127a06]</A> and <A  HREF = "text733.htm#bib_sz_tensor_decompose">[Baccent127aaccent127a05]</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "8440">SzElementToWord(G, g) : GrpMat, GrpMatElt -&gt; BoolElt, GrpSLPElt</A></H5>
+<BLOCKQUOTE>
+If G has been constructively recognised as a Suzuki group,
+and if g is an element of G, then return <TT>true</TT> and a 
+<TT>GrpSLPElt</TT> from the word group of G which evaluates to g, 
+else return <TT>false</TT>.
+<P>
+This facilitates membership testing in G.
+</BLOCKQUOTE>
+<H5><A NAME = "8441">SzPresentation(q) : RngIntElt -&gt; GrpFP, HomGrp</A></H5>
+<BLOCKQUOTE>
+If q = 2<sup>2m + 1</sup> for some m &gt; 0, return a short presentation of
+(Sz)(q) on the Magma standard generators,
+i.e. the generators returned by the <TT>Sz</TT> intrinsic.
+</BLOCKQUOTE>
+<H5><A NAME = "8442">SatisfiesSzPresentation(G) : GrpMat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+G is constructively recognised as (Sz)(q) for some q.
+Verify that it satisfies a presentation for this group.
+</BLOCKQUOTE>
+<H5><A NAME = "8443">SuzukiIrreducibleRepresentation(F, twists : parameters) : FldFin, SeqEnum[RngIntElt] -&gt; GrpMat</A></H5>
+
+<PRE>    CheckInput: BoolElt                 Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Let F be a finite field of cardinality q = 2<sup>2m + 1</sup> for some m &gt; 0, 
+and let <I>twists</I> be a sequence of n distinct integers in the range 
+[0 ... 2m]. The function returns an absolutely irreducible representation 
+of (Sz)(q) having dimension 4<sup>n</sup>, being a tensor product of twisted 
+powers of the copy returned by the <TT>Sz</TT> intrinsic, where the twists are 
+given by the input sequence.
+<P>
+If <TT>CheckInput</TT> is true, then it is verified that F and <I>twists</I> 
+satisfy the above requirements. Otherwise this is not checked.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8444">Example <TT>GrpASim_ex-1 (H70E13)</TT></A></H3>
+<P>
+We illustrate the basic facilities starting with a random conjugate
+of the standard version of the Suzuki group Sz(32). We first perform
+non-constructive recognition.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := Sz(32);
+&gt; G ^:= Random(Generic(G));
+&gt; flag, q := SuzukiRecognition(G);
+&gt; flag, q eq 32;
+true true
+</PRE>
+<P>
+The next step is to perform constructive recognition. The explicit 
+isomorphisms will be the values of <TT>iso</TT> and <TT>inv</TT>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; flag, iso, inv, g2slp, slp2g := RecognizeSz(G);
+&gt; flag;
+true
+&gt; iso, inv;
+Mapping from: GrpMat: G to MatrixGroup(4, GF(2^5)) given by a rule [no inverse]
+Mapping from: MatrixGroup(4, GF(2^5)) to GrpMat: G given by a rule [no inverse]
+</PRE>
+<P>
+We now experiment with membership testing.  We use Function to avoid Magma's 
+built-in membership testing  but in doing so, we may not obtain the shortest 
+possible SLP.
+<P>
+<P>
+<P>
+<PRE>
+&gt; w := Function(g2slp)(G.1);
+&gt; #w;
+284
+</PRE>
+<P>
+The algorithm is probabilistic, so different executions will most
+likely give different results.
+<P>
+<P>
+<P>
+<PRE>
+&gt; ww := Function(g2slp)(G.1);
+&gt; w eq ww;
+false
+</PRE>
+<P>
+Note that the resulting SLPs are from a word group that is not the word 
+group W corresponding to the defining generators of G. However, they 
+can be coerced into W.
+<P>
+<P>
+<P>
+<PRE>
+&gt; W := WordGroup(G);
+&gt; NumberOfGenerators(Parent(w)), NumberOfGenerators(W);
+7 3
+&gt; flag, ww := IsCoercible(W, w);
+&gt; flag;
+true
+&gt; slp2g(w) eq Evaluate(ww, UserGenerators(G));
+true
+</PRE>
+<P>
+So there are two ways to get the element back. An alternative is to use
+the intrinsic <TT>SzElementToWord</TT>, which is better if the elements 
+are not known to lie in the group.
+<P>
+<P>
+<P>
+<PRE>
+&gt; flag, ww := SzElementToWord(G, G.1);
+&gt; flag, slp2g(w) eq slp2g(ww);
+true true
+</PRE>
+<P>
+We take an element just outside the group.
+<P>
+<P>
+<P>
+<PRE>
+&gt; H := Sp(4, 32);
+&gt; flag, ww := SzElementToWord(G, H.1);
+&gt; flag;
+false
+&gt; // in this case we will not get an SLP
+&gt; ww := Function(g2slp)(H.1);
+&gt; ww;
+false
+&gt; SatisfiesSzPresentation(G);
+true
+</PRE>
+<HR>
+<H3><A NAME = "8445">Example <TT>GrpASim_ex-2 (H70E14)</TT></A></H3>
+<P>
+As a variation we apply the machinery to 2.Sz(8). We demonstrate
+constructive recognition and constructive membership testing.
+<P>
+<P>
+<P>
+<PRE>
+&gt; A := ATLASGroup("2Sz8");
+&gt; reps := MatRepKeys(A);
+&gt; G := MatrixGroup(reps[3]);
+&gt; Degree(G), CoefficientRing(G);
+40 Finite field of size 7
+&gt; flag, iso, inv, g2slp, slp2g := RecognizeSz(G);
+&gt; flag;
+true
+&gt; R := RandomProcess(G);
+&gt; g := Random(R);
+&gt; w := Function(g2slp)(g);
+&gt; slp2g(w) eq g;
+true
+</PRE>
+<HR>
+<H3><A NAME = "8446">Example <TT>GrpASim_ex-3 (H70E15)</TT></A></H3>
+<P>
+For the next example we consider a case where the dimension is large.
+We construct the Suzuki group in a 64-dimensional matrix representation
+and then take a random conjugate and also rewrite is over a smaller 
+field.
+<P>
+<P>
+<P>
+<PRE>
+&gt; F := GF(2, 9);
+&gt; twists := [0, 3, 6];
+&gt; G := SuzukiIrreducibleRepresentation(F, twists);
+&gt; Degree(G), IsAbsolutelyIrreducible(G);
+64 true
+&gt; G ^:= Random(Generic(G));
+&gt; flag, GG := IsOverSmallerField(G);
+&gt; flag, CoefficientRing(GG);
+true Finite field of size 2^3
+</PRE>
+<P>
+Non-constructive recognition is harder in this case and will give us the defining 
+field size.  Constructive recognition will decompose the tensor product.
+<P>
+<P>
+<P>
+<PRE>
+&gt; time SuzukiRecognition(GG);
+true 512
+Time: 2.330
+&gt; time flag, iso, inv, g2slp, slp2g := RecogniseSz(GG);
+Time: 4.800
+&gt; iso;
+Mapping from: GrpMat: GG to MatrixGroup(4, GF(2^9)) given by a rule [no inverse]
+</PRE>
+<P>
+Constructive membership is again easy
+<P>
+<P>
+<P>
+<PRE>
+&gt; R := RandomProcess(GG);
+&gt; g := Random(R);
+&gt; time w := Function(g2slp)(g);
+Time: 0.020
+&gt; // but SLP evaluation is harder in large dimensions
+&gt; time slp2g(w) eq g;
+true
+Time: 0.370
+&gt; time SatisfiesSzPresentation(GG);
+true
+Time: 10.930
+</PRE>
+<HR>
+<H3><A NAME = "8447">Example <TT>GrpASim_ex-4 (H70E16)</TT></A></H3>
+<P>
+The final example will be in cross characteristic. We build a representation
+of Sz(8) in cross characteristic.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := Sz(8);
+&gt; _, P := SuzukiPermutationRepresentation(G);
+&gt; // for example over GF(9)
+&gt; M := PermutationModule(P, GF(3, 2));
+&gt; factors := CompositionFactors(M);
+&gt; exists(m64){f : f in factors | Dimension(f) eq 64};
+true
+&gt; m64;
+GModule m64 of dimension 64 over GF(3^2)
+&gt; H := ActionGroup(m64);
+&gt; IsAbsolutelyIrreducible(H);
+true
+&gt; flag, G := IsOverSmallerField(H);
+&gt; Degree(G), CoefficientRing(G);
+64 Finite field of size 3
+</PRE>
+<P>
+We actually end up with a group in characteristic 3.
+<P>
+<P>
+<P>
+<PRE>
+&gt; time flag, iso, inv, g2slp, slp2g := RecogniseSz(G);
+Time: 3.490
+&gt; iso;
+Mapping from: GrpMat: G to MatrixGroup(4, GF(2^3)) given by a rule [no inverse]
+&gt; R := RandomProcess(G);
+&gt; g := Random(R);
+&gt; time w := Function(g2slp)(g);
+Time: 0.010
+&gt; time slp2g(w) eq g;
+true
+Time: 0.110
+&gt; time SatisfiesSzPresentation(G);
+true
+Time: 0.330
+</PRE>
+<HR>
+<H4><A NAME = "8448">Constructive Recognition of Small  Ree Groups</A></H4>
+
+
+
+<H5><A NAME = "8449">Introduction</A></H5>
+
+<P>
+<P>
+<P>
+This machinery provides functionality for constructive recognition and constructive 
+membership testing of the small Ree groups ((<sup>2</sup>)G<sub>2</sub>)(q) = (Ree)(q), with 
+q = 3<sup>2m + 1</sup> for some m &gt; 0.
+<P>
+The important intrinsics are <TT>RecogniseRee</TT> which performs constructive 
+recognition of G isomorphic to (Ree)(q), <TT>ReeElementToWord</TT> which returns 
+a <TT>GrpSLPElt</TT> for g in the generators of G, and <TT>IsReeGroup</TT> 
+which is a non-constructive test for isomorphism between G and (Ree)(q).
+<P>
+There are a few verbose flags used in the package.
+<DL COMPACT class='compact'>
+<DT></DT><DD><TT>ReeGeneral</TT>, for the general routines.
+<DT></DT><DD><TT>ReeStandard</TT>, for the routines related to the standard copy.
+<DT></DT><DD><TT>ReeConjugate</TT>, for the routines related to conjugation.
+<DT></DT><DD><TT>ReeTensor</TT>, for the routines related to tensor decomposition.
+<DT></DT><DD><TT>ReeMembership</TT>, for the routines related to membership testing.
+<DT></DT><DD><TT>ReeCrossChar</TT>, for the routines related to cross-characteristic representations.
+<DT></DT><DD><TT>ReeTrick</TT>, for the routines related to the stabiliser trick.
+<DT></DT><DD><TT>ReeInvolution</TT>, for the routines related to involution centralisers.
+<DT></DT><DD><TT>ReeSymSquare</TT>, for the routines related to symmetric square decomposition.
+<P>
+<P>
+<P>
+</DL>
+All the flags can be set to values up to 10, with higher values resulting in more output.
+
+
+<H5><A NAME = "8450">Recognition Functions</A></H5>
+
+
+
+<H5><A NAME = "8451">RecogniseRee(G : parameters) : GrpMat -&gt; BoolElt, Map, Map, Map, Map</A></H5>
+<H5>RecognizeRee(G : parameters) : GrpMat -&gt; BoolElt, Map, Map, Map, Map</H5>
+
+<PRE>    Verify: BoolElt                     Default: <TT>true</TT></PRE>
+
+<PRE>    FieldSize: RngIntElt                Default: </PRE>
+
+<PRE>    Optimise: BoolElt                   Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The matrix group G is absolutely irreducible and defined over minimal field.
+Constructively recognise G as a Ree group. If G is isomorphic to (Ree)(q) where q is the size of the defining field of G, then return:
+<DL COMPACT class='compact'>
+<DT></DT><DD>Isomorphism from G to (Ree)(q).
+<DT></DT><DD>Isomorphism from (Ree)(q) to G.
+<DT></DT><DD>Map from G to the word group of G.
+<DT></DT><DD>Map from the word group of G to G.
+<P>
+</DL>
+The isomorphisms are composed of maps that are defined by rules, so
+<TT>Function</TT> should be used on each component to avoid
+unnecessary built-in membership testing.
+<P>
+The word group is the <TT>GrpSLP</TT> which is the parent of the
+elements returned by <TT>ReeElementToWord</TT>. In general this is not
+the same as <TT>WordGroup(G)</TT>, but is created from it using
+<TT>AddRedundantGenerators</TT>.
+<P>
+If <TT>Verify</TT> is true, then it is checked that G is isomorphic to
+(Ree)(q), using <TT>IsReeGroup</TT>, otherwise this is not checked. In that case, <TT>FieldSize</TT> must be set to the correct value of q.
+<P>
+If <TT>Optimise</TT> is true, then the third map returns element in an
+optimised word group (using <TT>AddRedundantGenerators</TT>). Then each
+invocation of the map will be faster, but the initialisation will take
+longer.
+<P>
+The algorithm for constructive recognition is described in <A  HREF = "text733.htm#bib_baarnhielm14">[Baccent127aaccent127a14]</A>. 
+</BLOCKQUOTE>
+<H5><A NAME = "8452">ReeElementToWord(G, g) : GrpMat, GrpMatElt -&gt; BoolElt, GrpSLPElt</A></H5>
+<BLOCKQUOTE>
+If G has been constructively recognised as a Ree group,
+and if g is an element of G, then return <TT>true</TT> and a <TT>GrpSLPElt</TT> from the word group of G which evaluates to g, else return <TT>false</TT>.
+<P>
+This facilitates membership testing in G.
+</BLOCKQUOTE>
+<H5><A NAME = "8453">IsReeGroup(G) : GrpMat -&gt; BoolElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Determine (non-constructively) if G is isomorphic to (Ree)(q). The corresponding q is also returned.
+<P>
+If G is over a field of characteristic not 3 or has degree greater
+than 7, the Monte Carlo algorithm of <A  HREF = "text737.htm#GrpMatFF:LieType">LieType</A> is
+used. If G has degree 7 and is over a field of characteristic
+3, then a fast Las Vegas algorithm is used.
+</BLOCKQUOTE>
+<H5><A NAME = "8454">ReeIrreducibleRepresentation(F, twists : parameters) : FldFin, SeqEnum[RngIntElt] -&gt; GrpMat</A></H5>
+
+<PRE>    CheckInput: BoolElt                 Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+The finite field F must have size q = 3<sup>2m + 1</sup> for some m &gt; 0, and <I>twists</I> should be a sequence of n distinct pairs of integers (i, j) where i is 7 or 27 and j in the range [0 ... 2m].
+<P>
+Return an absolutely irreducible representation of (Ree)(q), a tensor product of twisted powers of the representation of dimension 7 or 27, where the twists are given by
+the input sequence.
+<P>
+If <TT>CheckInput</TT> is <TT>true</TT>, then it is verified that F and <I>twists</I> satisfy the above requirements. Otherwise this is not checked.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8455">Example <TT>GrpASim_ex-1 (H70E17)</TT></A></H3>
+<P>
+Our first example shows off the recognition machinery for the Ree group 
+defined over GF(27).
+<P>
+<P>
+<P>
+<PRE>
+&gt; SetSeed(1);
+&gt; F := GF(3, 3);
+&gt; G := ReeGroup(F);
+&gt; G ^:= Random(Generic(G));
+&gt; flag, q := ReeRecognition(G);
+&gt; flag, q eq #F;
+true true
+&gt; flag, iso, inv, g2slp, slp2g := RecognizeRee(G);
+&gt; flag;
+true
+&gt; iso, inv;
+Mapping from: GrpMat: G to MatrixGroup(7, GF(3^3)) given by a rule [no inverse]
+Mapping from: MatrixGroup(7, GF(3^3)) to GrpMat: G given by a rule [no inverse]
+</PRE>
+<P>
+We now experiment with membership testing. As the algorithm is probabilistic, 
+different executions will most likely give different results.
+<P>
+<P>
+<P>
+<PRE>
+&gt; w := Function(g2slp)(G.1);
+&gt; #w;
+342
+&gt; ww := Function(g2slp)(G.1);
+&gt; w eq ww;
+false
+</PRE>
+<P>
+The resulting SLPs are from another word group but can be coerced 
+into W.
+<P>
+<P>
+<P>
+<PRE>
+&gt; W := WordGroup(G);
+&gt; NumberOfGenerators(Parent(w)), NumberOfGenerators(W);
+7 3
+&gt; flag, ww := IsCoercible(W, w);
+&gt; flag;
+true
+&gt; // so there are two ways to get the element back
+&gt; slp2g(w) eq Evaluate(ww, UserGenerators(G));
+true
+</PRE>
+<P>
+If the elements are not known to lie in the group, a better alternative
+is to use the intrinsic <TT>ReeElementToWord</TT>. We take a generator of 
+&Omega;(7, F) as an example of an element not lying in G<sub>2</sub>(27).
+<P>
+<P>
+<P>
+<PRE>
+&gt; flag, ww := ReeElementToWord(G, G.1);
+&gt; flag, slp2g(w) eq slp2g(ww);
+true true
+&gt; H := Omega(7, #F);
+&gt; flag, ww := ReeElementToWord(G, H.1);
+&gt; flag;
+false
+&gt; ww := Function(g2slp)(H.1);
+&gt; ww;
+false
+</PRE>
+<HR>
+<H4><A NAME = "8456">Constructive Recognition of Large  Ree Groups</A></H4>
+
+
+
+<H5><A NAME = "8457">Introduction</A></H5>
+
+<P>
+<P>
+<P>
+This machinery provides functionality for constructive recognition and constructive 
+membership testing of the large Ree groups ((<sup>2</sup>)F<sub>4</sub>)(q) = (LargeRee)(q), with 
+q = 2<sup>2m + 1</sup> for some m &gt; 0.
+<P>
+The important intrinsics are <TT>RecogniseLargeRee</TT> which performs constructive 
+recognition of G isomorphic to (LargeRee)(q), <TT>LargeReeElementToWord</TT> which returns 
+a <TT>GrpSLPElt</TT> for g in the generators of G, and <TT>IsLargeReeGroup</TT> 
+which is a non-constructive test for isomorphism between G and (LargeRee)(q).
+<P>
+There are a few verbose flags used in the package.
+<DL COMPACT class='compact'>
+<DT></DT><DD><TT>LargeReeGeneral</TT>, for the general routines.
+<DT></DT><DD><TT>LargeReeStandard</TT>, for the routines related to the standard copy.
+<DT></DT><DD><TT>LargeReeConjugate</TT>, for the routines related to conjugation.
+<DT></DT><DD><TT>LargeReeRyba</TT>, for the routines related to membership testing.
+<DT></DT><DD><TT>LargeReeTrick</TT>, for the routines related to the stabiliser trick.
+<DT></DT><DD><TT>LargeReeInvolution</TT>, for the routines related to involution centralisers.
+<DT></DT><DD></DL>
+All the flags can be set to values up to 10, with higher values resulting in more output.
+
+
+<H5><A NAME = "8458">Recognition Functions</A></H5>
+
+
+
+<H5><A NAME = "8459">RecogniseLargeRee(G : parameters) : GrpMat -&gt; BoolElt, Map, Map, Map, Map</A></H5>
+<H5>RecognizeLargeRee(G : parameters) : GrpMat -&gt; BoolElt, Map, Map, Map, Map</H5>
+
+<PRE>    Verify: BoolElt                     Default: <TT>true</TT></PRE>
+
+<PRE>    FieldSize: RngIntElt                Default: </PRE>
+
+<PRE>    Optimise: BoolElt                   Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The matrix group G is absolutely irreducible and defined over minimal field.
+Constructively recognise G as a Large Ree group. If G is isomorphic to (LargeRee)(q) where q is the size of the defining field of G, then return:
+<DL COMPACT class='compact'>
+<DT></DT><DD>Isomorphism from G to (LargeRee)(q).
+<DT></DT><DD>Isomorphism from (LargeRee)(q) to G.
+<DT></DT><DD>Map from G to the word group of G.
+<DT></DT><DD>Map from the word group of G to G.
+<P>
+</DL>
+The isomorphisms are composed of maps that are defined by rules, so
+<TT>Function</TT> should be used on each component to avoid
+unnecessary built-in membership testing.
+<P>
+The word group is the <TT>GrpSLP</TT> which is the parent of the
+elements returned by <TT>LargeReeElementToWord</TT>. In general this is not
+the same as <TT>WordGroup(G)</TT>, but is created from it using
+<TT>AddRedundantGenerators</TT>.
+<P>
+If <TT>Verify</TT> is true, then it is checked that G is isomorphic to
+(LargeRee)(q), using <TT>IsLargeRee</TT>, otherwise this is not checked. In that case, <TT>FieldSize</TT> must be set to the correct value of q.
+<P>
+If <TT>Optimise</TT> is true, then the third map returns element in an
+optimised word group (using <TT>AddRedundantGenerators</TT>). Then each
+invocation of the map will be faster, but the initialisation will take
+longer.
+</BLOCKQUOTE>
+<H5><A NAME = "8460">LargeReeElementToWord(G, g) : GrpMat, GrpMatElt -&gt; BoolElt, GrpSLPElt</A></H5>
+<BLOCKQUOTE>
+If G has been constructively recognised as a Large Ree group,
+and if g is an element of G, then return <TT>true</TT> and a <TT>GrpSLPElt</TT> from the word group of G which evaluates to g, else return <TT>false</TT>.
+<P>
+This facilitates membership testing in G.
+</BLOCKQUOTE>
+<H5><A NAME = "8461">IsLargeReeGroup(G) : GrpMat -&gt; BoolElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Determine (non-constructively) if G is isomorphic to (LargeRee)(q). The corresponding q is also returned.
+<P>
+If G is over a field of characteristic not 2 or has degree greater
+than 26, the Monte Carlo algorithm of <A  HREF = "text737.htm#GrpMatFF:LieType">LieType</A> is
+used. If G has degree 26 and is over a field of characteristic
+2, then a fast Las Vegas algorithm is used.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text738.htm">[Next]</A><A  HREF = "text736.htm">[Prev]</A> <A  HREF = "text738.htm">[Right]</A> <A  HREF = "text736.htm">[Left]</A> <A  HREF = "text734.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

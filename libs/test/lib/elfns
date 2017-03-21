@@ -1,0 +1,140 @@
+/*
+Test Procedures which may be applied to any group(s) of correct type.
+For Elementary group functions (table 12.6).
+*/
+
+bOrder := function(G)
+    fG := FactoredOrder(G);
+    for i := 1 to NumberOfGenerators(G) do
+	if Order(G) mod Order(G.i) ne 0 then
+	    return true;
+	end if;
+    end for;
+    return Fpdt(fG) ne Order(G);
+end function;
+
+// Small groups
+dIndex := function(G, H)
+    return Index(G, H) ne #Transversal(G, H);
+end function;
+
+// Small-medium groups
+cIndex := function(G, H)
+    return Index(G, H) ne Order(G) div Order(H);
+end function;
+
+// Larger groups.  Depends on FactoredOrder primes being in sequence.
+eIndex := function(G, H)
+    fG := FactoredOrder(G);
+    fH := FactoredOrder(H);
+    fQ := Fdiv(fG, fH);
+    return Fpdt(fQ) ne Index(G, H);
+end function;
+
+cTranOrder := function(G, H)
+/*
+Test Transversal by adding up sizes of cosets.
+*/
+    N := 0;
+    trans, tf := Transversal(G, H);
+    err := false;
+    for t in trans do
+	ht := {h * t : h in H};
+	N +:= #ht;
+	if {tf(x): x in ht} ne {t} then
+	    return true;
+	end if;
+    end for;
+    return N ne Order(G);
+end function;
+
+cTranUnion := function(G, H)
+/*
+Ensure no element of G is not in a coset of some TRANSVERSAL element.
+*/
+    N := {x: x in G};
+    trans, tf := Transversal(G, H);
+    err := false;
+    for t in trans do
+	HT := {h * t : h in H};
+	N diff:= {h * t : h in H};
+	if {tf(ht): ht in HT} ne {t} then
+	    return true;
+	end if;
+    end for;
+    return N ne {};
+end function;
+
+cCoset := function(G, H)
+/*
+Check some conditions on cosact functions.
+*/
+    f, I, K := CosetAction(G, H);
+    if (I ne sub<Codomain(f) | {f(x) : x in Generators(G)}>) then
+	return true;
+    end if;
+    if (I ne CosetImage(G, H)) then
+	return true;
+    end if;
+    ct := CosetTable(G, H);
+    // q := [];
+    for e := 1 to NumberOfGenerators(G) do
+	for j := 1 to Degree(I) do
+	    w := G.e;
+	    if ct(j, w) ne j ^ f(G.e) then
+		return true;
+	    end if;
+	end for;
+	// Append(q, f(G.e));
+    end for;
+    // err = err or not IsSatisfied(q, Relations(G));
+    return false;
+end function;
+
+bEltSet := function(G, H)
+    return #ElementSet(G, H) ne Order(H);
+end function;
+
+cEltSet := function(G, H)
+    return #{x: x in H} ne Order(H);
+end function;
+
+cGens := function(G)
+    return G ne sub<G | Generators(G)>;
+end function;
+
+eGens := function(G)
+/*
+Is set minimal?
+*/
+    err := false;
+    if IsCyclic(G) and NumberOfGenerators(G) eq 1 then
+	return false;
+    end if;
+    for i := 1 to NumberOfGenerators(G) do
+	if sub<G | Generators(G) diff {G.i}> eq G then
+	    return true;
+	end if;
+    end for;
+    return err;
+end function;
+
+cNGens := function(G)
+    return #Generators(G) ne NumberOfGenerators(G);
+end function;
+
+bRanElt := function(G)
+    return not(Random(G) in G);
+end function;
+
+bRanWord := function(G)
+    return not(Random(G, 5, 25) in G);
+end function;
+
+bRelSat := function(G)
+    return not(IsSatisfied(Relations(G), Setseq(Generators(G))));
+end function;
+
+dCosKer := function(G,H)
+    return CosetKernel(G, H) ne Core(G, H);
+end function;

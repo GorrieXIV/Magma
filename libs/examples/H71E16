@@ -1,0 +1,26 @@
+"Source: Text/Group/GrpData.text";
+"Line: 2597";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Group/GrpData.text, line: 2597
+// Example: H71E16 ()
+print "Example: H71E16";
+ei := GetEchoInput();
+SetEchoInput(true);
+D:= IntegralMatrixGroupDatabase();
+#D;
+assert $1 eq 222;
+G:= Group(D, 8, 7); Construction(D, 8, 7);
+DQ:= RationalMatrixGroupDatabase();
+H:= Group(DQ, 8, 3); L:= Lattice(DQ, 8, 3);
+F:= PositiveDefiniteForm(G);
+for s in Sublattices(G) do
+  B:= BasisMatrix(s);
+  FF:= B * F * Transpose(B);
+  ok, T:= IsIsometric(LatticeWithGram(FF div GCD(Eltseq(FF))), L);
+  if ok then break; end if;
+end for;
+assert ok;
+T:= Matrix(Rationals(), T*B);
+[Matrix(Integers(), T*Matrix(G.i)*T^-1) in H : i in [1..Ngens(G)]];
+SetEchoInput(ei);

@@ -1,0 +1,65 @@
+/*
+Matrices over K[x] test.
+AKS, Nov 2014.
+*/
+
+procedure test_ring(K, n, d, count, FF)
+    q := #K;
+
+    P<x> := PolynomialRing(K);
+    R := P;
+    if FF then
+	F<x> := FunctionField(K);
+	R := F;
+    end if;
+
+    printf "FF: %o, Dim: %o, Deg: %o, Count: %o, K: %o\n", FF, n, d, count, K;
+
+    //printf "\n*******\nq: %o\n", pp(q);
+    ZEIT := Cputime();
+    //IndentPush();
+
+    rand := func<m, n, d | 
+	Matrix(n, [R!P![Random(K): j in [0 .. d]]: i in [1..m*n]])>;
+
+    time for i := 1 to count do
+
+	X := rand(n, n, d);
+
+	H, T := EchelonForm(X);
+	assert T*X eq H;
+	if not FF then
+	    det := Determinant(X);
+	    assert Normalize(det) eq Normalize(&*Diagonal(H));
+	end if;
+
+	X := rand(n + 1, n, d);
+	H, T := EchelonForm(X);
+	assert T*X eq H;
+
+	X := rand(n, n + 1, d);
+	H, T := EchelonForm(X);
+	assert T*X eq H;
+
+    end for;
+
+    //printf "Total field test time: %o\n", Cputime(ZEIT);
+end procedure;
+
+procedure test_both(K, n, d, count)
+    test_ring(K, n, d, count, false);
+    test_ring(K, n, d, count, true);
+end procedure;
+
+///////////////
+
+test_both(GF(2), 10, 10, 10);
+test_both(GF(2), 100, 2, 1);
+
+test_both(GF(3), 10, 10, 10);
+test_both(GF(3), 100, 1, 1);
+
+test_both(GF(23), 10, 10, 10);
+test_both(GF(23), 50, 1, 1);
+
+///////////////

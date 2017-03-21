@@ -1,0 +1,37 @@
+"Source: Text/Commut/Ideal.text";
+"Line: 2324";
+"Date: Tue Jun  7 22:27:15 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Commut/Ideal.text, line: 2324
+// Example: H112E15 ()
+print "Example: H112E15";
+ei := GetEchoInput();
+SetEchoInput(true);
+MatSquare := function(n)
+    P := PolynomialRing(RationalField(), n * n, "grevlex");
+    AssignNames(
+        ~P,
+        ["x" cat IntegerToString(i) cat IntegerToString(j): i, j in [1..n]]
+    );
+    M := MatrixRing(P, n);
+    X := M ! [P.((i - 1) * n + j): i, j in [1 .. n]];
+    Y := X^2;
+    return ideal<P | [Y[i][j]: i, j in [1 .. n]]>;
+end function;
+I := MatSquare(4);
+I;
+S<t> := HilbertSeries(I);
+S;
+H<d>, k := HilbertPolynomial(I);
+H, k;
+// Check that evaluations of H for d >= 5 match coefficients of S:
+L<u> := LaurentSeriesRing(IntegerRing());       
+L;
+L ! S;
+Evaluate(H, 5);
+assert $1 eq 5927;
+Evaluate(H, 6);
+assert $1 eq 14832;
+Evaluate(H, 19);
+assert $1 eq 10892530;
+SetEchoInput(ei);

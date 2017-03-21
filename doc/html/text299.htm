@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Classical Groups</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text300.htm">[Next]</A><A  HREF = "text298.htm">[Prev]</A> <A  HREF = "text300.htm">[Right]</A> <A  HREF = "text298.htm">[Left]</A> <A  HREF = "text291.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "2795">Classical Groups</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+Given the matrix F of a bilinear or sesquilinear form, the functions 
+described in the previous section can be used to construct classical
+groups which preserve F or preserve F up to a scalar.
+
+
+<P>
+Similar code can be used to construct the orthogonal group and the conformal 
+orthogonal group preserving a quadratic form or the unitary group
+and conformal unitary group preserving an hermitian form.
+<P>
+However, to construct a group strictly between the isometry group and the
+similarity group of a form some more work is needed.  The following example
+illustrates how this may be carried out for an hermitian form.
+<HR>
+<H3><A NAME = "2796">Example <TT>FldForms_fixaltform (H29E20)</TT></A></H3>
+For example the following code constructs the symplectic group G
+and the conformal symplectic group C preserving the non-degenerate 
+alternating form F.
+<P>
+<P>
+<PRE>
+&gt; F := Matrix(GF(5),4,4,[0,-1,-1,1, 1,0,1,-1, 1,-1,0,1, -1,1,-1,0]);
+&gt; V := SymplecticSpace(F);
+&gt; G := IsometryGroup(V);
+&gt; C := SimilarityGroup(V);
+&gt; f1, _ := IsIsomorphic(G,Sp(4,5));
+&gt; f2, _ := IsIsomorphic(C,CSp(4,5));
+&gt; f1, f2;
+true true
+</PRE>
+If only the symplectic group is needed this can be obtained on one line
+<P>
+<P>
+<PRE>
+&gt; G := IsometryGroup(SymplecticSpace(F));
+</PRE>
+<HR>
+<H3><A NAME = "2797">Example <TT>FldForms_fixhermform (H29E21)</TT></A></H3>
+This example constructs the group of unitary matrices of determinant 1 which
+preserve an hermitian form F.  The first step is to define a Magma function
+which takes the form as its only argument.  The base field and dimension of F 
+can be recovered from F itself and then an isometry varphi is constructed
+from the unitary space of the standard form to the unitary space of F. This
+is used to transform the generators of a standard copy of the special unitary 
+group to the group preserving the form.
+<P>
+<P>
+<PRE>
+&gt; specialUnitaryGrp := function(F)
+&gt;   K := BaseRing(F); n := NumberOfRows(F);
+&gt;   J, sigma := StandardHermitianForm(n,K);
+&gt;   V := UnitarySpace(F,sigma);
+&gt;   S := UnitarySpace(J,sigma);
+&gt;   flag, phi := IsIsometric(S,V);
+&gt;   assert flag;
+&gt;   T := Matrix(K,n,n,[phi(S.i) : i in [1..n]]);
+&gt;   H := SpecialUnitaryGroup(n,K);
+&gt;   return sub&lt;IsometryGroup(V) | [T^-1*H.i*T : i in [1..NumberOfGenerators(H)]]&gt;;
+&gt; end function;
+</PRE>
+<P>
+To complete the example we define an hermitian form F and then use the above
+function to find the special unitary group that preserves F.
+<P>
+<P>
+<P>
+<PRE>
+&gt; K&lt;z&gt; := GF(9);
+&gt; F := Matrix(K,4,4,[1,z^7,z^6,2, z^5,2,z^6,z^6,  z^2,z^2,1,z^3, 2,z^2,z,0]);
+&gt; G := specialUnitaryGrp(F);
+&gt; flag where flag is IsIsomorphic(G,SU(4,3));
+true
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text300.htm">[Next]</A><A  HREF = "text298.htm">[Prev]</A> <A  HREF = "text300.htm">[Right]</A> <A  HREF = "text298.htm">[Left]</A> <A  HREF = "text291.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

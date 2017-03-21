@@ -1,0 +1,36 @@
+"Source: Text/Lat/LatNF.text";
+"Line: 445";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Lat/LatNF.text, line: 445
+// Example: H31E2 ()
+print "Example: H31E2";
+ei := GetEchoInput();
+SetEchoInput(true);
+K := NumberField(Polynomial([5,0,1])); // Q(sqrt(-5))
+O := Integers(K);
+p2 := Factorization(2*O)[1][1]; // nonprincipal
+Js := [(2*O)/p2,2*O];
+v1 := Vector([K!1,0,0]);
+v2 := Vector([K!0,K.1,0]);
+L1 := NumberFieldLattice([v1,v2] : Ideals:=Js);
+assert not IsFree(L1); // not free
+assert not IsSimple(L1); // and not simple
+PseudoBasisMatrix(L1); // BasisMatrix does not work
+PseudoGramMatrix(L1);
+CoefficientIdeals(L1);
+Generators(L1); // three of these, though L1 has dimension 2
+assert #$1 eq 3 and Dimension(L1) eq 2;
+assert Degree(L1) eq 3 and Rank(L1) eq 2;
+assert BaseRing(L1) eq K;
+Discriminant(L1); // same as Volume
+Norm(K.1*L1);
+// now we take the direct sum of L1 with itself
+// which is free, and thus we can use other intrinsics
+D := DirectSum([L1,L1]);
+assert IsFree(D); // D itself is not in simple form
+Determinant(D); // works, as D is free
+S := SimpleLattice(D);
+BasisMatrix(S); // works, while for D would not
+assert #Generators(S) eq 4; // same as the basis vectors
+SetEchoInput(ei);

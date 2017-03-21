@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Elliptic Curves</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1610.htm">[Next]</A><A  HREF = "text1608.htm">[Prev]</A> <A  HREF = "text1610.htm">[Right]</A> <A  HREF = "text1608.htm">[Left]</A> <A  HREF = "text1592.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "17873">Elliptic Curves</A></H3>
+
+<P>
+<P>
+<P>
+Let E be an elliptic curve.  By the modularity theorem, which was
+recently proved by Breuil, Conrad, Diamond, Taylor, and Wiles there
+is a two-dimensional space M of modular symbols attached to E.
+Let N be the conductor of E; then M is obtained from <TT>ModularSymbols(N,2)</TT> by intersecting the kernels of T<sub>p</sub> - a<sub>p</sub>(E) for
+sufficiently many p.
+<P>
+<P>
+<P>
+<B>Warning:</B> 
+The computation of M can already be very resource intensive for
+elliptic curves for which <TT>Conductor(E)</TT> is on the order of 5000.  
+For example, the seemingly harmless expression <TT>ModularSymbols(EllipticCurve([0,6]))</TT> would bring my 
+computer to its knees.
+
+
+<H5><A NAME = "17874">ModularSymbols(E) : CrvEll -&gt; ModSym</A></H5>
+<H5>ModularSymbols(E, sign) : CrvEll, RngIntElt -&gt; ModSym</H5>
+<BLOCKQUOTE>
+The space M of modular symbols associated to the elliptic curve E.
+</BLOCKQUOTE>
+<H5><A NAME = "17875">EllipticCurve(M) : ModSym -&gt; CrvEll</A></H5>
+
+<PRE>    Database: BoolElt                   Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+An elliptic curve over the rational numbers that lies in the 
+isogeny class of elliptic curves associated to M.
+<P>
+By default, the Cremona database is used.  To compute the curve
+from scratch, set the optional parameter <TT>Database</TT> to <TT>false</TT>.
+(Note however that this is not optimized for large level.)
+</BLOCKQUOTE>
+<H5><A NAME = "17876">pAdicLSeries(E, p) : CrvEll, RngIntElt -&gt; RngSerPowElt</A></H5>
+
+<PRE>    CoefficientPrecision: RngIntElt     Default: 3</PRE>
+
+<PRE>    SeriesPrecision: RngIntElt          Default: 5</PRE>
+
+<PRE>    QuadraticTwist: RngIntElt           Default: 1</PRE>
+
+<PRE>    ProperScaling: BoolElt              Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given an elliptic curve over the rationals and a prime of multiplicative
+or good ordinary reduction, compute the p-adic L-series.
+For technical reasons involving caching, the curve is required to be
+given by a (global) minimal model.
+<P>
+This computation can be rather time-consuming for large conductors
+and/or primes.
+The algorithm needs to compute the modular symbols (taking N<sup>3</sup> time or so),
+and typically needs to evaluate 2(p - 1)p<sup>n</sup> of them, where n is the
+desired coefficient precision. Also, the desired coefficient precision
+does not always apply to every term in the series.
+<P>
+The <TT>QuadraticTwist</TT> vararg computes the p-adic L-series for a twist
+by a fundamental discriminant D. This requires |D| as many modular symbols
+to be computed, but in most cases is much faster than computing the modular
+symbols for the twisted curve. The twisting discriminant is required to be
+coprime to the conductor of the curve.
+<P>
+The <TT>ProperScaling</TT> vararg indicates whether to ensure that the scaling
+of the p-adic L-series is correct. For many applications, only the
+valuation of the coefficients is needed. The computation of the proper scaling
+induces a bit of extra overhead, but is still typically faster than computing
+the modular symbols for examples of interest.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17877">Example <TT>ModSym_BSD389A (H139E27)</TT></A></H3>
+We use the elliptic curve functions to numerically compute the Birch
+and Swinnerton-Dyer conjectural order of the Shafarevich-Tate group 
+of the elliptic curve <B>389A</B>, which is the curve
+of rank 2 with smallest conductor.  
+The Birch and Swinnerton-Dyer conjecture asserts that
+(L<sup>(r)</sup>(E, 1) /r!)= 
+(&prod;c<sub>p</sub>  .(Sha) .(Reg)
+/|E(Q)<sub>tor</sub>|<sup>2</sup>),
+where r is the order of vanishing of L(E, s) at s=1.
+<P>
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve(CremonaDatabase(),"389A");
+&gt; M := ModularSymbols(E);
+&gt; M;
+Modular symbols space of level 389, weight 2, and dimension 2
+&gt; LRatio(M,1);  
+0
+</PRE>
+Next we compute the analytic rank and the leading
+coefficient of the L-series at s=1.  (If your 
+computer is very slow, use a number smaller than 300 below.)
+<P>
+<P>
+<PRE>
+&gt; L1, r := LSeriesLeadingCoefficient(M,1,300);
+&gt; L1;
+0.7593165002922467906576260031        
+&gt; r;        // The analytic rank is 2.
+2
+</PRE>
+Finally we check that the rank conjecture is true in this case, and
+compute the conjectural order of the Shafarevich-Tate group.
+<P>
+<P>
+<PRE>
+&gt; Rank(E);  // The algebraic rank is 2.
+2
+&gt; Omega := Periods(M,300)[2][1] * 2; Omega;
+4.980435433609741580582713757
+&gt; Reg := Regulator(E); Reg;
+0.1524601779431437875
+&gt; #TorsionSubgroup(E);
+1
+&gt; TamagawaNumber(E,389);
+1
+&gt; TamagawaNumber(M,389);        // entirely different algorithm
+1
+&gt; Sha := L1/(Omega*Reg); Sha;
+0.9999979295234896211
+&gt; f := pAdicLSeries(E,3); _&lt;T&gt; := Parent(f); f;
+O(3^11) + O(3^3)*T - (1 + O(3^3))*T^2 + (2 + O(3^2))*T^3
+ - (2 + O(3^2))*T^4 + (1 + O(3^2))*T^5 + O(T^6)
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1610.htm">[Next]</A><A  HREF = "text1608.htm">[Prev]</A> <A  HREF = "text1610.htm">[Right]</A> <A  HREF = "text1608.htm">[Left]</A> <A  HREF = "text1592.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

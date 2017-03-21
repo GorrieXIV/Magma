@@ -1,0 +1,65 @@
+// SetVerbose("WGraph",2);
+
+/*
+    GetCells
+    InduceWG
+    InduceWGtable
+    IsWGsymmetric
+    MakeDirected
+    Mij2EltRootTable
+    Name2Mij
+    Partition2WGtable
+    TestHeckeRep
+    TestWG
+    WGelement2WGtable
+    WGidealgens2WGtable
+    WGtable2WG
+    WriteWG
+*/
+
+wtable, W :=Partition2WGtable([4,4,3,1]);
+wg:=WGtable2WG(wtable);
+TestWG(W,wg);
+
+
+b5:=[1,4,1,2,3,1,2,2,3,1,2,2,2,3,1];
+b5mat := SymmetricMatrix(b5);
+W := CoxeterGroup(GrpFPCox, b5mat );
+// eltroots:=Mij2EltRootTable(b5);
+table, _ :=WGelement2WGtable(W![5,4,3,2,1,2,3,4,5],{});
+wg:=WGtable2WG(table);
+TestWG(W,wg);
+
+
+e8:=[1,3,1,2,3,1,2,3,2,1,2,2,2,3,1,2,2,3,2,2,1,2,2,2,2,2,3,1,2,2,2,2,2,2,3,1];
+e8mat := SymmetricMatrix(e8);
+// era:=Mij2EltRootTable(e8);
+W := CoxeterGroup(GrpFPCox, e8mat );
+drs := Transversal(W,{1..7});
+// drs:=DReps(W,{1..7});
+tab,_:=WGelement2WGtable(drs[201],{1..7});
+wg:=WGtable2WG(tab);
+TestWG(W,wg);
+cells := GetCells(wg);
+flag, gr := IsWGsymmetric(wg);
+dgr := MakeDirected(wg);
+
+e6:=[1,3,1,2,3,1,2,3,2,1,2,2,2,3,1,2,2,3,2,2,1];
+E6 := CoxeterGroup(GrpFPCox, SymmetricMatrix(e6) );
+specht32, W := Partition2WGtable([3,2]);
+assert ReflectionTable(E6) eq Mij2EltRootTable(e6);
+table := InduceWGtable([1,2,4,5],specht32, E6);
+wg:=WGtable2WG(table);
+TestWG(E6,wg);
+
+mats := WG2HeckeRep(E6,wg);
+TestHeckeRep(E6,mats);
+
+assert SymmetricMatrix(Name2Mij("E6")) eq CoxeterMatrix("E6");
+
+J:={1,3,5};
+drs := Transversal(E6,J);
+ttt:=WGidealgens2WGtable([drs[1398],drs[156],drs[99]],{1,3,5});
+nwg:=WGtable2WG(ttt);
+TestWG(E6,nwg);
+

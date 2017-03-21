@@ -1,0 +1,24 @@
+// Example: I96c8e3
+print "Example: I96c8e3";
+previous_setting := GetEchoInput();
+SetEchoInput(true);
+quadrature := function( f, a, b : Al := "Trapezoid", n := 10)
+    // Check that parameter values are legal
+    error if Category(n) ne RngIntElt or n lt 1,
+        "Error: n not a positive integer";
+    error if Category(Al) ne MonStgElt
+      or Al notin {"Trapezoid", "Simpson"},
+        "Error: Al must be \"Trapezoid\" or \"Simpson\"";
+
+    R := RealField();
+    h := (b - a) / n;
+    if Al eq "Trapezoid" then
+        return h/2 * ( f(a) + f(b) + 
+          2* &+[ R | f(a + k*h): k in [1..(n-1)]] );
+    else // "Simpson" method
+        return h/3 * ( f(a) + f(b) +
+          4 * &+[ R | f(a + k*h): k in [1..(n-1) by 2]] +
+          2 * &+[ R | f(a + k*h): k in [2..(n-2) by 2]] );
+    end if;
+end function;
+SetEchoInput(previous_setting);

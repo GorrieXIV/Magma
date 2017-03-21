@@ -1,0 +1,63 @@
+
+// ThetaSeriesModularForm
+// SRD, Dec 2011
+
+/* [for internal use]
+import "../../package/Lattice/Lat/theta_modfrm.m" : 
+        InternalThetaSeriesModularForm;
+*/
+
+SetVerbose("Theta", 1);
+
+LD := LatticeDatabase();
+
+for d in [3, 4, 5, 6, 8, 9, 10, 12] do
+
+    for i := 1 to NumberOfLattices(LD, d) do
+
+        Ldb := Lattice(LD, d, i);
+        T := Ldb`ThetaSeries;
+
+        if not IsIntegral(Ldb) then
+           continue;
+        end if;
+
+        // Don't cheat in the test: L is not allowed 
+        // to have its theta series written down
+        G := GramMatrix(Ldb);
+        delete Ldb;
+        L := LatticeWithGram(G);
+        assert not assigned L`ThetaSeries; 
+
+        dim := Dimension(ThetaSeriesModularFormSpace(L));
+        if dim gt 20 then
+           continue;
+        end if;
+
+        printf "\ni = %o, d = %o, D = %o (dimension %o)\n\n", 
+                i, d, Determinant(L), dim;
+
+        f := ThetaSeriesModularForm(L);
+        /* [for internal use]
+        if IsEven(L) then
+           f := InternalThetaSeriesModularForm(L : safety:=6);
+        end if;
+        */
+
+        if IsOdd(L) then
+           b, g := IsCoercible(Parent(f), T);
+           assert b;
+           assert f eq g;
+        else
+           Tp := AbsolutePrecision(T);
+           T2 := &+ [Coefficient(T,i)*x^(i div 2) : i in [0..Tp-1] | IsEven(i)] 
+                     + O(x^Floor(Tp/2)) where x is Parent(T).1;
+           b, g := IsCoercible(Parent(f), T2);
+           assert b; // coercion is allowed only when uniquely determined in the space
+           assert f eq g;
+        end if;
+
+    end for;
+
+end for;
+

@@ -1,0 +1,39 @@
+"Source: Text/Ring/RngSlope.text";
+"Line: 511";
+"Date: Tue Jun  7 22:27:15 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Ring/RngSlope.text, line: 511
+// Example: H55E2 ()
+print "Example: H55E2";
+ei := GetEchoInput();
+SetEchoInput(true);
+S<u> := SnuRing (pAdicField (5, 15), 1); // slope 1 over 5-adics
+f := 5*u + u^2 + 2*u^3 + u^5 + O(u^10);
+g := u^4/25 + u^6 + u^8 + O(u^10);
+q := g/f;
+assert IsDistinguished (q);
+U, P := WeierstrassPreparation (q); // loses a lot of precision
+U;
+P;
+q, r := Quotrem (g, f); assert r eq 0; assert q eq g/f;
+q; // same as above, though is O(u^10) not O(u^9)
+q, r := Quotrem (f, g); // this is valid, as the valuations are equal
+q, r; assert f eq g*q + r;
+G, H, A, B := ExtendedGcd (f, g); assert H eq 0;
+G;
+assert A*f + B*g eq G; 
+f1 := 5*u^2 + 5^4;     // example from the text
+g1 := 5^2*u;           // where ExtendedGcd fails
+G, H := ExtendedGcd (f1, g1); assert H ne 0;
+H;
+GaussValuation (H); GaussValuation (g1);
+Su<z> := SuRing (S);
+F := Su!f; assert GaussValuation(F) eq 2;
+G := Su!g; assert GaussValuation(G) eq 2;
+Q, R := Quotrem (F, G); assert R eq 0;
+g, _, A, B, C, D := ExtendedGcd (F, G);
+g; assert g eq CanonicalElement (Su, 2);
+assert A*F + B*G eq g;
+assert C*F + D*G eq 0;
+assert A*D - B*C eq 1;
+SetEchoInput(ei);

@@ -1,0 +1,403 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Decoding</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1846.htm">[Next]</A><A  HREF = "text1844.htm">[Prev]</A> <A  HREF = "text1846.htm">[Right]</A> <A  HREF = "text1844.htm">[Left]</A> <A  HREF = "text1831.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "20613">Decoding</A></H3>
+
+<P>
+<P>
+Magma supplies functions for decoding vectors from the ambient space of a
+linear code C.
+The functions in this section only apply to codes over finite fields.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1845.htm#20614">Syndrome Decoding</A>
+<LI> <A  HREF = "text1845.htm#20618">Euclidean Decoding</A>
+<LI> <A  HREF = "text1845.htm#20622">Permutation Decoding</A>
+</UL>
+<H4><A NAME = "20614">Syndrome Decoding</A></H4>
+
+<P>
+<P>
+<P>
+While syndrome decoding applies to any linear code it is restricted
+to codes having small codimension since it needs to calculate the
+coset leaders.
+
+
+<H5><A NAME = "20615">SyndromeDecoding(C, v) : CodeLinFld, ModTupRngElt -&gt; BoolElt, ModTupRngElt</A></H5>
+<BLOCKQUOTE>
+Given a linear code C and a vector v from the ambient
+space V of C, attempt to decode v with respect to C.
+<P>
+If the decoding algorithm succeeds in computing
+a vector v' as the decoded version of v,
+then the function returns <TT>true</TT> and v'.
+If the decoding algorithm does not succeed in decoding v,
+then the function returns <TT>false</TT> and the zero vector.
+</BLOCKQUOTE>
+<H5><A NAME = "20616">SyndromeDecoding(C, Q) : CodeLinFld, [ ModTupRngElt ] -&gt; [ BoolElt ], [ ModTupRngElt ]</A></H5>
+<BLOCKQUOTE>
+Given a linear code C and a sequence Q of vectors from the ambient
+space V of C, attempt to decode the vectors of Q with respect to C.
+This function is similar to the function <TT>SyndromeDecoding(C, v)</TT> 
+except that 
+rather than decoding a single vector, it decodes a sequence of vectors 
+and returns a sequence of booleans and a sequence of decoded vectors
+corresponding to the given sequence. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20617">Example <TT>CodeFld_Syn_Decode (H158E43)</TT></A></H3>
+We create a code C and a vector v of C and then perturb v to a new
+vector w.  We then decode w to find v again.
+<P>
+<P>
+<PRE>
+&gt; C := GolayCode(GF(2), false);
+&gt; v := C ! [1,1,1,1,0,0,0,1,0,0,1,1,0,0,0,1,0,0,0,1,1,1,1];
+&gt; w := v;
+&gt; w[5] := 1 - w[5];
+&gt; w[20] := 1 - w[20];
+&gt; v;
+(1 1 1 1 0 0 0 1 0 0 1 1 0 0 0 1 0 0 0 1 1 1 1)
+&gt; w;
+(1 1 1 1 1 0 0 1 0 0 1 1 0 0 0 1 0 0 0 0 1 1 1)
+&gt; v - w;
+(0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0)
+&gt; b, d := SyndromeDecoding(C, w);
+&gt; b;
+true
+&gt; d;
+(1 1 1 1 0 0 0 1 0 0 1 1 0 0 0 1 0 0 0 1 1 1 1)
+&gt; d eq v;
+true
+&gt; SyndromeDecoding(C, [w]);
+[ true ]
+[
+    (1 1 1 1 0 0 0 1 0 0 1 1 0 0 0 1 0 0 0 1 1 1 1)
+]
+</PRE>
+<HR>
+<H4><A NAME = "20618">Euclidean Decoding</A></H4>
+
+<P>
+<P>
+<P>
+The Euclidean decoding algorithm applies to alternant codes which 
+include BCH, Goppa, and Reed--Solomon codes.  While the Euclidean 
+algorithm cannot correct as many errors as can the syndrome algorithm,
+in general it is much faster and so can be applied to much larger codes.
+This is because the syndrome algorithm needs to determine the coset 
+leaders of the code and so become inapplicable as soon as the 
+codimension of the code is moderately large.
+
+
+<H5><A NAME = "20619">EuclideanDecoding(C, v) : CodeLinFld, ModTupRngElt -&gt; BoolElt, ModTupRngElt</A></H5>
+<BLOCKQUOTE>
+Given a linear alternant code C and a vector v from the ambient
+space V of C, attempt to decode v with respect to C.
+<P>
+If the decoding algorithm succeeds in computing
+a vector v' as the decoded version of v,
+then the function returns <TT>true</TT> and v'.
+It may even happen that v' is not in C because
+there are too many errors in v to correct.
+If the decoding algorithm does not succeed in decoding v,
+then the function returns <TT>false</TT> and the zero vector.
+</BLOCKQUOTE>
+<H5><A NAME = "20620">EuclideanDecoding(C, Q) : CodeLinFld, [ ModTupRngElt ] -&gt; [ BoolElt ], [ ModTupRngElt ]</A></H5>
+<BLOCKQUOTE>
+Given a linear alternant code C and a sequence Q of vectors from the ambient
+space V of C, attempt to decode the vectors of Q with respect to C.
+This function is similar to the function <TT>EuclideanDecoding(C, v)</TT> 
+except that 
+rather than decoding a single vector, it decodes a sequence of vectors 
+and returns a sequence of booleans and a sequence of decoded vectors
+corresponding to the given sequence.  
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20621">Example <TT>CodeFld_Eucl_Decode (H158E44)</TT></A></H3>
+We create a Reed-Solomon code C over GF(2<sup>8</sup>) with designated minimum
+distance 12.  
+<P>
+<P>
+<P>
+<PRE>
+&gt; K := GF(2^8);
+&gt; C := ReedSolomonCode(K, 12);
+&gt; C:Minimal;
+[255, 244, 12] "BCH code (d = 12, b = 1)" Linear Code over GF(2^8)
+</PRE>
+So our code has length 255 and dimension 244. With minimum
+distance 12 it will correct 5 or fewer errors. We demonstrate
+this by introducing 5 errors into a random codeword c.
+<P>
+<P>
+<P>
+<PRE>
+&gt; c := Random(C);
+&gt; V := VectorSpace(C);
+&gt; e := V![ 0 :i in [1..255]];
+&gt; for i := 1 to 5 do
+&gt; j := Random(1, 255);
+&gt; k := Random(K);
+&gt; e[j] := k;
+&gt; end for;
+&gt; d := c + e;
+&gt; _, cc := EuclideanDecoding(C, d);
+&gt; c eq cc;
+true;
+</PRE>
+<P>
+If we introduce 6 or more errors the decoding will usually fail:-
+<P>
+<P>
+<P>
+<PRE>
+&gt; e := V![ 0 :i in [1..255]];
+&gt; for i := 1 to 6 do
+&gt; j := Random(1, 255);
+&gt; k := Random(K);
+&gt; e[j] := k;
+&gt; end for;
+&gt; d := c + e;
+&gt; _, cc := EuclideanDecoding(C, d);
+&gt; c eq cc;
+false
+</PRE>
+<HR>
+<H4><A NAME = "20622">Permutation Decoding</A></H4>
+
+
+
+<H5><A NAME = "20623">IsPermutationDecodeSet(C, I, S, s) : CodeLinFld, [RngIntElt], [AlgMatElt], RngIntElt -&gt; BoolElt</A></H5>
+<H5>IsPermutationDecodeSet(C, I, S, s) : CodeLinFld, [RngIntElt], [GrpPermElt], RngIntElt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Given
+<DL COMPACT class='compact'>
+<DT>--</DT><DD>an [n, k] linear code C over a finite field K;
+<DT>--</DT><DD>an information set I &sube;{1, ..., n } for C
+            as a sequence of coordinate positions;
+<DT>--</DT><DD>a sequence S of elements in the group of monomial matrices of 
+             degree n over K, OR if C is a binary code, a sequence of 
+             elements in the symmetric group Sym(n) acting on the set 
+             {1, ..., n}. In either case S must be an s-PD-set for 
+             C with respect to I; 
+<DT>--</DT><DD>and an integer s &isin;{1, ..., t}, where t is the error-correcting
+            capability of C;
+<P>
+this intrinsic returns <TT>true</TT> if and only if S is an s-PD-set for C with respect 
+to the information set I. 
+<P>
+</DL>
+Depending on the length of the code C, its dimension k, and the integer s, this 
+function could take some time to compute whether S is an s-PD-set for C with 
+respect to I. Specifically, if the function returns <TT>true</TT>, it is necessary to check
+&sum;<sub>i=1</sub><sup>s</sup> ((k)choose(i)) .((n - k)choose(s - i)) s-sets.
+<P>
+The verbose flag <TT>IsPDSetFlag</TT> is set to level 0 by default.  If it is set to 
+level 1, the total time used to check the condition is shown.  Moreover, the reason 
+the function returns <TT>false</TT> is also shown, that is, whether I is not an 
+information set, S is not a subset of the monomial automorphism group of C or
+S is not an s-PD-set. If it is set to level 2, the percentage of the computation
+process performed is also printed.
+</BLOCKQUOTE>
+<H5><A NAME = "20624">PermutationDecode(C, I, S, s, u) : CodeLinFld, [RngIntElt], [AlgMatElt], RngIntElt, ModTupFldElt -&gt; BoolElt, ModTupFldElt</A></H5>
+<H5>PermutationDecode(C, I, S, s, u) : CodeLinFld, [RngIntElt], [GrpPermElt], RngIntElt, ModTupFldElt -&gt; BoolElt, ModTupFldElt</H5>
+<BLOCKQUOTE>
+Given 
+<DL COMPACT class='compact'>
+<DT>--</DT><DD>an [n, k] linear code C over a finite field K; 
+<DT>--</DT><DD>an information set I &sube;{1, ..., n } for C as 
+             a sequence of coordinate positions;
+<DT>--</DT><DD>a sequence S of elements in the group of monomial matrices of 
+             degree n over K, OR if C is a binary code, a sequence of 
+             elements in the symmetric group Sym(n) acting on the set 
+             {1, ..., n}. In either case S must be an s-PD-set for 
+             C with respect to I; 
+<DT>--</DT><DD>an integer s &isin;{1, ..., t}, where t is the 
+             error-correcting capability of C;  
+<DT>--</DT><DD>and a vector u from the ambient space V of C, 
+<P>
+the intrinsic attempts to decode u with respect to C.  If the decoding algorithm 
+succeeds in computing a vector u'&isin;C as the decoded version of u &isin;V, then 
+the function returns <TT>true</TT> and the codeword u'.  If the decoding algorithm does 
+not succeed in decoding u, then the function returns <TT>false</TT> and the zero vector 
+in V. 
+<P>
+</DL>
+The decoding algorithm works by moving all errors in the received vector u=c + e,
+where c &isin;C and e &isin;V is the error vector with at most t errors, out of 
+the information positions, that is, moving the nonzero coordinates of e out of 
+the information set I for C, by using an automorphism of C.
+Note that the function does not check any of the conditions that I is 
+an information set for C, S is an s-PD-set for C with respect to I, 
+or s&le;t.
+</BLOCKQUOTE>
+<H5><A NAME = "20625">PermutationDecode(C, I, S, s, Q) : CodeLinFld, [RngIntElt], [AlgMatElt], RngIntElt, [ModTupFldElt] -&gt; [BoolElt], [ModTupFldElt]</A></H5>
+<H5>PermutationDecode(C, I, S, s, Q) : CodeLinFld, [RngIntElt], [GrpPermElt], RngIntElt, [ModTupFldElt] -&gt; [BoolElt], [ModTupFldElt]</H5>
+<BLOCKQUOTE>
+Given 
+<DL COMPACT class='compact'>
+<DT>--</DT><DD>an [n, k] linear code C over a finite field K; 
+<DT>--</DT><DD>an information set I &sube;{1, ..., n } for C as 
+             a sequence of coordinate positions;
+<DT>--</DT><DD>a sequence S of elements in the group of monomial matrices of 
+             degree n over K, OR if C is a binary code, a sequence of 
+             elements in the symmetric group Sym(n) acting on the set 
+             {1, ..., n}. In either case S must be an s-PD-set for 
+             C with respect to I; 
+<DT>--</DT><DD>an integer s &isin;{1, ..., t}, where t is the 
+             error-correcting capability of C;  
+<DT>--</DT><DD>a sequence Q of vectors from the ambient space V of C, 
+<P>
+the intrinsic attempts to decode the vectors of Q with respect to C.
+This function is similar to the function <TT>PermutationDecode(C, I, S, s, u)</TT> 
+except that rather than decoding a single vector, it decodes a sequence of 
+vectors and returns a sequence of booleans and a sequence of decoded vectors 
+corresponding to the given sequence. The algorithm used is as for the function 
+<TT>PermutationDecode(C, I, S, s, u)</TT>.</DL>
+</BLOCKQUOTE>
+<H5><A NAME = "20626">PDSetSimplexCode(K, m) : FldFin, RngIntElt -&gt; SeqEnum, SeqEnum, SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a finite field K of cardinality q, and a positive integer m, 
+the intrinsic constructs the [n=(q<sup>m</sup> - 1)/(q - 1), m, q<sup>m - 1</sup>] linear 
+simplex code C over K, as <TT>Dual(HammingCode(K, m))</TT>, 
+and then searches for an s-PD-set for C.  The function returns an 
+information set I for C together with a subset S of the monomial 
+automorphism group of C such that S is an s-PD-set for C with 
+respect to I, where s= &lfloor;((q<sup>m</sup> - 1)/(m(q - 1)))  &rfloor; - 1.
+<P>
+The information set I is returned as a sequence of m integers,
+giving the coordinate positions that correspond to the information set for C.
+The set S is also returned as a sequence, which contains the s + 1 elements in the group
+of monomial matrices of degree n over K described in <A  HREF = "text1830.htm#bib_Key">[FKM12]</A>.
+When K is GF(2), the function also returns the elements of S represented as elements
+in the symmetric group Sym(n) of permutations on the set {1, ..., n }.
+</BLOCKQUOTE>
+<H5><A NAME = "20627">PDSetHadamardCode(m) : RngIntElt -&gt; SeqEnum, SeqEnum, SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a positive integer m, the intrinsic constructs the 
+[2<sup>m</sup>, m + 1, 2<sup>m - 1</sup>] binary linear Hadamard code C, as
+<TT>Dual(ExtendCode(HammingCode(GF(2), m)))</TT>, and then searches for an
+s-PD-set for C.  The function returns an information set 
+I &sube;{1, ..., 2<sup>m</sup> } for C together with a subset S of the 
+permutation automorphism group of C such that S is an s-PD-set for 
+C with respect to I, where 
+s=  &lfloor;(2<sup>m</sup>/(m + 1))  &rfloor; - 1.
+<P>
+The information set I is returned as a sequence of m + 1 integers,
+giving the coordinate positions that correspond to the information set for
+C. The set S is also returned as a sequence, which contains the s + 1
+elements in the group of permutation matrices of degree 2<sup>m</sup> over GF(2)
+described in <A  HREF = "text1830.htm#bib_BV2015a">[BV16]</A>.  The function also returns the elements of S
+represented as elements in the symmetric group Sym(2<sup>m</sup>) of permutations
+on the set {1, ..., 2<sup>m</sup> }.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20628">Example <TT>CodeFld_spain-decode-1 (H158E45)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; C := Dual(ExtendCode(HammingCode(GF(2), 5)));
+&gt; C;
+[32, 6, 16] Linear Code over GF(2)
+Generator matrix:
+[1 0 0 0 0 0 1 1 1 0 0 1 0 0 0 1 0 1 0 1 1 1 1 0 1 1 0 1 0 0 1 1]
+[0 1 0 0 0 0 1 0 0 1 0 1 1 0 0 1 1 1 1 1 0 0 0 1 1 0 1 1 1 0 1 0]
+[0 0 1 0 0 0 1 0 1 0 1 1 1 1 0 1 1 0 1 0 0 1 1 0 0 0 0 0 1 1 1 1]
+[0 0 0 1 0 0 1 0 1 1 0 0 1 1 1 1 1 0 0 0 1 1 0 1 1 1 0 1 0 1 0 0]
+[0 0 0 0 1 0 0 1 0 1 1 0 0 1 1 1 1 1 0 0 0 1 1 0 1 1 1 0 1 0 1 0]
+[0 0 0 0 0 1 1 1 0 0 1 0 0 0 1 0 1 0 1 1 1 1 0 1 1 0 1 0 0 1 1 1]
+
+&gt; I, SMAut, SPAut := PDSetHadamardCode(5);
+&gt; I in AllInformationSets(C);
+true
+&gt; s := #SMAut-1;  s;
+4
+&gt; [ LinearCode(GeneratorMatrix(C)*SMAut[i]) eq C : i in [1..s+1] ];
+[true, true, true, true, true];
+&gt; [ LinearCode(GeneratorMatrix(C)^SPAut[i]) eq C : i in [1..s+1] ];
+[true, true, true, true, true];
+&gt; IsPermutationDecodeSet(C, I, SMAut, s);
+true
+&gt; IsPermutationDecodeSet(C, I, SPAut, s);
+true
+
+&gt; c := C ! [1^^32];
+&gt; c in C;
+true
+&gt; u := c;
+&gt; u[1] := c[1] + 1;
+&gt; u[2] := c[2] + 1;
+&gt; u[4] := c[4] + 1;
+&gt; u[32] := c[32] + 1;
+&gt; u in C;
+false
+&gt; isDecoded, uDecoded := PermutationDecode(C, I, SMAut, s, u);
+&gt; isDecoded;
+true
+&gt; uDecoded eq c;
+true
+&gt; isDecoded, uDecoded := PermutationDecode(C, I, SPAut, s, u);
+&gt; isDecoded;
+true
+&gt; uDecoded eq c;
+true
+</PRE>
+<HR>
+<H3><A NAME = "20629">Example <TT>CodeFld_spain-decode-2 (H158E46)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; K&lt;a&gt; := GF(4);
+&gt; C := Dual(HammingCode(K, 3));
+&gt; C;
+[21, 3, 16] Linear Code over GF(2^2)
+Generator matrix:
+[1 0 a^2 a 1 0 a^2 a 1 a^2 0 1 a a 1 0 a^2 1 a a^2 0]
+[0 1 1 1 1 0 0 0 0 a^2 a^2 a^2 a^2 a a a a 1 1 1 1]
+[0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1]
+
+&gt; I, SMAut := PDSetSimplexCode(K, 3);
+&gt; I in AllInformationSets(C);
+true
+&gt; s := #SMAut-1;  s;
+6
+&gt; [ LinearCode(GeneratorMatrix(C)*SMAut[i]) eq C : i in [1..s+1] ];
+[true, true, true, true, true, true, true];
+&gt; IsPermutationDecodeSet(C, I, SMAut, s);
+true
+
+&gt; c := C ! [0,1,1,1,1,0,0,0,0,a^2,a^2,a^2,a^2,a,a,a,a,1,1,1,1];
+&gt; c in C;
+true
+&gt; u := c;
+&gt; u[1] := c[1] + a;
+&gt; u[2] := c[2] + a^2;
+&gt; u[3] := c[3] + a;
+&gt; u[4] := c[4] + a^2;
+&gt; u[5] := c[5] + a;
+&gt; u[6] := c[6] + a^2;
+&gt; u in C;
+false
+&gt; isDecoded, uDecoded := PermutationDecode(C, I, SMAut, s, u);
+&gt; isDecoded;
+true
+&gt; uDecoded eq c;
+true
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1846.htm">[Next]</A><A  HREF = "text1844.htm">[Prev]</A> <A  HREF = "text1846.htm">[Right]</A> <A  HREF = "text1844.htm">[Left]</A> <A  HREF = "text1831.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,231 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Number Field Database</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text355.htm">[Next]</A><A  HREF = "text365.htm">[Prev]</A> <A  HREF = "text355.htm">[Right]</A> <A  HREF = "text365.htm">[Left]</A> <A  HREF = "text356.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "3539">Number Field Database</A></H3>
+
+<P>
+<P>
+An optional database of number fields may be downloaded from the Magma
+website.  This section defines the interface to that database.
+<P>
+There are databases for number fields of degrees 2 through 9.
+In the case of degree 2 the enumeration is complete in the discriminant
+range (discriminants of absolute value less than a million); the other
+databases include fields with small (absolute value of) discriminant,
+as well as various other fields that may be of interest.
+The selection of fields is eclectic, and it may well be that certain
+"obvious" ones are missing.
+<P>
+For each number field in the database, the following information is
+stored and may be used to limit the number fields of interest via
+the <A  HREF = "text366.htm#ANFDB:sub">sub</A> constructor: The discriminant; the signature; the Galois
+group; the class number; and the class group.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text366.htm#3540">Creation</A>
+<LI> <A  HREF = "text366.htm#3543">Access</A>
+</UL>
+<H4><A NAME = "3540">Creation</A></H4>
+
+
+
+<H5><A NAME = "3541">NumberFieldDatabase(d) : RngIntElt -&gt; DB</A></H5>
+<BLOCKQUOTE>
+Returns a database object for the number fields of degree d.
+</BLOCKQUOTE>
+<H5><A NAME = "3542"></A><A NAME = "ANFDB:sub">sub</A>&lt; D | dmin, dmax : parameters&gt; : DB, RngIntElt, RngIntElt -&gt; DB</H5>
+<H5>sub&lt; D | dabs : parameters&gt; : DB, RngIntElt -&gt; DB</H5>
+<H5>sub&lt; D | : parameters&gt; : DB-&gt; DB</H5>
+
+<PRE>    Signature: [ RngIntElt ]            Default: </PRE>
+
+<PRE>    Signatures: [ [RngIntElt] ]         Default: </PRE>
+
+<PRE>    GaloisGroup: RngIntElt <I>or</I> GrpPerm Default: </PRE>
+
+<PRE>    ClassNumber: RngIntElt              Default: </PRE>
+
+<PRE>    ClassNumberLowerBound: RngIntElt    Default: 1</PRE>
+
+<PRE>    ClassNumberUpperBound: RngIntElt    Default: &infin;</PRE>
+
+<PRE>    ClassNumberBounds: [ RngIntElt ]    Default: [ 1, &infin;]</PRE>
+
+<PRE>    ClassGroup: [ RngIntElt ]           Default: </PRE>
+
+<PRE>    ClassSubGroup: [ RngIntElt ]        Default: [ ]</PRE>
+
+<PRE>    ClassSuperGroup: [ RngIntElt ]      Default: </PRE>
+
+<PRE>    SearchByValue: BoolElt              Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Returns a sub-database of D, restricting (or further restricting,
+if D is already a sub-database of the full database for that degree)
+the contents to those number fields satisfying the specified conditions.
+Note that (with the exception of <TT>SearchByValue</TT>, which does not
+actually limit the fields in the database) it is not possible to "undo"
+restrictions with this constructor --- the results are always at least
+as limited as D is.
+<P>
+The valid non-parameter arguments are up to two integers specifying
+the desired range of discriminants in the result.
+If two integers are provided these are taken as the lower (<TT>dmin</TT>)
+and upper (<TT>dmax</TT>) bounds on the discriminant.  
+If one integer is provided it is taken as a bound (<TT>dabs</TT>) on
+the absolute value of the discriminant.
+If no integers are provided then the discriminant range is the same
+as for D.
+<P>
+The parameters <TT>Signature</TT> or <TT>Signatures</TT> may be used to
+specify the desired signature or signatures to match.  A signature
+is specified as a sequence of two integers [s<sub>1</sub>, s<sub>2</sub>] where
+s<sub>1</sub> + 2s<sub>2</sub> = d.
+<P>
+The parameter <TT>GaloisGroup</TT> may be used to specify the desired
+Galois group of the number field.  It may be given as either a
+permutation group, or as the explicit index of this Galois group in
+the transitive groups database.  (i.e., the first return value of
+<TT>TransitiveGroupIdentification</TT>.)
+<P>
+It is possible to require certain divisibility conditions on the class
+number.  Internally, there are lower and upper bounds on this value,
+such that a number field will only match if its class number is divisible
+by the lower bound and divides the upper bound.
+These bounds may be set individually using <TT>ClassNumberLowerBound</TT>
+or <TT>ClassNumberUpperBound</TT>; setting <TT>ClassNumber</TT> is equivalent
+to setting both bounds to the same value.
+Both values may be specified at once by setting <TT>ClassNumberBounds</TT>
+to the sequence of the lower and upper bounds.
+<P>
+When finer control is desired, it is possible to specify desired
+sub- and super-groups of the class group.
+Each group is specified by the sequence of its Abelian invariants;
+the desired subgroup is set using <TT>ClassSubGroup</TT>, and the desired
+supergroup is set using <TT>ClassSuperGroup</TT>.
+Both may be set at once (thus requiring the group to match exactly)
+using <TT>ClassGroup</TT>.
+<P>
+When iterating through the database, the default is to iterate in order
+of the absolute value of the discriminant.  Sometimes it is desirable to
+iterate in order of the actual value of the discriminant; this can be
+accomplished by setting the parameter <TT>SearchByValue</TT> to true.
+</BLOCKQUOTE>
+<H4><A NAME = "3543">Access</A></H4>
+
+
+
+<H5><A NAME = "3544">Degree(D) : DB -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the degree of the number fields stored in the database.
+</BLOCKQUOTE>
+<H5><A NAME = "3545">DiscriminantRange(D) : DB -&gt; RngIntElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the smallest and largest discriminants of the number fields
+stored in the database.
+</BLOCKQUOTE>
+<H5><A NAME = "3546"># D : DB -&gt; RngIntElt</A></H5>
+<H5>NumberOfFields(D) : DB -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Returns how many number fields are stored in the database.
+</BLOCKQUOTE>
+<H5><A NAME = "3547">NumberOfFields(D, d) : DB, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns how many number fields of discriminant d are stored in
+the database.
+</BLOCKQUOTE>
+<H5><A NAME = "3548">NumberFields(D) : DB -&gt; [ FldNum ]</A></H5>
+<BLOCKQUOTE>
+Returns the sequence of number fields stored in the database.
+</BLOCKQUOTE>
+<H5><A NAME = "3549">NumberFields(D, d) : DB, RngIntElt -&gt; [ FldNum ]</A></H5>
+<BLOCKQUOTE>
+Returns the sequence of number fields of discriminant d stored in
+the database.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3550">Example <TT>FldNum_anfdb-basic1 (H35E15)</TT></A></H3>
+We illustrate with some basic examples.  We start with the degree 2
+number fields and get some basic information about the database.
+<P>
+<P>
+<PRE>
+&gt; D := NumberFieldDatabase(2);
+&gt; DiscriminantRange(D);
+-999995 999997
+&gt; #D;
+607925
+</PRE>
+There are 13 fields with discriminant of absolute value less than 20:
+<P>
+<P>
+<PRE>
+&gt; D20 := sub&lt;D | 20&gt;;
+&gt; #D20;
+13
+&gt; [ Discriminant(F) : F in D20 ];
+[ -3, -4, 5, -7, -8, 8, -11, 12, 13, -15, 17, -19, -20 ]
+</PRE>
+Note that these were listed in order of absolute value of the
+discriminant; we can also list them in value order:
+<P>
+<P>
+<PRE>
+&gt; [ Discriminant(F) : F in sub&lt;D20 | : SearchByValue&gt; ];
+[ -20, -19, -15, -11, -8, -7, -4, -3, 5, 8, 12, 13, 17 ]
+</PRE>
+Two of these number fields have class number 2:
+<P>
+<P>
+<PRE>
+&gt; NumberFields(sub&lt;D20 | : ClassNumber := 2&gt;);
+[
+    Number Field with defining polynomial x^2 + x + 4 over the Rational Field,
+    Number Field with defining polynomial x^2 + 5 over the Rational Field
+]
+</PRE>
+<HR>
+<H3><A NAME = "3551">Example <TT>FldNum_anfdb-basic2 (H35E16)</TT></A></H3>
+Now we move onto the fields of degree five, and in particular those with
+signature [1,2].
+<P>
+<P>
+<PRE>
+&gt; D := NumberFieldDatabase(5);
+&gt; #D;
+289040
+&gt; D12 := sub&lt;D |: Signature := [1,2]&gt;;
+&gt; #D12;
+186906
+</PRE>
+We consider how many of these have class number equal to four.
+Note the cumulative nature of the restrictions has come into play.
+<P>
+<P>
+<PRE>
+&gt; #sub&lt;D12 |: ClassNumber := 4&gt;;
+1222
+&gt; #sub&lt;D |: ClassNumber := 4&gt;;
+1255
+</PRE>
+The number with class group specifically isomorphic to C<sub>2</sub> x C<sub>2</sub>
+is much less:
+<P>
+<P>
+<PRE>
+&gt; #sub&lt;D12 |: ClassGroup := [2,2]&gt;;
+99
+</PRE>
+<PRE></PRE> <A  HREF = "text355.htm">[Next]</A><A  HREF = "text365.htm">[Prev]</A> <A  HREF = "text355.htm">[Right]</A> <A  HREF = "text365.htm">[Left]</A> <A  HREF = "text356.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

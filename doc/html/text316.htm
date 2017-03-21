@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Orthogonalization</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text317.htm">[Next]</A><A  HREF = "text315.htm">[Prev]</A> <A  HREF = "text317.htm">[Right]</A> <A  HREF = "text315.htm">[Left]</A> <A  HREF = "text305.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "3029">Orthogonalization</A></H3>
+
+<P>
+<P>
+<P>
+The functions in this section perform orthogonalization and 
+orthonormalization of lattice bases over the field of fractions of the 
+base ring.  Note that this yields a basis orthogonalization of the space 
+in which a lattice embeds; in contrast <TT>OrthogonalDecomposition</TT> 
+returns a decomposition into orthogonal components over the base ring. 
+Basis orthogonalization is equivalent to diagonalization of the inner
+product matrix of a space.
+
+
+<H5><A NAME = "3030">Orthogonalize(M) : MtrxSpcElt -&gt; MtrxSpcElt, AlgMatElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a basis matrix M over a subring R of the real field, 
+compute a matrix N which is row-equivalent over to M over the 
+field of fractions K of R, but whose rows are orthogonal 
+(i.e., NN<sup>tr</sup> is a diagonal matrix).  This function returns three 
+values:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>An orthogonalized matrix N in row-equivalent to X 
+   over K;
+<DT>(b)</DT><DD>An invertible matrix T in the matrix ring over K 
+   whose degree is the number of rows of M such that TM = N;
+<DT>(c)</DT><DD>The rank of M.
+ </DL>
+</BLOCKQUOTE>
+<H5><A NAME = "3031">Diagonalization(F) : MtrxSpcElt -&gt; MtrxSpcElt, AlgMatElt, RngIntElt</A></H5>
+<H5>OrthogonalizeGram(F) : MtrxSpcElt -&gt; MtrxSpcElt, AlgMatElt, RngIntElt</H5>
+<BLOCKQUOTE>
+Given a symmetric n x n matrix F over R,
+where R is a subring of the real field, compute a <I>diagonal</I>
+matrix G such that G=TFT<sup>tr</sup> for some invertible matrix T over K,
+where K is the field of fractions of R.  F need not have rank n.
+This function returns three values:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>A diagonal matrix G defined over R; 
+<DT>(b)</DT><DD>An invertible n x n matrix T over K such that G=TFT<sup>tr</sup>;
+<DT>(c)</DT><DD>The rank of F.</DL>
+</BLOCKQUOTE>
+<H5><A NAME = "3032">Orthogonalize(L) : Lat -&gt; Lat, AlgMatElt</A></H5>
+<BLOCKQUOTE>
+For a lattice L, return a new lattice having the same Gram matrix 
+as L but embedded in an ambient space with diagonal inner product 
+matrix.
+</BLOCKQUOTE>
+<H5><A NAME = "3033">Orthonormalize(M, K) : MtrxSpcElt, Fld -&gt; AlgMatElt</A></H5>
+<H5>Cholesky(M, K) : MtrxSpcElt, Fld -&gt; AlgMatElt</H5>
+<H5>Orthonormalize(M) : MtrxSpcElt -&gt; AlgMatElt</H5>
+<H5>Cholesky(M) : MtrxSpcElt -&gt; AlgMatElt</H5>
+<BLOCKQUOTE>
+For a symmetric, positive definite matrix M, and a real field K, 
+return a lower triangular matrix T over K such that M = TT<sup>tr</sup>.
+The algorithm must take square roots so the result is returned as a 
+matrix over the real field K.  
+If the real field K is omitted, K is taken to be the default real 
+field.  Note that this function takes a Gram matrix M, <I>not</I> a 
+basis matrix as in the previous functions.
+</BLOCKQUOTE>
+<H5><A NAME = "3034">Orthonormalize(L, K) : Lat, FldRe -&gt; AlgMatElt</A></H5>
+<H5>Cholesky(L, K) : Lat, FldRe -&gt; AlgMatElt</H5>
+<H5>Orthonormalize(L) : Lat -&gt; AlgMatElt</H5>
+<H5>Cholesky(L) : Lat -&gt; AlgMatElt</H5>
+<BLOCKQUOTE>
+Given a lattice L with Gram matrix F, together with a real field K,
+return a new lattice over K which has the same Gram matrix F as L but
+has the standard Euclidean inner product.
+(This will involve taking square roots so that is why the result must be over
+a real field.)  The argument for the real field K may be omitted, in which 
+case K is taken to be the current default real field.
+This function is equivalent to the invocation
+<TT>LatticeWithBasis(Orthonormalize(GramMatrix(L), K))</TT>.
+It is sometimes more convenient to work with the resulting lattice
+since it has the standard Euclidean inner product.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3035">Example <TT>Lat_Orthogonalize (H30E19)</TT></A></H3>
+As an example for a lattice with non-trivial basis and inner product matrices
+we choose the dual lattice of the 12-dimensional Coxeter-Todd lattice.
+We compute the inner products of all pairs of shortest vectors and notice
+that this gets faster after changing to an isomorphic lattice with weighted
+standard Euclidean inner product.
+<P>
+<P>
+<PRE>
+&gt; L := Dual(CoordinateLattice(Lattice("Kappa", 12)));
+&gt; SL := ShortestVectors(L); 
+&gt; SL := SL cat [ -v : v in SL ]; #SL;
+756
+&gt; time { (v,w) : v,w in SL };
+{ -4, -2, -1, 0, 1, 2, 4 }
+Time: 7.120
+&gt; M := Orthogonalize(L);
+&gt; SM := ShortestVectors(M);
+&gt; SM := SM cat [ -v : v in SM ]; #SM;
+756
+&gt; time { (v,w) : v,w in SM };
+{ -4, -2, -1, 0, 1, 2, 4 }
+Time: 1.300
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text317.htm">[Next]</A><A  HREF = "text315.htm">[Prev]</A> <A  HREF = "text317.htm">[Right]</A> <A  HREF = "text315.htm">[Left]</A> <A  HREF = "text305.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

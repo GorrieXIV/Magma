@@ -1,0 +1,55 @@
+"Source: Text/Commut/Ideal.text";
+"Line: 1043";
+"Date: Tue Jun  7 22:27:15 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Commut/Ideal.text, line: 1043
+// Example: H112E7 ()
+print "Example: H112E7";
+ei := GetEchoInput();
+SetEchoInput(true);
+function ZRadical(I)
+    // Find radical of zero dimensional ideal I
+    P := Generic(I);
+    n := Rank(P);
+    G := UnivariateEliminationIdealGenerators(I);
+    N := {};
+
+    for i := 1 to n do
+        // Set FF to square-free part of the i-th univariate
+        // elimination ideal generator
+        F := G[i];
+        FF := F;
+        while true do
+            D := GCD(FF, Derivative(FF, 1, i));
+            if D eq 1 then
+                break;
+            end if;
+            FF := FF div D;
+        end while;
+        // Include FF in N if FF is a proper divisor of F
+        if FF ne F then
+            Include(~N, FF);
+        end if;
+    end for;
+
+    // Return the sum of I and N
+    if #N eq 0 then
+      return I;
+    else
+      return ideal<P | I, N>;
+    end if;
+end function;
+P<x, y, z> := PolynomialRing(RationalField(), 3);
+I := ideal<P | (x+1)^3*y^4, x*(y-z)^2+1, z^3-z^2>;
+R := ZRadical(I);     
+Groebner(I);
+Groebner(R);
+I;
+R;
+I subset R;
+assert $1;
+R subset I;
+assert not $1;
+IsInRadical(x + 1, I);
+assert $1;
+SetEchoInput(ei);

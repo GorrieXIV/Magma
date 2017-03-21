@@ -1,0 +1,3 @@
+174,1
+S,IsTwist,"Given two spaces of modular symbols representing (Galois orbits of) newforms, this returns true iff some Galois conjugate (over Q) of M2 is the twist of M1 by a nontrivial Dirichlet character of p-power conductor. If true, it also returns such a character",0,3,0,0,0,0,0,0,0,148,,0,0,ModSym,,0,0,ModSym,,36,GrpDrchElt,-38,-38,-38,-38
+S,IsMinimalTwist,"Given a Hecke-irreducible space of modular symbols of level N, returns true if the associated newform is not a twist of an eigenform belonging to a space of lower level by a Dirichlet character of p-power conducter. If false, also returns the space associated to the minimal newform, and the Dirichlet character",0,2,0,0,0,0,0,0,0,148,,0,0,ModSym,,36,ModSym,GrpDrchElt,-38,-38,-38

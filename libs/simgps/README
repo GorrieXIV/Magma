@@ -1,0 +1,121 @@
+This database contains a representation for G where:
+    G is a simple group other than a PSL(2, p), p a prime, having order
+	less than a million
+    G is PSL(2, p), for all primes p between 5 and 31.
+
+The representation takes the form of a permutation group representation
+G, a finite presentation F and isomorphisms phi: F --> G and rho: G --> F
+(for the larger groups, this map takes some time to compute).  Other
+information which is stored is representatives of the conjugacy
+classes, the maximal subgroups and a sylow subgroup for some of the
+possible primes dividing the order.
+
+    The list was prepared by A.R. Jamali, E.G. Robertson and C.M. Campbell.
+
+    Each group is accessed by its name (a string).  For a list of all
+names type "print SimNames();" -- these should be fairly self-explanatory.
+
+    The groups are accessed through the following functions only.
+
+    SimGroup(name)
+	This function returns a permutation group isomorphic to the
+	named simple group.
+
+    SimRecord(name)
+	This function returns a record of all the information stored
+	about the group.  Its fields are as follows:
+	    Name:	the name by which the group is accessed.
+	    F:		a finite presentation of the group.
+	    RepsF:	a sequence of class representatives of F.
+	    MaxF:	a sequence of maximal subgroups of F.
+	    SylF:	a sequence of sylow subgroups of F.
+	    G:		a permutation representation of the group.
+	    Reps:	a sequence of class representatives of G.
+	    Max:	a sequence of maximal subgroups of G.
+	    Syl:	a sequence of sylow subgroups of G.
+	    phi:	the isomorphism phi: F --> G.
+	    rho:	the isomorphism rho: G --> F.
+	    ClassInfo:	a string describing the classes of the group.
+	    MaxInfo:	a string describing the maximal subgroups of the group.
+
+    SimRecordInit(name)
+	As for SimRecord(name) except only the fields Name, ClassInfo and
+	MaxInfo are defined.  Use SimRecordRequire to fill in more fields.
+
+    SimRecordRequire(~X, Q)
+	Procedure.  Given a (partially defined) record X and a string
+	or sequence of strings which are from the field names listed in
+	SimRecord, ensure that these fields are defined.  Requiring
+	some fields may result in one or more other fields to be
+	automatically defined.
+
+    SimClassInfo(name)
+	This function returns a string describing the classes of the
+	named simple group.
+
+    SimClassNameIndex(name, classname)
+	This function returns the index into the sequence of class
+	representatives of the group designated by name (either a string
+	or a simple group record) of the class with name classname.
+
+    SimMaxInfo(name)
+	This function returns a string describing the maximal subgroups
+	of the named simple group.
+
+    SimNames()
+	This function returns the set of names of groups stored
+	in the database.
+
+    SimGroupSatisfying(f)
+	Given a boolean valued function f: GrpPerm --> BoolElt (which may
+	either be an intrinsic function or a user defined function),
+	return a group satisfying f(G).  This function runs through all
+	the stored groups, expanding each from the stored generators
+	and applies the predicate f until it finds a suitable one.
+	If no group is found, an error message is printed.
+
+    SimGroupsSatisfying(f)
+	As SimGroupSatisfying(f), except a sequence of all such groups
+	is returned.
+
+    SimProcess()
+	Return a "process" for looping over all the stored groups.
+	Initially it points to the first group (A5).
+
+    SimProcessIsEmpty(P)
+	Return whether the process P currently points to a group.
+
+    SimProcessGroup(P)
+	Given a process P which currently points to a group, return the
+	permutation representation.
+
+    SimProcessClassInfo(P)
+	Given a process P which currently points to a group, return the
+	string describing the classes of the group.
+
+    SimProcessMaxInfo(P)
+	Given a process P which currently points to a group, return the
+	string describing the maximal subgroups of the group.
+    
+    SimProcessName(P)
+	Given a process P which currently points to a group, return
+	the name of the group.
+
+    SimProcessNext(~P)
+	Procedure.  Given a process P which currently points to a
+	group, modify it so that it points to the next group if there
+	is one or make it empty if there is not.
+
+A fairly typical use of a process to loop over groups would look
+something like this:
+
+    P := SimProcess();
+    while not SimProcessIsEmpty(P) do
+	X := SimProcessRecordInit(P);
+	SimRecordRequire(~X, ["F", "phi", "G"]);
+	F := X`F;
+	G := X`G;
+	phi := X`phi;
+	... do stuff with F, G and phi ...
+	SimProcessNext(~P);
+    end while;

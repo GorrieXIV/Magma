@@ -1,0 +1,494 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Introduction and First Examples</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1405.htm">[Next]</A><A  HREF = "text1403.htm">[Prev]</A> <A  HREF = "text1405.htm">[Right]</A> [____] <A  HREF = "text1403.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "15725">Introduction and First Examples</A></H3>
+
+<P>
+<P>
+We describe a package to work quite generally with toric geometry
+within the scope of Magma's scheme machinery.
+From that point of view, we regard toric varieties as a vast
+array of possible ambient spaces for schemes, generalising the
+affine and projective spaces already available.
+But of course toric geometry is a large topic in its own
+right, and in the first place we present it for its own sake.
+<P>
+There are many different points of view on toric geometry.
+We model our approach on several sources: the primary ones are
+Danilov <A  HREF = "text1402.htm#bib_MR495499">[Dan78]</A> and Cox <A  HREF = "text1402.htm#bib_MR1299003">[Cox95]</A>, but also
+Fulton <A  HREF = "text1402.htm#bib_MR1234037">[Ful93]</A> and Oda <A  HREF = "text1402.htm#bib_MR922894">[Oda88]</A>.
+<P>
+One of the primary points of view, exemplified by Danilov <A  HREF = "text1402.htm#bib_MR495499">[Dan78]</A>,
+is to regard the two-way relationship
+between a part of scheme theory and the combinatorics of polyhedra
+as foundational. This package can operate from that point of
+view.
+<P>
+Another, more recent, point of view is that of the Cox ring,
+introduced by Cox <A  HREF = "text1402.htm#bib_MR1299003">[Cox95]</A>,
+a (multi-)graded polynomial ring that works as a homogeneous
+coordinate ring for a toric variety (or indeed any variety
+with finitely-generated Picard group) in much the same way
+as the coordinate ring of affine or projective space.
+This package can also operate from this point of view,
+and indeed this is the central object in its design.
+Again, this is bound to impose practical restrictions on
+the dimensions in which calculations can reasonably be
+expected to work: we use these `Cox coordinates' to define
+subschemes of toric varieties, which often leads to
+Gr&ouml;bner basis calculations, and these are famously
+intolerant of the number of variables involved.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1404.htm#15726">The Projective Plane as a Toric Variety</A>
+<LI> <A  HREF = "text1404.htm#15728">Resolution of a Nonprojective Toric Variety</A>
+<LI> <A  HREF = "text1404.htm#15732">The Cox Ring of a Toric Variety</A>
+</UL>
+<H4><A NAME = "15726">The Projective Plane as a Toric Variety</A></H4>
+
+<P>
+<P>
+The projective plane is the toric variety corresponding
+to the fan with three maximal cones lying in the Euclidean plane:
+<P>
+&lt; (0, 1), (1, 0) &gt;,
+<P>
+&lt; (1, 0), ( - 1, - 1) &gt;,
+<P>
+&lt; ( - 1, - 1), (0, 1) &gt;.
+
+
+<HR>
+<H3><A NAME = "15727">Example <TT>Toric_toric-example1 (H124E1)</TT></A></H3>
+We build the projective plane (defined over the rational field)
+as a toric variety.
+There are various simple constructors for this, but we
+do it slowly by constructing its fan first: we list the
+one-dimensional rays of the fan, and then describe each maximal
+cone by listing the sequence of indices of the rays that
+generate it.
+<P>
+<P>
+<PRE>
+&gt; rays := [ [0,1], [1,0], [-1,-1] ];
+&gt; cones := [ [1,2], [1,3], [2,3] ];
+&gt; F := Fan(rays,cones);
+&gt; F;
+Fan F with 3 rays:
+    ( 0,  1),
+    ( 1,  0),
+    (-1, -1)
+and 3 cones with indices:
+    [ 1, 2 ],
+    [ 1, 3 ],
+    [ 2, 3 ]
+</PRE>
+This is enough to determine a toric variety; we name its
+natural (Cox) coordinates as x, y, z during the definition.
+(Since this is a scheme, it needs to have a base ring
+assigned.)
+<P>
+<P>
+<PRE>
+&gt; X&lt;x,y,z&gt; := ToricVariety(Rationals(),F);
+&gt; X;
+Toric variety of dimension 2
+Variables: x, y, z
+The irrelevant ideal is:
+    (z, y, x)
+The grading is:
+    1, 1, 1
+</PRE>
+As with all schemes in Magma, points can be created by
+coercing sequences of coefficients (either from the given base
+field or from an extension of that) into the scheme.
+<P>
+<P>
+<PRE>
+&gt; X ! [1,2,3];
+(1 : 2 : 3)
+</PRE>
+When working over an extension k of the base field, one
+must coerce into the point set (of k-valued points of X).
+<P>
+<P>
+<PRE>
+&gt; k&lt;i&gt; := QuadraticField(-1);
+&gt; X(k);
+Set of points of X with coordinates in k
+&gt; X(k) ! [1,i,2*i];
+(1 : i : 2*i)
+</PRE>
+The irrelevant ideal (described in the display of X above)
+describes the locus of coordinates that do not represent
+points; in this case, the irrelevant ideal records the fact
+that (0:0:0) is not a point of projective space.
+<P>
+<P>
+<PRE>
+&gt; X ! [0,0,0];
+
+
+&gt;&gt; X ! [0,0,0];
+     ^
+Runtime error in '!': Illegal coercion
+&gt; Y&lt;u,v,w&gt; := ProjectiveSpace(Rationals(),2);
+&gt; Y;
+Projective Space of dimension 2
+Variables: u, v, w
+&gt; IrrelevantIdeal(Y);
+Ideal of Polynomial ring of rank 3 over Rational Field
+Order: Graded Reverse Lexicographical
+Variables: u, v, w
+Homogeneous
+Basis:
+[
+    u,
+    v,
+    w
+]
+&gt; Gradings(Y);
+[
+    [ 1, 1, 1 ]
+]
+&gt; Fan(Y);
+Fan with 3 rays:
+    ( 1,  0),
+    ( 0,  1),
+    (-1, -1)
+and 3 cones with indices:
+    [ 1, 2 ],
+    [ 1, 3 ],
+    [ 2, 3 ]
+</PRE>
+<HR>
+<H4><A NAME = "15728">Resolution of a Nonprojective Toric Variety</A></H4>
+
+<P>
+<P>
+Danilov translated the projectivity of a toric variety into
+properties of the fan. In geometry, projectivity is equivalent
+to the existence of an ample line bundle. In the combinatorics
+of the fan, the requirement is the existence of
+positive linear functions on each cone that agree on the boundaries
+and are strictly convex across boundaries.
+This is one small part of the theory of divisors on
+toric varieties that we cover in much greater detail in
+Section <A  HREF = "text1409.htm#15901">Invariant Divisors and  Riemann-Roch Spaces</A>.
+
+
+<HR>
+<H3><A NAME = "15729">Example <TT>Toric_toric-example10 (H124E2)</TT></A></H3>
+We construct an example of a complete but non-projective toric variety
+following Danilov's original example of how a fan can fail to admit
+a strictly convex piece-wise linear support function.
+We will build the fan by hand, first specifying exactly the
+(one-dimensional) rays that it contains.
+<P>
+<P>
+<PRE>
+&gt; rays := [ [0,0,1], [4,0,1], [0,4,1], [1,1,1], [2,1,1], [1,2,1], [-1,-1,-1] ];
+</PRE>
+Now we specify the top-dimensional cones that the fan contains.
+This is done by naming the rays that generate each cone from the list of
+rays above. So, for example, the sequence <TT>[1,3,6]</TT> below
+refers to the cone generated
+by the 1st, 3rd and 6th rays, that is by [0, 0, 1], [0, 4, 1] and [1, 2, 1].
+<P>
+<P>
+<PRE>
+&gt; cones := [ [1,3,6], [1,4,6], [1,2,4], [2,4,5], [2,3,5], [3,5,6], [4,5,6],
+&gt;             [1,3,7], [1,2,7], [2,3,7] ];
+</PRE>
+This is enough information to determine a fan. The command below
+to construct the fan F with this data takes a little time, since
+it checks that the maximal cones we nominated are indeed maximal
+and intersect correctly to lie in a fan.
+<P>
+<P>
+<PRE>
+&gt; F := Fan(rays,cones);
+</PRE>
+Finally we move away from the lattice world to the geometry by
+creating the toric variety corresponding to the fan F.
+<P>
+<P>
+<PRE>
+&gt; X := ToricVariety(Rationals(),F);
+</PRE>
+We can now ask questions of X as we would with any other variety
+or ambient space.
+<P>
+<P>
+<PRE>
+&gt; Dimension(X);
+3
+&gt; IsComplete(X);
+true
+&gt; IsProjective(X);
+false
+</PRE>
+Unfortunately our specimen is flawed: it has singularities.
+<P>
+<P>
+<PRE>
+&gt; IsNonsingular(X);
+false
+&gt; Y := Resolution(X);
+&gt; IsProjective(Y);
+false
+</PRE>
+The last line takes a little time: Magma computes the ample
+cone of Y and then determines whether or not it is empty.
+In this case, Y remains non-projective, although there is
+no reason to expect that: Danilov's original example can
+be made projective by blowing up a line (or simply flopping
+a line).
+<HR>
+<H3><A NAME = "15730">Example <TT>Toric_toric-divisor-scroll-example (H124E3)</TT></A></H3>
+We calculate the self-intersection of the zero section in the Hirzebruch surface F<sub>2</sub>, that is, the scroll P(O( - 2) direct-sum O) over P<sup>1</sup>. First we construct X = F<sub>2</sub>:
+<P>
+<P>
+<PRE>
+&gt; X&lt;x,y,u,v&gt;:=AbsoluteRationalScroll(Rationals(),[2,0]);
+&gt; X;
+Toric variety of dimension 2 over Rational Field
+Variables: x, y, u, v
+The components of the irrelevant ideal are:
+    (y, x), (v, u)
+The 2 gradings are:
+    1,  1, -2,  0,
+    0,  0,  1,  1
+</PRE>
+The zero locus is the third toric divisor.
+<P>
+<P>
+<PRE>
+&gt; ray:=Cone(Rays(X)[3]);
+&gt; form:=IntersectionForm(X,ray);
+&gt; D:=Weil(Divisor(X,[0,0,1,0]));
+&gt; phi:=WeilToClassLatticesMap(X);
+&gt; form * phi(D);
+-2
+</PRE>
+<HR>
+<H3><A NAME = "15731">Example <TT>Toric_toric-fano-index-example (H124E4)</TT></A></H3>
+We calculate the Fano index of a nonsingular toric Fano variety. We're interested in number 15 in the database of smooth toric Fano threefolds. First we fetch the corresponding Fano polytope P from the database:
+<P>
+<P>
+<PRE>
+&gt; P:=PolytopeSmoothFanoDim3(15);
+&gt; P;
+3-dimensional polytope P with 5 vertices:
+    ( 1,  0,  0),
+    ( 0,  1,  0),
+    ( 0,  0,  1),
+    (-1, -1,  1),
+    ( 0,  0, -1)
+</PRE>
+We convert the polytope P into a toric variety X whose fan is generated by the cones spanning the faces of P:
+<P>
+<P>
+<PRE>
+&gt; X&lt;x,y,u,z,v&gt;:=ToricVariety(Rationals(),SpanningFan(P));
+&gt; X;
+Toric variety of dimension 3 over Rational Field
+Variables: x, y, u, z, v
+The components of the irrelevant ideal are:
+    (v, u), (z, y, x)
+The 2 gradings are:
+    0, 0, 1, 0, 1,
+    1, 1, 0, 1, 1
+&gt; IsNonsingular(X);
+true
+&gt; IsFano(X);
+true
+</PRE>
+The variety X has Fano index 2:
+<P>
+<P>
+<PRE>
+&gt; K:=CanonicalDivisor(X);
+&gt; phi:=WeilToClassLatticesMap(X);
+&gt; fano_idx:=GCD(Eltseq(phi(Weil(-K))));
+&gt; fano_idx;
+2
+&gt; half_K:=phi(Weil(-K)) / 2;
+&gt; A:=Divisor(X,half_K @@ phi);
+&gt; A;
+Weil divisor A with coefficients:
+    0, 0, 0, 1, 1
+&gt; IsCartier(A);
+true
+&gt; IsAmple(A);
+true
+&gt; bool:=AreLinearlyEquivalent(-K, 2 * A);
+&gt; bool;
+true
+</PRE>
+Next we calculate the anti-canonical degree ( - K)<sup>2</sup> and first few terms of the Hilbert series (Hilb)(X, - K):
+<P>
+<P>
+<PRE>
+&gt; Degree(-K);
+56
+&gt; HilbertCoefficients(-K,5);
+[ 1, 31, 145, 399, 849, 1551 ]
+</PRE>
+We recognise X as 2-35 in the Mori--Mukai classification.
+<HR>
+<H4><A NAME = "15732">The Cox Ring of a Toric Variety</A></H4>
+
+<P>
+<P>
+The Cox ring of a toric variety is its natural homogeneous
+coordinate ring. It is a multigraded ring (with other
+data besides). It is often easier to construct the gradings
+for a Cox ring than it is to describe a fan.
+<P>
+A Cox ring requires four pieces of data:
+<DL COMPACT class='compact'>
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>a polynomial ring R (a ring of coordinates for an affine space)
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>a sequence B of `irrelevant' ideals (the loci defined by these
+are discarded from the affine space)
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>a sequence Z of sequences of integral weights for R;
+each element has length the number of indeterminates of R
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>a sequence Q of sequences of quotient gradings for R.</DL>
+
+
+<HR>
+<H3><A NAME = "15733">Example <TT>Toric_cox-ring-example (H124E5)</TT></A></H3>
+Cox's original construction determines a Cox ring from the
+fan of a toric variety, and then realises the toric variety
+as the quotient of the affine space (with the irrelevant locus
+discarded) by the action of a torus (determined by the sequences
+of weights).
+But it is also possible simply to specify this data independently of a fan.
+<P>
+<P>
+<PRE>
+&gt; R&lt;u,v,x,y,z&gt; := PolynomialRing(Rationals(),5);
+&gt; irrel1 := ideal&lt; R | u,v &gt;;
+&gt; irrel2 := ideal&lt; R | x,y,z &gt;;
+&gt; B := [ irrel1, irrel2 ];
+&gt; Zwts := [
+&gt;             [ 1, 1, 0, -1, -3 ],
+&gt;             [ 0, 0, 1,  2,  3 ] ];
+&gt; Qwts := [];
+&gt; C := CoxRing(R,B,Zwts,Qwts);
+&gt; C;
+Cox ring C with underlying Polynomial ring of rank 5 over Rational Field
+Order: Lexicographical
+Variables: u, v, x, y, z
+The components of the irrelevant ideal are:
+    (z, y, x), (v, u)
+The 2 gradings are:
+    1,  1,  0, -1, -3,
+    0,  0,  1,  2,  3
+</PRE>
+The pieces of data can be retrieved by <TT>Gradings(C)</TT>,
+<TT>QuotientGradings(C)</TT> and so on.
+<P>
+In favourable cases, a Cox ring does indeed arise from a
+fan using Cox's construction. This fan can be recovered.
+<P>
+<P>
+<PRE>
+&gt; F := Fan(C);
+&gt; F;
+Fan F with 5 rays:
+    ( 1,  0,  0),
+    ( 0,  1,  0),
+    ( 1,  1,  3),
+    (-2, -2, -3),
+    ( 1,  1,  1)
+and 6 cones with indices:
+    [ 1, 3, 4 ],
+    [ 1, 3, 5 ],
+    [ 1, 4, 5 ],
+    [ 2, 3, 4 ],
+    [ 2, 3, 5 ],
+    [ 2, 4, 5 ]
+</PRE>
+Alternatively, one can construct a toric variety from
+a Cox ring---as in Cox's construction, the Cox ring contains
+exactly the data required to construct a variety as a
+torus quotient.
+<P>
+<P>
+<PRE>
+&gt; X := ToricVariety(C);
+&gt; Dimension(X);
+3
+</PRE>
+Sequences of coefficients not lying in the locus of the irrelevant
+ideal can be interpreted as closed points of X as usual.
+<P>
+<P>
+<PRE>
+&gt; X ! [1,0,1,0,0];
+(1 : 0 : 1 : 0 : 0)
+&gt; X ! [1,0,0,0,0];
+
+
+&gt;&gt; X ! [1,0,0,0,0];
+     ^
+Runtime error in '!': Illegal coercion
+</PRE>
+The attempted coercion of the second point fails because
+its x, y and z coordinates (the 3rd, 4th and 5th coefficients
+of the vector) are all zero, but the locus x=y=z=0 is
+defined by a component of the irrelevant ideal and so has
+been discarded: points of X do not have all three of
+those coordinates simultaneously equal to zero.
+<P>
+The homogeneous coordinates that the Cox ring provides for
+X behave in a very similar way to the homogeneous coordinates
+on projective space. In particular, one can define subschemes
+of X by the vanishing of polynomials in the Cox ring that
+are homogeneous with respect to all the Z-gradings (and
+the quotient gradings too).
+<P>
+<P>
+<PRE>
+&gt; f := x^4*y + u^2*y^3 + v^5*z^2;
+&gt; Multidegree(X,f);
+[ -1, 6 ]
+[]
+</PRE>
+The multidegree is returned as two sequences: the first is
+the sequence of degrees of f with respect to each of the
+Z-gradings in turn, and the second is that with respect
+to the quotient gradings (in this case there are none).
+One defines a scheme as usual in Magma.
+<P>
+<P>
+<PRE>
+&gt; V := Scheme(X, f);
+&gt; V;
+Scheme over Rational Field defined by
+u^2*y^3 + v^5*z^2 + x^4*y
+&gt; Dimension(V);
+2
+</PRE>
+Much of Magma's scheme machinery works for schemes inside
+toric varieties, although at this stage some does not.
+(Some functions are missing because of the absence of
+standard nonsingular affine patches on toric varieties.
+In some cases these will be replaced by their orbifold
+analogues in due course.)
+<HR>
+<PRE></PRE> <A  HREF = "text1405.htm">[Next]</A><A  HREF = "text1403.htm">[Prev]</A> <A  HREF = "text1405.htm">[Right]</A> [____] <A  HREF = "text1403.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,4 @@
+174,1
+S,ComponentGroupOrder,The order of the component group of the special fiber of the Neron model of A over the algebraic closure of GF(p),0,2,0,0,0,0,0,0,0,148,,0,0,ModAbVar,,148,-38,-38,-38,-38,-38
+S,TamagawaNumber,"Let c be the product of the Tamagawa numbers of A at primes of bad reduction, where A is an abelian variety over Q attached to a newform. This command returns a divisor of c, an integer some power of which is a multiple of c, and true if the divisor is provably equal to c",0,1,0,0,0,0,0,0,0,ModAbVar,,148,148,36,-38,-38,-38
+S,TamagawaNumber,"A divisor of the Tamagawa number of A at p, an integer some power of which is a multiple of the Tamagawa number of A at p, and true if the divisor of the Tamagawa number is provably equal to the Tamagawa number of A. The abelian variety A must be attached to a newform",0,2,0,0,0,0,0,0,0,148,,0,0,ModAbVar,,148,148,36,-38,-38,-38

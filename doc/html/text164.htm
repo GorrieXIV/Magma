@@ -1,0 +1,283 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Primes and Primality Testing</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text165.htm">[Next]</A><A  HREF = "text163.htm">[Prev]</A> <A  HREF = "text165.htm">[Right]</A> <A  HREF = "text163.htm">[Left]</A> <A  HREF = "text155.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "1246">Primes and Primality Testing</A></H3>
+
+<P>
+<P>
+<P>
+Primality testing algorithms enable the user to certify the primality
+of prime integers.
+Proving the primality of very big integers can be time
+consuming and therefore in some of the algorithms using primes and factorization
+of integers the user can speed up the algorithm by explicitly allowing Magma to
+use probable primes rather than certified primes.
+<P>
+A <I>probable prime</I> is an integer that has failed some compositeness
+test; if an integer passes a compositeness test it will be composite, but
+there is a (small) probability that a composite number will fail the test
+and is hence called a probable prime. Each Miller-Rabin test for instance,
+has a probability of less than 1/4 of declaring a composite number
+probably prime; in practice that means that numbers that fail several such
+cheap independent Miller-Rabin compositeness tests will be prime.
+<P>
+Unless specifically asked otherwise, Magma will use rigorous primality
+proofs.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text164.htm#1247">Primality</A>
+<LI> <A  HREF = "text164.htm#1254">Other Functions Relating to  Primes</A>
+</UL>
+<H4><A NAME = "1247">Primality</A></H4>
+
+<P>
+<P>
+If a positive integer n is composite, this can be shown quickly by
+exhibiting a <I>witness</I> to this fact. A witness for the compositeness
+of n is an integer 1&lt;a&lt;n with the property that
+a<sup>r</sup> &#8802; 1 mod n  and  a<sup>r2<sup>i</sup></sup> &#8802; - 1 mod n  for i=0, 1, ..., k - 1
+where r odd, and k are such that n - 1=r.2<sup>k</sup>. A witness never falsely
+claims that n is composite, because for prime n it must hold
+that a<sup>n - 1</sup> &equiv; 1 mod n and only &#8723; 1 are square roots of 1
+modulo prime n. Moreover, it has been shown that a fraction of
+at least 3/4 of all a in the range 2 ... n - 1 will witness
+the compositeness of n. Thus randomly choosing a will usually
+quickly expose compositeness. Unless more than 3/4 of all possibilities
+for a are checked though (which in practice will be impossible for
+reasonable n) the procedure of checking k bases a at random
+for being a witness (often referred to as `Miller-Rabin') will not
+suffice to prove the primality of n; it does however lend credibility
+to the claim that n is most likely prime if among k (say 20) random choices
+for a no witness for compositeness has been found. In such cases n
+is called <I>probably prime of order k</I>, and in some sense the probability that
+n is composite is less than 4<sup> - k</sup>.
+<P>
+A slight adaptation of this compositeness test can be used for primality
+proofs in a bounded range.  There are no composites smaller than
+34.10<sup>13</sup> for which a witness does not exist among
+a=2, 3, 5, 7, 11, 13, 17 (<A  HREF = "text154.htm#bib_jaschke">[Jae93]</A>).
+Using these values of a for candidate witnesses
+it is certain that for any number n less than 34.10<sup>13</sup>
+the test will either find a witness or correctly declare n prime.
+<P>
+But even for large integers it
+is thus usually easy to identify composites without finding a factor;
+to be certain that a large probable prime is truly prime, a primality proving
+algorithm is invoked.
+Magma uses the ECPP (Elliptic Curve
+Primality Proving) method, as implemented by Fran&ccedil;ois Morain (Ecole
+Polytechnique and INRIA).  The ECPP program in turn uses the
+BigNum package developed jointly by INRIA and Digital PRL.
+This ECPP method is both fast and rigorous, but for large integers (of say
+more than 100 decimal digits) it will be still be much slower than the
+Miller-Rabin compositeness test.
+The method is too involved to be explained here; we refer the reader to
+the literature (<A  HREF = "text154.htm#bib_atkinMorain">[AM93]</A>).
+<P>
+The <TT>IsPrime</TT> function invokes ECPP, unless a Boolean flag
+is used to indicate that only `probable primality' is required. The
+latter is equivalent to a call to <TT>IsProbablePrime</TT>.
+
+
+<H5><A NAME = "1248">IsPrime(n) : RngIntElt -&gt; BoolElt</A></H5>
+<H5>IsPrime(n: parameter) : RngIntElt -&gt; BoolElt</H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Returns <TT>true</TT> iff the integer n is prime. A rigorous
+method will be used, unless n &gt; 34 .10<sup>13</sup> and the
+optional parameter <TT>Proof</TT> is set to <TT>Proof := false</TT>,
+in which case the result indicates that n is a probable
+prime (a strong pseudoprime to 20 bases).
+</BLOCKQUOTE>
+<H5><A NAME = "1249">SetVerbose("ECPP", v) : MonStgElt, Elt -&gt;</A></H5>
+<BLOCKQUOTE>
+Sets the verbose level for output when the ECPP algorithm is
+used in the above primality tests. The legal values are <TT>true</TT>, <TT>false</TT>,
+0, 1 and 2 (<TT>false</TT> and <TT>true</TT> are the same as 0 and 1 respectively).
+Level 1 outputs only basic information about the times for the top-level
+stages (downrun and uprun). Level 2 outputs full information about every step :
+this level is very verbose!
+</BLOCKQUOTE>
+<H5><A NAME = "1250">PrimalityCertificate(n) : RngIntElt -&gt; List</A></H5>
+<H5>IsPrimeCertificate(cert) : List -&gt; BoolElt</H5>
+
+<PRE>    ShowCertificate: BoolElt            Default: <TT>true</TT></PRE>
+
+<PRE>    Trust: RngIntElt                    Default: 0</PRE>
+<BLOCKQUOTE>
+<TT>PrimalityCertificate</TT> is a variant on <TT>IsPrime</TT> which uses ECPP and
+outputs a certificate of primality at the conclusion. If the number n
+is actually proven to be composite or the test fails, then a runtime
+error occurs. The certificate is a 
+<TT>Magma</TT> list with data in the format described in <A  HREF = "text154.htm#bib_atkinMorain">[AM93]</A>.
+<P>
+To verify that a given number is prime from its primality certificate,
+the function <TT>IsPrimeCertificate</TT> is used. By default, this outputs
+only the result of the verification : <TT>true</TT>  or <TT>false</TT>.
+If the user wishes to see the stages of the verification, the parameter
+<TT>ShowCertificate</TT> should be set to <TT>true</TT>. This is rather verbose as it
+shows the verification of primality of all small factors that need to be
+shown to be prime at each substage of the algorithm. It is usually more
+convenient to set the parameter <TT>Trust</TT> to a positive integer N
+which means that asserted primes less than N are not checked. This
+slightly reduces the time for the verification, but more importantly,
+it greatly reduces the output of <TT>ShowCertificate</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "1251">IsProbablePrime(n: parameter) : RngIntElt -&gt; BoolElt</A></H5>
+<H5>IsProbablyPrime(n: parameter) : RngIntElt -&gt; BoolElt</H5>
+
+<PRE>    Bases: RngIntElt                    Default: 20</PRE>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the integer n is a probable prime.
+More precisely, the function returns <TT>true</TT> if and only if 
+either n is prime for n &lt; 34.10<sup>13</sup>, or n 
+is a strong pseudoprime for 20 random bases b with 1 &lt; b &lt; n.
+By setting the optional parameter <TT>Bases</TT> to some value
+B, the number of random bases used is B instead of 20.
+</BLOCKQUOTE>
+<H5><A NAME = "1252">IsPrimePower(n) : RngIntElt -&gt; BoolElt, RngIntElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the integer n is a prime power; that is, 
+if n equals p<sup>k</sup> for some prime p and exponent k&ge;1.
+If this is the case, the prime p and the exponent k are 
+also returned, Note that the primality of p is rigorously 
+proven.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "1253">Example <TT>RngInt_RepUnits (H18E6)</TT></A></H3>
+This piece of code uses 5 Miller-Rabin tests to find the next
+probable <I>repunit</I>-prime (consisting of all 1's as decimal digits),
+using the fact that primes of this form consist of a prime number of
+digits:
+<P>
+<P>
+<PRE>
+&gt; NextPPRepunit := function(nn)
+&gt;    n := nn;
+&gt;    repeat
+&gt;       n := NextPrime(n);
+&gt;    until IsProbablePrime( (10^n-1) div 9 : Bases := 5);
+&gt;    return n;
+&gt; end function;
+</PRE>
+The first few cases are easy:
+<P>
+<P>
+<PRE>
+&gt; NextPPRepunit(1);
+2
+&gt; NextPPRepunit(2);
+19
+&gt; NextPPRepunit(19);
+23
+&gt; NextPPRepunit(23);
+317
+</PRE>
+So we found a 317 digit prime (although we should check genuine primality,
+using <TT>IsPrime</TT>)!
+We leave it to the reader to find the next (it has more than 1000 decimal
+digits).
+<HR>
+<H4><A NAME = "1254">Other Functions Relating to  Primes</A></H4>
+
+<P>
+<P>
+The functions <TT>NextPrime</TT> and <TT>PreviousPrime</TT> can be used
+to find primes in the neighbourhood of a given integer. After sieving out
+only multiples of very small primes, the remaining integers are tested
+for primality in order. Again, a rigorous method is used unless the
+user flags that probable primes suffice.
+<P>
+The <TT>PrimeDivisors</TT> function is different from all other functions
+in this section since it requires the factorization of its argument.
+
+
+<H5><A NAME = "1255">NextPrime(n) : RngIntElt -&gt; RngIntElt</A></H5>
+<H5>NextPrime(n: parameter) : RngIntElt -&gt; RngIntElt</H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+The least prime number greater than n, where n is a
+non-negative integer.
+The primality is proved.
+The optional boolean parameter `Proof' 
+(<TT>Proof := true</TT> by default) can be set to
+<TT>Proof := false</TT>, to indicate that the next
+probable prime (of order 20) may be returned.
+</BLOCKQUOTE>
+<H5><A NAME = "1256">PreviousPrime(n) : RngIntElt -&gt; RngIntElt</A></H5>
+<H5>PreviousPrime(n: parameter) : RngIntElt -&gt; RngIntElt</H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+The greatest prime number less than n, where n&ge;3 is an
+integer.
+The primality is proved.
+The optional boolean parameter `Proof' 
+(<TT>Proof := true</TT> by default) can be set to
+<TT>Proof := false</TT>, to indicate that the previous
+probable prime (of order 20) may be returned.	
+</BLOCKQUOTE>
+<H5><A NAME = "1257">PrimesUpTo(B) : RngIntElt -&gt; [RngIntElt]</A></H5>
+<BLOCKQUOTE>
+This function lists the primes up to (and including) the (positive) bound B.
+The algorithm is not super-optimised, but is reasonable.
+</BLOCKQUOTE>
+<H5><A NAME = "1258">PrimesInInterval(b, e) : RngIntElt, RngIntElt -&gt; [RngIntElt]</A></H5>
+<BLOCKQUOTE>
+This function lists the primes in the interval from b to e,
+including the endpoints. The algorithm is not very optimised.
+</BLOCKQUOTE>
+<H5><A NAME = "1259">NthPrime(n) : RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a number n, this function returns the nth prime.
+This is implemented for primes up to 10<sup>10</sup>.
+</BLOCKQUOTE>
+<H5><A NAME = "1260">RandomPrime(n: parameter) : RngIntElt -&gt; RngIntElt</A></H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+A random prime integer m such that 0 &lt; m &lt; 2<sup>n</sup>, where n is
+a small non-negative integer.  The function always returns 0 for
+n=0 or n=1.  
+A rigorous method will be used to check primality,
+unless m &gt; 34 .10<sup>13</sup> and the
+optional parameter `Proof' is set to <TT>Proof := false</TT>,
+in which case the result indicates that m is a probable
+prime (of order 20).
+</BLOCKQUOTE>
+<H5><A NAME = "1261">RandomPrime(n, a, b, x: parameter) :RngIntElt, RngIntElt, RngIntElt -&gt; BoolElt, RngIntElt</A></H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Tries up to x iterations to find a random prime integer m
+congruent to a modulo b such that 0 &lt; m &lt; 2<sup>n</sup>.
+Returns true, m if found, or false if not found.
+n must be larger than 0.  a must be between 0 and b - 1
+and b must be larger than 0.
+A rigorous method will be used to check primality,
+unless m &gt; 34 .10<sup>13</sup> and the
+optional parameter `Proof' is set to <TT>Proof := false</TT>,
+in which case the result indicates that m is a probable
+prime (of order 20).
+</BLOCKQUOTE>
+<H5><A NAME = "1262">PrimeBasis(n) : RngIntElt -&gt; [RngIntElt]</A></H5>
+<H5>PrimeDivisors(n) : RngIntElt -&gt; [RngIntElt]</H5>
+<BLOCKQUOTE>
+A sequence containing the distinct prime divisors of the positive integer |n|.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text165.htm">[Next]</A><A  HREF = "text163.htm">[Prev]</A> <A  HREF = "text165.htm">[Right]</A> <A  HREF = "text163.htm">[Left]</A> <A  HREF = "text155.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

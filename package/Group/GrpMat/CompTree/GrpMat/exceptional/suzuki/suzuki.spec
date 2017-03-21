@@ -1,0 +1,16 @@
+{
+	magma
+	{
+		suzuki.m
+		conjugate.m
+		tensor.m
+		standard.m
+		sylow.m
+		trick.m
+		membership.m
+		crosschar.m
+		maximals.m
+		elements.m
+		bn.m
+	}
+}

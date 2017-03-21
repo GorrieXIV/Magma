@@ -1,0 +1,500 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Number Field Lattices</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text326.htm">[Next]</A><A  HREF = "text324.htm">[Prev]</A> <A  HREF = "text326.htm">[Right]</A> <A  HREF = "text324.htm">[Left]</A> <A  HREF = "text323.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "3107">Number Field Lattices</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text325.htm#3108">Creation of Number Field Lattices</A>
+<LI> <A  HREF = "text325.htm#3127">Attributes of Number Field Lattices</A>
+<LI> <A  HREF = "text325.htm#3145">Predicates on Number Field Lattices</A>
+<LI> <A  HREF = "text325.htm#3153">Totally Positive Definite Lattices</A>
+</UL>
+<H4><A NAME = "3108">Creation of Number Field Lattices</A></H4>
+
+<P>
+<P>
+<P>
+A lattice L over a number field K is a torsion-free Z<sub>K</sub>-module
+contained in K<sup>n</sup>, together with an inner product having image in K.
+Note that the inner product is not required to be positive definite.
+Here n is the degree (of the vector space), and the rank of the module
+is referred to as the rank or dimension of the lattice.
+<P>
+Every such lattice admits a pseudobasis, which is an independent
+sequence of vectors vec b<sub>i</sub> and a sequence of nonzero fractional
+ideals J<sub>i</sub> such that every element in L can be written
+as &sum;<sub>i</sub> a<sub>i</sub>vec b<sub>i</sub> where a<sub>i</sub>&isin;J<sub>i</sub>. A <B>simple</B> lattice is one
+for which all the J<sub>i</sub>=(1), and lattices over principal ideal domains 
+are always free (and can be made simple by rescaling).
+<P>
+A number field lattice in Magma is specified by providing: a sequence of 
+vectors; an optional sequence of fractional ideals; and an optional inner 
+product, which can be given either on K<sup>n</sup> or as Gram matrix on the 
+given vectors.
+<P>
+The Handbook chapter Modules over Dedekind Domains (Section 
+<A  HREF = "text586.htm#6220">MODULES OVER DEDEKIND DOMAINS</A>), is closely related and functionality exists 
+for passing to and from such modules and number field lattices.
+
+
+<H5><A NAME = "3109">NumberFieldLattice(K, d) : FldNum, RngIntElt -&gt; LatNF</A></H5>
+
+<PRE>    Gram: Mtrx                          Default: IdentityMatrix(K,d)</PRE>
+<BLOCKQUOTE>
+Given a number field K and a degree d, create the standard lattice
+(with the identity as the basis). The <TT>Gram</TT> vararg (which must be
+invertible) can be used to specify the inner product on the basis vectors.
+</BLOCKQUOTE>
+<H5><A NAME = "3110">NumberFieldLattice(S) : [ModTupFldElt] -&gt; LatNF</A></H5>
+
+<PRE>    InnerProduct: Mtrx                  Default: 0</PRE>
+
+<PRE>    Gram: Mtrx                          Default: 0</PRE>
+
+<PRE>    Ideals: SeqEnum                     Default: []</PRE>
+
+<PRE>    Independent: BoolElt                Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a sequence of vectors S over a number field,
+return the number field lattice determined by them.
+The inner product matrix on the ambient space may be given,
+or alternatively a Gram matrix on the given vectors (a check is made
+if this is consistent if the vectors are dependent).
+In either case, the pseudoGram matrix on the resulting
+pseudobasis must be invertible.
+If neither is given, the trivial (identity) inner product is assumed.
+The vectors can be dependent, unless the <TT>Independent</TT> vararg
+is set to <TT>true</TT>.
+<P>
+The sequence of ideals can be used to specify a non-simple lattice,
+as indicated in the Introduction above.
+<P>
+Note that Magma attempts to retain the given basis vectors (unless they
+are dependent), and does not apply reduction (either echelonisation or 
+LLL-reduction), as such algorithms may not be available.
+</BLOCKQUOTE>
+<H5><A NAME = "3111">NumberFieldLattice(D) : ModDed -&gt; LatNF</A></H5>
+<BLOCKQUOTE>
+Given a Dedekind module D over a number field,  return the associated
+number field lattice, obtained by taking the <TT>PseudoMatrix</TT> containing
+its pseudobasis and fractional ideals. The module must not have a denominator
+(essentially meaning that it was not created by a quotient construction),
+so that it will be torsion-free.
+If the resulting lattice is free, it will be written in simple form.
+</BLOCKQUOTE>
+<H5><A NAME = "3112">Module(L) : LatNF -&gt; ModDed</A></H5>
+
+<PRE>    IP: BoolElt                         Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+The number field lattice L is turned into a Dedekind module,
+by taking as a pseudomatrix the lattice pseudobasis and the coefficient ideals.
+This requires the ambient inner product to be known, unless the <TT>IP</TT>
+vararg is <TT>false</TT> (when the resulting module has the trivial inner
+product on the ambient).
+</BLOCKQUOTE>
+<H5><A NAME = "3113">sub&lt;L | E&gt; : LatNF, SeqEnum -&gt; LatNF</A></H5>
+<BLOCKQUOTE>
+Given a number field lattice L and a suitable sequence E, return the
+desired sublattice. The sequence E may comprise lattice vectors (including
+those from a different number field lattice), sequences of elements
+whose length equals the degree, or vectors of the appropriate degree.
+</BLOCKQUOTE>
+<H5><A NAME = "3114">A + B : LatNF, LatNF -&gt; LatNF</A></H5>
+<BLOCKQUOTE>
+Given two number field lattices A and B of the same degree over the same 
+base ring, determine their join. If the pseudobasis vectors for A and B are
+independent, then the new lattice will have this union for its pseudobasis.
+The lattices must have the same inner product on the ambient space, and it
+must be known unless the K-span of either A and B contains the other
+(when the pseudoGram matrices are checked for consistency).
+</BLOCKQUOTE>
+<H5><A NAME = "3115">A meet B : LatNF, LatNF -&gt; LatNF</A></H5>
+<BLOCKQUOTE>
+Given two number field lattices  A and B having the same degree over the 
+same base ring, determine their intersection. The lattices must have the 
+same inner product (if known) on the ambient space. If one lattice is contained
+in the other, then it will be returned in its original form.
+</BLOCKQUOTE>
+<H5><A NAME = "3116">r * L : RngElt, LatNF -&gt; LatNF</A></H5>
+<H5>L * r : Lat NF, LatNF -&gt; LatNF</H5>
+<H5>L / r : Lat NF, LatNF -&gt; LatNF</H5>
+<H5>BasisScaling(L, r) : LatNF, RngElt -&gt; LatNF</H5>
+<BLOCKQUOTE>
+Given a number field lattice L and a nonzero scalar r coercible into the
+number field, return the lattice obtained by multiplying (or dividing) the 
+basis vectors by the scalar.
+</BLOCKQUOTE>
+<H5><A NAME = "3117">InnerProductScaling(L, r) : LatNF, RngElt -&gt; LatNF</A></H5>
+<BLOCKQUOTE>
+Given a number field lattice L and a nonzero scalar coercible r into the
+number field, return the lattice obtained by multiplying the inner product
+matrix (or Gram matrix if not available) by the scalar.
+</BLOCKQUOTE>
+<H5><A NAME = "3118">J * L : RngOrdFracIdl, LatNF -&gt; LatNF</A></H5>
+<H5>L * J: LatNF, RngOrdFracIdl -&gt; LatNF</H5>
+<H5>L / J: LatNF, RngOrdFracIdl -&gt; LatNF</H5>
+<BLOCKQUOTE>
+Given a number field lattice L and a nonzero fractional ideal J, return the
+number field lattice obtained by multiplying/dividing all the coefficient
+ideals by the given ideal.
+</BLOCKQUOTE>
+<H5><A NAME = "3119">T * L : Mtrx, LatNF -&gt; LatNF</A></H5>
+<BLOCKQUOTE>
+Given an invertible transformation matrix T of the same dimension
+as the given number field lattice L, return the lattice obtained
+by the given basis transformation.
+In other words, return the lattice {&sum;<sub>i</sub> a<sub>i</sub> T vec b<sub>i</sub> : a<sub>i</sub>&isin;J<sub>i</sub>}.
+Note that T does not need to be integral.
+</BLOCKQUOTE>
+<H5><A NAME = "3120">TJ * L : PMat, LatNF -&gt; LatNF</A></H5>
+<BLOCKQUOTE>
+Given a pseudomatrix TJ with invertible transformation matrix T
+and nonzero coefficient ideals J, return the number field lattice
+obtained from number field lattice L by applying T to L`s pseudobasis 
+and multiplying the coefficient ideals I<sub>i</sub> of L accordingly.
+In other words the new lattice is {&sum;<sub>i</sub> a<sub>i</sub> T vec b<sub>i</sub> : a<sub>i</sub>&isin;I<sub>i</sub>J<sub>i</sub>}.
+Note that T does not need to be integral.
+</BLOCKQUOTE>
+<H5><A NAME = "3121">L * T : LatNF, Mtrx -&gt; LatNF</A></H5>
+<BLOCKQUOTE>
+Given an invertible transformation matrix T of the same degree
+as the given number field lattice L, return the lattice obtained
+by the given basis transformation on the ambient space.
+If the transformation does not map the pseudobasis span
+onto itself, the lattice must have an ambient inner product.
+Note that T does not need to be integral.
+</BLOCKQUOTE>
+<H5><A NAME = "3122">DirectSum(A, B) : LatNF, LatNF -&gt; LatNF</A></H5>
+<BLOCKQUOTE>
+Given two number field lattices A and B over the same base ring, 
+determine their direct sum. The underlying basis vectors are retained.
+Also available on a nonempty sequence.
+</BLOCKQUOTE>
+<H5><A NAME = "3123">OrthogonalComplement(L, v) : LatNF, LatNFElt -&gt; LatNF</A></H5>
+<H5>OrthogonalComplement(L, S) : LatNF, LatNF -&gt; LatNF</H5>
+<BLOCKQUOTE>
+Given two number field lattices S&sub;L,
+or a vector v in a lattice L, determine the orthogonal complement.
+</BLOCKQUOTE>
+<H5><A NAME = "3124">Dual(L) : LatNF -&gt; LatNF</A></H5>
+<BLOCKQUOTE>
+Given a number field lattice L, return its dual, given by the pseudobasis
+G<sup> - 1</sup>B where B and G are the pseudobasis and pseudoGram matrix
+for L, with coefficient ideals J<sub>i</sub><sup> - 1</sup> for all i. The resulting
+pseudoGram matrix will be G<sup> - 1</sup>, while the inner product (if known)
+is preserved.
+</BLOCKQUOTE>
+<H5><A NAME = "3125">SimpleLattice(L) : LatNF -&gt; LatNF</A></H5>
+<BLOCKQUOTE>
+Given a number field lattice L all of whose coefficient ideals are principal,
+return the lattice obtained by multiplying the basis vectors by generators.
+Alternatively, if the lattice is free but not already in principal form,
+compute the <TT>SteinitzForm</TT> of the Dedekind module to get principal
+coefficient ideals, and then proceed as above. There will always be
+an ambiguity with choosing generators of the principal ideals.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3126">Example <TT>LatNF_creation-examples (H31E1)</TT></A></H3>
+We give some examples of lattice creation.
+<P>
+<P>
+<P>
+<PRE>
+&gt; K&lt;s5&gt; := NumberField(Polynomial([-5,0,1])); // Q(sqrt(5))
+&gt; L1 := NumberFieldLattice(K,3);
+&gt; G := Matrix(3,3,[K | 1,2,3, 2,s5,-1, 3,-1,0]);
+&gt; L2 := NumberFieldLattice(K,3 : Gram:=G); // with Gram matrix
+&gt; v1 := L1![1,2,3];
+&gt; v2 := L1![K.1,-1,2];
+&gt; L3 := NumberFieldLattice([Vector(v1),Vector(v2)]); // on vectors
+&gt; L4 := sub&lt;L1|[v1,v2]&gt;; // on LatNFElt's, same as L3
+&gt; M := Module(L3); // create the Dedekind module
+&gt; L5 := NumberFieldLattice(M); // and back to the NF lattice
+&gt; D := Dual(L3);
+&gt; L6 := D+L3;
+&gt; S := L3/K.1; // scaling
+&gt; L7 := S meet D; L7;
+Number field lattice over Number Field with defining polynomial x^2 - 5
+over the Rational Field with basis matrix
+[-3*s5 + 2         7         0]
+[  -s5 + 1         3         1]
+&gt; T3 := Matrix(3,3,[K | 1,2,3, 4,5,6, K.1,-1,-2]);
+&gt; L8 := L7*T3; // transform is same degree, operate on right
+&gt; T2 := Matrix(2,2,[K | 1,2, K.1,-1]);
+&gt; L9 := T2*L7; // lattice is 2-dim, operate on left (pseudobasis)
+&gt; assert Dimension(L9) eq 2 and Degree(L9) eq 3;
+&gt; DS := DirectSum(L2,L9); // 5-dimensional
+&gt; assert Dimension(DS) eq 3+2;
+&gt; O1 := OrthogonalComplement(L1,L3);
+&gt; O2 := OrthogonalComplement(L1,v1);
+&gt; O1;
+Number field lattice over Number Field with defining polynomial x^2 - 5
+over the Rational Field with basis matrix
+[  1/2*(7*s5 + 7)    1/2*(s5 + 13) 1/2*(-3*s5 - 11)]
+&gt; O2;
+Number field lattice over Number Field with defining polynomial x^2 - 5
+over the Rational Field with basis matrix
+[       -s5 - 1   1/2*(s5 + 1)              0]
+[1/2*(3*s5 + 3)              0  1/2*(-s5 - 1)]
+</PRE>
+<HR>
+<H4><A NAME = "3127">Attributes of Number Field Lattices</A></H4>
+
+
+
+<H5><A NAME = "3128">Basis(L) : LatNF -&gt; [ModTupFldElt]</A></H5>
+<H5>BasisMatrix(L) : LatNF -&gt; Mtrx</H5>
+<BLOCKQUOTE>
+Given the simple number field lattice L, return the basis,
+either as a sequence of vectors, or as a row matrix.
+</BLOCKQUOTE>
+<H5><A NAME = "3129">PseudoBasis(L) : LatNF -&gt; [ModTupFldElt]</A></H5>
+<H5>PseudoBasisMatrix(L) : LatNF -&gt; Mtrx</H5>
+<BLOCKQUOTE>
+Given the number field lattice L, return the basis of its pseudobasis,
+either as a sequence of vectors, or as a row matrix.
+</BLOCKQUOTE>
+<H5><A NAME = "3130">PseudoMatrix(L) : LatNF -&gt; PMat</A></H5>
+<BLOCKQUOTE>
+Given the number field lattice L, return the pseudomatrix of its
+coefficient ideals and pseudobasis.
+</BLOCKQUOTE>
+<H5><A NAME = "3131">CoefficientIdeals(L) : LatNF -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given the number field lattice L, return its coefficient ideals.
+</BLOCKQUOTE>
+<H5><A NAME = "3132">Generators(L) : LatNF -&gt; SeqEnum</A></H5>
+<H5>GeneratorMatrix(L) : LatNF -&gt; Mtrx</H5>
+<BLOCKQUOTE>
+Given the number field lattice L, return a sequence of generators.
+If the lattice is simple, these are just the standard basis vectors.
+</BLOCKQUOTE>
+<H5><A NAME = "3133">InnerProductMatrix(L) : LatNF -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given the number field lattice L, return its inner product matrix.
+An error occurs if this is not known (for instance, when the Gram matrix
+was prescribed instead).
+</BLOCKQUOTE>
+<H5><A NAME = "3134">MakeAmbientInnerProduct(~L, IP) : LatNF -&gt;</A></H5>
+<BLOCKQUOTE>
+Given the number field lattice L having no ambient inner product,
+attach the given matrix IP as the inner product matrix for L. 
+The matrix IP is checked to be consistent with the given pseudobasis 
+and pseudoGram matrices.
+</BLOCKQUOTE>
+<H5><A NAME = "3135">GramMatrix(L) : LatNF -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a simple number field lattice L, return its Gram matrix.
+</BLOCKQUOTE>
+<H5><A NAME = "3136">PseudoGramMatrix(L) : LatNF -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a number field lattice L, return the Gram matrix of its pseudobasis.
+</BLOCKQUOTE>
+<H5><A NAME = "3137">Rank(L) : LatNF -&gt; RngIntElt</A></H5>
+<H5>Dimension(L) : LatNF -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The rank (or dimension) of the number field lattice L.
+</BLOCKQUOTE>
+<H5><A NAME = "3138">Degree(L) : LatNF -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The degree (that is, dimension of the underlying ambient space)
+of the number field lattice L.
+</BLOCKQUOTE>
+<H5><A NAME = "3139">BaseRing(L) : LatNF -&gt; FldNum</A></H5>
+<BLOCKQUOTE>
+The number field over which the number field lattice L is defined.
+</BLOCKQUOTE>
+<H5><A NAME = "3140">Determinant(L) : LatNF -&gt; FldNumElt</A></H5>
+<BLOCKQUOTE>
+The determinant of the Gram matrix of the simple number field lattice L. 
+The determinant is well-defined up to squares of units on free lattices 
+by first applying <TT>SimpleLattice</TT> if necessary.
+</BLOCKQUOTE>
+<H5><A NAME = "3141">Discriminant(L) : LatNF -&gt; RngOrdFracIdl</A></H5>
+<H5>Volume(L) : LatNF -&gt; RngOrdFracIdl</H5>
+<BLOCKQUOTE>
+The volume of the number field lattice L, which is the ideal
+generated by the determinants of all free sublattices.
+It is defined by (det)(G)&prod;<sub>i</sub> J<sub>i</sub><sup>2</sup>
+where G is the pseudoGram matrix.
+</BLOCKQUOTE>
+<H5><A NAME = "3142">Norm(L) : LatNF -&gt; RngOrdFracIdl</A></H5>
+<BLOCKQUOTE>
+The norm of the lattice L, which is the ideal generated by the fractional ideals
+&eta;<sub>ij</sub>G<sub>ij</sub>J<sub>i</sub>J<sub>j</sub> where G is the pseudoGram matrix,
+and &eta;<sub>ij</sub> is 1 if i=j and 2 otherwise.
+The norms of all lattice vectors are contained in this ideal.
+</BLOCKQUOTE>
+<H5><A NAME = "3143">Scale(L) : LatNF -&gt; RngOrdFracIdl</A></H5>
+<BLOCKQUOTE>
+The scale of the lattice L,  which is the ideal generated by the fractional 
+ideals G<sub>ij</sub>J<sub>i</sub>J<sub>j</sub>, where G is the pseudoGram matrix.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3144">Example <TT>LatNF_attr-examples (H31E2)</TT></A></H3>
+Here are examples of getting attributes of number field lattices.
+<P>
+<P>
+<P>
+<PRE>
+&gt; K := NumberField(Polynomial([5,0,1])); // Q(sqrt(-5))
+&gt; O := Integers(K);
+&gt; p2 := Factorization(2*O)[1][1]; // nonprincipal
+&gt; Js := [(2*O)/p2,2*O];
+&gt; v1 := Vector([K!1,0,0]);
+&gt; v2 := Vector([K!0,K.1,0]);
+&gt; L1 := NumberFieldLattice([v1,v2] : Ideals:=Js);
+&gt; assert not IsFree(L1); // not free
+&gt; assert not IsSimple(L1); // and not simple
+&gt; PseudoBasisMatrix(L1); // BasisMatrix does not work
+[  1   0   0]
+[  0 K.1   0]
+&gt; PseudoGramMatrix(L1);
+[ 1  0]
+[ 0 -5]
+&gt; CoefficientIdeals(L1);
+[ Ideal of O Basis: [1 1]
+                    [0 2],
+  Principal Ideal of O, Generator: [2, 0] ]
+&gt; Generators(L1); // three of these, though L1 has dimension 2
+[
+    ( -3*$.1 - 7 -2*$.1 + 50           0),
+    (  44*$.1 + 1100 1770*$.1 - 4130               0),
+    ( 176*$.1 + 1628 2242*$.1 - 7080               0)
+]
+&gt; assert #$1 eq 3 and Dimension(L1) eq 2;
+&gt; assert Degree(L1) eq 3 and Rank(L1) eq 2;
+&gt; assert BaseRing(L1) eq K;
+&gt; Discriminant(L1); // same as Volume
+Principal Ideal Generator: [-40, 0]
+&gt; Norm(K.1*L1);
+Principal Ideal of O, Generator: [10, 0]
+&gt; // now we take the direct sum of L1 with itself
+&gt; // which is free, and thus we can use other intrinsics
+&gt; D := DirectSum([L1,L1]);
+&gt; assert IsFree(D); // D itself is not in simple form
+&gt; Determinant(D); // works, as D is free
+1600
+&gt; S := SimpleLattice(D);
+&gt; BasisMatrix(S); // works, while for D would not
+[-3*K.1 - 5 -4*K.1 + 20 0 0 0 0]
+[12*K.1 - 84 -100*K.1 - 20 0 5*K.1 - 1 0 0]
+[-72*K.1 + 54 100*K.1 + 370 0 -7*K.1 - 17 -8*K.1 + 50 0]
+[1080*K.1 - 864 -1560*K.1 - 5520 0 108*K.1 + 252 114*K.1 - 760 0]
+&gt; assert #Generators(S) eq 4; // same as the basis vectors
+</PRE>
+<HR>
+<H4><A NAME = "3145">Predicates on Number Field Lattices</A></H4>
+
+
+
+<H5><A NAME = "3146">IsSimple(L) : LatNF -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> when all the coefficient ideals of number field lattice L are trivial.
+</BLOCKQUOTE>
+<H5><A NAME = "3147">IsFree(L) : LatNF -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the number field lattice L is free. Freeness
+is determined by determining whether the Steinitz class of the 
+associated Dedekind module is principal.
+</BLOCKQUOTE>
+<H5><A NAME = "3148">IsTotallyPositiveDefinite(L) : LatNF -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the number field lattice L is totally positive 
+definite (which necessarily includes the base ring being totally real).
+</BLOCKQUOTE>
+<H5><A NAME = "3149">A eq B : LatNF, LatNF -&gt; BoolElt</A></H5>
+<H5>A ne B : LatNF, LatNF -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> (<TT>false</TT>) if the two number field lattices A and B
+are equal (not equal).  Two number field lattices are said to be equal 
+if they have the same degree, have compatible inner products and/or 
+pseudoGram matrices, and are subsets of each other.
+</BLOCKQUOTE>
+<H5><A NAME = "3150">IsIdentical(A, B) : LatNF, LatNF -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if the two number field lattices A and B are identical.
+Two number field lattices are said to be identical if they have the 
+same degree, rank, basis matrix, Gram matrix, and inner product matrix 
+if given.
+</BLOCKQUOTE>
+<H5><A NAME = "3151">IsSublattice(S, L) : LatNF, LatNF -&gt; BoolElt, Mtrx</A></H5>
+<H5>S subset L : LatNF, LatNF -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Given two lattices S and L of the same degree over the same 
+number field and with the same ambient inner product (if given),
+determine whether the first is a sublattice of the second.
+</BLOCKQUOTE>
+<H5><A NAME = "3152">IsModular(L) : LatNF -&gt; BoolElt, RngOrdFracIdl</A></H5>
+<BLOCKQUOTE>
+Determine whether the <TT>Dual</TT> of the lattice L is a scaling of 
+the original, and if so, return the scaling factor.
+</BLOCKQUOTE>
+<H4><A NAME = "3153">Totally Positive Definite Lattices</A></H4>
+
+<P>
+<P>
+<P>
+There is some additional functionality for totally positive definite
+lattices (which are necessarily over totally real fields).
+
+
+<H5><A NAME = "3154">AutomorphismGroup(L) : LatNF -&gt; GrpMat</A></H5>
+
+<PRE>    NaturalAction: BoolElt              Default: <TT>false</TT></PRE>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a number field lattice L, determine its automorphism group
+(returned a matrix group which stabilizes the Gram matrix).
+This relies on vector enumeration and can be expensive to compute.
+<P>
+If the <TT>NaturalAction</TT> vararg is set, then the automorphisms
+returned act on the ambient space. Otherwise they act on the pseudobasis.
+When the rank is less than the degree, the pseudobasis will be artificially
+extended to full rank, and the automorphisms will fix each vector
+in the extended part.
+<P>
+If <TT>Check</TT> is <TT>true</TT>, then Magma checks that each automorphism
+group generator maps L to itself.
+The <TT>Rank</TT> must be positive unless <TT>NaturalAction</TT> is <TT>true</TT>,
+in which case the <TT>Degree</TT> of the lattice must be nonzero.
+</BLOCKQUOTE>
+<H5><A NAME = "3155">IsIsometric(A, B) : LatNF, LatNF -&gt; BoolElt, Mtrx</A></H5>
+
+<PRE>    NaturalAction: BoolElt              Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given two totally positive definite number field lattices A and B over 
+the same (totally real) number field, determine if they are isometric.
+If so, also return a transformation matrix on pseudobases,
+unless <TT>NaturalAction</TT> is set, in which case the transformation
+is on the ambient, and the given lattices must have the same ambient
+inner product if known.
+This function can be costly to evaluate, as it relies on vector enumeration.
+</BLOCKQUOTE>
+<H5><A NAME = "3156">Sphere(L, x) : LatNF, RngElt -&gt; Setq</A></H5>
+
+<PRE>    Negatives: BoolElt                  Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a totally positive definite number field lattice L and a field element
+X that is either totally positive or zero, determine the set of vectors
+having that norm. Unless <TT>Negatives</TT> is <TT>false</TT>, the returned set
+contains both an element and its negation.
+<P>
+Examples of these are given in the final section of this chapter.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text326.htm">[Next]</A><A  HREF = "text324.htm">[Prev]</A> <A  HREF = "text326.htm">[Right]</A> <A  HREF = "text324.htm">[Left]</A> <A  HREF = "text323.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

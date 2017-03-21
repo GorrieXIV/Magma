@@ -1,0 +1,363 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Construction of a Rewrite  Monoid</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text898.htm">[Next]</A><A  HREF = "text896.htm">[Prev]</A> <A  HREF = "text898.htm">[Right]</A> <A  HREF = "text896.htm">[Left]</A> <A  HREF = "text895.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "10157">Construction of a Rewrite  Monoid</A></H3>
+
+
+
+<H5><A NAME = "10158">RWSMonoid(Q: parameters) : MonFP -&gt; MonRWS</A></H5>
+<BLOCKQUOTE>
+The Knuth--Bendix completion procedure for monoids is run, with the relations
+of Q taken as the initial reduction rules for the procedure. Regardless of
+whether or not the completion procedure succeeds, the result will be
+a rewrite monoid, M, containing a reduction machine and a sequence of 
+reduction relations. If the procedure succeeds M will be marked as confluent,
+and the word problem for M is therefore decidable. If, as is very likely, the
+procedure fails then M will be marked as non-confluent. In this case M will
+contain both the reduction relations and the reduction machine computed up to 
+the point of failure.
+<P>
+As the Knuth--Bendix procedure will more often than not run forever,
+some conditions must be specified under which it will stop. These take the 
+form of limits that are placed on certain variables, such as the number of 
+reduction relations. If any of these limits are exceeded during a run of the
+completion procedure it will fail, returning a non-confluent rewrite monoid.
+The optimal values for these limits varies from example to example.
+<P>
+<P>
+<PRE>
+     MaxRelations: RngIntElt             Default: 32767
+</PRE>
+Limit the maximum number of reduction equations to <TT>MaxRelations</TT>.
+<P>
+<P>
+<PRE>
+     GeneratorOrder: SeqEnum             Default: 
+</PRE>
+Give an ordering for the generators. This ordering affects the ordering 
+of words in the alphabet. If not specified the ordering defaults
+to the order induced by Q's generators, that is [g<sub>1</sub>, ..., g<sub>n</sub>]
+where g<sub>1</sub>, ..., g<sub>n</sub> are the generators of Q.
+<P>
+<P>
+<PRE>
+     Ordering: MonStgElt                 Default: "ShortLex"
+</PRE>
+<P>
+<PRE>
+     Levels: SeqEnum                     Default: 
+</PRE>
+<P>
+<PRE>
+     Weights: SeqEnum                    Default: 
+</PRE>
+<TT>Ordering := "ShortLex"</TT>:
+Use the short-lex ordering on strings.
+Shorter words come before longer, and for words of equal length
+lexicographical ordering is used, using the given ordering of the generators.
+<P>
+<P>
+<TT>Ordering := "Recursive" | "RTRecursive"</TT>:
+Use a recursive ordering on strings. 
+There are various ways to define this. Perhaps the quickest is as
+follows. Let u and v be strings in the generators.
+If one of u and v, say v,  is empty, then u &ge;v.
+Otherwise, let u=u' a and v=v' b,
+where a and b are generators.
+Then u &gt; v if and only if one of the following holds:
+<P>
+<P>
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>a = b and u' &gt; v';
+<DT>(ii)</DT><DD>a &gt; b and u &gt; v';
+<DT>(iii)</DT><DD>b &gt; a and u' &gt; v.
+<P>
+<P>
+</DL>
+The <TT>RTRecursive</TT> ordering is similar to the <TT>Recursive</TT> ordering, but 
+with u=au' and v=bv'.  Occasionally one or the other runs
+significantly quicker, but usually they perform similarly.
+<P>
+<P>
+<TT>Ordering := "WTShortLex"</TT>:
+Use a weighted-lex ordering.
+<TT>Weights</TT> should be a sequence of non-negative integers,
+with the i-th element of <TT>Weights</TT> giving the weight of the i-the
+generator. The length of <TT>Weights</TT> must equal the number of generators.
+The length of words in the generators is then computed by adding up
+the weights of the generators in the words. Otherwise, ordering is as for 
+short-lex. 
+<P>
+<P>
+<TT>Ordering := "Wreath"</TT>:
+Use a wreath-product ordering.
+<TT>Levels</TT> should be a sequence of non-negative integers,
+with the i-th element of <TT>Levels</TT> giving the level of the i-the
+generator. The length of <TT>Levels</TT> must equal the number of generators.
+In this ordering, two strings involving generators of the same level are
+ordered using short-lex, but all strings in generators of a higher level are
+larger than those involving generators of a lower level. That is not a
+complete definition; one can be found in <A  HREF = "text894.htm#bib_sims_fpgroups">[Sim94, pp. 46--50]</A>.
+Note that the recursive ordering is the special case in which the level
+of generator number i is i.
+<P>
+<P>
+<PRE>
+     TidyInt: RngIntElt                  Default: 100
+</PRE>
+After finding <TT>TidyInt</TT> new reduction equations, the completion procedure interrupts 
+the main process of looking for overlaps, to tidy up the existing 
+set of equations. This will eliminate any redundant equations performing
+some reductions on their left and right hand sides to make the set as
+compact as possible. (The point is that equations discovered later often
+make older equations redundant or too long.) 
+<P>
+<P>
+<PRE>
+     RabinKarp: Tup                      Default: 
+</PRE>
+Use the Rabin-Karp algorithm for word-reduction on words having length at least
+l, provided that there are at least n equations,
+where <TT>RabinKarp := &lt;l, n&gt;</TT>. This uses less space than 
+the default reduction automaton, but it is distinctly slower, so it should only
+be used when seriously short of memory. Indeed this option is only really
+useful for examples in which collapse occurs - i.e. at some intermediate
+stage of the calculation there is a very large set of equations, which later
+reduces to a much smaller confluent set. Collapse is not
+uncommon when analysing pathological presentations of finite groups, and
+this is one situation where the performance of the Knuth--Bendix algorithm can
+be superior to that of Todd-Coxeter coset enumeration. The best setting for 
+<TT>RabinKarp</TT> varies from example to example - generally speaking, the 
+smaller l is, the slower things will be, so set it as high as possible 
+subject to not running out of memory. The number of equations n should be 
+set higher than the expected final number of equations.
+<P>
+<P>
+<PRE>
+     MaxStates: RngIntElt                Default: 
+</PRE>
+Limit the maximum number 
+of states of the finite state automaton used for word reduction to <TT>MaxStates</TT>. 
+By default 
+there is no limit, and the space allocated is increased dynamically as 
+required. The space needed for the reduction automaton can also be restricted 
+by using the <TT>RabinKarp</TT> parameter. This limit is not usually needed.
+<P>
+<P>
+<PRE>
+     MaxReduceLen: RngIntElt             Default: 32767
+</PRE>
+Limit the maximum allowed length that a word can reach during reduction to 
+<TT>MaxReduceLen</TT>.  It is only likely to be exceeded when using the recursive 
+ordering on words.  This limit is usually not needed.
+<P>
+<P>
+<PRE>
+     ConfNum: RngIntElt                  Default: 500
+</PRE>
+If <TT>ConfNum</TT> overlaps are processed and no new equations are discovered, 
+then the overlap searching process is interrupted, and a fast check for
+confluence performed on the existing set of equations.  Doing this too often 
+wastes time, but doing it at the right moment can also save a lot of time. 
+If ConfNum = 0, then the fast confluence check is performed 
+only when the search for overlaps is complete.
+<P>
+<P>
+<P>
+<B>Warning:</B> Changing the default setting for any of the following parameters
+may either cause the procedure to terminate without having found a confluent
+presentation or change the monoid.
+<P>
+<P>
+<P>
+<P>
+<PRE>
+     MaxStoredLen: Tup                   Default: 
+</PRE>
+Only equations in which the left and right hand sides have lengths at most 
+l and r, respectively, where <TT>MaxStoredLen := &lt;l, r&gt;</TT> are kept. 
+Of course this may cause the overlap search to complete on a set of equations 
+that is not confluent. In some examples, particularly those involving collapse 
+(i.e. a large intermediate set of equations, which later simplifies to a small 
+set), it can result in a confluent set being found much more quickly. It is most 
+often useful when using a recursive ordering on words. Another danger with
+this option is that sometimes discarding equations can result in information 
+being lost, with the effect of changing the monoid defined by the equations.
+<P>
+<P>
+<PRE>
+     MaxOverlapLen: RngIntElt            Default: 
+</PRE>
+Only overlaps of total length at most <TT>MaxOverlapLen</TT> are processed.
+Of course this may cause the overlap search to complete on a set of equations 
+that is not confluent.
+<P>
+<P>
+<PRE>
+     Sort: BoolElt                       Default: <TT>false</TT>
+</PRE>
+<P>
+<PRE>
+     MaxOpLen: RngIntElt                 Default: 0
+</PRE>
+If <TT>Sort</TT> is set to {<TT>true</TT>} then the equations will be sorted in order of 
+increasing length of their
+left hand sides, rather than the default, which is to leave them in the
+order in which they were found. <TT>MaxOpLen</TT> should be a non-negative integer.
+If <TT>MaxOpLen</TT> is positive, then only equations with left hand sides having length
+at most <TT>MaxOpLen</TT> are output. If <TT>MaxOpLen</TT> is zero, then all equations are sorted by length.
+Of course, if <TT>MaxOpLen</TT> is positive, there is a danger that the monoid
+defined by the output equations may be different from the original.
+</BLOCKQUOTE>
+<H5><A NAME = "10159">SetVerbose("KBMAG", v) : MonStgElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Set the verbose printing level for the Knuth-Bendix completion algorithm.
+Setting this level allows a user to control how much extra information on 
+the progress of the algorithm is printed.
+Currently the legal values for v are 0 to 3 inclusive. Setting
+v to 0 corresponds to the `-silent' option of KBMAG in which no extra output
+is printed. Setting v to 2 corresponds to the `-v' (verbose) option of 
+KBMAG in which a small amount of extra output is printed. 
+Setting v to 3 corresponds to 
+the `-vv' (very verbose) option of KBMAG in which 
+a huge amount of diagnostic information is printed.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "10160">Example <TT>MonRWS_RWSMonoid (H83E1)</TT></A></H3>
+Starting with a monoid presentation for the alternating group
+A<sub>4</sub>, we construct a rewrite system. Since we don't specify an ordering 
+the default <TT>ShortLex</TT> ordering is used.  Since we don't specify a 
+generator ordering, the default generator ordering, in this case that 
+from Q, is used.
+<P>
+<P>
+<PRE>
+&gt; FM&lt;g10,g20,g30&gt; := FreeMonoid(3);
+&gt; Q := quo&lt; FM | g10^2=1, g20*g30=1, g30*g20=1,
+&gt;         g20*g20=g30, g30*g10*g30=g10*g20*g10&gt;;
+&gt; M := RWSMonoid(Q);
+&gt; print M;
+A confluent rewrite monoid.
+Generator Ordering = [ g10, g20, g30 ]
+Ordering = ShortLex.
+The reduction machine has 12 states.
+The rewrite relations are:
+    g10^2 = Id(FM)
+    g20 * g30 = Id(FM)
+    g30 * g20 = Id(FM)
+    g20^2 = g30
+    g30 * g10 * g30 = g10 * g20 * g10
+    g30^2 = g20
+    g20 * g10 * g20 = g10 * g30 * g10
+    g30 * g10 * g20 * g10 = g20 * g10 * g30
+    g10 * g20 * g10 * g30 = g30 * g10 * g20
+    g20 * g10 * g30 * g10 = g30 * g10 * g20
+    g10 * g30 * g10 * g20 = g20 * g10 * g30
+</PRE>
+<HR>
+<H3><A NAME = "10161">Example <TT>MonRWS_RWSMonoid-2 (H83E2)</TT></A></H3>
+We construct the second of Bernard Neumann's series of increasingly 
+complicated presentations of the trivial monoid. The example runs best
+with a large value of <TT>TidyInt</TT>. Again the default <TT>ShortLex</TT> ordering
+is used.
+<P>
+<P>
+<PRE>
+&gt; FM&lt;x,X,y,Y,z,Z&gt; := FreeMonoid(6);
+&gt; Q := quo&lt; FM |
+&gt;         x*X=1, X*x=1, y*Y=1, Y*y=1, z*Z=1, Z*z=1,
+&gt;         y*y*X*Y*x*Y*z*y*Z*Z*X*y*x*Y*Y*z*z*Y*Z*y*z*z*Y*Z*y=1,
+&gt;         z*z*Y*Z*y*Z*x*z*X*X*Y*z*y*Z*Z*x*x*Z*X*z*x*x*Z*X*z=1,
+&gt;         x*x*Z*X*z*X*y*x*Y*Y*Z*x*z*X*X*y*y*X*Y*x*y*y*X*Y*x=1&gt;;
+&gt; M := RWSMonoid(Q : TidyInt := 3000);
+&gt; print M;
+A confluent rewrite monoid.
+Generator Ordering = [ x, X, y, Y, z, Z ]
+Ordering = ShortLex.
+The reduction machine has 1 state.
+The rewrite relations are:
+    Z = Id(FM)
+    Y = Id(FM)
+    z = Id(FM)
+    X = Id(FM)
+    y = Id(FM)
+    x = Id(FM)
+</PRE>
+<HR>
+<H3><A NAME = "10162">Example <TT>MonRWS_RWSMonoid-4 (H83E3)</TT></A></H3>
+We construct a confluent presentation of a submonoid of a nilpotent group.
+<P>
+<P>
+<P>
+<PRE>
+&gt; FM&lt;a,b,c&gt; := FreeMonoid(6);
+&gt; Q := quo&lt; FM | b*a=a*b*c, c*a=a*c, c*b=b*c &gt;;
+&gt; M := RWSMonoid(Q:Ordering:="Recursive", GeneratorOrder:=[c,b,a]);
+&gt; M;
+A confluent rewrite monoid.
+Generator Ordering = [ c, b, a ]
+Ordering = Recursive.
+The reduction machine has 3 states.
+    b * a = a * b * c
+    c * a = a * c
+    c * b = b * c
+&gt; Order(M);
+Infinity
+</PRE>
+<HR>
+<H3><A NAME = "10163">Example <TT>MonRWS_RWSMonoid-5 (H83E4)</TT></A></H3>
+We construct a monoid presentation corresponding to the Fibonacci group
+F(2, 7). This is a very difficult calculation unless the parameters of
+<TT>RWSMonoid</TT> are selected carefully. The best approach is to 
+run the Knuth-Bendix once using a <TT>Recursive</TT> ordering with a limit on 
+the lengths of equations stored (<TT>MaxStoredLen := &lt;15,15&gt;</TT> works well).
+This will halt returning a non-confluent rewrite monoid M, and
+give a warning message that the Knuth-Bendix procedure only partly 
+succeeded.
+The original equations should then be appended to the relations of M,
+and the Knuth-Bendix re-run with no limits on lengths.
+It will then quickly complete with a confluent set. This is typical of a
+number of difficult examples, where good results can be obtained by running
+more than once.
+<P>
+<P>
+<P>
+<PRE>
+&gt; FM&lt;a,b,c,d,e,f,g&gt; := FreeMonoid(7);
+&gt; I := [a*b=c, b*c=d, c*d=e, d*e=f, e*f=g, f*g=a, g*a=b];
+&gt; Q := quo&lt;FM | I&gt;;
+&gt; M := RWSMonoid(Q: Ordering := "Recursive", MaxStoredLen := &lt;15,15&gt;);
+Warning: Knuth Bendix only partly succeeded
+&gt; Q := quo&lt; FM | Relations(M) cat I&gt;;
+&gt; M := RWSMonoid(Q: Ordering := "Recursive");
+&gt; print M;
+A confluent rewrite monoid.
+Generator Ordering = [ a, b, c, d, e, f, g ]
+Ordering = Recursive.
+The reduction machine has 30 states.
+The rewrite relations are:
+    c = a^25
+    d = a^20
+    e = a^16
+    f = a^7
+    g = a^23
+    b = a^24
+    a^30 = a
+&gt; Order(M);
+30
+</PRE>
+<P>
+It turns out that the non-identity elements of this monoid form a submonoid
+isomorphic to the Fibonacci group F(2, 7) which is cyclic of order 29.
+<HR>
+<PRE></PRE> <A  HREF = "text898.htm">[Next]</A><A  HREF = "text896.htm">[Prev]</A> <A  HREF = "text898.htm">[Right]</A> <A  HREF = "text896.htm">[Left]</A> <A  HREF = "text895.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

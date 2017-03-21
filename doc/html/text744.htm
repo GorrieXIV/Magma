@@ -1,0 +1,580 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Database of Small Groups</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text745.htm">[Next]</A><A  HREF = "text743.htm">[Prev]</A> <A  HREF = "text745.htm">[Right]</A> <A  HREF = "text743.htm">[Left]</A> <A  HREF = "text742.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "8512">Database of Small Groups</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+Magma includes the Small Groups Library prepared by 
+Besche, Eick and O'Brien. For a
+description of the algorithms used to generate these groups, details on the
+data structures used and applications we refer to
+<A  HREF = "text741.htm#bib_besche-eick-constr">[BE99a]</A>, <A  HREF = "text741.htm#bib_besche-eick-obrien-order-2000">[BEO01]</A>, <A  HREF = "text741.htm#bib_besche-eick-1000">[BE99b]</A>, <A  HREF = "text741.htm#bib_obrien-pgroup">[O'B90]</A>, <A  HREF = "text741.htm#bib_besche-eick-order-qnp">[BE01]</A>, <A  HREF = "text741.htm#bib_obrien-groups-256">[O'B91]</A>, <A  HREF = "text741.htm#bib_newman-ob-vl-04">[MNVL04]</A> and 
+the references therein.  
+<P>
+The Small Groups Library contains the following groups.
+<P>
+<DL COMPACT class='compact'>
+<DT>-</DT><DD>All groups of order up to 2000, excluding the groups of order 1024.
+<P>
+<DT>-</DT><DD>The groups whose order is a product of at most 3 primes.
+<P>
+<DT>-</DT><DD>The groups of order dividing p<sup>7</sup> for p a prime.
+<P>
+<DT>-</DT><DD>The groups of order 3<sup>8</sup>.
+<P>
+<DT>-</DT><DD>The groups of order q<sup>n</sup> p, where q<sup>n</sup> is a prime-power dividing
+          2<sup>8</sup>, 3<sup>6</sup>, 5<sup>5</sup> or 7<sup>4</sup> and p is a prime different to q.
+<P>
+</DL>
+The descriptions of the groups of order p<sup>4</sup>, p<sup>5</sup>, p<sup>6</sup> for p&gt;3
+were contributed by Boris Girnat, Robert McKibbin, M.F. Newman, 
+E.A. O'Brien, and M.R. Vaughan-Lee. 
+<P>
+The Magma version of this library uses the same internal data format as the
+implementation available in GAP. In particular, the numbering of the groups
+of a given order in both packages is the same.
+<P>
+For a different mechanism for accessing the p-groups in this collection,
+see the <A  HREF = "text745.htm#8549">The p-groups of Order Dividing p<sup>7</sup></A> section, specifically the functions
+<TT>SearchPGroups</TT> and <TT>CountPGroups</TT>. These functions also access
+the groups of order p<sup>7</sup> (contributed by O'Brien and Vaughan-Lee).
+<P>
+The groups of order 3<sup>8</sup> (also contributed by O'Brien and Vaughan-Lee)
+form an optional database that must be downloaded separately.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text744.htm#8513">Basic Small Group Functions</A>
+<LI> <A  HREF = "text744.htm#8530">Processes</A>
+<LI> <A  HREF = "text744.htm#8540">Small Group Identification</A>
+<LI> <A  HREF = "text744.htm#8544">Accessing Internal Data</A>
+</UL>
+<H4><A NAME = "8513">Basic Small Group Functions</A></H4>
+
+<P>
+<P>
+<P>
+Many of the functions in this section have an optional parameter <TT>Search</TT>.
+It can be used to limit the small group search to soluble
+(<TT>Search := "Soluble"</TT>) or insoluble (<TT>Search := "Insoluble"</TT>) groups.
+The default is <TT>Search := "All"</TT>, which allows all groups to be considered.
+<P>
+When a group is extracted from the database, it is returned
+as a <A  HREF = "text707.htm#GrpPC"> <TT>GrpPC</TT></A> if it is soluble, or as a <A  HREF = "text630.htm#GrpPerm"> <TT>GrpPerm</TT></A> if it
+is insoluble.
+<P>
+When using the small groups database for an extended search, it is
+advisable to open the database using the function
+<A  HREF = "text744.htm#GrpData:SmallGroupDatabase">SmallGroupDatabase</A>, which opens the database and returns
+a reference to it. This reference can then be passed as first argument
+to most of the functions described below, and will save that function
+from opening and closing the database for itself. Doing so will reduce the
+number of file operations when a lot of use is made of the database.  When the
+database is no longer needed, it can be closed using the <A  HREF = "text744.htm#GrpData:delete">delete</A>
+statement.
+
+
+<H5><A NAME = "8514"></A><A NAME = "GrpData:SmallGroupDatabase">SmallGroupDatabase</A>() : -&gt; DB</H5>
+<H5>OpenSmallGroupDatabase() : -&gt; DB</H5>
+<BLOCKQUOTE>
+Open the small groups database (for extended search) and return a 
+reference to it. This reference may be passed to other functions
+so that they do fewer file operations.
+</BLOCKQUOTE>
+<H5><A NAME = "8515"></A><A NAME = "GrpData:delete">delete</A>  D : DB -&gt;</H5>
+<BLOCKQUOTE>
+Close the small groups database <TT>D</TT> and free the resources associated with
+its use.
+</BLOCKQUOTE>
+<H5><A NAME = "8516">SmallGroupDatabaseLimit() : -&gt; RngIntElt</A></H5>
+<H5>SmallGroupDatabaseLimit(D) : DB -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The limiting order up to which all groups (except those of order 1024) are
+stored in the database of small groups, that is, currently 2000.
+</BLOCKQUOTE>
+<H5><A NAME = "8517"></A><A NAME = "GrpData:IsInSmallGroupDatabase">IsInSmallGroupDatabase</A>(o) : RngIntElt -&gt; BoolElt</H5>
+<H5>IsInSmallGroupDatabase(D, o) : DB, RngIntElt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if the groups of order o are contained in the database and
+<TT>false</TT> otherwise.  This function can be used to check whether
+o is a legitimate argument for other functions described in this section,
+avoiding runtime errors in user written loops or functions.
+</BLOCKQUOTE>
+<H5><A NAME = "8518"></A><A NAME = "GrpData:NumberOfSmallGroups">NumberOfSmallGroups</A>(o) : RngIntElt -&gt; RngIntElt</H5>
+<H5>NumberOfSmallGroups(D, o) : DB, RngIntElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Given a positive integer o, return the number of groups of order o in the
+database.  If the groups of order o are not contained in the database, 0 is
+returned. This function can be used to check whether a pair o, n defines
+a group contained in the small groups database, that is, whether it
+is a legitimate argument for other functions described in this
+section, avoiding runtime errors in user written loops or functions.
+</BLOCKQUOTE>
+<H5><A NAME = "8519"></A><A NAME = "GrpData:SmallGroup">SmallGroup</A>(o, n) : RngIntElt, RngIntElt -&gt; Grp</H5>
+<H5>SmallGroup(D, o, n) : DB, RngIntElt, RngIntElt -&gt; Grp</H5>
+<H5>Group(D, o, n) : DB, RngIntElt, RngIntElt -&gt; Grp</H5>
+<BLOCKQUOTE>
+Given a positive integer o, such that the groups of order o are contained
+in the small groups library, and a positive integer n, return the n-th
+group of order o in the database.
+If the groups of order o are not contained in the database or if n
+exceeds the number of groups of order o in the database, an error is
+reported.  The function <A  HREF = "text744.htm#GrpData:NumberOfSmallGroups">NumberOfSmallGroups</A> can be used
+to check whether the arguments are valid.
+</BLOCKQUOTE>
+<H5><A NAME = "8520">SmallGroup(o: parameters) : RngIntElt -&gt; Grp</A></H5>
+<H5>SmallGroup(D, o: parameters) : DB, RngIntElt -&gt; Grp</H5>
+
+<PRE>    Search: MonStgElt                   Default: "All"</PRE>
+<BLOCKQUOTE>
+Given a positive integer o, such that the groups of order o are contained
+in the small groups library, return the first
+group of order o in the database meeting the search criterion set by the
+parameter <TT>Search</TT>.
+If the groups of order o are not contained in the database, an error is
+reported.  The function <A  HREF = "text744.htm#GrpData:IsInSmallGroupDatabase">IsInSmallGroupDatabase</A> can be used
+to check whether o is a valid argument for this function.
+</BLOCKQUOTE>
+<H5><A NAME = "8521">SmallGroup(o, f: parameters) : RngIntElt, Program -&gt; Grp</A></H5>
+<H5>SmallGroup(D, o, f: parameters) : RngIntElt, Program -&gt; Grp</H5>
+
+<PRE>    Search: MonStgElt                   Default: "All"</PRE>
+<BLOCKQUOTE>
+Given a positive integer o such that the groups of order o are contained
+in the small groups library and a predicate f (as a function or intrinsic),
+return the first group of order o in the database meeting the search
+criterion set by the parameter <TT>Search</TT>, which satisfies f.
+</BLOCKQUOTE>
+<H5><A NAME = "8522">IsSoluble(D, o, n) : DB, RngIntElt, RngIntElt -&gt; Grp</A></H5>
+<H5>IsSolvable(D, o, n) : DB, RngIntElt, RngIntElt -&gt; Grp</H5>
+<H5>SmallGroupIsSoluble(o, n) : RngIntElt, RngIntElt -&gt; Grp</H5>
+<H5>SmallGroupIsSoluble(D, o, n) : DB, RngIntElt, RngIntElt -&gt; Grp</H5>
+<H5>SmallGroupIsSolvable(o, n) : RngIntElt, RngIntElt -&gt; Grp</H5>
+<H5>SmallGroupIsSolvable(D, o, n) : DB, RngIntElt, RngIntElt -&gt; Grp</H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> iff <TT>SmallGroup(o, n)</TT> is soluble.
+This function does not load the group.  If the group specified by the arguments
+does not exist in the database, an error is reported.  The function
+<A  HREF = "text744.htm#GrpData:NumberOfSmallGroups">NumberOfSmallGroups</A> can be used to check whether the
+arguments are valid.
+</BLOCKQUOTE>
+<H5><A NAME = "8523">SmallGroupIsInsoluble(o, n) : RngIntElt, RngIntElt -&gt; Grp</A></H5>
+<H5>SmallGroupIsInsoluble(D, o, n) : DB, RngIntElt, RngIntElt -&gt; Grp</H5>
+<H5>SmallGroupIsInsolvable(o, n) : RngIntElt, RngIntElt -&gt; Grp</H5>
+<H5>SmallGroupIsInsolvable(D, o, n) : DB, RngIntElt, RngIntElt -&gt; Grp</H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> iff <TT>SmallGroup(o, n)</TT> is insoluble.
+This function does not load the group.  If the group specified by the arguments
+does not exist in the database, an error is reported.  The function
+<A  HREF = "text744.htm#GrpData:NumberOfSmallGroups">NumberOfSmallGroups</A> can be used to check whether the
+arguments are valid.
+</BLOCKQUOTE>
+<H5><A NAME = "8524">SmallGroup(o, f: parameters) : RngIntElt, Program -&gt; Grp</A></H5>
+<H5>SmallGroup(S, f: parameters) : [RngIntElt], Program -&gt; Grp</H5>
+<H5>SmallGroup(D, o, f: parameters) : DB, RngIntElt, Program -&gt; Grp</H5>
+<H5>SmallGroup(D, S, f: parameters) : DB, [RngIntElt], Program -&gt; Grp</H5>
+
+<PRE>    Search: MonStgElt                   Default: "All"</PRE>
+<BLOCKQUOTE>
+Given a sequence S of orders or a single order o contained in the
+database and a predicate f
+(as a function or intrinsic), return the first group with order in S
+or equal to o, respectively, which meets the search criterion set by the
+parameter <TT>Search</TT> and satisfies f.
+</BLOCKQUOTE>
+<H5><A NAME = "8525">SmallGroups(o: parameters) : RngIntElt -&gt; [* Grp *]</A></H5>
+<H5>SmallGroups(D, o: parameters) : DB, RngIntElt -&gt; [* Grp *]</H5>
+
+<PRE>    Search: MonStgElt                   Default: "All"</PRE>
+
+<PRE>    Warning: BoolElt                    Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given an order o contained in the database, return a list of all
+groups of order o, meeting the search criterion
+set by the parameter <TT>Search</TT>. Some orders
+will produce a very large sequence of groups -- in such cases a warning
+will be printed unless the user specifies <TT>Warning := false</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "8526">SmallGroups(S: parameters) : [RngIntElt] -&gt; [* Grp *]</A></H5>
+<H5>SmallGroups(D, S: parameters) : DB, [RngIntElt] -&gt; [* Grp *]</H5>
+
+<PRE>    Search: MonStgElt                   Default: "All"</PRE>
+
+<PRE>    Warning: BoolElt                    Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a sequence S of orders contained in the database, return a list
+of all groups
+with order in S, meeting the search criterion set by the
+parameter <TT>Search</TT>. The resulting sequence may be very long -- in such
+cases a warning will be printed unless the user specifies
+<TT>Warning := false</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "8527">SmallGroups(o, f: parameters) : RngIntElt, Program -&gt; [* Grp *]</A></H5>
+<H5>SmallGroups(D, o, f: parameters) : DB, RngIntElt, Program -&gt; [* Grp *]</H5>
+
+<PRE>    Search: MonStgElt                   Default: "All"</PRE>
+<BLOCKQUOTE>
+Given an order o contained in the database and a predicate (function or
+intrinsic) f, return a list containing all groups G of order o,
+meeting the search criterion set by the parameter <TT>Search</TT> and satisfying
+<TT>f(G) eq true</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "8528">SmallGroups(S, f: parameters) : [RngIntElt], Program -&gt; [* Grp *]</A></H5>
+<H5>SmallGroups(D, S, f: parameters) : DB, [RngIntElt], Program -&gt; [* Grp *]</H5>
+
+<PRE>    Search: MonStgElt                   Default: "All"</PRE>
+<BLOCKQUOTE>
+Given a sequence S of orders contained in the database and a predicate
+(function or intrinsic) f, return a list containing all groups G
+with order in S, meeting the search criterion set by the parameter
+<TT>Search</TT> and satisfying <TT>f(G) eq true</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8529">Example <TT>GrpData_SmallGroups (H71E1)</TT></A></H3>
+<DL COMPACT class='compact'>
+<DT>(1)</DT><DD>We find the non-abelian groups of order 27.
+<P>
+<P>
+</DL>
+<PRE>
+&gt; list := SmallGroups(27, func&lt;x|not IsAbelian(x)&gt; );
+&gt; list;
+[*
+GrpPC of order 27 = 3^3
+PC-Relations:
+  $.2^$.1 = $.2 * $.3,
+
+
+GrpPC of order 27 = 3^3
+PC-Relations:
+  $.1^3 = $.3, 
+  $.2^$.1 = $.2 * $.3
+*]
+</PRE>
+<DL COMPACT class='compact'>
+<DT>(2)</DT><DD>We get the first group in the database with derived length greater than 2.
+<P>
+<P>
+</DL>
+<PRE>
+&gt; G := SmallGroup([1..100], func&lt;x|DerivedLength(x) gt 2&gt;);
+&gt; G;
+GrpPC of order 24 = 2^3 * 3
+PC-Relations:
+  G.1^3 = Id(G), 
+  G.2^2 = G.4, 
+  G.3^2 = G.4, 
+  G.4^2 = Id(G), 
+  G.2^G.1 = G.3, 
+  G.3^G.1 = G.2 * G.3, 
+  G.3^G.2 = G.3 * G.4
+</PRE>
+<DL COMPACT class='compact'>
+<DT>(3)</DT><DD>Now for a list of the insoluble groups of order 240.
+The insoluble groups in the database are returned as
+permutation groups.
+<P>
+<P>
+</DL>
+<PRE>
+&gt; list := SmallGroups(240:Search:="Insoluble");
+&gt; #list;
+8
+&gt; list[7];
+Permutation group acting on a set of cardinality 7
+  (1, 2, 3, 4)
+  (1, 5, 2, 4, 3)(6, 7)
+</PRE>
+<DL COMPACT class='compact'>
+<DT>(4)</DT><DD>The groups of order 2432 = 2<sup>7</sup>.19 should be contained in the small
+groups database.  We check this using the function
+<A  HREF = "text744.htm#GrpData:IsInSmallGroupDatabase">IsInSmallGroupDatabase</A> ... <PRE>
+&gt; IsInSmallGroupDatabase(2432);
+true
+</PRE> ... and determine the number of groups of order 2432.
+<P>
+<P>
+</DL>
+<PRE>
+&gt; NumberOfSmallGroups(2432);
+19324
+</PRE>
+<DL COMPACT class='compact'>
+<DT>(5)</DT><DD>We find all groups of order 7<sup>6</sup> with cyclic centre of order 7<sup>2</sup>.
+<P>
+<P>
+</DL>
+<PRE>
+&gt; f := function (G)
+&gt;   Z := Centre (G);
+&gt;   return IsCyclic (Z) and #Z eq 7^2;
+&gt; end function;
+&gt; P := SmallGroups(7^6, f);
+&gt; #P;
+30
+&gt; NumberOfSmallGroups(7^6);
+860
+</PRE>
+<HR>
+<H4><A NAME = "8530">Processes</A></H4>
+
+<P>
+<P>
+<P>
+A small group process enables iteration over all
+groups of specified orders satisfying a given predicate, without
+having to create and store all such groups together.
+<P>
+A small group process is created via the function
+<TT>SmallGroupProcess</TT> (in various forms).
+The standard process functions <TT>IsEmpty</TT>, <TT>Current</TT>,
+<TT>CurrentLabel</TT> and <TT>Advance</TT> can then be applied to the process.
+<P>
+The functions used to create a small group process all have a parameter
+<TT>Search</TT> attached to them.
+It can be used to limit the small group search to soluble
+(<TT>Search := "Soluble"</TT>) or insoluble (<TT>Search := "Insoluble"</TT>) groups.
+The default is <TT>Search := "All"</TT>, which allows all groups to be considered.
+<P>
+The <TT>Process</TT> functions described below do not have a variant with
+the database as first argument, as each process opens the database for 
+an extended search automatically.
+
+
+<H5><A NAME = "8531">SmallGroupProcess(o: parameters) : RngIntElt -&gt; Process</A></H5>
+
+<PRE>    Search: MonStgElt                   Default: "All"</PRE>
+<BLOCKQUOTE>
+Given an order o contained in the small groups database, return a small
+group process which will iterate though all groups of order o meeting the
+search criterion set by the parameter <TT>Search</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "8532">SmallGroupProcess(S: parameters) : [RngIntElt] -&gt; Process</A></H5>
+
+<PRE>    Search: MonStgElt                   Default: "All"</PRE>
+<BLOCKQUOTE>
+Given a sequence S of orders contained in the small groups database, return
+a small group process which will iterate though all groups with order in the
+sequence S meeting the search criterion set by the parameter <TT>Search</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "8533">SmallGroupProcess(o, f: parameters) : RngIntElt, Program -&gt; Process</A></H5>
+
+<PRE>    Search: MonStgElt                   Default: "All"</PRE>
+<BLOCKQUOTE>
+Given an order o contained in the small groups database and a predicate f
+(as function or intrinsic), return a small group process which will iterate
+though all groups of order o, which meet the search criterion set by the
+parameter <TT>Search</TT> and satisfy the predicate f.
+</BLOCKQUOTE>
+<H5><A NAME = "8534">SmallGroupProcess(S, f: parameters) : [RngIntElt], Program -&gt; Process</A></H5>
+
+<PRE>    Search: MonStgElt                   Default: "All"</PRE>
+<BLOCKQUOTE>
+Given a sequence S of orders contained in the small groups database and a
+predicate f (as function or intrinsic), return a small group process which
+will iterate though all groups with order in the sequence S, which meet
+the search criterion set by the parameter <TT>Search</TT> and satisfy the
+predicate f.
+</BLOCKQUOTE>
+<H5><A NAME = "8535">IsEmpty(p) : Process -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the process p has passed its last group.
+</BLOCKQUOTE>
+<H5><A NAME = "8536">Current(p) : Process -&gt; Grp</A></H5>
+<BLOCKQUOTE>
+Return the current group of the process p.
+</BLOCKQUOTE>
+<H5><A NAME = "8537">CurrentLabel(p) : Process -&gt; RngIntElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Return the label of the current group of the process p.
+That is, return o and  n such that the current group is
+<TT>SmallGroup(o, n)</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "8538">Advance(~p) : Process -&gt;</A></H5>
+<BLOCKQUOTE>
+Move the process p to its next group.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8539">Example <TT>GrpData_sg-process (H71E2)</TT></A></H3>
+We use a small group process to look at all the groups of
+order 128. We find the nilpotency class of each of them.
+<P>
+<P>
+<PRE>
+&gt; P := SmallGroupProcess(128);
+&gt; count := {* *};
+&gt; repeat
+&gt;   G := Current(P);
+&gt;   Include(~count, NilpotencyClass(G));
+&gt;   Advance(~P);
+&gt; until IsEmpty(P);
+&gt; count;
+{* 1^^15, 2^^947, 3^^1137, 4^^197, 5^^29, 6^^3 *}
+</PRE>
+<HR>
+<H4><A NAME = "8540">Small Group Identification</A></H4>
+
+<P>
+<P>
+<P>
+The following functions perform the inverse operation to the
+small group functions described earlier. Given a group G such that
+a group isomorphic to G is in the database and identification of
+groups of order |G| is supported, the identification functions
+return a pair &lt; o, n &gt; so that <TT>SmallGroup(o, n)</TT> 
+is isomorphic to G.
+<P>
+Note that identifying a finitely presented group involves the construction
+of a permutation representation of this group, which may fail. We refer
+to
+<A  HREF = "text819.htm#GrpFP_1:IdentifyGroup">IdentifyGroup</A>
+for details.
+
+
+<H5><A NAME = "8541"></A><A NAME = "GrpData:IdentifyGroup">IdentifyGroup</A>(G): Grp -&gt; Tup</H5>
+<H5>IdentifyGroup(D, G): DB, Grp -&gt; Tup</H5>
+<BLOCKQUOTE>
+Locate the pair of integers &lt; o, n &gt; so that
+<TT>SmallGroup(o, n)</TT> is isomorphic to G. If there is no such group 
+in the database or if identification of groups of order |G| is not
+supported, then an error will result.  The function
+<A  HREF = "text744.htm#GrpData:CanIdentifyGroup">CanIdentifyGroup</A> can be used to test whether groups
+of a certain order can be identified; this may be useful for avoiding
+runtime errors in user written loops or functions.
+</BLOCKQUOTE>
+<H5><A NAME = "8542"></A><A NAME = "GrpData:CanIdentifyGroup">CanIdentifyGroup</A>(o) : RngIntElt -&gt; BoolElt</H5>
+<H5>CanIdentifyGroup(D, o) : DB, RngIntElt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if identification of groups of order o in the database is
+supported.  This function can be used to check whether a group
+is a legitimate argument for the functions <A  HREF = "text744.htm#GrpData:IdentifyGroup">IdentifyGroup</A>
+described above, avoiding runtime errors in user written loops or functions.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8543">Example <TT>GrpData_SmallIdentify (H71E3)</TT></A></H3>
+We identify a permutation group in the small group database,
+and get an isomorphic group from the database.
+<P>
+<P>
+<PRE>
+&gt; G := DihedralGroup(10);
+&gt; G;
+Permutation group G acting on a set of cardinality 10
+Order = 20 = 2^2 * 5
+  (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+  (1, 10)(2, 9)(3, 8)(4, 7)(5, 6)
+&gt; IdentifyGroup(G);
+&lt;20, 4&gt;
+&gt; H := SmallGroup(20, 4);
+&gt; H;
+GrpPC : H of order 20 = 2^2 * 5
+PC-Relations:
+    H.1^2 = Id(H), 
+    H.2^2 = Id(H), 
+    H.3^5 = Id(H), 
+    H.3^H.1 = H.3^4
+</PRE>
+<HR>
+<H4><A NAME = "8544">Accessing Internal Data</A></H4>
+
+<P>
+<P>
+<P>
+The following functions provide access to data used internally by the
+Small Groups Library for representing groups.  They are included
+just for completeness and are intended to be used by experts only. In
+particular, we do not give a detailed explanation of the (complicated)
+data format in this manual.
+
+
+<H5><A NAME = "8545">Data(D, o, n) : DB, RngIntElt, RngIntElt -&gt; List</A></H5>
+<BLOCKQUOTE>
+Returns the data from which the group number n of order o in D is 
+constructed.  The format and the meaning of the items in the returned list
+depends on the group indicated by the pair (o, n).
+</BLOCKQUOTE>
+<H5><A NAME = "8546">SmallGroupEncoding(G) : GrpPC -&gt; RngIntElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a finite solvable group G in the category <A  HREF = "text707.htm#GrpPC"> <TT>GrpPC</TT></A>, return two
+integers c and o encoding the power conjugate presentation of G.
+<P>
+The second return value is the order of G.  The first return value is an
+integer specifying the power conjugate relations in the presentation of G.
+</BLOCKQUOTE>
+<H5><A NAME = "8547">SmallGroupDecoding(c, o) : RngIntElt, RngIntElt -&gt; GrpPC</A></H5>
+<BLOCKQUOTE>
+Given two integers c and o encoding a power conjugate presentation G,
+return G as a group in the category <A  HREF = "text707.htm#GrpPC"> <TT>GrpPC</TT></A>.
+<P>
+The second argument is the order of G.  The first return value is an
+integer specifying the power conjugate relations in the presentation G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8548">Example <TT>GrpData_SmallInternal (H71E4)</TT></A></H3>
+<DL COMPACT class='compact'>
+<DT>(1)</DT><DD>We extract a power conjugate presentation from the database and compute
+its encoding.
+<P>
+<P>
+</DL>
+<PRE>
+&gt; D := SmallGroupDatabase();
+&gt; G := SmallGroup(D,1053,51);
+&gt; Category(G);
+GrpPC
+&gt; SmallGroupEncoding(G);
+100286712487397165939678173 1053
+</PRE>
+<DL COMPACT class='compact'>
+<DT>(2)</DT><DD>The second group of order 525 in the small groups database is stored as
+encoded power conjugate presentation.
+<P>
+<P>
+</DL>
+<PRE>
+&gt; Data(D,525,2);
+[* code, 666501 *]
+</PRE>
+We can create the corresponding group by decoding this information.
+<P>
+<P>
+<PRE>
+&gt; G := SmallGroupDecoding(666501, 525);
+&gt; G;
+GrpPC : G of order 525 = 3 * 5^2 * 7
+PC-Relations:
+    G.1^3 = Id(G), 
+    G.2^5 = G.4, 
+    G.3^7 = Id(G), 
+    G.4^5 = Id(G)
+</PRE>
+This gives the same presentation as accessing the database in the "usual"
+way.
+<P>
+<P>
+<PRE>
+&gt; SmallGroup(D,525,2);
+GrpPC of order 525 = 3 * 5^2 * 7
+PC-Relations:
+    $.1^3 = Id($), 
+    $.2^5 = $.4, 
+    $.3^7 = Id($), 
+    $.4^5 = Id($)
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text745.htm">[Next]</A><A  HREF = "text743.htm">[Prev]</A> <A  HREF = "text745.htm">[Right]</A> <A  HREF = "text743.htm">[Left]</A> <A  HREF = "text742.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

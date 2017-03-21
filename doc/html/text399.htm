@@ -1,0 +1,448 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Automorphism Groups</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text400.htm">[Next]</A><A  HREF = "text398.htm">[Prev]</A> <A  HREF = "text400.htm">[Right]</A> [____] <A  HREF = "text398.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "4102">Automorphism Groups</A></H3>
+
+<P>
+<P>
+Automorphisms of an algebraic field and the group they form 
+can be calculated. Furthermore, field invariants that relate to the
+automorphism group can be determined.
+
+
+<H5><A NAME = "4103">Automorphisms(F) : FldAlg -&gt; [ Map ]</A></H5>
+
+<PRE>    Abelian: BoolElt                    Default: <TT>false</TT></PRE>
+
+<PRE>    SetVerbose("AutomorphismGroup", n):  Maximum: 3</PRE>
+<BLOCKQUOTE>
+Given an algebraic field F, return the automorphisms of F as a
+sequence of maps. If the extension is known to be abelian, the parameter
+<TT>Abelian</TT> should be set to <TT>true</TT> in which case a much more efficient 
+algorithm <A  HREF = "text397.htm#bib_Kl2">[Kl&uuml;97]</A>, <A  HREF = "text397.htm#bib_AcKl1">[AK99]</A>
+will be employed. If F is not a normal extension, the automorphisms
+are obtained by a variation of the polynomial factorisation
+algorithm.
+</BLOCKQUOTE>
+<H5><A NAME = "4104"></A><A NAME = "RngOrd:AutomorphismGroup">AutomorphismGroup</A>(F) : FldAlg -&gt; GrpPerm, PowMap, Map</H5>
+
+<PRE>    Abelian: BoolElt                    Default: <TT>false</TT></PRE>
+
+<PRE>    SetVerbose("AutomorphismGroup", n):  Maximum: 3</PRE>
+<BLOCKQUOTE>
+Given an algebraic field F, that is either a simple normal extension of Q
+or simple abelian extension of Q, return the automorphism group G
+of K as a permutation group of degree n, where n is the degree of
+the extension. If the extension is known to be abelian, the parameter
+<TT>Abelian</TT> should be set to <TT>true</TT> in which case a much more
+efficient algorithm  <A  HREF = "text397.htm#bib_Kl2">[Kl&uuml;97]</A>, <A  HREF = "text397.htm#bib_AcKl1">[AK99]</A>
+will be employed. If F is not a normal extension of Q an error will
+occur.  In addition to returning G, the function also returns 
+the power structure Aut of all automorphisms of F, and the transfer 
+map &phi; from G into Aut.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "4105">Example <TT>RngOrdGal_Automorphisms (H39E1)</TT></A></H3>
+We consider the extension obtained by adjoining a root of the irreducible 
+polynomial x<sup>4</sup> - 4x<sup>2</sup> + 1 to Q.
+<P>
+<P>
+<PRE>
+&gt; Q := RationalField();
+&gt; R&lt;x&gt; := PolynomialRing(Q);
+&gt; K&lt;w&gt; := NumberField(x^4 - 4*x^2 + 1);
+&gt; A := Automorphisms(K);
+&gt; A;
+[
+    Mapping from: FldNum: K to FldNum: K,
+    Mapping from: FldNum: K to FldNum: K,
+    Mapping from: FldNum: K to FldNum: K,
+    Mapping from: FldNum: K to FldNum: K
+]
+&gt; for phi in A do phi(w); end for;
+w
+w^3 - 4*w
+-w^3 + 4*w
+-w
+</PRE>
+Taking the same field K we use instead the function <TT>AutomorphismGroup</TT>:
+<P>
+<P>
+<PRE>
+&gt; G, Aut, tau := AutomorphismGroup(K);                                 
+&gt; for x in G do tau(x)(w); end for;
+w
+w^3 - 4*w
+-w^3 + 4*w
+-w
+</PRE>
+<HR>
+<H5><A NAME = "4106">AutomorphismGroup(K, F) : FldAlg, FldAlg -&gt; GrpPerm, PowMap, Map</A></H5>
+<H5>AutomorphismGroup(K, F) : FldRat, FldAlg -&gt; GrpPerm, PowMap, Map</H5>
+<H5>AutomorphismGroup(K, F) : FldAlg, FldRat -&gt; GrpPerm, PowMap, Map</H5>
+<BLOCKQUOTE>
+Computes the group of K automorphisms of F as a permutation group
+together with a list of all automorphisms and a map between the permutation
+group and explicit automorphisms of the field.
+<P>
+This function computes the automorphism group of F over Q first.
+</BLOCKQUOTE>
+<H5><A NAME = "4107">DecompositionGroup(p) : RngIntElt -&gt;  GrpPerm</A></H5>
+<H5>DecompositionGroup(p) : RngOrdIdl -&gt;  GrpPerm</H5>
+<BLOCKQUOTE>
+For an ideal p of the maximal order of some absolute normal field F with 
+group of automorphisms G, compute
+the decomposition group, i.e. the subgroup U of the automorphism
+group such that:
+ U := { s &isin;G | s(p) = p }
+<P>
+If F is not a normal extension of Q an error will
+occur. 
+</BLOCKQUOTE>
+<H5><A NAME = "4108">RamificationGroup(p, i) : RngOrdIdl, RngIntElt -&gt;  GrpPerm</A></H5>
+<BLOCKQUOTE>
+For an ideal p of the maximal
+order  M of some absolute normal field F with 
+group of automorphisms G, compute
+the i-th ramification group, i.e. the subgroup U of the automorphism
+group such that:
+ U := { s &isin;G | s(x) - x &isin;p<sup>i + 1</sup> for all x in M }
+<P>
+If F is not a normal extension of Q an error will
+occur. 
+</BLOCKQUOTE>
+<H5><A NAME = "4109">RamificationGroup(p) : RngOrdIdl -&gt; GrpPerm</A></H5>
+<BLOCKQUOTE>
+This is just an abbreviation for <TT>RamificationGroup(p, 1)</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "4110">InertiaGroup(p) : RngOrdIdl -&gt; GrpPerm</A></H5>
+<BLOCKQUOTE>
+This is just an abbreviation for <TT>RamificationGroup(p, 0)</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "4111"></A><A NAME = "RngOrd:FixedField">FixedField</A>(K, U) : FldAlg, GrpPerm -&gt; FldNum, Map</H5>
+<BLOCKQUOTE>
+Given a normal field K over Q and a subgroup U of
+<TT>AutomorphismGroup(K)</TT>, this returns the largest subfield of K
+that is fixed by U.
+<P>
+This function is inverse to <A  HREF = "text399.htm#RngOrd:FixedGroup">FixedGroup</A>.
+<P>
+If K is not a normal extension of Q an error will
+occur. 
+</BLOCKQUOTE>
+<H5><A NAME = "4112">FixedField(K, S) : FldAlg, [Map] -&gt; FldAlg, Map</A></H5>
+<BLOCKQUOTE>
+Given a field K and a sequence of automorphisms of K, this returns
+the largest subfield of K that is fixed by the given automorphisms.
+</BLOCKQUOTE>
+<H5><A NAME = "4113"></A><A NAME = "RngOrd:FixedGroup">FixedGroup</A>(K, L) : FldAlg, FldAlg -&gt; GrpPerm</H5>
+<BLOCKQUOTE>
+Given a normal field K over Q and a subfield L,
+compute the subgroup U of the <TT>AutomorphismGroup(K)</TT>
+that fixes L.
+<P>
+This function is inverse to <A  HREF = "text399.htm#RngOrd:FixedField">FixedField</A>.
+<P>
+If K is not a normal extension of Q an error will
+occur. 
+</BLOCKQUOTE>
+<H5><A NAME = "4114">FixedGroup(K, L) : FldAlg, [FldAlgElt] -&gt; GrpPerm</A></H5>
+<BLOCKQUOTE>
+Given a normal field K over Q and a sequence of number field
+elements L,
+compute the subgroup U of the <TT>AutomorphismGroup(K)</TT>
+that fixes L.
+<P>
+If K is not a normal extension of Q an error will
+occur. 
+</BLOCKQUOTE>
+<H5><A NAME = "4115">FixedGroup(K, a) : FldAlg, FldAlgElt -&gt; GrpPerm</A></H5>
+<BLOCKQUOTE>
+Given a normal field K over Q and a number field
+element a,
+compute the subgroup U of the <TT>AutomorphismGroup(K)</TT>
+that fixes a.
+<P>
+This function is inverse to <A  HREF = "text399.htm#RngOrd:FixedField">FixedField</A>.
+<P>
+If K is not a normal extension of Q an error will
+occur. 
+</BLOCKQUOTE>
+<H5><A NAME = "4116">DecompositionField(p) : RngOrdIdl -&gt; FldNum, Map</A></H5>
+<BLOCKQUOTE>
+This is an abbreviation for <TT>FixedField(K, DecompositionGroup(p))</TT>
+where K is the number field of the order of p.
+</BLOCKQUOTE>
+<H5><A NAME = "4117">RamificationField(p, i) : RngOrdIdl, RngIntElt -&gt; FldNum, Map</A></H5>
+<BLOCKQUOTE>
+This is an abbreviation for <TT>FixedField(K, RamificationGroup(p, i))</TT>
+where K is the number field of the order of p.
+</BLOCKQUOTE>
+<H5><A NAME = "4118">RamificationField(p) : RngOrdIdl -&gt; FldNum, Map</A></H5>
+<BLOCKQUOTE>
+This is an abbreviation for <TT>FixedField(K, RamificationGroup(p))</TT>
+where K is the number field of the order of p.
+</BLOCKQUOTE>
+<H5><A NAME = "4119">InertiaField(p) : RngOrdIdl -&gt; FldNum, Map</A></H5>
+<BLOCKQUOTE>
+This is an abbreviation for <TT>FixedField(K, InertiaField(p))</TT>
+where K is the number field of the order of p.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "4120">Example <TT>RngOrdGal_Ramification (H39E2)</TT></A></H3>
+We will demonstrate the various groups and fields. In order to do so,
+we first construct a non-trivial normal field.
+<P>
+<P>
+<PRE>
+&gt; o := MaximalOrder(ext&lt;Rationals()|&gt;.1^4-3);
+&gt; os := MaximalOrder(SplittingField(NumberField(o)));
+&gt; P := Decomposition(os, 2)[1][1];
+&gt; G, M := RayClassGroup(P^3);
+&gt; G;
+Abelian Group isomorphic to Z/2
+Defined on 1 generator
+Relations:
+    2*G.1 = 0
+</PRE>
+Since G is cyclic and the module P invariant under the
+automorphisms of os, the class field corresponding to G
+will be normal over Q. It Galois group over Q will
+be an extension of D<sub>4</sub> by C<sub>2</sub>.
+<P>
+<P>
+<PRE>
+&gt; A := AbelianExtension(M);
+&gt; O := MaximalOrder(EquationOrder(A));
+&gt; Oa := AbsoluteOrder(O);
+&gt; Ka := NumberField(Oa);
+&gt; Gal, _, Map := AutomorphismGroup(Ka);
+&gt; Gal;
+Permutation group Gal acting on a set of cardinality 16
+Order = 16 = 2^4
+    (1, 2, 7, 5)(3, 8, 6, 10)(4, 12, 14, 9)(11, 16, 13, 15)
+    (1, 3, 7, 6)(2, 8, 5, 10)(4, 13, 14, 11)(9, 16, 12, 15)
+    (1, 4)(2, 9)(3, 11)(5, 12)(6, 13)(7, 14)(8, 15)(10, 16)
+</PRE>
+Now, let us pick some ideals. The only interesting primes are the primes
+dividing the discriminant, which in this case will be the primes
+over 2 and 3.
+<P>
+<P>
+<PRE>
+&gt; P2 := Decomposition(Oa, 2)[1][1];
+&gt; P3 := Decomposition(Oa, 3)[1][1];
+</PRE>
+First, the valuation of the different of Oa at P2 should be
+&sum;<sub>i=0</sub>^&infin;(#G(P2, i) - 1) where G(P2, i) is the i-th
+ramification group. 
+<P>
+<P>
+<PRE>
+&gt; s := 0; i := 0;
+&gt; repeat
+&gt;   G := RamificationGroup(P2, i);
+&gt;   s +:= #G-1;
+&gt;   print i, "-th ramification group is of order ", #G;
+&gt;   i +:= 1;
+&gt; until #G eq 1;
+0 -th ramification group is of order  8 
+1 -th ramification group is of order  8 
+2 -th ramification group is of order  2 
+3 -th ramification group is of order  2 
+4 -th ramification group is of order  2 
+5 -th ramification group is of order  2 
+6 -th ramification group is of order  1 
+&gt; s;
+18
+&gt; Valuation(Different(Oa), P2);
+18
+</PRE>
+According to the theory, P2 should be totally ramified over the
+inertia field and unramified over Q:
+<P>
+<P>
+<PRE>
+&gt; K2 := InertiaField(P2);
+&gt; M2 := MaximalOrder(K2);
+&gt; K2r := RelativeField(K2, Ka);
+&gt; M2r := MaximalOrder(K2r);
+&gt; p2 := M2 meet (MaximalOrder(K2r)!!P2);
+&gt; IsInert(p2); 
+true
+&gt; IsTotallyRamified(M2r!!P2);
+true
+</PRE>
+Now we try the same for P3. Since 3 is split in Ka, we may
+consider an additional field: the decomposition field.
+It should be the maximal subfield if K such that 3 is neither
+inert (f=1) nor ramified (e=1), 
+therefore 3 has to split totally.
+<P>
+<P>
+<PRE>
+&gt; D3 := DecompositionField(P3);
+&gt; D3M := MaximalOrder(D3);
+&gt; IsTotallySplit(3, D3M);   
+true
+</PRE>
+The inertia field is the maximal subfield such that 3 is unramified.
+It has to be an extension of D3.
+<P>
+<P>
+<PRE>
+&gt; I3 := InertiaField(P3);
+&gt; I3;
+Number Field with defining polynomial $.1^4 + 
+    80346384509631057182412*$.1^3 + 
+    2256835583037881432653115137736209396615693022*$.\
+    1^2 + 2795818092855476469056989739955845736579291605177\
+    3809455107173769804*$.1 + 
+    220778768568255398038534226352664407997541&equiv;375161428\
+    41147104301325760481728833650060994 over the Rational 
+Field
+&gt; Discriminant($1);
+10700005925626216180895747020647047166414333000723923591882\
+57829873417638072117114945163507537844711544617147344227643\
+21408503489566949866295669400825222748660907808235401444104\
+29329493645714658394673579309893726532999745496689571082958\
+8286937125090034449967033769822464
+</PRE>
+This (polynomial) discriminant is huge, in fact it is so large
+that we should avoid the factorisation. We already know
+the discriminant of Ka. The discriminant of I3 has to be
+a divisor - so we can use the <TT>Discriminant</TT> parameter to
+<TT>MaximalOrder</TT>:
+(We are going to need the <TT>MaximalOrder</TT> for the following embedding.)
+<P>
+<P>
+<PRE>
+&gt; I3M := MaximalOrder(EquationOrder(I3):
+&gt; Discriminant := Discriminant(Oa));
+&gt; I3M := MaximalOrder(I3);
+</PRE>
+D3 should be a subfield of I3, so lets verify it:
+<P>
+<P>
+<PRE>
+&gt; IsSubfield(D3, I3);
+true Mapping from: FldNum: D3 to FldNum: I3
+</PRE>
+As a side-effect, Magma is now aware of the embedding and will use it.
+Without the <TT>IsSubfield</TT> call, the <TT>RelativeField</TT> function
+will fail.
+<P>
+<P>
+<PRE>
+&gt; I3r := RelativeField(D3, I3);
+&gt; I3rM := MaximalOrder(I3r);
+&gt; K3r := RelativeField(D3, Ka);
+&gt; K3rM := MaximalOrder(K3r);
+&gt; IsInert(K3rM!!P3 meet D3M, I3rM);
+true
+</PRE>
+The last step: verify that P3 is totally ramified over I3:
+<P>
+<P>
+<PRE>
+&gt; K3r := RelativeField(I3, Ka);
+&gt; K3rM := MaximalOrder(K3r);
+&gt; IsTotallyRamified(K3rM!!P3 meet I3M, K3rM);
+true
+</PRE>
+Using the decomposition group, we can get the splitting behaviour of
+any prime in any subfield of Ka.
+<P>
+<P>
+<PRE>
+&gt; L := SubgroupLattice(Gal);
+&gt; [ IsNormal(Gal, L[x]) : x in [1..#L]];
+[ true, true, true, true, false, false, false, false, true, 
+true, true, true, true, true, true, false, false, false, 
+false, true, true, true, true, true, true, true, true ]
+&gt; U := L[5];
+&gt; k := FixedField(Ka, U);
+&gt; kM := MaximalOrder(EquationOrder(k) :
+&gt;                    Discriminant := Discriminant(Oa));
+&gt; kM := MaximalOrder(k);
+&gt; Kr := RelativeField(k, Ka);
+&gt; KrM := MaximalOrder(Kr);
+&gt; P43 := Decomposition(Oa, 43)[1][1];
+&gt; V := DecompositionGroup(P43);
+</PRE>
+The splitting behaviour is determined by the double coset decomposition
+of Gal with respect to U and V:
+<P>
+<P>
+<PRE>
+&gt; f, I := CosetAction(Gal, U);
+&gt; orbs := Orbits(f(V));
+&gt; reps := [];
+&gt; for o in orbs do 
+&gt;   _, x := IsConjugate(I, 1, Rep(o));
+&gt;   Append(~reps, x @@ f); 
+&gt; end for;
+&gt; reps;
+[
+    Id(G),
+    (1, 2, 7, 5)(3, 8, 6, 10)(4, 12, 14, 9)(11, 16, 13, 15),
+    (1, 7)(2, 5)(3, 6)(4, 14)(8, 10)(9, 12)(11, 13)(15, 16),
+    (1, 8)(2, 6)(3, 5)(4, 15)(7, 10)(9, 13)(11, 12)(14, 16),
+]
+&gt; #reps;
+4
+</PRE>
+So there will be at least 4 prime ideals over 43 in k:
+<P>
+<P>
+<PRE>
+&gt; L := [ ];
+&gt; for i in reps do
+&gt;   Append(~L, kM meet KrM !! Map(i)(P43));
+&gt; end for;
+&gt; [ IsPrime(x) : x in L];
+[ true, true, true, true ]
+&gt; LL := Decomposition(kM, 43);#LL;
+4
+&gt; [ Position(L, x[1]) : x in LL];
+[ 4, 3, 1, 2 ]
+</PRE>
+<HR>
+<H5><A NAME = "4121">FrobeniusElement(K, p) : FldNum, RngIntElt -&gt; GrpPermElt</A></H5>
+<BLOCKQUOTE>
+Compute a Frobenius element at p in the Galois group of the Galois closure
+of K. This is a permutation on the roots of a polynomial defining K,
+which can be recovered as <TT>DefiningPolynomial(A)</TT> for any Artin
+representation A of K; the Frobenius element is well-defined
+up to conjugacy and modulo inertia.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "4122">Example <TT>RngOrdGal_nf-sig-FrobeniusElement (H39E3)</TT></A></H3>
+We take a polynomial whose Galois group is D<sub>5</sub> and compute
+Frobenius elements at p=2 and p=5.
+They in two different conjugacy classes of 5-cycles in the Galois group.
+<P>
+<P>
+<PRE>
+&gt; load galpols;
+&gt; f:=PolynomialWithGaloisGroup(5,2);
+&gt; assert IsIsomorphic(GaloisGroup(f),DihedralGroup(5));
+&gt; K:=NumberField(f);
+&gt; FrobeniusElement(K,2);
+(1, 5, 4, 3, 2)
+&gt; FrobeniusElement(K,5);
+(1, 3, 5, 2, 4)
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text400.htm">[Next]</A><A  HREF = "text398.htm">[Prev]</A> <A  HREF = "text400.htm">[Right]</A> [____] <A  HREF = "text398.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

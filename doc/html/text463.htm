@@ -1,0 +1,183 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Ray Class Groups</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text464.htm">[Next]</A><A  HREF = "text462.htm">[Prev]</A> <A  HREF = "text464.htm">[Right]</A> [____] <A  HREF = "text462.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "5062">Ray Class Groups</A></H3>
+
+<P>
+<P>
+<P>
+The ray divisor class group Cl<sub>m</sub> modulo a divisor m of
+a global function field K is defined via the
+following exact sequence:
+1 to k<sup> x </sup> to O<sup> x </sup><sub>m</sub> to Cl<sub>m</sub> to Cl to 1
+where O<sup> * </sup><sub>m</sub> is the group of units in the "residue ring" mod m,
+k is the exact constant field of K and Cl is the divisor class group
+of K.
+This follows the methods outlined in <A  HREF = "text461.htm#bib_Pau2">[HPP97]</A>.
+
+
+<H5><A NAME = "5063">RayResidueRing(D) : DivFunElt -&gt; GrpAb, Map</A></H5>
+<BLOCKQUOTE>
+Let D = &sum;n<sub>i</sub>P<sub>i</sub> be an effective divisor for some places P<sub>i</sub> (so n<sub>i</sub>&gt;0).
+The ray residue ring R is the product of the unit groups of the local
+rings: 
+R = O<sup> x </sup><sub>m</sub> := &prod;(O<sub>P<sub>i</sub></sub>/P<sub>i</sub><sup>n<sup>i</sup></sup>)<sup> x </sup>
+where O<sub>P<sub>i</sub></sub> is the valuation ring of P<sub>i</sub>.
+<P>
+The map returned as the second return value is from the 
+ray residue ring R into the function field and admits a pointwise inverse
+for the computation of discrete logarithms.
+</BLOCKQUOTE>
+<H5><A NAME = "5064"></A><A NAME = "FldFunAb:RayClassGroup">RayClassGroup</A>(D) : DivFunElt -&gt; GrpAb, Map</H5>
+<BLOCKQUOTE>
+Let D be an effective (positive) divisor. The ray class group modulo
+D is a quotient of the group of divisors that are coprime to D modulo
+certain principal divisors. It may be computed using the exact sequence:
+1 to k<sup> x </sup> to O<sup> x </sup><sub>m</sub> to Cl<sub>m</sub> to Cl to 1
+<P>
+Note that in contrast to the number field case, the ray class group of a 
+function field is infinite.
+<P>
+The map returned as the second return value is the map from the 
+ray class group into the group of divisors and admits a pointwise inverse
+for the computation of discrete logarithms.
+<P>
+Since this function uses the class group of the function field in an
+essential way, it may be necessary for large examples to precompute the
+class group. Using <A  HREF = "text456.htm#Divisors:Classes:ClassGroup">ClassGroup</A> directly gives access
+to options that may be necessary for complicated fields.
+</BLOCKQUOTE>
+<H5><A NAME = "5065">RayClassGroupDiscLog(y, D) : DivFunElt, DivFunElt -&gt; GrpAbElt</A></H5>
+<H5>RayClassGroupDiscLog(y, D) : PlcFunElt, DivFunElt -&gt; GrpAbElt</H5>
+<BLOCKQUOTE>
+Return the discrete log of the place or divisor y in the ray class group
+modulo the divisor D.
+This is a version of the pointwise inverse of the map returned by
+<A  HREF = "text463.htm#FldFunAb:RayClassGroup">RayClassGroup</A>.
+The main difference is that using the intrinsics
+the values are cached, ie. if the same place (or divisor) is decomposed
+twice, the second time will be instantaneous.
+<P>
+A disadvantage is that in situations where a great number of discrete logarithms
+is computed for pairwise different divisors, a great amount of memory is wasted.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5066">Example <TT>FldFunAb_classfield-structures (H45E1)</TT></A></H3>
+We will demonstrate the creation of some ray class and ray residue groups.
+First we have to create a function field:
+<P>
+<P>
+<PRE>
+&gt; k&lt;w&gt; := GF(4);
+&gt; kt&lt;t&gt; := PolynomialRing(k);
+&gt; ktx&lt;x&gt; := PolynomialRing(kt);
+&gt; K := FunctionField(x^3-w*t*x^2+x+t);
+</PRE>
+Now, to create some divisors:
+<P>
+<P>
+<PRE>
+&gt; lp := Places(K, 2);
+&gt; D1 := 4*lp[2]+2*lp[6];
+&gt; D2 := &amp;+Support(D1);
+</PRE>
+And now the groups:
+<P>
+<P>
+<PRE>
+&gt; G1, mG1 := RayResidueRing(D1); G1;
+Abelian Group isomorphic to Z/2 + Z/2 + Z/2 + Z/2 + Z/2 + Z/2 + 
+Z/2 + Z/4 + Z/60 + Z/60
+Defined on 10 generators
+Relations:
+    2*G1.1 = 0
+    2*G1.2 = 0
+    2*G1.3 = 0
+    2*G1.4 = 0
+    2*G1.5 = 0
+    2*G1.6 = 0
+    2*G1.7 = 0
+    4*G1.8 = 0
+    60*G1.9 = 0
+    60*G1.10 = 0
+&gt; G2, mG2 := RayResidueRing(D2); G2;
+Abelian Group isomorphic to Z/15 + Z/15
+Defined on 2 generators
+Relations:
+    15*G2.1 = 0
+    15*G2.2 = 0
+</PRE>
+G<sub>1</sub> = O<sub>D<sub>1</sub></sub><sup> x </sup> should surject onto D<sub>2</sub> = O<sub>D<sub>2</sub></sub><sup> x </sup> since
+D<sub>2</sub> | D<sub>1</sub>:
+<P>
+<P>
+<PRE>
+&gt; h := hom&lt;G1 -&gt; G2 | [G1.i@mG1@@mG2 : i in [1..Ngens(G1)]]&gt;;
+&gt; Image(h) eq G2;
+true
+&gt; [ h(G1.i) : i in [1..Ngens(G1)]];
+[
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    G2.2,
+    G2.1
+]
+</PRE>
+Ray class groups are similar and can be mapped in the same way:
+<P>
+<P>
+<PRE>
+&gt; R1, mR1 := RayClassGroup(D1);
+&gt; R2, mR2 := RayClassGroup(D2); R2;
+Abelian Group isomorphic to Z/5 + Z/15 + Z
+Defined on 3 generators
+Relations:
+    5*R2.1 = 0
+    15*R2.2 = 0
+&gt; hR := hom&lt;R1 -&gt; R2 | [R1.i@mR1@@mR2 : i in [1..Ngens(R1)]]&gt;;
+&gt; Image(hR);
+Abelian Group isomorphic to Z/5 + Z/15 + Z
+Defined on 3 generators in supergroup R2:
+    $.1 = R2.1
+    $.2 = R2.2
+    $.3 = R2.3
+Relations:
+    5*$.1 = 0
+    15*$.2 = 0
+&gt; $1 eq R2;
+true
+</PRE>
+Note that the missing C<sub>3</sub> part in comparing G<sub>2</sub> and R<sub>2</sub> corresponds
+to factoring by k<sup> x </sup>. The free factor comes from the class group.
+<P>
+Now, let us investigate the defining exact sequence for R<sub>2</sub>:
+<P>
+<P>
+<PRE>
+&gt; C, mC := ClassGroup(K);
+&gt; h1 := map&lt;K -&gt; G2 | x :-&gt; (K!x)@@mG2&gt;;
+&gt; h2 := hom&lt;G2 -&gt; R2 | [ G2.i@mG2@@mR2 : i in [1..Ngens(G2)]]&gt;;
+&gt; h3 := hom&lt;R2 -&gt; C | [ R2.i@mR2@@mC : i in [1..Ngens(R2)]]&gt;;
+&gt; sub&lt;G2 | [h1(x) : x in k | x ne 0]&gt; eq Kernel(h2);
+&gt; Image(h2) eq Kernel(h3);
+&gt; Image(h3) eq C;
+</PRE>
+So indeed, the exact sequence property holds.
+<HR>
+<PRE></PRE> <A  HREF = "text464.htm">[Next]</A><A  HREF = "text462.htm">[Prev]</A> <A  HREF = "text464.htm">[Right]</A> [____] <A  HREF = "text462.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

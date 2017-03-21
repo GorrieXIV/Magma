@@ -1,0 +1,539 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>First Examples</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1358.htm">[Next]</A><A  HREF = "text1356.htm">[Prev]</A> <A  HREF = "text1358.htm">[Right]</A> [____] <A  HREF = "text1356.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "14905">First Examples</A></H3>
+
+<P>
+<P>
+This chapter describes functions for constructing and studying
+algebraic curves.
+The first section below contains elementary examples to help with
+getting started. The biggest obstacle is being able to create geometric
+objects. After that one should be able to consult the later sections for
+off-the-shelf functions to apply to the curves.
+<P>
+Within Magma, curves are realised as a specialised type of scheme,
+themselves covered in
+Chapter <A  HREF = "text1321.htm#14366">SCHEMES</A>.
+As schemes they may be defined over any ring, although most functions
+will require this to be at least a domain and often a field.
+<P>
+In previous versions of Magma, curves were restricted to lie in some plane
+for the dedicated functions below to apply to them. However, we have now
+generalised the curve definition to apply to any one-dimensional scheme.
+The general type is <TT>Crv</TT> and the plane curve now has sub-type
+<TT>CrvPln</TT>.
+As before, for the vast majority of the specialist functionality to apply
+to a curve, it has to be integral (reduced and irreducible) and defined
+over a field.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1357.htm#14906">Ambients</A>
+<LI> <A  HREF = "text1357.htm#14907">Curves</A>
+<LI> <A  HREF = "text1357.htm#14908">Projective Closure</A>
+<LI> <A  HREF = "text1357.htm#14909">Points</A>
+<LI> <A  HREF = "text1357.htm#14910">Choosing Coordinates</A>
+<LI> <A  HREF = "text1357.htm#14911">Function Fields and Divisors</A>
+</UL>
+<H4><A NAME = "14906">Ambients</A></H4>
+
+<P>
+<P>
+One usually starts by defining an affine or projective space over some base
+ring in which our curves
+will live, although it is not absolutely necessary. Normal affine and
+projective spaces are the commonest, although product or weighted
+projective spaces may also be used.
+This space is often referred to as the <I>ambient space</I> and these are
+more fully described in the general chapter on schemes referred to above.
+A two-dimensional ambient is referred to as a plane. Plane curves -
+the ones of subtype <TT>CrvPln</TT> - are those whose ambient space is
+a plane (and these are defined by a single polynomial equation).
+If you intend later to create several curves and would like them to be
+taken to lie in the same space, then deliberately creating their common
+ambient space in advance is certainly the surest way.
+It is important to be aware that any two ambients that have been created
+independently will always be distinct. For example, if one wants to
+intersect two plane curves, the curves are not allowed to lie in distinct planes,
+even if one might consider the planes to be mathematically equivalent.
+<P>
+The basic creation function takes two arguments. The first is the 
+intended base ring, the second the intended dimension.
+In the code fragment below we make an affine plane (of dimension 2).
+The x, y delineated by diamond brackets determine the names of the
+coordinates.
+This syntax is just the same as that for analogous structures such as 
+polynomial rings.
+<P>
+<P>
+<PRE>
+&gt; k := Rationals();
+&gt; A&lt;x,y&gt; := AffineSpace(k,2);
+&gt; A;
+Affine space of dimension 2 with coordinates x,y
+</PRE>
+One can retrieve the characteristic data related to a particular plane
+as in the following examples.
+<P>
+<P>
+<PRE>
+&gt; BaseRing(A);
+Rational Field
+&gt; Dimension(A);
+2
+&gt; CoordinateRing(A);
+Polynomial ring of rank 2 over Rational Field
+Lexicographical Order
+Variables: x, y
+</PRE>
+The variables x and y are named on A, but are really
+elements of the coordinate ring of A.
+Thus, <TT>A.1</TT>, the first variable of A which in this case is x, is
+synonymous with <TT>CoordinateRing(A).1</TT>. Higher dimensional affine
+ambients are precisely analogous, the difference being that there are
+more variables.
+
+
+<H4><A NAME = "14907">Curves</A></H4>
+
+<P>
+<P>
+Algebraic curves are schemes of dimension one. That is, they are 
+described by the vanishing of a set of polynomials or an ideal in the
+coordinate ring of their ambient space A and this set of zeros has
+algebraic dimension 1.
+<P>
+Plane curves are described by the vanishing of a single polynomial equation
+f=0 in some plane A. In other ambients of dimension d, at least
+d - 1 polynomials are needed and usually more (when d - 1 suffice, we
+refer to the curve as a global complete intersection).
+<P>
+The polynomials or ideal must belong to the coordinate ring of A and be
+homogeneous when A is projective.
+In practical terms, this means that one should usually write the polynomial
+using the variables of A.
+When using most of the creation functions below, one must be explicit about the
+ambient in which the curve lies.
+<P>
+Given some affine plane A with coordinates u, v,
+define a curve C as the zero locus of a polynomial f in u, v.
+<P>
+<P>
+<PRE>
+&gt; A&lt;u,v&gt; := AffineSpace(FiniteField(32003),2);
+&gt; f := u^2 - v^5;
+&gt; C := Curve(A,f);
+&gt; C;
+Curve over GF(32003) defined by u^2 + 32002*v^5
+</PRE>
+As we see next, the curve C remains in the ambient space A in which it was
+constructed. It will always lie in that particular space.
+<P>
+<P>
+<PRE>
+&gt; AmbientSpace(C);
+Affine space of dimension 2 with coordinates u,v
+&gt; AmbientSpace(C) eq A;
+true
+&gt; BaseField(C);
+Finite field of size 32003
+</PRE>
+Magma can solve systems of polynomial equations over a given field
+(or even over a domain using resultants).
+In particular, it can find the singular points of C defined over the
+current base field.
+<P>
+<P>
+<PRE>
+&gt; SingularPoints(C);
+{ (0,0) }
+&gt; HasSingularPointsOverExtension(C);
+false
+</PRE>
+The function <TT>HasSingularPointsOverExtension()</TT>
+above returns <TT>false</TT> if and only if there are no additional
+singular points defined over some extension of the base field of C.
+(It calculates the radical of the Jacobian algebra to check whether the
+singularities over the current base field account for the whole algebra.)
+So the origin really is the only singularity of C defined over this field.
+There are functions which help one find the singularities of C over
+an extension if they exist.
+
+
+<H4><A NAME = "14908">Projective Closure</A></H4>
+
+<P>
+<P>
+Magma maintains a close connection between a curve and its projective closure.
+Here we illustrate some of the nice results of this.
+<P>
+In this example we
+define an affine curve in coordinates x, y and take its projective closure.
+For clarity, we
+name the homogeneous coordinates on projective space X, Y, Z.
+These names are really maintained by the projective space containing D even
+though they appear to have been created with D. Any other curve
+in this projective space will be expressed in terms of these variables.
+Names are not automatically given to the projective space.
+In this example the choice is made at the first opportunity, but it
+can be made or changed at any time.
+<P>
+<P>
+<PRE>
+&gt; A&lt;x,y&gt; := AffineSpace(Rationals(),2);
+&gt; C := Curve(A,(y^2 - x^3)^2 - y*x^6);
+&gt; D&lt;X,Y,Z&gt; := ProjectiveClosure(C);
+&gt; D;
+Curve over Rational Field defined by
+X^6*Y - X^6*Z + 2*X^3*Y^2*Z^2 - Y^4*Z^3
+</PRE>
+Conversely one can retrieve the affine patches of a projective curve.
+The standard patches are usually the ones of interest, although others can be
+recovered. The first line below checks that the first patch really is C.
+Again, variable names are not automatically determined
+for curves lying in spaces that have not already been created.
+As seen below, the only result of not assigning names to variables is
+that the printing is a little unreadable: the first coordinate function
+is referred to as <TT>$.1</TT> and so on.
+<P>
+<P>
+<PRE>
+&gt; AffinePatch(D,1) eq C;
+true
+&gt; C2 := AffinePatch(D,2);
+&gt; C2;
+Curve defined by -$.1^6*$.2 + $.1^6 + 2*$.1^3*$.2^2 - $.2^3
+</PRE>
+We name the coordinate functions and check that C<sub>2</sub> really is a patch of D.
+<P>
+<P>
+<PRE>
+&gt; A2&lt;u,v&gt; := AmbientSpace(C2);
+&gt; C2;
+Curve defined by -u^6*v + u^6 + 2*u^3*v^2 - v^3
+&gt; ProjectiveClosure(C2);
+Curve defined by -X^6*Y + X^6*Z - 2*X^3*Y^2*Z^2 + Y^4*Z^3
+</PRE>
+
+
+<H4><A NAME = "14909">Points</A></H4>
+
+<P>
+<P>
+Points have already arisen as the singular points of a curve. In this chapter
+we always think of points as being a sequence of coordinates that satisfies
+the equations of a curve rather than as a zero-dimensional scheme.
+While the coordinates of a point often lie in the base ring of the curve,
+they may lie in any extension of that base ring. Technically,
+the parent of points is not considered to be the curve at all, but instead
+a <I>point set</I>. Point sets are characterised by two pieces of
+information. The first piece of information is some scheme,
+in this case a curve C. The second is some algebra over the base ring.
+(Note that while we say <I>algebra</I> here to emphasise the mathematical point,
+in Magma one uses any ring which admits a map from the base ring rather
+than an explicit Magma algebra type as the second piece of information.)
+In other words, given an extension L of the
+base ring k of a curve C, there is a set, C(L), of points of C with
+coordinates in L. You can consider the point set C(L) literally to be
+the set of points of C with coordinates in L, although this set does not
+actually compute or list all its elements since there are often infinitely many.
+<P>
+Thus points can be thought of as being the closest thing to the notion
+of point that one uses colloquially: "Is the curve C singular at
+the point p?", for example, can be translated as <TT>IsSingular(C,p)</TT>.
+<P>
+Creating points is easy.
+For sequences of coordinates of the base ring of a curve, the expression
+<TT>C ! [1,2]</TT>, for example, creates the point (1, 2) on the
+scheme C (assuming that coordinate sequences of length 2 are appropriate
+for C and that (1, 2) satisfies the equations of C).
+If the coordinates are in some extension, or if you
+really want a particular point set as parent, you must be
+explicit about the point set and write <TT>C(L) ! [1,2]</TT>.
+<P>
+Points may belong to the point sets either
+of a curve or of the ambient plane of the curve.
+When a point and a curve are both arguments to a function
+then this difference isn't visible --- in the background the function will check
+that the point really does lie on the curve if that is what is mathematically
+required --- although being careful about
+where points lie is good practice. Often one is allowed to omit the curve
+argument in such functions, in which case one must be clear that the
+point really does
+lie exactly where one wants it to lie: <TT>IsNonsingular(p)</TT> is an example
+of function that is rather susceptible to returning confusing results if one
+isn't careful about where the point lies.
+<P>
+The <TT>!</TT> operator is Magma's usual coercion operator. It can be used in a
+variety of situations where one might hope to make natural reinterpretations
+of objects. Here it is used to reinterpret a sequence of numbers as the
+coordinates of a point in a plane or a curve.
+<P>
+<P>
+<PRE>
+&gt; A&lt;x,y&gt; := AffineSpace(FiniteField(23),2);
+&gt; p := A ! [1,2];
+&gt; p;
+(1, 2)
+&gt; q := Origin(A);
+&gt; q;
+(0, 0)
+</PRE>
+So now it is possible to analyse particular points of a curve.
+<P>
+<P>
+<PRE>
+&gt; C := Curve(A,x^2 + 2*x*y^2 - y^5);
+&gt; C;
+Curve over GF(23) defined by
+x^2 + 2*x*y^2 + 22*y^5
+&gt; p in C;
+true (1, 2)
+&gt; IsSingular(C,p);
+false
+&gt; TangentLine(C,p);
+Curve over GF(23) defined by
+10*x + 20*y + 19
+</PRE>
+Notice that the statement <TT>p in C</TT> is evaluated in a generous way:
+p is really in
+a point set of the plane but it happens to satisfy the equation of the curve
+and that is what is checked. There are two ways to
+force the parent of the point to be a point
+set of C: either use the coercion operator or test it with the standard
+<TT>IsCoercible()</TT> function.
+The tangent line to C at p is interpreted as a linear curve embedded in
+the same plane as C and intersecting it at p. These tangent lines are only 
+defined for plane curves C and are themselves plane curves.
+In particular, functions which can take a curve as argument can take this
+tangent line as argument.
+The tangent line is given the name T in the discussion
+below and used as an argument in a function which takes two curves and a point.
+Recall that the tangent line to a curve C at a nonsingular
+point p is the unique line having intersection number at least 2
+with C at p.
+<P>
+<P>
+<PRE>
+&gt; T := $1;
+&gt; IntersectionNumber(C,T,p);
+2
+</PRE>
+
+
+<H4><A NAME = "14910">Choosing Coordinates</A></H4>
+
+<P>
+<P>
+One way to express a curve C after a change of coordinates is to
+make a map --- an automorphism of the ambient space --- which realises 
+the change of coordinates and then compute the image of C under 
+this map.
+<P>
+Here is a hands-on analysis of a singularity on a curve which
+involves changes of coordinates. The example is again a plane curve
+and involves several functions still only available for such:
+<TT>TangentCone</TT> and <TT>Blowup</TT>.
+The singularity is first moved to the origin where coordinates are
+chosen so that the tangent directions lie along the coordinate axes.
+<P>
+<P>
+<PRE>
+&gt; A&lt;x,y&gt; := AffineSpace(GF(11,2),2);
+&gt; C := Curve(A,-x^6 + x*y^2 - 2*x*y + x + (y - 1)^3);
+&gt; SingularPoints(C);
+{ (0, 1) }
+&gt; p := Representative(SingularPoints(C));
+&gt; f := Translation(A,p);
+&gt; C1 := f(C);
+&gt; q := Origin(A);
+&gt; TangentCone(C1,q);
+Curve over GF(11^2) defined by x*y^2 + y^3
+&gt; g := Automorphism(A,y);
+&gt; C2 := g(C1);
+&gt; TangentCone(C2,q);
+Curve over GF(11^2) defined by x*y^2
+</PRE>
+The singularity is now in a suitable form for study.
+The following could be the first steps in an analysis.
+It can be skipped over by anyone not familiar with the language;
+otherwise see Chapter <A  HREF = "text548.htm#5802">NEWTON POLYGONS</A>.
+<P>
+<P>
+<PRE>
+&gt; D,E := Blowup(C2);
+&gt; IsSingular(D,q),IsSingular(E,q);
+true false
+&gt; TangentCone(D,q);
+Curve over GF(11^2) defined by y^2
+&gt; Faces(NewtonPolygon(D));
+[ &lt;2, 3, 6&gt; ]
+</PRE>
+So the singularity is almost resolved.
+One more blowup of the cusp at the origin of D will make a resolution.
+
+
+<H4><A NAME = "14911">Function Fields and Divisors</A></H4>
+
+<P>
+<P>
+If C is an integral curve then the field of fractions of its coordinate
+ring (or the homogeneous part of degree 0 in the projective case), is known
+as the <I>function field</I> of C. The function field allows us to conveniently
+perform many different computations with the curve. The function fields of 
+an affine curve and its projective closure are isomorphic and are identified 
+in Magma (with the projective version).
+<P>
+In fact, there are two Magma function fields associated to the curve, both
+abstractly isomorphic to its field of rational functions. What we refer
+to as the function field here has type <TT>FunFldFracSch</TT> and is associated 
+with more general schemes. Additional information may be
+found in Chapter <A  HREF = "text1321.htm#14366">SCHEMES</A>. This provides the basic user interface for curve 
+functions when they are explicitly needed.
+For the most part, functions apply to the curve directly with the function
+field being used in the background. The second function field is an 
+algebraic function field (see Chapter <A  HREF = "text442.htm#4512">ALGEBRAIC FUNCTION FIELDS</A>). This provides
+much of the deeper functionality associated to the curve but lies even
+further in the background and most users should never need to access it
+directly.
+<P>
+Divisors --- loosely speaking, formal sums of points of a curve --- are an
+important part of the technology having many substantial applications.
+Any nonzero rational function determines a divisor: take the formal sum
+of zeros of the function on the curve (counted with multiplicity) minus
+the poles of the function. Divisors of this form are called principal divisors.
+Conversely, divisors arising in this way
+determine the function which defined them
+up to a scalar multiple.
+<P>
+There are two important groups in which divisors are often considered:
+the divisor group in which addition is simply coefficient-wise, and the
+divisor class group which is the divisor group modulo the subgroup
+of principal divisors. In the case of elliptic curves, the class group
+provides a formal setup in which to interpret the group law.
+<P>
+If you want to see it explicitly, the function field of a curve may be
+accessed. 
+<P>
+<P>
+<PRE>
+&gt; k := FiniteField(17);
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(k,2);
+&gt; E := Curve(P, y^2*z - x^3 - 4*x*z^2);
+&gt; E1&lt;u,v&gt; := AffinePatch(E,1);
+&gt; F&lt;a,b&gt; := FunctionField(E);
+&gt; F;
+Function Field of Curve over GF(17) defined by
+16*x^3 + 13*x*z^2 + y^2*z
+&gt; Genus(E);
+1
+</PRE>
+But often you don't need the function field in your hands
+since the function you want can be called directly with the curve as argument.
+<P>
+Divisors are constructed by referring to the curve on which they
+should lie together with some characteristic data for them.
+<P>
+<P>
+<PRE>
+&gt; Div := DivisorGroup(E);
+&gt; Div;
+Group of divisors of Curve over GF(17) defined by
+16*x^3 + 13*x*z^2 + y^2*z
+&gt; p := E ! [0,0,1];
+&gt; L := TangentLine(E,p);
+&gt; D := Divisor(E,L);
+&gt; D;
+Divisor of Curve over GF(17) defined by
+16*x^3 + 13*x*z^2 + y^2*z
+&gt; Decomposition(D);
+[
+    &lt;Place at (0 : 0 : 1), 2&gt;
+    &lt;Place at (0 : 1 : 0), 1&gt;,
+]
+</PRE>
+A little explanation is required. Firstly, the divisor D constructed here
+is really the divisor of the rational function with zero along L and
+pole along the line at infinity. Secondly, the basic printing of D is not
+so helpful: the point is to ensure that potentially lengthy calculations are
+avoided so it is not immediately printed in `factorised' form.
+Next, once factorised, the divisor refers to places of the curve. Since
+the curve could be singular and divisor computations are done on the
+nonsingular model, the language of places is used.
+Note that when printing a place, a point corresponding to the place is shown. 
+Of course, this point does not uniquely characterise the place.
+If p is a singular point of a curve
+it is possible to have unequal places that both display p as their support.
+<P>
+In this case, the curve is nonsingular so everything is above board: D is
+literally the divisor 2p<sub>1</sub> + p<sub>2</sub> where p<sub>1</sub> is the prime divisor at the
+point (0:0:1) and p<sub>2</sub> is the prime divisor at the point (0:1:0).
+Now, after defining these prime divisors, we define a new divisor of
+degree 0.
+<P>
+<P>
+<PRE>
+&gt; p1 := Divisor(p);
+&gt; p2 := Divisor(E![0,1,0]);
+&gt; D2 := D - 3*p1;
+&gt; Decomposition(D2);
+[
+    &lt;Place at (0 : 0 : 1), -1&gt;
+    &lt;Place at (0 : 1 : 0), 1&gt;,
+]
+&gt; Degree(D2);
+0
+</PRE>
+The natural question to ask of a divisor of degree 0 is whether or not
+it is principal.
+<P>
+<P>
+<PRE>
+&gt; IsPrincipal(D2);
+false
+&gt; IsPrincipal(2*D2);
+true 1/a
+</PRE>
+So D<sub>2</sub> is not principal but two times D<sub>2</sub> is principal.
+Moreover, the rational function 1/a defines 2 x D<sub>2</sub>.
+(This corresponds to the rational function z/x on P.)
+<P>
+Now we look at the class group of E.
+This function requires that E be defined over a finite field.
+All the operations above apply to a curve defined over any field.
+<P>
+<P>
+<PRE>
+&gt; Cl, _, phi := ClassGroup(E);
+&gt; Cl;
+Abelian Group isomorphic to Z/4 + Z/4 + Z
+Defined on 3 generators
+Relations:
+    4*Cl.1 = 0
+    4*Cl.2 = 0
+&gt; phi;
+Mapping from: DivCrv: D to GrpAb: Cl given by a rule
+&gt; phi(D2);
+2*Cl.2
+</PRE>
+<P>
+<P>
+<P>
+<P>
+<P>
+
+
+<PRE></PRE> <A  HREF = "text1358.htm">[Next]</A><A  HREF = "text1356.htm">[Prev]</A> <A  HREF = "text1358.htm">[Right]</A> [____] <A  HREF = "text1356.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

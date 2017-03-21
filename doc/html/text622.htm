@@ -1,0 +1,230 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Conjugacy Classes of Elements</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text623.htm">[Next]</A><A  HREF = "text621.htm">[Prev]</A> <A  HREF = "text623.htm">[Right]</A> <A  HREF = "text621.htm">[Left]</A> <A  HREF = "text612.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "6791">Conjugacy Classes of Elements</A></H3>
+
+<P>
+<P>
+There are three aspects of the conjugacy problem for elements: determining
+whether two elements are conjugate in a group G, determining a set of
+representatives for the conjugacy classes of elements of G, and listing 
+all the elements in a particular class of G. The algorithms used depend on
+the category of G.  If G is in category <A  HREF = "text630.htm#GrpPerm"> <TT>GrpPerm</TT></A> or <A  HREF = "text654.htm#GrpMat"> <TT>GrpMat</TT></A>,
+conjugacy is determined by means of a backtrack search over base-images.
+If G is in category <A  HREF = "text707.htm#GrpPC"> <TT>GrpPC</TT></A>, testing conjugacy is performed
+by transforming each element into a standard representative of its conjugacy
+class by an orbit-stabilizer process that works down a sequence of
+increasing quotients of G. Conjugacy testing for a group G in category
+<A  HREF = "text832.htm#GrpGPC"> <TT>GrpGPC</TT></A> is only possible if G is nilpotent. In this case, an algorithm
+by E. Lo <A  HREF = "text611.htm#bib_lo_nilpotent">[Lo98]</A> is used.
+<P>
+<P>
+Some functions described in this section may not exist or may have restrictions
+for some categories of groups. Details can be found in the chapters on the
+individual categories.
+
+
+<H5><A NAME = "6792">Class(H, x) : GrpFin, GrpFinElt -&gt; { GrpFinElt }</A></H5>
+<H5>Conjugates(H, x) : GrpFin, GrpFinElt -&gt; { GrpFinElt }</H5>
+<BLOCKQUOTE>
+Given a group H and an element x belonging to a group K
+such that H and K are subgroups of the same symmetric group,
+this function returns the set of conjugates of x under the
+action of H. If H = K, the function returns the conjugacy
+class of x in H.
+</BLOCKQUOTE>
+<H5><A NAME = "6793">ClassMap(G: parameters) : GrpFin -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Given a group G, construct the conjugacy classes and the class map f 
+for G. For any element x of G, f(x) will be the index of the conjugacy
+class of x in the sequence returned by the <TT>Classes</TT> function.
+<P>
+<P>
+<P>
+If G is a permutation group, the construction may be controlled
+using the parameters <TT>Orbits</TT>, <TT>WeakLimit</TT> and <TT>StrongLimit</TT>.
+If the parameter <TT>Orbits</TT> 
+is set <TT>true</TT>, the classes are computed as orbits of elements under conjugation
+and the class  map is stored as a list of images of the elements 
+of G (a list of length |G|). This option gives fast evaluation 
+of the class map but is practical only in the case of very small groups.
+With <TT>Orbits := false</TT>, <TT>WeakLimit</TT> and <TT>StrongLimit</TT> are 
+used to control the random classes algorithm (see function <TT>Classes</TT>).
+</BLOCKQUOTE>
+<H5><A NAME = "6794">ConjugacyClasses(G: parameters) : GrpFin -&gt; [ &lt;RngIntElt, RngIntElt, GrpFinElt&gt; ]</A></H5>
+<H5>Classes(G: parameters) : GrpFin -&gt; [ &lt;RngIntElt, RngIntElt, GrpFinElt&gt; ]</H5>
+
+<PRE>    WeakLimit: RngIntElt                Default: 200</PRE>
+
+<PRE>    StrongLimit: RngIntElt              Default: 500</PRE>
+
+<PRE>    Reps: [ GrpFinElt ]                 Default: </PRE>
+
+<PRE>    Al: MonStg                          Default: </PRE>
+<BLOCKQUOTE>
+Construct a set of representatives for the conjugacy classes of G.
+The classes are returned as a sequence of triples containing the
+element order, the class length and a representative element for the
+class. The parameters <TT>Reps</TT> and <TT>Al</TT> enable the user to select
+the algorithm that is to be used when G is a permutation or matrix
+group.
+<P>
+<TT>Reps := <I>Q</TT></I>: Create the classes of G by assuming that Q is
+a sequence of class representatives for G.  The orders and lengths of
+the classes will be computed and checked for consistency.
+<P>
+<TT>Al := "Action"</TT>:  Create the classes of G by computing the orbits 
+of the set of elements of G under the action of conjugation. This option 
+is only feasible for small groups.
+<P>
+<TT>Al := "Random"</TT>:  Construct the conjugacy classes of elements for
+a permutation or matrix group G using an algorithm that searches for
+representatives of all conjugacy classes of G by examining a random
+selection of group elements and their powers. The behaviour of this
+algorithm is controlled by two associated optional parameters <TT>WeakLimit</TT> and <TT>StrongLimit</TT>, whose values are positive integers
+n<sub>1</sub> and n<sub>2</sub>, say.  Before describing the effect of these
+parameters, some definitions are needed:  A mapping f: G -&gt; I
+is called a <I>class invariant</I> if f(g) = f(g<sup>h</sup>) for all g, h&isin;G.
+For permutation groups, the cycle structure of g is a readily
+computable class invariant.  In matrix groups, the primary invariant
+factors are used where possible, or the characteristic or minimal
+polynomials otherwise.  Two elements g and h are said to be <I>weakly conjugate</I> with respect to the class invariant f if f(g) =
+f(h).  By definition, conjugacy implies weak conjugacy, but the
+converse is false. The random algorithm first examines n<sub>1</sub> random
+elements and their powers, using a test for weak conjugacy.  It then
+proceeds to examine a further n<sub>2</sub> random elements and their powers,
+using a test for ordinary conjugacy.  The idea behind this strategy is
+that the algorithm should attempt to find as many classes as possible
+using the very cheap test for weak conjugacy, before employing the more
+expensive ordinary conjugacy test to recognize the remaining classes.
+<P>
+<TT>Al := "Extend"</TT>:  Construct the conjugacy classes of G by first
+computing classes in a quotient G/N and then extending these classes
+to successively larger quotients G/H until the classes for G/1 are
+known.  More precisely, a maximal series of subgroups 1 = G<sub>0</sub> &lt; G<sub>1</sub> &lt; ... &lt; G<sub>r</sub> = R &lt; G is computed such that R is the (solvable)
+radical of G and G<sub>i + 1</sub>/G<sub>i</sub> is elementary abelian.  A
+representation of G/R is computed using an algorithm of Derek Holt
+and its classes computed and represented as elements of G.  To extend
+to the next larger quotient, a group is computed from each class which
+acts on the transversal.  Each distinct orbit in that action gives rise
+to a new class.
+To compute the classes of G/R, the default algorithm (excluding the
+extension method) is used.  The same set of parameters is passed on, so
+you can control limits in the random classes method if it is chosen.
+The limitations of the algorithm are that R may be trivial, in which
+case nothing is done except to call a different algorithm, or one or
+more of the sections may be so large as to prohibit computing the
+action on the transversal.
+This algorithm is currently only available for permutation groups.
+</BLOCKQUOTE>
+<H5><A NAME = "6795">ClassesData(G: parameters) : GrpFin -&gt; [ &lt;RngIntElt, RngIntElt&gt; ]</A></H5>
+<BLOCKQUOTE>
+Return the sequence of pairs giving element orders and class lengths of the
+group G. This uses the same algorithms as the <A  HREF = "text1.htm#"></A> function, with
+the same parameters, to compute the classes and their representatives, but only
+returns the basic data of orders and lengths. The class representatives are
+stored within the group structure, just as with the <A  HREF = "text1.htm#"></A> function.
+</BLOCKQUOTE>
+<H5><A NAME = "6796">ClassRepresentative(G, x) : GrpFin, GrpFinElt -&gt; GrpFinElt</A></H5>
+<BLOCKQUOTE>
+Given a group G for which the conjugacy classes are known and
+an element x of G, return the designated representative for
+the conjugacy class of G containing x.
+</BLOCKQUOTE>
+<H5><A NAME = "6797">IsConjugate(G, g, h) : GrpFin, GrpFinElt, GrpFinElt -&gt; BoolElt, GrpFinElt</A></H5>
+<BLOCKQUOTE>
+Given a group G and elements g and h belonging to G,
+return the value <TT>true</TT> if g and h are conjugate in G. The
+function returns a second value if the elements
+are conjugate: an element k which conjugates g into h.
+</BLOCKQUOTE>
+<H5><A NAME = "6798">IsConjugate(G, H, K) : GrpFin, GrpFin, GrpFin -&gt; BoolElt, GrpFinElt</A></H5>
+<BLOCKQUOTE>
+Given a group G and subgroups H and K belonging to G,
+return the value <TT>true</TT> if G and H are conjugate in G. The
+function returns a second value if the subgroups
+are conjugate: an element z which conjugates H into K.
+</BLOCKQUOTE>
+<H5><A NAME = "6799">Exponent(G) : GrpFin -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The exponent of the group G. 
+</BLOCKQUOTE>
+<H5><A NAME = "6800">NumberOfClasses(G) : GrpFin -&gt; RngIntElt</A></H5>
+<H5>Nclasses(G) : GrpFin -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The number of conjugacy classes of elements for the group G.
+</BLOCKQUOTE>
+<H5><A NAME = "6801">PowerMap(G) : GrpFin -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Given a group G, construct the power map for G. Suppose that the order 
+of G is m and that G has r conjugacy classes.  When the classes 
+are determined by Magma, they are numbered from 1 to r. Let C be 
+the set of class indices { 1, ..., r }.
+The <I>power map</I> f for G is the mapping
+f : C x Z -&gt; C
+where the value of f(i, j) for i &isin;C and j &isin;Z 
+is the number of the class which contains x<sub>i</sub><sup>j</sup>, 
+where x<sub>i</sub> is a representative of the i-th conjugacy class.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6802">Example <TT>Grp_Classes (H62E22)</TT></A></H3>
+The  conjugacy classes of the Mathieu group M<sub>11</sub> can be
+constructed as follows:
+<P>
+<P>
+<PRE>
+&gt; M11 := sub&lt;Sym(11) | (1,10)(2,8)(3,11)(5,7), (1,4,7,6)(2,11,10,9)&gt;;
+&gt; Classes(M11);
+Conjugacy Classes of group M11
+------------------------------
+[1]     Order 1       Length 1      
+        Rep Id(M11)
+
+
+[2]     Order 2       Length 165    
+        Rep (3, 10)(4, 9)(5, 6)(8, 11)
+
+
+[3]     Order 3       Length 440    
+        Rep (1, 2, 4)(3, 5, 10)(6, 8, 11)
+
+
+[4]     Order 4       Length 990    
+        Rep (3, 6, 10, 5)(4, 8, 9, 11)
+
+
+[5]     Order 5       Length 1584   
+        Rep (1, 3, 6, 2, 8)(4, 7, 10, 9, 11)
+
+
+[6]     Order 6       Length 1320   
+        Rep (1, 11, 2, 6, 4, 8)(3, 10, 5)(7, 9)
+
+
+[7]     Order 8       Length 990    
+        Rep (1, 4, 5, 6, 2, 7, 11, 10)(8, 9)
+
+
+[8]     Order 8       Length 990    
+        Rep (1, 7, 5, 10, 2, 4, 11, 6)(8, 9)
+
+
+[9]     Order 11      Length 720    
+        Rep (1, 11, 9, 10, 4, 3, 7, 2, 6, 5, 8)
+
+
+[10]    Order 11      Length 720    
+        Rep (1, 9, 4, 7, 6, 8, 11, 10, 3, 2, 5)
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text623.htm">[Next]</A><A  HREF = "text621.htm">[Prev]</A> <A  HREF = "text623.htm">[Right]</A> <A  HREF = "text621.htm">[Left]</A> <A  HREF = "text612.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

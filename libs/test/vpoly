@@ -1,0 +1,636 @@
+/*
+Univariate Polynomial Test.
+AKS 18/08/98.
+*/
+
+
+ClearVerbose();
+
+/*
+SetDelCheck(true);
+SetTrace(159492, true);
+SetMark(true);
+*/
+
+Z := IntegerRing();
+Q := RationalField();
+BIG_LIMIT := 10^20;
+
+rand_int := func<r | Random(-r, r)>;
+rand_rat := func<r | Random(-r, r) / Random(1, r)>;
+
+function rand_c(R, r)
+    if R cmpeq Z then
+	return rand_int(r);
+    elif R cmpeq Q then
+	return rand_rat(r);
+    elif Type(R) eq FldQuad then
+	return rand_rat(r) + R.1 * rand_rat(r);
+    else
+	return R ! rand_rat(r);
+    end if;
+end function;
+
+rand_one_poly := func<P, k, r |
+    P ! [Random(1, k) le r select 1 else 0: i in [1 .. k]]
+	where R is BaseRing(P)>;
+rand_one_minus_one_poly := func<P, k, r |
+    P ! [Random(1, k) le r select Random([-1, 1]) else 0: i in [1 .. k]]
+	where R is BaseRing(P)>;
+
+rand_poly := func<P, k, rand |
+    P ! [rand(): i in [1 .. k]] where R is BaseRing(P)>;
+
+rand_sign := func<| Random([-1, 1])>;
+rand_real := func<a, b | a + (RealField(100)!b - a)*Random(0, 10^10)/10^10>;
+rand_log_frac := func<n |
+    Max(1, Floor(Exp(rand_real(0, l)))) where l is Log(RealField(100)!n)>;
+rand_log_frac := func<n | rand_sign()*RandomBits(Random(0, Ilog2(n)))>;
+    //Max(1, Floor(Exp(rand_real(0, l)))) where l is Log(RealField(100)!n)>;
+rand_log_frac_half := func<n |
+    Max(1, Floor(Exp(rand_real(l/2, l)))) where l is Log(n)>;
+
+split_poly := function(f)
+    P := Parent(f);
+    c := Coefficients(f);
+    return P ! [c[i]: i in [1 .. #c by 2]], P ! [c[i]: i in [2 .. #c by 2]];
+end function;
+
+procedure general_test(R, length, range, count)
+//SetMark(true); procedure()
+    "\nGENERAL TEST";
+    "Seed:", GetSeed();
+    //G: Minimal;
+    "R:", R;
+    printf "Length: %o, Range: %o, Count: %o\n", length, range, count;
+
+    CPU := Cputime();
+
+    P<x> := PolynomialRing(R);
+
+    char_0 := Characteristic(R) eq 0;
+    is_field := IsField(R);
+    is_ff := Type(R) eq FldFin;
+    is_finite := is_ff or Type(R) eq RngIntRes;
+    is_char_0_field := char_0 and is_field;
+    is_char_2 := Characteristic(R) eq 2;
+    has_gcd := is_field or R cmpeq Z;
+    has_resultant := IsUFD(R);
+
+    if is_finite then
+	rand_func := func<| Random(R)>;
+    elif R cmpeq Z then
+	rand_func := func<| rand_int(range)>;
+    elif R cmpeq Q then
+	rand_func := func<| rand_rat(range)>;
+    elif Type(R) eq FldQuad then
+	rand_func := func<| rand_rat(range) + R.1 * rand_rat(range)>;
+    elif Type(R) eq FldCyc then
+	rand_func := func<| R ! [rand_rat(range): i in [1 .. Degree(R)]]>;
+    else
+	rand_func := func<| R!rand_int(range)>;
+    end if;
+
+    zero := P ! 0;
+    one := P ! 1;
+    minus_one := P ! -1;
+    assert IsZero(zero);
+    assert IsOne(one);
+    assert IsMinusOne(minus_one);
+
+    if range lt 0 then
+	random_k := func<| Random(R)>;
+    else
+	random_k := func<| Random(1, range)>;
+    end if;
+
+    for i in [1 .. count] do
+	//printf "Polynomial Ring i: %o, Seed: %o\n", i, GetSeed();
+
+	L := [ P |
+	    0,
+	    1,
+	    -1,
+	    rand_one_poly(P, length, length div 2),
+	    rand_one_poly(P, length, Min(5, length))
+	];
+
+	if not is_char_2 then
+	    L cat:= [
+		rand_one_minus_one_poly(P, length, length div 2),
+		rand_one_minus_one_poly(P, length, Min(5, length))
+	    ];
+	end if;
+
+	if is_finite then
+	    L cat:= [
+		rand_poly(P, Random(1, length), rand_func),
+		rand_poly(P, rand_log_frac_half(length), rand_func)
+	    ];
+	    if not is_char_2 then
+		L cat:= [
+		    rand_poly(P, length, rand_func)
+		];
+	    end if;
+	else
+	    L cat:= [
+		rand_poly(P, length, rand_func),
+		rand_poly(P, length, func<| rand_log_frac(range)>),
+		rand_poly(P, Random(1, length), func<| rand_log_frac(range)>),
+		rand_poly(
+		    P, rand_log_frac_half(length), func<| rand_log_frac(range)>
+		)
+	    ];
+	end if;
+
+	for fi := 1 to #L do
+	    f := L[fi];
+	    //printf "f := %o;\n", f;
+	    //printf "*** f = %o ...\n", Substring(Sprint(f), 1, 50);
+
+	    if f ne 0 and Degree(f) le 10 then
+		v := Valuation(f);
+		d := Degree(f);
+		assert TrailingCoefficient(f) eq Coefficient(f, v);
+		assert LeadingCoefficient(f) eq Coefficient(f, d);
+		assert TrailingTerm(f) eq TrailingCoefficient(f)*x^v;
+		assert LeadingTerm(f) eq LeadingCoefficient(f)*x^d;
+		assert forall{i: i in [0 .. v - 1] | Coefficient(f, i) eq 0};
+		assert Coefficient(f, v) ne 0;
+		assert forall{
+		    i: i in [0 .. Degree(f) + 5] |
+			Coefficient(f, i) eq MonomialCoefficient(f, x^i)
+		};
+		assert Evaluate(f, 0) eq Coefficient(f, 0);
+		assert Evaluate(f, 1) eq &+Coefficients(f);
+	    end if;
+
+	    assert (-1) * f eq -f;
+	    assert 3 * f eq f + f + f;
+	    assert f * 4 eq f + f + f + f;
+	    ff := f * f;
+	    assert f^2 eq ff;
+	    assert f^3 eq ff * f;
+	    assert f^0 eq 1;
+	    assert f^1 eq f;
+	    assert (f + 1)^2 eq ff + 2*f + 1;
+	    assert f + f eq 2 * f;
+	    assert f + 0 eq f;
+	    assert f - f eq 0;
+	    assert f * 0 eq 0;
+	    assert IsZero(f - f);
+
+	    if is_finite then
+		u := random{x: x in R | IsUnit(x)};
+	    else
+		u := -1;
+	    end if;
+	    assert f/u eq R!(1/u)*f;
+	    assert IsUnit(f) eq
+		(Degree(f) eq 0 and IsUnit(LeadingCoefficient(f)));
+
+	    f_is_big := R cmpeq Z and
+		Abs(Max(Coefficients(x*f + 1))) ge BIG_LIMIT;
+
+	    k := Degree(f) + 1;
+	    if is_field and (not is_finite or #R gt k) and k le 100 then
+		c := 0;
+		pr := 1;
+		repeat
+		    if is_finite then
+			p := [R | Random(R): i in [1 .. k]];
+		    else
+			pr +:= 1;
+			p := [R | rand_c(R, pr): i in [1 .. k]];
+		    end if;
+		    c +:= 1;
+		until #Set(p) eq #p or c eq 10;
+
+		if #Set(p) eq #p then
+		    //printf "Interp f: %o\n", f;
+		    //printf "Interp p: %o\n", p;
+		    //eval := [R | Evaluate(f, x): x in p];
+		    ev := [R | Evaluate(f, x): x in p];
+		    //printf "Interp eval: %o\n", ev;
+		    I := Interpolation(p, ev);
+		    assert I eq f;
+		end if;
+	    end if;
+
+	    if has_gcd and not f_is_big then
+		//if GCD(ff, ff + f) ne Normalize(f) then
+		//printf "P<x> := %m;\n", Parent(f);
+		//printf "f := %o;\n", f;
+		//printf "ff := %o;\n", ff;
+		//end if;
+		assert GCD(ff, ff + f) eq Normalize(f);
+		c, p := ContentAndPrimitivePart(f);
+		assert c eq Content(f);
+		assert p eq PrimitivePart(f);
+		assert c * p eq f;
+                if is_field then
+                    assert IsZero(f) select IsZero(c) else IsOne(c);
+                 else
+                    assert c eq GCD(Coefficients(f));
+                end if;
+	    end if;
+
+	    if has_resultant then
+		a, b := split_poly(f);
+		if f_is_big then
+		    e := 3;
+		else
+		    e := 100;
+		end if;
+		a := a mod (x^e + 1) + 1;
+		b := b mod (x^e + 1) + 1;
+		fe := f mod (x^e + 1) + 1;
+		//printf "a := %o;\n", a;
+		//printf "b := %o;\n", b;
+		//printf "fe := %o;\n", fe;
+		assert Resultant(fe, a)*Resultant(fe, b) eq Resultant(fe, a*b);
+		//time "res:", Resultant(fe, a * b);
+		d := Degree(fe);
+		if d ge 1 then
+		    fed := Derivative(fe);
+		    assert Discriminant(fe) eq
+			(-1)^((d * (d - 1)) div 2) *
+			    LeadingCoefficient(fe)^(d - Degree(fed) - 2) *
+			    Resultant(fe, fed);
+		end if;
+	    end if;
+
+	    if is_char_0_field then
+		int_f := Integral(f);
+		assert Derivative(int_f) eq f;
+	    end if;
+
+	    if is_ff and f ne 0 then
+		assert Modexp(x, 0, f) eq 1;
+		assert Modexp(x, 1, f) eq (x mod f);
+		if Degree(f) ge 200 then
+		    // The whole test run is too slow unless these are used:
+		    e1 := 3;
+		    e2 := 6;
+		else
+		    e1 := Random(10, 20);
+		    e2 := Random(20, 21);
+		end if;
+		g := f div x^(Degree(f) div 2) + x + 1;
+
+		//printf "Modexp_g: = %o;\n", g;
+/*
+printf "g := %o;\n", g;
+printf "e1 := %o;\n", e1;
+printf "e2 := %o;\n", e2;
+printf "f := %o;\n", f;
+*/
+		assert Modexp(g, e1 + e2, f) eq
+		    (Modexp(g, e1, f) * Modexp(g, e2, f)) mod f;
+	    end if;
+
+	    assert Derivative(f, 0) eq f;
+	    assert Derivative(f, Degree(f) + 1) eq 0;
+	    assert Derivative(f, 3) eq Derivative(Derivative(Derivative(f)));
+
+	    for gi := 1 to fi do
+		g := L[gi];
+
+		//printf "    g = %o ...\n", Substring(Sprint(g), 1, 50);
+
+		g_is_big := R cmpeq Z and
+		    Abs(Max(Coefficients(x*g + 1))) ge BIG_LIMIT;
+		fg := f * g;
+		gg := g * g;
+		assert f + g eq g + f;
+		assert fg eq g * f;
+		assert (f + g) * (f - g) eq ff - gg;
+		assert (f + g)^2 eq ff + 2*fg + gg;
+		assert f * (f + g) eq ff + fg;
+		assert f - g eq -(g - f);
+		if g ne 0 and IsUnit(LeadingCoefficient(g)) then
+		    q, r := Quotrem(f, g);
+		    //printf "f:=%o;\n", f;
+		    //printf "g:=%o;\n", g;
+		    //printf "q:=%o;\n", q;
+		    //printf "r:=%o;\n", r;
+		    //printf "sum:=%o;\n", q*g + r;
+		    assert q * g + r eq f;
+		    assert q eq f div g;
+		    assert r eq f mod g;
+		end if;
+
+		if has_gcd and not f_is_big and not g_is_big then
+		    assert GCD(fg, fg + f) eq Normalize(f);
+		end if;
+
+		if is_field and Max(Degree(f), Degree(g)) le 100 then
+		    c, a, b := XGCD(f, g);
+		    assert (Degree(g) le 0 or Degree(a) lt Degree(g)) and
+			   (Degree(f) le 0 or Degree(b) lt Degree(f));
+		    assert c eq 0 or LeadingCoefficient(c) eq 1;
+		    if 0 eq 1 and a*f + b*g ne c then
+			printf "P<x> := PolynomialRing(%m);\n", R;
+			printf "f := %o;\n", f;
+			printf "g := %o;\n", g;
+			printf "c := %o;\n", c;
+			printf "a := %o;\n", a;
+			printf "b := %o;\n", b;
+		    end if;
+		    assert a*f + b*g eq c;
+		end if;
+
+		if Max(Degree(f), Degree(g)) le 200 then
+		    assert
+			Derivative(fg) eq
+			f * Derivative(g) + g * Derivative(f);
+		end if;
+	    end for;
+	end for;
+    end for;
+
+    if is_field then
+	def := x^20 - 1;
+	fact := x - 1;
+	QR<y> := quo<P | def>;
+
+	assert not IsUnit(QR ! fact);
+	assert P!y eq x;
+	assert QR!x eq y;
+
+	for i in [1 .. count] do
+	    //printf "Quotient ring i: %o, Seed: %o\n", i, GetSeed();
+
+	    L := [ QR |
+		0,
+		1,
+		-1,
+		rand_one_poly(P, length, length div 2),
+		rand_one_minus_one_poly(P, length, length div 2)
+	    ];
+
+	    if is_finite then
+		L cat:= [ QR |
+		    rand_poly(P, length, func<| Random(R)>)
+		];
+	    else
+		L cat:= [ QR |
+		    rand_poly(P, length, func<| rand_sign()*Random(1, range)>)
+		];
+	    end if;
+
+	    for fi := 1 to #L do
+		f := L[fi];
+		//printf "f := %o;\n", f;
+		//printf "*** f = %o ...\n", Substring(Sprint(f), 1, 50);
+
+		assert Evaluate(f, 0) eq Coefficient(f, 0);
+		assert Evaluate(f, 1) eq &+Coefficients(f);
+
+		assert (-1) * f eq -f;
+		assert 3 * f eq f + f + f;
+		assert f * 4 eq f + f + f + f;
+		ff := f * f;
+		assert f^2 eq ff;
+		assert f^3 eq ff * f;
+		assert f^0 eq 1;
+		assert f^1 eq f;
+		assert (f + 1)^2 eq ff + 2*f + 1;
+		assert f + f eq 2 * f;
+		assert f + 0 eq f;
+		assert f - f eq 0;
+		assert f * 0 eq 0;
+		assert IsZero(f - f);
+
+		if IsUnit(f) then
+		    finv := f^-1;
+		    assert finv * f eq 1;
+		    assert IsMinusOne(finv * -f);
+		end if;
+
+		if f ne 0 then
+		    assert IsOne(f^0);
+		    assert f^1 eq f;
+		    e1 := Random(2, 5);
+		    e2 := Random(6, 10);
+		    assert f^(e1 + e2) eq f^e1 * f^e2;
+		end if;
+
+		for gi := 1 to fi do
+		    g := L[gi];
+
+		    //printf "    g = %o ...\n", Substring(Sprint(g), 1, 50);
+
+		    fg := f * g;
+		    gg := g * g;
+		    assert f + g eq g + f;
+		    assert fg eq g * f;
+		    assert (f + g) * (f - g) eq ff - gg;
+		    assert (f + g)^2 eq ff + 2*fg + gg;
+		    assert f * (f + g) eq ff + fg;
+		    assert f - g eq -(g - f);
+		    if IsUnit(g) then
+			q := f / g;
+			assert q * g eq f;
+		    end if;
+		end for;
+	    end for;
+	end for;
+    end if;
+
+    t := Cputime(CPU);
+    t, "seconds";
+//end procedure(); ShowActive();
+end procedure;
+
+//SetSeed(1671381455);
+//general_test(GF(2, 23), 50, 0, 1);
+//SetSeed(1);
+
+general_test(GF(3, 2), 100, 0, 1);
+
+general_test(IntegerRing(), 100, 10, 1);
+general_test(IntegerRing(), 100, 2^30, 1);
+general_test(IntegerRing(), 10000, 100, 1);
+
+general_test(GF(2), 3000, 0, 1);
+general_test(GF(2, 2), 500, 0, 1);
+general_test(GF(2, 21), 2000, 0, 1);
+general_test(GF(2, 32), 500, 0, 1);
+general_test(GF(2, 33), 500, 0, 1);
+general_test(GF(2, 100), 100, 0, 1);
+general_test(GF(3), 2000, 0, 1);
+general_test(GF(3, 2), 500, 0, 1);
+general_test(GF(5), 500, 0, 1);
+general_test(GF(23), 500, 0, 1);
+general_test(GF(257), 500, 0, 1);
+general_test(GF(1024), 100, 0, 1);
+general_test(GF(65537), 50, 0, 1);
+general_test(GF(2, 16), 100, 0, 1);
+general_test(GF(2, 23), 50, 0, 1);
+general_test(GF(2, 20 * 9), 10, 0, 1);
+general_test(GF(2, 20 * 5), 10, 0, 1);
+general_test(GF(2, 20 * 3), 10, 0, 1);
+general_test(GF(2, 20 * 2), 10, 0, 1);
+general_test(GF(3, 2), 100, 0, 1);
+general_test(GF(3, 10), 50, 0, 1);
+general_test(IntegerRing(4), 1000, 0, 1);
+general_test(IntegerRing(2^30 - 1), 1000, 0, 1);
+general_test(IntegerRing(10^30), 256, 0, 1);
+general_test(GF(NextPrime(10^20: Proof := false), 1), 256, 0, 1);
+general_test(GF(11863279), 500, 0, 1);
+general_test(GF(PreviousPrime(2^30)), 512, 0, 1);
+general_test(Z, 256, 10^300, 1);
+general_test(Z, 512, 10^50, 1);
+general_test(Q, 16, 10^10, 1);
+general_test(QuadraticField(-1), 10, 10, 1);
+general_test(CyclotomicField(4), 10, 10, 1);
+
+F<t> := FunctionField(GF(2));
+P<x> := PolynomialRing(F);
+f := (x^2 + t)*(x^2 + 1);
+L := SquarefreeFactorization(f);
+assert &*[t[1]: t in L] eq (x^2 + t)*(x + 1);
+
+/*
+The following tests the FFT-based multiplication, since the bound on the
+absolute product coefficient is just above 256 bits and sign handling is
+needed.
+*/
+
+P<x> := PolynomialRing(IntegerRing());
+f := P!
+[8623817851614787552697809518774579801,-28010887278831662657694446958946677308,
+35792056518844299241688291934509862340,35792056518844299241688291934509862340,
+35792056518844299241688291934509862340,35792056518844299241688291934509862340,
+35792056518844299241688291934509862340,-28010887278831662657694446958946677308,
+35792056518844299241688291934509862340,-28010887278831662657694446958946677308,
+35792056518844299241688291934509862340,-28010887278831662657694446958946677308,
+35792056518844299241688291934509862340,35792056518844299241688291934509862340,
+-28010887278831662657694446958946677308,35792056518844299241688291934509862340,
+35792056518844299241688291934509862340,35792056518844299241688291934509862340,
+-28010887278831662657694446958946677308,35792056518844299241688291934509862340,
+35792056518844299241688291934509862340,-28010887278831662657694446958946677308,
+-28010887278831662657694446958946677308,-28010887278831662657694446958946677308,
+35792056518844299241688291934509862340,35792056518844299241688291934509862340,
+35792056518844299241688291934509862340,35792056518844299241688291934509862340,
+-28010887278831662657694446958946677308,35792056518844299241688291934509862340,
+35792056518844299241688291934509862340,-28010887278831662657694446958946677308,
+-28010887278831662657694446958946677308,35792056518844299241688291934509862340,
+-28010887278831662657694446958946677308,-28010887278831662657694446958946677308,
+-28010887278831662657694446958946677308,-28010887278831662657694446958946677308,
+35792056518844299241688291934509862340,35792056518844299241688291934509862340,
+35792056518844299241688291934509862340,-28010887278831662657694446958946677308,
+-28010887278831662657694446958946677308,35792056518844299241688291934509862340,
+-28010887278831662657694446958946677308,-28010887278831662657694446958946677308,
+-28010887278831662657694446958946677308,35792056518844299241688291934509862340,
+-28010887278831662657694446958946677308,-28010887278831662657694446958946677308,
+35792056518844299241688291934509862340,-28010887278831662657694446958946677308,
+35792056518844299241688291934509862340,-28010887278831662657694446958946677308,
+35792056518844299241688291934509862340,-28010887278831662657694446958946677308,
+-28010887278831662657694446958946677308,-28010887278831662657694446958946677308,
+-28010887278831662657694446958946677308,-28010887278831662657694446958946677308,
+35792056518844299241688291934509862340];
+g := P!
+[8623817851614787552697809518774579801,35792056518844299241688291934509862340,
+-28010887278831662657694446958946677308,-28010887278831662657694446958946677308,
+-28010887278831662657694446958946677308,-28010887278831662657694446958946677308,
+-28010887278831662657694446958946677308,35792056518844299241688291934509862340,
+-28010887278831662657694446958946677308,35792056518844299241688291934509862340,
+-28010887278831662657694446958946677308,35792056518844299241688291934509862340,
+-28010887278831662657694446958946677308,-28010887278831662657694446958946677308,
+35792056518844299241688291934509862340,-28010887278831662657694446958946677308,
+-28010887278831662657694446958946677308,-28010887278831662657694446958946677308,
+35792056518844299241688291934509862340,-28010887278831662657694446958946677308,
+-28010887278831662657694446958946677308,35792056518844299241688291934509862340,
+35792056518844299241688291934509862340,35792056518844299241688291934509862340,
+-28010887278831662657694446958946677308,-28010887278831662657694446958946677308,
+-28010887278831662657694446958946677308,-28010887278831662657694446958946677308,
+35792056518844299241688291934509862340,-28010887278831662657694446958946677308,
+-28010887278831662657694446958946677308,35792056518844299241688291934509862340,
+35792056518844299241688291934509862340,-28010887278831662657694446958946677308,
+35792056518844299241688291934509862340,35792056518844299241688291934509862340,
+35792056518844299241688291934509862340,35792056518844299241688291934509862340,
+-28010887278831662657694446958946677308,-28010887278831662657694446958946677308,
+-28010887278831662657694446958946677308,35792056518844299241688291934509862340,
+35792056518844299241688291934509862340,-28010887278831662657694446958946677308,
+35792056518844299241688291934509862340,35792056518844299241688291934509862340,
+35792056518844299241688291934509862340,-28010887278831662657694446958946677308,
+35792056518844299241688291934509862340,35792056518844299241688291934509862340,
+-28010887278831662657694446958946677308,35792056518844299241688291934509862340,
+-28010887278831662657694446958946677308,35792056518844299241688291934509862340,
+-28010887278831662657694446958946677308,35792056518844299241688291934509862340,
+35792056518844299241688291934509862340,35792056518844299241688291934509862340,
+35792056518844299241688291934509862340,35792056518844299241688291934509862340,
+-28010887278831662657694446958946677308];
+h := f*g;
+PP<x> := PolynomialRing(GF(2965819));
+assert PP!h eq (PP!f)*(PP!g);
+
+/*
+From Claus/Juergen, Feb 2013.
+Tests bounds on poly mult in ss (need 1 more for num bits when not signed
+since not accounted for in ss case).
+*/
+
+l := [ 652539072606711969923874339257711623491820892746571876360235468985566\
+75454762884125812, 16861909299884043994106603166218050278514654122616898235827\
+015571395614069961174764069, 1024588403176334187624130775174478985289633007939\
+25123740715294755465523987576514291938, 70359262923068640542889831040478221994\
+677714754885608840986584858150269265577988471601, 1215816095061576210169541254\
+78253097884678173283792405268122625930936098480939475817869, 91120403208634466\
+224290308478107257901323844656758865166119589311591021589870166049580, 1230818\
+280393420895555240097241952068426319863360015291865179821896712483520794392569\
+41, 84629437222387003192887515387844160941428615158616526876513342118921562776\
+470308973558, 1169962126896678818253694349645885435829561539887150607768126043\
+49910281503985126110027, 12347003911962612039796023627159723608655205378324225\
+4529440128178557889731311584678906, 107713942660051826849058879901883457383317\
+366050058096007671427764627132138985380835047, 1225291974490903609957150797650\
+40880252641752456652455191074339592801944888338866051023, 11190794536188099298\
+6129451212964542267154430213463921970843840941429163029040791867431, 696378214\
+25436856489661354196220701740141156482260076701701070633307093027454270711430,\
+ 1 ];
+
+f := Polynomial(l);
+g := Polynomial(l);
+assert f eq g;
+assert f*g eq f^2;
+
+P<z> := PolynomialRing(GF(32003));
+ff := P!f;
+gg := P!g;
+assert ff^2 eq P!(f^2);
+assert ff*gg eq P!(f*g);
+
+/*
+Sep 2015.
+*/
+
+"Large function field XGCD";
+
+K := GF(1021);
+F<u13,u12,u11,u10, u23,u22,u21,u20> := FunctionField(K, 8);
+P<x> := PolynomialRing(F);
+f := x^4 + u13*x^3 + u12*x^2 + u11*x + u10;
+g := x^4 + u23*x^3 + u22*x^2 + u21*x + u20;
+
+time c,a,b := XGCD(f, g);
+assert a*f + b*g eq c;
+time c,a,b := XGCD(g, f);
+assert a*g + b*f eq c;
+
+g := x*g;
+time c,a,b := XGCD(f, g);
+assert a*f + b*g eq c;
+time c,a,b := XGCD(g, f);
+assert a*g + b*f eq c;
+
+
+/*
+clear;
+;
+
+if not IsOpt() then
+    ShowActive();
+end if;
+*/

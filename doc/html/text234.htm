@@ -1,0 +1,247 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Introduction</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text235.htm">[Next]</A><A  HREF = "text233.htm">[Prev]</A> <A  HREF = "text235.htm">[Right]</A> [____] <A  HREF = "text233.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "2031">Introduction</A></H3>
+
+<P>
+<P>
+Real and complex numbers can only be stored in the computer effectively in
+<P>
+approximations. Magma provides a number of facilities for calculating with
+such approximations.  Most of these facilities are based upon the C libraries
+MPFR, which provides algorithms for manipulating real numbers with <I>exact
+rounding</I>, and MPC, an extension of MPFR to handle complex numbers.  More
+specifically, the MFPR library extends the semantics of the ANSI/IEEE-754
+standard for double-precision numbers --- which are used in virtually all major
+programming languages --- to handle real numbers of arbitrary precision.  The
+precise semantics of MPFR give the user fine control over precision loss, which
+is a tremendous advantage when working with reals and complexes.
+Magma currently uses MPFR 2.4.1 and MPC 0.8. 
+Documentation for algorithms used in MPFR
+can be found at <TT>mpfr.org</TT>.
+<P>
+As MPFR and MPC are works in progress, they do not yet provide a complete
+framework for working with the reals and complexes.  For those functions that
+these libraries are missing, Magma falls back to algorithms taken from Pari.
+The documentation of MFPR and MPC provide a list of the functions that they
+provide. Assume that each intrinsic uses MPFR unless otherwise stated.
+<P>
+Although we use the terms <I>real field</I> and <I>complex
+field</I> for Magma structures containing
+real or
+complex	
+approximations, it should be noted that such a 
+subset of the real or complex field may not even form a commutative ring. 
+Never the less, the real and complex fields are considered to be fields by 
+Magma, they comprise objects of type <A NAME = "FldRe"><TT>FldRe</TT></A> and <A NAME = "FldCom"><TT>FldCom</TT></A> with
+elements of type <A NAME = "FldReElt"><TT>FldReElt</TT></A> and <A NAME = "FldComElt"><TT>FldComElt</TT></A> respectively.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text234.htm#2032">Overview of Real Numbers in Magma</A>
+<LI> <A  HREF = "text234.htm#2034">Coercion</A>
+<LI> <A  HREF = "text234.htm#2035">Homomorphisms</A>
+<LI> <A  HREF = "text234.htm#2037">Special Options</A>
+<LI> <A  HREF = "text234.htm#2042">Version Functions</A>
+</UL>
+<H4><A NAME = "2032">Overview of Real Numbers in Magma</A></H4>
+
+<P>
+<P>
+<P>
+Real numbers are stored internally as expansions &sum;b<sub>i</sub> 2<sup>i</sup>.  Complex
+numbers consist of a pair of real numbers of identical precision.  Each real or
+complex number is associated with a corresponding field structure, which has
+the same precision as all of its elements.  Magma stores a list of real and
+complex fields that have been created during a session, and it is guaranteed
+that any two fields of the same fixed precision are the same. This means in
+particular that changing the name of Sqrt( - 1) (see <TT>AssignNames</TT> below)
+on one of the complex fields of precision r will change the name on every
+complex field of that same precision.  As a convenience, Magma allows
+real and complex numbers of differing precisions to be used in the same
+expression; internally, Magma implicitly reduces the precision of the higher
+precision element to the precision of the lower element.
+<P>
+While internally we store real numbers in base two, when creating real or
+complex fields the precision is by default specified in the number of <I>decimal</I> digits, not binary digits, required.  It is possible to specify the
+precision in binary digits if needed (see the documentation for 
+<A  HREF = "text235.htm#FldRe:RealField">RealField</A>
+for details).
+
+
+<HR>
+<H3><A NAME = "2033">Example <TT>FldRe_RealIntro (H25E1)</TT></A></H3>
+We show how to create and manipulate real numbers.  In particular, note that
+there is an inherent loss of precision in the conversion between base 10 and
+base 2 representations of some real numbers.
+<P>
+<P>
+<PRE>
+&gt; S1 := RealField(20);
+&gt; S2 := RealField(10);
+&gt; a := S1 ! 0.5;
+&gt; a;
+0.50000000000000000000
+&gt; b := S2 ! 0.05;
+&gt; b;
+0.05000000000
+&gt; a + b;
+0.5500000000
+&gt; Precision(a + b);
+10
+</PRE>
+A warning is in place here; in the examples above, the real number on the
+right hand side had to be constructed in some real field <I>before</I> it could
+be coerced into S<sub>1</sub> and S<sub>2</sub>. That real field is the so-called <I>default
+real field</I>. In these examples it is assumed that the default field has
+sufficiently large precision to store the real numbers on the right accurately
+to the last digit.
+<HR>
+<H4><A NAME = "2034">Coercion</A></H4>
+
+<P>
+<P>
+Automatic coercion ensures that all functions listed below that
+<P>
+<P>
+take an element of some real field as an argument, will also
+accept an integer or a rational number as an argument; in this
+case the integer or rational number will be coerced automatically
+into the default real field.
+For the binary operations (such as <TT>+, *</TT>) coercion also takes
+place: if one argument is real and the other is integral or rational,
+automatic coercion will put them both in the parent field of the
+real argument. If the arguments are real numbers of different fixed precision,
+the result will have the smaller precision of the two.
+<P>
+The same coercion rules
+<P>
+<P>
+<P>
+<P>
+apply for functions taking a complex number as an argument; in that
+case real numbers will be valid input as well: if necessary reals, rationals
+or integers will be coerced into the appropriate complex field.
+<P>
+Elements of quadratic and cyclotomic fields that are real can be
+coerced into any real field using <TT>!</TT>; any quadratic or
+<P>
+<P>
+<P>
+<P>
+cyclotomic field element can be coerced by <TT>!</TT> into any
+complex field. Functions taking real or complex arguments will
+not <I>automatically</I> coerce such arguments though.
+
+
+<H4><A NAME = "2035">Homomorphisms</A></H4>
+
+<P>
+<P>
+The only homomorphisms that have a real field or a complex field
+<P>
+as domain are the coercion functions.
+Therefore, homomorphisms from the reals or complexes may be specified
+as follows.
+
+
+<H5>hom&lt; R -&gt; S |  &gt; : FldRe, Str -&gt; Map</H5><P>
+
+
+
+Here S must be a structure into which all elements of the
+real or complex field R are coercible, such as another real
+or complex field, or a polynomial ring over one of these.
+These homomorphisms
+can also be obtained as map by using the function <TT>Coercion</TT>, also
+called <TT>Bang</TT>.
+
+
+<HR>
+<H3><A NAME = "2036">Example <TT>FldRe_Homomorphisms (H25E2)</TT></A></H3>
+Here are two equivalent ways of creating the embedding function
+from a real field into a polynomial ring over some complex field.
+<P>
+<P>
+<PRE>
+&gt; Re := RealField(20);
+&gt; PC&lt;x, y&gt; := PolynomialRing(ComplexField(8), 2);
+&gt; f := hom&lt; Re -&gt; PC | &gt;;
+&gt; bangf := Bang(Re, PC);
+&gt; f(Pi(Re));
+3.1415927
+&gt; f(Pi(Re)) eq bangf(Pi(Re));
+true
+</PRE>
+<HR>
+<H4><A NAME = "2037">Special Options</A></H4>
+
+<P>
+<P>
+When Magma is started up, real and complex fields of precision 30 are created
+by default.  They serve (among other things) as a parent for reals that are
+created as literals, such as 1.2345, in the same way as the default ring of
+integers is the parent for literal integers.  It is possible to change this
+default real field with <TT>SetDefaultRealField</TT>.
+<P>
+Finally, <TT>AssignNames</TT> can be used to change the name for
+Sqrt( - 1) in a complex field.
+
+
+<H5><A NAME = "2038">SetDefaultRealField(R) : FldRe -&gt;</A></H5>
+<BLOCKQUOTE>
+Procedure to change the default parent for literal real numbers to the real
+field R. This parent is the real field of precision 30 by default.
+</BLOCKQUOTE>
+<H5><A NAME = "2039">GetDefaultRealField() : -&gt; FldRe</A></H5>
+<BLOCKQUOTE>
+Return the current parent for literal real numbers.
+</BLOCKQUOTE>
+<H5><A NAME = "2040">AssignNames(~C, [s]) : FldCom, [ MonStgElt ]) -&gt;</A></H5>
+<BLOCKQUOTE>
+Procedure to change the name of the purely imaginary element Sqrt( - 1) in the
+complex field C to the contents of the string s.  When C is created, the
+name is "C.1"; suitable choices of s might be <TT>"i"</TT>, <TT>"I"</TT> or <TT>"j"</TT>. 
+<P>
+This procedure only changes the name used in printing the elements of C. 
+It does <I>not</I> assign to an identifier called s
+the value of Sqrt( - 1) in C; to do this, use an assignment statement,
+or use angle brackets when creating the field.
+<P>
+Note that since this is a procedure that modifies C, 
+it is necessary to have a reference <TT>~C</TT> to C 
+in the call to this function.
+</BLOCKQUOTE>
+<H5><A NAME = "2041">Name(C, 1) : FldCom, RngIntElt -&gt; FldComElt</A></H5>
+<BLOCKQUOTE>
+Given a complex field C, return the element which has the name attached to
+it, that is, return the purely imaginary element Sqrt( - 1) of C.
+</BLOCKQUOTE>
+<H4><A NAME = "2042">Version Functions</A></H4>
+
+<P>
+<P>
+<P>
+The following intrinsics retrieve the versions of MPFR, MPC and GMP which 
+the current Magma is using.
+
+
+<H5><A NAME = "2043">GetGMPVersion() : -&gt;</A></H5>
+<H5>GetMPFRVersion() : -&gt;</H5>
+<H5>GetMPCVersion() : -&gt;</H5>
+<BLOCKQUOTE>
+The version of GMP, MPFR or MPC being used.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text235.htm">[Next]</A><A  HREF = "text233.htm">[Prev]</A> <A  HREF = "text235.htm">[Right]</A> [____] <A  HREF = "text233.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

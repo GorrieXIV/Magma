@@ -1,0 +1,113 @@
+
+P<t> := PowerSeriesRing(GF(101));
+R<x> := PolynomialRing(P);
+U := UnramifiedExtension(P, x^2 + 2 + t^20);
+_<y> := PolynomialRing(U);
+T<tt> := TotallyRamifiedExtension(U, y^2 + t*y + t);
+
+assert Precision(ChangePrecision(U, 20)) eq 20;
+assert Precision(ChangePrecision(U, 20000)) eq 20000;
+
+assert Precision(ChangePrecision(T, 20)) eq 20;
+assert Precision(ChangePrecision(T, 20000)) eq 20000;
+
+assert Precision(U) eq Infinity();
+assert Precision(T) eq Infinity();
+
+assert Valuation(UniformizingElement(U)) eq 1;
+assert Valuation(UniformizingElement(T)) eq 1;
+
+assert U.1 + T.1 eq T.1 + U.1;
+assert U.1*T.1 eq T.1*U.1;
+
+assert U.1 - T.1 eq -(T.1 - U.1);
+
+assert RelativePrecision(U.1*U.1^-1 - 1) eq 0;
+assert AbsolutePrecision(U.1^-1) eq U`DefaultPrecision;
+
+assert IsZero(U!0);
+assert IsZero(T!0);
+assert IsUnit(U.1);
+assert not IsUnit(T.1);
+
+assert U!Eltseq(U.1^5) eq U.1^5;
+assert T!Eltseq(T.1^5) eq T.1^5;
+
+function MultPolFacts(f)
+//Multiplies the factors with multiplicities
+    if #f eq 0 then
+        return Universe(f)[1]!1;
+    end if;
+
+    return &*[T[1]^(T[2]) : T in f];
+end function;
+
+function IsImpreciseZeroPolynomial(f)
+// return whether every coefficient of f has relative precision 0
+    return &and[RelativePrecision(c) eq 0 : c in Coefficients(f)];
+end function;
+
+P<t> := PowerSeriesRing(GF(101));
+R<x> := PolynomialRing(P);
+f := Factorization((x^2 + 2)*(x - 1));
+assert IsImpreciseZeroPolynomial(MultPolFacts(f) - (x^2 + 2)*(x - 1));
+Factorization((x^2 + 2)*(x - 1) : Certificates);
+f := Factorization((x - t)*(x + t));
+assert IsImpreciseZeroPolynomial(MultPolFacts(f) - (x - t)*(x + t));
+f := Factorization(x^5 + t*x^4 - t^2*x^3 + (1 + t^20)*x^2 + t*x + t^6);
+MultPolFacts(f) - (x^5 + t*x^4 - t^2*x^3 + (1 + t^20)*x^2 + t*x + t^6);
+assert IsImpreciseZeroPolynomial(
+	MultPolFacts(f) - (x^5 + t*x^4 - t^2*x^3 + (1 + t^20)*x^2 + t*x + t^6));
+Factorization(x^2 + t*x + t);
+
+U<u> := UnramifiedExtension(P, x^2 + 2);
+Y<y> := PolynomialRing(U);
+f := Factorization((y - 1)*(y - 3));
+assert IsImpreciseZeroPolynomial(MultPolFacts(f) - (y - 1)*(y - 3));
+Factorization((y - 1)*(y - 3) : Certificates);
+f := Factorization((y - u)*(y^3 + 3));
+assert IsImpreciseZeroPolynomial(MultPolFacts(f) - (y - u)*(y^3 + 3));
+f := Factorization((y^4 + 3) : Certificates);
+assert IsImpreciseZeroPolynomial(MultPolFacts(f) - (y^4 + 3));
+f := Factorization((y^4 + u) : Certificates);
+assert IsImpreciseZeroPolynomial(MultPolFacts(f) - (y^4 + u));
+f := Factorization(y^2 + t*y + t : Certificates);
+assert IsImpreciseZeroPolynomial(MultPolFacts(f) - (y^2 + t*y + t));
+f := Factorization(y^6 + t*y^4 + (1 + t)*y^3 + t^5*y^2 + t : Certificates);
+assert IsImpreciseZeroPolynomial(MultPolFacts(f) - (y^6 + t*y^4 + (1 + t)*y^3 + t^5*y^2 + t));
+
+P<t> := PowerSeriesRing(GF(101));
+R<x> := PolynomialRing(P);
+T<tt> := TotallyRamifiedExtension(P, x^2 + t*x + t);
+Y<y> := PolynomialRing(T);
+f := Factorization((y - 1)*(y - 2));
+assert IsImpreciseZeroPolynomial(MultPolFacts(f) - (y - 1)*(y - 2));
+f := Factorization((y - 1)*(y - t));
+assert IsImpreciseZeroPolynomial(MultPolFacts(f) - (y - 1)*(y - t));
+f := Factorization((y - 1)*(y - T.1));
+assert IsImpreciseZeroPolynomial(MultPolFacts(f) - (y - 1)*(y - T.1));
+f := Factorization(y^2 + t*y + t);
+MultPolFacts(f) - (y^2 + t*y + t);
+[<c, RelativePrecision(c)> : c in Coefficients($1)];
+assert IsImpreciseZeroPolynomial(MultPolFacts(f) - (y^2 + t*y + t));
+f := Factorization(y^5 + (tt + t)*y^4 + t*tt*y^3 + t*y^2 + tt*y + tt^10 :
+Certificates);
+assert IsImpreciseZeroPolynomial(MultPolFacts(f) - (y^5 + (tt + t)*y^4 + t*tt*y^3 + t*y^2 + tt*y + tt^10));
+
+Y<y> := PolynomialRing(U);
+T<tt> := TotallyRamifiedExtension(U, y^2 + t*y + t);
+Y<y> := PolynomialRing(T);
+f := Factorization((y - 1)*(y - 2));
+assert IsImpreciseZeroPolynomial(MultPolFacts(f) - (y - 1)*(y - 2));
+f := Factorization((y - 1)*(y - t));
+assert IsImpreciseZeroPolynomial(MultPolFacts(f) - (y - 1)*(y - t));
+f := Factorization((y - 1)*(y - tt));
+assert IsImpreciseZeroPolynomial(MultPolFacts(f) - (y - 1)*(y - tt));
+f := Factorization((y - T!u)*(y - tt));
+assert IsImpreciseZeroPolynomial(MultPolFacts(f) - (y - T!u)*(y - tt));
+f := Factorization(y^2 + t*y + t);
+assert IsImpreciseZeroPolynomial(MultPolFacts(f) - (y^2 + t*y + t));
+f := Factorization(y^5 + (tt + t + u)*y^4 + t*tt*u*y^3 + t*y^2 + tt^10*y + u^10:
+Certificates);
+assert IsImpreciseZeroPolynomial(MultPolFacts(f) - (y^5 + (tt + t + u)*y^4 + t*tt*u*y^3 + t*y^2 + tt^10*y + u^10));
+

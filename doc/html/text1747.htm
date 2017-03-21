@@ -1,0 +1,1405 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Tableaux</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1742.htm">[Next]</A><A  HREF = "text1746.htm">[Prev]</A> <A  HREF = "text1742.htm">[Right]</A> <A  HREF = "text1746.htm">[Left]</A> <A  HREF = "text1743.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "19282">Tableaux</A></H3>
+
+<P>
+<P>
+The tableaux module in Magma is loosely based on the 
+computational algebra system SYMMETRICA developed by
+Adalbert Kerber and Axel Kohnert <A  HREF = "text1742.htm#bib_SYMMETRICA">[KKL92]</A>. 
+The main reference for the theory of this section is "Young Tableaux" by
+William Fulton <A  HREF = "text1742.htm#bib_tableaux-fulton">[Ful97]</A>. 
+<P>
+A Young diagram, or Ferrers diagram, is a collection of 
+boxes, or cells, arranged in left-justified
+rows, with a weakly decreasing number of cells in each row. Listing the number
+of cells in each row gives a partition (its shape) of n,
+where n is the total number of cells in the diagram.
+Conversely, each partition corresponds to a unique
+Young diagram. A numbering of a Young diagram is an assignment of 
+a positive integer to
+each box.
+More generally a numbering can be done using any ordered set of labels, 
+in Magma this means the generators
+of some ordered monoid, (see section <A  HREF = "text1746.htm#19244">Words</A>).
+<P>
+A Young tableau, or simply tableau, is a numbering 
+of a Young diagram which has
+(i) weakly increasing entries across each row, and (ii) strictly increasing
+entries down each column.
+These tableaux form a monoid with respect to a multiplication which 
+may be defined in either of
+two ways, Schensted's "bumping" row insertion, or Sch&uuml;tzenberger's
+"sliding" <I>jeu de taquin</I>, (see <A  HREF = "text1742.htm#bib_tableaux-fulton">[Ful97]</A> for full
+details).
+<P>
+A tableau monoid is constructed from an ordered monoid (see section 
+<A  HREF = "text1746.htm#19244">Words</A>), the generators of the ordered monoid
+comprising the tableau labels.
+A tableau monoid and a plactic monoid derived from the same
+ordered monoid are in fact isomorphic to one another.
+<P>
+Flipping a diagram over its main diagonal gives the conjugate
+diagram, its shape being the <TT>ConjugatePartition</TT>
+of the original shape.
+<P>
+A skew diagram or skew shape is the diagram obtained
+by deleting a smaller Young diagram from inside a larger one. A
+skew tableau is a numbering on a skew diagram obeying the same
+restrictions on its entries.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1747.htm#19283">Tableau Monoids</A>
+<LI> <A  HREF = "text1747.htm#19289">Creation of Tableaux</A>
+<LI> <A  HREF = "text1747.htm#19303">Enumeration of Tableaux</A>
+<LI> <A  HREF = "text1747.htm#19311">Random Tableaux</A>
+<LI> <A  HREF = "text1747.htm#19316">Basic Access Functions</A>
+<LI> <A  HREF = "text1747.htm#19336">Properties</A>
+<LI> <A  HREF = "text1747.htm#19346">Operations</A>
+<LI> <A  HREF = "text1747.htm#19359">The Robinson-Schensted-Knuth  Correspondence</A>
+<LI> <A  HREF = "text1747.htm#19372">Counting Tableaux</A>
+</UL>
+<H4><A NAME = "19283">Tableau Monoids</A></H4>
+
+<P>
+<P>
+Let O be an ordered monoid, elements of O are expressed as
+products of its generators.
+The generators of O can be used as the set of labels 
+for a family of tableaux M, called a <I>tableau monoid</I>.
+<P>
+A tableau monoid has only one defining characteristic, the ordered
+monoid which specifies its labels.
+<P>
+The most important tableau monoid is the one defined over the
+set of all positive integers.
+
+
+<H5><A NAME = "19284">TableauMonoid(O) : MonOrd -&gt; MonTbl</A></H5>
+<H5>TableauMonoid(P) : MonPlc -&gt; MonTbl</H5>
+<BLOCKQUOTE>
+Given an ordered monoid O or a plactic monoid P, (in which case
+let O be the ordered monoid on which P is based), 
+then return the tableau monoid of tableaux whose labels are the 
+generators of O.
+</BLOCKQUOTE>
+<H5><A NAME = "19285">TableauIntegerMonoid() : -&gt; MonTbl</A></H5>
+<BLOCKQUOTE>
+Return the tableau monoid over the positive integers.
+</BLOCKQUOTE>
+<H5><A NAME = "19286">OrderedMonoid(M) : MonPlc -&gt; MonOrd;</A></H5>
+<BLOCKQUOTE>
+Given a tableau monoid M, return the ordered monoid from which M
+gets its labels.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19287">Example <TT>Tableau_TabMonoid-standard (H151E8)</TT></A></H3>
+We create the tableau monoid over the positive integers.
+We take a word in the associated ordered monoid and look at its image 
+in the tableau monoid.
+<P>
+<P>
+<P>
+<PRE>
+&gt; M := TableauIntegerMonoid();
+&gt; M;
+Monoid of Tableaux labelled by the generators of:
+The monoid of words over the positive integers
+&gt; 
+&gt; w := OrderedMonoid(M) ! [3,6,2,8,3,9,1];
+&gt; w;
+3 6 2 8 3 9 1 
+&gt; M ! w;
+Tableau of shape: 4 2 1 
+1 3 8 9 
+2 6 
+3 
+</PRE>
+<HR>
+<H3><A NAME = "19288">Example <TT>Tableau_TabMonoid-fingen (H151E9)</TT></A></H3>
+We create a tableau monoid over a finite set of labels, and look
+at the image of a word.
+<P>
+<P>
+<P>
+<PRE>
+&gt; O&lt;x,y,z&gt; := OrderedMonoid(3);
+&gt; M := TableauMonoid(O);
+&gt; M;
+Monoid of Tableaux labelled by the generators of:
+The monoid of words over 3 generators: x y z
+&gt; 
+&gt; M ! (z*y*x*z*y*y*x*y*x*z);
+Tableau of shape: 5 3 2 
+x x x y z 
+y y y 
+z z 
+</PRE>
+<HR>
+<H4><A NAME = "19289">Creation of Tableaux</A></H4>
+
+<P>
+<P>
+Tableaux are created from the words of some ordered monoid. 
+For tableaux over the positive integers, the rows can be input directly as 
+sequences. Words
+can be used to exactly specify the rows of a tableau, or
+an entire word can be mapped to a tableau using row insertion.
+
+
+<H5><A NAME = "19290">Tableau(Q) : SeqEnum[RngIntElt/2] -&gt; Tbl</A></H5>
+<BLOCKQUOTE>
+Given a sequence of sequences of non-negative integers Q, 
+return the tableau with
+the elements of Q as its rows. Zeroes will indicate skew
+entries. 
+The resulting tableau  must have weakly increasing rows
+and strictly increasing
+columns.
+</BLOCKQUOTE>
+<H5><A NAME = "19291">Tableau(Q) : SeqEnum[MonOrdElt] -&gt; Tbl</A></H5>
+<BLOCKQUOTE>
+Given a sequence Q of words from some ordered monoid, return the
+(non-skew) tableau with the words of Q as its rows. 
+The resulting tableau  must have weakly increasing rows 
+and strictly increasing
+columns.
+</BLOCKQUOTE>
+<H5><A NAME = "19292">Tableau(S, Q) : SeqEnum[RngIntElt], SeqEnum[RngIntElt/2] -&gt; Tbl</A></H5>
+<BLOCKQUOTE>
+Given a sequence of nonnegative integers S which is a partition,
+and a sequence of sequences of positive integers Q.
+Create a skew tableau with skew (inner) shape given by the partition S,
+and the non-skew part of each row being given by the entries
+of Q.
+The resulting tableau must have weakly increasing rows and strictly
+increasing columns.
+</BLOCKQUOTE>
+<H5><A NAME = "19293">Tableau(S, Q) : SeqEnum[RngIntElt], SeqEnum[MonOrdElt] -&gt; Tbl</A></H5>
+<BLOCKQUOTE>
+Given a sequence of nonnegative integers S which is a partition,
+and a sequence Q of words from some ordered monoid.
+Create a skew tableau with skew (inner) shape given by the partition S,
+and the non-skew part of each row being given by the words
+of Q.
+The resulting tableau must have weakly increasing rows and strictly
+increasing columns.
+</BLOCKQUOTE>
+<H5><A NAME = "19294">WordToTableau(w) : MonOrdElt -&gt; Tbl</A></H5>
+<H5>WordToTableau(u) : MonPlcElt -&gt; Tbl</H5>
+<BLOCKQUOTE>
+Given a word w from an ordered monoid,
+return the tableau obtained by row inserting the entries of w
+(from the left) into the empty tableau.
+<P>
+If given an element u of a plactic monoid, any word of its
+Knuth equivalence class is used.
+This map is invariant under Knuth equivalence and so is well defined
+for elements of the plactic monoid. 
+<P>
+It is a surjective homomorphism from the ordered
+monoid to the tableau monoid, and an isomorphism from the plactic monoid
+to the tableau monoid.
+</BLOCKQUOTE>
+<H5><A NAME = "19295">M ! w : MonTbl, MonOrdElt -&gt; Tbl</A></H5>
+<BLOCKQUOTE>
+Given a tableau monoid M and a word w from its associated ordered
+monoid, return the tableau corresponding to w through row insertion.
+</BLOCKQUOTE>
+<H5><A NAME = "19296">M ! u : MonTbl, MonPlcElt -&gt; Tbl</A></H5>
+<BLOCKQUOTE>
+Given a tableau monoid M and an element u from a plactic monoid
+associated with the same ordered
+monoid as M, return the tableau corresponding to u through row insertion.
+</BLOCKQUOTE>
+<H5><A NAME = "19297">M ! [i<sub>1</sub>, ..., i<sub>n</sub>] : MonPlc, [MonPlcElt] -&gt; MonPlcElt</A></H5>
+<BLOCKQUOTE>
+Given the tableau monoid M over the positive integers, 
+and a sequence of positive integers, return the tableau corresponding
+to the word 
+i<sub>1</sub> * ... * i<sub>n</sub>.
+</BLOCKQUOTE>
+<H5><A NAME = "19298">M ! Q : MonPlc, SeqEnum -&gt; MonPlcElt</A></H5>
+<BLOCKQUOTE>
+Given the tableau monoid M over the positive integers,
+and a sequence of sequences of non-negative integers Q,
+return the tableau with
+the elements of Q as its rows. Zeroes will indicate skew
+entries.
+The resulting tableau  must have weakly increasing rows
+and strictly increasing
+columns.
+</BLOCKQUOTE>
+<H5><A NAME = "19299">M ! Q : MonPlc, SeqEnum -&gt; MonPlcElt</A></H5>
+<BLOCKQUOTE>
+Given a tableau monoid M, and a sequence Q of words from 
+its associated ordered monoid, return the
+(non-skew) tableau with the words of Q as its rows.
+The resulting tableau  must have weakly increasing rows
+and strictly increasing
+columns.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19300">Example <TT>Tableau_Tabcreate-basic (H151E10)</TT></A></H3>
+We create a tableau over the positive integers in two ways.
+First we input its rows explicitly, then we use a single word which
+specifies the tableau.
+We also create a skew tableau by using zero entries in a sequence
+of sequences.
+<P>
+<P>
+<P>
+<PRE>
+&gt; O := OrderedIntegerMonoid();
+&gt; 
+&gt; T := Tableau( [ [2,5,5,6], [5,7,9,9], [6,9] ]);
+&gt; T;
+Tableau of shape: 4 4 2 
+2 5 5 6 
+5 7 9 9 
+6 9 
+&gt; WordToTableau( O ! [6,9,5,7,9,9,2,5,5,6] );
+Tableau of shape: 4 4 2 
+2 5 5 6 
+5 7 9 9 
+6 9 
+&gt; Tableau([ [0,0,0,3,4,5], [0,1,2,4], [1,6] ]);
+Skew tableau of shape: 6 4 2 / 3 1 
+0 0 0 3 4 5 
+0 1 2 4 
+1 6 
+</PRE>
+<HR>
+<H3><A NAME = "19301">Example <TT>Tableau_Tabcreate-fingen (H151E11)</TT></A></H3>
+We create a skew tableau in a tableau monoid with finitely many labels.
+<P>
+<P>
+<P>
+<PRE>
+&gt; O&lt;a,b,c,d&gt; := OrderedMonoid(4);
+&gt; T := Tableau( [3,2] , [ a*a*b*d, b*d*d, a*b]);
+&gt; T;
+Skew tableau of shape: 7 5 2 / 3 2 
+0 0 0 a a b d 
+0 0 b d d 
+a b 
+</PRE>
+<HR>
+<H3><A NAME = "19302">Example <TT>Tableau_Tabcreate-bang (H151E12)</TT></A></H3>
+We create the ordered, plactic and tableau monoids each over the 
+positive integers, and examine the natural maps between them.
+<P>
+<P>
+<P>
+<PRE>
+&gt; O := OrderedIntegerMonoid();
+&gt; P := PlacticIntegerMonoid();
+&gt; M := TableauIntegerMonoid();
+&gt; w1 := O ! [4,6,2,6,9,6,2,2,1,7];
+&gt; w2 := O ! [9,4,2,1,6,2,6,2,6,7];
+&gt; w1 eq w2;
+false
+&gt; IsKnuthEquivalent(w1,w2);
+true
+</PRE>
+Knuth equivalence implies equality for the image in both the plactic
+and tableau monoids.
+<P>
+<P>
+<PRE>
+&gt; (P!w1) eq (P!w2);
+true
+&gt; P!w1;
+9 4 2 6 6 1 2 2 6 7 
+&gt; 
+&gt; (M!w1) eq (M!w2);
+true
+&gt; M!w1;
+Tableau of shape: 5 3 1 1 
+1 2 2 6 7 
+2 6 6 
+4 
+9 
+</PRE>
+The plactic and tableau monoids are isomorphic. We confirm that the natural
+image of an equivalence class from the plactic monoid is the same
+as the natural images of its member words.
+<P>
+<P>
+<PRE>
+&gt; M!w1 eq M ! (P!w1);
+true
+</PRE>
+<HR>
+<H4><A NAME = "19303">Enumeration of Tableaux</A></H4>
+
+<P>
+<P>
+Multiple tableaux may be created
+corresponding to specified parameters.
+
+
+<H5><A NAME = "19304">StandardTableaux(P) : SeqEnum[RngIntElt] -&gt; SetEnum</A></H5>
+<H5>StandardTableaux(M, P) : MonTbl, SeqEnum[RngIntElt] -&gt; SetEnum</H5>
+<BLOCKQUOTE>
+Returns the set of all standard tableau from the tableau monoid M of 
+shape P, which is a partition.
+<P>
+If a tableau monoid M is not specified then the monoid over
+the positive integers is used. If M is specified then it must
+contain enough labels to fill the shape P (i.e., more than <TT>Weight(P)</TT>).
+</BLOCKQUOTE>
+<H5><A NAME = "19305">StandardTableauxOfWeight(n) : RngIntElt -&gt; SetEnum</A></H5>
+<H5>StandardTableauxOfWeight(M, n) : MonTbl, RngIntElt -&gt; SetEnum</H5>
+<BLOCKQUOTE>
+Returns the set of all standard tableau from the tableau monoid M and
+of weight n, which is a positive 
+integer.
+<P>
+If a tableau monoid M is not specified then the monoid over
+the positive integers is used. If M is specified then it must
+contain at least n labels.
+</BLOCKQUOTE>
+<H5><A NAME = "19306">TableauxOfShape(S, m) : SeqEnum[RngIntElt], RngIntElt -&gt; SetEnum</A></H5>
+<H5>TableauxOfShape(M, S, m) : MonTbl, SeqEnum[RngIntElt], RngIntElt -&gt; SetEnum</H5>
+<BLOCKQUOTE>
+Given a tableau monoid M, a sequence of positive integers S
+which is a partition, and
+a positive integer m, then return the set of all tableau of shape S which
+use only the first m labels of the tableau monoid M.
+<P>
+If a tableau monoid M is not specified then the monoid over
+the positive integers is used. If M is specified then it must
+contain at least m labels.
+</BLOCKQUOTE>
+<H5><A NAME = "19307">TableauxOnShapeWithContent(S, C) : SeqEnum[RngIntElt], SeqEnum[RngIntElt] -&gt; SetEnum</A></H5>
+<H5>TableauxOnShapeWithContent(M, S, C) : MonTbl, SeqEnum[RngIntElt],                                                     SeqEnum[RngIntElt] -&gt; SetEnum</H5>
+<BLOCKQUOTE>
+Given a tableau monoid M, a sequence of positive integers S
+which is a partition, and
+a sequence of non-negative integers C, then return the set
+of all tableau from M having shape S and 
+<I>content</I> C (see section <A  HREF = "text1747.htm#19336">Properties</A> for definition
+of content).
+If C prescribes fewer cells than would completely fill
+the shape S, then the tableau
+within the given shape is returned.
+<P>
+If a tableau monoid M is not specified then the monoid over
+the positive integers is used. If M is specified then it must have
+at least as many labels as C has entries.
+</BLOCKQUOTE>
+<H5><A NAME = "19308">TableauxWithContent(C) : SeqEnum[RngIntElt] -&gt; SetEnum</A></H5>
+<H5>TableauxWithContent(M, C) : MonTbl, SeqEnum[RngIntElt] -&gt; SetEnum</H5>
+<BLOCKQUOTE>
+Given a tableau monoid M, and a sequence of non-negative integers C,
+return the set of all tableau from M with <I>content</I> C
+(see section <A  HREF = "text1747.htm#19336">Properties</A> for definition
+of content).
+<P>
+If a tableau monoid M is not specified then the monoid over
+the positive integers is used. If M is specified then it must have
+at least as many labels as C has entries.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19309">Example <TT>Tableau_MultTabCreate1 (H151E13)</TT></A></H3>
+We create all tableaux of a given shape, then check that the number
+of tableaux created agrees with the combinatorical result.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P := [ 3, 2];
+&gt; S := StandardTableaux( P );
+&gt; S;
+{ Tableau of shape: 3 2 
+ 1 2 3
+ 4 5, Tableau of shape: 3 2 
+ 1 3 4
+ 2 5, Tableau of shape: 3 2 
+ 1 3 5
+ 2 4, Tableau of shape: 3 2 
+ 1 2 5
+ 3 4, Tableau of shape: 3 2 
+ 1 2 4
+ 3 5 }
+&gt;  
+&gt; #S eq NumberOfStandardTableaux( P );
+true
+</PRE>
+<HR>
+<H3><A NAME = "19310">Example <TT>Tableau_MultTabcreate-fingen (H151E14)</TT></A></H3>
+We create all tableau over the ordered generators a, b, c, d which
+have shape [4, 2] and exactly two a's, one b, two c's and one d.
+There is in fact four of them.
+<P>
+<P>
+<P>
+<PRE>
+&gt; O&lt;a,b,c,d&gt; := OrderedMonoid(4);
+&gt; M := TableauMonoid(O);
+&gt; TableauxOnShapeWithContent( M, [4,2], [2,1,2,1]);
+{ Tableau of shape: 4 2 
+a a c c 
+b d , Tableau of shape: 4 2 
+a a b c 
+c d , Tableau of shape: 4 2 
+a a b d 
+c c , Tableau of shape: 4 2 
+a a c d 
+b c  }
+</PRE>
+<HR>
+<H4><A NAME = "19311">Random Tableaux</A></H4>
+
+<P>
+<P>
+The functions in this section are based on ideas from <A  HREF = "text1742.htm#bib_random-tab-greene">[GNW84]</A>.
+
+
+<H5><A NAME = "19312">RandomHookWalk(P, i, j) : SeqEnum[RngIntElt], RngIntElt, RngIntElt -&gt;                                                         RngIntElt, RngIntElt</A></H5>
+<H5>RandomHookWalk(t, i, j) : Tbl, RngIntElt, RngIntElt -&gt;  RngIntElt, RngIntElt</H5>
+<BLOCKQUOTE>
+A random hook walk is an essential tool for the creation of random tableau.
+The <I>hook</I> of a cell on a Young diagram is the cells
+to the right and below its position. The Young diagram is specified
+by either the sequence of positive integers P which is a partition,
+or the tableau t. 
+<P>
+Given positive integers i and j such that (i, j) lies on the shape, 
+the walk proceeds as follows. 
+Starting from the specified (i, j)-th cell, 
+move to another cell chosen at random from its hook.
+Repeat this 
+process until a outside corner of the Young diagram is reached, 
+and return the two integers representing the coordinates of this final cell.
+</BLOCKQUOTE>
+<H5><A NAME = "19313">RandomTableau(S) : SeqEnum[RngIntElt] -&gt; Tbl</A></H5>
+<H5>RandomTableau(M, S) : MonTbl, SeqEnum[RngIntElt] -&gt; Tbl</H5>
+<BLOCKQUOTE>
+Given a tableau monoid M, and a sequence of positive integers
+S which is a partition,
+return a random standard tableau from M of shape S.
+<P>
+If a tableau monoid M is not specified then the monoid over
+the positive integers is used. If M is specified then it must
+contain enough labels to fill the shape S (i.e., more than <TT>Weight(S)</TT>).
+</BLOCKQUOTE>
+<H5><A NAME = "19314">RandomTableau(n) : RngIntElt -&gt; Tbl</A></H5>
+<H5>RandomTableau(M, n) : MonTbl, RngIntElt -&gt; Tbl</H5>
+<BLOCKQUOTE>
+Given a tableau monoid M, and a positive integer n, 
+return a (not completely) random standard tableau of weight n.
+The probability of any specific tableau of shape S being returned is
+N<sub>S</sub>/n!, where N<sub>S</sub> is the number of standard tableaux of shape S. 
+So tableaux on more populous
+shapes are more likely to occur.
+<P>
+If a tableau monoid M is not specified then the monoid over
+the positive integers is used. If M is specified then it must
+contain at least n labels.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19315">Example <TT>Tableau_Tab-Random (H151E15)</TT></A></H3>
+We numerically test the random creation of tableau of a given shape,
+by calculating the average percentage difference in the number
+of each tableau created. We find it to be less than one percent.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P := [4,3,2];
+&gt; Runs := 10000;
+&gt;  
+&gt; S := Setseq( StandardTableaux( P ) );
+&gt; Count := [0: i in [1..#S]];
+&gt;  
+&gt; for k in [1..Runs] do
+&gt;     T := RandomTableau( P );
+&gt;     i := Index(S,T);
+&gt;     Count[i] +:= 1;
+&gt; end for;
+&gt;  
+&gt; Average :=  Runs/#S;
+&gt; Diff := [RealField(2) | Abs( (Count[i] - Average)/Average )
+&gt; : i in [1..#Count]];
+&gt;  
+&gt; AvgDiff := (&amp;+ Diff)/#Diff;
+&gt; AvgDiff;
+0.006
+</PRE>
+<HR>
+<H4><A NAME = "19316">Basic Access Functions</A></H4>
+
+
+
+<P>
+<H5><A NAME = "19317">Shape(t) : Tbl -&gt; SeqEnum[RngIntElt]</A></H5>
+<H5>OuterShape(t) : Tbl -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+The (outer) shape of a tableau t is the sequence of positive integers
+denoting the (decreasing) row lengths of its Young Diagram, which 
+results in a partition.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "19318">SkewShape(t) : Tbl -&gt; SeqEnum[RngIntElt]</A></H5>
+<H5>InnerShape(t) : Tbl -&gt; SeqEnum[RngIntElt]</H5>
+<BLOCKQUOTE>
+The Young diagram of a skew tableau t has a smaller Young diagram 
+inside of it deleted. The skew, or inner, shape of a skew tableau is
+the sequence of positive integers denoting the (decreasing) row lengths
+of this deleted diagram, which results in a partition.
+<P>
+A non-skew tableau is a special case of a skew tableau, whose
+skew shape is simply the null sequence.
+<P>
+Trailing zeroes are added to the inner shape of t to give it the same
+length as the outer shape of t.
+</BLOCKQUOTE>
+<H5><A NAME = "19319">PartitionCovers(P1, P2) : SeqEnum, SeqEnum -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given two sequences of integers, P<sub>1</sub> and P<sub>2</sub>, which are partitions,
+return <TT>true</TT> if the Young diagram of P<sub>1</sub> covers the Young diagram of P<sub>2</sub>.
+</BLOCKQUOTE>
+<H5><A NAME = "19320">ConjugatePartition(P) : SeqEnum -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a sequence of integers P which is a partition, return the
+partition corresponding to the <I>conjugate</I> Young diagram of P
+(see section <A  HREF = "text1747.htm#19282">Tableaux</A> for a full description).
+</BLOCKQUOTE>
+<H5><A NAME = "19321">Weight(t) : Tbl -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a tableau t, return the positive integer which is
+the number of (non-skew) cells in its Young Diagram.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "19322">SkewWeight(t) : Tbl -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a tableau t, return the positive integer which is
+the number of skew cells in its Young Diagram.
+</BLOCKQUOTE>
+<H5><A NAME = "19323">NumberOfRows(t) : Tbl -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a tableau t, return a positive integer which is its number of rows.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "19324">NumberOfSkewRows(t) : Tbl -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a tableau t, return a positive integer which is its 
+number of skewed rows.
+</BLOCKQUOTE>
+<H5><A NAME = "19325">Row(t, i) : Tbl, RngIntElt -&gt; MonOrdElt</A></H5>
+<BLOCKQUOTE>
+Given a tableau t, return the non-skewed entries of the ith row
+as a word of an ordered monoid.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "19326">Rows(t) : Tbl -&gt; SeqEnum[MonOrdElt]</A></H5>
+<BLOCKQUOTE>
+Given a tableau t, return a sequence of words from an ordered monoid
+which are the non-skewed entries of its rows.
+</BLOCKQUOTE>
+<H5><A NAME = "19327">Column(t, j) : Tbl, RngIntElt -&gt; MonOrdElt</A></H5>
+<BLOCKQUOTE>
+Given a tableau t, return the non-skewed entries of the jth column
+as a word of an ordered monoid.
+</BLOCKQUOTE>
+<H5><A NAME = "19328">Columns(t) : Tbl -&gt; SeqEnum[MonOrdElt]</A></H5>
+<BLOCKQUOTE>
+Given a tableau t, return a sequence of words from an ordered monoid
+which are the non-skewed entries of its columns.
+</BLOCKQUOTE>
+<H5><A NAME = "19329">RowSkewLength(t, i) : Tbl,RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a tableau t, 
+return the length of the skewed portion of the ith row 
+(zero if no
+skewed portion).
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "19330">ColumnSkewLength(t, j) : Tbl,RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a tableau t,
+return the length of the skewed portion of the jth column 
+(zero if no
+skewed portion).
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "19331">FirstIndexOfRow(t, i) : Tbl,RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a tableau t and a positive integer i,
+return the index of the first non-skew entry of the ith row of t. 
+If the row
+has no non-skew entries then the index will be one greater than the length
+of the row (i.e., out of bounds).
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "19332">LastIndexOfRow(t, i) : Tbl,RngIntElt -&gt; RngIntElt</A></H5>
+<H5>RowLength(t, i) : Tbl,RngIntElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Given a tableau t and a positive integer i,
+return the index of the last entry of the ith row of t,
+which is the length of the ith row.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "19333">FirstIndexOfColumn(t, j) : Tbl,RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a tableau t and a positive integer j,
+return the index of the first non-skew entry of the jth column of t.
+If the column
+has no non-skew entries then the index will be one greater than the length
+of the column (i.e., out of bounds).
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "19334">LastIndexOfColumn(t, j) : Tbl,RngIntElt -&gt; RngIntElt</A></H5>
+<H5>ColumnLength(t, j): Tbl,RngIntElt -&gt; RnfIntElt</H5>
+<BLOCKQUOTE>
+Given a tableau t and a positive integer j,
+return the index of the last entry in the jth column of t,
+which is the length of the jth column.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19335">Example <TT>Tableau_Tab-Access (H151E16)</TT></A></H3>
+Given a skew tableau, we access a number of its structural
+properties.
+<P>
+<P>
+<P>
+<PRE>
+&gt; T := Tableau( [3,3,2] , [ [4, 6 ] ,[5, 9], [1, 8] ]);
+&gt; T;
+Skew tableau of shape: 5 5 4 / 3 3 2 
+0 0 0 4 6 
+0 0 0 5 9 
+0 0 1 8 
+&gt; Shape(T);
+[ 5, 5, 4 ]
+&gt; Weight(T);
+6
+&gt; SkewWeight(T);
+8
+&gt; NumberOfRows(T);
+3
+&gt; NumberOfSkewRows(T);
+3
+&gt; RowSkewLength(T, 2);
+3
+&gt; Row(T, 2);
+5 9 
+&gt; ColumnSkewLength(T, 3);
+2
+&gt; Column(T, 3);
+1
+</PRE>
+<HR>
+<H4><A NAME = "19336">Properties</A></H4>
+
+
+
+<P>
+<P>
+<H5><A NAME = "19337">HookLength(t, i, j) : Tbl, RngIntElt, RngIntElt -&gt; RngIntElt</A></H5>
+<H5>HookLength(P, i, j) : SeqEnum[RngIntElt],RngIntElt,RngIntElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The <I>hook</I> of a cell on a Young diagram comprises the cells
+to the right and below its position. The Young diagram is specified
+by either the sequence of positive integers P which is a partition
+or the tableau t.
+The number of cells contained in a hook is its <I>length</I>.
+<P>
+For positive integers i and j such that (i, j) is the co-ordinates of a
+cell lying on the specified Young diagram, a positive integer is returned
+which is the length of the hook of that cell.
+</BLOCKQUOTE>
+<H5><A NAME = "19338">Content(t) : Tbl -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a tableau t, return a sequence of non-negative integers
+which is its <I>content</I>.
+<P>
+The content of t is 
+such that its ith value denotes the number of times the
+ith label occurs in t.
+</BLOCKQUOTE>
+<H5><A NAME = "19339">Word(t) : Tbl -&gt; MonOrdElt</A></H5>
+<H5>RowWord(t) : Tbl -&gt; MonOrdElt</H5>
+<BLOCKQUOTE>
+Given a tableau t, its row word is formed by
+reading its entries from left to right, bottom to top.
+The result is a word of an ordered monoid.
+</BLOCKQUOTE>
+<H5><A NAME = "19340">ColumnWord(t) : Tbl -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a tableau t, its column word is formed by
+reading its labels from bottom to top, left to right.
+The result is a word of an ordered monoid.
+</BLOCKQUOTE>
+<H5><A NAME = "19341">IsStandard(t) : Tbl -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a tableau t of weight n, then t is standard if and only if 
+its entries are exactly the first n labels of its parent monoid. 
+So t is standard if and only if
+it has a content of the form [1, 1, ..., 1].
+</BLOCKQUOTE>
+<H5><A NAME = "19342">IsSkew(t) : Tbl -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the tableau t is a skew tableau.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "19343">IsLittlewoodRichardson(t) : Tbl -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a tableau t, then it is a Littlewood--Richardson tableau if
+the content of t forms a reverse lattice word, (see section 
+<A  HREF = "text1746.htm#19244">Words</A>
+for a definition of a reverse lattice word).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19344">Example <TT>Tableau_Tab-check-standard (H151E17)</TT></A></H3>
+We create a tableau which is not standard. Examining its
+content shows a simple to way to transform it into a standard tableau.
+<P>
+<P>
+<P>
+<PRE>
+&gt; O := OrderedIntegerMonoid();
+&gt; T := WordToTableau( O ! [8,1,7,3,6,2,5,9] );
+&gt; T;
+Tableau of shape: 4 2 1 1 
+ 1 2 5 9
+ 3 6
+ 7
+ 8
+&gt; Content(T);
+[ 1, 1, 1, 0, 1, 1, 1, 1, 1 ]
+&gt; IsStandard(T);
+false
+&gt;  
+&gt; RowInsert(~T, 4);
+&gt; T;
+Tableau of shape: 4 2 1 1 1 
+ 1 2 4 9
+ 3 5
+ 6
+ 7
+ 8
+&gt; Content(T);
+[ 1, 1, 1, 1, 1, 1, 1, 1, 1 ]
+&gt; IsStandard(T);
+true
+</PRE>
+<HR>
+<H3><A NAME = "19345">Example <TT>Tableau_Tab-check-words (H151E18)</TT></A></H3>
+Given a tableau, check that the row and column words are Knuth
+equivalent.
+<P>
+<P>
+<P>
+<PRE>
+&gt; T := Tableau( [2, 2], [ [1,2,3], [4,6,6], [1,5], [2,6] ]);
+&gt; T;
+Skew tableau of shape: 5 5 2 2 / 2 2 
+0 0 1 2 3 
+0 0 4 6 6 
+1 5 
+2 6 
+&gt; 
+&gt; RW := RowWord(T);
+&gt; RW;
+2 6 1 5 4 6 6 1 2 3 
+&gt; CW := ColumnWord(T);
+&gt; CW;
+2 1 6 5 4 1 6 2 6 3 
+&gt; IsKnuthEquivalent(RW, CW);
+true
+</PRE>
+<HR>
+<H4><A NAME = "19346">Operations</A></H4>
+
+<P>
+<P>
+Several operations exist to manipulate tableaux
+and allow them to interact.
+
+
+<H5><A NAME = "19347">t1 eq t2 : MonPlcElt, MonPlcElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given two tableaux t<sub>1</sub> and t<sub>2</sub>, return <TT>true</TT> if they are equal.
+</BLOCKQUOTE>
+<H5><A NAME = "19348">t1 * t2 : Tbl, Tbl -&gt; Tbl</A></H5>
+<BLOCKQUOTE>
+Given two tableaux t<sub>1</sub> and t<sub>2</sub>, return another tableau which is
+their product. The product of two tableaux can be defined using 
+either row insertion or <I>jeu de taquin</I>.
+</BLOCKQUOTE>
+<H5><A NAME = "19349">DiagonalSum(t1, t2) : Tbl,Tbl -&gt; Tbl</A></H5>
+<BLOCKQUOTE>
+The <TT>DiagonalSum</TT> of two tableau t1 and t2 is formed 
+by first building a rectangle
+of empty cells, with the same number of columns as t1 and the same
+number of rows as t2. Then t1 is attached below the rectangle and
+t2 attached to right of it.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "19350">Conjugate(t) : Tbl -&gt; Tbl</A></H5>
+<BLOCKQUOTE>
+Given a tableau t with strictly increasing rows, the rows and columns
+of t are transposed to form a new tableau on the conjugate Young diagram.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "19351">JeuDeTaquin(~t, i, j) : Tbl, RngIntElt, RngIntElt -&gt;</A></H5>
+<H5>JeuDeTaquin(t, i, j) : Tbl, RngIntElt, RngIntElt -&gt; Tbl</H5>
+<BLOCKQUOTE>
+Given a skew tableau t, and the co-ordinates (i, j) which must be a skew cell
+that is an <I>inside corner</I> (a corner on the skew shape of t).
+The skewed (i, j)th cell is removed
+using <I>jeu de taquin</I>.
+<P>
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "19352">JeuDeTaquin(~t) : Tbl -&gt;</A></H5>
+<H5>JeuDeTaquin(t) : Tbl -&gt; Tbl</H5>
+<H5>Rectify(~t) : Tbl -&gt;</H5>
+<H5>Rectify(t) : Tbl -&gt; Tbl</H5>
+<BLOCKQUOTE>
+Given a tableau t, remove all skewed cells successively using
+<I>jeu de taquin</I>.
+</BLOCKQUOTE>
+<H5><A NAME = "19353">InverseJeuDeTaquin(~t, i, j) : Tbl, RngIntElt, RngIntElt -&gt;</A></H5>
+<H5>InverseJeuDeTaquin(t, i, j) : Tbl, RngIntElt, RngIntElt -&gt; Tbl</H5>
+<BLOCKQUOTE>
+Given a tableau t, and co-ordinates (i, j) which must lie on the
+outside of t resulting in a new and valid shape.
+A new skew tableau with skew degree one higher than t is created.
+This is achieved by adding a new skew cell in the (i, j)th position,
+then performing <I>jeu de taquin</I> in reverse, which moves the new entry
+to create a valid skew tableau.
+</BLOCKQUOTE>
+<H5><A NAME = "19354">RowInsert(~t, w) : Tbl, MonOrdElt -&gt;</A></H5>
+<H5>RowInsert(t, w) : Tbl, MonOrdElt -&gt; Tbl</H5>
+<H5>RowInsert(~t, u) : Tbl, MonPlcElt -&gt;</H5>
+<H5>RowInsert(t, u) : Tbl, MonPlcElt -&gt; Tbl</H5>
+<BLOCKQUOTE>
+Given a tableau t and a word w from the same ordered monoid that
+t is associated to, insert w into t using Schensted's
+row insertion algorithm.
+<P>
+If given an element u of a plactic monoid, any word of its
+Knuth equivalence class is used.
+This map is invariant under Knuth equivalence and so is well defined
+for elements of the plactic monoid. 
+</BLOCKQUOTE>
+<H5><A NAME = "19355">RowInsert(~t, x) : Tbl, RngIntElt -&gt;</A></H5>
+<H5>RowInsert(t, x) : Tbl, RngIntElt -&gt; Tbl</H5>
+<BLOCKQUOTE>
+Given a tableau t over the positive integers, and a positive integer
+x, insert x into t using the Schensted's
+row insertion algorithm.
+<P>
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "19356">InverseRowInsert(~t, i, j) : Tbl, RngIntElt, RngIntElt -&gt;</A></H5>
+<H5>InverseRowInsert(t, i, j) : Tbl, RngIntElt, RngIntElt -&gt; Tbl, MonOrdElt</H5>
+<BLOCKQUOTE>
+Given a tableau t and positive integers i and j such that
+(i, j) corresponds to an outside corner cell of the
+tableau t, then the row insertion algorithm is applied in reverse
+to remove the specified entry.
+In the functional form, both the generated tableau and the
+value of the removed entry as a word of an ordered monoid are
+returned.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19357">Example <TT>Tableau_Tab-Jeu (H151E19)</TT></A></H3>
+The order with which the skew entries of a skew tableau are removed
+using jeu de taquin is irrelevant to the final tableau produced.
+We give an example of this.
+<P>
+<P>
+<P>
+<PRE>
+&gt; T := Tableau([2,1], [ [2], [3,4] ,[3] ]);
+&gt; T1 := T;
+&gt; T;
+Skew tableau of shape: 3 3 1 / 2 1 
+ 0 0 2
+ 0 3 4
+ 3
+&gt;  
+&gt; JeuDeTaquin(~T, 1, 2); T;
+Skew tableau of shape: 3 2 1 / 1 1 
+ 0 2 4
+ 0 3
+ 3
+&gt; JeuDeTaquin(~T, 2, 1); T;
+Skew tableau of shape: 3 2 / 1 
+ 0 2 4
+ 3 3
+&gt; JeuDeTaquin(~T, 1, 1); T;
+Tableau of shape: 3 1 
+ 2 3 4
+ 3
+&gt;  
+&gt; JeuDeTaquin(~T1, 2, 1); T1;
+Skew tableau of shape: 3 3 / 2 
+ 0 0 2
+ 3 3 4
+&gt; JeuDeTaquin(~T1, 1, 2); T1;
+Skew tableau of shape: 3 2 / 1 
+ 0 2 4
+ 3 3
+&gt; JeuDeTaquin(~T1, 1, 1); T1;
+Tableau of shape: 3 1 
+ 2 3 4
+ 3
+&gt;  
+&gt; T eq T1;
+true
+</PRE>
+<HR>
+<H3><A NAME = "19358">Example <TT>Tableau_Tab-Comp-Mult (H151E20)</TT></A></H3>
+We manually compare the two different methods of multiplying 
+tableau.
+<P>
+<P>
+<P>
+<PRE>
+&gt; O&lt;a,b,c,d,e,f,g,h&gt; := OrderedMonoid(8);
+&gt; T1 := Tableau( [ a*c*f, d*g]);
+&gt; T2 := Tableau( [ b*b*e*f, d*g*h]);
+</PRE>
+First using row insert,
+<P>
+<P>
+<PRE>
+&gt; w := Word(T2);
+&gt; w;
+d g h b b e f 
+&gt; Res1 := RowInsert(T1, w);
+&gt; Res1;
+Tableau of shape: 5 4 2 1 
+a b b e f 
+c d g h 
+d f 
+g 
+</PRE>
+and then using JeuDeTaquin.
+<P>
+<P>
+<PRE>
+&gt; Res2 := DiagonalSum(T1, T2);
+&gt; Res2;
+Skew tableau of shape: 7 6 3 2 / 3 3 
+0 0 0 b b e f 
+0 0 0 d g h 
+a c f 
+d g 
+&gt; Rectify(~Res2);
+&gt; Res2;
+Tableau of shape: 5 4 2 1 
+a b b e f 
+c d g h 
+d f 
+g 
+</PRE>
+Now we check our results.
+<P>
+<P>
+<PRE>
+&gt; Res1 eq Res2;
+true
+&gt; Res1 eq (T1*T2);
+true
+</PRE>
+<HR>
+<H4><A NAME = "19359">The Robinson-Schensted-Knuth  Correspondence</A></H4>
+
+<P>
+<P>
+While the map from the plactic monoid to tableaux is an isomorphism,
+many different words from the original ordered 
+monoid map to the
+same tableau. However a bijective map exists between
+an ordered monoid and <I>pairs</I> of tableau of the same shape, 
+the second of which
+being a standard tableau. This is known as the <I>Robinson
+correspondence</I>.
+<P>
+By removing the restriction that the second tableau be standard, 
+this correspondence is extended further to 
+a bijective map with all matrices with non-negative integers.
+This is known as the Robinson-Schensted-Knuth (RSK) correspondence.
+<P>
+This latter correspondence can also be made to all lexicographically
+ordered pairs of words (both having the same length).
+
+
+<H5><A NAME = "19360">LexicographicalOrdering(~w1, ~w2) : MonOrdElt, MonOrdElt -&gt;</A></H5>
+<H5>LexicographicalOrdering(w1, w2) : MonOrdElt, MonOrdElt -&gt; MonOrdElt, MonOrdElt</H5>
+<BLOCKQUOTE>
+Given two words w<sub>1</sub> and w<sub>2</sub> of the same length,
+place them in increasing lexicographical order 
+(the functional version returns two new words).
+Lexicographical ordering on the pairs (w<sub>1</sub>[i], w<sub>2</sub>[i]) is determined 
+primarily by the comparison w<sub>2</sub>[i] &lt; w<sub>2</sub>[j],
+but if w<sub>2</sub>[i] = w<sub>2</sub>[j] then the comparison w<sub>1</sub>[i] &lt; w<sub>1</sub>[j]
+is taken into account.
+</BLOCKQUOTE>
+<H5><A NAME = "19361">IsLexicographicallyOrdered(w1, w2) : MonOrdElt, MonOrdElt -&gt; boolean</A></H5>
+<BLOCKQUOTE>
+Given two words w<sub>1</sub> and w<sub>2</sub>, return
+<TT>true</TT> if the pairs (w<sub>1</sub>[i], w<sub>2</sub>[i]) are ordered according to the
+ordering described in <TT>LexicographicalOrdering</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "19362">RSKCorrespondence(w) : SeqEnum[RngIntElt] -&gt; Tbl, Tbl</A></H5>
+<BLOCKQUOTE>
+Given a word w, use the bijective map described by the
+Robinson-Schensted-Knuth correspondence to return
+two tableau t<sub>1</sub> and t<sub>2</sub>.
+The first tableau, t<sub>1</sub>, will be labelled by the entries of w, while t<sub>2</sub>
+is a standard tableau over the positive integers.
+<P>
+The map described by the correspondence is as follows. Map the word w
+to t<sub>1</sub> by row inserting its entries into the empty tableau, (as is done
+in <TT>WordToTableau</TT>). As t<sub>1</sub> is being generated, the insertion
+tableau t<sub>2</sub> is built simultaneously.
+As w[k] is inserted into t<sub>1</sub>, an additional cell is added to its shape.
+A new cell is added to t<sub>2</sub> in exactly the same place, and it is
+labelled with
+the integer k.
+</BLOCKQUOTE>
+<H5><A NAME = "19363">InverseRSKCorrespondenceSingleWord(t1, t2) : Tbl, Tbl -&gt; MonOrdElt</A></H5>
+<BLOCKQUOTE>
+Given a pair of tableaux t<sub>1</sub>, t<sub>2</sub>, of the same shape,
+where t<sub>2</sub> is over the
+positive integers, return the preimage of t<sub>1</sub> and t<sub>2</sub>
+using the bijective map described by
+the Robinson-Schensted-Knuth correspondence.
+<P>
+The result is
+returned as a single word of the ordered monoid of t<sub>1</sub>, as described in
+the single word version of <TT>RSKCorrespondence</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "19364">RSKCorrespondence(w1, w2) : SeqEnum[RngIntElt], SeqEnum[RngIntElt] -&gt; Tbl,Tbl</A></H5>
+<BLOCKQUOTE>
+Given two lexicographically ordered words w<sub>1</sub> and w<sub>2</sub> of the same length,
+where w<sub>2</sub> must be over the positive
+integers, use the bijective map described by the
+Robinson-Schensted-Knuth correspondence to return
+two tableau t<sub>1</sub> and t<sub>2</sub>.
+The first tableau, t<sub>1</sub>, will be labelled by the entries of w<sub>1</sub>, while t<sub>2</sub>
+will be labelled by the entries of w<sub>2</sub>.
+<P>
+The map described by the correspondence is as follows. Map the word w<sub>1</sub>
+to t<sub>1</sub> by row inserting its entries into the empty tableau, (as is done
+in <TT>WordToTableau</TT>). As t<sub>1</sub> is being generated, the insertion
+tableau t<sub>2</sub> is built simultaneously.
+As w[k] is inserted into t<sub>1</sub>, an additional cell is added to its shape.
+A new cell is added to t<sub>2</sub> in exactly the same place, and it is labelled with
+the integer w<sub>2</sub>[k].
+</BLOCKQUOTE>
+<H5><A NAME = "19365">InverseRSKCorrespondenceDoubleWord(t1, t2) : Tbl, Tbl -&gt; MonOrdElt, MonOrdElt</A></H5>
+<BLOCKQUOTE>
+Given a pair of tableaux t<sub>1</sub>, t<sub>2</sub>, of the same shape,
+where t<sub>2</sub> is over the
+positive integers, return the preimage of t<sub>1</sub> and t<sub>2</sub>
+using the bijective map described by
+the Robinson-Schensted-Knuth correspondence.
+<P>
+The result is
+returned as words of the ordered monoids of t<sub>1</sub> and t<sub>2</sub> respectively,
+as described in
+the double word version of <TT>RSKCorrespondence</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "19366">RSKCorrespondence(M) : Mtrx -&gt; Tbl, Tbl</A></H5>
+<BLOCKQUOTE>
+Given a matrix M of non-negative integers,
+use the bijective map described by the
+Robinson-Schensted-Knuth correspondence to return
+two tableau t<sub>1</sub> and t<sub>2</sub> over the positive integers.
+<P>
+The map described by the correspondence is as follows.
+Initialise two words over the positive
+integers, w<sub>1</sub> and w<sub>2</sub>, as null words.
+For the (i, j)th entry of M, say m<sub>ij</sub>, append i to
+w<sub>1</sub> m<sub>ij</sub> times, and append j to w<sub>2</sub> m<sub>ij</sub> times.
+These two words are then used in the correspondence described in
+the above version of <TT>RSKCorrespondence</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "19367">InverseRSKCorrespondenceMatrix(t1, t2) : Tbl, Tbl -&gt; Mat</A></H5>
+<BLOCKQUOTE>
+Given a pair of tableaux t<sub>1</sub>, t<sub>2</sub>, of the same shape,
+both over the
+positive integers, return the preimage of t<sub>1</sub> and t<sub>2</sub>
+using the bijective map described by
+the Robinson-Schensted-Knuth correspondence.
+<P>
+The result is a matrix of non-negative integers,
+as described in
+the matrix version of <TT>RSKCorrespondence</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19368">Example <TT>Tableau_RSK-singleword (H151E21)</TT></A></H3>
+We take two words from the ordered monoid over the positive integers.
+Although they correspond to the same tableau under the natural
+mapping into the tableau monoid, we show they have
+a different image under the RSK correspondence.
+That is, they have different
+<I>insertion</I> tableaux.
+<P>
+<P>
+<P>
+<PRE>
+&gt; O := OrderedIntegerMonoid();
+&gt; M := TableauMonoid(O);
+&gt; a := O ! [4,7,2,8,4,9,2];
+&gt; a;
+4 7 2 8 4 9 2
+&gt; b := O ! [7,4,2,4,2,8,9];
+&gt; b;
+7 4 2 4 2 8 9
+</PRE>
+Now we will see that a and b have the same image in the tableau monoid,
+but that they are distinguished under the RSK correspondence.
+<P>
+<P>
+<PRE>
+&gt; (M!a) eq (M!b);
+true
+&gt; Ta1, Ta2 := RSKCorrespondence(a);
+&gt; Tb1, Tb2 := RSKCorrespondence(b);
+&gt; Ta1 eq Tb1;
+true
+&gt; Ta2 eq Tb2;
+false
+&gt; Ta2;
+Tableau of shape: 4 2 1
+1 2 4 6
+3 5
+7
+&gt; Tb2;
+Tableau of shape: 4 2 1
+1 4 6 7
+2 5
+3
+</PRE>
+To check that the map is indeed bijective we find a and b as
+the pre-images of the created tableaux.
+<P>
+<P>
+<PRE>
+&gt; InverseRSKCorrespondenceSingleWord(Ta1,Ta2 );
+4 7 2 8 4 9 2
+&gt; InverseRSKCorrespondenceSingleWord(Tb1,Tb2 );
+7 4 2 4 2 8 9
+</PRE>
+<HR>
+<H3><A NAME = "19369">Example <TT>Tableau_RSK-doubleword (H151E22)</TT></A></H3>
+We apply the RSK correspondence to two arbitrary words, the
+first from a finitely generated ordered monoid.
+The second word must always be over the positive integers.
+The first step is to put them
+into lexicographical order.
+<P>
+<P>
+<P>
+<PRE>
+&gt; O1&lt;a,b,c,d,e,f&gt; := OrderedMonoid(6);
+&gt; O2 := OrderedIntegerMonoid();
+&gt;
+&gt; w1 := e*a*e*b*f*d*a;
+&gt; w2 := O2 ! [3,8,2,8,3,3,6];
+&gt; LexicographicalOrdering(~w1, ~w2);
+&gt; w1, w2;
+e d e f a a b  2 3 3 3 6 8 8
+</PRE>
+Now we use the correspondence,
+<P>
+<P>
+<PRE>
+&gt; T1, T2 := RSKCorrespondence(w1, w2);
+&gt; T1;
+Tableau of shape: 3 3 1
+a a b
+d e f
+e
+&gt; T2;
+Tableau of shape: 3 3 1
+2 3 3
+3 8 8
+6
+</PRE>
+and check that the inverse is correct.
+<P>
+<P>
+<PRE>
+&gt; InverseRSKCorrespondenceDoubleWord(T1, T2);
+e d e f a a b  2 3 3 3 6 8 8
+</PRE>
+<HR>
+<H3><A NAME = "19370">Example <TT>Tableau_RSK-Matrix (H151E23)</TT></A></H3>
+We give an example of the bijective map provided by the RSK correspondence
+between matrices of non-negative integers and pairs of tableaux
+of the same shape.
+<P>
+<P>
+<P>
+<PRE>
+&gt; M := Matrix(2,3,[0,0,2,3,1,2]);
+&gt; M;
+[0 0 2]
+[3 1 2]
+&gt; T1, T2 := RSKCorrespondence(M);
+&gt; T1;
+Tableau of shape: 6 2
+1 1 1 2 3 3
+3 3
+&gt; T2;
+Tableau of shape: 6 2
+1 1 2 2 2 2
+2 2
+&gt; InverseRSKCorrespondenceMatrix(T1, T2);
+[0 0 2]
+[3 1 2]
+</PRE>
+Looking now at preimage of the tableaux in the double word format,
+the (i, j) co-ordinates of entries of M can clearly be seen with the
+correct multiplicities.
+<P>
+<P>
+<PRE>
+&gt; wj, wi := InverseRSKCorrespondenceDoubleWord(T1, T2);
+&gt; wi;
+1 1 2 2 2 2 2 2
+&gt; wj;
+3 3 1 1 1 2 3 3
+</PRE>
+<HR>
+<H3><A NAME = "19371">Example <TT>Tableau_RSK-perms (H151E24)</TT></A></H3>
+We illustrate the remarkable property that a permutation p (in image
+notation) corresponds to the tableaux pair (T1, T2) if and only if
+the inverse permutation p<sup> - 1</sup> corresponds to the tableaux pair
+(T2, T1).
+<P>
+<P>
+<P>
+<PRE>
+&gt; O := OrderedIntegerMonoid();
+&gt; n := Random([1..100]);
+&gt; G := SymmetricGroup(n);
+&gt; p := Random(G);
+&gt;
+&gt; T1, T2 := RSKCorrespondence( O ! Eltseq(p) );
+&gt;
+&gt; p1 := InverseRSKCorrespondenceSingleWord( T2, T1);
+&gt; p1 := G ! Eltseq(p1);
+&gt;
+&gt; p1 eq p^-1;
+true
+</PRE>
+<HR>
+<H4><A NAME = "19372">Counting Tableaux</A></H4>
+
+
+
+<H5><A NAME = "19373">NumberOfStandardTableaux(P) : SeqEnum -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a sequence of positive integers P which is a partition,
+return the number of standard tableaux of shape P.
+This is the same as the number of
+Knuth equivalent words corresponding to each standard tableaux
+of shape P.
+</BLOCKQUOTE>
+<H5><A NAME = "19374">NumberOfStandardTableauxOnWeight(n) : RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a positive integer n, return
+the number of standard tableaux having
+weight n.
+</BLOCKQUOTE>
+<H5><A NAME = "19375">NumberOfTableauxOnAlphabet(P, m) : SeqEnum,RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a sequence of positive integers P which is a partition,
+return the number of tableau of shape P
+with entries from [1, ..., m].
+</BLOCKQUOTE>
+<H5><A NAME = "19376">KostkaNumber(S, C) : SeqEnum[RngIntElt], SeqEnum[RngIntElt] -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a sequence of positive integers S forming a partition, 
+and a sequence of non-negative integers C, 
+return the number of tableau having shape S and content C.
+If C prescribes fewer cells than would completely fill
+the shape S, then the number of tableau
+within the given shape is returned.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19377">Example <TT>Tableau_CountStandardTab (H151E25)</TT></A></H3>
+There is a correspondence between the number of standard
+tableaux on a given shape, and the number of words associated with
+each of those tableaux.
+We manually count the number of words corresponding to a
+specific  standard tableau,
+and show that this is equal to the number of standard tableaux
+on that shape.
+<P>
+<P>
+<P>
+<PRE>
+&gt; O := OrderedIntegerMonoid();
+&gt; T := Tableau( [ [ 1, 2, 3, 4, 7],
+&gt;                 [ 5, 8],
+&gt;                 [ 6]    ] );
+&gt; T;
+Tableau of shape: 5 2 1 
+ 1 2 3 4 7
+ 5 8
+ 6
+&gt;  
+&gt; n := Weight(T);
+&gt; G := SymmetricGroup(n);
+&gt; S := [1..n];
+&gt;  
+&gt; Count := 0;
+&gt; for p in G do
+&gt;     T1 := WordToTableau( O ! (S^p) );
+&gt;     if T1 eq T then
+&gt;         Count +:= 1;
+&gt;     end if;
+&gt; end for;
+&gt;  
+&gt; Count;
+64
+&gt; NumberOfStandardTableaux( Shape(T) );
+64
+</PRE>
+<HR>
+<H3><A NAME = "19378">Example <TT>Tableau_CountTabAlph-Binomial (H151E26)</TT></A></H3>
+If a tableaux is constructed of the shape [1, 1, 1, ..., 1] then
+the entries must be strictly increasing, hence non-repeating. So
+for such a tableau of length n
+on an alphabet of m symbols, each subset of n symbols will
+correspond to one single distinct tableau. So the number of tableau will
+be (m choose n).
+<P>
+<P>
+<P>
+<PRE>
+&gt; m := Random(1,50);
+&gt; n := Random(1,m);
+&gt;  
+&gt; Shape := [ 1 : i in [1..n] ];
+&gt; Binomial(m,n) eq NumberOfTableauxOnAlphabet(Shape, m);
+true
+</PRE>
+<PRE></PRE> <A  HREF = "text1742.htm">[Next]</A><A  HREF = "text1746.htm">[Prev]</A> <A  HREF = "text1742.htm">[Right]</A> <A  HREF = "text1746.htm">[Left]</A> <A  HREF = "text1743.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,8 @@
+174,1
+S,AutomorphismGroupMatchingIdempotents,"Returns the group of all automorphism of the basic algebra A that preserve the basic idempotent structure. That is, any element of this group induces the identity automorphism on the quotient A/Rad(A) of A by its Jacobson radical",0,1,0,0,0,0,0,0,0,34,,34,155,-38,-38,-38,-38
+S,IsIsomorphicMatchingIdempotents,True if there is an isomorphism from the basic algebra A to the basic algebra B that preserves the ordering of the idempotents. The function also returns the matrix of the isomorphism,0,2,0,0,0,0,0,0,0,34,,0,0,34,,36,155,148,-38,-38,-38
+S,AutomorphismGroupWithoutBlocks,"Returns the automorphism group of the basic Algebra A, together with the group of permutations of the idempotents that match automorphisms",0,1,0,0,0,0,0,0,0,34,,178,224,-38,-38,-38,-38
+S,IsIsomorphic,"True if the basic algebra A is isomorphic to the basic algebra B and if so, returns the matrix of an isomorphism",0,2,0,0,0,0,0,0,0,34,,0,0,34,,37,175,-38,-38,-38,-38
+S,BlocksOfBasicAlgebra,"Returns the block structure of a basic algebra, a sequence of sets, each set consisting of the indexes of the idempotents in the block of that set",0,1,0,0,0,0,0,0,0,34,,82,-38,-38,-38,-38,-38
+S,BlockAlgebra,"Returns the block algebra of a basic algebra A, where S is a subset set consisting of the indices of the idempotents that form a block of A. Also returned is sequence of indices of the generators of A that are in the block",0,2,0,0,0,0,0,0,0,-50,,0,0,34,,34,82,-38,-38,-38,-38
+S,AutomorphismGroup,"Returns the automorphism group of the basic Algebra A, together with the group of permutations of the idempotents that match automorphisms",0,1,0,0,0,0,0,0,0,34,,178,224,-38,-38,-38,-38

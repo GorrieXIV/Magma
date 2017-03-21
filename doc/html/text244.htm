@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Numerical Functions</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text232.htm">[Next]</A><A  HREF = "text243.htm">[Prev]</A> <A  HREF = "text232.htm">[Right]</A> <A  HREF = "text243.htm">[Left]</A> <A  HREF = "text233.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "2239">Numerical Functions</A></H3>
+
+<P>
+<P>
+This section contains some functions for numerical analysis, taken from
+Pari.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text244.htm#2240">Summation of Infinite Series</A>
+<LI> <A  HREF = "text244.htm#2244">Integration</A>
+<LI> <A  HREF = "text244.htm#2249">Numerical Derivatives</A>
+</UL>
+<H4><A NAME = "2240">Summation of Infinite Series</A></H4>
+
+<P>
+<P>
+There are three functions for evaluating infinite sums of real numbers.
+The sum should be specified as a map m from the integers 
+to the real field, such that m(n) is the 
+n<sup>th</sup> term of the sum.
+The summation begins at term i.
+The precision of the result will be the default precision
+of the real field.
+
+
+<H5><A NAME = "2241">InfiniteSum(m, i) : Map, RngIntElt -&gt; FldReElt</A></H5>
+<BLOCKQUOTE>
+An approximation to the infinite sum m(i) + m(i + 1) + m(i + 2) + ... .
+This function also works for maps to the complex field.
+</BLOCKQUOTE>
+<H5><A NAME = "2242">PositiveSum(m, i) : Map, RngIntElt -&gt; FldReElt</A></H5>
+<BLOCKQUOTE>
+An approximation to the infinite sum m(i) + m(i + 1) + m(i + 2) + ... .
+Designed for series in which every term is positive, it 
+uses van Wijngaarden's trick for converting the series 
+into an alternating one.
+Due to the stopping criterion, terms equal to 0 will create 
+problems and should be removed.
+</BLOCKQUOTE>
+<H5><A NAME = "2243">AlternatingSum(m, i) : Map, RngIntElt -&gt; FldReElt</A></H5>
+
+<PRE>    Al: MonStgElt                       Default: "Villegas"</PRE>
+<BLOCKQUOTE>
+An approximation to the infinite sum m(i) + m(i + 1) + m(i + 2) + ... .
+Designed for series in which the terms alternate in sign.
+The optional argument <TT>Al</TT> can be used to specify the algorithm used.
+The possible values are <TT>"Villegas"</TT> (the default), and
+<TT>"EulerVanWijngaarden"</TT>.
+Due to the stopping criterion, terms equal to 0 will create 
+problems and should be removed.
+</BLOCKQUOTE>
+<H4><A NAME = "2244">Integration</A></H4>
+
+<P>
+<P>
+A number of `Romberg-like' integration methods have been taken from
+Pari. The precision should not be made too large for this, and
+singularities are not allowed in the interval of integration (including
+its boundaries).
+
+
+<H5><A NAME = "2245">Interpolation(P, V, x) : [FldReElt], [FldReElt], FldReElt -&gt; FldReElt, FldReElt</A></H5>
+<BLOCKQUOTE>
+Using Neville's algorithm, interpolate the value of x under a polynomial
+p such that p(P[i]) = V[i].  An estimate of the error is also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "2246">RombergQuadrature(f, a, b: parameters) : Program, FldReElt, FldReElt -&gt; FldReElt</A></H5>
+
+<PRE>    Precision: FldReElt                 Default: 1.0e-6</PRE>
+
+<PRE>    MaxSteps: RngIntElt                 Default: 20</PRE>
+
+<PRE>    K: RngIntElt                        Default: 5</PRE>
+<BLOCKQUOTE>
+Using Romberg's method of order 2K, approximate the integral of f from
+a to b.  The desired accuracy may be specified by setting the
+<TT>Precision</TT> parameter, and the order of the algorithm by changing
+<TT>K</TT>.  The algorithm ceases after <TT>MaxSteps</TT> iterations if the
+desired accuracy has not been achieved.
+</BLOCKQUOTE>
+<H5><A NAME = "2247">SimpsonQuadrature(f, a, b, n) : Program, FldReElt, FldReElt, RngIntElt -&gt; FldReElt</A></H5>
+<BLOCKQUOTE>
+Using Simpson's rule on n sub-intervals, approximate the integral of f from
+a to b.
+</BLOCKQUOTE>
+<H5><A NAME = "2248">TrapezoidalQuadrature(f, a, b, n) : Program, FldReElt, FldReElt, RngIntElt -&gt; FldReElt</A></H5>
+<BLOCKQUOTE>
+Using the trapezoidal rule on n sub-intervals, approximate the integral of f
+from a to b.
+</BLOCKQUOTE>
+<H4><A NAME = "2249">Numerical Derivatives</A></H4>
+
+<P>
+<P>
+There is also a function to compute the NumericalDerivative of a function.
+This works via computing enough interpolation points and using a Taylor
+expansion.
+
+
+<H5><A NAME = "2250">NumericalDerivative(f, n, z) : UserProgram, RngIntElt, FldComElt -&gt; FldComElt</A></H5>
+<BLOCKQUOTE>
+Given a suitably nice function f, compute a numerical approximation
+to the nth derivative at the point z.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2251">Example <TT>FldRe_NumericalDerivative (H25E10)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; f := func&lt;x|Exp(2*x)&gt;;
+&gt; NumericalDerivative(f, 10, ComplexField(30)! 1.0) / f (1.0);
+1024.00000000000000000000000000
+&gt; NumericalDerivative(func&lt;x|LogGamma(x)&gt;,1,ComplexField()!3.0);
+0.922784335098467139393487909918
+&gt; Psi(3.0); // Psi is Gamma'/Gamma
+0.922784335098467139393487909918
+</PRE>
+<PRE></PRE> <A  HREF = "text232.htm">[Next]</A><A  HREF = "text243.htm">[Prev]</A> <A  HREF = "text232.htm">[Right]</A> <A  HREF = "text243.htm">[Left]</A> <A  HREF = "text233.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

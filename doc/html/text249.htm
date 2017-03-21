@@ -1,0 +1,533 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Creation of Matrices</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text250.htm">[Next]</A><A  HREF = "text248.htm">[Prev]</A> <A  HREF = "text250.htm">[Right]</A> <A  HREF = "text248.htm">[Left]</A> <A  HREF = "text247.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "2256">Creation of Matrices</A></H3>
+
+<P>
+<P>
+This section describes the elementary constructs provided for creating
+a matrix or vector.
+For each of the following functions, the parent of the result
+will be as follows:
+<P>
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>If the result is a vector then its parent will be the appropriate
+    R-space (of type <TT>ModTupRng</TT> or <TT>ModTupFld</TT>).
+<DT>(b)</DT><DD>If the result is a square matrix then its parent will be the
+    appropriate matrix algebra (of type <TT>AlgMatElt</TT>).
+<DT>(c)</DT><DD>If the result is a non-square matrix then its parent will be the
+    appropriate R-matrix space (of type <TT>ModMatRng</TT> or <TT>ModMatFld</TT>).
+<P>
+<P>
+</DL>
+A matrix or a vector may also be created by coercing a sequence of ring
+elements into the appropriate parent matrix structure.
+There is also a virtual type <TT>Mtrx</TT> and all matrix types inherit
+from <TT>Mtrx</TT>.  While writing package intrinsics, an argument should
+be declared to be of type <TT>Mtrx</TT> if it is a general matrix.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text249.htm#2257">General Matrix Construction</A>
+<LI> <A  HREF = "text249.htm#2260">Shortcuts</A>
+<LI> <A  HREF = "text249.htm#2269">Construction of Structured Matrices</A>
+<LI> <A  HREF = "text249.htm#2288">Construction of Random Matrices</A>
+<LI> <A  HREF = "text249.htm#2294">Creating Vectors</A>
+</UL>
+<H4><A NAME = "2257">General Matrix Construction</A></H4>
+
+
+
+<H5><A NAME = "2258">Matrix(R, m, n, Q) : Rng, RngIntElt, RngIntElt, [ RngElt ] -&gt; Mtrx</A></H5>
+<H5>Matrix(R, m, n, Q) : Rng, RngIntElt, RngIntElt, [ &lt;RngIntElt, RngIntElt, RngElt&gt; ] -&gt; Mtrx</H5>
+<H5>Matrix(R, m, n, Q) : Rng, RngIntElt, RngIntElt, [ [ RngElt ] ] -&gt; Mtrx</H5>
+<BLOCKQUOTE>
+Given a ring R, integers m, n&ge;0 and a sequence Q, return the
+m x n matrix over R whose entries are those specified by Q,
+coerced into R.
+Either of m and n may be 0, in which case Q must have length 0
+(and may even be null), and the m x n zero matrix over R is returned.
+There are several possibilities for Q:
+<P>
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>The sequence Q may be a sequence of length mn containing
+    elements of a ring S, in which case the entries are given in
+    row-major order.  In this case, the function is equivalent to <TT>MatrixRing(R, n)!Q</TT> if m=n and <TT>RMatrixSpace(R, m, n)!Q</TT>
+    otherwise.
+<DT>(b)</DT><DD>The sequence Q may be a sequence of tuples, each of the form <TT>&lt;i, j, x&gt;</TT>, where 1&le;i&le;m, 1&le;j&le;n, and x&isin;S
+    for some ring S.  Such a tuple specifies that the (i, j)-th
+    entry of the matrix is x.  If an entry position is not given
+    then its value is zero, while if an entry position is repeated then
+    the last value overrides any previous value(s).  This case is
+    useful for creating sparse matrices.
+<DT>(c)</DT><DD>The sequence Q may be a sequence of m sequences, each of length
+    n and having entries in a ring S, in which case the rows of
+    the matrix are specified by the inner sequences.
+<DT>(d)</DT><DD>The sequence Q may be a sequence of m vectors, each of length
+    n and having entries in a ring S, in which case the rows of
+    the matrix are specified by the vectors.</DL>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2259">Example <TT>Mat_Create (H26E1)</TT></A></H3>
+This example demonstrates simple ways of creating matrices using
+the general <TT>Matrix(R, m, n, Q)</TT> function.
+<P>
+<P>
+<P>
+(a) Defining a 2 x 2 matrix over Z:
+<P>
+<P>
+<P>
+<PRE>
+&gt; X := Matrix(IntegerRing(), 2, 2, [1,2, 3,4]);
+&gt; X;
+[1 2]
+[3 4]
+&gt; Parent(X);
+Full Matrix Algebra of degree 2 over Integer Ring
+</PRE>
+<P>
+(b) Defining a 2 x 3 matrix over GF(23):
+<P>
+<P>
+<P>
+<PRE>
+&gt; X := Matrix(GF(23), 2, 3, [1,-2,3, 4,100,-6]);
+&gt; X;
+[ 1 21  3]
+[ 4  8 17]
+&gt; Parent(X);
+Full KMatrixSpace of 2 by 3 matrices over GF(23)
+</PRE>
+<P>
+(c) Defining a sparse 5 x 10 matrix over Q:
+<P>
+<P>
+<P>
+<PRE>
+&gt; X := Matrix(RationalField(), 5, 10, [&lt;1,2,23&gt;, &lt;3,7,11&gt;, &lt;5,10,-1&gt;]);        
+&gt; X;
+[ 0 23  0  0  0  0  0  0  0  0]
+[ 0  0  0  0  0  0  0  0  0  0]
+[ 0  0  0  0  0  0 11  0  0  0]
+[ 0  0  0  0  0  0  0  0  0  0]
+[ 0  0  0  0  0  0  0  0  0 -1]
+&gt; Parent(X);
+Full KMatrixSpace of 5 by 10 matrices over Rational Field
+</PRE>
+<P>
+(c) Defining a sparse 10 x 10 matrix over GF(101):
+<P>
+<P>
+<P>
+<PRE>
+&gt; X := Matrix(GF(101), 10, 10, [&lt;2*i-1, 2*j-1, i*j&gt;: i, j in [1..5]]);         
+&gt; X;
+[  1   0   2   0   3   0   4   0   5   0]
+[  0   0   0   0   0   0   0   0   0   0]
+[  2   0   4   0   6   0   8   0  10   0]
+[  0   0   0   0   0   0   0   0   0   0]
+[  3   0   6   0   9   0  12   0  15   0]
+[  0   0   0   0   0   0   0   0   0   0]
+[  4   0   8   0  12   0  16   0  20   0]
+[  0   0   0   0   0   0   0   0   0   0]
+[  5   0  10   0  15   0  20   0  25   0]
+[  0   0   0   0   0   0   0   0   0   0]
+&gt; Parent(X); 
+Full Matrix Algebra of degree 10 over GF(101)
+</PRE>
+<HR>
+<H4><A NAME = "2260">Shortcuts</A></H4>
+
+<P>
+<P>
+The following functions are "shortcut" versions of the previous
+general creation function, where some of the arguments are omitted
+since they can be inferred by Magma.
+
+
+<H5><A NAME = "2261">Matrix(m, n, Q) : RngIntElt, RngIntElt, [ RngElt ] -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given integers m, n&ge;0 and a sequence Q of length mn containing
+elements of a ring R, return the m x n
+matrix over R whose entries are the entries of Q, in row-major order.
+Either of m and n may be 0,
+in which case Q must have length 0 and some universe R.
+This function is equivalent to <TT>MatrixRing(Universe(Q), n)!Q</TT>
+if m=n and <TT>RMatrixSpace(Universe(Q), m, n)!Q</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "2262">Matrix(m, n, Q) : RngIntElt, RngIntElt, [ [ RngElt ] ] -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given integers m and n, and a sequence Q consisting of m sequences,
+each of length n and having entries in a ring R,
+return the m x n matrix over R whose rows are given by
+the inner sequences of Q.
+</BLOCKQUOTE>
+<H5><A NAME = "2263">Matrix(Q) : [ Mtrx ] -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a sequence Q of m vectors, each of length n over a ring R,
+return the m x n matrix over R whose rows are the entries of Q.
+</BLOCKQUOTE>
+<H5><A NAME = "2264">Matrix(R, n, Q) : Rng, RngIntElt, [ RngElt ] -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a ring R, an integer n&ge;0 and a sequence Q of length l
+containing elements of a ring S, such that n divides l, return
+the (l/n) x n matrix over R whose entries are the entries of Q,
+coerced into R, in row-major order. The argument n may be 0, in 
+which case Q must have length 0 (and may even be null), in which 
+case the 0 x 0 matrix over R is returned.
+This function is equivalent to <TT>MatrixRing(R, n)!Q</TT>
+if l=n<sup>2</sup> and <TT>RMatrixSpace(R, #Q div n, n)!Q</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "2265">Matrix(n, Q) : RngIntElt, [ RngElt ] -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given an integer n&ge;0 and a sequence Q of length l containing
+elements of a ring R, such that n divides l, return the (l/n) x n
+matrix over R whose entries are the entries of Q, in row-major order.
+The argument n may be 0, in which case Q must have length 0 and 
+some universe R, in which case the 0 x 0 matrix over R is returned.
+This function is equivalent to <TT>MatrixRing(Universe(Q), n)!Q</TT>
+if l=n<sup>2</sup> and <TT>RMatrixSpace(Universe(Q), #Q div n, n)!Q</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "2266">Matrix(Q) : [ [ RngElt ] ] -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a sequence Q consisting of m sequences, each of length n
+and having entries in a ring R, return the m x n matrix over
+R whose rows are given by the inner sequences of Q.
+</BLOCKQUOTE>
+<H5><A NAME = "2267">Matrix(R, Q) : Rng, [ [ RngElt ] ] -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a sequence Q consisting of m sequences, each of length n
+and having entries in a ring S, return the m x n matrix over
+R whose rows are given by the inner sequences of Q, with the
+entries coerced into R.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2268">Example <TT>Mat_ShortCuts (H26E2)</TT></A></H3>
+The first matrix in the previous example may be created thus:
+<P>
+<P>
+<PRE>
+&gt; X := Matrix(2, [1,2, 3,4]);
+&gt; X;
+[1 2]
+[3 4]
+&gt; X := Matrix([[1,2], [3,4]]); 
+&gt; X;
+[1 2]
+[3 4]
+</PRE>
+The second matrix in the previous example may be created thus:
+<P>
+<P>
+<PRE>
+&gt; X := Matrix(GF(23), 3, [1,-2,3, 4,100,-6]);
+&gt; X;
+[ 1 21  3]
+[ 4  8 17]
+&gt; Parent(X);
+Full KMatrixSpace of 2 by 3 matrices over GF(23)
+&gt; X := Matrix(GF(23), [[1,-2,3], [4,100,-6]]); 
+&gt; X;
+[ 1 21  3]
+[ 4  8 17]
+&gt; X := Matrix([[GF(23)|1,-2,3], [4,100,-6]]); 
+&gt; X;
+[ 1 21  3]
+[ 4  8 17]
+</PRE>
+<HR>
+<H4><A NAME = "2269">Construction of Structured Matrices</A></H4>
+
+
+
+<H5><A NAME = "2270">ZeroMatrix(R, m, n) : Rng, RngIntElt, RngIntElt -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a ring R and integers m, n&ge;0, return the m x n zero
+matrix over R.
+</BLOCKQUOTE>
+<H5><A NAME = "2271">ScalarMatrix(n, s) : RngIntElt, RngElt -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given an integer n&ge;0 and an element s of a ring R, return the
+n x n scalar matrix over R which has s on the diagonal and
+zeros elsewhere.  The argument n may be 0, in which case the 0 x 0 matrix over R is returned.  This function is equivalent to
+<TT>MatrixRing(Parent(s), n)!s</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "2272">ScalarMatrix(R, n, s) : Rng, RngIntElt, RngElt -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a ring R, an integer n&ge;0 and an element s of a ring S,
+return the n x n scalar matrix over R which has s, coerced into
+R, on the diagonal and zeros elsewhere.
+n may be 0, in which case in which case the 0 x 0 matrix over R
+is returned.
+This function is equivalent to <TT>MatrixRing(R, n)!s</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "2273">DiagonalMatrix(R, n, Q) : Rng, RngIntElt, [ RngElt ] -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a ring R, an integer n&ge;0 and a sequence Q of n ring elements,
+return the n x n diagonal matrix over R whose diagonal entries
+correspond to the entries of Q, coerced into R.
+</BLOCKQUOTE>
+<H5><A NAME = "2274">DiagonalMatrix(R, Q) : Rng, [ RngElt ] -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a ring R and a sequence Q of n ring elements,
+return the n x n diagonal matrix over R whose diagonal entries
+correspond to the entries of Q, coerced into R.
+</BLOCKQUOTE>
+<H5><A NAME = "2275">DiagonalMatrix(Q) : [ RngElt ] -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a sequence Q of n elements from a ring R,
+return the n x n diagonal matrix over R whose diagonal entries
+correspond to the entries of Q.
+</BLOCKQUOTE>
+<H5><A NAME = "2276">Matrix(A) : Mtrx -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a matrix A of any type, return the same matrix but having
+as parent the appropriate matrix algebra if A is square, or the
+appropriate R-matrix space otherwise.  This is useful, for example,
+if it is desired to convert a matrix group element or a square 
+R-matrix space element to be an element of a general matrix algebra.
+</BLOCKQUOTE>
+<H5><A NAME = "2277">LowerTriangularMatrix(Q) : [ RngElt ] -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a sequence Q of length l containing elements of a ring R,
+such that l=((n + 1) choose 2) = n(n + 1)/2 for some integer n (so
+l is a triangular number), return the n x n lower-triangular
+matrix F over R such that the entries of Q describe the
+lower triangular part of F, in row major order.
+</BLOCKQUOTE>
+<H5><A NAME = "2278">LowerTriangularMatrix(R, Q) : Rng, [ RngElt ] -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a ring R and a sequence Q of length l containing elements
+of a ring S, such that l=((n + 1) choose 2) = n(n + 1)/2 for some
+integer n (so l is a triangular number), return the n x n
+lower-triangular matrix F over R such that the entries of Q, coerced
+into R, describe the lower triangular part of F, in row major
+order.
+</BLOCKQUOTE>
+<H5><A NAME = "2279">UpperTriangularMatrix(Q) : [ RngElt ] -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a sequence Q of length l containing elements of a ring R,
+such that l=((n + 1) choose 2) = n(n + 1)/2 for some integer n (so
+l is a triangular number), return the n x n upper-triangular
+matrix F over R such that the entries of Q describe the
+upper triangular part of F, in <I>row major</I> order.
+</BLOCKQUOTE>
+<H5><A NAME = "2280">UpperTriangularMatrix(R, Q) : Rng, [ RngElt ] -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a ring R and a sequence Q of length l containing elements
+of a ring S, such that l=((n + 1) choose 2) = n(n + 1)/2 for some
+integer n (so l is a triangular number), return the n x n
+upper-triangular matrix F over R such that the entries of Q, coerced
+into R, describe the upper triangular part of F, in <I>row major</I>
+order.
+</BLOCKQUOTE>
+<H5><A NAME = "2281">SymmetricMatrix(Q) : [ RngElt ] -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a sequence Q of length l containing elements of a ring R,
+such that l=((n + 1) choose 2) = n(n + 1)/2 for some integer n (so
+l is a triangular number), return the n x n symmetric
+matrix F over R such that the entries of Q describe the
+lower triangular part of F, in row major order.
+This function allows the creation of symmetric matrices without 
+the need to specify the redundant upper triangular part.
+</BLOCKQUOTE>
+<H5><A NAME = "2282">SymmetricMatrix(R, Q) : Rng, [ RngElt ] -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a ring R and a sequence Q of length l containing elements
+of a ring S, such that l=((n + 1) choose 2) = n(n + 1)/2 for some
+integer n (so l is a triangular number), return the n x n
+symmetric matrix F over R such that the entries of Q, coerced
+into R, describe the lower triangular part of F, in row major
+order.  This function allows the creation of symmetric matrices without 
+the need to specify the redundant upper triangular part.
+</BLOCKQUOTE>
+<H5><A NAME = "2283">AntisymmetricMatrix(Q) : [ RngElt ] -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a sequence Q of length l containing elements of a ring R,
+such that l=((n) choose 2) = n(n - 1)/2 for some integer n (so
+l is a triangular number), return the n x n antisymmetric
+matrix F over R such that the entries of Q describe the
+proper lower triangular part of F, in row major order.
+The diagonal of F is zero and the proper upper triangular part of
+F is the negation of the proper lower triangular part of F.
+</BLOCKQUOTE>
+<H5><A NAME = "2284">AntisymmetricMatrix(R, Q) : Rng, [ RngElt ] -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a ring R and a sequence Q of length l containing elements
+of a ring S, such that l=((n) choose 2) = n(n - 1)/2 for some
+integer n (so l is a triangular number), return the n x n
+antisymmetric matrix F over R such that the entries of Q, coerced
+into R, describe the proper lower triangular part of F, in row major
+order.
+</BLOCKQUOTE>
+<H5><A NAME = "2285">PermutationMatrix(R, Q) : Rng, [ RngIntElt ] -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a ring R and a sequence Q of length n, such that Q
+is a permutation of [1, 2, ..., n],
+return the n by n permutation matrix over R corresponding Q.
+</BLOCKQUOTE>
+<H5><A NAME = "2286">PermutationMatrix(R, x) : Rng, GrpPermElt -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a ring R and a permutation x of degree n,
+return the n by n permutation matrix over R corresponding x.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2287">Example <TT>Mat_Shortcuts (H26E3)</TT></A></H3>
+This example demonstrates ways of creating special matrices.
+<P>
+(a) Defining a 3 x 3 scalar matrix over Z:
+<P>
+<P>
+<PRE>
+&gt; S := ScalarMatrix(3, -4);
+&gt; S;
+[-4  0  0]
+[ 0 -4  0]
+[ 0  0 -4]
+&gt; Parent(S);
+Full Matrix Algebra of degree 3 over Integer Ring
+</PRE>
+<P>
+<P>
+<P>
+(b) Defining a 3 x 3 diagonal matrix over GF(23):
+<P>
+<P>
+<PRE>
+&gt; D := DiagonalMatrix(GF(23), [1, 2, -3]);
+&gt; D;
+[ 1  0  0]
+[ 0  2  0]
+[ 0  0 20]
+&gt; Parent(D);
+Full Matrix Algebra of degree 3 over GF(23)
+</PRE>
+<P>
+<P>
+<P>
+(c) Defining a 3 x 3 symmetric matrix over Q:
+<P>
+<P>
+<PRE>
+&gt; S := SymmetricMatrix([1, 1/2,3, 1,3,4]);
+&gt; S;
+[  1 1/2   1]
+[1/2   3   3]
+[  1   3   4]
+&gt; Parent(S);
+Full Matrix Algebra of degree 3 over Rational Field
+</PRE>
+<P>
+<P>
+<P>
+(d) Defining n x n lower- and upper-triangular matrices for
+various n:
+<P>
+<P>
+<P>
+<PRE>
+&gt; low := func&lt;n | LowerTriangularMatrix([i: i in [1 .. Binomial(n + 1, 2)]])&gt;; 
+&gt; up := func&lt;n | UpperTriangularMatrix([i: i in [1 .. Binomial(n + 1, 2)]])&gt;;
+&gt; sym := func&lt;n | SymmetricMatrix([i: i in [1 .. Binomial(n + 1, 2)]])&gt;;       
+&gt; low(3);
+[1 0 0]
+[2 3 0]
+[4 5 6]
+&gt; up(3);
+[1 2 3]
+[0 4 5]
+[0 0 6]
+&gt; sym(3);
+[1 2 4]
+[2 3 5]
+[4 5 6]
+
+&gt; up(6);
+[ 1  2  3  4  5  6]
+[ 0  7  8  9 10 11]
+[ 0  0 12 13 14 15]
+[ 0  0  0 16 17 18]
+[ 0  0  0  0 19 20]
+[ 0  0  0  0  0 21]
+</PRE>
+<HR>
+<H4><A NAME = "2288">Construction of Random Matrices</A></H4>
+
+
+
+<H5><A NAME = "2289">RandomMatrix(R, m, n) : Rng, RngIntElt, RngIntElt -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given a <I>finite</I> ring R and positive integers m and n,
+construct a random m x n matrix over R.
+</BLOCKQUOTE>
+<H5><A NAME = "2290">RandomUnimodularMatrix(M, n) : RngIntElt, RngIntElt -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given positive integers M and n, construct a random integral n x n matrix having determinant 1 or -1. Most entries will lie
+in the range [ - M, M].
+</BLOCKQUOTE>
+<H5><A NAME = "2291">RandomSLnZ(n, k, l) : RngIntElt, RngIntElt, RngIntElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+A random element of SL<sub>n</sub>(Z), obtained by multiplying l random matrices 
+of the form I + E, where E has exactly one nonzero entry, which is off
+the diagonal and has absolute value at most k.
+</BLOCKQUOTE>
+<H5><A NAME = "2292">RandomGLnZ(n, k, l) : RngIntElt, RngIntElt, RngIntElt -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+A random element of GL<sub>n</sub>(Z), obtained in a similar way to <TT>RandomSLnZ</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "2293">RandomSymplecticMatrix(g, m) : RngIntElt, RngIntElt -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given positive integers n and m, construct a (somewhat) random 2n x 2n symplectic matrix over the integers. The entries will have
+the same order of magnitude as m.
+</BLOCKQUOTE>
+<H4><A NAME = "2294">Creating Vectors</A></H4>
+
+
+
+<H5><A NAME = "2295">Vector(n, Q) : RngIntElt, [ RngElt ] -&gt; ModTupRngElt</A></H5>
+<BLOCKQUOTE>
+Given an integer n and a sequence Q of length n containing elements
+of a ring R, return the vector of length n whose entries are the
+entries of Q.
+The integer n may be 0,
+in which case Q must have length 0 and some universe R.
+This function is equivalent to <TT>RSpace(Universe(Q), n)!Q</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "2296">Vector(Q) : [ RngElt ] -&gt; ModTupRngElt</A></H5>
+<BLOCKQUOTE>
+Given a sequence Q of length l containing elements of a ring R,
+return the vector of length l whose entries are the entries of Q.
+The argument Q may have length 0 if it has a universe R (i.e., 
+it may not be null).  This function is equivalent to 
+<TT>RSpace(Universe(Q), #Q)!Q</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "2297">Vector(R, n, Q) : Rng, RngIntElt, [ RngElt ] -&gt; ModTupRngElt</A></H5>
+<BLOCKQUOTE>
+Given a ring R, an integer n, and a sequence Q of length n
+containing elements of a ring S, return the vector of length n
+whose entries are the entries of Q, coerced into R.
+The integer n may be 0, in which case Q must have length 0
+(and may even be null).
+This function is equivalent to <TT>RSpace(R, n)!Q</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "2298">Vector(R, Q) : Rng, [ RngElt ] -&gt; ModTupRngElt</A></H5>
+<BLOCKQUOTE>
+Given a ring R and a sequence Q of length l containing elements of a
+ring S, return the vector of length l whose entries are the entries of Q,
+coerced into R.  The argument Q may have length 0 and may be null.
+This function is equivalent to <TT>RSpace(R, #Q)!Q</TT>.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text250.htm">[Next]</A><A  HREF = "text248.htm">[Prev]</A> <A  HREF = "text250.htm">[Right]</A> <A  HREF = "text248.htm">[Left]</A> <A  HREF = "text247.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

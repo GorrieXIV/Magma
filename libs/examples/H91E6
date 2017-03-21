@@ -1,0 +1,36 @@
+"Source: Text/Algebra/AlgQuat.text";
+"Line: 511";
+"Date: Tue Jun  7 22:38:11 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Algebra/AlgQuat.text, line: 511
+// Example: H91E6 ()
+print "Example: H91E6";
+ei := GetEchoInput();
+SetEchoInput(true);
+P<x> := PolynomialRing(Rationals());
+F<b> := NumberField(x^3-3*x-1);
+A<alpha,beta,alphabeta> := QuaternionAlgebra<F | -3,b>;
+O := MaximalOrder(A);
+Factorization(Discriminant(O));
+Z_F := BaseRing(O);
+PseudoBasis(O);
+for c := 1 to 10 do
+  D := Random([d : d in [-100..100] | not IsSquare(d)]);
+  K<w> := NumberField(x^2-D);
+  Z_K := MaximalOrder(K);
+  K<K1,w> := FieldOfFractions(Z_K);
+  a := Random([i : i in [-50..50] | i ne 0]) + Random([-50..50])*w;
+  b := Random([i : i in [-50..50] | i ne 0]) + Random([-50..50])*w;
+  printf "D = %o, a = %o, b = %o\n", D, a, b;
+  A := QuaternionAlgebra<K | a,b>;
+  O := MaximalOrder(A);
+  ds := [<pp[1],pp[2],HilbertSymbol(A,pp[1])> :
+           pp in Factorization(Discriminant(O))];
+  print ds;
+  for d in ds do
+    if d[3] eq 1 then
+      break c;
+    end if;
+  end for;
+end for;
+SetEchoInput(ei);

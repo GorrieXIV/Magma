@@ -1,0 +1,107 @@
+// AKS, Dec 2006
+
+////////////////////////////////////////////////////////////////////////////////
+
+k := 2*10^3;
+printf "Bernoulli(%o)\n", k;
+time n := Bernoulli(k);
+
+k := 2*10^6;
+printf "Factorial(%o)\n", k;
+time n := Factorial(k);
+
+////////////////////////////////////////////////////////////////////////////////
+
+"\nGF(7) irreducibility/factorization";
+
+P<x> := PolynomialRing(GF(7));
+f := x^3547 + P!IntegerToSequence(16893, 7);
+time assert IsIrreducible(f);
+time _ := Factorization(f + 1);
+
+////////////////////////////////////////////////////////////////////////////////
+
+n := 33;
+
+printf "\nFactorization of (x^%o - 1) over Cyclotomic Field of order %o\n",
+    n, n;
+
+P<x> := PolynomialRing(CyclotomicField(n));
+time L := Factorization(x^n - 1);
+assert #L eq n and &*[t[1]: t in L] eq x^n - 1;
+
+////////////////////////////////////////////////////////////////////////////////
+
+"\nGModule IndecomposableSummands";
+
+G := PSU(3, 5);
+H := Sylow(G, 3);
+M := Restriction(GModule(G, GF(3)), H);
+time L := IndecomposableSummands(M);
+assert #L eq 14 and forall{m: m in L | Dimension(m) eq 9};
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+"\nCyclic 8 Homog Q GB";
+
+K := RationalField();
+P<a,b,c,d,e,f,g,h,H> := PolynomialRing(K, 9, "grevlex");
+I := ideal<P |
+a*b*c*d*e*f*g*h-H^8,
+a*b*c*d*e*f*g+a*b*c*d*e*f*h+a*b*c*d*e*g*h+a*b*c*d*f*g*h+a*b*c*e*f*g*h+a*b*d*e*f*g*h+a*c*d*e*f*g*h+b*c*d*e*f*g*h,
+a*b*c*d*e*f+b*c*d*e*f*g+a*b*c*d*e*h+a*b*c*d*g*h+a*b*c*f*g*h+a*b*e*f*g*h+a*d*e*f*
+g*h+c*d*e*f*g*h,
+a*b*c*d*e+b*c*d*e*f+c*d*e*f*g+a*b*c*d*h+a*b*c*g*h+a*b*f*g*h+a*e*f*g*h+d*e*f*g*h,
+a*b*c*d+b*c*d*e+c*d*e*f+d*e*f*g+a*b*c*h+a*b*g*h+a*f*g*h+e*f*g*h,
+a*b*c+b*c*d+c*d*e+d*e*f+e*f*g+a*b*h+a*g*h+f*g*h,
+a*b+b*c+c*d+d*e+e*f+f*g+a*h+g*h,
+a+b+c+d+e+f+g+h >;
+time g := GroebnerBasis(I);
+assert #g eq 1182;
+
+////////////////////////////////////////////////////////////////////////////////
+
+"\nPoint counting (250 bits)";
+
+p :=
+1365818482732697446402720195556907535508433803960330956891804833247742206397;
+K := GF(p);
+L := [ K |
+  105319257760165612377382863332027372719546517814954679759055331222952775149, 
+  889894525824026889708948328075802396592859068384361698847474424843480737211 ];
+E := EllipticCurve(L);
+time o := #E;
+assert o eq
+  1365818482732697446402720195556907535449788231835735960768287780741253111196;
+assert IsZero(o*Random(E));
+
+////////////////////////////////////////////////////////////////////////////////
+
+"\nInvariant Ring C_5, GF(5)";
+
+R := InvariantRing(CyclicGroup(5), GF(5));
+time HilbertSeries(Module(R)) eq HilbertSeries(R);
+
+////////////////////////////////////////////////////////////////////////////////
+
+"";
+"Matrix mult, rank, inverse";
+for t in
+    [
+	<2, 10000>, <3, 5000>, <23, 2000>,
+	<2965819, 2000>, <11863279, 2000>, <2^31 - 1, 1000>,
+	<NextPrime(10^50: Proof := false), 500>
+    ]
+do
+    p, k := Explode(t);
+    printf "GF(%o), dim %o\n", p, k;
+    X := Random(MatrixRing(GF(p), k));
+    time Y := X*(X + 1);
+    delete Y;
+    time r := Rank(X);
+    time E, T := EchelonForm(X);
+    delete E, T, X;
+end for;
+
+////////////////////////////////////////////////////////////////////////////////

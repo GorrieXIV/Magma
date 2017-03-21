@@ -1,0 +1,97 @@
+\magnification 1200
+\def\GL{{\rm GL}}
+\def\GF{{\rm GF}}
+\def\SL{{\rm SL}}
+\centerline{\bf Data structures for matrix recognition.  Cyclic groups}
+\medskip
+The critical issue is to determine when we can avoid the use of discrete logs in a large field.
+
+There are two types of cyclic nodes; abstract and field.  The only ones where the cyclic group can
+become large is in the field type.
+
+The current strategy ensures that large cyclic groups only arise in nodes defined by taking determinants.
+I don't think that this is an important point from a strategic point of view; but it simplifies a description
+of what is going on.
+
+If we are to construct a composition series we have to know what primes turn up as orders of composition factors, so integer factorisation has to be able to cope
+with the order of the image of the determinant.  So now we have a list of bad primes, for which we are
+unwilling or reluctant to carry out discrete log calculations.  
+
+A small point.  We are concerned with large primes dividing $q-1$ (or $q^e-1$ for some $e$).  The
+primes are not so large that we can't find them, but they are too big for comfortable discrete logs.
+ Does it ever occur in practice that such a large
+prime divides $q-1$ twice?  I shall assume that this does not happen to simplify the discussion.
+
+A chief factor of order a power of a large prime $\ell$ lies in $O_{p,\ell}(G)$.  In other words, if we divide
+out by $O_p(G)$, and then by $O_\ell(G/O_p(G))$, we are left with a group with no composition
+factor of order  $\ell$.
+So we can put all the chief factors of order a power of $\ell$ at the bottom of $G/O_p(G)$, where
+they will define an elementary abelian group (I think); that is to say, we have a direct sum of
+$F_\ell(G)$-modules.  Call this the $\ell$-layer.
+
+The goal for which I am aiming is as follows.  Without the use of discrete logs we arrive at this position,
+but where each homogeneous factor of the $\ell$-layer is a subspace of $F_\ell^k$ for some known $k$, but the dimension of the space (that is, the multiplicity of the composition factor) may not be known.
+
+We can then carry out a limited number of discrete log calculations to remove these ambiguities.
+
+The first step in processing a group is to divide out by $O_p(G)$, leaving a group that acts
+completely reducibly, say on the direct sum of $k$ irreducible modules.  Some of these irreducibles
+may be written over a larger field, perhaps with Galois automorphisms.  Suppose that some large prime $\ell$ arises as a determinant, so $\ell$ divides $q-1$, or $q^e-1$ in a larger field context.  If
+$\ell$ divides $q-1$ then $\ell$ arises as a determinant order in, say, $k_0$ of the irreducible
+modules.  Now we have a node of type elementary abelian, with parameters $\ell$ and $k_0$,
+and data structure ordered $k_0$-tuples of field elements of order $\ell$.  We cannot determine
+relations between the elements without resort to discrete logs.  But we will manage without, though
+at some stage we need to resolve the problem of the rank of this elementary abelian group.
+
+If $\ell$ divides $q^e-1$, where an irreducible factor has been written over $\GF(q^e)$, but does not
+divide $q-1$ the situation is slightly different.  The Galois group may act on the $\ell$ factor.  Now if
+there are more than one such irreducible factor for the given $\ell$ the critical, and easily decided,
+question is whether the $\ell$ factors are isomorphic as modules.  For example, the Galois group
+might be of order 2, inverting the $\ell$ cycle, and this might happen in two irreducible factors of
+the module.  Now if the Galois groups act on the two $\ell$-cycles as the Klein 4-group the
+$\ell$-cycles must be different (and are non-isomorphic as $G$-modules); but if the Galois group
+acts as a single 2-cycle we have an ambiguity, and we have either one or two $\ell$-cycles
+inverted by this $C_2$.
+
+There is another situation where $\ell$-cycles may occur.  Suppose that we have a system of imprimitivity, giving rise, for example, to $\GL(r,q)\wr S$, for some transitive permutation group $S$ on
+$s$ symbols.  The discrete log problem gives rise to a difficulty, in that we
+don't know whether the base group modulo its derived subgroup is the full direct product of
+$s$ copies of $C_\ell$, or is some subgroup of this.  This can be sorted out, I think, by
+using the action of $S$.  For example if $s=2$ then either both copies of $C_\ell$ arise, and
+you have the full wreath product, or you have one of the diagonal subgroups $\{(a,a):a\in C_\ell\}$ or 
+$\{(a,a^{-1}):a\in C_\ell\}$, and it is easy to see which is the case.  In fact the case $s=2$ is
+unrealistic, in that the determinant of the whole group will have been taken earlier, so when we
+get down to the wreath product we will be in the $(a,a^{-1})$ case.  For larger $s$ there is more to be done.
+
+In any case we have a node whose universal group is $C_\ell^k$, elements being represented by
+$k$-tuples of field elements of order $\ell$, but given as polynomials in some primitive element
+(additive form) rather than as powers of a primitive element (multiplicative form).  So we can perform
+the black box operations of multiplication, division, and testing for the identity, but
+explicit membership is slow.
+
+At some point we need to determine the rank of this $\ell$-group.  Using tricks such as those
+above may help; and if they prove that the rank is 1 (which may be obvious) we don't need
+discrete logs at all.
+
+The critical point is to avoid the use of discrete logs to construct the rest of the composition tree.
+This reduces their use to a minimum.
+
+We use explicit membership in a right node to construct random elements in the left node.  If we have
+a node whose right child is a node of type elementary abelian, with
+$\ell$ as the prime, we construct a random element of the left node by taking a random 
+element of the derived group of the parent node, and multiplying it by the $\ell$-th power of
+a random element of the parent node.  This can be used both for mandarins and workers.  It works
+because the left child of the parent node is known not to map onto $C_\ell$.
+
+I think that the following simple recipe works.
+
+Whenever we are looking at a node that acts completely reducibly (no $O_p$), look at the determinant
+of its restriction to the various irreducible blocks, increasing the field first where possible.  If any of these determinants involve a large prime $\ell$, map to a
+node of type elementary abelian, with one parameter the number of blocks whose determinants 
+involve $\ell$, and the other $\ell$ itself.  Now taking determinants and powering (to kill other primes)
+gives the required homomorphism onto this node.
+
+Now you can navigate round this node rapidly, and at some date determine (using discrete logs if
+need be) what the actual rank is.
+
+\bye

@@ -1,0 +1,479 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Creation of Vector Spaces and  Arithmetic with Vectors</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text283.htm">[Next]</A><A  HREF = "text281.htm">[Prev]</A> <A  HREF = "text283.htm">[Right]</A> <A  HREF = "text281.htm">[Left]</A> <A  HREF = "text280.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "2578">Creation of Vector Spaces and  Arithmetic with Vectors</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text282.htm#2579">Construction of a Vector Space</A>
+<LI> <A  HREF = "text282.htm#2586">Construction of a Vector Space with Inner Product Matrix</A>
+<LI> <A  HREF = "text282.htm#2588">Construction of a Vector</A>
+<LI> <A  HREF = "text282.htm#2596">Deconstruction of a Vector</A>
+<LI> <A  HREF = "text282.htm#2598">Arithmetic with Vectors</A>
+<LI> <A  HREF = "text282.htm#2619">Indexing Vectors and Matrices</A>
+</UL>
+<H4><A NAME = "2579">Construction of a Vector Space</A></H4>
+
+
+
+<H5><A NAME = "2580">VectorSpace(K, n) : Fld, RngIntElt -&gt; ModTupFld</A></H5>
+<H5>KSpace(K, n) : Fld, RngIntElt -&gt; ModTupFld</H5>
+<BLOCKQUOTE>
+Given a field K and a non-negative integer n, create the n-dimensional
+vector space V = K<sup>(n)</sup>, consisting of all n-tuples over K. The vector 
+space is created with respect to the standard basis, e<sub>1</sub>, ..., e<sub>n</sub>,
+where e<sub>i</sub> (i = 1, ..., n) is the vector containing a 1 in the 
+i-th position and zeros elsewhere.  
+<P>
+Use of the functions <TT>VectorSpace</TT> and <TT>KSpace</TT> ensures that 
+subspaces of V will be presented in embedded form.
+</BLOCKQUOTE>
+<H5><A NAME = "2581">KModule(K, n) : Fld, RngIntElt -&gt; ModFld</A></H5>
+<BLOCKQUOTE>
+Given a field K and a non-negative integer n, create the n-dimensional
+vector space V = K<sup>(n)</sup>, consisting of all n-tuples over K. The vector 
+space is created with respect to the standard basis, e<sub>1</sub>, ..., e<sub>n</sub>,
+where e<sub>i</sub> (i = 1, ..., n) is the vector containing a 1 in the 
+i-th position and zeros elsewhere.  
+<P>
+Use of the function <TT>KModule</TT> ensures that subspaces of V will be 
+presented in reduced form. In all other respects, a vector space created
+by this function is identical to one created by <TT>KSpace</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "2582">KMatrixSpace(K, m, n) : Fld, RngIntElt, RngIntElt -&gt; ModMatFld</A></H5>
+<BLOCKQUOTE>
+Given a field K and integers m and n greater than one, create
+the vector space K<sup>(m x n)</sup>, consisting of all m x n matrices
+over K. The vector space is created with the standard basis,
+{E<sub>ij</sub>  |  i = 1 ..., m, j = 1 ..., n}, where E<sub>ij</sub>
+is the matrix having a 1 in the (i, j)-th position and zeros
+elsewhere.
+<P>
+Note that for a matrix space, subspaces will always be presented in embedded 
+form, i.e. there is no reduced mode available for matrix spaces.
+</BLOCKQUOTE>
+<H5><A NAME = "2583">Hom(V, W) : ModTupFld, ModTupFld -&gt; ModMatFld</A></H5>
+<BLOCKQUOTE>
+If V is the vector space K<sup>(m)</sup> and W is the vector space K<sup>(n)</sup>, 
+create the matrix space Hom<sub>K</sub>(V, W) as the vector space 
+K<sup>(m x n)</sup>, represented as the set of all m x n matrices
+over K. The vector space is created with the standard basis,
+{E<sub>ij</sub>  |  i = 1 ..., m, j = 1 ..., n}, where E<sub>ij</sub>
+is the matrix having a 1 in the (i, j)-th position and zeros
+elsewhere.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2584">Example <TT>ModFld_CreateQ6 (H28E1)</TT></A></H3>
+We construct the vector space V consisting of 6-tuples over 
+the rational field.
+<P>
+<P>
+<PRE>
+&gt; Q := RationalField();
+&gt; V := VectorSpace(Q, 6); 
+&gt; V;
+Vector space of dimension 6 over Rational Field
+</PRE>
+<HR>
+<H3><A NAME = "2585">Example <TT>ModFld_CreateK35 (H28E2)</TT></A></H3>
+We construct the matrix space M consisting of  3 x 5 
+matrices over the field Q(Sqrt(5)).
+<P>
+<P>
+<PRE>
+&gt; K&lt;w&gt; := QuadraticField(5);
+&gt; V := KMatrixSpace(K, 3, 5); 
+&gt; V;
+Full Vector Space of 3 by 5 matrices over Quadratic Field Q(w)
+</PRE>
+<HR>
+<H4><A NAME = "2586">Construction of a Vector Space with Inner Product Matrix</A></H4>
+
+<P>
+<P>
+
+
+<H5><A NAME = "2587">VectorSpace(K, n, F) : Fld, RngIntElt, Mtrx -&gt; ModTupFld</A></H5>
+<H5>KSpace(K, n, F) : Fld, RngIntElt, Mtrx -&gt; ModTupFld</H5>
+<BLOCKQUOTE>
+Given a field K, a non-negative integer n and a square n x n
+symmetric matrix F, create the n-dimensional
+vector space V = K<sup>(n)</sup> (in embedded form), with inner product
+matrix F.
+This is the same as <TT>VectorSpace(K, n)</TT>, except that the
+functions <TT>Norm</TT> and <TT>InnerProduct</TT> (see below) will
+be with respect to the inner product matrix F.
+</BLOCKQUOTE>
+<H4><A NAME = "2588">Construction of a Vector</A></H4>
+
+
+
+<H5><A NAME = "2589">elt&lt;V | L&gt; : ModTupFld, List -&gt; ModTupFldElt</A></H5>
+<BLOCKQUOTE>
+<DL COMPACT class='compact'>
+<DT>(1)</DT><DD>Suppose V is a subspace of the vector space K<sup>(n)</sup>. Given 
+elements a<sub>1</sub>, ..., a<sub>n</sub> belonging to K, construct the vector 
+v = (a<sub>1</sub>, ..., a<sub>n</sub>) as a vector of V. Note that if v is
+not an element of V, an error will result.  
+<P>
+<DT>(2)</DT><DD>Suppose V is a subspace of the matrix space K<sup>(m x n)</sup>. 
+Given elements a<sub>1</sub>, ..., a<sub>mn</sub> belonging to K, construct the matrix 
+m = (a<sub>1</sub>, ..., a<sub>mn</sub>) as an element of V. Note that if m is
+not an element of V, an error will result.  </DL>
+</BLOCKQUOTE>
+<H5><A NAME = "2590">V ! Q : ModTupFld, [RngElt] -&gt; ModTupFldElt</A></H5>
+<BLOCKQUOTE>
+<DL COMPACT class='compact'>
+<DT>(1)</DT><DD>Suppose V is a subspace of the vector space K<sup>(n)</sup>. Given 
+elements a<sub>1</sub>, ..., a<sub>n</sub> belonging to K, construct the vector 
+v = (a<sub>1</sub>, ..., a<sub>n</sub>) as a vector of V. Note that if v is
+not an element of V, an error will result.  
+<P>
+<DT>(2)</DT><DD>Suppose V is a subspace of the matrix space K<sup>(m x n)</sup>. 
+Given elements a<sub>1</sub>, ..., a<sub>mn</sub> belonging to K, construct the matrix 
+m = (a<sub>1</sub>, ..., a<sub>mn</sub>) as an element of V. Note that if m is
+not an element of V, an error will result.  </DL>
+</BLOCKQUOTE>
+<H5><A NAME = "2591">CharacteristicVector(V, S) : ModTupFld, { RngElt } -&gt; ModTupFldElt</A></H5>
+<BLOCKQUOTE>
+Given a subspace V of the vector space K<sup>(n)</sup> together with
+a set S of integers lying in the interval [1, n], return the 
+characteristic number of S as a vector of V.
+</BLOCKQUOTE>
+<H5><A NAME = "2592">V ! 0 : ModTupFld, RngIntElt -&gt; ModTupFldElt</A></H5>
+<H5>Zero(V) : ModTupFld -&gt; ModTupFldElt</H5>
+<BLOCKQUOTE>
+The zero element for the vector space V.
+</BLOCKQUOTE>
+<H5><A NAME = "2593">Random(V) : ModTupFld -&gt; ModTupFldElt</A></H5>
+<BLOCKQUOTE>
+Given a vector space V defined over a finite field, 
+return a random vector.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2594">Example <TT>ModFld_Vectors (H28E3)</TT></A></H3>
+We create the 5-dimensional vector space V over GF(4) and
+define the vector u = (1, w, 1 + w, 0, 0), where w is a primitive element of
+GF(4).
+<P>
+<P>
+<PRE>
+&gt; K&lt;w&gt; := GaloisField(4);
+&gt; V    := VectorSpace(K, 5);
+&gt; u    := V ! [1, w, 1+w, 0, 0];
+&gt; u;
+(1 w w + 1 0 0)
+&gt; zero := V ! 0;
+&gt; zero;
+(0 0 0 0 0)
+r := Random(V);
+(1 0 w 1 w + 1)
+</PRE>
+<HR>
+<H3><A NAME = "2595">Example <TT>ModFld_Matrices (H28E4)</TT></A></H3>
+We create an element belonging to the space of 3 x 4 
+matrices over the number field Q(w), where w is a root of x<sup>7</sup> - 7x + 3.
+<P>
+<P>
+<P>
+<PRE>
+&gt; R&lt;x&gt; := PolynomialRing(RationalField());
+&gt; L&lt;w&gt; := NumberField(x^7 - 7*x + 3);
+&gt; L34 := KMatrixSpace(L, 3, 4);
+&gt; a := L34 ! [ 1, w, 0, -w, 0, 1+w, 2, -w^3, w-w^3, 2*w, 1/3, 1 ];
+&gt; a;
+[1    w    0    -1 * w]
+[0    w + 1    2    -1 * w^3]
+[-1 * w^3 + w    2 * w    1/3    1]
+</PRE>
+<HR>
+<H4><A NAME = "2596">Deconstruction of a Vector</A></H4>
+
+
+
+<H5><A NAME = "2597">ElementToSequence(u) : ModTupFldElt -&gt; [RngElt]</A></H5>
+<H5>Eltseq(u) : ModTupFldElt -&gt; [RngElt]</H5>
+<BLOCKQUOTE>
+Given an element u belonging to the K-vector space V, return u in 
+the form of a sequence Q of elements of V. Thus, if u is an 
+element of K<sup>(n)</sup>, then Q[i] = u[i], 1 &le;i &le;n.
+</BLOCKQUOTE>
+<H4><A NAME = "2598">Arithmetic with Vectors</A></H4>
+
+<P>
+<P>
+For the following operations the vectors u and v must belong to
+the same vector space i.e. the same tuple space K<sup>(n)</sup> or the 
+same matrix space K<sup>(m x n)</sup>.  The scalar a must belong to 
+the field K.
+
+
+<H5><A NAME = "2599">u + v : ModTupFldElt, ModTupFldElt -&gt; ModTupFldElt</A></H5>
+<BLOCKQUOTE>
+Sum of the vectors u and v, where u and v lie in the same 
+vector space.
+</BLOCKQUOTE>
+<H5><A NAME = "2600">- u : ModTupFldElt -&gt; ModTupFldElt</A></H5>
+<BLOCKQUOTE>
+Additive inverse of the vector u.
+</BLOCKQUOTE>
+<H5><A NAME = "2601">u - v : ModTupFldElt, ModTupFldElt -&gt; ModTupFldElt</A></H5>
+<BLOCKQUOTE>
+Difference of the vectors u and v, where u and v lie in the 
+same vector space.
+</BLOCKQUOTE>
+<H5><A NAME = "2602">x * u : FldElt, ModTupFldElt -&gt; ModTupFldElt</A></H5>
+<H5>u * x : ModTupFldElt, FldElt -&gt; ModTupFldElt</H5>
+<BLOCKQUOTE>
+The scalar product of the vector u belonging to the K-vector space
+and the field element x belonging to K.
+</BLOCKQUOTE>
+<H5><A NAME = "2603">u / x : ModTupFldElt, FldElt -&gt; ModTupFldElt</A></H5>
+<BLOCKQUOTE>
+The scalar product of the vector u belonging to the K-vector space
+and the field element 1/x belonging to K where x is non-zero.
+</BLOCKQUOTE>
+<H5><A NAME = "2604">NumberOfColumns(u) : ModTupFldElt -&gt; RngIntElt</A></H5>
+<H5>Ncols(u) : ModTupFldElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The number of columns in the vector u.
+</BLOCKQUOTE>
+<H5><A NAME = "2605">Depth(u) : ModTupRngElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The index of the first non-zero entry of the vector u (0 if none such).
+</BLOCKQUOTE>
+<H5><A NAME = "2606">(u, v) : ModTupFldElt, ModTupFldElt -&gt; FldElt</A></H5>
+<H5>InnerProduct(u, v) : ModTupFldElt, ModTupFldElt -&gt; FldElt</H5>
+<BLOCKQUOTE>
+Return the inner product of the vectors u and v with respect to the inner
+product defined on the space.  If an inner product matrix F is given
+when the space is created, then this is defined to be
+u.F.v<sup>tr</sup>.  Otherwise, this is simply u.v<sup>tr</sup>.
+</BLOCKQUOTE>
+<H5><A NAME = "2607">IsZero(u) : ModElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> iff the vector u belonging to a vector space is the zero element.
+</BLOCKQUOTE>
+<H5><A NAME = "2608">Norm(u) : ModTupFldElt -&gt; FldElt</A></H5>
+<BLOCKQUOTE>
+Return the norm product of the vector u with respect to the inner
+product defined on the space.  If an inner product matrix F is given
+when the space is created, then this is defined to be
+u.F.u<sup>tr</sup>.  Otherwise, this is simply u.u<sup>tr</sup>.
+</BLOCKQUOTE>
+<H5><A NAME = "2609">Normalise(u) : ModTupFldElt -&gt; ModTupFldElt</A></H5>
+<H5>Normalize(u) : ModTupFldElt -&gt; ModTupFldElt</H5>
+<BLOCKQUOTE>
+Given an element u, not the zero element, belonging to the K-vector 
+space V, return (1/a) * u, where a is the first non-zero 
+component of u. If u is the zero vector, it is returned.
+The net effect is that <TT>Normalize(u)</TT> always 
+returns a vector v in the subspace generated by u, such that the 
+first non-zero component of v (if existent) is K!1.
+</BLOCKQUOTE>
+<H5><A NAME = "2610">Rotate(u, k) : ModTupFldElt, RngIntElt -&gt; ModTupFldElt</A></H5>
+<BLOCKQUOTE>
+Given a vector u, return the vector obtained from u by 
+rotating by k coordinate positions.
+</BLOCKQUOTE>
+<H5><A NAME = "2611">Rotate(~u, k) : ModTupFldElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Given a vector u, destructively rotate u by k coordinate positions.
+</BLOCKQUOTE>
+<H5><A NAME = "2612">NumberOfRows(u) : ModTupFldElt -&gt; RngIntElt</A></H5>
+<H5>Nrows(u) : ModTupFldElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The number of rows in the vector u (1 of course; included for completeness).
+</BLOCKQUOTE>
+<H5><A NAME = "2613">Support(u) : ModTupFldElt -&gt; { RngElt }</A></H5>
+<BLOCKQUOTE>
+A set of integers giving the positions of the non-zero components 
+of the vector u.
+</BLOCKQUOTE>
+<H5><A NAME = "2614">TensorProduct(u, v) : ModTupFldElt, ModTupFldElt -&gt; FldElt</A></H5>
+<BLOCKQUOTE>
+The tensor (Kronecker) product of the vectors u and v.  The resulting
+vector has degree equal to the product of the degrees of u and v.
+</BLOCKQUOTE>
+<H5><A NAME = "2615">Trace(u, F) : ModTupFldElt, Fld -&gt; ModTupFldElt</A></H5>
+<H5>Trace(u) : ModTupFldElt -&gt; ModTupFldElt</H5>
+<BLOCKQUOTE>
+Given a vector belonging to the space K<sup>(n)</sup>, and a subfield
+F of K, return the vector obtained by replacing each component
+of u by its trace over the subfield F. If F is the prime field
+of K, it may be omitted.
+</BLOCKQUOTE>
+<H5><A NAME = "2616">Weight(u) : ModTupFldElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The number of non-zero components of the vector u.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2617">Example <TT>ModFld_Arithmetic (H28E5)</TT></A></H3>
+We illustrate the use of the arithmetic operators for module 
+elements by applying them to elements of the 4-dimensional vector space 
+over the field Q(w), where w is an 8-th root of unity.
+<P>
+<P>
+<PRE>
+&gt; K&lt;w&gt; := CyclotomicField(8);
+&gt; V := VectorSpace(K, 4);
+&gt; x := V ! [ w, w^ 2, w^ 4, 0];
+&gt; y := V ! [1, w, w^ 2, w^ 4];
+&gt; x + y;
+((1 + w) (w + w^2) (-1 + w^2) -1)
+&gt; -x;
+((-w) (-w^2)         1         0)
+&gt; x - y;
+((-1 + w) (-w + w^2) (-1 - w^2) 1)
+&gt; w * x;
+(  (w^2) (w^3)  (-w)          0)
+&gt; y * w^ -4;
+(       -1 (-w) (-w^2)         1)
+&gt; Normalize(x);
+(         1   (w) (w^3)          0)
+&gt; InnerProduct(x, y);
+(w - w^2 + w^3)
+&gt; z := V ! [1, 0, w, 0 ]; 
+&gt; z;
+(       1        0 (w)        0)
+&gt; Support(z);
+{ 1, 3 }
+</PRE>
+<HR>
+<H3><A NAME = "2618">Example <TT>ModFld_InnerProduct (H28E6)</TT></A></H3>
+We illustrate how one can define a non-trivial inner product on
+a space.
+<P>
+<P>
+<PRE>
+&gt; Q := RationalField();
+&gt; F := SymmetricMatrix(Q, [1, 0,2, 0,0,3, 1,2,3,4]);
+&gt; F;
+[1 0 0 1]
+[0 2 0 2]
+[0 0 3 3]
+[1 2 3 4]
+&gt; V := VectorSpace(Q, 4, F);
+&gt; V;
+Full Vector space of degree 4 over Rational Field
+Inner Product Matrix:
+[1 0 0 1]
+[0 2 0 2]
+[0 0 3 3]
+[1 2 3 4]
+&gt; v := V![1,0,0,0];
+&gt; Norm(v);
+1
+&gt; w := V![0,1,0,0];
+&gt; Norm(w);
+2
+&gt; InnerProduct(v, w);
+0
+&gt; z := V![0,0,0,1];
+&gt; Norm(z);
+4
+&gt; InnerProduct(v, z);
+1
+&gt; InnerProduct(w, z);
+2
+</PRE>
+<HR>
+<H4><A NAME = "2619">Indexing Vectors and Matrices</A></H4>
+
+<P>
+<P>
+The indexing operations have a different meaning depending upon whether
+they are applied to a tuple space or a matrix space.
+
+
+<H5><A NAME = "2620">u[i] : ModTupFldElt, RngIntElt -&gt; RngElt</A></H5>
+<H5>u[i] : ModTupFldElt, RngIntElt -&gt; ModTupFldElt</H5>
+<H5>u[i, j] : ModTupFldElt, RngIntElt, RngIntElt -&gt; ModTupFldElt</H5>
+<BLOCKQUOTE>
+Given a vector u belonging to a K-vector space V, the result of 
+this operation depends upon whether V is a tuple or matrix space. 
+<P>
+If V is a subspace of K<sup>(n)</sup>, and i, 1 &le;i&le;n, is a positive 
+integer, the i-th component of the vector u is returned (as an element 
+of the field K). 
+<P>
+If V is a subspace of K<sup>(m x n)</sup>, and i, 1 &le;i&le;m, is a 
+positive integer, u[i] will return the i-th row of the matrix u (as an 
+element of the vector space K<sup>(n)</sup>). Similarly, if i and j, 
+1 &le;i&le;m, 1 &le;j&le;n, are positive integers, u[i, j] will 
+return the (i, j)-th component of the matrix u (as an element of K).
+</BLOCKQUOTE>
+<H5><A NAME = "2621">u[i] : = x : ModTupFldElt, RngIntElt, RngElt -&gt;  ModTupFldElt</A></H5>
+<H5>u[i] : = x : ModTupFldElt, RngIntElt, ModTupFldElt -&gt;  ModTupFldElt</H5>
+<H5>u[i, j] : = x : ModTupFldElt, RngIntElt, RngIntElt, ModTupFldElt -&gt;  ModTupFldElt</H5>
+<BLOCKQUOTE>
+Given a vector u belonging to a K-vector space V, and an element x 
+of K, the result of this operation depends upon whether V is a tuple or 
+matrix space. 
+<P>
+If V is a subspace of K<sup>(n)</sup>, and i, 1 &le;i&le;n, is a positive 
+integer, the i-th component of the vector u is redefined to be x.
+<P>
+If V is a subspace of K<sup>(m x n)</sup> and 1 &le;i&le;m is a 
+positive integer and x is an element of K<sup>(n)</sup>, <TT>u[i] := x</TT> will redefine 
+the i-th row of the matrix u to be the vector x, where x must be an 
+element of K<sup>(n)</sup>. Similarly, if 1 &le;i&le;m, 1 &le;j&le;n, are 
+positive integers, <TT>u[i, j] := x</TT> will redefine the (i, j)-th component 
+of the matrix u to be x, where x must be an element of K.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2622">Example <TT>ModFld_Indexing (H28E7)</TT></A></H3>
+We illustrate the use of the indexing operators for vector space 
+elements by applying them to a 3-dimensional tuple space and a 2 x 3
+matrix space over the field Q(w), where w is an 8-th root of unity.
+<P>
+<P>
+<P>
+<PRE>
+&gt; K&lt;w&gt; := CyclotomicField(8);
+&gt; V := VectorSpace(K, 3);
+&gt; u := V ! [ 1 + w, w^ 2, w^ 4];
+&gt; u;
+((1 + w)     (w^2)           -1)
+&gt; u[3];
+-1
+&gt; u[3] := 1 + w - w^7;
+&gt; u;
+((1 + w) (w^2) (1 + w + w^3))
+&gt; // We now demonstrate indexing a matrix space
+&gt; W := KMatrixSpace(K, 2, 3);
+&gt; l := W ! [ 1 - w, 1 + w, 1 + w + w^2, 0, 1 - w^7, 1 - w^3 + w^6 ];
+&gt; l;
+[(1 - w) (1 + w) (1 + w + w^2)]
+[0 (1 + w^3) (1 - w^2 - w^3)]
+&gt; l[2];
+(0 (1 + w^3) (1 - w^2 - w^3))
+&gt; l[2,2];
+(1 + w^3)
+&gt; m := l[2];
+&gt; m;
+(0 (1 + w^3) (1 - w^2 - w^3))
+&gt; l[2] := u;
+&gt; l;
+[(1 - w) (1 + w) (1 + w + w^2)]
+[(1 + w) (w^2) -1]
+&gt; l[2, 3] := 1 + w - w^7;
+&gt; l;
+[(1 - w) (1 + w) (1 + w + w^2)]
+[(1 + w) (w^2) (1 + w + w^3)]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text283.htm">[Next]</A><A  HREF = "text281.htm">[Prev]</A> <A  HREF = "text283.htm">[Right]</A> <A  HREF = "text281.htm">[Left]</A> <A  HREF = "text280.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

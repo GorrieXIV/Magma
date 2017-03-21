@@ -1,0 +1,41 @@
+"Source: Text/RepThy/ModGrp.text";
+"Line: 123";
+"Date: Tue Jun  7 22:27:15 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/RepThy/ModGrp.text, line: 123
+// Example: H96E2 ()
+print "Example: H96E2";
+ei := GetEchoInput();
+SetEchoInput(true);
+MakeMod := function(A, G)
+    // Make G-module M of G acting on A by conjugation
+    k := CoefficientRing(A);
+    d := Dimension(A);
+    S := RMatrixSpace(A, k);
+    return GModule(
+        G,
+        [
+            MatrixAlgebra(k, d) |
+            &cat[
+                Coordinates(S, S.j^g): j in [1 .. d]
+            ] where g is G.i: i in [1 .. Ngens(G)]
+        ]
+    );
+end function;
+MakeGroup := function(A)
+    // Make group G from upper-triangular matrix algebra A
+    k := CoefficientRing(A);
+    n := Degree(A);
+    return MatrixGroup<n, k | [Eltseq(1 + A.i): i in [1 .. Ngens(A)]]>;
+end function;
+k := GF(3);
+n := 4;
+M := MatrixAlgebra(k, n);
+A := sub<M |
+     [0,2,1,1, 0,0,1,1, 0,0,0,1, 0,0,0,0],
+     [0,1,0,0, 0,0,2,2, 0,0,0,1, 0,0,0,0]>;
+G := MakeGroup(A);
+G;
+M := MakeMod(A, G);
+M: Maximal;
+SetEchoInput(ei);

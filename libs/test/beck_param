@@ -1,0 +1,133 @@
+// Examples: Resolution, classification and parametrization of surfaces
+//  - adapted from a test file of Tobias Beck
+// ====================================================================
+
+Q := Rationals();
+P<x,y,z,w> := PolynomialRing(Q, 4, "grevlex");
+Pr := Proj(P);
+
+// Some resolution tests:
+F1 := (y^2-w*z)*(w^2-y*x)*z+x*(x*z-y*w)^2;
+F2 := (y^2-w*z)*(w^2-y*x)+(x*z-y*w)^2;
+F3 := w^3*y^2*z+(x*z+w^2)^3;
+
+// Normal mode
+time n :=  #ResolveSingularSurface(Surface(Pr,F1) : AdjComp := false);
+assert n eq 62;
+time n :=  #ResolveSingularSurface(Surface(Pr,F2) : AdjComp := false);
+assert n eq 38;
+time n := #ResolveSingularSurface(Surface(Pr,F3) : AdjComp := false);
+assert n eq 26;
+
+// Fast mode for adjoint computation
+time n := #ResolveSingularSurface(Surface(Pr,F1) : AdjComp := true);
+assert n eq 14;
+time n := #ResolveSingularSurface(Surface(Pr,F2) : AdjComp := true);
+assert n eq 3;
+time n := #ResolveSingularSurface(Surface(Pr,F3) : AdjComp := true);
+assert n eq 18;
+
+// A parametrized example of adjoint computation
+l := 2; h := 3;
+for n := l to h do
+	f := Surface(Pr,z^(2*n-1)+y^n*w^(n-1)+x^2*w^(2*n-3));
+	fd := ResolveSingularSurface(f : AdjComp := true, UseFormalDesing := true);
+	for i := 0 to 2*n do
+		ha := HomAdjoints(1, i, f : UseFormalDesing := true);
+	end for;
+end for;
+
+
+// Examples from Josef's thesis
+F1 := Surface(Pr,(y^2-w*z)*(w^2-y*x)*z+x*(x*z-y*w)^2);
+F2 := Surface(Pr,(y^2-w*z)*(w^2-y*x)+(x*z-y*w)^2);
+F3 := Surface(Pr,w^3*y^2*z+(x*z+w^2)^3);
+
+// timed classification:
+time _,_,typ := ClassifyRationalSurface(F1);
+assert typ eq "Conic bundle";
+
+time _,_,typ := ClassifyRationalSurface(F2);
+assert typ eq "Rational scroll";
+
+time _,_,typ := ClassifyRationalSurface(F3);
+assert typ eq "Del Pezzo degree 6";
+
+
+// Examples from Josef's article in JSC
+// ------------------------------------
+// Example 2.1
+f1 := Surface(Pr,x^2+y^2+z^2-w^2);
+// Example 3.3
+f2 := Surface(Pr,(x^4+z^4)*w^2 + (x*y+z^2)^3);
+// Example 3.4
+f3 := Surface(Pr,x^2*y^2+8*x^3*y+4*x^4+x*y*z^2-x^2*z^2-y^2*w^2-7*x*y*w^2+8*x^2*w^2);
+// Example 3.8
+f4 := Surface(Pr,x^4+y^4-z^4-w^4);
+// Example 4.1
+f5 := Surface(Pr,x^4+y^4-z^2*w^2);
+// Example 5.1
+f6 := Surface(Pr,x^2*w^3+y^3*w^2+z^5);
+
+// timed classification:
+time _,_,typ := ClassifyRationalSurface(f1);
+assert typ eq "Quadric surface";
+
+time _,_,typ := ClassifyRationalSurface(f2);
+assert typ eq "Rational scroll";
+
+time _,_,typ := ClassifyRationalSurface(f3);
+assert typ eq "Conic bundle";
+
+time _,_,typ := ClassifyRationalSurface(f4);
+assert typ eq "Not rational";
+
+time _,_,typ := ClassifyRationalSurface(f5);
+assert typ eq "Not rational";
+
+time _,_,typ := ClassifyRationalSurface(f6);
+assert typ eq "Del Pezzo degree 1";
+
+
+// Random examples
+P<s,t,u> := PolynomialRing(Q, 3, "grevlex");
+S<x,y,z,w> := PolynomialRing(Q, 4, "grevlex");
+
+// A set of testcases of randomly generated rational surfaces of given type
+testcases := [<"P^2",  y + z - w>, //type 1 
+  <"Quadric surface",  8*x^2 - 12*x*y + 17*x*z + 3*y*z + 2*z^2 + 30*x*w - 9*y*w + 15*z*w + 18*w^2 >,
+	//type 2
+  <"Quadric surface",  225*x^2 - 105*x*y - 17*y^2 - 375*x*z + 245*y*z + 100*z^2 - 315*x*w + 33*y*w 
+	+ 60*z*w + 252*w^2>, //type 2
+  <"Rational scroll", 27*x^3 + 54*x^2*y + 27*x*y^2 + 117*x^2*z + 126*x*y*z + 9*y^2*z + 147*x*z^2 +
+    54*y*z^2 + 61*z^3 - 126*x^2*w - 90*x*y*w + 36*y^2*w - 300*x*z*w - 36*y*z*w - 
+    180*z^2*w + 147*x*w^2 - 36*y*w^2 + 159*z*w^2 - 32*w^3>, //type 3a
+  <"Rational scroll", 16*x^3*y + 48*x^2*y^2 + 48*x*y^3 + 16*y^4 - 24*x^3*z - 96*x^2*y*z - 
+    168*x*y^2*z - 96*y^3*z + 72*x^2*z^2 + 324*x*y*z^2 + 216*y^2*z^2 - 270*x*z^3 - 
+    216*y*z^3 + 81*z^4 - 16*x^3*w - 48*x^2*y*w - 48*x*y^2*w - 16*y^3*w + 168*x^2*z*w +
+    432*x*y*z*w + 120*y^2*z*w - 612*x*z^2*w - 108*y*z^2*w - 54*z^3*w + 144*x^2*w^2 +
+    144*x*y*w^2 - 264*x*z*w^2 + 240*y*z*w^2 - 468*z^2*w^2 + 144*x*w^3 + 144*y*w^3 - 
+    360*z*w^3>,//type 3a
+  <"P^2", x^4 - 4*x^3*y + 5*x^2*y^2 - 2*x*y^3 + y^4 + 3*x^3*z - 7*x^2*y*z + 5*x*y^2*z - 
+    2*y^3*z + 3*x^2*z^2 - 3*x*y*z^2 + y^2*z^2 + x^3*w - 3*x^2*y*w + 3*x*y^2*w - 
+    4*y^3*w - x^2*z*w + x*y*z*w + 2*y^2*z*w - 3*x*z^2*w + y*z^2*w + x^2*w^2 - 
+    2*x*y*w^2 + 4*y^2*w^2 + x*z*w^2 - 2*y*z*w^2 + z^2*w^2 - y*w^3> ]; //type 3b
+
+// try to classify random rational surfaces
+for cs in testcases do
+	printf "Testcase of type %2o: \n", cs[1];
+	printf "f = %o\n", cs[2];
+	time _,_,tp := ClassifyRationalSurface(Surface(Proj(S),cs[2]));
+	assert cs[1] eq tp[1..#cs[1]];
+end for;
+
+// try to parametrize random rational surfaces
+f := testcases[1][2]; f;
+boo, mp := ParametrizeProjectiveSurface(Surface(ProjectiveSpace(S),f), ProjectiveSpace(P));
+assert boo;
+f := testcases[4][2]; f;
+boo, mp := ParametrizeProjectiveSurface(Surface(ProjectiveSpace(S),f), ProjectiveSpace(P));
+assert boo;
+f := testcases[5][2]; f;
+boo, mp := ParametrizeProjectiveSurface(Surface(ProjectiveSpace(S),f), ProjectiveSpace(P));
+assert boo;

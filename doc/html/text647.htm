@@ -1,0 +1,441 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Base and Strong Generating Set</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text648.htm">[Next]</A><A  HREF = "text646.htm">[Prev]</A> <A  HREF = "text648.htm">[Right]</A> <A  HREF = "text646.htm">[Left]</A> <A  HREF = "text629.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "7296">Base and Strong Generating Set</A></H3>
+
+<P>
+<P>
+The key concept for representing a permutation group is that of a <I>base 
+and strong generating set</I> (BSGS). Given a BSGS for a group, its order may be
+deduced immediately.  Brownie, Cannon and Sims (1991) showed that it 
+is practical, in some cases at least, to construct a BSGS for short-base 
+groups having degree up to ten million.
+<P>
+The great majority of functions for computing with permutation groups require
+a BSGS to be present. If one is not known, Magma will attempt to automatically
+compute one. For large degree groups, the computation of a BSGS may be expensive
+and in such cases the user may achieve better performance through directly
+invoking a function which creates a BSGS. For example, if the group order is
+known in advance, it may be supplied to Magma and then a random method for
+computing a BSGS is applied which will use the group order as a termination
+condition.
+<P>
+In the first part of this section we present the elementary functions that
+use a BSGS, while towards the end we describe firstly, functions which allow
+the user to select and control the algorithm employed, and secondly, functions
+which provide access to the BSGS data structures. The material specific to BSGS
+should be omitted on a first reading.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text647.htm#7297">Construction of a Base and Strong Generating Set</A>
+<LI> <A  HREF = "text647.htm#7306">Defining Values for Attributes</A>
+<LI> <A  HREF = "text647.htm#7311">Accessing the Base and Strong  Generating Set</A>
+<LI> <A  HREF = "text647.htm#7327">Working with a Base and Strong Generating Set</A>
+<LI> <A  HREF = "text647.htm#7336">Modifying a Base and Strong Generating Set</A>
+</UL>
+<H4><A NAME = "7297">Construction of a Base and Strong Generating Set</A></H4>
+
+<P>
+<P>
+Computing structural information for a permutation group G requires,
+in most cases, a representation of the set of elements of G. Magma
+represents this set by means of a <I>base and strong generating set</I>,
+or <I>BSGS</I>, for G. Suppose the group G acts on the set &Omega;. A
+<I>base</I> B for G is a sequence of distinct points from &Omega;
+with the property that the identity is the only element of G that
+fixes B pointwise. A base B of length n determines a sequence of
+subgroups G<sup>(i)</sup>, 1 &le;i &le;n + 1, where G<sup>(i)</sup> is the
+stabilizer of the first i - 1 points of B. (In particular, G<sup>(1)</sup>=G
+and G<sup>(n + 1)</sup> is trivial.) Given a base B for G,
+a subset S of G is said to be a <I>strong generating set</I> for G
+(with respect to B)
+if G<sup>(i)</sup> = &lt; S &cap;G<sup>(i)</sup> &gt;, for i = 1, ..., n.
+
+
+<H5><A NAME = "7298">BSGS(G) : GrpPerm -&gt;</A></H5>
+<BLOCKQUOTE>
+The general procedure for constructing a BSGS. This version uses
+the default algorithm choices.
+</BLOCKQUOTE>
+<H5><A NAME = "7299">SimsSchreier(G: parameters) : GrpPerm -&gt;</A></H5>
+
+<PRE>    SV: BoolElt                         Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Construct a base and strong generating set for the group G using
+the standard Schreier-Sims algorithm. If the parameter <TT>SV</TT> is set
+<TT>true</TT> (default) the transversals are stored in the form of Schreier
+vectors. If <TT>SV</TT> is set <TT>false</TT>, then the transversals are stored both
+as lists of permutations and as Schreier vectors. If the base
+attribute has been previously defined for G, a variant of the
+Sims-Schreier algorithm will be employed, in which permutation
+multiplications are replaced by base image calculations wherever
+possible.
+</BLOCKQUOTE>
+<H5><A NAME = "7300">RandomSchreier(G: parameters) : GrpPerm -&gt;</A></H5>
+
+<PRE>    Max: RngIntElt                      Default: 100</PRE>
+
+<PRE>    Run: RngIntElt                      Default: 20</PRE>
+<BLOCKQUOTE>
+Construct a probable base and strong generating set for the group G.
+The strong generators are constructed from a set of randomly chosen
+elements of G.  The expectation is that, if sufficient random elements
+are taken, then, upon termination, the algorithm will have produced a
+BSGS for G. If the attribute Order is defined for G, the random Schreier
+will continue until a BSGS defining a group of the indicated order is
+obtained. In such circumstances this method is the fastest method of
+constructing a base and strong generating set for G. This is particularly
+so for groups of large degree.  If nothing is known about G, the random
+Schreier algorithm  provides a cheap way of obtaining lower bounds on the
+group's order and, in the case of a permutation group, on its degree of
+transitivity.  This parameter has two associated parameters, <TT>Max</TT>
+and <TT>Run</TT>, which take positive integer values. The parameter <TT>Max</TT>
+specifies the number of random elements to be used (default 100). If the
+value of <TT>Run</TT> is n<sub>2</sub>, then the algorithm terminates after n<sub>2</sub>
+consecutive random elements are found to lie in the set defined by the
+current BSGS (default 20). The two limits are independent of one another.
+It should be emphasized that unpredictable results may arise if the programmer
+uses the base and strong generators produced by this algorithm when, in
+fact, it does not constitute a BSGS for G.
+<P>
+If the order of the group is known then construction of a BSGS stops when
+a BSGS of this order is reached.
+</BLOCKQUOTE>
+<H5><A NAME = "7301">ToddCoxeterSchreier(G: parameters) : GrpPerm -&gt;</A></H5>
+<BLOCKQUOTE>
+Construct a BSGS for G using the Todd-Coxeter Schreier algorithm. 
+</BLOCKQUOTE>
+<H5><A NAME = "7302">SolubleSchreier(G: parameters) : GrpPerm -&gt;</A></H5>
+<H5>SolvableSchreier(G: parameters) : GrpPerm -&gt;</H5>
+
+<PRE>    Depth: RngIntElt                    Default: <I>See below</I></PRE>
+<BLOCKQUOTE>
+Construct a base and strong generating set for the soluble permutation
+group G using the algorithm of Sims <A  HREF = "text628.htm#bib_sol-schreier">[Sim90]</A>. The algorithm
+proceeds by recursively constructing the terms of the derived series.
+If G is not soluble then the algorithm will not terminate. In order to
+avoid non-termination, a limit on the number of terms in the normal subgroup
+chain constructed must be prescribed. The user may set this limit as the
+value of the parameter <TT>Depth</TT>. The default value,
+&lceil;1.6  log<sub>2</sub> Degree(G) &rceil;,
+is based on an upper
+limit (due to Dixon) on the length of the derived series of a soluble 
+permutation group.
+This algorithm is often significantly faster than the general Schreier-Sims
+algorithm.
+</BLOCKQUOTE>
+<H5><A NAME = "7303">Verify(G: parameters ) : RngIntElt  -&gt;</A></H5>
+
+<PRE>    Levels: RngIntElt                   Default: 0</PRE>
+
+<PRE>    OrbitLimit: RngIntElt               Default: 4,000</PRE>
+<BLOCKQUOTE>
+Given a permutation group G for which a probable BSGS is stored,
+verify the correctness of the BSGS. If it is not complete, proceed
+to complete it. The two parameters <TT>Levels</TT> and <TT>OrbitLimit</TT>
+define how many levels the Todd-Coxeter-Schreier-Sims
+verifies before switching to the Brownie-Cannon-Sims algorithm.
+If <TT>Levels</TT> is set to n non-zero then n levels are verified by 
+the TCSS algorithm before switching.
+If <TT>Levels</TT> is zero, the switch-over point is determined by
+the value of the parameter <TT>OrbitLimit</TT>. All levels with basic
+orbit length at most <TT>OrbitLimit</TT> are verified using TCSS. When a level is
+encountered with orbit length greater than this, a decision based on 
+expected amount of work to do for
+this level by each algorithm determines what strategy is used for
+this level. Once one level uses the BCS method, all levels from then on
+will use it.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7304">Example <TT>GrpPerm_BSGS (H63E41)</TT></A></H3>
+The Higman-Sims simple group represented on 100 letters is
+generated by two permutations.  To create a base and strong generating
+set for it using the Todd-Coxeter-Schreier algorithm, we can use the
+<TT>ToddCoxeterSchreier</TT> procedure as follows:
+<P>
+<P>
+<PRE>
+&gt; G := sub&lt;Sym(100) |
+&gt;    (2,8,13,17,20,22,7)(3,9,14,18,21,6,12)(4,10,15,19,5,11,16)
+&gt;        (24,77,99,72,64,82,40)(25,92,49,88,28,65,90)(26,41,70,98,91,38,75)
+&gt;        (27,55,43,78,86,87,45)(29,69,59,79,76,35,67)(30,39,42,81,36,57,89)
+&gt;        (31,93,62,44,73,71,50)(32,53,85,60,51,96,83)(33,37,58,46,84,100,56)
+&gt;        (34,94,80,61,97,48,68)(47,95,66,74,52,54,63),
+&gt;    (1,35)(3,81)(4,92)(6,60)(7,59)(8,46)(9,70)(10,91)(11,18)(12,66)(13,55)
+&gt;        (14,85)(15,90)(17,53)(19,45)(20,68)(21,69)(23,84)(24,34)(25,31)(26,32)
+&gt;        (37,39)(38,42)(40,41)(43,44)(49,64)(50,63)(51,52)(54,95)(56,96)(57,100)
+&gt;        (58,97)(61,62)(65,82)(67,83)(71,98)(72,99)(74,77)(76,78)(87,89) &gt;;
+&gt; ToddCoxeterSchreier(G);
+&gt; Order(G);
+44352000
+</PRE>
+<HR>
+<H3><A NAME = "7305">Example <TT>GrpPerm_BSFS-2 (H63E42)</TT></A></H3>
+The simple group of Rudvalis has a permutation representation
+of degree 4060. A generating set for the Rudvalis group, Ru, may be 
+found in the standard Magma database <TT>pergps</TT>, where  it is called
+<TT>ru</TT>.  We use the random Schreier algorithm followed by the <TT>Verify</TT> 
+procedure to produce a base and strong generating set. We increase the
+limits for <TT>RandomSchreier</TT> to increase the probability that a complete 
+base and strong generating set is found. This is done as follows:
+<P>
+<P>
+<PRE>
+&gt; load "ru";
+&gt; RandomSchreier(G : Max := 50, Run := 20);
+&gt; Order(G);
+145926144000
+&gt; Verify(G);
+&gt; Order(G);
+145926144000
+&gt; Base(G);
+[ 1, 2, 3, 4 ]
+&gt; BasicOrbitLengths(G);
+[ 4060, 2304, 780, 20 ]
+</PRE>
+<HR>
+<H4><A NAME = "7306">Defining Values for Attributes</A></H4>
+
+<P>
+<P>
+If the order of a permutation group is known in advance, the construction
+of a base and strong generating set can be greatly speeded up by taking 
+advantage of this knowledge. The <TT>AssertAttribute</TT> constructor may be
+used to communicate this and other useful information to Magma.
+
+
+<H5><A NAME = "7307">AssertAttribute(G, "Order", n) : GrpPerm, MonStgElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Define the order attribute for the permutation group G.
+</BLOCKQUOTE>
+<H5><A NAME = "7308">AssertAttribute(G, "Order", Q) : GrpPerm, MonStgElt, [&lt;RngIntElt, RngIntElt&gt;] -&gt;</A></H5>
+<BLOCKQUOTE>
+Define the (factored) order of the permutation group G to be Q.
+</BLOCKQUOTE>
+<H5><A NAME = "7309">[Future release] AssertAttribute(G, "BSGS", S) : GrpPerm, MonStgElt, GrpPermBSGS -&gt;</A></H5>
+<BLOCKQUOTE>
+Define the base and strong generating set structure S to be the BSGS
+for G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7310">Example <TT>GrpPerm_RandomSchreier (H63E43)</TT></A></H3>
+The ability to set the order provides a short cut when
+constructing a BSGS. If the order attribute is set and the random
+Schreier-Sims algorithm applied, it will run until a BSGS for a 
+group of the designated order has been constructed. We illustrate
+this in the case of the wreath product, with product action, of 
+Sym(42) with Alt(8).
+<P>
+<P>
+<PRE>
+&gt; G := WreathProduct(Sym(42), Alt(8));
+&gt; AssertAttribute(G, "Order", Factorial(42)^8 * (Factorial(8) div 2));
+&gt; RandomSchreier(G);
+&gt; Order(G);
+3061373016723610165203127456307122124535329726578404327\
+5428034073188691030999256052666924787022950130890371891\
+0525089665194187638747340938406861181340150889944654752\
+7025207255845130274434558221633869210079882581975069742\
+1672055466250914291002570275499685768646240411055766098\
+2370739110690651875215676663235534126138270781440155683\
+9906515353600000000000000000000000000000000000000000000\
+00000000000000000000000000000
+</PRE>
+<HR>
+<H4><A NAME = "7311">Accessing the Base and Strong  Generating Set</A></H4>
+
+
+
+<H5><A NAME = "7312">Base(G) : GrpPerm -&gt; [Elt]</A></H5>
+<BLOCKQUOTE>
+A base for the permutation group G. The base is returned as a
+sequence of points of its natural G-set. If a base is not known, 
+one will be constructed.
+</BLOCKQUOTE>
+<H5><A NAME = "7313">BasePoint(G, i) : GrpPerm, RngIntElt -&gt; Elt</A></H5>
+<BLOCKQUOTE>
+The i-th base point for the permutation group G. A base
+and strong generating set must be known for G.
+</BLOCKQUOTE>
+<H5><A NAME = "7314">BasicOrbit(G, i) : GrpPerm, RngIntElt -&gt; SetIndx</A></H5>
+<BLOCKQUOTE>
+The basic orbit at level i as defined by the current base for the
+permutation group G. This function assumes that a BSGS is known for
+G.
+</BLOCKQUOTE>
+<H5><A NAME = "7315">BasicOrbits(G) : GrpPerm -&gt; [SetIndx]</A></H5>
+<BLOCKQUOTE>
+The basic orbits as defined by the current base for the permutation
+group G. This function assumes that a BSGS is known for G.
+The orbits are returned as a sequence of indexed sets.
+</BLOCKQUOTE>
+<H5><A NAME = "7316">BasicOrbitLength(G, i) : GrpPerm, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The length of the basic orbit at level i as defined by the current
+base for the permutation group G. This function assumes that a BSGS
+is known for G.
+</BLOCKQUOTE>
+<H5><A NAME = "7317">BasicOrbitLengths(G) : GrpPerm -&gt; [RngIntElt]</A></H5>
+<BLOCKQUOTE>
+The lengths of the basic orbits as defined by the current base for
+the permutation group G. This function assumes that a BSGS is known
+for G.  The lengths are returned as a sequence of integers.
+</BLOCKQUOTE>
+<H5><A NAME = "7318">BasicStabilizer(G, i) : GrpPerm, RngIntElt -&gt; GrpPerm</A></H5>
+<H5>BasicStabiliser(G, i) : GrpPerm, RngIntElt -&gt; GrpPerm</H5>
+<BLOCKQUOTE>
+Given a permutation group G for which a base and strong generating set
+are known, and an integer i, where 1 &le;i &le;k with k the length
+of the base, return the subgroup of G which fixes the first i - 1 points
+of the base.
+</BLOCKQUOTE>
+<H5><A NAME = "7319">BasicStabilizerChain(G) : GrpPerm -&gt; [GrpPerm]</A></H5>
+<H5>BasicStabiliserChain(G) : GrpPerm -&gt; [GrpPerm]</H5>
+<BLOCKQUOTE>
+Given a permutation group G, return the stabilizer chain defined
+by the base as a sequence of subgroups of G. If a BSGS is not
+already known for G, it will be created.
+</BLOCKQUOTE>
+<H5><A NAME = "7320">IsMemberBasicOrbit(G, i, a) : GrpPerm, RngIntElt, Elt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the point a of &Omega; lies in the basic orbit at
+level i. This function assumes that a BSGS is known for G.
+</BLOCKQUOTE>
+<H5><A NAME = "7321">NumberOfStrongGenerators(G) : GrpPerm -&gt; RngIntElt</A></H5>
+<H5>Nsgens(G) : GrpPerm -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The number of elements in the current strong generating set for G.
+</BLOCKQUOTE>
+<H5><A NAME = "7322">NumberOfStrongGenerators(G, i) : GrpPerm, RngIntElt -&gt; RngIntElt</A></H5>
+<H5>Nsgens(G, i) : GrpPerm, RngIntElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The number of elements in the strong generating set for the
+i-th term of the stabilizer chain for G.
+</BLOCKQUOTE>
+<H5><A NAME = "7323">SchreierVectors(G) : GrpPerm -&gt; [ [RngIntElt] ]</A></H5>
+<BLOCKQUOTE>
+The Schreier vectors corresponding to the current BSGS for the
+permutation group G. The vectors are returned as a sequence of
+integer sequences.
+</BLOCKQUOTE>
+<H5><A NAME = "7324">SchreierVector(G, i) : GrpPerm, RngIntElt -&gt; [RngIntElt]</A></H5>
+<BLOCKQUOTE>
+The Schreier vector corresponding the i-th term of the stabilizer
+chain defined by the current BSGS for the permutation group G. The
+vector is returned as a sequence of integers.
+</BLOCKQUOTE>
+<H5><A NAME = "7325">StrongGenerators(G) : GrpPerm -&gt; SetIndx(GrpPermElt)</A></H5>
+<BLOCKQUOTE>
+A set of strong generators for the permutation group G. If
+they are not currently available, they will be computed.
+</BLOCKQUOTE>
+<H5><A NAME = "7326">StrongGenerators(G, i) : GrpPerm, RngIntElt -&gt; SetIndx(GrpPermElt)</A></H5>
+<BLOCKQUOTE>
+A set of strong generators for the i-th term in the stabilizer
+chain for the permutation group G. A BSGS must be known for G.
+</BLOCKQUOTE>
+<H4><A NAME = "7327">Working with a Base and Strong Generating Set</A></H4>
+
+
+
+<H5><A NAME = "7328">BaseImage(x) : GrpPermElt -&gt; [Elt]</A></H5>
+<BLOCKQUOTE>
+Given a permutation x belonging to the group G, for which a base
+and strong generating set is known, form the base image of x.
+</BLOCKQUOTE>
+<H5><A NAME = "7329">Permutation(G, Q) : GrpPerm, [Elt] -&gt; GrpPermElt</A></H5>
+<BLOCKQUOTE>
+Given a permutation group G acting on the set &Omega;, for
+which a base and strong generating set are known, and a
+sequence Q of distinct points of &Omega; defining an element
+x of G, return x as a permutation.
+</BLOCKQUOTE>
+<H5><A NAME = "7330">SVPermutation(G, i, a) : GrpPerm, RngIntElt, Elt -&gt; GrpPermElt</A></H5>
+<BLOCKQUOTE>
+The permutation of G defined by the Schreier vector at level
+i, which takes the point a of &Omega; to the base point at
+level i. This function assumes that a BSGS is known for G.
+</BLOCKQUOTE>
+<H5><A NAME = "7331">SVWord(G, i, a) : GrpPerm, RngIntElt, Elt -&gt; GrpFPElt</A></H5>
+<BLOCKQUOTE>
+An element in the word group of G defined by the Schreier vector
+at level i, which takes the point a of &Omega; to the base point
+at level i. This function assumes that a BSGS is known for G.
+</BLOCKQUOTE>
+<H5><A NAME = "7332">Strip(H, x) : GrpPerm, GrpPermElt -&gt; BoolElt, GrpPermElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given an element x of a permutation group G, and given a group H
+for which a base and strong generating set is known, returns:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>the value of <TT>x in H</TT>
+<DT>(b)</DT><DD>The residual permutation y resulting
+from the stripping of x with respect to the BSGS for H; and 
+<DT>(c)</DT><DD>The first level i such that y is not contained in H<sup>(i)</sup>.</DL>
+</BLOCKQUOTE>
+<H5><A NAME = "7333">WordStrip(H, x) : GrpPerm, GrpPermElt -&gt; BoolElt, GrpFPElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given an element x of a permutation group G, and given a group H
+for which a base and strong generating set is known, returns:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>the value of <TT>x in H</TT>
+<DT>(b)</DT><DD>the residual word w (an element in the word group of G)
+resulting from the stripping of x with respect to the BSGS for H,
+<DT>(c)</DT><DD>The first level i such that y is not contained in H<sup>(i)</sup>.</DL>
+</BLOCKQUOTE>
+<H5><A NAME = "7334">BaseImageWordStrip(H, x) : GrpPerm, GrpPermElt -&gt; BoolElt, GrpFPElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given an element x of a permutation group G, and given a group H
+for which a base and strong generating set is known, returns:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>Whether the base image strip succeeded at all levels. Note that
+a true value here does <I>not</I>, on its own, imply x &isin;H.
+<DT>(b)</DT><DD>the residual word w (an element in the word group of G)
+resulting from the stripping of x with respect to the BSGS for H,
+<DT>(c)</DT><DD>The first level i such that the strip could not continue.</DL>
+</BLOCKQUOTE>
+<H5><A NAME = "7335">WordInStrongGenerators(H, x) : GrpPerm, GrpPermElt -&gt; GrpFPElt</A></H5>
+<BLOCKQUOTE>
+Given an element x of a permutation group H
+for which a base and strong generating set is known, returns
+a word in the strong generators of H which represents x.
+This function uses base images to determine the word for x,
+so giving x not&isin;H will have unpredictable results.
+This function returns the inverse of the second return
+value of <TT>BaseImageWordStrip</TT>, when the latter is successful.
+</BLOCKQUOTE>
+<H4><A NAME = "7336">Modifying a Base and Strong Generating Set</A></H4>
+
+
+
+<H5><A NAME = "7337">ChangeBase(~G, Q) : GrpPerm, [Elt] -&gt;</A></H5>
+<BLOCKQUOTE>
+Given a group H with a base and strong generating set, change the
+base of G, so that the points in the sequence Q form an initial
+segment of the new base.
+</BLOCKQUOTE>
+<H5><A NAME = "7338">AddNormalizingGenerator(~H, x) : GrpPerm, GrpPermElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Given a group H with a base B and strong generating set X,
+and an element x that normalizes H belonging to a group that
+contains H, extend the existing BSGS for H so that they form
+a BSGS for the subgroup &lt;H, x&gt;.
+</BLOCKQUOTE>
+<H5><A NAME = "7339">ReduceGenerators(~G) : GrpPerm -&gt;</A></H5>
+<BLOCKQUOTE>
+Given a group G with a base and strong generating set, remove
+redundant strong generators.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text648.htm">[Next]</A><A  HREF = "text646.htm">[Prev]</A> <A  HREF = "text648.htm">[Right]</A> <A  HREF = "text646.htm">[Left]</A> <A  HREF = "text629.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

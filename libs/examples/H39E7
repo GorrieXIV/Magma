@@ -1,0 +1,52 @@
+"Source: Text/Ring/RngOrdGal.text";
+"Line: 1887";
+"Date: Wed Jun  8 13:56:28 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Ring/RngOrdGal.text, line: 1887
+// Example: H39E7 ()
+print "Example: H39E7";
+ei := GetEchoInput();
+SetEchoInput(true);
+ST := ShephardTodd(8);
+R := InvariantRing(ST);
+p := PrimaryInvariants(R);
+_<i> := BaseRing(Universe(p));
+_<x1,x2> := Universe(p);
+p := [
+x1^8 + (-4*i - 4)*x1^7*x2 + 14*i*x1^6*x2^2 + (-14*i +
+    14)*x1^5*x2^3 - 21*x1^4*x2^4 + (14*i + 14)*x1^3*x2^5
+    - 14*i*x1^2*x2^6 + (4*i - 4)*x1*x2^7 + x2^8,
+x1^12 + (-6*i - 6)*x1^11*x2 + 33*i*x1^10*x2^2 + (-55*i +
+    55)*x1^9*x2^3 - 231/2*x1^8*x2^4 + (66*i + 
+    66)*x1^7*x2^5 + (-66*i + 66)*x1^5*x2^7 - 
+    231/2*x1^4*x2^8 + (55*i + 55)*x1^3*x2^9 - 
+    33*i*x1^2*x2^10 + (6*i - 6)*x1*x2^11 + x2^12
+];
+p;
+res := Resultant(p[1]-2, p[2]-3, 2);
+f4  := Polynomial(Rationals(), UnivariatePolynomial(res));
+bool, f := IsPower(f4, 4);
+bool, f;
+G, R, S := GaloisGroup(f);
+#G;
+assert $1 eq 192;
+rel := LinearRelations(f : Galois := <G, R, S>);
+#rel;
+assert $1 eq 20;
+v := rel[3];
+v;
+IR := SLPolynomialRing(Integers(), 24);
+r := &+ [v[i]*IR.i : i in [1..24]];
+r;
+VerifyRelation(f, r : Galois := <G, R, S>);
+assert $1;
+I := &+ [ (e[n]-1)*IR.n : n in [1..24]] where e is Eltseq(Random(Sym(24)));
+Iorbit := [Apply(g, I) : g in G];
+#{Evaluate(i, R) : i in Iorbit};
+exists(n){n : n in [1..24] | #Orbit(G, [1,n]) eq 192}; n;
+assert $2;
+I := IR.1 + IR.n^2;
+Iorbit := [Apply(g, I) : g in G];
+#{Evaluate(i, R) : i in Iorbit};
+assert $1 eq 192;
+SetEchoInput(ei);

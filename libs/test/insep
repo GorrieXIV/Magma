@@ -1,0 +1,468 @@
+////////////////////////////////////////////////////////////////////////////////
+
+/*
+Inseparable field extensions test.
+AKS, March 2003.
+*/
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+COUNT_SCALE := 1;
+is_opt := true;
+if is_opt then
+    COUNT_SCALE := 3;
+end if;
+
+PDECOMP_COUNT := 1 * COUNT_SCALE;
+TEST_FACT_COUNT := 4 * COUNT_SCALE;
+
+////////////////////////////////////////////////////////////////////////////////
+
+ClearVerbose();
+SetVerbose("PolyFact", 0);
+SetVerbose("MultiGCD", 0);
+SetVerbose("Radical", 0);
+SetVerbose("Groebner", 0);
+SetVerbose("Decomposition", 0);
+
+VERB := true;
+VERB := false;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure test_ideal(I)
+
+    if Dimension(I) lt 0 then
+	return;
+    end if;
+
+    Groebner(I);
+
+    if VERB then
+        "\nIDEAL";
+        "=====";
+        I;
+    else
+	/*
+        printf "Primary Decomposition; rank: %o, base size: %o\n",
+	    Rank(I), #CoefficientRing(I);
+	*/
+    end if;
+
+    Q, P := PrimaryDecomposition(I);
+
+    if VERB then
+        "==============";
+        "PRIMARY IDEALS";
+        "==============";
+        Q;
+        "=======================";
+        "ASSOCIATED PRIME IDEALS";
+        "=======================";
+        P;
+    end if;
+
+    n := #Q;
+
+    assert &meet Q eq I;
+    assert forall{J: J in Q | IsPrimary(J)};
+    assert IsPrimary(I) eq (#Q eq 1);
+    assert not IsPrime(I) or (#P eq 1);
+    assert IsMaximal(I) eq (IsPrime(I) and IsZeroDimensional(I));
+
+    R := Radical(I);
+    assert IsRadical(I) eq (I eq R);
+
+    if not IsRadical(I) then
+	if &meet P ne R then
+	    "BAD I:", I: Magma;
+	    bad1 := &meet P;
+	    Groebner(bad1);
+	    "BAD1 &meet P:", bad1;
+	    I subset bad1;
+	    { IsInRadical(f, I): f in Basis(bad1) };
+	    "BAD2 R:", R;
+	    I subset R;
+	    { IsInRadical(f, I): f in Basis(R) };
+	    assert false;
+	end if;
+
+        //assert &meet P eq R;
+        assert forall{J: J in P | IsPrime(J)};
+        assert forall{Radical(Q[i]) eq P[i]: i in [1 .. n]};
+        if IsPrime(R) ne (#RadicalDecomposition(I) eq 1) then
+	    "BAD I:", I: Magma;
+	    "R:", R;
+	    "IsPrime(R):", IsPrime(R);
+	    "RadicalDecomposition(I):", RadicalDecomposition(I);
+	    assert false;
+	end if;
+        assert IsMaximal(R) eq (#P eq 1 and IsZeroDimensional(I));
+
+        RP := RadicalDecomposition(I);
+        assert &meet RP eq R;
+    end if;
+end procedure;
+
+////////////////////////////////////////////////////////////////////////////////
+
+"Special extension stuff";
+ZEIT := Cputime();
+
+procedure do_ext(FF, a, b, t, u)
+    PPP<x,y> := PolynomialRing(FF, 2); 
+    I := ideal<PPP| (x^2 + a*y)^2*(x^2 + b)^2, (y + t*u)^2*(y^2 + b*u)>;
+    test_ideal(I);
+end procedure;
+
+P<r,s> := PolynomialRing(GF(2), 2);
+F<a,b> := FunctionField(s^3 + r);
+FF<t,u> := FunctionField(F, 2);
+do_ext(FF, a, b, t, t);
+
+P<r,s> := PolynomialRing(GF(2), 2);
+F<a,b> := FunctionField(r^3 + s);
+FF<t> := FunctionField(F, 2);
+do_ext(FF, a, b, t, t);
+
+P<r> := PolynomialRing(GF(2));
+PP<s> := PolynomialRing(P);
+F<a> := FunctionField(s^3 - r);
+FF<t> := FunctionField(F);
+do_ext(FF, a, r*a, t, r*t);
+
+"Special extension time:", Cputime(ZEIT);
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure names(~R, base)
+    AssignNames(~R, [Sprintf("%o%o", base, i): i in [1 .. Rank(R)]]);
+end procedure;
+
+function non_zero_rand(R)
+    repeat
+	x := Random(R);
+    until x ne 0;
+    return x;
+end function;
+
+rand_mon := func<P, d | Monomial(P, [Random(0, d): i in [1 .. Rank(P)]])>;
+rand_poly := func<P, d, lenf, cf | &+[cf()*rand_mon(P, d): i in [1 .. lenf()]]>;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure test_pdecomp_ff(q, n, r, deg, len, e)
+    printf "pdecomp: q = %o, n = %o, r = %o, deg = %o, len = %o, e = %o\n",
+	q, n, r, deg, len, e;
+
+    K := GF(q);
+    P := PolynomialRing(K, n);
+    names(~P, "x");
+    cf := func<|non_zero_rand(K)>;
+    lenf := func<|Random(1, len)>;
+    R := [rand_poly(P, deg, lenf, cf): i in [1 .. r]];
+    I := ideal<P | R>;
+    test_ideal(I);
+end procedure;
+
+procedure test_pdecomp_polyf(q, m, r, deg, e)
+    printf "pdecomp: q = %o, m = %o, r = %o, deg = %o, e = %o\n",
+	q, m, r, deg, e;
+
+    K := GF(q);
+    F := FunctionField(K, m);
+    names(~F, "t");
+end procedure;
+
+////////////////////////////////////////////////////////////////////////////////
+
+for i := 1 to PDECOMP_COUNT do
+    test_pdecomp_ff(2, 3, 2, 2, 5, 2);
+    test_pdecomp_ff(2, 3, 3, 3, 3, 2);
+    test_pdecomp_ff(2, 4, 2, 2, 2, 2);
+end for;
+
+for n in [1..3] do
+    for m in [1 .. 2] do
+	for p in [2,3,5] do
+	    if m eq 1 then
+		F := FunctionField(GF(p));
+	    else
+		F := FunctionField(GF(p), m);
+	    end if;
+	    P := PolynomialRing(F, n);
+	    I := ideal<P | [P.i^p + P.i + 1: i in [1 .. n]]>;
+//I;
+	    test_ideal(I);
+	end for;
+    end for;
+end for;
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure check_gcd(f)
+    n := Rank(Parent(f));
+    //"GCD";
+    //time
+    for v := 1 to n do
+	if n eq 1 then
+	    fd := Derivative(f);
+	else
+	    fd := Derivative(f, v);
+	end if;
+	g := GCD(f, fd);
+	qf := f div g;
+	assert qf*g eq f;
+	qfd := fd div g;
+	assert qfd*g eq fd;
+	assert GCD(qf, qfd) eq 1;
+    end for;
+end procedure;
+
+procedure check_fact_list(f, L)
+    // Check factorization of f is L
+    p := &*[Parent(f) | t[1]^t[2]: t in L];
+    if p ne Normalize(f) then
+        "check_fact FAILS";
+        "f:", f;
+        "L:", L;
+        "product:", p;
+        error "";
+    end if;
+end procedure;
+
+procedure check_fact(f)
+    check_fact_list(f, Factorization(f));
+end procedure;
+
+procedure check_fact_dual(f)
+    // Check Factorization of f * (f + 1) is combination of factorization of
+    // f and factorization of (f + 1)
+    if IsMinusOne(f) then
+        return;
+    end if;
+
+    if VERB then
+        "check_fact_dual:", f;
+        "Seed:", GetSeed();
+    end if;
+
+    T := Cputime();
+
+    //"Fact Parent:", Parent(f);
+    //"Fact f:", f;
+
+    L := Factorization(f);
+    //"f factorization:", L;
+    check_fact_list(f, L);
+    //"Fact Parent:", Parent(f);
+    //"Fact f:", f+1;
+    L1 := Factorization(f + 1);
+    check_fact_list(f + 1, L1);
+
+    //"Fact Parent:", Parent(f);
+    //"Fact f:", f*(f+1);
+    LL1 := Factorization(f * (f + 1));
+    check_fact_list(f * (f + 1), LL1);
+
+    if LL1 ne Sort(L cat L1) then
+        "check_fact_dual FAILS";
+        "f:", f;
+        "L:", L;
+        "L1:", L1;
+        "LL1:", LL1;
+        error "";
+    end if;
+    if VERB then
+        "LL1:", LL1;
+        "Time:", Cputime(T);
+    end if;
+end procedure;
+
+////////////////////////////////////////////////////////////////////////////////
+
+"Special GCD/Factorization";
+ZEIT := Cputime();
+
+p := 2;
+F<t,u> := FunctionField(GF(p), 2);
+K<a,b,c> := AffineAlgebra<F,a,b,c| a^2 + t*b, b^4 + b^2 + c, c^2 + t*u>;
+P<x,y,z> := PolynomialRing(K, 3);
+f := (x*y^2+a)^2*(x*y + a)^2*(x*y*z + a)*(x^2 + t)*(x^2*y^2 + t)*(x*z^3
+ + t)*(x^2 + z + a)*(y^2*z + t)^2*(x^2*y + z)*(x*z + 1);
+time check_fact(f);
+
+f := (z^2 + t*u)*(x^4 + x^2 + c)*(y^2 + t*b);
+time check_fact_dual(f);
+
+FF := GF(2);
+F<t,u> := FunctionField(FF, 2);
+K<a,b> := AffineAlgebra<F,a,b| a^2 + t, b^2 + u>;
+P<x,y,z> := PolynomialRing(K, 3);
+time check_fact((x^4 + u)*(x^2 + y^2 + t)*(x^3 + y^2 + u));
+
+K<a,b> := AffineAlgebra<F,a,b| a^2 + b, b^2 + b + t*u>;
+P<x,y,z> := PolynomialRing(K, 3);
+time check_fact((x^4 + u)*(x^2 + y^2 + t)*((x+y)^2 + x + y + u));
+time check_fact((x^4 + u)*(x^2 + y^2 + t)*((x+y+z)^2 + x + y + z+ t*u)*
+(x^2 + x+ y + z));
+time check_fact((x^4 + u)*(x^2 + y^2 + t)*((x+y+z)^2 + x + y + z+ t*u)*(x^2+x
++ y + z)*(x^4 + x^2 + b));
+
+"Special stuff time:", Cputime(ZEIT);
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure test_fact(:
+    q := 2, m := 2, n := 3, fd := 2, a := 3, ad := 2, al := 2, ae := 1,
+    deg := 2, len := 3, nf := 2, e := 2)
+    printf
+"TEST_FACT: q = %o, n = %o, a = %o, m = %o, deg = %o, len = %o, e = %o\n",
+	q, n, a, m, deg, len, e;
+    "Seed:", GetSeed();
+
+    ZEIT := Cputime();
+
+    p := Factorization(q)[1, 1];
+
+    FF := GF(q);
+
+    if m eq 1 then
+	F := FunctionField(FF);
+    else
+	F := FunctionField(FF, m);
+    end if;
+    names(~F, "t");
+
+    if a eq 1 then
+	R := PolynomialRing(F);
+    else
+	R := PolynomialRing(F, a);
+    end if;
+    names(~R, "a");
+
+    while true do
+	rels := [];
+	degs := [];
+	for v := a to 1 by -1 do
+	    rand_mon_ee := func<R, range, d, ee |
+		&*[R | R.j^(Random(1, d)*ee): j in range]>;
+
+	    ee := Random([1, ae]);
+	    d := Random(1, ad);
+	    degs[d] := v;
+	    f := R.v^(d*ee);
+//"v:", v;
+	    for i := 2 to al do
+		c := &+[non_zero_rand(FF)*rand_mon_ee(F, [1 .. m], fd, 1)];
+//"i:", i;
+//"c:", c;
+//"f:", f;
+		f := f + c*rand_mon_ee(R, [v + 1 .. a], ad, ee);
+//"new f:", f;
+	    end for;
+
+	    Append(~rels, f);
+	end for;
+
+	K := quo<R | rels>;
+
+	if IsField(K) then
+	    break;
+	end if;
+	//"NOT FIELD; TRY AGAIN";
+    end while;
+
+//Groebner(DivisorIdeal(K));
+//K;
+
+    if n eq 1 then
+	P := PolynomialRing(K);
+    else
+	P := PolynomialRing(K, n);
+    end if;
+    names(~P, "x");
+
+    L := [];
+
+    rels := Reverse(rels);
+//"rels:", rels;
+    for v := 1 to a do
+	im := P.Random(1, n);
+	ims := [P!K.i: i in [1 .. a]];
+	ims[v] := im;
+//"ims:", ims;
+	Rh := hom<R -> P | ims>;
+//"some elts:", (R.1), (F.1), (R.1+F.1), rels[1];
+//"some ims:", Rh(R.1), Rh(F.1), Rh(R.1+F.1), Rh(rels[1]);
+	f := Rh(rels[v]);
+	Append(~L, f);
+    end for;
+
+    IndentPush();
+    check_fact(&*L);
+    IndentPop();
+
+    time for f in L do
+	// "NOW DUAL", f;
+	IndentPush();
+	check_fact_dual(f);
+	IndentPop();
+
+	check_gcd(f);
+    end for;
+
+    f := &*[(P.Random(1, n) + K.i)^p: i in [1 .. a]];
+    check_fact_dual(f);
+    check_gcd(f);
+
+    "TEST_FACT time:", Cputime(ZEIT);
+end procedure;
+
+
+/*
+SetMark(true);
+SetTrace(160408, true);
+SetDelCheck(true);
+UseDpolyCopyDebug(true);
+*/
+
+//SetSeed(1, 34438);
+for i := 1 to TEST_FACT_COUNT do
+    "*** i:", i;
+    time test_fact();
+    for n in [1 .. 2] do
+	for a in [1 .. 2] do
+	    for m in [1 .. 2] do
+		time test_fact(: n := n, a := a, m := m);
+	    end for;
+	end for;
+    end for;
+    test_fact(: q := 2, a := 3);
+    test_fact(: q := 4, a := 2, ae := 2);
+    test_fact(: q := 3, a := 2, ae := 3);
+    test_fact(: q := 5, a := 2);
+end for;
+
+/*
+clear;
+ShowActive();
+*/
+
+////////////////////////////////////////////////////////////////////////////////
+
+K := GF(2);
+P<x1,x2,x3,x4,x5>:=PolynomialRing(K,5);
+I := ideal<P|
+   [ x1*x5 + x2^2 + x2*x3 + x3^2 + x5^2,
+     x1*x5 + x2*x3 + x4^2,
+     x2^2 + x2*x3 + x5^2] >;
+f := x4^2+x3*x4+x3*x5;
+R := Radical(I);
+assert R ne I;
+assert f^2 in I;
+assert f notin I;
+assert f in R;
+
+////////////////////////////////////////////////////////////////////////////////

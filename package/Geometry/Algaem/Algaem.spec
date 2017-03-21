@@ -1,0 +1,15 @@
+{
+   etalealg.m
+   mynumfld.m
+   newell.m
+   newmisc.m
+   localdata.m
+   pointsearch.m
+   cosets.m
+   ellchab.m
+   selmer.m
+   casselsmap.m
+   ellchab-MWS.m
+   twocovdesc.m
+   resolvent.m
+}

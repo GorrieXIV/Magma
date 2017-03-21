@@ -1,0 +1,59 @@
+HilbertSeries
+    {
+	misc.m
+	first_gens.m
+	hilb.m
+    }
+Baskets
+    {
+	point.m
+	curve.m
+	basket.m
+	check.m
+	dissident.m
+	lists.m
+    }
+SubKCurve
+    {
+	subkcurve.m
+	catalogue.m
+    }
+CalabiYau
+    {
+	cy.m
+	cyhilb.m
+	cysolve.m
+	cymakedb.m
+    }
+Fano
+    {
+	fano.m
+	fanohilb.m
+    }
+DatabaseK3
+    {
+        k3baskets.m
+	k3build.m
+	k3db.m
+    }
+K3
+    {
+	k3.m
+        AFR.m
+    }
+DatabaseK3
+    {
+	k3records.m
+    }
+DatabaseFano
+    {
+	fanobaskets.m
+	fanodb.m
+	fanorecords.m
+	fanobuild.m
+    }
+Generic
+    {
+	gr.m
+	gr2rec.m
+    }

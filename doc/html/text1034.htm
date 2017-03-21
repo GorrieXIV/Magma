@@ -1,0 +1,643 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>The Construction of all  Irreducible Modules</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1035.htm">[Next]</A><A  HREF = "text1033.htm">[Prev]</A> <A  HREF = "text1035.htm">[Right]</A> <A  HREF = "text1033.htm">[Left]</A> <A  HREF = "text1028.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "11681">The Construction of all  Irreducible Modules</A></H3>
+
+<P>
+<P>
+<P>
+The construction of all irreducible K[G]-modules for a finite group G
+is of major interest. If G is soluble there is a very effective method
+that dates back to Schur. This proceeds by working up a composition series
+for G and constructing the irreducibles for each subgroup by inducing
+or extending representations from the previous subgroup. This works equally
+well over finite fields and over fields of characteristic zero. If G is
+non-soluble the situation is more difficult. Starting with a faithful
+representation, by a theorem of Burnside, it is possible to construct all 
+representations by splitting tensor powers of the faithful representation.
+An algorithm based on this idea developed by Cannon and Holt uses the Meataxe 
+to split representations and works well over small finite fields.  A similar
+algorithm for rational representations using a different method for 
+splitting representations is under development by Steel. Methods based on
+the theorem of Burnside, will be referred to as <I>Burnside algorithms</I>.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1034.htm#11682">Generic Functions for Finding Irreducible Modules</A>
+<LI> <A  HREF = "text1034.htm#11685">The Burnside Algorithm</A>
+<LI> <A  HREF = "text1034.htm#11690">The Schur Algorithm for Soluble  Groups</A>
+<LI> <A  HREF = "text1034.htm#11697">The Rational Algorithm</A>
+</UL>
+<H4><A NAME = "11682">Generic Functions for Finding Irreducible Modules</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+The functions described in this section construct all irreducible 
+representations of a finite group. The choice of algorithm depends
+upon the type of group and the kind of field given. The individual 
+algorithms may be invoked directly by means of intrinsic functions 
+described in subsequent sections.
+
+
+<H5><A NAME = "11683">IrreducibleModules(G, K : parameters) : Grp, Fld -&gt; SeqEnum</A></H5>
+<H5>AbsolutelyIrreducibleModules(G, K : parameters) : Grp, Fld -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Let G be a finite group and let K be a field. If G is soluble
+then K may be either a finite field, the rational field or a cyclotomic 
+field whose order divides the exponent of G. If G is non-soluble,
+then currently K is restricted to being a finite field or the rational
+field. These functions construct all of the irreducible or absolutely
+irreducible G-modules over K.
+Since V2.16, if K is the rational field, then by default a new
+algorithm is used.  Otherwise, if G is soluble, Schur's algorithm
+is normally used while if G is non-soluble, the Burnside method is used.
+<P>
+<P>
+<PRE>
+     Alg: MonStgElt                      Default: 
+</PRE>
+The parameter <TT>Alg</TT> may be used to override the usual choice of 
+algorithm if desired. Note that Schur's algorithm may only be applied
+to soluble groups, while, for the time being, Burnside's method requires
+that the field K is finite.
+<P>
+The Schur algorithm is usually very fast and is often able to find
+the complex representations more quickly than it is possible to compute 
+the character table. The speed of the Burnside algorithm is determined
+firstly by the maximal degree of the irreducible modules and secondly 
+by the number of irreducible modules. It will start to become quite slow 
+if G has modules of dimension in excess of 1000. In order to prevent 
+the Burnside method from wasting huge amounts of time, the algorithm
+takes a parameter which controls the degree of the largest module that
+will be consider for splitting.
+<P>
+<P>
+<PRE>
+     DimLim: RngInt                      Default: 2000
+</PRE>
+The parameter <TT>DimLim</TT> only affects the Burnside algorithm where it is
+used to limit the dimension of the modules which will be considered for 
+splitting.  If this limit prevents all irreducibles being found, a warning 
+message is output and those irreducibles that have been found will be 
+returned. This possibility allows the user to determine a sample of low 
+degree modules without using excessive time.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11684">Example <TT>ModGrp_IrreducibleModules (H96E13)</TT></A></H3>
+We take a group of order 416 = 2<sup>5</sup> 13 and compute its irreducible 
+modules over various fields.
+<P>
+<P>
+<PRE>
+&gt; G := SmallGroup(416, 136);
+&gt; G;
+GrpPC : G of order 416 = 2^5 * 13
+PC-Relations:
+    G.1^2 = Id(G), 
+    G.2^2 = G.5, 
+    G.3^2 = Id(G), 
+    G.4^2 = G.5, 
+    G.5^2 = Id(G), 
+    G.6^13 = Id(G), 
+    G.3^G.1 = G.3 * G.5, 
+    G.3^G.2 = G.3 * G.4, 
+    G.4^G.2 = G.4 * G.5, 
+    G.4^G.3 = G.4 * G.5, 
+    G.6^G.1 = G.6^12
+</PRE>
+<P>
+We first compute the K[G]-modules for the finite fields K = GF(p), where
+p runs through the primes dividing the order of G.
+<P>
+<P>
+<P>
+<PRE>
+&gt; IrreducibleModules(G, GF(2)); 
+[
+    GModule of dimension 1 over GF(2),
+    GModule of dimension 12 over GF(2)
+]
+&gt; IrreducibleModules(G, GF(13));
+[
+    GModule of dimension 1 over GF(13),
+    GModule of dimension 1 over GF(13),
+    GModule of dimension 1 over GF(13),
+    GModule of dimension 1 over GF(13),
+    GModule of dimension 1 over GF(13),
+    GModule of dimension 1 over GF(13),
+    GModule of dimension 1 over GF(13),
+    GModule of dimension 1 over GF(13),
+    GModule of dimension 2 over GF(13),
+    GModule of dimension 2 over GF(13),
+    GModule of dimension 4 over GF(13)
+]
+</PRE>
+<P>
+We now compute the K[G]-modules where K is the rational field.
+<P>
+<P>
+<P>
+<PRE>
+&gt; time L := IrreducibleModules(G, Rationals());     
+Time: 16.170
+&gt; L;                                           
+[
+    GModule of dimension 1 over Rational Field,
+    GModule of dimension 1 over Rational Field,
+    GModule of dimension 1 over Rational Field,
+    GModule of dimension 1 over Rational Field,
+    GModule of dimension 1 over Rational Field,
+    GModule of dimension 1 over Rational Field,
+    GModule of dimension 1 over Rational Field,
+    GModule of dimension 1 over Rational Field,
+    GModule of dimension 2 over Rational Field,
+    GModule of dimension 2 over Rational Field,
+    GModule of dimension 8 over Rational Field,
+    GModule of dimension 12 over Rational Field,
+    GModule of dimension 12 over Rational Field,
+    GModule of dimension 12 over Rational Field,
+    GModule of dimension 12 over Rational Field,
+    GModule of dimension 24 over Rational Field,
+    GModule of dimension 96 over Rational Field
+]
+</PRE>
+<P>
+Finally, we compute the K[G]-modules taking K to be the splitting field
+over the rationals and verify that the number of irreducibles is equal to
+the number of conjugacy classes of G.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Exponent(G);
+104
+&gt; mods := IrreducibleModules(G, CyclotomicField(104));
+&gt; #mods;
+53;
+&gt; #Classes(G);
+53
+&gt; [ Dimension(N) : N in mods ];
+[ 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 4, 
+  4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 ]
+&gt; X := CharacterTable(G);                                                                  
+&gt; [ Degree(x) : x in X ];
+[ 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 4, 
+  4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 ]
+
+</PRE>
+<HR>
+<H4><A NAME = "11685">The Burnside Algorithm</A></H4>
+
+<P>
+<P>
+<P>
+The Burnside algorithm finds all irreducible K[G]-modules with a 
+faithful K[G]-module P and looks for the distinct irreducibles among 
+the tensor powers of P. Both irreducible and absolutely irreducible
+modules may be found. At present the algorithm is restricted to finite
+fields. In more detail the algorithm starts with a some faithful permutation 
+module over the given field, splits it into irreducibles using the meataxe, 
+and constructing further modules to split as tensor products of those already 
+found.  A warning is printed if all irreducible modules are not found.
+
+
+<H5><A NAME = "11686">AbsolutelyIrreducibleModulesBurnside(G, K : parameters ) : Grp, FldFin -&gt; [ ModGrp ]</A></H5>
+
+<PRE>    DimLim: RngIntElt                   Default: 2000</PRE>
+<BLOCKQUOTE>
+Given a finite group G and a finite field K, this function
+constructs the absolutely irreducible K[G]-modules over 
+extensions of K.  Currently, the group G is restricted to 
+a permutation group. The maximum dimension of a module considered
+for splitting is controlled by the parameter <TT>DimLim</TT>, which 
+has default value 2000.
+</BLOCKQUOTE>
+<H5><A NAME = "11687">IrreducibleModulesBurnside(G, K : parameters ) : Grp, FldFin -&gt; [ ModGrp ]</A></H5>
+
+<PRE>    DimLim: RngIntElt                   Default: 2000</PRE>
+<BLOCKQUOTE>
+Given a finite group G and a finite field K, this function
+constructs the irreducible K[G]-modules over K.  Currently, 
+the group G is restricted to  a permutation group. The maximum 
+dimension of a module considered for splitting is controlled by 
+the parameter <TT>DimLim</TT>, which has default value 2000.
+</BLOCKQUOTE>
+<H5><A NAME = "11688">AbsolutelyIrreducibleConstituents(M) : ModGrp -&gt; [ ModGrp ]</A></H5>
+<BLOCKQUOTE>
+Given an irreducible module M, return M if it is already
+absolutely irreducible, else return the absolutely irreducible
+modules obtained by finding the constituents of M after extending 
+the base field of M to a splitting field.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11689">Example <TT>ModGrp_IrreducibleModules_M11 (H96E14)</TT></A></H3>
+We find all irreducible modules for M<sub>11</sub> over GF(2),
+and all absolutely irreducible modules of characteristic 2.
+The Burnside algorithm is used by default.
+<P>
+<P>
+<PRE>
+&gt; load m11;
+Loading "/home/magma/libs/pergps/m11"
+M11 - Mathieu group on 11 letters - degree 11 
+Order 7 920 = 2^4 * 3^2 * 5 * 11;  Base 1,2,3,4 
+Group: G
+&gt; IrreducibleModules(G, GF(2));          
+[
+  GModule of dimension 1 over GF(2),
+  GModule of dimension 10 over GF(2),
+  GModule of dimension 44 over GF(2),
+  GModule of dimension 32 over GF(2)
+]
+&gt; AbsolutelyIrreducibleModules(G, GF(2));
+[
+  GModule of dimension 1 over GF(2),
+  GModule of dimension 10 over GF(2),
+  GModule of dimension 44 over GF(2),
+  GModule of dimension 16 over GF(2^2),
+  GModule of dimension 16 over GF(2^2)
+]
+</PRE>
+<HR>
+<H4><A NAME = "11690">The Schur Algorithm for Soluble  Groups</A></H4>
+
+<P>
+<P>
+<P>
+This collection of functions allows the user to find all irreducible modules 
+of a finite soluble group. The group is first replaced by an isomorphic group
+defined by a power-conjugate presentation.  The irreducibles are then found 
+using Schur's method of working up the composition series for G defined by 
+the pc-presentation.
+
+
+<H5><A NAME = "11691">IrreducibleModules(G, K : parameters) : Grp, Fld -&gt; SeqEnum</A></H5>
+<H5>AbsolutelyIrreducibleModulesSchur(G, K: parameters) : GrpPC, Rng -&gt; List[GModule]</H5>
+<H5>AbsolutelyIrreducibleModulesSchur(G, k, i: parameters) : GrpPC, Rng, RngIntElt -&gt; List[GModule]</H5>
+<H5>AbsolutelyIrreducibleModulesSchur(G, k, L: parameters) : GrpPC, Rng, List[GModule] -&gt; List[GModule]</H5>
+<H5>AbsolutelyIrreducibleModulesSchur(G, k, L, i: parameters) : GrpPC, Rng, RngIntElt -&gt; List[GModule]</H5>
+<BLOCKQUOTE>
+Let G be a finite soluble group and let K be one the following
+types of field: a finite field, the rational field or a cyclotomic field.
+The order of a cyclotomic field must divide the exponent of G.
+The function constructs all absolutely irreducible representations 
+of G over appropriate extensions or subfields of the field K. The 
+modules returned are non-isomorphic and consist of all distinct 
+modules, subject to the conditions imposed. In the case when K 
+is a finite field, the Glasby-Howlett algorithm is used to 
+determine the minimal field over which an irreducible module may be 
+realised. If K has characteristic 0, the field over which an 
+irreducible module is given may not be minimal.
+<P>
+The irreducible modules are found using Schur's method of climbing the 
+composition series for G defined by the pc-presentation. 
+<P>
+<P>
+<P>
+<PRE>
+     Process: BoolElt                    Default: <TT>true</TT>
+</PRE>
+If the parameter <TT>Process</TT> is set true then the list is a list of 
+pairs comprising an integer and a representation.  This list or any sublist 
+of it is a suitable value for the argument L in the last versions of the 
+function, and in this case only the representations in L will be extended 
+up the series. This allows the user to inspect the representations produced 
+along the way and cull any that are uninteresting.
+<P>
+<P>
+<P>
+<PRE>
+     GaloisAction: MonStgElt             Default: "Yes"
+</PRE>
+Possible values are "Yes", "No" and "Relative". 
+The default is "Yes" for intermediate levels and "No" for the whole group.
+The value "Yes" means that it only lists one irreducible from each
+orbit of the 
+action of the absolute Galois group Gal(K/hbox(primefield(K))). 
+Setting this parameter
+to "No" turns this reduction off (thus listing all inequivalent 
+representations), while setting it to "Relative" uses the
+group Gal(K/k).
+<P>
+<P>
+<PRE>
+     MaxDimension: RngIntElt             Default: 
+</PRE>
+Restrict the irreducible to those of dimension &le; MaxDimension.
+Default is no restriction.
+<P>
+<P>
+<PRE>
+     ExactDimension: SetEnum             Default: 
+</PRE>
+If <TT>ExactDimension</TT> is assigned a set S of positive integers,
+attention is restricted to irreducible having dimensions lying in the set
+S. The default is equivalent to taking the set of all positive integers.
+<P>
+If both <TT>MaxDimension</TT> and <TT>ExactDimension</TT> are assigned values,
+then irreducible having dimensions that are either bounded by 
+<TT>MaxDimension</TT> or contained in <TT>ExactDimension</TT> are produced.
+</BLOCKQUOTE>
+<H5><A NAME = "11692">IrreducibleModulesSchur(G, K: parameters) : GrpPC, Rng -&gt;     List[GModule]</A></H5>
+<H5>IrreducibleModulesSchur(G, K, i: parameters) : GrpPC, Rng, RngIntElt -&gt; List[GModule]</H5>
+<H5>IrreducibleModulesSchur(G, K, L: parameters) : GrpPC, Rng, List[GModule] -&gt; List[GModule]</H5>
+<H5>IrreducibleModulesSchur(G, K, L, i: parameters) : GrpPC, Rng, List[GModule], RngIntElt -&gt; List[GModule]</H5>
+<BLOCKQUOTE>
+Compute irreducible modules for G over the given field K.
+All arguments and parameters are as for the absolutely irreducible case.
+<P>
+The computation proceeds by first computing the absolutely irreducible
+representations subject to the given conditions, then rewriting over the
+field K, with a consequent change of dimension of the representation.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11693">Example <TT>ModGrp_Reps (H96E15)</TT></A></H3>
+We compute representations of the dihedral group of order 20.
+<P>
+<P>
+<PRE>
+&gt; G := DihedralGroup(GrpPC, 10);
+&gt; FactoredOrder(G);
+[ &lt;2, 2&gt;, &lt;5, 1&gt; ]
+</PRE>
+<P>
+First some modular representations with characteristic 2.
+<P>
+<P>
+<PRE>
+&gt; r := IrreducibleModulesSchur(G, GF(2));
+&gt; r;
+[*
+    GModule of dimension 1 over GF(2),
+    GModule of dimension 4 over GF(2)
+*]
+&gt; r := AbsolutelyIrreducibleModulesSchur(G, GF(2));     
+&gt; r;
+[*
+    GModule of dimension 1 over GF(2),
+    GModule of dimension 2 over GF(2^2),
+    GModule of dimension 2 over GF(2^2)
+*]
+&gt; r := AbsolutelyIrreducibleModulesSchur(G, GF(2) : GaloisAction:="Yes");     
+&gt; r;
+[*
+    GModule of dimension 1 over GF(2),
+    GModule of dimension 2 over GF(2^2)
+*]
+</PRE>
+The irreducible representation of dimension 4 is not absolutely irreducible,
+as over GF(4) it splits into two Galois-equivalent representations.
+<P>
+Finding irreducible modules over the complex field is straightforward,
+despite not being able to use the complex field as the field argument. 
+We could instead specify the cyclotomic field having order equal to the 
+exponent of G, but it is preferable to ask for all absolutely irreducible 
+modules over the rationals.
+<P>
+<P>
+<PRE>
+&gt; r := AbsolutelyIrreducibleModulesSchur(G, Rationals());
+&gt; r;
+[*
+   GModule of dimension 1 over Rational Field,
+   GModule of dimension 1 over Rational Field,
+   GModule of dimension 1 over Rational Field,
+   GModule of dimension 1 over Rational Field,
+   GModule of dimension 2 over Cyclotomic Field of order 5 and degree 4,
+   GModule of dimension 2 over Cyclotomic Field of order 5 and degree 4,
+   GModule of dimension 2 over Cyclotomic Field of order 5 and degree 4,
+   GModule of dimension 2 over Cyclotomic Field of order 5 and degree 4
+*]
+&gt; Representation(r[6])(G.2);
+[zeta_5^3        0]
+[       0 zeta_5^2]
+</PRE>
+<HR>
+<H5><A NAME = "11694">AbsolutelyIrreducibleRepresentationsInit(G, F : parameters) : GrpPC, Fld -&gt; SolRepProc</A></H5>
+<H5>AbsolutelyIrreducibleModulesInit(G, F : parameters) : GrpPC, Fld -&gt; SolRepProc</H5>
+<H5>IrreducibleRepresentationsInit(G, F : parameters) : GrpPC, Fld -&gt; SolRepProc</H5>
+<H5>IrreducibleModulesInit(G, F : parameters) : GrpPC, Fld -&gt; SolRepProc</H5>
+<BLOCKQUOTE>
+Initialize a Process for calculating all linear representations of a soluble
+group G over the field F. The field F is restricted to either a finite
+field or the rationals. The parameters are as described above. 
+</BLOCKQUOTE>
+<H5><A NAME = "11695">NextRepresentation(P) : SolRepProc  -&gt; BoolElt, Map</A></H5>
+<H5>NextModule(P) : SolRepProc  -&gt; BoolElt, ModGrp</H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> and the next representation from the process P, 
+if there is one,
+or just <TT>false</TT> if the process is exhausted.
+</BLOCKQUOTE>
+<H5><A NAME = "11696">AbsolutelyIrreducibleRepresentationProcessDelete(~P) : SolRepProc -&gt;</A></H5>
+<BLOCKQUOTE>
+Free all data associated with the process P.
+</BLOCKQUOTE>
+<H4><A NAME = "11697">The Rational Algorithm</A></H4>
+
+<P>
+<P>
+<P>
+Magma V2.16 contains a new algorithm for constructing irreducible
+rational representations of an arbitrary finite group.
+This algorithm is now selected by default in the function
+<TT>IrreducibleModules(G, K)</TT> when the field K is Q.
+<P>
+Given an irreducible complex character for a group G, the sum of its
+Galois orbit gives an <I>irreducible rational character</I> for G.
+The Schur index of an irreducible rational character &chi;
+is defined to be the Schur index of an irreducible complex character whose
+Galois orbit sum is &chi;.
+<P>
+We call the sequence of all possible irreducible rational
+characters for G (sorted by degree) the <I>rational character table</I> of
+G.
+The irreducible modules returned by
+<TT>IrreducibleModules(G, RationalField())</TT> always match the
+rational character table.
+
+
+<H5><A NAME = "11698">IrreducibleModules(G, Q : parameters) : Grp, FldRat -&gt; SeqEnum, SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a finite group G, this function returns a sequence L of all
+irreducible rational K[G]-modules, and also the rational character
+table of G as a sequence C, which matches L.
+The character of the i-th module L[i] is always s<sub>i</sub> .C[i],
+where s<sub>i</sub> is the Schur index of C[i].  Thus the dimension of the
+irreducible module L[i] is s<sub>i</sub> .Deg(C[i]).
+<P>
+<P>
+<P>
+<PRE>
+     MaxDegree: RngIntElt                Default: 0
+</PRE>
+Setting the parameter <TT>MaxDegree</TT> to a positive integer D instructs the
+algorithm not to spend effort on constructing irreducible modules whose
+corresponding irreducible rational characters have degree greater than
+D.  Note that irreducible modules whose character degrees greater than
+D may be returned in any case, if they are easily constructed
+(often as side effects of operations used to construct smaller-dimensional
+modules).
+<P>
+<P>
+<PRE>
+     Characters: [AlgChtrElt]            Default: 
+</PRE>
+Setting the parameter <TT>Characters</TT> to a set or sequence S of
+characters for the group G instructs the algorithm to attempt to
+construct only the irreducible modules whose characters are in S.
+Each character in S may either be an irreducible rational character,
+or a (complex) ordinary character &chi;, in which case the irreducible
+rational character corresponding to &chi; (the orbit sum of &chi;)
+is used.  As for the parameter <TT>MaxDegree</TT>, irreducible modules
+whose characters are not in S may be returned in any case, if they are
+easily constructed or are needed as intermediate modules to construct
+the desired modules.
+<P>
+<P>
+<PRE>
+     CharacterDegrees: [RngIntElt]       Default: 
+</PRE>
+Setting the parameter <TT>CharacterDegrees</TT> to a set or sequence I of
+positive integers instructs the algorithm to attempt to construct only the
+irreducible modules whose character degrees are in S.  This is
+equivalent to setting the parameter <TT>Characters</TT> to
+<TT>[c: c in RationalCharacterTable(G) | Degree(c) in I]</TT>.
+<P>
+<P>
+<PRE>
+     UseInduction: BoolElt               Default: <TT>true</TT>
+</PRE>
+By default, as the algorithm proceeds, it automatically searches for
+subgroups H<sub>i</sub> of G such that irreducible rational H<sub>i</sub>-modules
+may be induced up to G to yield G-modules from which irreducible
+G-modules may be computed.  In general, this method is very effective
+(and often yields modules for G with small entries) but can be
+very slow for some groups (particularly when G has many subgroups).
+Thus setting the parameter <TT>UseInduction</TT> to {<TT>false</TT>} will force
+the algorithm not to use induction.
+</BLOCKQUOTE>
+<H5><A NAME = "11699">RationalCharacterTable(G) : Grp -&gt; SeqEnum, SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a finite group G, return the rational character table of
+G as a sequence C of the irreducible rational characters of G
+(sorted by degree), and also a index sequence I, such that for
+each i, C[i] is the sum of the Galois orbit of T[I[i]],
+where T is the ordinary (complex) character table of G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11700">Example <TT>ModGrp_IrreducibleModules (H96E16)</TT></A></H3>
+We compute all irreducible rational modules for PSL(3, 3) and
+note that the characters of the resulting modules match the entries
+in the rational character table.
+<P>
+<P>
+<PRE>
+&gt; G := PSL(3, 3); #G;
+5616
+&gt; T := CharacterTable(G); [Degree(x): x in T];
+[ 1, 12, 13, 16, 16, 16, 16, 26, 26, 26, 27, 39 ]
+&gt; C := RationalCharacterTable(G); C;
+[
+    ( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ),
+    ( 12, 4, 3, 0, 0, 1, 0, 0, -1, -1, -1, -1 ),
+    ( 13, -3, 4, 1, 1, 0, -1, -1, 0, 0, 0, 0 ),
+    ( 26, 2, -1, -1, 2, -1, 0, 0, 0, 0, 0, 0 ),
+    ( 27, 3, 0, 0, -1, 0, -1, -1, 1, 1, 1, 1 ),
+    ( 39, -1, 3, 0, -1, -1, 1, 1, 0, 0, 0, 0 ),
+    ( 52, -4, -2, -2, 0, 2, 0, 0, 0, 0, 0, 0 ),
+    ( 64, 0, -8, 4, 0, 0, 0, 0, -1, -1, -1, -1 )
+]
+&gt; time L := IrreducibleModules(G, RationalField());
+Time: 0.760
+&gt; L;
+[
+    GModule of dimension 1 over Rational Field,
+    GModule of dimension 12 over Rational Field,
+    GModule of dimension 13 over Rational Field,
+    GModule of dimension 26 over Rational Field,
+    GModule of dimension 27 over Rational Field,
+    GModule of dimension 39 over Rational Field,
+    GModule of dimension 52 over Rational Field,
+    GModule of dimension 64 over Rational Field
+]
+&gt; [Character(M): M in L];
+[
+    ( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ),
+    ( 12, 4, 3, 0, 0, 1, 0, 0, -1, -1, -1, -1 ),
+    ( 13, -3, 4, 1, 1, 0, -1, -1, 0, 0, 0, 0 ),
+    ( 26, 2, -1, -1, 2, -1, 0, 0, 0, 0, 0, 0 ),
+    ( 27, 3, 0, 0, -1, 0, -1, -1, 1, 1, 1, 1 ),
+    ( 39, -1, 3, 0, -1, -1, 1, 1, 0, 0, 0, 0 ),
+    ( 52, -4, -2, -2, 0, 2, 0, 0, 0, 0, 0, 0 ),
+    ( 64, 0, -8, 4, 0, 0, 0, 0, -1, -1, -1, -1 )
+]
+</PRE>
+<HR>
+<H3><A NAME = "11701">Example <TT>ModGrp_IrreducibleModules2 (H96E17)</TT></A></H3>
+For large groups, one can use the parameter <TT>MaxDegree</TT> to compute the
+irreducible modules of reasonable dimension.
+<P>
+<P>
+<PRE>
+&gt; load m23;
+Loading "/home/magma/libs/pergps/m23"
+M23 - Mathieu group on 23 letters - degree 23 
+Order 10 200 960 = 2^7 * 3^2 * 5 * 7 * 11 * 23;  Base 1,2,3,4,5,6
+Group: G
+&gt; T := CharacterTable(G); [Degree(x): x in T];
+[ 1, 22, 45, 45, 230, 231, 231, 231, 253, 770, 770,
+896, 896, 990, 990, 1035, 2024 ]
+&gt; C := RationalCharacterTable(G); C;
+[
+    ( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ),
+    ( 22, 6, 4, 2, 2, 0, 1, 1, 0, 0, 0, -1, -1, -1, -1, -1, -1 ),
+    ( 90, -6, 0, 2, 0, 0, -1, -1, -2, 2, 2, 1, 1, 0, 0, -2, -2 ),
+    ( 230, 22, 5, 2, 0, 1, -1, -1, 0, -1, -1, 1, 1, 0, 0, 0, 0 ),
+    ( 231, 7, 6, -1, 1, -2, 0, 0, -1, 0, 0, 0, 0, 1, 1, 1, 1 ),
+    ( 253, 13, 1, 1, -2, 1, 1, 1, -1, 0, 0, -1, -1, 1, 1, 0, 0 ),
+    ( 462, 14, -6, -2, 2, 2, 0, 0, -2, 0, 0, 0, 0, -1, -1, 2, 2 ),
+    ( 1035, 27, 0, -1, 0, 0, -1, -1, 1, 1, 1, -1, -1, 0, 0, 0, 0 ),
+    ( 1540, -28, 10, -4, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1 ),
+    ( 1792, 0, -8, 0, 2, 0, 0, 0, 0, -1, -1, 0, 0, 2, 2, -2, -2 ),
+    ( 1980, -36, 0, 4, 0, 0, -1, -1, 0, 0, 0, -1, -1, 0, 0, 2, 2 ),
+    ( 2024, 8, -1, 0, -1, -1, 1, 1, 0, 0, 0, 1, 1, -1, -1, 0, 0 )
+]
+&gt; Q := RationalField();
+&gt; time L := IrreducibleModules(G, Q: MaxDegree := 253);
+Time: 23.400
+&gt; L;
+[
+    GModule of dimension 1 over Rational Field,
+    GModule of dimension 22 over Rational Field,
+    GModule of dimension 90 over Rational Field,
+    GModule of dimension 230 over Rational Field,
+    GModule of dimension 231 over Rational Field,
+    GModule of dimension 253 over Rational Field,
+    undef,
+    undef,
+    undef,
+    undef,
+    GModule of dimension 1980 over Rational Field
+]
+</PRE>
+Note that the module of dimension 1980 is included (it was easily
+constructed as the tensor product of modules of dimension 20 and 90).
+<HR>
+<PRE></PRE> <A  HREF = "text1035.htm">[Next]</A><A  HREF = "text1033.htm">[Prev]</A> <A  HREF = "text1035.htm">[Right]</A> <A  HREF = "text1033.htm">[Left]</A> <A  HREF = "text1028.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

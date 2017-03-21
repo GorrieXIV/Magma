@@ -1,0 +1,278 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Galois Groups</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text448.htm">[Next]</A><A  HREF = "text446.htm">[Prev]</A> <A  HREF = "text448.htm">[Right]</A> <A  HREF = "text446.htm">[Left]</A> <A  HREF = "text442.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "4606">Galois Groups</A></H3>
+
+<P>
+<P>
+<P>
+Finding Galois groups (of normal closures) of polynomials over
+rational function fields over k&isin;{Q, F<sub>q</sub>}, where F<sub>q</sub> denotes
+the finite field of characteristic p with q=p<sup>r</sup>, r&isin;Z<sub>&gt; 0</sub>
+is a hard problem, in general. All practical algorithms used the
+classification of transitive groups, which is known up to degree 31
+<A  HREF = "text441.htm#bib_conwayhulpkemckay">[CHM98]</A>.  These algorithms fall into two groups: The
+absolute resolvent method <A  HREF = "text441.htm#bib_MK2">[SM85]</A> and the method of Stauduhar
+<A  HREF = "text441.htm#bib_Stau">[Sta73]</A>.
+<P>
+The Magma implementation is based on an extension of the method of
+Stauduhar by Kl&uuml;ners, Gei&szlig;ler <A  HREF = "text441.htm#bib_geissler">[Gei03]</A>, <A  HREF = "text441.htm#bib_GK1">[GK00]</A> 
+and, more recently, Fieker <A  HREF = "text441.htm#bib_fieker_galois">[FK14]</A> and Sutherland <A  HREF = "text441.htm#bib_suth_galois">[Sut15]</A>.
+There is no longer any limit on the degree of the polynomials or fields
+as this algorithm does not use the classification of transitive groups.
+In contrast to the absolute resolvent method, it also provides
+the explicit action on the roots of the polynomial f which generates
+the function field.  The algorithm strongly depends on the fact that
+the corresponding problem is implemented for the residue class field.
+<P>
+Roughly speaking, the method of Stauduhar traverses the subgroup
+lattice of transitive permutation groups of degree n from the
+symmetric group to the actual Galois group.  This is done by using
+so-called relative resolvents. Resolvents are polynomials whose
+splitting fields are subfields of the splitting field of the given
+polynomial which are computed using approximations of the roots of the
+polynomial f.
+<P>
+If the field (or the field defined by a polynomial) has subfields 
+(i.e. the Galois group is imprimitive) the current implementation 
+changes the starting point of the algorithm
+in the subgroup lattice, to get as close as possible to the actual
+Galois group. This is done via computation of subfields of a stem
+field of f, that is the field extension of k(t) which we get by
+adjoining a root of f to k(t). 
+The Galois group is found as a subgroup of the
+intersection of suitable wreath products (using the knowledge of the
+subfields) which may be easily computed.
+<P>
+If the field (or the field defined by a polynomial) does not have subfields
+(i.e. the Galois group is primitive)
+we use a combination of the
+method of Stauduhar and the absolute resolvent method.  The Frobenius
+automorphism of the underlying field already determines a subgroup of
+the Galois group, which is used to speed up computations in the
+primitive case.  
+<P>
+The algorithms used here are similar to those use for number fields.
+See also Chapter <A  HREF = "text398.htm#4101">GALOIS GROUPS AND AUTOMORPHISMS</A>. In addition to the intrinsics described 
+here, some of the intrinsics described in 
+Section <A  HREF = "text400.htm#4123">Galois Groups</A> apply to polynomials over function fields also.
+
+
+<H5><A NAME = "4607">GaloisGroup(f) : RngUPolElt -&gt; GrpPerm, [ RngElt ], GaloisData</A></H5>
+
+<PRE>    Prime: RngElt                       Default: </PRE>
+
+<PRE>    NextPrime: UserProgram              Default: </PRE>
+
+<PRE>    ProofEffort: RngIntElt              Default: 10</PRE>
+
+<PRE>    Ring: GaloisData                    Default: </PRE>
+
+<PRE>    ShortOK: BoolElt                    Default: <TT>false</TT></PRE>
+
+<PRE>    Old: BoolElt                        Default: <TT>false</TT></PRE>
+
+<PRE>    SetVerbose("GaloisGroup", n):       Maximum: 5</PRE>
+<BLOCKQUOTE>
+Given a separable, (irreducible if k is Q) polynomial f(t, x) of degree n
+over the rational function field k(t),  k&isin;{Q, F<sub>q</sub>}, 
+or an extension K thereof (if k = F<sub>q</sub>) this function returns a permutation 
+group that forms the Galois group of 
+a splitting field for f
+in some algebraic closure of K. 
+The permutation group acts on the points 1, 2, ..., n.  The roots of f are calculated in the process, expressed
+as power series and returned as the second argument: For a prime
+polynomial p(t)&isin;k(t) denote by bar(N) the splitting field of
+the polynomial f(t, x) mod p(t). It is well known that the roots of
+the polynomial f(t, x) can be expressed as power series in
+bar(N)[[t]]. 
+We embed bar(N) in an unramified
+p-adic extension. 
+The third return value is a structure containing
+information about the computation that can be used to compute the
+roots of f to arbitrary precision. This can be used for example
+in <A  HREF = "text400.htm#RngOrdGal:GaloisSubgroup">GaloisSubgroup</A> to compute arbitrary subfields
+of the splitting field.
+<P>
+ The required precision increases linearly with the index of the
+subgroups, which are passed traversing the subgroup lattice. Therefore
+computations may slow down considerably for higher degrees and large
+indices. This expense can be reduced by setting <TT>ShortOK</TT> to 
+<TT>true</TT>, in which case a descent using only the short 
+cosets <A  HREF = "text441.htm#bib_elsenhans_short">[Els14]</A> will be considered as reliable as a descent 
+using all cosets.
+<P>
+ The default version employs series computations over either
+unramified p-adic fields (k=Q) or finite fields (k=F<sub>q</sub>). 
+The prime polynomial is determined during a
+Galois group computation in such a way that f is squarefree modulo
+p.
+<P>
+The prime to use for splitting field computations can be given via the parameter
+<TT>Prime</TT>. The method of choosing primes for splitting field computations can
+be given by the parameter <TT>NextPrime</TT>. An indication of how much effort 
+the computation should make to prove the results can be provided by altering
+the parameter <TT>ProofEffort</TT>, it should be increased if more effort should
+be made.
+<P>
+ If <TT>Old</TT> is set to <TT>true</TT>, then the old version is called if available.
+Since the return values of the new version differ substantially from the 
+old one, this may be used in old applications.
+</BLOCKQUOTE>
+<H5><A NAME = "4608">GaloisGroup(F) : FldFun -&gt; GrpPerm, [RngElt], GaloisData</A></H5>
+<H5>GaloisGroup(F) : FldFun[FldFun[FldFunRat]] -&gt; GrpPerm, [RngElt], GaloisData</H5>
+<H5>GaloisGroup(F) : FldFun[FldFin] -&gt; GrpPerm, [RngElt], GaloisData</H5>
+<H5>GaloisGroup(F) : FldFun[FldFunRat] -&gt; GrpPerm, [RngElt], GaloisData</H5>
+<H5>GaloisGroup(F) : FldFun[FldRat] -&gt; GrpPerm, [RngElt], GaloisData</H5>
+
+<PRE>    Prime: RngElt                       Default: </PRE>
+
+<PRE>    NextPrime: UserProgram              Default: </PRE>
+
+<PRE>    ProofEffort: RngIntElt              Default: 10</PRE>
+
+<PRE>    Ring: GaloisData                    Default: </PRE>
+
+<PRE>    ShortOK: BoolElt                    Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a function field F defined as an extension of either a rational function
+field or a global algebraic function field by one polynomial compute the 
+Galois group of a normal closure of F.
+<P>
+The prime to use for splitting field computations can be given via the parameter
+<TT>Prime</TT>. The method of choosing primes for splitting field computations can
+be given by the parameter <TT>NextPrime</TT>. An indication of how much effort 
+the computation should make to prove the results can be provided by altering
+the parameter <TT>ProofEffort</TT>, it should be increased if more effort should
+be made. If the parameter <TT>ShortOK</TT> is set to <TT>true</TT> then a descent using
+only the short cosets <A  HREF = "text441.htm#bib_elsenhans_short">[Els14]</A>
+will be considered as reliable as a descent using all cosets.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "4609">Example <TT>FldFunG_GaloisGroups (H44E13)</TT></A></H3>
+A Galois group computation is shown below.
+<P>
+<P>
+<PRE>
+&gt; k&lt;t&gt;:= FunctionField(Rationals());
+&gt; R&lt;x&gt;:= PolynomialRing(k);
+&gt; f:= x^15 + (-1875*t^2 - 125)*x^3 + (4500*t^2 + 300)*x^2 + 
+&gt;     (-3600*t^2 - 240)*x + 960*t^2+ 64;
+&gt; G, r, S:= GaloisGroup(f);
+&gt; TransitiveGroupDescription(G);
+1/2[S(5)^3]S(3)
+&gt; A := Universe(r);
+&gt; AssignNames(~A,  ["t"]);
+&gt; A;
+Power series ring in t over Unramified extension
+defined by the polynomial (1 + O(191^20))*x^4 +
+    O(191^20)*x^3 + (7 + O(191^20))*x^2 + (100 +
+    O(191^20))*x + 19 + O(191^20)
+ over Unramified extension defined by the
+polynomial (1 + O(191^20))*x + 190 + O(191^20)
+ over pAdicField(191)
+&gt; r[1];
+&gt; r[1];
+-54*$.1^3 + 68*$.1^2 + 31*$.1 - 12 + O(191) +
+    (-15*$.1^3 - 66*$.1^2 - 2*$.1 - 39 + O(191))*t
+    + O(t^2)
+&gt; S;
+GaloisData of type p-Adic (FldFun over Q)
+&gt; TransitiveGroupIdentification(G);
+99 15
+</PRE>
+<HR>
+<H3><A NAME = "4610">Example <TT>FldFunG_GaloisGroups2 (H44E14)</TT></A></H3>
+Some examples for polynomials over rational function fields over finite fields
+<P>
+<P>
+<PRE>
+&gt; k&lt;x&gt;:= FunctionField(GF(1009));
+&gt; R&lt;y&gt;:= PolynomialRing(k);
+&gt; f:= y^10 + (989*x^4 + 20*x^3 + 989*x^2 + 20*x + 989)*y^8 + (70*x^8 + 
+&gt; 869*x^7 + 310*x^6 + 529*x^5 + 600*x^4 + 479*x^3 + 460*x^2 + 719*x + 
+&gt; 120)*y^6 + (909*x^12 + 300*x^11 + 409*x^10 + 1000*x^9 + 393*x^8 + 
+&gt; 657*x^7 + 895*x^6 + 764*x^5 + 420*x^4 + 973*x^3 + 177*x^2 + 166*x + 
+&gt; 784)*y^4 + (65*x^16 + 749*x^15 + 350*x^14 + 909*x^13 + 484*x^12 + 
+&gt; 452*x^11 + 115*x^10 + 923*x^9 + 541*x^8 + 272*x^7 + 637*x^6 + 314*x^5 + 
+&gt; 724*x^4 + 490*x^3 + 948*x^2 + 99*x + 90)*y^2 + 993*x^20 + 80*x^19 + 
+&gt; 969*x^18 + 569*x^17 + 895*x^16 + 101*x^15 + 742*x^14 + 587*x^13 + 
+&gt; 55*x^12+ 437*x^11 + 97*x^10 + 976*x^9 + 62*x^8 + 171*x^7 + 930*x^6 + 
+&gt; 604*x^5 + 698*x^4 + 60*x^3 + 60*x^2 + 1004*x + 1008;
+&gt; G, r, p:= GaloisGroup(f);
+&gt; t1, t2:= TransitiveGroupIdentification(G);
+&gt; t1;
+1
+&gt; t2;
+10
+</PRE>
+And a second one.
+<P>
+<P>
+<PRE>
+&gt; k&lt;t&gt;:= FunctionField(GF(7));
+&gt; R&lt;x&gt;:= PolynomialRing(k);
+&gt; f:= x^12 + x^10 + x^8 + (6*t^2 + 3)*x^6 + (4*t^4 + 6*t^2 + 1)*x^4 + 
+&gt; (5*t^4 + t^2)*x^2 + 2*t^4;
+&gt; G, r, p:= GaloisGroup(f);
+&gt; G;
+Permutation group G acting on a set of cardinality 12
+    (2, 8)(3, 9)(4, 10)(5, 11)
+    (1, 5, 9)(2, 6, 10)(3, 7, 11)(4, 8, 12)
+    (1, 12)(2, 3)(4, 5)(6, 7)(8, 9)(10, 11)
+&gt; A := Universe(r);
+&gt; AssignNames(~A,  ["t"]);
+&gt; r;
+[
+    w^950*t^13 + w^1350*t^12 + w^1900*t^11 + w^500*t^10 + w^2050*t^9 + 2*t^8 + 
+        w^1350*t^7 + w^300*t^6 + w^350*t^5 + w^1450*t^4 + w^950*t^3 + w^1000*t^2
+        + w^1100*t + w^550,
+    w^1175*t^13 + w^1825*t^12 + w^1675*t^11 + w^725*t^10 + w^1025*t^9 + 
+        w^1825*t^8 + w^1325*t^7 + w^775*t^6 + w^1775*t^5 + w^1325*t^4 + 
+        w^1575*t^3 + w^1175*t^2 + w^2225*t + w^2275,
+    w^25*t^13 + w^1075*t^12 + w^425*t^11 + w^925*t^10 + w^225*t^9 + w^2375*t^8 +
+        w^2125*t^7 + w^625*t^6 + w^1175*t^5 + w^425*t^4 + w^575*t^3 + w^825*t^2 
+        + w^1175*t + w^2375,
+    w^175*t^13 + w^1525*t^12 + w^575*t^11 + w^475*t^10 + w^1575*t^9 + w^1025*t^8
+        + w^475*t^7 + w^775*t^6 + w^1025*t^5 + w^1775*t^4 + w^1625*t^3 + 
+        w^2175*t^2 + w^1025*t + w^1025,
+    w^1025*t^13 + w^1975*t^12 + w^2125*t^11 + w^1475*t^10 + w^2375*t^9 + 
+        w^1975*t^8 + w^2075*t^7 + w^1825*t^6 + w^425*t^5 + w^875*t^4 + 
+        w^1425*t^3 + w^2225*t^2 + w^1175*t + w^325,
+    w^650*t^13 + w^2250*t^12 + w^100*t^11 + w^1100*t^10 + w^1150*t^9 + 2*t^8 + 
+        w^1050*t^7 + w^2100*t^6 + w^1250*t^5 + w^550*t^4 + w^650*t^3 + 
+        w^2200*t^2 + w^1700*t + w^1450,
+    w^2150*t^13 + w^150*t^12 + w^700*t^11 + w^1700*t^10 + w^850*t^9 + 5*t^8 + 
+        w^150*t^7 + w^1500*t^6 + w^1550*t^5 + w^250*t^4 + w^2150*t^3 + 
+        w^2200*t^2 + w^2300*t + w^1750,
+    w^2375*t^13 + w^625*t^12 + w^475*t^11 + w^1925*t^10 + w^2225*t^9 + w^625*t^8
+        + w^125*t^7 + w^1975*t^6 + w^575*t^5 + w^125*t^4 + w^375*t^3 + 
+        w^2375*t^2 + w^1025*t + w^1075,
+    w^1225*t^13 + w^2275*t^12 + w^1625*t^11 + w^2125*t^10 + w^1425*t^9 + 
+        w^1175*t^8 + w^925*t^7 + w^1825*t^6 + w^2375*t^5 + w^1625*t^4 + 
+        w^1775*t^3 + w^2025*t^2 + w^2375*t + w^1175,
+    w^1375*t^13 + w^325*t^12 + w^1775*t^11 + w^1675*t^10 + w^375*t^9 + 
+        w^2225*t^8 + w^1675*t^7 + w^1975*t^6 + w^2225*t^5 + w^575*t^4 + 
+        w^425*t^3 + w^975*t^2 + w^2225*t + w^2225,
+    w^2225*t^13 + w^775*t^12 + w^925*t^11 + w^275*t^10 + w^1175*t^9 + w^775*t^8 
+        + w^875*t^7 + w^625*t^6 + w^1625*t^5 + w^2075*t^4 + w^225*t^3 + 
+        w^1025*t^2 + w^2375*t + w^1525,
+    w^1850*t^13 + w^1050*t^12 + w^1300*t^11 + w^2300*t^10 + w^2350*t^9 + 5*t^8 +
+        w^2250*t^7 + w^900*t^6 + w^50*t^5 + w^1750*t^4 + w^1850*t^3 + w^1000*t^2
+        + w^500*t + w^250
+]
+&gt; p;
+t^2 + 4
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text448.htm">[Next]</A><A  HREF = "text446.htm">[Prev]</A> <A  HREF = "text448.htm">[Right]</A> <A  HREF = "text446.htm">[Left]</A> <A  HREF = "text442.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

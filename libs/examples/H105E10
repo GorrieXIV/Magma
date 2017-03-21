@@ -1,0 +1,35 @@
+"Source: Text/LieTheory/GrpRfl.text";
+"Line: 1037";
+"Date: Wed Jun  8 14:05:44 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/LieTheory/GrpRfl.text, line: 1037
+// Example: H105E10 ()
+print "Example: H105E10";
+ei := GetEchoInput();
+SetEchoInput(true);
+G := ComplexReflectionGroup("O",4);
+print #[c[3] : c in Classes(G) | IsReflection(c[3])];
+assert $1 eq 1;
+R := Class(G,G.1); #R;
+#G;
+assert $1 eq 46080;
+L := [sub<G|G.1>];
+layers := [L];
+n := 0;
+while true do
+  n +:= 1;
+  nextlayer := [];
+  for H in layers[n] do
+    for A in {sub<G|H,s> : s in R | s notin H} do
+      if forall{B : B in L | not IsConjugate(G,A,B)} then
+        Append(~nextlayer,A);
+        Append(~L,A);
+      end if;
+    end for;
+  end for;
+  if IsEmpty(nextlayer) then break; end if;
+  Append(~layers,nextlayer);
+  print n+1,"generators";
+  print [#A : A in nextlayer];
+end while;
+SetEchoInput(ei);

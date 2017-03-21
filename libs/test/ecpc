@@ -1,0 +1,158 @@
+/*
+Elliptic Curves Point Counting test.
+AKS 09/07/99.
+*/
+
+
+procedure test_curve(E)
+    K<w> := BaseRing(E);
+
+    printf "Test: %m\n", E;
+    T := Cputime();
+
+    o := #E;
+    one := E!0;
+
+    for i := 1 to 10 do
+        assert o * Random(E) eq one;
+    end for;
+
+    if o le 10^40 then
+	f := FactoredOrder(E);
+	assert FactorizationToInteger(f) eq o;
+
+	for i := 1 to 5 do
+	    p := Random(E);
+	    po := Order(p);
+	    pf := FactoredOrder(p);
+	    assert FactorizationToInteger(pf) eq po;
+	    assert po * p eq one;
+
+	    for t in pf do
+		assert (po div t[1]) * p ne one;
+	    end for;
+	end for;
+
+	G, f := AbelianGroup(E);
+	assert Ngens(G) eq Ngens(E);
+	assert [ f(G.i) : i in [1..Ngens(G)] ] eq Generators(E);
+	assert forall{i: i in [1 .. Ngens(G)] | Order(f(G.i)) eq Order(G.i)};
+	assert [f(G.i): i in [1 .. Ngens(G)]] eq Generators(E);
+	assert f(G!0) eq E!0;
+	for i := 1 to 5 do
+	    x := Random(G);
+	    y := Random(G);
+	    assert f(x + y) eq f(x) + f(y);
+	end for;
+    end if;
+
+    printf "Test time: %o\n", Cputime(T);
+end procedure;
+
+procedure test_field(K)
+    repeat
+	l, E := IsEllipticCurve([1, 0, 0, 0, Random(K)]);
+    until l;
+    test_curve(E);
+end procedure;
+
+random_prime := func<n | NextPrime(Random(n div 2, n))>;
+
+for k in [10 .. 20] do
+    repeat
+	p := RandomPrime(k);
+	L := Factorization(p + 1);
+	n := L[#L, 1];
+    until n ge 2^(k - 4);
+    E := BaseExtend(SupersingularEllipticCurve(GF(p)), GF(p^2));
+    test_curve(E);
+end for;
+
+for i := 1 to 40 do
+    test_field(GF(2, i));
+    test_field(GF(random_prime(2^i)));
+end for;
+
+for i := 1 to 10 do
+    test_field(GF(3, i));
+    test_field(GF(23, i));
+end for;
+
+for i := 1 to 10 do
+    test_field(GF(random_prime(10^10)));
+end for;
+
+for i := 1 to 3 do
+    test_field(GF(random_prime(10^20)));
+end for;
+
+for i := 1 to 2 do
+    test_field(GF(random_prime(10^30)));
+end for;
+
+for i := 1 to 1 do
+    test_field(GF(random_prime(10^40)));
+end for;
+
+p := PreviousPrime(2^30);
+for i := 1 to 3 do
+    test_field(GF(p, i));
+end for;
+
+
+"Weil Pairing";
+
+for j in [1..3] do
+    p := RandomPrime(16);
+    FF := GF(p^2);                               
+    repeat
+       E := SupersingularEllipticCurve(FF);
+       N := #E; 
+    until IsSquare(N);
+    E;
+    fact := Factorization(#E);
+    n := fact[#fact][1];
+    m := Isqrt(N) div n;
+    for i in [1..3] do
+       P := m*Random(E);
+       Q := m*Random(E);
+       assert IsDivisibleBy(n, Order(P))
+	  and IsDivisibleBy(n, Order(Q));
+       z := WeilPairing(P,Q,n); 
+       assert z^n eq 1;
+       assert WeilPairing(P, Id(E), n) eq 1;
+       assert WeilPairing(Id(E), Q, n) eq 1;
+       for r in [1..5] do
+	   assert WeilPairing(P,r*P,n) eq 1;
+	   assert WeilPairing(Q,r*Q,n) eq 1;
+	   assert WeilPairing(P,r*P+Q,n) eq z;
+	   assert WeilPairing(P+r*Q,Q,n) eq z;
+	   assert WeilPairing(r*P,Q,n) eq z^r;
+	   assert WeilPairing(P,r*Q,n) eq z^r;
+       end for;
+    end for;
+end for;
+
+"ECM factor";
+
+p := 709601635082267320966424084955776789770864725643996885415676682297;
+time EO := ECMFactoredOrder(p, 1875377824);
+assert EO eq
+    [ <2, 2>, <3, 1>, <11243, 1>, <336181, 1>, <844957, 1>, <1866679, 1>,
+    <6062029, 1>, <7600843, 1>, <8046121, 1>, <8154571, 1>, <13153633, 1>,
+    <249436823, 1> ];
+
+for i in [1..100] do
+    p:=NextPrime(Random(2^50)); A:=Random(p); B:=Random(p);
+    E:=EllipticCurve([0,0,0,A,B]); x:=FrobeniusTraceDirect(E,p);
+    assert x^2 lt 4*p; Ep:=ChangeRing(E,GF(p));
+    for j in [1..10] do
+	P:=Random(Ep); assert (p+1-x)*P eq Identity(Ep);
+    end for;
+end for;
+
+ConjecturalRegulator(EllipticCurve([0,-1,1,0,0]) : Precision:=8);
+ConjecturalRegulator(EllipticCurve([0,-1,1,0,0]) : Precision:=21);
+ConjecturalRegulator(EllipticCurve([0,-1,1,0,0]) : Precision:=35);
+ConjecturalRegulator(EllipticCurve([0,-1,1,0,0]) : Precision:=50);
+

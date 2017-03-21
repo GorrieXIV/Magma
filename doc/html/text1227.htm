@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Hilbert Series and Hilbert  Polynomial</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1228.htm">[Next]</A><A  HREF = "text1226.htm">[Prev]</A> <A  HREF = "text1228.htm">[Right]</A> <A  HREF = "text1226.htm">[Left]</A> <A  HREF = "text1214.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "13637">Hilbert Series and Hilbert  Polynomial</A></H3>
+
+<P>
+<P>
+Let I be a <I>homogeneous</I> ideal of the graded polynomial ring
+P = K[x<sub>1</sub>, ..., x<sub>n</sub>], where K is a field.  Then the quotient ring P/I
+is a <I>graded</I> vector space in the following way: P/I is the direct sum of
+the vector spaces V<sub>d</sub> for d = 0, 1, ... where
+V<sub>d</sub> is the K-vector space consisting of all homogeneous polynomials in
+P/I (i.e., reduced residues of polynomials of P with respect to I)
+of weighted degree d.  The <I>Hilbert Series</I> of the graded vector
+space P/I is the generating function
+ H<sub>P/I</sub>(t) = &sum;<sub>d=0</sub><sup>&infin;</sup> dim(V<sub>d</sub>) t<sup>d</sup>. 
+The Hilbert series can be written as a rational function in
+the variable t.
+<P>
+If the weights on the variables of P are all 1, then there also exists
+the Hilbert polynomial F<sub>P/I</sub>(d) corresponding to
+the Hilbert series H<sub>P/I</sub>(t) which is a univariate polynomial in Q[d]
+such that F<sub>P/I</sub>(i) is equal to the coefficient of t<sup>i</sup> in the
+Hilbert series for all i &ge;k for some fixed k.
+
+
+<H5><A NAME = "13638"></A><A NAME = "dpoly_ideal:HilbertSeries">HilbertSeries</A>(I) : RngMPol -&gt; FldFunUElt</H5>
+<BLOCKQUOTE>
+Given an homogeneous ideal I of a polynomial ring P over a field, return the
+Hilbert series H<sub>P/I</sub>(t) of the quotient ring P/I as an element of the
+univariate function field Z(t) over the ring of integers.
+The algorithm implemented is that given in <A  HREF = "text1213.htm#bib_BayerStillman">[BS92]</A>.
+<P>
+Note that this is equivalent to
+<A  HREF = "text1265.htm#PMod:HilbertSeries">HilbertSeries</A><TT>(QuotientModule(I))</TT>, while if one
+wishes the Hilbert series of I considered as a P-module, one
+should call <A  HREF = "text1265.htm#PMod:HilbertSeries">HilbertSeries</A><TT>(Submodule(I))</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "13639">HilbertSeries(I, p) : RngMPol, RngIntElt -&gt; RngSerLaurElt</A></H5>
+<BLOCKQUOTE>
+Given an homogeneous ideal I of a polynomial ring P over a field,
+return the Hilbert series H<sub>P/I</sub>(t) of the quotient ring P/I as a
+power series to precision p.
+</BLOCKQUOTE>
+<H5><A NAME = "13640"></A><A NAME = "dpoly_ideal:HilbertDenominator">HilbertDenominator</A>(I) : RngMPol -&gt; RngUPol</H5>
+<BLOCKQUOTE>
+Given an homogeneous ideal I of a polynomial ring P over a field,
+return the unreduced Hilbert denominator D of P/I
+(as a univariate polynomial over the ring of integers).  
+The denominator D equals
+&prod;<sub>i=1</sub><sup>n</sup>
+(1 - t<sup>w<sub>i</sub></sup>), where n is the rank of P and w<sub>i</sub> is the weight of
+the i-th variable (1 by default).
+</BLOCKQUOTE>
+<H5><A NAME = "13641">HilbertNumerator(I) : RngMPol -&gt; RngUPol</A></H5>
+<BLOCKQUOTE>
+Given an homogeneous ideal I of a polynomial ring P over a field,
+return the unreduced Hilbert numerator N of P/I (as a univariate
+polynomial over the ring of integers).  The numerator N equals D x  x H<sub>P/I</sub>(t), where D is the unreduced Hilbert denominator above.
+Computing with the unreduced numerator is often more convenient.
+</BLOCKQUOTE>
+<H5><A NAME = "13642">HilbertPolynomial(I) : RngMPol -&gt; RngUPolElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given an homogeneous ideal I of a polynomial ring P over a field with
+weight 1 for each variable, return the
+Hilbert polynomial H(d) of the quotient ring P/I as an element of the
+univariate polynomial ring Q[d], together with the index
+of regularity of P/I (the minimal integer k &ge;0
+such that H(d) agrees with the Hilbert function of P/I at d for all
+d &ge;k).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13643">Example <TT>Ideal_Hilbert (H112E15)</TT></A></H3>
+We compute the Hilbert series and Hilbert polynomial for an ideal
+corresponding to the square of a matrix (see <A  HREF = "text1213.htm#bib_BayerStillman">[BS92]</A>).
+<P>
+<P>
+<PRE>
+&gt; MatSquare := function(n)
+&gt;     P := PolynomialRing(RationalField(), n * n, "grevlex");
+&gt;     AssignNames(
+&gt;         ~P,
+&gt;         ["x" cat IntegerToString(i) cat IntegerToString(j): i, j in [1..n]]
+&gt;     );
+&gt;     M := MatrixRing(P, n);
+&gt;     X := M ! [P.((i - 1) * n + j): i, j in [1 .. n]];
+&gt;     Y := X^2;
+&gt;     return ideal&lt;P | [Y[i][j]: i, j in [1 .. n]]&gt;;
+&gt; end function;
+&gt; I := MatSquare(4);
+&gt; I;
+Ideal of Polynomial ring of rank 16 over Rational Field
+Order: Graded Reverse Lexicographical
+Variables: x11, x12, x13, x14, x21, x22, x23, x24, x31, x32,
+    x33, x34, x41, x42, x43, x44
+Homogeneous
+Basis:
+[
+    x11^2 + x12*x21 + x13*x31 + x14*x41,
+    x11*x12 + x12*x22 + x13*x32 + x14*x42,
+    x11*x13 + x12*x23 + x13*x33 + x14*x43,
+    x11*x14 + x12*x24 + x13*x34 + x14*x44,
+    x11*x21 + x21*x22 + x23*x31 + x24*x41,
+    x12*x21 + x22^2 + x23*x32 + x24*x42,
+    x13*x21 + x22*x23 + x23*x33 + x24*x43,
+    x14*x21 + x22*x24 + x23*x34 + x24*x44,
+    x11*x31 + x21*x32 + x31*x33 + x34*x41,
+    x12*x31 + x22*x32 + x32*x33 + x34*x42,
+    x13*x31 + x23*x32 + x33^2 + x34*x43,
+    x14*x31 + x24*x32 + x33*x34 + x34*x44,
+    x11*x41 + x21*x42 + x31*x43 + x41*x44,
+    x12*x41 + x22*x42 + x32*x43 + x42*x44,
+    x13*x41 + x23*x42 + x33*x43 + x43*x44,
+    x14*x41 + x24*x42 + x34*x43 + x44^2
+]
+&gt; S&lt;t&gt; := HilbertSeries(I);
+&gt; S;
+(t^12 - 7*t^11 + 20*t^10 - 28*t^9 + 14*t^8 + 15*t^7 - 20*t^6 +
+    19*t^5 - 22*t^4 + 7*t^3 + 20*t^2 + 8*t + 1)/(t^8 - 8*t^7 +
+    28*t^6 - 56*t^5 + 70*t^4 - 56*t^3 + 28*t^2 - 8*t + 1)
+&gt; H&lt;d&gt;, k := HilbertPolynomial(I);
+&gt; H, k;
+1/180*d^7 + 7/90*d^6 + 293/360*d^5 + 61/36*d^4 + 1553/360*d^3 +
+    851/180*d^2 + 101/30*d + 1
+5
+&gt; // Check that evaluations of H for d &gt;= 5 match coefficients of S:
+&gt; L&lt;u&gt; := LaurentSeriesRing(IntegerRing());       
+&gt; L;
+Laurent Series Algebra over Integer Ring
+&gt; L ! S;
+1 + 16*u + 120*u^2 + 575*u^3 + 2044*u^4 + 5927*u^5 + 14832*u^6 +
+    33209*u^7 + 68189*u^8 + 130642*u^9 + 236488*u^10 + 408288*u^11 +
+    677143*u^12 + 1084929*u^13 + 1686896*u^14 + 2554659*u^15 +
+    3779609*u^16 + 5476772*u^17 + 7789144*u^18 + 10892530*u^19 +
+    O(u^20)
+&gt; Evaluate(H, 5);
+5927
+&gt; Evaluate(H, 6);
+14832
+&gt; Evaluate(H, 19);
+10892530
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1228.htm">[Next]</A><A  HREF = "text1226.htm">[Prev]</A> <A  HREF = "text1228.htm">[Right]</A> <A  HREF = "text1226.htm">[Left]</A> <A  HREF = "text1214.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

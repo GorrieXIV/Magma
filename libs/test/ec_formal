@@ -1,0 +1,77 @@
+
+// Test FormalLog, FormalGroupLaw and FormalGroupHomomorphism 
+
+
+// test E over Q
+
+prec := 20; // should be > 10
+
+while true do 
+  Es := EllipticCurves(CremonaDatabase(),Random([11..1000]));
+  if #Es gt 0 then
+    E := Random(Es);
+    if Max([Abs(c) : c in Coefficients(E)]) lt 10^4 then
+      break;
+    end if;
+  end if;
+end while;
+
+"Testing", E;
+
+R := RealField(prec);
+e := 5;
+repeat
+  e +:= 1;
+  P := Points(E(R), 10^e)[1]; // P is near 0 on E
+until Abs(-P[1]/P[2]) lt 10^-1;
+
+"FormalLog"; 
+time
+L := FormalLog(E : Precision:=prec);
+LP := Evaluate(L, -P[1]/P[2]);
+LQ := Evaluate(L, -Q[1]/Q[2]) where Q is 2*P;
+assert Abs(LQ - 2*LP) lt 10^(10-prec); // should be 10^-prec * |size of coeffs|
+
+"FormalGroupLaw";
+_<T1,T2> := PolynomialRing(Rationals(),2);
+fgl1 := T1 + T2;
+for n := 2 to prec div 2 do
+   time
+   fgl := Evaluate( FormalGroupLaw(E,n), [T1,T2] );
+   assert &and[ TotalDegree(mon) eq n : mon in Monomials(fgl - fgl1) ];
+   fgl1 := fgl;
+end for;
+
+m := Random([2..5]);
+isog := MultiplicationByMMap(E,m);
+"FormalGroupHomomorphism for multiplication by", m;
+time 
+fgh := FormalGroupHomomorphism(isog, prec);
+zP := -P[1]/P[2];
+zmP := -Q[1]/Q[2] where Q is m*P;
+zPimage := Evaluate(fgh, zP);
+assert Abs(zmP - zPimage) lt 10^(10-prec); // should be 10^-prec * |size of coeffs|
+
+///////////////////////////////////////////////////////////////////////////////////
+
+// testing generic E
+
+prec := 10;
+
+"Testing generic elliptic curve over Q";
+F<a1,a2,a3,a4,a6> := RationalFunctionField(Rationals(), 5);
+E := EllipticCurve([a1,a2,a3,a4,a6]);
+time _ := FormalLog(E : Precision:=prec);
+time _ := FormalGroupLaw(E, prec);
+time _ := FormalGroupHomomorphism(MultiplicationByMMap(E,2), prec);
+
+"Testing generic elliptic curve over F_3";
+F<a1,a2,a3,a4,a6> := RationalFunctionField(GF(3), 5);
+E := EllipticCurve([a1,a2,a3,a4,a6]);
+time _ := FormalGroupLaw(E, prec);
+m2 := map< E->E | DefiningEquations(MultiplicationByMMap(E,2)) >; 
+m4 := m2*m2; 
+assert #Components(m4) eq 2; // not expanded 
+time _ := FormalGroupHomomorphism(m2, prec);
+time _ := FormalGroupHomomorphism(m4, prec);
+

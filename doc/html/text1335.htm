@@ -1,0 +1,425 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Arithmetic Properties of  Schemes and Points</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1336.htm">[Next]</A><A  HREF = "text1334.htm">[Prev]</A> <A  HREF = "text1336.htm">[Right]</A> <A  HREF = "text1334.htm">[Left]</A> <A  HREF = "text1321.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "14579">Arithmetic Properties of  Schemes and Points</A></H3>
+
+<P>
+<P>
+<P>
+This section contains several functions of arithmetic interest,
+that apply to general schemes defined over the rationals,
+number fields, or function fields.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1335.htm#14580">Height</A>
+<LI> <A  HREF = "text1335.htm#14582">Restriction of Scalars</A>
+<LI> <A  HREF = "text1335.htm#14584">Local Solubility</A>
+<LI> <A  HREF = "text1335.htm#14592">Searching for Points</A>
+<LI> <A  HREF = "text1335.htm#14595">Reduction Mod p</A>
+</UL>
+<H4><A NAME = "14580">Height</A></H4>
+
+
+
+<H5><A NAME = "14581">HeightOnAmbient(P) : Pt -&gt; RngElt</A></H5>
+
+<PRE>    Absolute: BoolElt                   Default: <TT>false</TT></PRE>
+
+<PRE>    Precision: RngIntElt                Default: 30</PRE>
+<BLOCKQUOTE>
+The height of the given point, as a point in the ambient projective space (or affine space).
+This is the <I>exponential</I> height (for the logarithmic height, take <TT>Log</TT>!).
+By default it is the <I>relative</I> height, unless the optional parameter <TT>Absolute</TT> is given.
+The function works when the ambient space (of the scheme containing P) is any affine
+or projective space (possibly weighted), and the ring of definition of P is contained
+in the rationals or a number field.
+</BLOCKQUOTE>
+<H4><A NAME = "14582">Restriction of Scalars</A></H4>
+
+
+
+<H5><A NAME = "14583">RestrictionOfScalars(S, F) : Sch, Fld -&gt; Sch, MapSch, UserProgram, Map</A></H5>
+<H5>WeilRestriction(S, F) : Sch, Fld -&gt; Sch, MapSch, UserProgram, Map</H5>
+
+<PRE>    SubfieldMap: Map                    Default: </PRE>
+
+<PRE>    ExtensionBasis: [ FldElt ]          Default: []</PRE>
+<BLOCKQUOTE>
+Given an affine scheme S whose base ring is a field K, the function 
+returns its restriction of scalars from K to F. The scheme S must be
+contained in an affine space. The field F should be either a subfield of K, 
+or else isomorphic to a subfield of K; in this case the inclusion map 
+may be specified as the optional argument <TT>SubfieldMap</TT>, or otherwise 
+is the same as the map returned by <TT>IsSubfield(F,K)</TT>.
+<P>
+The restriction of scalars S<sub>res</sub> is a scheme over F satisfying the 
+following functorial property (for point sets):
+S<sub>res</sub>(R) = S(R tensor <sub>F</sub> K) for all rings R &supe;F.
+<P>
+Four objects are returned; the first is the scheme S<sub>res</sub>, and the other
+three are maps of various kinds:
+<DL COMPACT class='compact'>
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>the natural map of schemes from the base extension (S<sub>res</sub>)<sub> tensor K</sub> 
+to S,
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>a function which takes a point in a point set S<sub>res</sub>(R) and computes
+its image under the map S<sub>res</sub>(R) to S(RK) (if there is no known
+relationship between R and K an error results), and
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>a map of point sets S(K) to S<sub>res</sub>(F).
+<P>
+<P>
+<P>
+</DL>
+The result is obtained by direct substitution using the standard basis 
+of K/F, or the basis given in ExtensionBasis if this is specified.
+</BLOCKQUOTE>
+<H4><A NAME = "14584">Local Solubility</A></H4>
+
+<P>
+<P>
+<P>
+Let X be a scheme over a number field K. One of the fundamental problems in
+arithmetic geometry is to decide if X(K) is empty. In general, this is a very
+hard question. One way to arrive at an affirmative answer is to prove that
+X(L) is empty for some larger field L. An important class of such field is
+formed by <I>complete local fields</I>. These are obtained by taking the p-adic
+topology on K associated to a prime ideal p of the ring of integers of K
+and to consider the topological completion L of K 
+(see <A  HREF = "text389.htm#RngOrd:Completion1">Completion</A>).
+
+
+<H5><A NAME = "14585">IsEmpty(Xm) : SetPt -&gt; BoolElt, Pt</A></H5>
+
+<PRE>    Smooth: BoolElt                     Default: <TT>false</TT></PRE>
+
+<PRE>    AssumeIrreducible: BoolElt          Default: <TT>false</TT></PRE>
+
+<PRE>    AssumeNonsingular: BoolElt          Default: <TT>false</TT></PRE>
+
+<PRE>    SetVerbose("LocSol", n):            Maximum: 2</PRE>
+<BLOCKQUOTE>
+Let X be a scheme over a number field K and let L be a completion of K
+at a finite prime. If Xm is the point set of X taking values in L, this
+function returns if the point set is empty. If <TT>false</TT> is returned, then
+(a minimal approximation to) a point is returned.
+<P>
+Setting <TT>AssumeIrreducible := true</TT> tells the system to assume that X is
+irreducible. This leads to unpredictable results if the components of X have
+distinct dimensions.
+<P>
+Setting <TT>AssumeNonsingular := true</TT> tells the system to assume that X has no
+L-rational singular points. If there are such points and this flag is set,
+then an infinite loop can result.
+<P>
+Setting <TT>Smooth := true</TT> tells the system to only consider nonsingular points
+on X. This is only implemented for plane curves. The system will blow up any
+L-rational singular points when encountered and test the desingularized model
+for solubility. If a point is found, then an approximation may be returned that
+is indistinguishable from a singular point.
+<P>
+The following classes of schemes are recognized and treated separately :
+<P>
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>Hyperelliptic curves over fields with large residue field of odd
+characteristic. For these fields a generalization by Nils Bruin of an algorithm
+presented in <A  HREF = "text1320.htm#bib_merriss">[MSS96]</A> is used. 
+The complexity of this algorithm is independent of the
+size of the residue field.
+<DT>(ii)</DT><DD>Hyperelliptic curves over fields with small residue field or residue field of
+even characteristic. For these fields a depth-first backtracking algorithm is
+used to construct a solution.
+<DT>(iii)</DT><DD>Nonsingular curves represented by a possibly singular planar model. In this
+case, a depth-first backtracking algorithm is used to construct a solution.
+Whenever a tentative solution approximates a rational singularity, that
+singularity is blown up and the construction is continued on the desingularized
+model with Hensel's lemma as a stopping criterion. Use <TT>Smooth := true</TT> to
+access  this option.
+<DT>(iv)</DT><DD>An intersection in (P)<sup>3</sup> of a quadratic cone with a singularity at
+(0:0:0:1) and another quadric. This case (often needed in computations
+concerning elliptic curves) is handled by testing hyperelliptic curves for local
+solubility.
+<DT>(v)</DT><DD>General schemes. The system decomposes X into primary components over K,
+which are equidimensional. For each of the components, it tests the singular
+subscheme for solubility. If a solution is found, this is returned. Otherwise,
+it tests the scheme itself for solubility using a depth-first backtracking
+algorithm with Hensel's lemma as stopping criterion.
+<P>
+</DL>
+Note that to construct a point set over a completion of a number field, one
+should use
+<TT>PointSet(X,phi)</TT> where <TT>Kp, phi := Completion(K,p)</TT>. This rather cryptic
+syntax is due to the fact that, although a completion strictly speaking is an
+<I>extension</I> of K, Magma does not recognise this fact and therefore does
+not allow for automatic coercion into K<sub>p</sub>. The system has to be presented
+explicitly with the map &phi; from K into K<sub>p</sub>.
+<P>
+For a description of the algorithms used, see <A  HREF = "text1320.htm#bib_bruin-magmabook">[Bru04]</A>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14586">Example <TT>Scheme_anf1 (H118E26)</TT></A></H3>
+Some usage of <TT>IsEmpty</TT> is illustrated below.
+<P>
+<P>
+<PRE>
+&gt; P2&lt;X,Y,Z&gt; := ProjectiveSpace(Rationals(),2);
+&gt; C := Curve(P2,X^2+Y^2);
+&gt; IsEmpty(C(pAdicField(2,20)));
+false (O(2^2) : O(2^2) : 1 + O(2^20))
+&gt; IsEmpty(C(pAdicField(2,20)):Smooth);
+true
+&gt; K&lt;i&gt; := NumberField(PolynomialRing(Rationals())![1,0,1]);
+&gt; CK := BaseChange(C,K);
+&gt; p := (1+i)*IntegerRing(K);
+&gt; Kp,toKp := Completion(K,p);
+&gt; CKp := PointSet(CK,toKp);
+&gt; IsEmpty(CKp:Smooth);
+false (O(Kp.1^3) : O(Kp.1^3) : 1 + O(Kp.1^100))
+</PRE>
+<HR>
+<H3><A NAME = "14587">Example <TT>Scheme_anf2 (H118E27)</TT></A></H3>
+And a simpler example.
+<P>
+<P>
+<PRE>
+&gt; p := 32003;
+&gt; P&lt;x&gt; := PolynomialRing(Rationals());
+&gt; C := HyperellipticCurve(p*(x^10+p*x^3-p^2*4710));
+&gt; Qp := pAdicField(p);
+&gt; time IsEmpty(C(Qp));
+true
+Time: 0.090
+</PRE>
+<HR>
+<H5><A NAME = "14588">IsLocallySolvable(X, p) : Sch, RngOrdIdl -&gt; BoolElt, Pt</A></H5>
+<H5>IsLocallySolvable(X, p) : Sch, RngIntElt -&gt; BoolElt, Pt</H5>
+
+<PRE>    Smooth: BoolElt                     Default: <TT>false</TT></PRE>
+
+<PRE>    AssumeIrreducible: BoolElt          Default: <TT>false</TT></PRE>
+
+<PRE>    AssumeNonsingular: BoolElt          Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a projective scheme X defined over a number field or over the rationals,
+test if the scheme is locally solvable at the prime ideal p (for number fields) or
+prime number p (for rationals) indicated. If the scheme is found to have a local
+point, then <TT>true</TT> is returned together with an approximation to a point.
+Otherwise, <TT>false</TT> is returned.
+<P>
+The optional parameters have the same meaning as for <TT>IsEmpty</TT> (see above).
+<P>
+For a description of the algorithms used, see <A  HREF = "text1320.htm#bib_bruin-magmabook">[Bru04]</A>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14589">Example <TT>Scheme_anf-local-solv (H118E28)</TT></A></H3>
+A locally solvable scheme and a non--locally solvable scheme (when considering
+only non--singular points) are both shown below.
+<P>
+<P>
+<PRE>
+&gt; P2&lt;X,Y,Z&gt; := ProjectiveSpace(Rationals(),2);
+&gt; C := Curve(P2,X^2+Y^2);
+&gt; IsLocallySolvable(C,2);
+true (O(2^2) : O(2^2) : 1 + O(2^50))
+&gt; IsLocallySolvable(C,2:Smooth);
+false
+&gt; K&lt;i&gt;:=NumberField(PolynomialRing(Rationals())![1,0,1]);
+&gt; CK:=BaseChange(C,K);
+&gt; p:=(1+i)*IntegerRing(K);
+&gt; IsLocallySolvable(BaseChange(C,K),p:Smooth);
+true (O($.1^3) : O($.1^3) : 1 + O($.1^100))
+</PRE>
+<HR>
+<H5><A NAME = "14590">LiftPoint(P, n) : Pt, RngIntElt -&gt; Pt</A></H5>
+
+<PRE>    Strict: BoolElt                     Default: <TT>true</TT></PRE>
+<H5>LiftPoint(F, d, P, n) : [RngMPolElt], RngIntElt, [FldLocElt], RngIntElt -&gt; SeqEnum</H5>
+
+<PRE>    Strict: BoolElt                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Let P be in X(L), where X is a scheme over the rationals or over a number
+field and L is a completion of the base field at a finite prime. This routine
+attempts to lift P to the desired precision n using quadratic newton
+iteration. This routine only works if P is distinguishable from all singular
+points on X. Note that if X is of positive dimension, then the lift is
+inherently arbitrary.
+<P>
+Due to limited precision used in the computation, it may be impossible to
+attain the desired precision exactly. By default this leads to an error. If the
+user specifies <TT>Strict := false</TT> the system silently returns a lift with
+maximum attainable precision if the desired precision cannot be reached.
+<P>
+The second form provides the same functionality, but requires all input data to
+be supplied over L. The sequence F should be the defining equations 
+of a scheme
+over L of dimension d. The sequence P should be coordinates of an
+approximation of a point on that scheme. The returned sequence is a lift of the
+point described by P to precision n, if possible.
+<P>
+In principle, a point returned by <TT>IsEmpty</TT> has sufficient precision for
+<TT>LiftPoint</TT> to work. However, <TT>IsEmpty</TT> may perform nontrivial
+operations on the scheme. A nonsingular point on a component of X may be
+singular on X itself.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14591">Example <TT>Scheme_anf_lift (H118E29)</TT></A></H3>
+A lift of a point in a non empty pointset is given.
+<P>
+<P>
+<PRE>
+&gt; P2&lt;X,Y,Z&gt;:=ProjectiveSpace(Rationals(),2);
+&gt; C:=Curve(P2,X^2+Y^2-17*Z^2);
+&gt; Qp:=pAdicField(2,20);
+&gt; bl,P:=IsEmpty(C(Qp));
+&gt; LiftPoint(P,15);
+(9961 + O(2^15) : O(2^15) : 1 + O(2^20))
+</PRE>
+<HR>
+<H4><A NAME = "14592">Searching for Points</A></H4>
+
+<P>
+<P>
+<P>
+The following intrinsic implements a nontrivial method to search for points on any 
+scheme defined over the rationals. 
+
+
+<H5><A NAME = "14593">PointSearch(S,H : parameters) : Sch[FldRat], RngIntElt -&gt; SeqEnum</A></H5>
+
+<PRE>    Dimension: RngIntElt                Default: 0</PRE>
+
+<PRE>    Primes: SeqEnum                     Default: [ ]</PRE>
+
+<PRE>    OnlyOne: BoolElt                    Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Searches for points on the scheme S up to roughly height H.
+The scheme must be in either an affine space or a non-weighted 
+projective space.
+<P>
+ This uses a p-adic algorithm: first find points
+ locally modulo a small prime (or two small primes),
+ then lift these p-adically,
+ and then see if these give global solutions. Lattice reduction is
+ used at this stage, and this makes the method far more efficient than 
+ a naive search, for most schemes. Note that points which reduce to 
+ singular points modulo p are not necessarily found.
+<P>
+ If <TT>OnlyOne</TT> is <TT>true</TT>, then the computation will terminate
+ as soon as one point is found.  The algorithm computes the dimension
+ of the scheme unless <TT>Dimension</TT> is set to a nonzero value.
+<P>
+ The algorithm chooses its own primes unless <TT>Primes</TT> is non-empty;
+ either one prime or two can be specified. The algorithm slows down
+ considerably in higher dimension --- for threefolds, it can take a few
+ hours to search for points up to height 500 or so. For special types
+ of curves (ternary cubics, intersection of quadrics), efficient search
+ methods are implemented under other names (for instance <TT>Points</TT>
+ and <TT>PointsQI</TT>).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14594">Example <TT>Scheme_point-count (H118E30)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; P&lt;a,b,c,d&gt; := ProjectiveSpace(Rationals(),3);
+&gt; S := Scheme (P, a^2*c^2 - b*d^3 + 2*a^2*b*c + a*b^3 - a*b^2*c +
+&gt;                 7*a*c^2*d + 4*a*b*d^2);
+&gt; Dimension(S);
+2
+&gt; time PS := PointSearch(S,100);
+Time: 9.050
+&gt; #PS; // not necessarily exhaustive
+67571
+</PRE>
+<HR>
+<H4><A NAME = "14595">Reduction Mod p</A></H4>
+
+
+
+<H5><A NAME = "14596"></A><A NAME = "sch-red-mod-p">Reduction</A>(X, p) : Sch, Any -&gt; Sch</H5>
+
+<PRE>    ambient: Sch                        Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+X should be an ordinary projective scheme defined over a field K
+which should be the rational field or a number field. If K is 
+the rationals then argument p should be a rational prime and 
+if K is a number field, p should be a place or a prime ideal
+in an order of K.
+<P>
+The intrinsic computes and returns the reduction mod p of
+the <I>flat closure</I> of X in projective space
+over the local ring of p. This reduction is a scheme in
+projective space of dimension n over the residue class field k<sub>p</sub> of
+p where n is the dimension of the projective ambient of X.
+<P>
+It is possible to enter the ambient that the user wishes the result to
+lie in using the <TT>ambient</TT> parameter. The value entered should be
+an ordinary projective space of dimension n over k, a finite field
+equal to k<sub>p</sub>.
+<P>
+Note that the flat closure essentially computes a saturation of
+the ideal I of X with respect to a local parameter &pi; of p
+and takes the reduction of this mod p to give the result (though usually
+a full colon ideal computation is unnecessary, and a simple reduction
+of basis elements is checked to give the correct result
+via Hilbert polynomials). This reduction is guaranteed to be of the
+same dimension as X and have the same Hilbert polynomial, but it
+is not "minimised" in any way. For example, it will not
+necessarily give the reduction of the minimal model of a curve -
+even an elliptic curve.
+</BLOCKQUOTE>
+<H5><A NAME = "14597">Reduction(I, p) : RngMPol, Any -&gt; RngMPol</A></H5>
+
+<PRE>    parent: RngMPol                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+This is a simple variant on the first intrinsic, included for
+convenience in case the user prefers working with ideals. I should
+be a homogeneous ideal in a multivariate polynomial ring over
+K, the rational field or a number field. p is as before.
+Returns the defining ideal of the reduction mod p of the
+projective scheme defined by I. 
+<P>
+More precisely, if
+K[x<sub>1</sub>, ..., x<sub>n</sub>] is the polynomial ring in which I lies,
+the result lies in k<sub>p</sub>[x<sub>1</sub>, ..., x<sub>n</sub>], where k<sub>p</sub> is the
+residue class field of p, and can be defined as the reduction
+mod p of I &cap;O<sub>p</sub>[x<sub>1</sub>, ..., x<sub>n</sub>], where O<sub>p</sub> is the
+local ring of p.
+<P>
+The user may specify the polynomial ring in which the result is
+to lie by using the <TT>parent</TT> parameter which should be
+set to a multivariate polynomial ring in n variables over
+a finite field k equal to k<sub>p</sub>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14598">Example <TT>Scheme_scheme-red-mod-p (H118E31)</TT></A></H3>
+This easy example is a complete intersection of 2 quadric equations
+in (P)<sup>3</sup> over the rationals which defines a scheme that decomposes
+into a union of 4 lines over the algebraic closure. Simply reducing
+the two given defining quadrics mod 3 gives a 2-dimensional scheme defined
+by a single equation which isn't the reduction of the flat closure.
+The intrinsic gives the correct result (which isn't hard to find by
+inspection in this case).
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z,t&gt; := ProjectiveSpace(Rationals(),3);
+&gt; S := Scheme (P, [3*x^2+3*y^2-z^2-t^2,z^2+t^2]);
+&gt; Reduction(S,3);
+Scheme over GF(3) defined by
+$.1^2 + $.2^2,
+$.3^2 + $.4^2
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1336.htm">[Next]</A><A  HREF = "text1334.htm">[Prev]</A> <A  HREF = "text1336.htm">[Right]</A> <A  HREF = "text1334.htm">[Left]</A> <A  HREF = "text1321.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

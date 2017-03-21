@@ -1,0 +1,122 @@
+/////////////////////////////////////////////////////////////////////////
+// polytopes
+// $Revision: 31078 $
+// $Date: 2010-11-30 23:38:30 +1100 (Tue, 30 Nov 2010) $
+// $LastChangedBy: kasprzyk $
+/////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////
+// Polytopes and Polyhedra
+/////////////////////////////////////////////////////////////////////////
+"------\nPolytopes and Polyhedra\n";
+
+P:=Polytope([[0,1,0],[0,0,1],[0,-3,-3]]);
+L:=Ambient(P);
+assert Dimension(L) eq 3;
+assert IsPolytope(P);
+assert NumberOfVertices(P) eq 3;
+assert NumberOfFacets(P) eq 3;
+assert Dimension(P) eq 2;
+assert Volume(P) eq 7;
+assert VolumeOfBoundary(P) eq 3;
+assert IsIntegral(Representative(P));
+assert ContainsZero(P);
+assert IsSimplicial(P);
+assert not IsFano(P);
+assert not IsSmooth(P);
+assert not IsReflexive(P);
+assert L![0,0,1] in P;
+assert IsOnBoundary(L![0,1/2,1/2],P);
+assert not IsInInterior(L![0,1/2,1/2],P);
+assert IsInInterior(L![0,0,1/2],P);
+P;
+Vertices(P);
+Facets(P);
+
+Q:=Polar(P);	
+assert Dimension(Ambient(Q)) eq 3;
+assert Ambient(Q) eq Dual(L);
+assert Ambient(Q) eq Dual(Ambient(P));
+assert Ambient(Polar(Q)) eq Ambient(P);
+assert Dimension(Q) eq 3;
+assert not IsPolytope(Q);
+assert Dual(L)![3,-1,-1] in Q;
+assert IsOnBoundary(Dual(L)![3,-1,-1],Q);
+assert IsInInterior(Zero(Dual(L)),Q);
+assert NumberOfVertices(Q) eq 0;
+assert NumberOfFacets(Q) eq 3;
+Q;
+
+IQ:=IntegralPart(Q);
+
+assert Ambient(IQ) eq Ambient(Q);
+IQ;
+
+C:=InfinitePart(Q);
+assert Dimension(C) eq 1;
+C;
+D:=-C;
+assert -D eq InfinitePart(Q);
+
+P:=ChangeAmbient(P,Ambient(Q));
+assert Ambient(P) eq Ambient(Q);
+
+PP:=P+Q;
+assert not IsPolytope(PP);
+assert Dimension(PP) eq 3;
+assert NumberOfVertices(PP) eq 0;
+assert NumberOfFacets(PP) eq 5;
+PP;
+
+X:=WPS(Rationals(),[1,2,3,4]);
+D:=Divisor(X,[8,0,0,0]);
+C:=GradedCone(D);
+_:=ZGenerators(C);
+P:=Polyhedron(C);
+IntegralPart(P);
+assert IsIntegral(IntegralPart(P));
+
+L:=GradedToricLattice(1);
+C:=Cone([L|[1,-1],[1,1]]);
+P:=Polyhedron(C : level:= 3);
+assert Volume(P) eq 6;
+assert VolumeOfBoundary(P) eq NumberOfVertices(P);
+PP:=IntegralPart(P);
+assert Points(P) eq Points(PP);
+
+X<x,y,z,t>:=WPS(Rationals(),[1,2,3,4]);
+D:=Divisor(X,[8,0,0,0]);
+P:=Polyhedron(D);
+assert #Vertices(P) eq 5;
+assert Dimension(P) eq 3;
+assert IsIntegral(P);
+assert #Points(P) eq 1+ //t^2
+                     4+ //t*(deg 4 in x,y,z)
+                     2+ //z^2*(deg 2 in x,y)
+                     3+ //z*(deg 5 in x,y)
+                     5; //deg 8 in x,y
+
+X<x,y,z,t>:=WPS(Rationals(),[1,2,3,4]);
+assert #MonomialsOfWeightedDegree(X,DivisorClassGroup(X)![8]) eq #Points(P);
+
+X:=WPS(Rationals(),[1,1,1,2,3]);
+assert #MonomialsOfWeightedDegree(X,DivisorClassGroup(X)![4]) eq 25;
+
+X:=WeightedProjectiveSpace(Rationals(),[2,3,5,7]);
+K:=CanonicalDivisor(X);
+assert #Points(Polyhedron(0 * K)) eq 1;
+assert Zero(MonomialLattice(X)) in Polyhedron(0*K);
+assert IsEmpty(Polyhedron(K));
+assert not IsEmpty(Polyhedron(-K));
+
+P:=RandomPolytope(3,5,5);
+PP:=&meet[HalfspaceToPolyhedron(H[1],H[2]) : H in Inequalities(P)];
+assert PP eq P;
+
+/////////////////////////////////////////////////////////////////////////
+// Finally, clear the caches
+/////////////////////////////////////////////////////////////////////////
+"------\nClearing caches\n";
+
+CacheClearToricVariety();
+CacheClearToricLattice();

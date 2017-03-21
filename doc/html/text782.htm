@@ -1,0 +1,279 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Constructing Distinct Extensions</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text783.htm">[Next]</A><A  HREF = "text781.htm">[Prev]</A> <A  HREF = "text783.htm">[Right]</A> <A  HREF = "text781.htm">[Left]</A> <A  HREF = "text773.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "8859">Constructing Distinct Extensions</A></H3>
+
+<P>
+<P>
+<P>
+The functions below compute the distinct extensions of one group  by another.  
+
+
+<H5><A NAME = "8860"></A><A NAME = "GrpCoh:DistinctExtensions">DistinctExtensions</A>(CM) : ModCoho -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Given the cohomology module CM for the group G acting on the module M,
+this function returns a sequence containing all of the distinct extensions 
+of the module M by G, each in the form returned by <TT>Extension(CM, s)</TT>. 
+Two such extensions E<sub>1</sub>, E<sub>2</sub> are regarded as being distinct if there is no 
+group isomorphism from one to the other that maps the subgroup of E<sub>1</sub> 
+corresponding to M to the subgroup of E<sub>2</sub> corresponding to M.
+<P>
+This function may only be applied when the module M used to define 
+CM is defined over a finite field of prime order, the integers, or as 
+an abelian group in a call of <TT>CohomologyModule(G, Q, T)</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8861">Example <TT>GrpCoh_distinct-extensions (H73E8)</TT></A></H3>
+We consider the extensions of the trivial module over GF(2) by the
+group Z<sub>2</sub> x Z<sub>2</sub>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := DirectProduct(CyclicGroup(2),CyclicGroup(2));
+&gt; M := TrivialModule(G,GF(2));
+&gt; C := CohomologyModule(G,M);
+&gt; CohomologicalDimension(C,2);
+3
+&gt; D := DistinctExtensions(C);
+&gt; #D;
+4
+</PRE>
+<P>
+So there are 2<sup>3</sup> = 8 equivalence classes of extensions.  But only four 
+are distinct up to an isomorphism fixing the module.  To examine them, we 
+form permutation representations:
+<P>
+<P>
+<P>
+<PRE>
+&gt; DP := [ CosetImage(g,sub&lt;g|&gt;) : g in D ];
+&gt; [IsAbelian(d): d in DP];
+[ true, true, false, false ]
+// the first two are abelian
+&gt; [IsIsomorphic(d,DihedralGroup(4)) : d in DP];
+[ false, false, true, false ]
+// The third one is dihedral
+&gt; #[g : g in DP[4] | Order(g) eq 4];
+6
+</PRE>
+<P>
+So the fourth group must be the quaternion group.
+<HR>
+<H5><A NAME = "8862">ExtensionsOfElementaryAbelianGroup(p, d, G) : RngIntElt, RngIntElt, GrpPerm -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a prime p, a positive integer d, and a permutation group G,
+this function returns a list of finitely presented groups which are
+isomorphic to the distinct extensions of an elementary abelian group N of
+order p<sup>d</sup> by G. Two such extensions E<sub>1</sub> and E<sub>2</sub>  with normal subgroups 
+N<sub>1</sub> and N<sub>2</sub> isomorphic to N are considered to be distinct if there is 
+no group isomorphism G<sub>1</sub> -&gt; G<sub>2</sub> that maps N<sub>1</sub> to N<sub>2</sub>. 
+Each extension E is defined on d + r generators, where r is the 
+number of generators of G. The last d of these generators generate 
+the normal subgroup N, and the quotient of E by N is a presentation 
+of G on its own generators.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8863">Example <TT>GrpCoh_extensions-abelian (H73E9)</TT></A></H3>
+We form the distinct extensions of the elementary abelian group 
+Z<sub>2</sub> x Z<sub>2</sub> by the alternating group A<sub>4</sub>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; E := ExtensionsOfElementaryAbelianGroup(2,2,Alt(4));                         
+&gt; #E;
+4
+</PRE>
+<P>
+So there are four distinct extensions of an elementary group of order
+4 by A<sub>4</sub>
+<P>
+<P>
+<P>
+<PRE>
+&gt; EP := [ CosetImage(g,sub&lt;g|&gt;) : g in E ];
+&gt; [#Centre(e): e in EP];
+[ 1, 1, 4, 4 ]
+</PRE>
+<P>
+The first two have nontrivial action on the module.  The module generators 
+in the extensions come last, so these will be e.3 and e.4. We can use 
+this to test which of the extensions are non-split.
+<P>
+<P>
+<P>
+<PRE>
+&gt; [ Complements(e,sub&lt;e|e.3,e.4&gt;) eq [] : e in EP];
+[ false, true, false, true ]
+&gt; AbelianInvariants(Sylow(EP[2],2));
+[ 4, 4 ]
+</PRE>
+<P>
+So the first and fourth extensions split and the second and third do not.
+EP[2] has a normal abelian subgroup of type [4, 4].
+<HR>
+<H5><A NAME = "8864">ExtensionsOfSolubleGroup(H, G) : GrpPerm, GrpPerm -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given permutation groups G and H, where H is soluble, this
+function returns a sequence of finitely presented groups, the terms 
+of which are isomorphic to the distinct extensions of H by G.  Two
+such extensions  E<sub>1</sub> and E<sub>2</sub> with normal subgroups H<sub>1</sub> and
+H<sub>2</sub> isomorphic to H are considered to be distinct if there is no
+group isomorphism G<sub>1</sub> -&gt; G<sub>2</sub> that maps H<sub>1</sub> to H<sub>2</sub>. Each
+extension E is defined on d + r generators, where the last
+d generators generate the normal subgroup H, and the quotient of
+E by H is a presentation for G on its own generators.  (The
+last d generators of E do not correspond to the original
+generators of H, but to a PC-generating sequence for H.)
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8865">Example <TT>GrpCoh_extensions-soluble (H73E10)</TT></A></H3>
+How many extensions are there of a dihedral group of order 8 by itself? 
+This calculation is currently rather slow.
+<P>
+<P>
+<P>
+<PRE>
+&gt; D4 := DihedralGroup(4);
+&gt; time S := ExtensionsOfSolubleGroup(D4, D4);
+Time: 120.210
+&gt; #S;                                                                   
+20
+&gt; ES := [CosetImage(g,sub&lt;g|&gt;) : g in S ];
+&gt; [#Centre(g): g in ES];
+[ 4, 2, 4, 2, 4, 2, 2, 4, 2, 4, 4, 2, 4, 2, 4, 2, 4, 2, 4, 2 ]
+&gt; [NilpotencyClass(g) : g in ES ];
+[ 2, 3, 2, 3, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 ]
+&gt; [Exponent(g): g in ES];
+[ 4, 8, 4, 8, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8 ]
+</PRE>
+<HR>
+<H3><A NAME = "8866">Example <TT>GrpCoh_distinct-extensions (H73E11)</TT></A></H3>
+We determine the distinct extensions of the abelian group with invariants
+[2, 4, 4] by the cyclic group of order 4.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Z := Integers();
+&gt; G := PermutationGroup&lt;4 | (1,2,4,3)&gt;;
+&gt; Q := [2, 4, 4];
+&gt; T := [ Matrix(Z,3,3,[1,2,0,0,0,1,0,1,2]) ];
+&gt; CM := CohomologyModule(G, Q, T);
+&gt; extns := DistinctExtensions(CM);
+&gt; extns;
+[
+    Finitely presented group on 4 generators
+    Relations
+        $.2^2 = Id($)
+        $.3^4 = Id($)
+        $.4^4 = Id($)
+        ($.2, $.3) = Id($)
+        ($.2, $.4) = Id($)
+        ($.3, $.4) = Id($)
+        $.1^-1 * $.2 * $.1 * $.3^-2 * $.2^-1 = Id($)
+        $.1^-1 * $.3 * $.1 * $.4^-1 = Id($)
+        $.1^-1 * $.4 * $.1 * $.4^-2 * $.3^-1 = Id($)
+        $.1^4 = Id($),
+
+    Finitely presented group on 4 generators
+    Relations
+        $.2^2 = Id($)
+        $.3^4 = Id($)
+        $.4^4 = Id($)
+        ($.2, $.3) = Id($)
+        ($.2, $.4) = Id($)
+        ($.3, $.4) = Id($)
+        $.1^-1 * $.2 * $.1 * $.3^-2 * $.2^-1 = Id($)
+        $.1^-1 * $.3 * $.1 * $.4^-1 = Id($)
+        $.1^-1 * $.4 * $.1 * $.4^-2 * $.3^-1 = Id($)
+        $.1^4 * $.2^-1 * $.3^-1 * $.4^-3 = Id($),
+
+    Finitely presented group on 4 generators
+    Relations
+        $.2^2 = Id($)
+        $.3^4 = Id($)
+        $.4^4 = Id($)
+        ($.2, $.3) = Id($)
+        ($.2, $.4) = Id($)
+        ($.3, $.4) = Id($)
+        $.1^-1 * $.2 * $.1 * $.3^-2 * $.2^-1 = Id($)
+        $.1^-1 * $.3 * $.1 * $.4^-1 = Id($)
+        $.1^-1 * $.4 * $.1 * $.4^-2 * $.3^-1 = Id($)
+        $.1^4 * $.3^-2 * $.4^-2 = Id($)
+]
+</PRE>
+Since the extensions are soluble groups, we construct pc-presentations
+of each and verify that no two of the groups are isomorphic.
+<P>
+<P>
+<P>
+<PRE>
+&gt; E1 := SolubleQuotient(extns[1]);
+&gt; E2 := SolubleQuotient(extns[2]);
+&gt; E3 := SolubleQuotient(extns[3]);
+&gt; IsIsomorphic(E1, E2);
+false
+&gt; IsIsomorphic(E1, E3);
+false
+&gt; IsIsomorphic(E2, E3);
+false
+</PRE>
+<HR>
+<H5><A NAME = "8867"></A><A NAME = "GrpCoh:IsExtensionOf">IsExtensionOf</A>(G) : GrpPerm -&gt; [], </H5>
+
+<PRE>    Degree: RngInt                      Default: 0</PRE>
+
+<PRE>    MaxId: RngInt                       Default: 15</PRE>
+
+<PRE>    DegreeBound: RngInt                 Default: &infin;</PRE>
+<BLOCKQUOTE>
+For a given permutation group G, find normal abelian subgroup
+A&lt;G such that G can be obtained by extending G/A by A.
+The function returns a sequence of tuples T containing
+<DL COMPACT class='compact'>
+<DT></DT><DD>- the cohomology module of G/A acting on A
+<DT></DT><DD>- the 2-cocyle as an element in H<sup>2</sup>(G/A, A) corresponding to G
+<DT></DT><DD>- the actual 2-cocyle as a user defined function
+<DT></DT><DD>- a pair &lt; a, b &gt; giving the degree a of the
+  transitive group G/A and the number b identifying the
+  group in the data base. If b is larger than 20 (or <TT>MaxId</TT>)
+  the hash value of the group is returned instead.
+<DT></DT><DD>- the abelian invariants of A
+<DT></DT><DD>- a set containing all pairs &lt; a, b &gt; such that 
+  <sub>a</sub>T<sub>b</sub> can be obtained through this extension process.
+<P>
+</DL>
+If <TT>DegreeBound</TT> is given, only subgroups A are considered such that
+G/A has less than <TT>DegreeBound</TT> many elements. The list
+considered contains only sugroups that are maximal under the
+restrictions.
+If <TT>Degree</TT> is given, G/A must have exactly <TT>Degree</TT> many elements.
+</BLOCKQUOTE>
+<H5><A NAME = "8868">IsExtensionOf(L) : [GrpPerm] -&gt; [], []</A></H5>
+
+<PRE>    Degree: RngInt                      Default: 0</PRE>
+
+<PRE>    MaxId: RngInt                       Default: 15</PRE>
+
+<PRE>    DegreeBound: RngInt                 Default: &infin;</PRE>
+<BLOCKQUOTE>
+For all groups G in L, <A  HREF = "text782.htm#GrpCoh:IsExtensionOf">IsExtensionOf</A> is called.
+The first sequence returned contains tuples as in <A  HREF = "text782.htm#GrpCoh:IsExtensionOf">IsExtensionOf</A>
+above. The sequence is minimal such that all groups in L can be generated
+using the cohomology modules in the sequence. The second return value
+contains a set of pairs &lt; a, b &gt; describing all
+transitive groups that can be obtained through the processes.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text783.htm">[Next]</A><A  HREF = "text781.htm">[Prev]</A> <A  HREF = "text783.htm">[Right]</A> <A  HREF = "text781.htm">[Left]</A> <A  HREF = "text773.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

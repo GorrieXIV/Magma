@@ -1,0 +1,473 @@
+freeze;
+ 
+declare verbose SmallerField, 1;
+
+forward IsRealisableOverSmallerField, IsRealisableOverSubfield, MainSmallerField, 
+        ProcessSubfields;
+
+/////////////////////////////////////////////////////////////////////////////
+
+intrinsic AbsoluteModuleOverMinimalField (M::ModGrp, F::FldFin) -> ModGrp
+{Write the absolutely irreducible module M over the smallest possible 
+field containing F, without increasing the dimension of the module}
+
+      // First write the module over the smallest possible field K
+ 
+      N := M;
+      if Degree(Field(N)) gt 1 then 
+           Min_K := MinimalField(N);
+           if #Min_K lt #Field(N) then
+                N := ChangeRing(N, Min_K);
+           end if;
+           yes, N1 := IsRealisableOverSmallerField(N);
+           if yes then 
+                N :=  N1; 
+           end if;
+      end if;
+
+      // Now write the module over the smallest field L that contains
+      // both F and K
+ 
+      K := BaseRing(N);
+      k := Degree(K);
+      f := Degree(F);
+      l := LCM(k, f);
+      if l gt k then 
+         L := ext< F | l div f >;
+         N := ChangeRing(N, L);
+      end if;
+
+      return N;
+
+end intrinsic;
+
+
+/////////////////////////////////////////////////////////////////////////////
+
+intrinsic AbsoluteModuleOverMinimalField (M::ModGrp:DoNice := false, All := false) -> ModGrp
+{Write the absolutely irreducible module M over the smallest possible 
+field without increasing the dimension of the module}
+
+      // First write the module over the smallest possible field K
+ 
+      if Characteristic(Field(M)) eq 0 then
+        return InternalAbsoluteModuleOverMinimalField(M : DoNice := DoNice, 
+                                                          All := All);
+      end if;
+
+      require All cmpeq false: "Parameter \"All\" not available in positive characteristic";
+
+      N := M;
+      if Degree(Field(N)) gt 1 then 
+           Min_K := MinimalField(N);
+           if #Min_K lt #Field(N) then
+                N := ChangeRing(N, Min_K);
+           end if;
+           yes, N1 := IsRealisableOverSmallerField(N);
+           if yes then 
+                N :=  N1; 
+           end if;
+      end if;
+
+      return N;
+
+end intrinsic;
+
+
+/////////////////////////////////////////////////////////////////////////////
+
+intrinsic AbsoluteModulesOverMinimalField (Q::SeqEnum, F::FldFin) -> SeqEnum
+{Write the sequence Q of modules over the smallest possible field 
+containing F, without increasing the dimension of the module}
+
+      return [ AbsoluteModuleOverMinimalField(M, F) : M in Q ];
+
+end intrinsic;
+
+
+/////////////////////////////////////////////////////////////////////////////
+
+intrinsic ModuleOverSmallerField (M::ModGrp, F::FldFin) -> ModGrp
+{Write the module M over the field F}
+
+      // First write the module over the smallest possible field K
+ 
+      N := M;
+      N := AbsoluteModuleOverMinimalField(N, F);
+
+      // If the base field of M strictly contains F, write M over F by
+      // blowing up the dimension of M
+ 
+      if #Field(N) ne #F then
+         N := WriteOverSmallerField(N, F);
+      end if;
+
+      return N;
+
+end intrinsic;
+
+
+/////////////////////////////////////////////////////////////////////////////
+
+intrinsic ModulesOverSmallerField (Q::SeqEnum, F::FldFin) -> SeqEnum
+{Write the sequnce Q of modules over the smallest possible field without
+increasing the dimension of the module}
+
+      return [ ModuleOverSmallerField(M, F) : M in Q ];
+
+end intrinsic;
+
+
+/////////////////////////////////////////////////////////////////////////////
+
+intrinsic AbsolutelyIrreducibleConstituents(M::ModGrp) -> SeqEnum
+{Given an irreducible module M, return M if it is already
+absolutely irreducible, else return the absolutely irreducible
+modules obtained by rewriting M in smaller degree after extending 
+the base field of M to a splitting field}
+
+        require IsIrreducible(M) : "Module is not irreducible.";
+
+             yes, mx, deg := IsAbsolutelyIrreducible(M);
+             if yes then
+                 return [ M ];
+             else
+                F := BaseRing(M);
+                M1 := ChangeRing( M, ext< F | deg >);
+                return Constituents(M1); 
+            end if;
+
+end intrinsic;
+
+/////////////////////////////////////////////////////////////////////////////
+
+intrinsic ModulesOverCommonField( M::ModGrp, N::ModGrp ) -> ModGrp, ModGrp
+{Given A-modules M and N, change their base fields to F, where F is the 
+smallest overfield containg the base fields of M and N}
+
+
+         FldM := BaseRing(M);
+         FldN := BaseRing(N);
+         K := PrimeField(FldM);
+         d1 := Degree(FldM);
+         d2 := Degree(FldN);
+         d := LCM(d1, d2);
+
+         if d1 ne d then 
+              M1 := ChangeRing(M, ext<Field(M) | d div d1>); 
+         else
+              M1 := M;
+         end if;
+
+         if d2 ne d then 
+              N1 := ChangeRing(N, ext<Field(N) | d div d2>); 
+         else
+              N1 := N;
+         end if;
+
+         return M1, N1;
+
+end intrinsic;
+
+
+/////////////////////////////////////////////////////////////////////////////
+
+intrinsic CommonOverfield( K::FldFin, L::FldFin ) -> FldFin
+{Given finite fields K and L, both of characteristic p, return 
+the smallest field which contains both of them} 
+
+	 // Allan: this is the correct way to do it!!!
+	 l, C := ExistsCoveringStructure(K, L);
+	 require l: "No covering field exists";
+	 return C;
+
+/*
+	 require Characteristic(K) eq Characteristic(L):
+	    "Fields have different characteristics";
+         F := PrimeField(K);
+         d1 := Degree(K);
+         d2 := Degree(L);
+         d := LCM(d1, d2);
+         if (d1 eq d2) or (d eq d1) then 
+            return K; 
+         elif d eq d2 then
+            return L;
+         else
+            return ext<K | d div d1>;
+         end if;
+*/
+
+end intrinsic;
+
+
+/////////////////////////////////////////////////////////////////////////////
+/*
+intrinsic ConstituentsOverMinimalField ( M::ModGrp ) -> []
+{Given a module M, return the irreducible constituients of M,
+each written over the smallest field in which it can be realised}
+
+     return [ WriteOverMinimalField(N) : N in Constituents(M) ];
+
+end intrinsic;
+*/
+///////////////////////////////////////////////////////////////////////////////
+
+intrinsic IsRealisableOverSubfield(M:: ModGrp, F::FldFin) -> BoolElt, ModGrp
+{Determine whether M can be realised over the subfield F of its
+base field K.  If so, return true and the equivalent module.} 
+ 
+     K := BaseRing(M);
+     if #K eq #F then
+         return true, M;
+     end if;
+     p := Characteristic(K);
+     d := Degree(F);
+     e := Degree(K);
+     assert (e mod d) eq 0;
+     yes, N, X := IsRealisableOverSubfield(M, d);
+     return yes, N, X; 
+
+end intrinsic;
+
+
+/////////////////////////////////////////////////////////////////////////////
+
+intrinsic WriteOverSmallerField(M::ModGrp, F::FldFin) -> ModGrp, Map
+{Given a module of dimension d over a finite field E having degree e
+and a subfield F of E having degree f, write the action of M as
+d*e/f by d*e/f matrices over F and return the module and the isomorphism};
+
+    K := Field(M);
+    require Type(K) eq FldFin: "Argument 1 is not over a finite field";
+    require PrimeField(K) eq PrimeField(F): "Arguments are not compatible";
+
+    d := Dimension(M);
+    Act := ActionGenerators(M);
+    A := MatrixRing(K, d);
+    B, f := MatrixRing(A, F);
+
+    N := GModule( Group(M), [ f(Act[i]) : i in [1 .. #Act] ]);
+    g := hom<M -> N | x :-> f(x)>;
+    return N, g;
+
+end intrinsic;
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+AlgebraRandomElement := function (AA, F, P: Length := 4)
+
+/* construct random F-linear combination of group algebra M;
+   P is group or random process for the group */
+
+   RanElt := function (F);
+      repeat x := Random (F); until x ne 0;
+      return x;
+   end function;
+   B := [AA ! Random (P): i in [1..Length]];
+   L := [RanElt (F): i in [1..#B]];
+   return &+[L[i] * B[i]: i in [1..#B]];
+end function;
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+Spin := function (G, v)
+
+/* construct a linearly independent basis consisting of 
+   images of v under G; this is the so-called Spin algorithm */ 
+
+   return SpinOrbit (v, [G.i: i in [1..Ngens (G)]]);
+ 
+end function;
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+IsInSmallerField := function (gens, F)
+   return forall{g : g in gens | forall{x : x in Eltseq (g) | x in F}};
+end function;
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+function IsRealisableOverSubfield(M, d: NumberRandom := 20)
+
+/*
+   Test whether the module M can be realised over a degree d extension
+   of the prime field
+*/
+
+   QualityLimit := 5;
+
+   vprint SmallerField: "Test SmallerField for degree ", d;
+   K := BaseRing (M);
+   n := Dimension(M);
+
+   p := Characteristic (K);
+   F := GF (p, d);
+
+   MA := MatrixAlgebra (K, n);
+   G := Group(M);
+   AG := ActionGroup(M);
+   P := RandomProcess (AG: Scramble := QualityLimit);
+   SF := PolynomialRing (F);
+   nmr := 0; 
+   repeat 
+      x := AlgebraRandomElement (MA, F, P: Length := 4 + 2 * nmr);
+      cp := CharacteristicPolynomial (x);
+      coeffs := Coefficients (cp);
+      if forall {x : x in coeffs | x in F} then
+         facs := Factorisation (SF!cp);
+         degs := [<Degree (f[1]), f[2]>: f in facs];
+         nmr +:= 1;
+         found := <1,1> in degs; 
+      else
+         vprint SmallerField: "Coefficients of characteristic polynomial not over smaller field";
+         return false, _; 
+      end if;
+   until found or nmr gt NumberRandom;
+
+   if not found then 
+      error "Should find an element with eigenspace of dimension 1"; 
+   end if;
+
+   vprint SmallerField: "Number of tries to find element with eigenspace of rank 1 = ", nmr;
+   // vprint SmallerField: "Time to get good random element is ", Cputime (t);
+
+   pos := Position (degs, <1,1>);
+   fac := facs[pos];
+   R := Roots (fac[1]);
+   r := R[1][1];
+   E := Eigenspace (x, r);
+   vprint SmallerField: "Now spin eigenspace to construct basis";
+   S := Spin (AG, E.1);
+   S;
+   A := MA!&cat[Eltseq (s): s in S];
+   Am1 := A^-1;
+   Q := ActionGenerators(M);
+   gens := [A * Q[i] * Am1: i in [1..#Q] ];
+   if IsInSmallerField (gens, F) then
+      N := GModule(G, gens);
+      N := ChangeRing(N, F);
+      return true, N;
+   else
+      return false, _;
+   end if;
+end function;
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+procedure ProcessSubfields (~M, ~divse)
+
+   if divse eq {} then return; end if;
+
+   repeat 
+      d := Maximum (divse);
+      flag, tmp := IsRealisableOverSubfield (M, d);
+      "*** Line 4 in ProcessSubfields ***", flag;
+      if flag eq false then 
+         divse diff:= Set (Divisors (d));
+      else 
+         M := tmp;
+         divse := divse meet Set (Exclude (Divisors (d), d));
+         $$ (~M, ~divse); 
+         return;
+      end if;
+   until #divse eq 0;
+         
+end procedure;
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+MainSmallerField := function (M, divse)
+
+   "*** In MainOverSmallerField ***";
+   K := BaseRing (M);
+   N := M;
+   ProcessSubfields (~N, ~divse);
+   F := BaseRing (N);
+   if #F ne #K then 
+      return true, N;
+   else
+      return false, _;
+   end if;
+
+end function;
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+IsRealisableOverSmallerField := function (M) 
+
+// Does G have an equivalent representation (modulo scalars if Scalars is true) 
+//  over a subfield? If so, return true and equivalent representation.} 
+
+   "*** In IsRealisableOverSmallerField ***";
+   K := BaseRing (M);
+   e := Degree (K);
+   n := Dimension (M);
+   divse := Set (Exclude (Divisors (e), e));
+   return MainSmallerField (M, divse);
+
+end function;
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+intrinsic IsRealisableOverSubfield (M :: ModGrp, d :: RngIntElt ) -> BoolElt, ModGrp 
+{Given a module M determine whether there a module isomorphic to M over a 
+degree d extension of the prime field.}
+
+   K := BaseRing (M);
+   e := Degree (K);
+   if not d in [1..e - 1] or e mod d ne 0 then return false, _; end if;
+
+// require IsAbsolutelyIrreducible (M): "Module must be absolutely irreducible";
+   n := Dimension (M);
+   return MainSmallerField (M, {d});
+
+end intrinsic;
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+intrinsic ActionGenerators(M::ModGrp) -> []
+{Return the matrices giving the action on M as a sequence}
+
+    return [ ActionGenerator(M, i) : i in [1..Nagens(M)] ];
+
+end intrinsic;
+
+intrinsic ActionGenerators(M::ModRng) -> []
+{Return the matrices giving the action on M as a sequence}
+
+    return [ ActionGenerator(M, i) : i in [1..Nagens(M)] ];
+
+end intrinsic;
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+intrinsic ActionGroup(M::ModGrp) -> GrpMat
+{The matrix group generated by the action generators of a G-module M}
+
+    G := Group(M);
+    ngens := Ngens(G);
+    gens := [ ActionGenerator(M, i) : i in [1..Nagens(M)] ];
+    assert #gens eq ngens;
+    deg := Degree(Universe(gens));
+    R := BaseRing(Universe(gens));    
+    if Type(G) eq GrpMat and Degree(G) eq deg and BaseRing(G) eq R and
+	forall{i:i in [1..ngens]|G.i eq gens[i]}
+    then
+	return G;
+    end if;
+
+    res := MatrixGroup<deg, R | gens>;
+    return res;
+end intrinsic;
+
+///////////////////////////////////////////////////////////////////////////////

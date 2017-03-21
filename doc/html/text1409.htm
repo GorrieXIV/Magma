@@ -1,0 +1,571 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Invariant Divisors and  Riemann-Roch Spaces</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1410.htm">[Next]</A><A  HREF = "text1408.htm">[Prev]</A> <A  HREF = "text1410.htm">[Right]</A> <A  HREF = "text1408.htm">[Left]</A> <A  HREF = "text1403.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "15901">Invariant Divisors and  Riemann-Roch Spaces</A></H3>
+
+<P>
+<P>
+<P>
+Divisors on toric varieties work in the same way as
+on any other varieties, except that within each
+linear equivalence class it is possible to choose
+torus invariant representatives. These invariant
+divisors are composed of toric strata, and so in raw
+combinatorial terms one can regard divisors as being
+integer (or rational) labels on the rays of the fan.
+This is a convenient way to construct divisors, but
+there are many other methods.
+<P>
+As for other schemes on which divisor calculations
+are defined in Magma, divisors on a toric variety
+have a single divisor group as their parent.
+Divisors can be constructed by coercing appropriate
+data into this group, but this is not the only method
+so it can be ignored for most purposes.
+(This group is, however, the connection between
+divisors and the toric variety, so it is always
+alive in the background.)
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1409.htm#15902">Divisor Group</A>
+<LI> <A  HREF = "text1409.htm#15908">Constructing Invariant Divisors</A>
+<LI> <A  HREF = "text1409.htm#15919">Properties of Divisors</A>
+<LI> <A  HREF = "text1409.htm#15942">Linear Equivalence of Divisors</A>
+<LI> <A  HREF = "text1409.htm#15950">Riemann--Roch Spaces of Invariant Divisors</A>
+</UL>
+<H4><A NAME = "15902">Divisor Group</A></H4>
+
+
+
+<H5><A NAME = "15903">DivisorGroup(X) : TorVar -&gt; DivTor</A></H5>
+<BLOCKQUOTE>
+The divisor group of the toric variety X. This is simply a
+parent object for divisors on X, and it is not
+computed as an abstract group.
+</BLOCKQUOTE>
+<H5><A NAME = "15904">ToricVariety(G) : DivTor -&gt; TorVar</A></H5>
+<BLOCKQUOTE>
+The toric variety of which G is the divisor group.
+</BLOCKQUOTE>
+<H5><A NAME = "15905">G1 eq G2 : DivTor,DivTor -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the divisor groups G<sub>1</sub> and G<sub>2</sub> are
+those of the same toric variety.
+</BLOCKQUOTE>
+<H5><A NAME = "15906">Divisor(G,S) : DivTor,[RngIntElt] -&gt; DivTorElt</A></H5>
+<H5>Divisor(G,S) : DivTor,[FldRatElt] -&gt; DivTorElt</H5>
+<BLOCKQUOTE>
+The divisor on the toric variety X associated to the divisor group G
+with coefficients given by the sequence S of integers or rationals
+with respect to the rays of the fan of X.
+</BLOCKQUOTE>
+<H5><A NAME = "15907">Divisor(G,i) : DivTor,RngIntElt -&gt; DivTorElt</A></H5>
+<BLOCKQUOTE>
+The divisor on the toric variety X associated to the divisor group G
+given by the vanishing of the ith coordinate of X.
+</BLOCKQUOTE>
+<H4><A NAME = "15908">Constructing Invariant Divisors</A></H4>
+
+
+
+<H5>D1 + D2 : DivTorElt,DivTorElt -&gt; DivTorElt</H5>
+
+<H5>n * D : FldRatElt,DivTorElt -&gt; DivTorElt</H5>
+
+<H5>- D : DivTorElt -&gt; DivTorElt</H5>
+
+<H5>D1 - D2 : DivTorElt,DivTorElt -&gt; DivTorElt</H5>
+
+<H5>D * v : DivTorElt,TorLatElt -&gt; RngIntElt</H5><P>
+
+
+
+Standard arithmetic operations for divisors D, D<sub>1</sub>, D<sub>2</sub>
+on a toric variety, where n&isin;Q and v is a point of the
+ambient toric lattice of the corresponding fan.
+
+
+<H5><A NAME = "15909">Divisor(X,S) : TorVar,[RngIntElt] -&gt; DivTorElt</A></H5>
+<BLOCKQUOTE>
+The Weil divisor (respectively Q-Weil divisor)
+on the toric variety X
+whose multiplicity on the ith coordinate divisor is
+the ith element of the sequence S of integers (respectively,
+rational numbers).
+</BLOCKQUOTE>
+<H5><A NAME = "15910">Divisor(X,i) : TorVar,RngIntElt -&gt; DivTorElt</A></H5>
+<BLOCKQUOTE>
+The divisor on the toric variety X
+given by the vanishing of the ith coordinate of X.
+</BLOCKQUOTE>
+<H5><A NAME = "15911">Divisor(X,f) : TorVar,RngMPolElt -&gt; DivTorElt</A></H5>
+<BLOCKQUOTE>
+The divisor on the toric variety X defined by the
+polynomial f of the Cox ring of X.
+</BLOCKQUOTE>
+<H5><A NAME = "15912">Divisor(X,m) : TorVar,TorLatElt -&gt; DivTorElt</A></H5>
+<BLOCKQUOTE>
+If m is in the monomial lattice of the toric variety X, this gives the
+principal divisor on X corresponding to the monomial m. If m is a form on
+the ray lattice of X, then this gives the Weil divisor corresponding to m.
+</BLOCKQUOTE>
+<H5><A NAME = "15913">ZeroDivisor(X) : TorVar -&gt; DivTorElt</A></H5>
+<BLOCKQUOTE>
+The zero divisor on the toric variety X.
+</BLOCKQUOTE>
+<H5><A NAME = "15914">Representative(X,m) : TorVar,ModEDElt -&gt; DivTorElt</A></H5>
+
+<PRE>    effective: BoolElt                  Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+A divisor D on the toric variety X whose class modulo linear
+equivalence equals m, an element of the divisor class group of X.
+Unless the parameter <TT>effective</TT> is set to <TT>false</TT>, D will be
+chosen to be effective if possible.
+</BLOCKQUOTE>
+<H5><A NAME = "15915">Representative(X,m) : TorVar,TorLatElt -&gt; DivTorElt</A></H5>
+
+<PRE>    effective: BoolElt                  Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+A divisor D on the toric variety X whose class modulo linear
+equivalence equals m, an element of the Picard lattice or
+divisor class lattice of X.
+Unless the parameter <TT>effective</TT> is set to <TT>false</TT>, D will be
+chosen to be effective if possible.
+</BLOCKQUOTE>
+<H5><A NAME = "15916">CanonicalDivisor(X) : TorVar -&gt; DivTorElt</A></H5>
+<BLOCKQUOTE>
+<P>
+The canonical divisor of the toric variety X.
+</BLOCKQUOTE>
+<H5><A NAME = "15917">CanonicalClass(X) : TorVar -&gt; DivTorElt</A></H5>
+
+<PRE>    group: MonStgElt                    Default: "Pic"</PRE>
+<BLOCKQUOTE>
+The class of canonical divisor of the toric variety X.
+By default this is returned as an element of the Picard lattice of X
+(and X must be Q-Gorenstein for this to make sense).
+However, the parameter <TT>group</TT> can be changed to <TT>Cl</TT> to
+return the divisor in the divisor class lattice or <TT>ClZ</TT> to
+return the divisor in the divisor class group.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15918">Example <TT>Toric_toric-kawamata-blowup-example (H124E15)</TT></A></H3>
+We compute the Kawamata blowup of 1/7(1, 2, 5). First we construct the singular cone by hand:
+<P>
+<P>
+<PRE>
+&gt; L := ToricLattice(3);
+&gt; C := PositiveQuadrant(L);
+&gt; v := L![1/7,2/7,5/7];
+&gt; LL,phi := AddVectorToLattice(v);
+&gt; CC := Cone(phi(Rays(C)));
+&gt; CC;
+3-dimensional simplicial cone CC with 3 minimal generators:
+    (1, 0, 0),
+    (0, 1, 0),
+    (4, 1, 7)
+</PRE>
+Now we compute the blowup.
+<P>
+<P>
+<PRE>
+&gt; FF := Fan(CC);
+&gt; vv := phi(v);
+&gt; vv;
+(3, 1, 5)
+&gt; GG := Blowup(Fan(CC),vv);
+</PRE>
+The blowup map is easy to recover:
+<P>
+<P>
+<PRE>
+&gt; X := ToricVariety(Rationals(),FF);
+&gt; Y&lt;x,y,z,t&gt; := ToricVariety(Rationals(),GG);
+&gt; f := ToricVarietyMap(Y,X);
+&gt; f;
+A map between toric varieties described by:
+    (t)^(2/7)*(x),
+    (t)^(1/7)*(y),
+    (t)^(5/7)*(z)
+</PRE>
+Finally we shall compute the discrepancy of this Kawamata blowup. It should be 1/7.
+<P>
+<P>
+<PRE>
+&gt; KX := CanonicalDivisor(X);
+&gt; KY := CanonicalDivisor(Y);
+&gt; KY - Pullback(f,KX);
+Q-Weil divisor with coefficients:
+    0, 0, 0, 1/7
+</PRE>
+<HR>
+<H4><A NAME = "15919">Properties of Divisors</A></H4>
+
+
+
+<H5><A NAME = "15920">Variety(D) : DivTorElt -&gt; TorVar</A></H5>
+<BLOCKQUOTE>
+The toric variety on which the divisor D is defined.
+</BLOCKQUOTE>
+<H5><A NAME = "15921">Parent(D) : DivTorElt -&gt; DivTor</A></H5>
+<BLOCKQUOTE>
+The divisor group of a toric variety in which the divisor D lies.
+</BLOCKQUOTE>
+<H5><A NAME = "15922">Weil(D) : DivTorElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The multiplicities on rays of the fan of X that determine
+the invariant divisor D, where X is the toric variety on
+which D is defined.
+</BLOCKQUOTE>
+<H5><A NAME = "15923">Cartier(D) : DivTorElt -&gt; SeqEnum[TorLatElt]</A></H5>
+<BLOCKQUOTE>
+The sequence of toric lattice elements (of the monomial lattice
+of X) that determine the divisor D on the toric affine
+patches of the toric variety X on which D lies.
+This requires that D be Q-Cartier.
+</BLOCKQUOTE>
+<H5><A NAME = "15924">IsQCartier(D) : DivTorElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if some integer multiple of the divisor D
+on a toric variety is Cartier.
+</BLOCKQUOTE>
+<H5><A NAME = "15925">IsCartier(D) : DivTorElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the divisor D on a toric variety is Cartier.
+</BLOCKQUOTE>
+<H5><A NAME = "15926">IsWeil(D) : DivTorElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the divisor D on a toric variety is a Weil divisor
+(that is, its coefficients are integers rather than rational numbers).
+</BLOCKQUOTE>
+<H5><A NAME = "15927">IsAmple(D) : DivTorElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the divisor D on a toric variety is ample.
+</BLOCKQUOTE>
+<H5><A NAME = "15928">IsNef(D) : DivTorElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the divisor D on a toric variety is nef.
+</BLOCKQUOTE>
+<H5><A NAME = "15929">IsBig(D) : DivTorElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the divisor D on a toric variety is big.
+</BLOCKQUOTE>
+<H5><A NAME = "15930">IsEffective(D) : DivTorElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the divisor D on a toric variety is effective.
+</BLOCKQUOTE>
+<H5><A NAME = "15931">PicardClass(D) : DivTorElt -&gt; TorLatElt</A></H5>
+<BLOCKQUOTE>
+<P>
+The class in the Picard lattice corresponding to the Q-Cartier divisor D.
+</BLOCKQUOTE>
+<H5><A NAME = "15932">MovablePart(D) : DivTorElt -&gt; DivTorElt</A></H5>
+<BLOCKQUOTE>
+The movable part (or mobile part) of the divisor D on
+a toric variety.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15933">Example <TT>Toric_toric-movable-example (H124E16)</TT></A></H3>
+We compute a variety as a blowup of the projective plane.
+<P>
+<P>
+<PRE>
+&gt; X := ProjectiveSpace(Rationals(),[1,1,1]);
+&gt; Y&lt;u,v,x,y&gt; := Blowup(X, &amp;+Rays(Fan(X))[1..2]);
+&gt; Y;
+Toric variety of dimension 2
+Variables: u, v, x, y
+The components of the irrelevant ideal are:
+    (y, x), (v, u)
+The 2 gradings are:
+    0, 0, 1, 1,
+    1, 1, 1, 0
+</PRE>
+We consider a (toric coordinate) divisor on Y.
+<P>
+<P>
+<PRE>
+&gt; D := Divisor(Y,4);
+&gt; MovablePart(D);
+Weil divisor with coefficients:
+    0, 0, 0, 0
+&gt; MovablePart(D) eq ZeroDivisor(Y);
+true
+</PRE>
+The movable part of this divisor is the zero divisor.
+Adding a little bit of another effective divisor doesn't
+yet make a mobile divisor, but it has made it stably mobile:
+some multiple now has a movable part.
+<P>
+<P>
+<PRE>
+&gt; E := D + (1/2)*Divisor(Y,u);
+&gt; MovablePart(E);
+Weil divisor with coefficients:
+    0, 0, 0, 0
+&gt;   MovablePart(2*E);
+Weil divisor with coefficients:
+    1, 0, 0, 1
+&gt;   MovablePart(2*E) eq (D + Divisor(Y,u));
+true
+</PRE>
+<HR>
+<H5><A NAME = "15934">ImageFan(D) : DivTorElt -&gt; TorFan</A></H5>
+<BLOCKQUOTE>
+The dual fan to the rational polyhedron of sections of the
+divisor D on a toric variety X. If X is a complete
+variety, this will give the fan of Proj of the ring of sections of
+positive powers of D.
+</BLOCKQUOTE>
+<H5><A NAME = "15935">Proj(D) : DivTorElt -&gt; TorVar, PlcEnum</A></H5>
+<BLOCKQUOTE>
+Proj (as a toric variety) of the ring of sections of the divisor D
+on a toric variety. The map of underlying lattices which determines
+the map <TT>Variety(D)</TT> -&gt; <TT>Proj(D)</TT> is also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "15936">RelativeProj(D) : DivTorElt -&gt; TorVar</A></H5>
+<BLOCKQUOTE>
+The relative (sheaf) Proj of sections of the divisor D on
+a toric variety. If D is Q-Cartier, then the identity will be
+constructed; for non Q-Cartier divisors, a partial
+Q-factorialisation will be given.
+</BLOCKQUOTE>
+<H5><A NAME = "15937">IntersectionForm(X,C) : TorVar,TorCon -&gt; TorLatElt</A></H5>
+<BLOCKQUOTE>
+If the cone C is a codimension 1 face of the fan of the
+toric variety X, return the dual toric lattice vector that
+represents intersection of the toric subvariety corresponding
+to C.
+</BLOCKQUOTE>
+<H5><A NAME = "15938">IntersectionForms(X) : TorVar -&gt; [TorLatElt]</A></H5>
+<BLOCKQUOTE>
+The sequence of forms on the Picard lattice of the toric variety X which define the intersection forms with all torus invariant curves.
+</BLOCKQUOTE>
+<H5><A NAME = "15939">CartierToWeilMap(X) : TorVar -&gt; Map</A></H5>
+<BLOCKQUOTE>
+The embedding map from the lattice of torus-invariant Cartier divisors to the lattice of torus-invariant Weil divisors of the toric variety X.
+</BLOCKQUOTE>
+<H5><A NAME = "15940">PicardToClassGroupsMap(X) : TorVar -&gt; Map</A></H5>
+<BLOCKQUOTE>
+The embedding of the Picard group of X into the divisor class group.
+</BLOCKQUOTE>
+<H5><A NAME = "15941">PicardToClassLatticesMap(X) : TorVar -&gt; Map</A></H5>
+<BLOCKQUOTE>
+The natural embedding of the Picard lattice of X into divisor class lattice.
+</BLOCKQUOTE>
+<H4><A NAME = "15942">Linear Equivalence of Divisors</A></H4>
+
+
+
+<H5><A NAME = "15943">IsQPrincipal(D) : DivTorElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if some integer multiple of
+the divisor D on a toric variety is principal.
+</BLOCKQUOTE>
+<H5><A NAME = "15944">IsPrincipal(D) : DivTorElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the divisor D on a toric
+variety is principal.
+</BLOCKQUOTE>
+<H5><A NAME = "15945">IsLinearlyEquivalentToCartier(D) : DivTorElt -&gt; BoolElt, DivTorElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the divisor D on a toric variety is
+linearly equivalent to a Cartier divisor; if so, then a representative
+Cartier divisor is also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "15946">AreLinearlyEquivalent(D,E) : DivTorElt,DivTorElt -&gt; BoolElt</A></H5>
+<H5>IsLinearlyEquivalent(D,E) : DivTorElt,DivTorElt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the divisors D and E are linearly equivalent.
+</BLOCKQUOTE>
+<H5><A NAME = "15947">LinearlyEquivalentDivisorWithNoSupportOn(D,S) : DivTorElt,[RngMPolElt] -&gt; DivTorElt</A></H5>
+<BLOCKQUOTE>
+A divisor linearly equivalent to the divisor D, with no support on the locus defined by S. S should be a sequence of variables on the variety of D. If S has more than just variables, the other polynomials will be ignored.
+</BLOCKQUOTE>
+<H5><A NAME = "15948">DefiningMonomial(D) : DivTorElt -&gt; RngMPolElt</A></H5>
+<BLOCKQUOTE>
+The monomial (if D is effective) or rational monomial defining the
+divisor D on a toric variety.
+</BLOCKQUOTE>
+<H5><A NAME = "15949">LatticeElementToMonomial(D,v) : DivTorElt,TorLatElt -&gt; RngMPolElt</A></H5>
+<BLOCKQUOTE>
+The monomial in the Cox ring that corresponds to the monomial
+lattice element v when regarded as a section of the
+divisor D.
+</BLOCKQUOTE>
+<H4><A NAME = "15950">Riemann--Roch Spaces of Invariant Divisors</A></H4>
+
+
+
+<H5><A NAME = "15951">RiemannRochPolytope(D) : DivTorElt -&gt; TorPol</A></H5>
+<BLOCKQUOTE>
+The Riemann--Roch space of the divisor D as a polytope in
+the monomial lattice of the underlying toric variety.
+</BLOCKQUOTE>
+<H5><A NAME = "15952">RiemannRochBasis(D) : DivTorElt -&gt; [RngElt]</A></H5>
+<BLOCKQUOTE>
+A basis of the Riemann--Roch space of the divisor D on
+a toric variety X: this is a sequence of rational functions on X.
+</BLOCKQUOTE>
+<H5><A NAME = "15953">RiemannRochDimension(D) : DivTorElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The dimension of the Riemann--Roch space of the divisor D on
+a toric variety.
+</BLOCKQUOTE>
+<H5><A NAME = "15954">GradedCone(D) : DivTorElt -&gt; TorCon</A></H5>
+<BLOCKQUOTE>
+The graded cone of sections of multiples of the divisor D
+on a toric variety. In other words, the integral
+points of the ith graded piece of this cone represent
+sections of the divisor i * D.
+</BLOCKQUOTE>
+<H5><A NAME = "15955">Polyhedron(D) : DivTorElt -&gt; TorPol</A></H5>
+<BLOCKQUOTE>
+The integral polyhedron whose integral points corresponds to sections of
+the divisor D.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15956">Example <TT>Toric_toric-rr-example (H124E17)</TT></A></H3>
+We make a simple toric variety Y by blowing up the plane.
+<P>
+<P>
+<PRE>
+&gt; X := ProjectiveSpace(Rationals(),[1,1,1]);
+&gt; Y&lt;u,v,x,y&gt; := Blowup(X, &amp;+Rays(Fan(X))[1..2]);
+&gt; Y;
+Toric variety of dimension 2
+Variables: u, v, x, y
+The components of the irrelevant ideal are:
+    (y, x), (v, u)
+The 2 gradings are:
+    0, 0, 1, 1,
+    1, 1, 1, 0
+</PRE>
+We make a non-effective divisor as a difference of fibres
+of the natural map from Y to the line.
+<P>
+<P>
+<PRE>
+&gt; D := 2*Divisor(Y,u) - Divisor(Y,v);
+&gt; IsEffective(D);
+false
+&gt; P := Polyhedron(D);
+&gt; monos := [ LatticeElementToMonomial(D,v) : v in Points(P) ];
+&gt; monos;
+[
+    u,
+    v
+]
+</PRE>
+The polyhedron P is not quite the Riemann--Roch space of D,
+but it is for a divisor linearly equivalent to D.
+<P>
+<P>
+<PRE>
+&gt; [ AreLinearlyEquivalent(Divisor(Y,m),D) : m in monos ];
+[ true, true ]
+</PRE>
+<HR>
+<H5><A NAME = "15957">HilbertSeries(D) : DivTor -&gt; FldFunRatUElt</A></H5>
+<BLOCKQUOTE>
+The Hilbert series of the divisor D on a toric variety X, namely
+<P>
+&Sigma;<sub>m&ge;0</sub> dim H<sup>0</sup>(X, mD).
+<P>
+This assumes that the spaces of sections H<sup>0</sup>(X, D) of D
+finite dimensional. This will be true if X is projective,
+for example, but it holds in other cases too.
+</BLOCKQUOTE>
+<H5><A NAME = "15958">HilbertPolynomial(D) : DivTor -&gt; [RngUPolElt]</A></H5>
+<BLOCKQUOTE>
+The Hilbert (quasi-)polynomial for the divisor D.
+The space of sections of D must be finite dimensional.
+That is, a sequence of polynomials [p<sub>0</sub>, ..., p<sub>r - 1</sub>]
+of length r, the
+quasi-period of the Hilbert polynomial, so that
+dim H<sup>0</sup>(X, mD) is the value of p<sub>s</sub>(k)
+where m=kr + s is the Euclidean division of m by r;
+in other words, s is the least residue of m modulo r.
+Note that since Magma indexes sequences from 1,
+we have that p<sub>i</sub> =  <TT>HilbertPolynomial(D)[i+1]</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "15959">HilbertCoefficients(D,l) : DivTor,RngIntElt -&gt; [RngIntElt]</A></H5>
+<BLOCKQUOTE>
+The first l + 1 coefficients of the Hilbert series of the
+divisor D on a toric variety
+(starting with 0D up to and including lD).
+</BLOCKQUOTE>
+<H5><A NAME = "15960">HilbertCoefficient(D,i) : DivTor,RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Thefirst ith coefficient of the Hilbert series of the
+divisor D on a toric variety.
+</BLOCKQUOTE>
+<H5><A NAME = "15961">HilbertDeltaVector(D) : DivTor -&gt; [RngIntElt]</A></H5>
+<BLOCKQUOTE>
+The Hilbert &delta;-vector (or h<sup> * </sup>-vector) for the divisor D on a toric variety.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15962">Example <TT>Toric_toric-rr-by-hand (H124E18)</TT></A></H3>
+One can recreate the Cech cohomology calculation of the
+Riemann--Roch space of a divisor D on a toric variety X:
+<P>
+H<sup>0</sup>(X, (O)<sub>X</sub>(D)) =
+&cap;<sub>&sigma;</sub> (m<sub>&sigma;</sub> + check(&sigma;))
+<P>
+where the sum is taken over top-dimensional cones &sigma; in
+the fan of X, and m<sub>&sigma;</sub> is the monomial in the
+dual lattice which determines D on the affine patch X<sub>&sigma;</sub>;
+check(&sigma;) is the cone dual to &sigma;.
+<P>
+<P>
+<PRE>
+&gt; X&lt;x,y,z&gt; := ProjectiveSpace(Rationals(),[1,3,5]);
+&gt; D := Divisor(X,[2,3,1]);
+&gt; cones := Cones(Fan(X));
+&gt; RRD := &amp;meet [ Polytope([Cartier(D)[i]]) + Dual(cones[i]) : i in [1..3]];
+&gt; IsPolytope(RRD);
+true
+</PRE>
+We could compute the number of points of this cone RRD by saying
+<TT>#Points(RRD)</TT>. This should be regarded as a slow method to
+determine the number of points---after all, it requires us to
+find all the points before counting them. There is a specialised
+point-counting intrinsic <TT>NumberOfPoints</TT> which does not
+find the points first. The latter should be used for point counting,
+although in relatively small examples the former can be a little faster.
+<P>
+<P>
+<PRE>
+&gt; NumberOfPoints(RRD);
+14
+</PRE>
+To compute also the number of points of integral dilations of this
+polytope, we revert to using the divisor and computing its
+Hilbert series (or a few coefficients if that's all we need).
+<P>
+<P>
+<PRE>
+&gt; time HilbertCoefficients(D,10);
+[ 1, 14, 44, 92, 156, 238, 337, 452, 585, 735, 902 ]
+&gt; h&lt;t&gt; := HilbertSeries(D);
+&gt; h;
+(-4*t^8 - 21*t^7 - 38*t^6 - 51*t^5 - 51*t^4 - 47*t^3 - 30*t^2 - 13*t - 1)/(t^9 -
+    t^8 - t^6 + t^5 - t^4 + t^3 + t - 1)
+&gt; h * (1 - t) * (1 - t^3) * (1 - t^5);
+4*t^8 + 21*t^7 + 38*t^6 + 51*t^5 + 51*t^4 + 47*t^3 + 30*t^2 + 13*t + 1
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1410.htm">[Next]</A><A  HREF = "text1408.htm">[Prev]</A> <A  HREF = "text1410.htm">[Right]</A> <A  HREF = "text1408.htm">[Left]</A> <A  HREF = "text1403.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

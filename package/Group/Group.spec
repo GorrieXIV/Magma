@@ -1,0 +1,165 @@
+Grp
+{
+	burnside.m
+  	is_conj_subgroup.m
+  	commutator.m
+  	simple_names.m
+	misc.m
+	prospector.m
+}
+GrpAtlas
+{
+       +atlas.spec
+}
+GrpAtc
+{
+	db.m
+}
+GrpAuto
+{
+    +GrpAuto.spec
+}
+GGrp
+{
+	GGrp.m
+}
+GrpAb
+{
+	direct_sum.m 
+  	hom.m
+  	subgrp.m
+        misc.m
+	autabgp.m
+}
+GrpCoh
+{
+        attributes.m
+        intrinsics.m
+        strongpres.m
+        pcpresgen.m
+        matgp.m
+        compab.m
+        strongpresab.m
+        pcpresgenab.m
+        pcpres.m
+	fp.m
+        nonab
+        {
+                cohom.m
+        }
+}
+
+GrpData
+{
+	perfgps
+  	{
+    		perfgps.m
+  	}
+  	prmgps.m
+  	trngps.m
+  	smallgps2.m
+	smallSF.m
+	p4.m
+	p5.m
+	p6
+	{
+	    +spec
+	}
+	p7
+	{
+	    +spec
+	}
+	p8
+	{
+	    +spec
+	}
+	c9lattices.m
+}
+GrpExt
+{
+    degred.m
+    elabext.m
+    modext.m
+    solext.m
+}
+GrpFin
+{
+  misc.m
+  semidirect_product.m
+  subgroup_lattice.m
+  rational.m
+  groupname.m
+  Lix
+  {
+    lowindex.m
+    lifns.m
+    extend1sub.m
+   }
+   SimpleRecog
+   {
+    altsym.m
+    recognise_sl.m
+    slbbrec.m
+    recognise_sp_odd.m
+    recognise_sp4_even.m
+    recognise_su3.m
+    recognise_su4.m
+    bbattributes.m
+    bbprelims.m
+    bbsporadics.m
+    bbsl2.m
+    bbutil.m
+    an-recog
+    {
+      +spec
+    }
+   }
+}
+GrpFP
+{
+    +GrpFP.spec
+}
+GrpMat
+{
+    +GrpMat.spec
+}
+GrpPC
+{
+    +GrpPC.spec
+}
+GrpPerm
+{
+  butler_classes.m
+  double_cosets.m
+  dtgroups.m
+  holt_classes_lift.m
+  holt_classes_tf.m
+  is_wreath_product.m
+  matrix_aut.m
+  matrix_quo.m
+  misc.m
+  trans32id.m
+  trans33to47id.m
+  TransGpId.m
+  aut
+  {
+    +aut.spec
+  }
+  max
+  {
+    +max.spec
+  }
+}
+GrpBrd
+{
+  isppdc.m
+}
+GrpBB
+{
+    GrpBB.m
+}
+GrpPCBF
+{
+    +GrpPCBF.spec
+}
+    GrpGPC.m

@@ -1,0 +1,202 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Building Databases</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1387.htm">[Next]</A><A  HREF = "text1399.htm">[Prev]</A> <A  HREF = "text1387.htm">[Right]</A> <A  HREF = "text1399.htm">[Left]</A> <A  HREF = "text1388.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "15708">Building Databases</A></H3>
+
+<P>
+<P>
+<P>
+This section contains a sketch of how databases of examples
+can be built.  This is an aside from the rest of the chapter,
+and is only of interest if one either wants to understand the
+construction of the K3 database for its own sake, or wishes
+to create other similar lists that take too long to be
+regenerated on demand.
+Note, however, that the database facility described here is
+not suitable for very large databases:  roughly speaking,
+it is intended for those containing a few tens of thousands
+of elements, not millions, and certainly not in the
+Kreuzer--Skarke <A  HREF = "text1387.htm#bib_KrSk">[KS00]</A> range.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1400.htm#15709">The K3 Database</A>
+<LI> <A  HREF = "text1400.htm#15721">Making New Databases</A>
+</UL>
+<H4><A NAME = "15709">The K3 Database</A></H4>
+
+<P>
+<P>
+<P>
+This section describes briefly the method of construction used for
+the K3 database.   The K3 database is fully installed in
+Magma---see Section <A  HREF = "text1397.htm#15675">The K3 Database</A> for instructions---and there is
+no need to use the functions described here to rebuild it unless
+you intend to modify the code to incorporate new information in
+the database.
+<P>
+<P>
+The construction is in two steps.  First we create all the
+K3 surfaces we require and write them as abbreviated records
+to a series of files.  Then we load these files one at a time,
+writing their contents in further abbreviated form to a binary
+data file, <TT>K3S.dat</TT>.  The writing functions keep track of
+key indexing information and write this to an index file,
+<TT>K3S.ind</TT>.  Functions to read from these files are already
+installed, so the process is completed by copying these two
+files to the standard data directory in the Magma libraries.
+<P>
+We now go through the process in detail.
+
+
+<H5><A NAME = "15710">Creating Many K3 Surfaces</A></H5>
+
+
+
+<H5><A NAME = "15711">CreateK3Data(g) : RngIntElt -&gt; SeqEnum</A></H5>
+<H5>CreateK3Data(g,r) : RngIntElt,RngIntElt -&gt; SeqEnum</H5>
+<H5>CreateK3Data(g,B) : RngIntElt,SeqEnum -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Create a sequence containing all K3 surfaces of genus g&ge; - 1;
+restrict to those with singular rank at most r, if given as an
+argument, or having baskets in the sequence B of baskets, if given
+as an argument.
+<P>
+The return sequence is ordered according to the natural
+numerical order on the coefficients of Hilbert series.
+Analysis of projections of Types I and II is made to
+modify weights of K3 surfaces, and any inconsistencies between
+different predictions of weights coming from different projections
+are reported.
+</BLOCKQUOTE>
+<H5><A NAME = "15712">K3 Surfaces as Records</A></H5>
+
+
+
+<H5><A NAME = "15713">K3SurfaceToRecord(X) : GRK3 -&gt; Rec</A></H5>
+<BLOCKQUOTE>
+A record in K3 record format that contains a subset of the data
+associated to the K3 surface X from which all attributes of X
+can be computed.
+</BLOCKQUOTE>
+<H5><A NAME = "15714">K3Surface(x) : Rec -&gt; GRK3</A></H5>
+<BLOCKQUOTE>
+The K3 surface with the same data as that of the record x
+in K3 record format.
+</BLOCKQUOTE>
+<H5><A NAME = "15715">Writing K3 Surfaces to a File</A></H5>
+
+
+
+<H5><A NAME = "15716">WriteK3Data(Q,F) : SeqEnum,MonStgElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Write the K3 surfaces in the sequence Q to the file with name
+given by the string F.  The resulting file F is a text file
+containing Magma code which, when loaded into a Magma session,
+generates a sequence called <TT>data</TT> of records in K3 record
+format that corresponds to Q.
+</BLOCKQUOTE>
+<H5><A NAME = "15717">Writing the Data and Index Files</A></H5>
+
+<P>
+<P>
+<P>
+With the data for the K3 database saved as a series of files
+"k3data-1", "k3data0" and so on, the command
+<TT>load "writek3db.m";</TT> (or <TT>load "PATH/writek3db.m";</TT>)
+loads them in turn, writes the two binary files and then deletes
+the data from the Magma session.  Magma must be running in
+the directory containing all the data files "k3data ... ".
+
+
+<H5><A NAME = "15718">Reading the Raw Data</A></H5>
+
+<P>
+<P>
+<P>
+In normal Magma use, even though the data in the K3 database
+is in coded form (as a tuple, in fact), when returned to the user
+it is expressed as a K3 surface.  Of course, this final translation
+step takes a little time, insignificant in most use, but very
+significant when searching through the whole database.
+So there are functions to access the raw data, and then to
+translate it into a K3 surface.  The search intrinsics installed
+in the Magma packages use these functions, as should any new
+searches that need only modest increase in speed.
+
+
+<H5><A NAME = "15719">K3SurfaceRaw(D,i) : DB,RngIntElt -&gt; Tup</A></H5>
+<H5>K3SurfaceRaw(D,Q,i) : DB,SeqEnum,RngIntElt -&gt; Tup</H5>
+<BLOCKQUOTE>
+The i-th element of the K3 database D expressed as a tuple
+of data (or the i-th element whose Hilbert series has
+coefficients of t<sup>i</sup> given by the integers in the sequence Q,
+which may have length at most 5).
+</BLOCKQUOTE>
+<H5><A NAME = "15720">K3Surface(x) : Tup -&gt; GRK3</A></H5>
+<BLOCKQUOTE>
+The K3 surface with the same data as that of the tuple x
+that is in the raw K3 database format.
+</BLOCKQUOTE>
+<H4><A NAME = "15721">Making New Databases</A></H4>
+
+<P>
+<P>
+<P>
+Here we explain in general terms how to write new databases
+of polarised varieties.  We give complete instructions for writing
+the data and index files, but are more sketchy on the other
+steps:  you will have to assemble the data, write translation
+functions and write any cosmetic wrapping functions for yourself.
+<P>
+<P>
+<B>Step 1:  Prepare the directory.  </B>
+Make a new directory, `NewDB' say, and copy the files
+<TT>data_spec.m</TT>, <TT>write.m</TT>, <TT>init_info.m</TT>, <TT>write_tools.m</TT>,
+<TT>write_func.m</TT>, <TT>create_ind_func.m</TT> into NewDB from
+the Magma package directories.
+Of these files, the first two will have to be edited to conform
+to the required database, while the remaining four are common
+to all databases.
+<P>
+<B>Step 2:  Decide record format.  </B>
+Edit the file <TT>data_spec.m</TT>.
+This determines which data is stored, and places unbreakable
+restrictions on that data.
+In particular, the choice of up to 5 indexing parameters is
+made here.
+Write intrinsics that translate between the data in its
+original representation and in its record representation.
+<P>
+<B>Step 3:  Update the writing functions.  </B>
+Edit the file <TT>write.m</TT>.
+<P>
+<B>Step 4:  Collect the data.  </B>
+Write all required data as records in one or more files.
+It is essential that the data is written to these files
+so that it can be read into a single Magma session in
+increasing order (with respect to the chosen indexes).
+<P>
+<B>Step 5:  Build the binary data and index files.  </B>
+<P>
+<B>Step 6:  Move the binaries to the data libraries.  </B>
+<P>
+<B>Step 7:  Final cosmetics.  </B>
+Write as Magma package code any cosmetic wrappers or
+search routines that are to be used with the new database.
+Document these intrinsics.
+
+
+<PRE></PRE> <A  HREF = "text1387.htm">[Next]</A><A  HREF = "text1399.htm">[Prev]</A> <A  HREF = "text1387.htm">[Right]</A> <A  HREF = "text1399.htm">[Left]</A> <A  HREF = "text1388.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

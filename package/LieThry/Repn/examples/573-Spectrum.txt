@@ -1,0 +1,72 @@
+/* 
+ * Spectrum
+ *
+ * Equivalent to 5.7.3 in the LiE manual, except for the last 
+ *   paragraph (on D6) which has been omitted here.
+ */
+
+/* two functions from 5.7.1 and 5.7.2: */
+toral := function(v) 
+    v := Eltseq(v); gc := GCD(v);
+    return Vector([ (v[i] div gc) mod v[#v]: i in [1..#v-1] ] cat [ v[#v] ]); 
+end function;
+
+mk_toral := function(b,d)
+    n := #Eltseq(b);
+    for i in [2..(n-1)] do
+        b[i] := (b[i-1]+b[i]) mod d;
+    end for;
+    b[n] := d;
+    return b;
+end function;
+ 
+R := RootDatum("A4" : Isogeny := "SC");
+/* toral element  */ t := [1,0,0,0,2]; 
+/* standard repr. */ sr := LieRepresentationDecomposition(R, [1,0,0,0]);
+Spectrum(sr, t);
+
+/* Since t represents a second root of unity, [3,2] means that t
+   has 3 eigenvalues t^0=1, and 2 eigenvalues t^1=-1 in the standard
+   representation. 
+
+   So t is conjugate to
+*/
+tp := mk_toral([0,0,0,1,1],2); tp;
+
+/* (t itself is equal can be found by a suitable permutation 
+    of the eigenvalues:) */
+t eq mk_toral([1,1,0,0,0],2);
+
+/* Removing the final entry of t we get a vector representing a 
+   one parameter subgroup containing t. We may use Branch to obtain
+   information of the whole subgroup: */
+Branch(ToralRootDatum(1), sr, Transpose(Matrix([[1,0,0,0]]))):Maximal;
+/* Which shows that the element of the one parameter subgroup
+   parametrised by some z \in C* has one eigenvalue z^-1, three
+   eigenvalues 1, and one eigenvalue z in the standard representation. */
+
+/* We can find the centraliser of t and the centraliser of the one
+   parameter subgroup containing it, A1A2T1 and A2T2, respectively: */
+rts := CentralisingRoots(R, Vector([1,0,0,0]), 2); rts;
+centrlt := sub<R | rts>; centrlt;
+rtsops := CentralisingRoots(R, Vector([1,0,0,0]), 0); rtsops;
+sub<R | rtsops>;
+
+/* On the other hand, we may compute */
+Spectrum(Adjoint(R), [1,0,0,0,2]);
+/* whose first entry corresponds to the dimension of the Lie subalgebra
+   fixed (eigenvalue (-1)^0) by t in the adjoint representation. 
+   
+   Indeed, 12 is the dimension of (the Lie algebra of) the centraliser of t:
+*/
+Dimension(LieAlgebra(centrlt, Rationals()));
+
+
+/* Similarly: */
+ar := Adjoint(R);
+Branch(ToralRootDatum(1), ar, Transpose(Matrix([[1,0,0,0]]))):Maximal;
+/* shows that this centraliser has dimension 10 (the multiplicity 
+   corresponding to weight 0), in accordance with the dimension of A2T2.*/
+
+
+

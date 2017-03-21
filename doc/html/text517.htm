@@ -1,0 +1,390 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Extensions of Series Rings</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text508.htm">[Next]</A><A  HREF = "text516.htm">[Prev]</A> <A  HREF = "text508.htm">[Right]</A> <A  HREF = "text516.htm">[Left]</A> <A  HREF = "text509.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "5612">Extensions of Series Rings</A></H3>
+
+<P>
+<P>
+<P>
+Extensions of series rings are either unramified or totally ramified.
+Only series rings defined over finite fields can be extended.
+We recommend constructing polynomials from sequences rather than by addition
+of terms, especially over fields, to avoid some precision loss. For example, 
+x<sup>4</sup> + t will not have full precision in the constant coefficient as there will
+be a O term in the constant coefficient of x<sup>4</sup> which will reduce its precision
+as a field element. Extensions require full precision polynomials and some 
+polynomials such as x<sup>4</sup> + t may not have enough precision to be used to 
+construct
+an extension whereas the equivalent <TT>Polynomial([t, 0, 0, 0, 1])</TT> will.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text517.htm#5613">Constructions of Extensions</A>
+<LI> <A  HREF = "text517.htm#5619">Operations on Extensions</A>
+<LI> <A  HREF = "text517.htm#5632">Elements of Extensions</A>
+<LI> <A  HREF = "text517.htm#5638">Optimized Representation</A>
+</UL>
+<H4><A NAME = "5613">Constructions of Extensions</A></H4>
+
+
+
+<H5><A NAME = "5614">UnramifiedExtension(R, f) : RngSerPow[FldFin], RngUPolElt -&gt; RngSerExt</A></H5>
+<H5>UnramifiedExtension(R, f) : RngSerLaur[FldFin], RngUPolElt -&gt; RngSerExt</H5>
+<H5>UnramifiedExtension(R, f) : RngSerExt, RngUPolElt -&gt; RngSerExt</H5>
+<BLOCKQUOTE>
+Construct the unramified extension of R, a series ring or an extension 
+thereof, defined by the inertial polynomial
+f, that is, adjoin a root of f to R.
+</BLOCKQUOTE>
+<H5><A NAME = "5615">TotallyRamifiedExtension(R, f) : RngSerPow[FldFin], RngUPolElt -&gt; RngSerExt</A></H5>
+<H5>TotallyRamifiedExtension(R, f) : RngSerLaur[FldFin], RngUPolElt -&gt; RngSerExt</H5>
+<H5>TotallyRamifiedExtension(R, f) : RngSerExt, RngUPolElt -&gt; RngSerExt</H5>
+
+<PRE>    MaxPrecision: RngIntElt             Default: </PRE>
+<BLOCKQUOTE>
+Construct a totally ramified extension of R, a series ring or an extension 
+thereof, defined by the eisenstein polynomial f, that is, adjoin a root of
+f to R.
+<P>
+The parameter <TT>MaxPrecision</TT> defaults to the precision of R. It can be
+set to the maximum precision the coefficients of f are known to, which must
+not be less than the precision of R. This allows
+the precision of the result to be increased to the degree of f multiplied
+by this maximum precision.
+<P>
+The polynomial f may be given over a series ring or an extension of a series
+ring having a higher precision than R. This allows the precision of the 
+result to be increased up to the precision the polynomial is known to (or 
+<TT>MaxPrecision</TT> if set) without losing any of the polynomial 
+known past the precision of R.
+<P>
+The precision of a ramified extension cannot be increased unless the defining
+polynomial is known to more precision than the coefficient ring, indicated
+either by providing the polynomial to greater precision or by setting
+<TT>MaxPrecision</TT>. This should be taken into account when constructing
+ramified extensions, especially if polynomials are to be factored over the
+extension.
+</BLOCKQUOTE>
+<H5><A NAME = "5616">ChangePrecision(E, r) : RngSerExt, RngIntElt -&gt; RngSerExt</A></H5>
+<H5>ChangePrecision(~E, r) : RngSerExt, RngIntElt -&gt;</H5>
+<BLOCKQUOTE>
+The extension of a series ring E with precision r. It is not possible to
+increase the precision of a ramified extension unless the parameter 
+<TT>MaxPrecision</TT> was set on construction of the extension and r is less
+than or equal to this value multiplied by the ramification degree or
+the polynomial used in creating the extension was given to more precision
+than the coefficient ring of E.
+</BLOCKQUOTE>
+<H5><A NAME = "5617">FieldOfFractions(E) : RngSerExt -&gt; RngSerExt</A></H5>
+<BLOCKQUOTE>
+The field of fractions of the extension of a series ring E.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5618">Example <TT>RngSer_extensions_eg (H49E5)</TT></A></H3>
+We show a simple creation of a two-step extension and change its precision.
+<P>
+<P>
+<PRE>
+&gt; P&lt;t&gt; := PowerSeriesRing(GF(101), 50);
+&gt; PP&lt;tt&gt; := PowerSeriesRing(GF(101));
+&gt; R&lt;x&gt; := PolynomialRing(PP);
+&gt; U := UnramifiedExtension(P, x^2 + 2);
+&gt; T := TotallyRamifiedExtension(U, x^2 + tt*x + tt); T;
+Extension of Extension of Power series ring in t over GF(101) with fixed 
+absolute precision 50 by x^2 + 2 + O(t^50) by x^2 + (t + O(t^50))*x + t + 
+    O(t^50)
+&gt; Precision($1);
+100
+&gt; ChangePrecision($2, 200);
+Extension of Extension of Power series ring in $.1 over GF(101) with fixed 
+absolute precision 100 by x^2 + 2 + O($.1^100) by x^2 + ($.1 + O($.1^100))*x + 
+    $.1 + O($.1^100)
+&gt; ChangePrecision($1, 1000);
+Extension of Extension of Power series ring in $.1 over GF(101) with fixed 
+absolute precision 500 by x^2 + 2 + O($.1^500) by x^2 + ($.1 + O($.1^500))*x + 
+    $.1 + O($.1^500)
+&gt; ChangePrecision($1, 20);      
+Extension of Extension of Power series ring in $.1 over GF(101) with fixed 
+absolute precision 10 by x^2 + 2 + O($.1^10) by x^2 + ($.1 + O($.1^10))*x + $.1 
+    + O($.1^10)
+</PRE>
+Both U and T have a field of fractions.
+<P>
+<P>
+<PRE>
+&gt; FieldOfFractions(U);
+Extension of Laurent series field in $.1 over GF(101) with fixed relative 
+precision 50 by (1 + O($.1^50))*x^2 + O($.1^50)*x + 2 + O($.1^50)
+&gt; FieldOfFractions(T);
+Extension of Extension of Laurent series field in $.1 over GF(101) with fixed 
+relative precision 50 by (1 + O($.1^50))*x^2 + O($.1^50)*x + 2 + O($.1^50) by (1
+    + O($.1^50))*x^2 + ($.1 + O($.1^50))*x + $.1 + O($.1^50)
+</PRE>
+<HR>
+<H4><A NAME = "5619">Operations on Extensions</A></H4>
+
+
+
+<H5><A NAME = "5620">Precision(E) : RngSerExt -&gt; RngIntElt</A></H5>
+<H5>GetPrecision(E) : RngSerExt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The maximum precision elements of the extension of a series ring E may have.
+</BLOCKQUOTE>
+<H5><A NAME = "5621">CoefficientRing(E) : RngSerExt -&gt; Rng</A></H5>
+<H5>BaseRing(E) : RngSerExt -&gt; Rng</H5>
+<BLOCKQUOTE>
+The ring the extension of a series ring E was defined over.
+</BLOCKQUOTE>
+<H5><A NAME = "5622">DefiningPolynomial(E) : RngSerExt -&gt; RngUPolElt</A></H5>
+<BLOCKQUOTE>
+The polynomial used to define the extension E.
+</BLOCKQUOTE>
+<H5><A NAME = "5623">InertiaDegree(E) : RngSerExt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The degree of the extension E if E is an unramified extension, 
+1 otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "5624">RamificationIndex(E) : RngSerExt -&gt; RngIntElt</A></H5>
+<H5>RamificationDegree(E) : RngSerExt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The degree of the extension E if E is a totally ramified extension, 1
+otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "5625">ResidueClassField(E) : RngSerExt -&gt; FldFin</A></H5>
+<BLOCKQUOTE>
+The residue class field of the extension E, that is, E / &pi; E.
+</BLOCKQUOTE>
+<H5><A NAME = "5626">UniformizingElement(E) : RngSerExt -&gt; RngSerExtElt</A></H5>
+<BLOCKQUOTE>
+A uniformizing element for the extension E, that is, an element of E
+of valuation 1.
+</BLOCKQUOTE>
+<H5><A NAME = "5627">IntegerRing(E) : RngSerExt -&gt; RngSerExt</A></H5>
+<H5>Integers(E) : RngSerExt -&gt; RngSerExt</H5>
+<H5>RingOfIntegers(E) : RngSerExt -&gt; RngSerExt</H5>
+<BLOCKQUOTE>
+The ring of integers of the extension E of a series ring if E is a field
+(extension of a laurent series ring).
+</BLOCKQUOTE>
+<H5><A NAME = "5628">E1 eq E2 : RngSerExt, RngSerExt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Whether extensions E1 and E2 are considered to be equal.
+</BLOCKQUOTE>
+<H5><A NAME = "5629">E . i : RngSerExt, RngIntElt -&gt; RngSerExtElt</A></H5>
+<BLOCKQUOTE>
+The primitive element of the extension E, that is, the root of the defining
+polynomial of E adjoined to the coefficient ring of E to construct E.
+</BLOCKQUOTE>
+<H5><A NAME = "5630">AssignNames(~E, S) : RngSerExt, [ MonStgElt ] -&gt;</A></H5>
+<BLOCKQUOTE>
+Assign the string in the sequence S to be the name of the primitive element
+of E, that is, the root of the defining polynomial adjoined to the 
+coefficient ring of E to construct E.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5631">Example <TT>RngSer_ext-ops (H49E6)</TT></A></H3>
+A number of the operations above are applied to a two-step extension
+<P>
+<P>
+<PRE>
+&gt; L&lt;t&gt; := LaurentSeriesRing(GF(53), 30); 
+&gt; P&lt;x&gt; := PolynomialRing(L);
+&gt; U := UnramifiedExtension(L, x^3 + 3*x^2 + x + 4);
+&gt; P&lt;y&gt; := PolynomialRing(U);
+&gt; T := TotallyRamifiedExtension(U, Polynomial([t, 0, 0, 0, 1]));
+&gt; Precision(U);
+30
+&gt; Precision(T);
+120
+&gt; CoefficientRing(U);
+Laurent series field in t over GF(53) with fixed relative precision 30
+&gt; CoefficientRing(T);
+Extension of Laurent series field in t over GF(53) with fixed relative precision
+30 by (1 + O(t^30))*x^3 + (3 + O(t^30))*x^2 + (1 + O(t^30))*x + 4 + O(t^30)
+&gt; DefiningPolynomial(U);
+(1 + O(t^30))*x^3 + (3 + O(t^30))*x^2 + (1 + O(t^30))*x + 4 + O(t^30)
+&gt; DefiningPolynomial(T);
+(1 + O(t^30))*y^4 + O(t^30)*y^3 + O(t^30)*y^2 + O(t^30)*y + t + O(t^30)
+&gt; InertiaDegree(U);
+3
+&gt; InertiaDegree(T);
+1
+&gt; RamificationDegree(U);
+1
+&gt; RamificationDegree(T);
+4
+&gt; ResidueClassField(U);
+Finite field of size 53^3
+Mapping from: RngSerExt: U to GF(53^3)
+&gt; ResidueClassField(T);
+Finite field of size 53^3
+Mapping from: RngSerExt: T to GF(53^3)
+&gt; UniformizingElement(U);
+t + O(t^31)
+&gt; UniformizingElement(T);
+(1 + O(t^30))*$.1 + O(t^30)
+&gt; Integers(T);
+Extension of Extension of Power series ring in $.1 over GF(53) with fixed 
+absolute precision 30 by x^3 + (3 + O($.1^30))*x^2 + x + 4 + O($.1^30) by x^4 + 
+    $.1 + O($.1^30)
+&gt; U.1;
+(1 + O(t^30))*$.1 + O(t^30)
+&gt; T.1;
+(1 + O(t^30))*$.1 + O(t^30)
+</PRE>
+<HR>
+<H4><A NAME = "5632">Elements of Extensions</A></H4>
+
+
+
+<H5>x * y : RngSerExtElt, RngSerExtElt -&gt; RngSerExtElt</H5>
+
+<H5>x + y : RngSerExtElt, RngSerExtElt -&gt; RngSerExtElt</H5>
+
+<H5>x - y : RngSerExtElt, RngSerExtElt -&gt; RngSerExtElt</H5>
+
+<H5>- x : RngSerExtElt -&gt; RngSerExtElt</H5>
+
+<H5>x ^ n : RngSerExtElt, RngIntElt -&gt; RngSerExtElt</H5>
+
+<H5>x div y : RngSerExtElt, RngSerExtElt -&gt; RngSerExtElt</H5>
+
+<H5>x / y : RngSerExtElt, RngSerExtElt -&gt; RngSerExtElt</H5>
+
+
+<H5>x eq y : RngSerExtElt, RngSerExtElt -&gt; BoolElt</H5>
+
+<H5>IsZero(e) : RngSerExtElt -&gt; BoolElt</H5>
+
+<H5>IsOne(e) : RngSerExtElt -&gt; BoolElt</H5>
+
+<H5>IsMinusOne(e) : RngSerExtElt -&gt; BoolElt</H5>
+
+<H5>IsUnit(e) : RngSerExtElt -&gt; BoolElt</H5><P>
+
+
+<H5><A NAME = "5633">Valuation(e) : RngSerExtElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The valuation of the element e of an extension of a series ring. This is
+the index of the largest power of &pi; which divides e.
+</BLOCKQUOTE>
+<H5><A NAME = "5634">RelativePrecision(e) : RngSerExtElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The relative precision of the element e of an extension of a series ring.
+This is the number of digits of e (in &pi;) which are known.
+</BLOCKQUOTE>
+<H5><A NAME = "5635">AbsolutePrecision(e) : RngSerExtElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The absolute precision of the element e of an extension of a series ring. 
+This is the same as the sum of the relative precision of e and the valuation
+of e.
+</BLOCKQUOTE>
+<H5><A NAME = "5636">Coefficients(e) : RngSerExtElt -&gt; [ RngElt ]</A></H5>
+<H5>Eltseq(e) : RngSerExtElt -&gt; [ RngElt ]</H5>
+<H5>ElementToSequence(e) : RngSerExtElt -&gt; [ RngElt ]</H5>
+<BLOCKQUOTE>
+Given an element e of an extension of a series ring, return the coefficients 
+of e with respect to the powers of the uniformizing element of the
+extension.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5637">Example <TT>RngSer_serext-simple (H49E7)</TT></A></H3>
+We show some simple arithmetic with some elements of some extensions.
+<P>
+<P>
+<PRE>
+&gt; P&lt;t&gt; := PowerSeriesRing(GF(101), 50);
+&gt; R&lt;x&gt; := PolynomialRing(P);
+&gt; U&lt;u&gt; := UnramifiedExtension(P, x^2 + 2*x + 3);
+&gt; UF := FieldOfFractions(U);
+&gt; R&lt;y&gt; := PolynomialRing(U);
+&gt; T&lt;tt&gt; := TotallyRamifiedExtension(U, y^2 + t*y + t);
+&gt; TF&lt;tf&gt; := FieldOfFractions(T);
+&gt; UF&lt;uf&gt; := FieldOfFractions(U);                      
+&gt; u + t;
+u + t + O(t^50)
+&gt; uf * t;
+($.1 + O($.1^50))*uf + O($.1^51)
+&gt; tf eq tt;
+false
+&gt; tf - tt; 
+O($.1^50)*tf + O($.1^50)
+&gt; IsZero($1);
+false
+&gt; Valuation($2);
+100
+&gt; Valuation(tt); 
+1
+&gt; Valuation(U!t);
+1
+&gt; Valuation(T!t);
+2
+&gt; RelativePrecision(u);
+50
+&gt; AbsolutePrecision(u);
+50
+&gt; AbsolutePrecision(uf);
+50
+&gt; RelativePrecision(uf);
+50
+&gt; RelativePrecision(u - uf);
+0
+&gt; AbsolutePrecision(u - uf); 
+50
+&gt; u^7;
+(13 + O(t^50))*u + 71 + O(t^50)
+&gt; Coefficients($1);
+[
+    71 + O(t^50),
+    13 + O(t^50)
+]
+&gt; tt^8;
+(4*t^4 + 91*t^5 + 6*t^6 + 100*t^7 + O(t^50))*tt + t^4 + 95*t^5 + 5*t^6 + 100*t^7
+    + O(t^50)
+&gt; Coefficients($1);
+[ t^4 + 95*t^5 + 5*t^6 + 100*t^7 + O(t^50), 4*t^4 + 91*t^5 + 6*t^6 + 100*t^7 + 
+    O(t^50) ]
+</PRE>
+<HR>
+<H4><A NAME = "5638">Optimized Representation</A></H4>
+
+
+
+<H5><A NAME = "5639">OptimizedRepresentation(E) : RngSerExt -&gt; RngSer, Map</A></H5>
+<H5>OptimisedRepresentation(E) : RngSerExt -&gt; RngSer, Map</H5>
+<BLOCKQUOTE>
+An optimized representation for the unramified extension E of a series ring.
+The defining polynomial of E must be coercible into the residue class field.
+The result is a series ring over the residue class field of E and a map 
+from E to this series ring.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5640">Example <TT>RngSer_opt-rep (H49E8)</TT></A></H3>
+We give a simple example of the use of <TT>OptimizedRepresentation</TT>.
+<P>
+<P>
+<PRE>
+&gt; P&lt;t&gt; := PowerSeriesRing(GF(101), 50);
+&gt; R&lt;x&gt; := PolynomialRing(P);
+&gt; U&lt;u&gt; := UnramifiedExtension(P, x^2 + 2*x + 3);
+&gt; U;
+Extension of Power series ring in t over GF(101) with fixed absolute precision 
+50 by x^2 + (2 + O(t^50))*x + 3 + O(t^50)
+&gt; OptimizedRepresentation(U);                                                  
+Power series ring in $.1 over GF(101^2) with fixed absolute precision 50
+Mapping from: RngSerExt: U to Power series ring in s over GF(101^2) with fixed 
+absolute precision 50 given by a rule
+</PRE>
+<PRE></PRE> <A  HREF = "text508.htm">[Next]</A><A  HREF = "text516.htm">[Prev]</A> <A  HREF = "text508.htm">[Right]</A> <A  HREF = "text516.htm">[Left]</A> <A  HREF = "text509.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,30 @@
+AlgBas
+{
+    +AlgBas.spec
+}
+Examples
+{
+    attr.m
+    endomorphism.m
+    matrixalg.m
+}
+Homomorphism
+{
+    autofunc.m
+    autoiso.m
+    changeidem.m
+    cover.m
+    graded.m
+    inner.m
+}
+ModRngMPol
+{
+    access.m
+    complex.m
+    cons.m
+    creation.m
+    elt.m
+    ext.m
+    hom.m
+    tensor.m
+}

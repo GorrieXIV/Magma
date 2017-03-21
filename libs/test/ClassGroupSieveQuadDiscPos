@@ -1,0 +1,145 @@
+function RandomPrimeIdeal(R)
+    if Type(R) in {RngOrd, RngQuad, RngCyc, RngFunOrd} then
+        p := RandomPrimeIdeal(CoefficientRing(R));
+        ps := Decomposition(R, p);
+        if Type(R) in {RngOrd, RngQuad, RngCyc} then
+            return ps[i][1] where i is Random([1 .. #ps]);
+        else
+            return ps[i] where i is Random([1 .. #ps]);
+        end if;
+    elif Type(R) eq  RngInt then
+        return RandomPrime(10);
+    elif Type(R) eq RngUPol then
+        if Characteristic(R) eq 0 then
+            return R!ChangeUniverse(Eltseq(RandomPrimePolynomial(PolynomialRing(GF(NextPrime(100))), 3)), Integers());
+        else
+            return RandomPrimePolynomial(R, 3);
+        end if;
+    elif Type(R) eq RngVal then
+        return R!(1/FieldOfFractions(R).1);
+    end if;
+
+end function;
+
+function RandomIdeal(R)
+//{Returns an ideal which is a random product of some random prime ideals}
+
+    if Type(R) notin {RngOrd, RngQuad, RngCyc, RngFunOrd} then
+	error "Ring must be an order of a number field or a function field";
+    end if;
+
+    r := Random(1, 3);
+
+    I := 1*R;
+    for i in [1 .. r] do
+        I := I*RandomPrimeIdeal(R)^Random(1, 3);
+    end for;
+
+    return I;
+
+end function;
+
+SetVerbose("ClassGroup", 3);
+SetVerbose("ClassGroupSieve", 3);
+
+procedure test_class_group_sieve(K)
+O := MaximalOrder(K);
+t := Cputime();
+ShowMemoryUsage();
+GetSeed();
+time G, m := ClassGroup(O : Al := "Sieve"); G;
+ShowMemoryUsage();
+for i in [1 .. Ngens(G)] do
+    fi := m(G.i);
+    time assert fi @@ m eq G.i;
+    time assert not IsPrincipal(fi);
+    if Order(G.i) lt 10000 then
+	time fi := fi^Order(G.i);
+	time assert IsPrincipal(fi);
+	_, g := IsPrincipal(fi);
+	"Got generator";
+	p, e := ProductRepresentation(g);
+	if #p lt 10000 and Maximum(e) lt 1000000 then
+	    assert g*O eq fi;
+	end if;
+    end if;
+end for;
+if Ngens(G) eq 0 then
+    I := RandomIdeal(O);
+    assert IsPrincipal(I);
+    _, g := IsPrincipal(I);
+    "Got generator";
+    p, e := ProductRepresentation(g);
+    if #p lt 10000 and Maximum(e) lt 1000000 then
+	assert g*O eq I;
+    end if;
+end if;
+#p, Maximum(e);
+"TIME ", K, " = ", Cputime(t);
+ShowMemoryUsage();
+end procedure;
+
+K := QuadraticField(NextPrime(10^20)); // 1.3s  trivial group 7/10
+test_class_group_sieve(K);		//3.27s	4/11
+K := QuadraticField(NextPrime(10^24));	//non-trivial 1.5s  7/10
+//test_class_group_sieve(K);		//0.76s 4/11
+K := QuadraticField(NextPrime(10^25)); // 1.7s  trivial group 7/10
+test_class_group_sieve(K);		//1.27s 4/11
+K := QuadraticField(NextPrime(10^30)); // 1.6s trivial group 7/10
+//test_class_group_sieve(K);		//1.17s 4/11
+K := QuadraticField(NextPrime(10^31));	//non-trivial 9.7s  7/10
+test_class_group_sieve(K);		//1969.44s 4/11
+K := QuadraticField(NextPrime(10^32));	// 12.58s trivial group 7/10
+//test_class_group_sieve(K);		//10s 4/11
+K := QuadraticField(NextPrime(10^33));	// 6.5s trivial group 7/10
+//test_class_group_sieve(K);		//12.2s 4/11
+K := QuadraticField(NextPrime(10^34));	//non-trivial 6s 7/10
+//test_class_group_sieve(K);		//17.68s 4/11
+K := QuadraticField(NextPrime(10^35));	//4.12s trivial group 7/10
+test_class_group_sieve(K);		//4.34s 4/11
+K := QuadraticField(NextPrime(10^36));	// 21.98 trivial group 7/10
+//test_class_group_sieve(K);		// 11.51s 4/11
+K := QuadraticField(NextPrime(10^37));	//non-trivial 10.25s 7/10
+//test_class_group_sieve(K);		// 30.36s 4/11
+K := QuadraticField(NextPrime(10^38));	// 9.47s trivial group 7/10
+//test_class_group_sieve(K);		// 13.36s 4/11
+K := QuadraticField(NextPrime(10^39));	// 13.19s trivial group 7/10
+//test_class_group_sieve(K);		//14.43s 4/11
+K := QuadraticField(NextPrime(10^40));	//non-trivial 11.5s 7/10
+test_class_group_sieve(K);		//10.26s 4/11
+/*
+K := QuadraticField(NextPrime(10^45));	//non-trivial 73.43s 7/10
+test_class_group_sieve(K);		//608.7s 4/11
+K := QuadraticField(NextPrime(10^50));	// 249.9s trivial group 7/10
+test_class_group_sieve(K);		//339.66s 4/11
+K := QuadraticField(NextPrime(10^55));	// 5620s 8/10
+test_class_group_sieve(K);		// 1090.22 4/11
+K := QuadraticField(NextPrime(10^59));	// 5132s 13/10
+test_class_group_sieve(K);		// 7199s 4/11
+K := QuadraticField(NextPrime(10^60));	// non-trivial 6643s 4/11 log_D == 200!
+test_class_group_sieve(K);		//19334s 4/11
+K := QuadraticField(NextPrime(10^65));	// log_D == 200!
+test_class_group_sieve(K);		// 33291s 4/11
+K := QuadraticField(NextPrime(10^70));	// log_D == 220!
+test_class_group_sieve(K);
+K := QuadraticField(NextPrime(10^75));	// log_D == 240!
+test_class_group_sieve(K);
+K := QuadraticField(NextPrime(10^80));	// log_D == 260!
+test_class_group_sieve(K);
+K := QuadraticField(NextPrime(10^85));	// log_D == 280!
+test_class_group_sieve(K);
+K := QuadraticField(NextPrime(10^90));	// log_D == 280!
+test_class_group_sieve(K);
+K := QuadraticField(NextPrime(10^95));	// log_D == 300!
+test_class_group_sieve(K);
+K := QuadraticField(NextPrime(10^100));	// log_D == 320!
+test_class_group_sieve(K);
+K := QuadraticField(NextPrime(10^101));	// log_D == 320!
+test_class_group_sieve(K);
+K := QuadraticField(NextPrime(10^102));	// log_D == 320!
+test_class_group_sieve(K);
+K := QuadraticField(NextPrime(10^103));	// log_D == 340!
+test_class_group_sieve(K);
+K := QuadraticField(NextPrime(10^105));	// log_D == 340!
+test_class_group_sieve(K);
+*/

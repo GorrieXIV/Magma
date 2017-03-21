@@ -1,0 +1,844 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Using Newton Polygons to Find Roots of Polynomials over Series Rings</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text547.htm">[Next]</A><A  HREF = "text552.htm">[Prev]</A> <A  HREF = "text547.htm">[Right]</A> <A  HREF = "text552.htm">[Left]</A> <A  HREF = "text548.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "5853">Using Newton Polygons to Find Roots of Polynomials over Series Rings</A></H3>
+
+<P>
+<P>
+The operations described in this section are relevant for polynomials 
+over series rings. There are two main algorithms involved.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text553.htm#5855">Operations not associated with Duval's Algorithm</A>
+<LI> <A  HREF = "text553.htm#5866">Operations associated with Duval's algorithm</A>
+<LI> <A  HREF = "text553.htm#5871">Roots of Polynomials</A>
+</UL>
+<H5><A NAME = "5854">SetVerbose("Newton", v) : MonStgElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Set the verbose printing to level v for <TT>PuiseuxExpansion</TT>, 
+<TT>ExpandToPrecision</TT>, <TT>DuvalPuiseuxExpansion</TT>, <TT>Roots</TT>
+and <TT>ImplicitFunction</TT>. A level of 1 will mean that any partial
+solutions that could not be expanded to the precision requested will be 
+printed before an error is returned except for <TT>Roots</TT>. 
+The polynomials used in forming 
+extensions will also be printed before the extension is computed. 
+In <TT>Roots</TT>, the algorithm used to compute the expansions will be printed.
+When Walker's algorithm is being used the current value of the denominator
+will be printed. 
+For <TT>ImplicitFunction</TT> a warning about a potentially bad value of d 
+will be printed if the value of d given is not divisible by the 
+exponent denominator of some coefficient of f. 
+A level of 2
+will print the last polynomials calculated during the newton polygon part
+of <TT>PuiseuxExpansion</TT> and <TT>DuvalPuiseuxExpansion</TT> and some 
+evaluated polynomials during <TT>ImplicitFunction</TT>.
+</BLOCKQUOTE>
+<H4><A NAME = "5855">Operations not associated with Duval's Algorithm</A></H4>
+
+
+
+<H5><A NAME = "5856"></A><A NAME = "Newton:PuiseuxExpansion">PuiseuxExpansion</A>(f, n) : RngUPolElt, RngIntElt -&gt; SeqEnum[RngSerPuisElt]</H5>
+
+<PRE>    PreciseRoot: BoolElt                Default: <TT>false</TT></PRE>
+
+<PRE>    TestSquarefree: BoolElt             Default: <TT>true</TT></PRE>
+
+<PRE>    NoExtensions: BoolElt               Default: <TT>false</TT></PRE>
+
+<PRE>    LowerFaces: BoolElt                 Default: <TT>true</TT></PRE>
+
+<PRE>    OneRoot: BoolElt                    Default: <TT>false</TT></PRE>
+
+<PRE>    SetVerbose("Newton", n):            Maximum: 2</PRE>
+<BLOCKQUOTE>
+This function implements the algorithm described in <A  HREF = "text547.htm#bib_Wa78">[Wal78]</A>.
+<P>
+Return a sequence of partial expansions of the roots of the polynomial
+f over a series ring as puiseux series. The roots are returned with relative
+precision at least n/d where d is the least common multiple of exponent 
+denominator for the 
+series expansion and the exponent denominators of the coefficients of the f. 
+An input of n = 0 will return the expansions calculated
+by the newton polygon part of the algorithm and these will be to the
+precision of what is known. The coefficient ring of the series ring 
+containing the coefficients of f must always be a field 
+and unless extensions are not required it must be able to be extended.
+<P>
+If the coefficient ring of the series ring is a finite field whose
+characteristic is less than or equal to the degree of the polynomial then the
+denominators computed in the newton polygon part of the algorithm
+may not be bounded and the function will return an error. However, it
+is possible for some polynomials that the denominators will be bounded.
+This is stated by <A  HREF = "text547.htm#bib_Gr95">[Gri95]</A>, pg 269 -- 272. 
+<P>
+Care needs to be taken with polynomials whose coefficients have low precision. 
+The algorithm must extract
+from f the squarefree part and in doing so lose even more precision.
+The result is that the algorithm may not have enough precision to calculate the 
+expansions correctly.
+A solution is to set <TT>TestSquarefree</TT> to <TT>false</TT> if the polynomial 
+is known to have no multiple roots. However this will not solve all precision
+problems and the answer is only as good as the precision allows it to be.
+<P>
+If <TT>PreciseRoot</TT> is set to <TT>true</TT> then
+the partial expansions to be returned are checked and if any are exact
+roots of f they are returned with full precision.
+If <TT>NoExtensions</TT> is set to <TT>true</TT> then expansions are found 
+within the puiseux series ring only. By default, the coefficient ring of the 
+series ring is extended to find all the partial expansions. 
+If <TT>LowerFaces</TT> is set to <TT>false</TT> then expansions with negative 
+valuations will not be found.
+If <TT>OneRoot</TT> is set to true then representatives of conjugate roots
+only will be found instead of each of the roots individually.
+<P>
+Note that it may useful to define the polynomial over an algebraically
+closed field (via <A  HREF = "text424.htm#FldAC:AlgebraicClosure">AlgebraicClosure</A>), so that all roots may be
+found.
+</BLOCKQUOTE>
+<H5><A NAME = "5857">ExpandToPrecision(f, c, n) : RngUPolElt, RngSerElt, RngIntElt -&gt; RngSerElt</A></H5>
+
+<PRE>    PreciseRoot: BoolElt                Default: <TT>false</TT></PRE>
+
+<PRE>    TestSquarefree: BoolElt             Default: <TT>true</TT></PRE>
+
+<PRE>    SetVerbose("Newton", n):            Maximum: 2</PRE>
+<BLOCKQUOTE>
+Given a polynomial f over a Puiseux series ring and a partial root c of 
+that polynomial (found by <TT>PuiseuxExpansion</TT> for example)
+continue to expand that root until it has relative precision n/d
+where d is the least common multiple of the exponent denominator of c
+and the exponent denominators of the coefficients of f. 
+If c is given to greater
+precision (or length greater than n if its precision is infinite), the 
+relative precision of c is reduced to n/d. An error results if
+c is not a partial expansion to precision n/d.
+If <TT>PreciseRoot</TT> is true then the partial expansion to be returned is
+checked and if it is an exact root of f it is returned with full precision.
+All input is checked for being an exact root regardless.
+If <TT>TestSquarefree</TT> is <TT>false</TT> the polynomial will not be made
+squarefree. This may avoid some loss of precision but may result in some
+unique partial roots not being recognized as unique partial roots and 
+as such they cannot be expanded.
+<P>
+An error may result if c is a partial root of f but the exponent 
+denominator of the full expansion is greater than that of c. 
+Therefore for c to be expanded it must have the same denominator as 
+the expansion it is part of. This will rarely be an issue for those partial 
+expansions resulting from <TT>PusieuxExpansion</TT> which did not encounter 
+problems with precision in the newton polygon part since the algorithm 
+for this will find at least as 
+much of the expansion as necessary to compute the exponent denominator.
+</BLOCKQUOTE>
+<H5><A NAME = "5858">ImplicitFunction(f, d, n) : RngUPolElt, RngIntElt, RngIntElt -&gt; RngSerElt</A></H5>
+
+<PRE>    SetVerbose("Newton", n):            Maximum: 2</PRE>
+<BLOCKQUOTE>
+Return a root of the polynomial f over a series ring. 
+The input d is the denominator (or a multiple of) the exponent denominator
+of the root. The root is given to absolute precision n/d. The evaluation
+of f at zero (polynomial) evaluated at zero (series) must be zero but that
+of its derivative must be nonzero.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5859">Example <TT>Newton_poly-ops-ex (H54E6)</TT></A></H3>
+This example illustrates the joint use of <TT>PuiseuxExpansion</TT> and 
+<TT>ExpandToPrecision</TT> which can be used together to gain and improve 
+partial roots of a polynomial. The use of <TT>ExpandToPrecision</TT> following
+<TT>PuiseuxExpansion</TT> avoids the recalculation of information already known.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P&lt;x&gt; := PuiseuxSeriesRing(Rationals());
+&gt; R&lt;y&gt; := PolynomialRing(P);
+&gt; f := y^3 + 2*x^-1*y^2 + 1*x^-2*y + 2*x;
+&gt; c := PuiseuxExpansion(f, 0);
+&gt; A&lt;a&gt; := Parent(c[1]);
+&gt; N&lt;n&gt; := CoefficientRing(A);
+&gt; Q&lt;q&gt; := PolynomialRing(A);
+&gt; c;
+[
+    -2*a^3 + O(a^4),
+    -a^-1 + n*a + O(a^2),
+    -a^-1 - n*a + O(a^2)
+]
+&gt; [ExpandToPrecision(f, c[i], 10) : i in [1 .. #c]];
+[
+    -2*a^3 - 8*a^7 - 56*a^11 + O(a^13),
+    -a^-1 + n*a + a^3 + 5/4*n*a^5 + 4*a^7 + O(a^9),
+    -a^-1 - n*a + a^3 - 5/4*n*a^5 + 4*a^7 + O(a^9)
+]
+</PRE>
+The same results could have been gained using <TT>PuiseuxExpansion</TT> with the 
+required precision in the first place.
+<P>
+<P>
+<P>
+<PRE>
+&gt; c := PuiseuxExpansion(f, 10);
+&gt; A&lt;a&gt; := Parent(c[1]);
+&gt; N&lt;n&gt; := CoefficientRing(A);
+&gt; c;
+[
+    -2*a^3 - 8*a^7 - 56*a^11 + O(a^13),
+    -a^-1 + n*a + a^3 + 5/4*n*a^5 + 4*a^7 + O(a^9),
+    -a^-1 - n*a + a^3 - 5/4*n*a^5 + 4*a^7 + O(a^9)
+]
+</PRE>
+However, asking for more precision requires time so that if it is not 
+necessary the extra calculation can be avoided and if more precision
+happens to be required then it can be gained without recalculation.
+<TT>ExpandToPrecision</TT> is also called on only one root so that if 
+only one expansion is required using <TT>PusieuxExpansion</TT> and then
+<TT>ExpandToPrecision</TT> will not calculate any unnecessary information.
+<P>
+<P>
+<PRE>
+&gt; time c := PuiseuxExpansion(f, 100);
+Time: 2.810
+&gt; time c := PuiseuxExpansion(f, 10);
+Time: 0.060
+&gt; A&lt;a&gt; := Parent(c[1]);
+&gt; N&lt;n&gt; := CoefficientRing(A);
+&gt; time ExpandToPrecision(f, c[1], 100);
+-2*a^3 - 8*a^7 - 56*a^11 - 480*a^15 - 4576*a^19 - 46592*a^23 - 
+    496128*a^27 - 5457408*a^31 - 61529600*a^35 - 707266560*a^39 - 
+    8257566720*a^43 - 97654702080*a^47 - 1167349284864*a^51 - 
+    14082308833280*a^55 - 171221451538432*a^59 - 
+    2096081963188224*a^63 - 25814314231136256*a^67 - 
+    319605795242639360*a^71 - 3975750610806374400*a^75 - 
+    49666299938073477120*a^79 - 622818862289639178240*a^83 - 
+    7837247078959687925760*a^87 - 98931046460491133091840*a^91 - 
+    1252424949872174982758400*a^95 - 15897106567806080658702336*a^99
+    + O(a^103)
+Time: 0.410
+</PRE>
+<HR>
+<H5><A NAME = "5860">IsPartialRoot(f, c) : RngUPolElt, RngSerElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if the series c can be expanded to at least one root of 
+the polynomial f.
+</BLOCKQUOTE>
+<H5><A NAME = "5861">IsUniquePartialRoot(f, c) : RngUPolElt, RngSerElt -&gt; BoolElt</A></H5>
+
+<PRE>    TestSquarefree: BoolElt             Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Return <TT>true</TT> if the series 
+c can be expanded to exactly one distinct root of the polynomial f.
+By default f will have multiple factors removed to allow partial expansions
+of multiple roots to be recognized as being unique. If <TT>TestSquarefree</TT>
+is set to <TT>false</TT> then f will be taken as given which may avoid errors
+due to lost precision but may not pick partial expansions of multiple roots
+as being unique and as such is best used when f is squarefree or the expansion
+is known to be of a single root.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5862">Example <TT>Newton_pol-is (H54E7)</TT></A></H3>
+The above 2 functions can be used to reduce the occurrence of errors 
+from <TT>ExpandToPrecision</TT> by checking that the input can be expanded.
+Errors resulting from a lack of precision which means that the expansion
+cannot be calculated to the requested precision are the only errors that
+cannot be removed. Only unique partial roots can be expanded.
+If a partial root is not unique then calling <TT>PuiseuxExpansion</TT> will
+provide several further partial expansions of the partial root that 
+will themselves be unique
+and so can be used to calculate several expansions of the original.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x&gt; := PuiseuxSeriesRing(Rationals());
+&gt; R&lt;y&gt; := PolynomialRing(P);
+&gt; f := (y^2 - x^3)^2 - y*x^6;
+&gt; IsPartialRoot(f, x^(3/2));
+true
+&gt; ExpandToPrecision(f, x^(3/2), 10);
+
+&gt;&gt; ExpandToPrecision(f, x^(3/2), 10);
+                    ^
+Runtime error in 'ExpandToPrecision': Element is not a unique partial 
+root of the polynomial
+&gt; IsUniquePartialRoot(f, x^(3/2));
+false
+&gt; c := PuiseuxExpansion(f, 0);
+&gt; A&lt;a&gt; := Parent(c[1]);
+&gt; N&lt;n&gt; := CoefficientRing(A);
+&gt; Q&lt;q&gt; := PolynomialRing(A);
+&gt; c;
+[
+    a^(3/2) + 1/2*a^(9/4) + O(a^(5/2)),
+    a^(3/2) - 1/2*a^(9/4) + O(a^(5/2)),
+    -a^(3/2) + 1/2*n*a^(9/4) + O(a^(5/2)),
+    -a^(3/2) - 1/2*n*a^(9/4) + O(a^(5/2))
+]
+&gt; IsUniquePartialRoot(f, x^(3/2) + 1/2*x^(9/4));
+true
+&gt; ExpandToPrecision(f, x^(3/2) + 1/2*x^(9/4), 10);
+x^(3/2) + 1/2*x^(9/4) - 1/64*x^(15/4) + O(x^4)
+&gt; ExpandToPrecision(f, x^(3/2) + x^2, 30);
+
+&gt;&gt; ExpandToPrecision(f, x^(3/2) + x^2, 30);
+                    ^
+Runtime error in 'ExpandToPrecision': Element is not a partial root of 
+the polynomial
+&gt; IsPartialRoot(f, x^(3/2) + x^2);
+false
+</PRE>
+So if <TT>IsPartialRoot</TT> returns <TT>false</TT> then no expansion can be made.
+If <TT>IsUniquePartialRoot</TT> returns <TT>false</TT> (but <TT>IsPartialRoot</TT>
+returns <TT>true</TT>) then several expansions can be made after calling
+<TT>PuiseuxExpansion</TT>.
+<HR>
+<H5><A NAME = "5863">PuiseuxExponents(p) : RngSerElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a series expansion return the sequence of exponents [a/b]
+of the non zero terms of the series p up to and including the first one where
+b is the global denominator for the series.
+</BLOCKQUOTE>
+<H5><A NAME = "5864">PuiseuxExponentsCommon(p, q) : RngSerElt, RngSerElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given two series return the sequence of exponents [a/b] of the non
+zero initial terms of the series p and q which are equal up to but not including the 
+first unequal terms. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5865">Example <TT>Newton_exps (H54E8)</TT></A></H3>
+This example illustrates how <TT>PuiseuxExponents</TT> and 
+<TT>PuiseuxExponentsCommon</TT> can be used on output from <TT>PusieuxExpansion</TT>. 
+(Similar can be done with related functions and general series).
+<P>
+<P>
+<PRE>
+&gt; P&lt;x&gt; := PuiseuxSeriesRing(FiniteField(5, 3));
+&gt; R&lt;y&gt; := PolynomialRing(P);
+&gt; f := (1+x)*y^4 - x^(-1/3)*y^2 + y + x^(1/2);
+&gt; time c := PuiseuxExpansion(f, 5); 
+Time: 0.030
+&gt; c;
+[
+    4*x^(1/2) + x^(2/3) + 3*x^(5/6) + x^(7/6) + O(x^(4/3)),
+    x^(1/3) + x^(1/2) + 4*x^(2/3) + 2*x^(5/6) + O(x^(7/6)),
+    4*x^(-1/6) + 2*x^(1/3) + O(x^(2/3)),
+    x^(-1/6) + 2*x^(1/3) + O(x^(2/3))
+]
+&gt; PuiseuxExponents(c[1]);
+[ 1/2, 2/3, 5/6 ]
+&gt; PuiseuxExponents(c[3]);
+[ -1/6 ]
+&gt; P&lt;x&gt; := PuiseuxSeriesRing(FiniteField(5, 3));
+&gt; R&lt;y&gt; := PolynomialRing(P);
+&gt; f := ((y^2 - x^3)^2 - y*x^6)^2 - y*x^15;
+&gt; c := PuiseuxExpansion(f, 0);
+&gt; A&lt;a&gt; := Parent(c[1]);
+&gt; N&lt;n&gt; := CoefficientRing(A);
+&gt; Q&lt;q&gt; := PolynomialRing(A);
+&gt; c;
+[
+    4*a^(3/2) + 4*a^(9/4) + 4*a^3 + O(a^(13/4)),
+    4*a^(3/2) + 4*a^(9/4) + a^3 + O(a^(13/4)),
+    4*a^(3/2) + a^(9/4) + 4*a^3 + O(a^(13/4)),
+    4*a^(3/2) + a^(9/4) + a^3 + O(a^(13/4)),
+    a^(3/2) + 3*a^(9/4) + 4*a^3 + O(a^(13/4)),
+    a^(3/2) + 3*a^(9/4) + a^3 + O(a^(13/4)),
+    a^(3/2) + 2*a^(9/4) + 4*a^3 + O(a^(13/4)),
+    a^(3/2) + 2*a^(9/4) + a^3 + O(a^(13/4))
+]
+&gt; PuiseuxExponentsCommon(c[1], c[1]);
+[ 3/2, 9/4, 3 ]
+&gt; PuiseuxExponentsCommon(c[1], c[2]);
+[ 3/2, 9/4 ]
+&gt; PuiseuxExponentsCommon(c[1], c[3]);
+[ 3/2 ]
+&gt; PuiseuxExponentsCommon(c[1], c[8]);
+[]
+</PRE>
+<HR>
+<H4><A NAME = "5866">Operations associated with Duval's algorithm</A></H4>
+
+<P>
+<P>
+The following functions have a similar use to those given above 
+but implement a different algorithm, namely that of <A  HREF = "text547.htm#bib_Duv89">[Duv89]</A>  
+which is faster and can handle larger degree polynomials. However, 
+it can only be used with polynomials which are essentially over a laurent
+series ring and the coefficient ring of that laurent series ring
+has either characteristic zero or characteristic greater than the degrees
+of the squarefree factors of the polynomial.
+
+
+<H5><A NAME = "5867">DuvalPuiseuxExpansion(f, n) : RngUPolElt, RngIntElt -&gt; SeqEnum</A></H5>
+
+<PRE>    Version: MonStgElt                  Default: "Rational"</PRE>
+
+<PRE>    TestSquarefree: BoolElt             Default: <TT>true</TT></PRE>
+
+<PRE>    NoExtensions: BoolElt               Default: <TT>false</TT></PRE>
+
+<PRE>    LowerFaces: BoolElt                 Default: <TT>true</TT></PRE>
+
+<PRE>    OneRoot: BoolElt                    Default: <TT>false</TT></PRE>
+
+<PRE>    SetVerbose("Newton", n):            Maximum: 2</PRE>
+<BLOCKQUOTE>
+A sequence of parametrizations of puiseux expansions of roots of f, 
+as puiseux series, where f is a polynomial over a series ring. 
+The expansions will have at least n 
+non zero terms (unless the expansion is finite and has less than n 
+non zero terms), with more than n occurring only if n is less than the
+number of terms returned by the newton polygon part of the algorithm.
+The coefficients of f must have exponent denominator 1. 
+<P>
+This algorithm is faster than that given by Walker and implemented in 
+<TT>PuiseuxExpansion</TT>, since it doesn't calculate non zero terms explicitly 
+and doesn't make all necessary extensions during the algorithm leaving 
+some to be made when the series is computed from the parametrizations.
+<P>
+If f has coefficients with finite precision then the expansions can 
+only be computed to as many non zero terms as can be known for that expansion.
+After this limit has been reached, an error results since the next non 
+zero term is not known. If f has roots with finite puiseux expansions 
+then if n is greater than the number of non zero terms in the expansion 
+the expansion is returned with infinite precision.
+<P>
+If <TT>Version</TT> is set to <TT>"Classical"</TT> then the (slower) 
+classical branch of the algorithm will be run which makes all extensions
+necessary for the computation of the expansions. It is still faster than
+<TT>PusieuxExpansion</TT> since it does not iterate through and calculate
+zero terms but will encounter the same problems that <TT>PuiseuxExpansion</TT>
+does with field extensions over the rationals. The classical version
+will return as many parametrizations as there are expansions and some of 
+these parametrizations will give the same set of expansions.
+<P>
+If <TT>NoExtensions</TT> is set to <TT>true</TT> then only the expansions which lie
+in the puiseux series ring corresponding to the coefficient ring of f
+are calculated. Otherwise, all the expansions of roots of f are calculated
+regardless of where they lie.
+<TT>LowerFaces</TT> and <TT>OneRoot</TT> work as for <TT>PuiseuxExpansion</TT>.
+<P>
+This algorithm works with the squarefree part of f only. If any coefficient
+of f has low precision then this step may make it impossible for any
+information about the expansions to be gained due to a loss of further 
+precision. A way around this is to set <TT>TestSquarefree</TT> to <TT>false</TT>
+if the polynomial is known to be squarefree. This may result in some
+information being returned but such information is only as good
+as the precision it was allowed. 
+</BLOCKQUOTE>
+<H5><A NAME = "5868">ParametrizationToPuiseux(T) : Tup -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The series that satisfy the parametrization <TT>T</TT>. These are found by 
+evaluating <TT>T[2]</TT> at t where <TT>T[1]</TT> = &lambda; t<sup>e</sup>.
+</BLOCKQUOTE>
+<H5><A NAME = "5869">PuiseuxToParametrization(S) : RngSerElt -&gt; Tup</A></H5>
+<BLOCKQUOTE>
+A parametrization of the series S. It is the simplest one which takes the
+denominator out of S and makes it the exponent of the first entry in the
+parametrization.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5870">Example <TT>Newton_duval-ex (H54E9)</TT></A></H3>
+This example illustrates the use of <TT>DuvalPuiseuxExpansion</TT> 
+and <TT>ParametrizationToPuiseux</TT> to gain the information given by 
+<TT>PuiseuxExpansion</TT> and also compares the performance of the two algorithms.
+It also highlights some of the anomalies that may be encountered due 
+to precision concerns.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x&gt; := PuiseuxSeriesRing(Rationals());
+&gt; R&lt;y&gt; := PolynomialRing(P);
+&gt; f := (y^2 - x^3)^2 - y*x^6;
+&gt; time D := DuvalPuiseuxExpansion(f, 0);
+Time: 0.000
+&gt; D;
+[
+    &lt;16*x^4, 64*x^6 + 256*x^9 + O(x^10)&gt;
+]
+&gt; time P := ParametrizationToPuiseux(D[1]);
+Time: 0.060
+&gt; A&lt;a&gt; := Parent(P[1]);
+&gt; N&lt;n&gt; := CoefficientRing(A);
+&gt; P;
+[
+    a^(3/2) + 1/2*a^(9/4) + O(a^(5/2)),
+    a^(3/2) - 1/2*a^(9/4) + O(a^(5/2)),
+    -a^(3/2) + 1/2*n*a^(9/4) + O(a^(5/2)),
+    -a^(3/2) - 1/2*n*a^(9/4) + O(a^(5/2))
+]
+&gt; time c := PuiseuxExpansion(f, 0); 
+Time: 0.050
+</PRE>
+Here it can be seen that the newton polygon part of the algorithm is
+substantially faster using Duval's method, though the converting of
+the parametrization to a series is not as fast. Asking for more terms
+shows this more substantially.
+<P>
+<P>
+<PRE>
+&gt; time D := DuvalPuiseuxExpansion(f, 10);
+Time: 0.020
+&gt; D;                                       
+[
+    &lt;16*x^4, 64*x^6 + 256*x^9 - 512*x^15 + 2048*x^18 - 4608*x^21 + 56320*x^27 - 
+        294912*x^30 + 792064*x^33 - 12082176*x^39 + 68157440*x^42 + O(x^43)&gt;
+]
+&gt; time P := ParametrizationToPuiseux(D[1]);
+Time: 0.129
+&gt; time c := PuiseuxExpansion(f, 10);       
+Time: 0.100
+&gt; A&lt;a&gt; := Parent(c[1]);
+&gt; N&lt;n&gt; := CoefficientRing(A);
+&gt; c;
+[
+    a^(3/2) + 1/2*a^(9/4) - 1/64*a^(15/4) + O(a^4),
+    a^(3/2) - 1/2*a^(9/4) + 1/64*a^(15/4) + O(a^4),
+    -a^(3/2) + 1/2*n*a^(9/4) + 1/64*n*a^(15/4) + O(a^4),
+    -a^(3/2) - 1/2*n*a^(9/4) - 1/64*n*a^(15/4) + O(a^4)
+]
+&gt; A&lt;a&gt; := Parent(P[1]);
+&gt; N&lt;n&gt; := CoefficientRing(A);
+&gt; P;
+[
+    a^(3/2) + 1/2*a^(9/4) - 1/64*a^(15/4) + 1/128*a^(9/2) - 9/4096*a^(21/4) + 
+        55/131072*a^(27/4) - 9/32768*a^(15/2) + 1547/16777216*a^(33/4) - 
+        11799/536870912*a^(39/4) + 65/4194304*a^(21/2) + O(a^(43/4)),
+    a^(3/2) - 1/2*a^(9/4) + 1/64*a^(15/4) + 1/128*a^(9/2) + 9/4096*a^(21/4) - 
+        55/131072*a^(27/4) - 9/32768*a^(15/2) - 1547/16777216*a^(33/4) + 
+        11799/536870912*a^(39/4) + 65/4194304*a^(21/2) + O(a^(43/4)),
+    -a^(3/2) + 1/2*n*a^(9/4) + 1/64*n*a^(15/4) - 1/128*a^(9/2) - 
+        9/4096*n*a^(21/4) - 55/131072*n*a^(27/4) + 9/32768*a^(15/2) + 
+        1547/16777216*n*a^(33/4) + 11799/536870912*n*a^(39/4) - 
+        65/4194304*a^(21/2) + O(a^(43/4)),
+    -a^(3/2) - 1/2*n*a^(9/4) - 1/64*n*a^(15/4) - 1/128*a^(9/2) + 
+        9/4096*n*a^(21/4) + 55/131072*n*a^(27/4) + 9/32768*a^(15/2) - 
+        1547/16777216*n*a^(33/4) - 11799/536870912*n*a^(39/4) - 
+        65/4194304*a^(21/2) + O(a^(43/4))
+]
+</PRE>
+It can be seen that the computation of the information is a lot faster 
+using Duval's method. It is only the cosmetic of converting this 
+information into series that could make this algorithm seem slow. But 
+also note that there is much greater information given by Duval's algorithm.
+The equivalent information is given below.
+<P>
+<P>
+<PRE>
+&gt; time D := DuvalPuiseuxExpansion(f, 3);   
+Time: 0.009
+&gt; time P := ParametrizationToPuiseux(D[1]);
+Time: 0.049
+&gt; A&lt;a&gt; := Parent(P[1]);
+&gt; N&lt;n&gt; := CoefficientRing(A);
+&gt; P;
+[
+    a^(3/2) + 1/2*a^(9/4) - 1/64*a^(15/4) + O(a^4),
+    a^(3/2) - 1/2*a^(9/4) + 1/64*a^(15/4) + O(a^4),
+    -a^(3/2) + 1/2*n*a^(9/4) + 1/64*n*a^(15/4) + O(a^4),
+    -a^(3/2) - 1/2*n*a^(9/4) - 1/64*n*a^(15/4) + O(a^4)
+]
+</PRE>
+One thing that may be taken for granted from <TT>PuiseuxExpansion</TT> is
+that all the expansions lie in the same puiseux series ring. However, for
+<TT>DuvalPuiseuxExpansion</TT> this may not be the case. It will always be 
+true that each of the parametrizations will lie in the same puiseux series
+ring but series resulting from different parametrizations may not. This occurs
+since some extensions are left to the stage of calculating the series from
+the parametrization to be made and for different parametrizations these
+extensions may be different.
+<P>
+<P>
+<PRE>
+&gt; f := (-x^3 + x^4) - 2*x^2*y - x*y^2 + 2*x*y^4 + y^5;
+&gt; time D := DuvalPuiseuxExpansion(f, 0);
+Time: 0.010
+&gt; D;
+[
+    &lt;x^2, -x^2 - x^3 + O(x^4)&gt;,
+    &lt;x^3, x + O(x^2)&gt;
+]
+&gt; time P := ParametrizationToPuiseux(D[1]);
+Time: 0.000
+&gt; P;
+[
+    -x - x^(3/2) + O(x^2),
+    -x + x^(3/2) + O(x^2)
+]
+&gt; Parent(P[1]);
+Puiseux series field in x over Rational Field
+&gt; time P := ParametrizationToPuiseux(D[2]);
+Time: 0.030
+&gt; A&lt;a&gt; := Parent(P[1]);
+&gt; N&lt;n&gt; := CoefficientRing(A);
+&gt; P;
+[
+    a^(1/3) + O(a^(2/3)),
+    n*a^(1/3) + O(a^(2/3)),
+    (-n - 1)*a^(1/3) + O(a^(2/3))
+]
+&gt; Parent(P[1]);
+Puiseux series field in a over N
+&gt; N;
+Number Field with defining polynomial $.1^2 + $.1 + 1 over the Rational Field
+</PRE>
+<TT>DuvalPuiseuxExpansion</TT> reacts differently to <TT>PuiseuxExpansion</TT>
+when given input which has finite expansions either due to finite precision
+or exact roots. These differences are shown below and are due to the fact that
+<TT>DuvalPuiseuxExpansion</TT> always looks for the next non zero term in 
+an expansion whereas <TT>PuiseuxExpansion</TT> will calculate zero terms.
+<P>
+<P>
+<PRE>
+&gt; f := y - x^3 - x^7 - x^76 + O(x^200);
+&gt; D := DuvalPuiseuxExpansion(f, 0);
+&gt; D;
+[
+    &lt;x, x^3 + O(x^4)&gt;
+]
+&gt; D := DuvalPuiseuxExpansion(f, 3);
+&gt; D;
+[
+    &lt;x, x^3 + x^7 + x^76 + O(x^77)&gt;
+]
+&gt; D := DuvalPuiseuxExpansion(f, 4);
+
+&gt;&gt; D := DuvalPuiseuxExpansion(f, 4);
+                            ^
+Runtime error in 'DuvalPuiseuxExpansion': Insufficient precision to calculate to
+requested precision
+&gt; c := PuiseuxExpansion(f, 197);
+&gt; c;
+[
+    x^3 + x^7 + x^76 + O(x^200)
+]
+&gt; c := PuiseuxExpansion(f, 200);                    
+
+&gt;&gt; c := PuiseuxExpansion(f, 200);
+                        ^
+Runtime error in 'PuiseuxExpansion': Insufficient precision to calculate to 
+requested precision
+
+&gt; f := y - x^3 - x^7 - x^76;           
+&gt; D := DuvalPuiseuxExpansion(f, 0);
+&gt; D;
+[
+    &lt;x, x^3 + O(x^4)&gt;
+]
+&gt; D := DuvalPuiseuxExpansion(f, 3);
+&gt; D;
+[
+    &lt;x, x^3 + x^7 + x^76 + O(x^77)&gt;
+]
+&gt; D := DuvalPuiseuxExpansion(f, 4);
+&gt; D;                               
+[
+    &lt;x, x^3 + x^7 + x^76&gt;
+]
+&gt; c := PuiseuxExpansion(f, 10); 
+&gt; c;
+[
+    x^3 + x^7 + O(x^13)
+]
+&gt; c := PuiseuxExpansion(f, 100);
+&gt; c;
+[
+    x^3 + x^7 + x^76 + O(x^103)
+]
+&gt; c := PuiseuxExpansion(f, 200);
+&gt; c;
+[
+    x^3 + x^7 + x^76 + O(x^203)
+]
+&gt; c := PuiseuxExpansion(f, 200 : PreciseRoot := true);
+&gt; c;
+[
+    x^3 + x^7 + x^76
+]
+</PRE>
+The two methods can be combined. Given a series there is no way that Duval's
+REGULAR algorithm can be used to further the precision of an expansion.
+But <TT>ExpandToPrecision</TT> can be used to gain the extra precision. Using
+the REGULAR algorithm would be preferable since it is faster but this is not
+possible for the type of input that is available. This is explored in the
+case of our first example.
+<P>
+<P>
+<PRE>
+&gt; f := (y^2 - x^3)^2 - y*x^6;
+&gt; time D := DuvalPuiseuxExpansion(f, 0);
+Time: 0.009
+&gt; time P := ParametrizationToPuiseux(D[1]);
+Time: 0.050
+&gt; A&lt;a&gt; := Parent(P[1]);
+&gt; N&lt;n&gt; := CoefficientRing(A);
+&gt; P;
+[
+    a^(3/2) + 1/2*a^(9/4) + O(a^(5/2)),
+    a^(3/2) - 1/2*a^(9/4) + O(a^(5/2)),
+    -a^(3/2) + 1/2*n*a^(9/4) + O(a^(5/2)),
+    -a^(3/2) - 1/2*n*a^(9/4) + O(a^(5/2))
+]
+&gt; time ExpandToPrecision(f, P[1], 20);
+a^(3/2) + 1/2*a^(9/4) - 1/64*a^(15/4) + 1/128*a^(9/2) - 9/4096*a^(21/4) + 
+    O(a^(13/2))
+Time: 0.070
+&gt; time D := DuvalPuiseuxExpansion(f, 5);
+Time: 0.010
+&gt; time P := ParametrizationToPuiseux(D[1]);
+Time: 0.059
+</PRE>
+It can be seen that using <TT>ExpandToPrecision</TT> is slower even 
+than rerunning Duval's algorithm from the beginning. Even more so when it is 
+remembered that running Duval's algorithm with the extra precision will give
+parametrizations of all the expansions of the roots of f and not just one
+expansion. This seems to still be the case when larger examples are 
+considered so that if more terms of an expansion are required it is probably 
+best to start from the beginning asking for these extra terms.
+<P>
+<P>
+<PRE>
+&gt; time p1 := ExpandToPrecision(f, P[1], 50);     
+&gt; A&lt;a&gt; := Parent(p1);
+&gt; N&lt;n&gt; := CoefficientRing(A);
+&gt; p1;
+a^(3/2) + 1/2*a^(9/4) - 1/64*a^(15/4) + 1/128*a^(9/2) - 9/4096*a^(21/4) + 
+    55/131072*a^(27/4) - 9/32768*a^(15/2) + 1547/16777216*a^(33/4) - 
+    11799/536870912*a^(39/4) + 65/4194304*a^(21/2) - 189805/34359738368*a^(45/4)
+    + 1584999/1099511627776*a^(51/4) - 2261/2147483648*a^(27/2) + O(a^14)
+Time: 0.439
+&gt; time D := DuvalPuiseuxExpansion(f, 13);
+Time: 0.009
+&gt; time P := ParametrizationToPuiseux(D[1]);
+Time: 0.200
+</PRE>
+<HR>
+<H4><A NAME = "5871">Roots of Polynomials</A></H4>
+
+<P>
+<P>
+This section describes two similar functions that can be used for finding 
+roots of polynomials over series rings in a similar way to finding roots
+of polynomials over any other ring for which roots can be computed in Magma.
+
+
+<H5><A NAME = "5872">Roots(f) : RngUPolElt -&gt; [&lt;RngSerElt, RngIntElt&gt;]</A></H5>
+<H5>Roots(f, n) : RngUPolElt, RngIntElt -&gt; [&lt;RngSerElt, RngIntElt&gt;]</H5>
+
+<PRE>    SetVerbose("Newton", n):            Maximum: 2</PRE>
+<BLOCKQUOTE>
+Find the roots of the polynomial f which lie in the coefficient ring of f. The first
+form of this function can be used on any polynomial over any ring for which
+Magma can compute roots. Since precision is an issue in series rings and 
+some roots may have infinite expansions, the second version of this function
+which is specific to series rings allows a lower bound for 
+the precision to which these 
+roots will be known to be specified.
+The first computes the roots to at least the default precision of the 
+ring if that ring
+has infinite precision otherwise it computes them to at least the precision of the ring.
+The first version will be enough when all the coefficients of the polynomial 
+have infinite precision. The second version may
+be required when a precision other than that assumed by the first is
+sought which may be due to the impossibility of computing the roots
+to such a high precision as the default. 
+The precision is relative to the least common multiple of the exponent 
+denominators of the coefficients of f and the exponent denominator 
+of the root.
+Roots which are known to be different but are identical to the precision
+specified will be returned as two distinct roots.
+<P>
+Duval's algorithm as implemented in <TT>DuvalPuiseuxExpansion</TT> will usually 
+be used. Walker's algorithm as implemented in <TT>PuiseuxExpansion</TT> will
+be used if the polynomial has coefficients involving fractional powers
+or the characteristic of the coefficient ring of the series ring is
+less than the degree of a squarefree factor.
+<P>
+If Walker's algorithm is used and the characteristic of the field is less 
+than the degree of the polynomial then the computation may not finish
+(see remarks under <TT>PuiseuxExpansion</TT>) and control will return
+to the user when interrupted.
+<P>
+If verbose printing of partial output that doesn't have enough precision is 
+required the functions <TT>PuiseuxExpansion</TT> and <TT>DuvalPuiseuxExpansion</TT>
+should be used with the appropriate precision. <TT>Roots</TT> also requires that 
+there is enough precision in the roots so that the multiplicities can be 
+calculated correctly and the parts of the roots that are returned are distinct.
+Therefore an error will be given if there is not enough precision to calculate 
+the part of the root that results from the newton polygon part of the 
+algorithm and the root is not known to be a single root since the 
+multiplicity may not be able to be calculated correctly.
+Information at such a low precision can be gained correctly by using 
+the <TT>PuiseuxExpansion</TT> functions and determining the multiplicities 
+manually.
+</BLOCKQUOTE>
+<H5><A NAME = "5873">HasRoot(f) : RngUPolElt -&gt; BoolElt, RngSerElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if the polynomial f has a root in its coefficient ring and that root 
+can be found to the fixed or default precision of the ring as applicable. 
+A root is also returned in this case. If f is irreducible over its 
+coefficient ring then return <TT>false</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5874">Example <TT>Newton_roots-ex (H54E10)</TT></A></H3>
+Below are some examples of the use of the <TT>Roots</TT> function.
+<P>
+<PRE>
+&gt; SetVerbose("Newton", 1);
+&gt; P&lt;x&gt; := PuiseuxSeriesRing(Rationals());
+&gt; R&lt;y&gt; := PolynomialRing(P);
+&gt; f := y^3 + 2*x^-1*y^2 + 1*x^-2*y + 2*x;
+&gt; Roots(f);
+DUVAL : 
+[
+    &lt;-2*x^3 - 8*x^7 - 56*x^11 - 480*x^15 - 4576*x^19 + O(x^23), 1&gt;
+]
+&gt; f := f^2;
+&gt; Roots(f);
+DUVAL : 
+[
+   &lt;-2*x^3 - 8*x^7 - 56*x^11 - 480*x^15 - 4576*x^19 + O(x^23), 2&gt; 
+]
+&gt; f := y^3 + 2*x^-1*y^2 + 1*x^-2*y + 2*x;
+&gt; f +:= O(x^20)*(y^3 + y^2 + y + 1);
+&gt; f;
+(1 + O(x^20))*y^3 + (2*x^-1 + O(x^20))*y^2 + (x^-2 + O(x^20))*y + 2*x + O(x^20)
+&gt; Roots(f);
+DUVAL : 
+
+&gt;&gt; Roots(f);
+        ^
+Runtime error in 'Roots': Roots not calculable to default precision
+&gt; Roots(f, 10);
+DUVAL : 
+[
+   &lt;-2*x^3 - 8*x^7 - 56*x^11 + O(x^13), 1&gt;
+]
+&gt; f := f^2;
+&gt; f;
+(1 + O(x^20))*y^6 + (4*x^-1 + O(x^19))*y^5 + (6*x^-2 + O(x^18))*y^4 + (4*x^-3 + 
+   4*x + O(x^18))*y^3 + (x^-4 + 8 + O(x^18))*y^2 + (4*x^-1 + O(x^18))*y + 4*x^2
+   + O(x^21)
+&gt; Roots(f, 10);
+DUVAL : 
+[
+   &lt;-2*x^3 - 8*x^7 - 56*x^11 + O(x^13), 2&gt;
+]
+&gt; f := (y - x^(1/4))*(y - x^(1/3));                                            
+&gt; Roots(f);
+WALKER : 
+[
+    &lt;x^(1/3) + O(x^2), 1&gt;,
+    &lt;x^(1/4) + O(x^(23/12)), 1&gt;
+]
+</PRE>
+<PRE></PRE> <A  HREF = "text547.htm">[Next]</A><A  HREF = "text552.htm">[Prev]</A> <A  HREF = "text547.htm">[Right]</A> <A  HREF = "text552.htm">[Left]</A> <A  HREF = "text548.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

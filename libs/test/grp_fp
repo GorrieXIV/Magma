@@ -1,0 +1,1427 @@
+/*
+Test input for finitely presented groups.
+
+This file should include a test of every function listed in the manual,
+apart from the PQ, which should have a separate test file.
+
+No claims are made for completeness in the testing!  in particular, not
+all cases will be tested, and certain complex interactions are not tested.
+*/
+
+
+
+/*
+----------------------------------------
+    Construction of a free group
+----------------------------------------
+*/
+
+f2 := FreeGroup(2);
+f3 := FreeGroup(3);
+
+f<x, y> := FreeGroup(2);
+delete x, y, f;
+
+/*
+----------------------------------------
+    Specification of a word
+----------------------------------------
+*/
+
+errors := 0;
+
+if (f2.1) ne f2.1 then
+    print "ERROR: Parenthesised generator not equal to non-parenthesised generator";
+    errors := errors + 1;
+end if;
+
+if f3.2^f3.3 ne f3.3^-1 * f3.2 * f3.3 then
+    print "ERROR: Conjugate of generators not correct";
+    errors := errors + 1;
+end if;
+
+if f3.2^3 ne f3.2 * f3.2 * f3.2 then
+    print "ERROR: Power of generator not correct";
+    errors := errors + 1;
+end if;
+
+if (f3.1,f3.2) ne f3.1^-1 * f3.2^-1 * f3.1 * f3.2 then
+    print "ERROR: Commutator of two generators not correct";
+    errors := errors + 1;
+end if;
+
+if (f3.1,f3.2,f3.3,f3.1) ne (((f3.1,f3.2),f3.3),f3.1) then
+    print "ERROR: Depth 4 commutator not correctly normed";
+    errors := errors + 1;
+end if;
+
+if f2![1, 2, -1, 2, 2] ne f2.1 * f2.2 * f2.1^-1 * f2.2^2 then
+    print "ERROR: Sequence not equal to word";
+    errors := errors + 1;
+end if;
+
+if f2!1 ne Id(f2) then
+    print "ERROR: f2!1 not equal to Id(f2)";
+    errors := errors + 1;
+end if;
+
+if errors eq 0 then
+    print "Correctness in specification of words";
+else
+    print errors, " error(s) in specification of words";
+end if;
+
+/*
+----------------------------------------
+    Elementary operators for words
+----------------------------------------
+*/
+
+errors := 0;
+
+u := f2.1 * f2.2^3 * f2.1^-2;
+v := f2.1^4 * f2.2^-1 * f2.1;
+
+if u * v ne f2.1 * f2.2^3 * f2.1^2 * f2.2^-1 * f2.1 then
+    print "ERROR: Word product not correct";
+    errors := errors + 1;
+end if;
+
+if v^-1 ne f2.1^-1 * f2.2 * f2.1^-4 then
+    print "ERROR: Inverse of word incorrect";
+    errors := errors + 1;
+end if;
+
+if v^2 * v^-1 ne v then
+    print "ERROR: v^2 * v^-1 ne v";
+    errors := errors + 1;
+end if;
+
+if u^5 * u^-6 ne u^-1 then
+    print "ERROR: u^5 * u^-6 ne u^-1";
+    errors := errors + 1;
+end if;
+
+if v^3 ne f2.1^4 * f2.2^-1 * f2.1^5 * f2.2^-1 * f2.1^5 * f2.2^-1 * f2.1 then
+    print "ERROR: Power of word incorrect";
+    errors := errors + 1;
+end if;
+
+if u^v ne f2.1^-1 * f2.2 * f2.1^-3 * f2.2^3 * f2.1^2 * f2.2^-1 * f2.1 then
+    print "ERROR: Conjugate of two words incorrect";
+    errors := errors + 1;
+end if;
+
+if (u,v) ne f2.1^2 * f2.2^-3 * f2.1^-2 * f2.2 * f2.1^-3 * f2.2^3 * f2.1^2 *
+	    f2.2^-1 * f2.1 then
+    print "ERROR: Commutator of two words incorrect";
+    errors := errors + 1;
+end if;
+
+delete u, v;
+
+if errors eq 0 then
+    print "Correctness in elementary operators for words";
+else
+    print errors, " error(s) in elementary operators for words";
+end if;
+
+/*
+----------------------------------------
+    Boolean operators for words
+----------------------------------------
+*/
+
+errors := 0;
+
+u1 := f3.3^3 * f3.1 * (f3.2,f3.1^2,f3.3);
+u2 := f3.3^3 * f3.1 * f3.2;
+u3 := f3.3^-3 * f3.1^-1 * (f3.2^-1,f3.1^-2,f3.3^-1);
+
+v1 := f3.1 * f3.2;
+v2 := f3.1^2;
+v3 := f3.2 * f3.1;
+
+if u1 eq u2 then
+    print "ERROR: Failure for eq between two words";
+    errors := errors + 1;
+end if;
+
+if u2 ne u2 then
+    print "ERROR: Failure for ne between two words";
+    errors := errors + 1;
+end if;
+
+if v1 lt v2 then
+    print "ERROR: Failure for lt between two words";
+    errors := errors + 1;
+end if;
+
+if v3 le v2 then
+    print "ERROR: Failure for le between two words";
+    errors := errors + 1;
+end if;
+
+if u2 gt u1 then
+    print "ERROR: Failure for gt between two words";
+    errors := errors + 1;
+end if;
+
+if v3 ge u3 then
+    print "ERROR: Failure for ge between two words";
+    errors := errors + 1;
+end if;
+
+delete u1, u2, u3, v1, v2, v3;
+
+if errors eq 0 then
+    print "Correctness in Boolean operators for words";
+else
+    print errors, " error(s) in Boolean operators for words";
+end if;
+
+/*
+----------------------------------------
+    Elementary functions for words
+----------------------------------------
+*/
+
+errors := 0;
+
+u1 := f3.3^3 * f3.1 * (f3.2,f3.1^2);
+u2 := f3.3^3 * f3.2 * f3.3 * (f3.2^-1 * f3.3^-1)^2 * (f3.2 * f3.3)^2;
+u3 := f2.-1 * f2.2^2 * f2.1 * f2.2^-2 * f2.1;
+
+v1 := f3.1 * f3.2;
+v2 := f3.2 * f3.3 * f3.2;
+
+// # (length of a word)
+
+if #u1 ne 10 then
+    print "ERROR: Length of non-trivial word incorrect";
+    errors := errors + 1;
+end if;
+
+if #Id(f2) ne 0 then
+    print "ERROR: Length of trivial word incorrect";
+    errors := errors + 1;
+end if;
+
+// G!sequence
+
+if &*[v2] ne v2 then
+    print "ERROR: Simple sequence to word failed";
+    errors := errors + 1;
+end if;
+
+if &*[u1, v1, v1] ne u1 * v1^2 then
+    print "ERROR: Non-trivial sequence to word failed";
+    errors := errors + 1;
+end if;
+
+// Eliminate
+
+if Eliminate(u1, f3.1, f3.2 * f3.3) ne u2 then
+    print "ERROR: Non-trivial Eliminate incorrect";
+    errors := errors + 1;
+end if;
+
+if Eliminate(v1, f3.3, f3.1) ne v1 then
+    print "ERROR: Trivial Eliminate incorrect";
+    errors := errors + 1;
+end if;
+
+if Eliminate({u1, v1}, f3.1, f3.2 * f3.3) ne {u2, v2} then
+    print "ERROR: Non-trivial set Eliminate incorrect";
+    errors := errors + 1;
+end if;
+
+// ExponentSum
+
+if ExponentSum(u1, f3.3) ne 3 then
+    print "ERROR: Non-trivial exponent sum incorrect";
+    errors := errors + 1;
+end if;
+
+if ExponentSum(v1, f3.3) ne 0 then
+    print "ERROR: Exponent sum wrong for generator not present";
+    errors := errors + 1;
+end if;
+
+if ExponentSum(Id(f3), f3.1) ne 0 then
+    print "ERROR: Exponent sum wrong for trivial word";
+    errors := errors + 1;
+end if;
+
+// GeneratorNumber
+
+if GeneratorNumber(u1) ne 3 then
+    print "ERROR: Positive GeneratorNumber incorrect";
+    errors := errors + 1;
+end if;
+
+if GeneratorNumber(u1^-1) ne -1 then
+    print "ERROR: Negative GeneratorNumber incorrect";
+    errors := errors + 1;
+end if;
+
+if GeneratorNumber(Id(f3)) ne 0 then
+    print "ERROR: Zero GeneratorNumber incorrect";
+    errors := errors + 1;
+end if;
+
+// Match
+
+m_t, m_s := Match(u2, v2, 1);
+if not m_t or m_s ne 10 then
+    print "ERROR: Non-trivial Match incorrect";
+    errors := errors + 1;
+end if;
+
+m_t, m_s := Match(u2, u2, 1);
+if not m_t or m_s ne 1 then
+    print "ERROR: Matching identical words failed";
+    errors := errors + 1;
+end if;
+
+if Match(u1, u2, 3) then
+    print "ERROR: Match claimed for non-subword";
+    errors := errors + 1;
+end if;
+
+if Match(Id(f3), u2, 1) then
+    print "ERROR: Match in trivial word failed";
+    errors := errors + 1;
+end if;
+
+m_t, m_s := Match(v1, Id(f3), 2);
+if not m_t or m_s ne 2 then
+    print "ERROR: Matching trivial word failed";
+    errors := errors + 1;
+end if;
+
+delete m_t, m_s;
+
+// Random
+
+if Random(f3, 0, 0) ne Id(f3) then
+    print "ERROR: Random word of length 0 not identity";
+    errors := errors + 1;
+end if;
+
+lrf3 := #Random(f3, 5, 12);
+if lrf3 lt 5 or lrf3 gt 12 then
+    print "ERROR: Random word was length outside range";
+    errors := errors + 1;
+end if;
+delete lrf3;
+
+// RotateWord
+
+if RotateWord(u1, 0) ne u1 then
+    print "ERROR: Rotation by zero does not return original word";
+    errors := errors + 1;
+end if;
+
+if RotateWord(u2, #u2) ne u2 then
+    print "ERROR: Rotation of word by its length does not return original word";
+    errors := errors + 1;
+end if;
+
+if RotateWord(Id(f2), 2) ne Id(f2) then
+    print "ERROR: Rotation of identity does not return identity";
+    errors := errors + 1;
+end if;
+
+if RotateWord(v2, 1) ne RotateWord(v2, #v2 + 1) then
+    print "ERROR: Rotation does not reduce by length of word";
+    errors := errors + 1;
+end if;
+
+if RotateWord(v2, 1) ne RotateWord(v2, 1 - #v2) then
+    print "ERROR: Negative rotation not equal to equivalent positive rotation";
+    errors := errors + 1;
+end if;
+
+if RotateWord(u1, 3) ne f3.2 * f3.1^2 * f3.3^3 * f3.1 * f3.2^-1 * f3.1^-2 then
+    print "ERROR: Non-trivial rotation failed";
+    errors := errors + 1;
+end if;
+
+for i in [-#u3 .. #u3] do
+    if RotateWord(u3, i) ne f2!ElementToSequence(RotateWord(u3, i)) then
+	print "ERROR: rotation failed to cancel properly";
+	errors +:= 1;
+    end if;
+end for;
+
+// Substitute
+
+if Substitute(u1, 1, #u1, u1) ne u1 then
+    print "ERROR: Substitution of word for itself failed";
+    errors := errors + 1;
+end if;
+
+if Substitute(u1, 1, 0, u1) ne u1^2 then
+    print "ERROR: Substitution of trivial string failed";
+    errors := errors + 1;
+end if;
+
+if Substitute(u2, 1, #u2, v1) ne v1 then
+    print "ERROR: Complete substitution failed";
+    errors := errors + 1;
+end if;
+
+if Substitute(v2, 2, 1, v1) ne f3.2 * f3.1 * f3.2^2 then
+    print "ERROR: Simple substitution failed";
+    errors := errors + 1;
+end if;
+
+// Subword
+
+if Subword(u1, 1, #u1) ne u1 then
+    print "ERROR: Complete subword incorrect";
+    errors := errors + 1;
+end if;
+
+if Subword(u2, 2, 0) ne Id(f3) then
+    print "ERROR: Trivial subword incorrect";
+    errors := errors + 1;
+end if;
+
+if Subword(u2, 10, 3) ne v2 then
+    print "ERROR: Proper subword incorrect";
+    errors := errors + 1;
+end if;
+
+delete u1, u2, u3, v1, v2;
+
+if errors eq 0 then
+    print "Correctness in elementary functions for words";
+else
+    print errors, " error(s) in elementary functions for words";
+end if;
+
+/*
+----------------------------------------
+    Specification of Relations
+----------------------------------------
+*/
+
+errors := 0;
+
+u := f2.1 * f2.2^2 * f2.1^-1;
+v := (f2.1,f2.2,f2.1^-2,f2.2);
+
+r := u = v;
+
+if LHS(r) ne u then
+    print "ERROR: Left hand side of relation incorrect";
+    errors := errors + 1;
+end if;
+
+if RHS(r) ne v then
+    print "ERROR: Right hand side of relation incorrect";
+    errors := errors + 1;
+end if;
+
+delete u, v, r;
+
+if errors eq 0 then
+    print "Correctness in specification of relations";
+else
+    print errors, " error(s) in specification of relations";
+end if;
+
+/*
+----------------------------------------
+    Construction of a quotient
+----------------------------------------
+*/
+
+// Trivial group E_1, due to B.H. Neumann
+
+triv := quo<f3 | f3.3^-1*f3.1*f3.3*f3.1^-2, f3.1^-1*f3.2*f3.1*f3.2^-2,
+		 f3.2^-1*f3.3*f3.2*f3.3^-2>;
+
+// Alternating(5)
+
+A5 := quo<f2 | f2.1^2, f2.2^3, (f2.1 * f2.2)^5>;
+
+// Binary tetrahedral group
+
+tetra<r, s> := Group<r, s | r^3, s^3, (r * s)^2>;
+//tetra := Group<r, s | r^3, s^3, (r * s)^2>;
+//r := tetra.1;
+//s := tetra.2;
+
+// group of Order 16
+
+G16 := quo<f3 | f3.1^2, f3.2^2, f3.3^2,
+		f3.1*f3.2*f3.3 = f3.2*f3.3*f3.1 = f3.3*f3.1*f3.2>;
+
+// (8, 7 | 2, 3), from Cannon, Dimino, Havas and Watson
+
+TC := quo<f2 | f2.1^8, f2.2^7, (f2.1 * f2.2)^2, (f2.1^-1 * f2.2)^3>;
+
+// Second Janko group (J2)
+
+J2<a, b, c> := Group<a, b, c | a^3, b^3, c^3, a*b*a*b^-1*a^-1*b^-1, (c*a)^5,
+				(c*b)^5, (c*b^-1*c*b)^2,
+				a^-1*b*a*c*a^-1*b*a*c^-1*a^-1*b^-1*a*c^-1,
+				a*b*a^-1*c*a*b*a^-1*c^-1*a*b^-1*a^-1*c^-1>;
+/*
+J2 := Group<a, b, c | a^3, b^3, c^3, a*b*a*b^-1*a^-1*b^-1, (c*a)^5,
+				(c*b)^5, (c*b^-1*c*b)^2,
+				a^-1*b*a*c*a^-1*b*a*c^-1*a^-1*b^-1*a*c^-1,
+				a*b*a^-1*c*a*b*a^-1*c^-1*a*b^-1*a^-1*c^-1>;
+a := J2.1;
+b := J2.2;
+c := J2.3;
+*/
+
+// An infinite group
+
+Inf := quo<f2 | f2.1^3, f2.2^3, (f2.1 * f2.2)^3>;
+
+/*
+----------------------------------------
+    Construction of a subgroup
+----------------------------------------
+*/
+
+// sub<group | Generators>
+
+errors := 0;
+
+triv12 := sub<triv | triv.1, triv.2>;
+triv13 := sub<triv | triv.1, triv.3>;
+triv2 := sub<triv | triv.2>;
+triv0 := sub<triv | Id($)>;
+
+H := sub<A5 | A5.1, A5.1^A5.2>;
+K := sub<A5 | [A5.1 * A5.2, A5.2 * A5.1]>;
+A5a := sub<A5 | A5.1>;
+A5b := sub<A5 | A5.2>;
+
+t1 := sub<tetra | [1, 2]>;
+t2 := sub<tetra | {r, r^s}>;
+
+G16a := sub<G16 | (G16.1,G16.2)>;
+G16b := sub<G16 | G16.1^G16.3, G16.2>;
+
+TC1 := sub<TC | [[1, 1]]>;
+TC2 := sub<TC | {[-1, 2]}>;
+TC3 := sub<TC | TC1, TC2>;
+
+J2sub := sub<J2 | a, c, c^b>;
+
+Inf1 := sub<Inf|>;
+
+// ncl<group | Generators>
+
+G16an := ncl<G16 | (G16.1,G16.2)>;
+
+t1n := ncl<tetra | [1, 2]>;
+
+TCn := ncl<TC | TC1, GeneratingWords(TC, TC3)>;
+
+J2n := ncl<J2 | a>;
+
+if G16an ne G16a then
+    print "ERROR: ncl and sub different for normal subgroup";
+    errors := errors + 1;
+end if;
+
+if TCn ne TC then
+    print "ERROR: ncl does not give whole group for whole group normal closure";
+    errors := errors + 1;
+end if;
+
+if J2n ne J2 then
+    print "ERROR: ncl does not give whole group for simple group";
+    errors := errors + 1;
+end if;
+
+// Quotients with normal subgroups
+
+G16q := G16 / G16a;
+
+tq := tetra / t1;
+
+Iq := Inf / Inf;
+
+if Index(Iq, sub<Iq|>) ne 1 then
+    print "ERROR: Quotient of group by itself is not trivial";
+    errors := errors + 1;
+end if;
+
+if Index(G16, G16a) ne Index(G16q, sub<G16q|>) then
+    print "ERROR: Quotient by normal subgroup gives wrong Index";
+    errors := errors + 1;
+end if;
+
+if Index(tq, sub<tq|>) ne Index(tetra, NormalClosure(tetra, t1)) then
+    print "ERROR: Quotient by non-normal subgroup incorrect";
+    errors := errors + 1;
+end if;
+
+if errors eq 0 then
+    print "Correctness in construction of quotients and subgroups";
+else
+    print errors, " error(s) in construction of quotients and subgroups";
+end if;
+
+/*
+----------------------------------------
+    Editing defining Relations
+----------------------------------------
+*/
+
+errors := 0;
+
+G16add := AddRelation(G16, G16!G16a.1 = Id(G16));
+G16add2 := AddRelation(G16, G16!G16a.1 = Id(G16), 2);
+G16iso1 := DeleteRelation(G16add2, 3);
+G16iso2 := DeleteRelation(G16add2, G16!G16a.1 = Id(G16));
+A4a := ReplaceRelation(Inf, 3, (Inf.1 * Inf.2)^2 = Id(Inf));
+A4b := ReplaceRelation(Inf, (Inf.1 * Inf.2)^3 = Id(Inf), (Inf.1 * Inf.2)^2 = Id(Inf));
+tetraP := AddGenerator(tetra);
+tetraPM := DeleteGenerator(tetraP, tetraP.3);
+A5iso := AddGenerator(A5, A5.1 * A5.2);
+
+if Index(G16add, sub<G16add|>) ne Index(G16q, sub<G16q|>) then
+    print "ERROR: Add relation not equivalent to quotient";
+    errors := errors + 1;
+end if;
+
+if Index(G16add, sub<G16add|>) ne Index(G16add2, sub<G16add2|>) then
+    print "ERROR: Adding relation in different position gives different group";
+    errors := errors + 1;
+end if;
+
+if Index(G16iso1, sub<G16iso1|>) ne Index(G16, sub<G16|>) then
+    print "ERROR: Adding and deleting a relation changes group";
+    errors := errors + 1;
+end if;
+
+if Index(G16iso2, sub<G16iso2|>) ne Index(G16, sub<G16|>) then
+    print "ERROR: Apparently deleted wrong relation";
+    errors := errors + 1;
+end if;
+
+if Index(A4a, sub<A4a|>) ne 12 then
+    print "ERROR: Replace relation gives wrong Index";
+    errors := errors + 1;
+end if;
+
+if Index(A4a, sub<A4a|>) ne Index(A4b, sub<A4b|>) then
+    print "ERROR: Replace relation different for number and relation";
+    errors := errors + 1;
+end if;
+
+if ToddCoxeter(tetraP, sub<tetraP|>) ne 0 then
+    print "ERROR: Free added generator does not make group infinite";
+    errors := errors + 1;
+end if;
+
+if Index(tetraPM, sub<tetraPM|>) ne Index(tetra, sub<tetra|>) then
+    print "ERROR: Deleting an added generator gives a different group";
+    errors := errors + 1;
+end if;
+
+if Index(A5iso, sub<A5iso|>) ne Index(A5, sub<A5|>) then
+    print "ERROR: Adding redundant generator gives different group";
+    errors := errors + 1;
+end if;
+
+delete G16add, G16add2, G16iso1, G16iso2, A4a, A4b, tetraP, tetraPM, A5iso;
+
+if errors eq 0 then
+    print "Correctness in editing defining relations";
+else
+    print errors, " error(s) in editing defining relations";
+end if;
+
+/*
+----------------------------------------
+    Construction of extensions
+----------------------------------------
+*/
+
+errors := 0;
+
+DA5 := Darstellungsgruppe(A5);
+
+if Index(DA5, sub<DA5|>) mod Index(A5, sub<A5|>) ne 0 then
+    print "ERROR: Order of Darstellungsgruppe not divisible by group order";
+    errors := errors + 1;
+end if;
+
+A5xA5 := DirectProduct(A5, A5);
+
+if Index(A5xA5, sub<A5xA5|>) ne Index(A5, sub<A5|>)^2 then
+    print "ERROR: Order of direct product not product of orders";
+    errors := errors + 1;
+end if;
+
+if Index(A5xA5, sub<A5xA5 | A5xA5.1, A5xA5.2>) ne Index(A5, sub<A5|>) then
+    print "ERROR: First component of direct product not original group";
+    errors := errors + 1;
+end if;
+
+if Index(A5xA5, sub<A5xA5 | A5xA5.3, A5xA5.4>) ne Index(A5, sub<A5|>) then
+    print "ERROR: Second component of direct product not original group";
+    errors := errors + 1;
+end if;
+
+A5fA5 := FreeProduct(A5, A5);
+
+if errors eq 0 then
+    print "Correctness in construction of extensions";
+else
+    print errors, " error(s) in construction of extensions";
+end if;
+
+/*
+----------------------------------------
+    Defining standard groups
+----------------------------------------
+*/
+
+errors := 0;
+
+A3 := AlternatingGroup(GrpFP, 3);
+if Index(A3, sub<A3|>) ne Order(AlternatingGroup(3)) then
+    print "ERROR: Alternating(3) not the same as permutation version";
+    errors := errors + 1;
+end if;
+
+A7 := AlternatingGroup(GrpFP, 7);
+if Index(A7, sub<A7|>) ne Order(AlternatingGroup(7)) then
+    print "ERROR: Alternating(7) not the same as permutation version";
+    errors := errors + 1;
+end if;
+
+S3 := SymmetricGroup(GrpFP, 3);
+if Index(S3, sub<S3|>) ne Order(SymmetricGroup(3)) then
+    print "ERROR: Symmetric(3) not the same as permutation version";
+    errors := errors + 1;
+end if;
+
+S8 := SymmetricGroup(GrpFP, 8);
+if Index(S8, sub<S8|>) ne Order(SymmetricGroup(8)) then
+    print "ERROR: Symmetric(8) not the same as permutation version";
+    errors := errors + 1;
+end if;
+
+D3 := DihedralGroup(GrpFP, 3);
+if Index(D3, sub<D3|>) ne Order(DihedralGroup(3)) then
+    print "ERROR: Dihedral(3) not the same as permutation version";
+    errors := errors + 1;
+end if;
+
+D427 := DihedralGroup(GrpFP, 427);
+if Index(D427, sub<D427|>) ne Order(DihedralGroup(427)) then
+    print "ERROR: Dihedral(427) not the same as permutation version";
+    errors := errors + 1;
+end if;
+
+C1 := CyclicGroup(GrpFP, 1);
+if Index(C1, sub<C1|>) ne Order(CyclicGroup(1)) then
+    print "ERROR: Cyclic(1) not the same as permutation version";
+    errors := errors + 1;
+end if;
+
+C1302 := CyclicGroup(GrpFP, 1302);
+if Index(C1302, sub<C1302|>) ne Order(CyclicGroup(1302)) then
+    print "ERROR: Cyclic(1302) not the same as permutation version";
+    errors := errors + 1;
+end if;
+
+Z1 := AbelianGroup(GrpFP, [1]);
+if Index(Z1, sub<Z1|>) ne (&*([1])) then
+    print "ERROR: Abelian([1]) not the same as permutation version";
+    errors := errors + 1;
+end if;
+
+Z6480 := AbelianGroup(GrpFP, [5, 12, 6, 1, 18]);
+if Index(Z6480, sub<Z6480|>) ne (&*([5, 12, 6, 1, 18])) then
+    print "ERROR: Abelian(6480) not the same as permutation version";
+    errors := errors + 1;
+end if;
+
+delete A3, A7, S3, S8, D3, D427, C1, C1302, Z1, Z6480;
+
+if errors eq 0 then
+    print "Correctness in construction of standard groups";
+else
+    print errors, " error(s) in construction of standard groups";
+end if;
+
+/*
+----------------------------------------
+    Accessing defining Generators and Relations
+----------------------------------------
+*/
+
+errors := 0;
+
+if NumberOfGenerators(f2) ne 2 then
+    print "ERROR: NumberOfGenerators wrong for free group";
+    errors := errors + 1;
+end if;
+
+if NumberOfGenerators(J2) ne 3 then
+    print "ERROR: NumberOfGenerators wrong for fp group";
+    errors := errors + 1;
+end if;
+
+if NumberOfGenerators(f2) ne #Generators(f2) then
+    print "ERROR: NumberOfGenerators not #Generators for free group";
+    errors := errors + 1;
+end if;
+
+if NumberOfGenerators(J2) ne #Generators(J2) then
+    print "ERROR: NumberOfGenerators not #Generators for fp group";
+    errors := errors + 1;
+end if;
+
+if Generators(f3) ne {f3.1, f3.2, f3.3} then
+    print "ERROR: Generating set wrong for free group";
+    errors := errors + 1;
+end if;
+
+if Generators(TC) ne {TC.1, TC.2} then
+    print "ERROR: Generating set wrong for fp group";
+    errors := errors + 1;
+end if;
+
+if GeneratingWords(TC, TC3) ne {TC.1^2, TC.1^-1 * TC.2} then
+    print "ERROR: Generating words incorrect for subgroup";
+    errors := errors + 1;
+end if;
+
+if Parent(f2.1) ne f2 then
+    print "ERROR: Parent wrong for element of free group";
+    errors := errors + 1;
+end if;
+
+if Parent(t1.1) ne t1 then
+    print "ERROR: Parent wrong for fp group";
+    errors := errors + 1;
+end if;
+
+if #Relations(f2) ne 0 then
+    print "ERROR: Number of relations wrong for free group";
+    errors := errors + 1;
+end if;
+
+if Relations(f2) ne [] then
+    print "ERROR: Relations wrong for free group";
+    errors := errors + 1;
+end if;
+
+if #Relations(J2) ne 9 then
+    print "ERROR: Number of relations wrong for quotient";
+    errors := errors + 1;
+end if;
+
+if Relations(A5) ne [A5.1^2 = Id(A5), A5.2^3 = Id(A5),
+		     (A5.1 * A5.2)^5 = Id(A5)] then
+    print "ERROR: Wrong relations for quotient";
+    errors := errors + 1;
+end if;
+
+if errors eq 0 then
+    print "Correctness in accessing generators and relations";
+else
+    print errors, " error(s) in accessing generators and relations";
+end if;
+
+/*
+----------------------------------------
+    Operations on Subgroups
+----------------------------------------
+*/
+
+errors := 0;
+
+// H^u
+
+if t2^Id(tetra) ne t2 then
+    print "ERROR: Subgroup conjugated by identity not itself";
+    errors := errors + 1;
+end if;
+
+if Index(J2, J2sub^Random(J2, 3, 7)) ne Index(J2, J2sub) then
+    print "ERROR: Conjugate gives incorrect index";
+    errors := errors + 1;
+end if;
+
+if G16a^(G16.3 * G16.2^2) ne G16a then
+    print "ERROR: Normal subgroup not conjugated to itself";
+    errors := errors + 1;
+end if;
+
+if H^A5.2 eq H then
+    print "ERROR: Subgroup incorrectly equal to conjugate";
+    errors := errors + 1;
+end if;
+
+// meet
+
+if TC1 meet TC1 ne TC1 then
+    print "ERROR: Meet of subgroup with itself failed";
+    errors := errors + 1;
+end if;
+
+if t1 meet t2 ne t1 then
+    print "ERROR: Meet with whole group does not return original subgroup";
+    errors := errors + 1;
+end if;
+
+if Index(A5, A5a meet A5b) ne 60 then
+    print "ERROR: Meet of disjoint subgroups not trivial";
+    errors := errors + 1;
+end if;
+
+// Core
+
+if Core(A5, A5) ne A5 then
+    print "ERROR: Core of group in itself not whole group";
+    errors := errors + 1;
+end if;
+
+if Core(G16, G16a) ne G16a then
+    print "ERROR: Core of normal subgroup not itself";
+    errors := errors + 1;
+end if;
+
+if Index(A5, Core(A5, H)) ne 60 then
+    print "ERROR: Core which should be trivial is not";
+    errors := errors + 1;
+end if;
+
+// Index
+
+if Index(J2, J2) ne 1 then
+    print "ERROR: Index of group in itself not 1";
+    errors := errors + 1;
+end if;
+
+if Index(Inf, Inf1) ne 0 then
+    print "ERROR: Non-zero index returned for infinite quotient";
+    errors := errors + 1;
+end if;
+
+if Index(TC, TC2) ne 3584 then
+    print "ERROR: Large index wrong";
+    errors := errors + 1;
+end if;
+
+// maximal overgroup
+
+if MaximalOvergroup(G16, G16b) ne G16 then
+    print "ERROR: Maximal overgroup of maximal subgroup not whole group";
+    errors := errors + 1;
+end if;
+
+if Index(G16, MaximalOvergroup(G16, G16a)) ne 2 then
+    print "ERROR: Wrong maximal overgroup";
+    errors := errors + 1;
+end if;
+
+// minimal overgroup
+
+if MinimalOvergroup(G16, G16b) ne G16 then
+    print "ERROR: Maximal overgroup of maximal subgroup not whole group";
+    errors := errors + 1;
+end if;
+
+if Index(G16, MinimalOvergroup(G16, G16a)) ne 4 then
+    print "ERROR: Wrong minimal overgroup";
+    errors := errors + 1;
+end if;
+
+if MaximalOvergroup(A5, A5a) ne MinimalOvergroup(A5, A5a) then
+    print "ERROR: Maximal and minimal overgroups differ incorrectly";
+    errors := errors + 1;
+end if;
+
+if MaximalOvergroup(TC, TC3) eq MinimalOvergroup(TC, TC3) then
+    print "ERROR: Different maximal and minimal overgroups claimed the same";
+    errors := errors + 1;
+end if;
+
+// normal closure
+
+if NormalClosure(tetra, tetra) ne tetra then
+    print "ERROR: Normal closure of whole group not itself";
+    errors := errors + 1;
+end if;
+
+if NormalClosure(G16, G16a) ne G16a then
+    print "ERROR: Normal closure of normal subgroup not itself";
+    errors := errors + 1;
+end if;
+
+if Index(tetra, NormalClosure(tetra, t1)) ne 3 then
+    print "ERROR: Non-trivial normal closure has wrong index";
+    errors := errors + 1;
+end if;
+
+if NormalClosure(tetra, t1) ne t1n then
+    print "ERROR: Normal closure not the same as ncl";
+    errors := errors + 1;
+end if;
+
+if NormalClosure(J2, J2sub) ne J2 then
+    print "ERROR: Normal closure in simple group not whole group";
+    errors := errors + 1;
+end if;
+
+// Normalizer
+
+if Normalizer(A5a, A5a) ne A5a then
+    print "ERROR: Normalizer of group in itself wrong";
+    errors := errors + 1;
+end if;
+
+if Normalizer(G16, G16a) ne G16 then
+    print "ERROR: Normalizer of normal subgroup not whole group";
+    errors := errors + 1;
+end if;
+
+if Normalizer(J2, J2sub) ne J2sub then
+    print "ERROR: Normalizer of self-normalizing subgroup not itself";
+    errors := errors + 1;
+end if;
+
+if Index(TC, Normalizer(TC, TC3)) ne 112 then
+    print "ERROR: Wrong normalizer for non-trivial case";
+    errors := errors + 1;
+end if;
+
+// schreier Generators
+
+if SchreierGenerators(tetra, tetra) ne { r, s } then
+    print "ERROR: Schreier generators for whole group incorrect";
+    errors := errors + 1;
+end if;
+
+if #SchreierGenerators(TC, TC3 : Simplify := false) ne 449 then
+    print "ERROR: Incorrect number of Schreier generators";
+    errors := errors + 1;
+end if;
+
+if sub<tetra | SchreierGenerators(tetra, t1)> ne t1 then
+    print "ERROR: Schreier generators do not generate same subgroup";
+    errors := errors + 1;
+end if;
+
+// Transversal(G, H)
+
+if Transversal(tetra, t2) ne { Id(tetra) } then
+    print "ERROR: Wrong transversal for index 1 subgroup";
+    errors := errors + 1;
+end if;
+
+if #Transversal(J2, J2sub) ne Index(J2, J2sub) then
+    print "ERROR: Length of transversal not index";
+    errors := errors + 1;
+end if;
+
+A5t, A5f := Transversal(A5, H);
+
+if #A5t ne 6 then
+    print "ERROR: Wrong length for transversal";
+    errors := errors + 1;
+end if;
+
+if (A5.2 * A5.1 * A5.2)@A5f ne A5.2 * A5.1 * A5.2 then
+    print "ERROR: Coset rep not mapped to itself by Schreier coset map";
+    errors := errors + 1;
+end if;
+
+if (A5.2^A5.1)@A5f ne A5.2 * A5.1 then
+    print "ERROR: Wrong image for Schreier coset map";
+    errors := errors + 1;
+end if;
+
+delete A5t, A5f;
+
+// Transversal(G, H, K)
+
+if Transversal(A5, H, K) ne { Id(A5) } then
+    print "ERROR: Wrong double coset reps for trivial case";
+    errors := errors + 1;
+end if;
+
+if #Transversal(TC, TC1, TC2) ne 896 then
+    print "ERROR: Wrong length for double coset reps in large case";
+    errors := errors + 1;
+end if;
+
+if errors eq 0 then
+    print "Correctness in operations on subgroups";
+else
+    print errors, " error(s) in operations on subgroups";
+end if;
+
+/*
+----------------------------------------
+    Boolean operations on subgroups
+----------------------------------------
+*/
+
+errors := 0;
+
+// u in H
+
+if not (triv.1 in triv) then
+    print "ERROR: Generator not in its group";
+    errors := errors + 1;
+end if;
+
+if TC.1^2 in TC2 then
+    print "ERROR: Element incorrectly reported in subgroup";
+    errors := errors + 1;
+end if;
+
+// u notin H
+
+if Id(A5a) notin A5a then
+    print "ERROR: Identity not in its group";
+    errors := errors + 1;
+end if;
+
+for gen in GeneratingWords(G16, G16b) do
+    if gen notin G16b then
+	print "ERROR: Generator reported not in subgroup";
+	errors := errors + 1;
+    end if;
+end for;
+
+// H eq K
+
+if not (t1 eq t1) then
+    print "ERROR: Group not equal to itself";
+    errors := errors + 1;
+end if;
+
+if not (t2 eq tetra) then
+    print "ERROR: Group not equal to index 1 subgroup";
+    errors := errors + 1;
+end if;
+
+if TC1 eq TC2 then
+    print "ERROR: Different subgroups claimed equal";
+    errors := errors + 1;
+end if;
+
+// H ne K
+
+if TC3 ne TC3 then
+    print "ERROR: Group not equal to self";
+    errors := errors + 1;
+end if;
+
+if triv2 ne triv13 then
+    print "ERROR: Two index 1 subgroups not equal";
+    errors := errors + 1;
+end if;
+
+if not (G16a ne G16b) then
+    print "ERROR: Different subgroups not different";
+    errors := errors + 1;
+end if;
+
+// H in K
+
+if not (J2 subset J2) then
+    print "ERROR: Group in itself claimed false";
+    errors := errors + 1;
+end if;
+
+if not (triv12 subset triv13) then
+    print "ERROR: Index 1 subgroup in index 1 subgroup claimed false";
+    errors := errors + 1;
+end if;
+
+if A5a subset A5b then
+    print "ERROR: Incorrect inclusion claimed";
+    errors := errors + 1;
+end if;
+
+if not (TC1 subset TC3) then
+    print "ERROR: Proper inclusion claimed false";
+    errors := errors + 1;
+end if;
+
+// H notin K
+
+if A5b notsubset A5b then
+    print "ERROR: Group notin itself claimed true";
+    errors := errors + 1;
+end if;
+
+if triv13 notsubset triv2 then
+    print "ERROR: Index 1 subgroup notin index 1 subgroup claimed true";
+    errors := errors + 1;
+end if;
+
+if TC2 notsubset TC3 then
+    print "ERROR: Proper inclusion not recognised";
+    errors := errors + 1;
+end if;
+
+// IsConjugate(G, H, K)
+
+if not IsConjugate(tetra, tetra, tetra) then
+    print "ERROR: Group not conjugate to itself in itself";
+    errors := errors + 1;
+end if;
+
+if not IsConjugate(G16, G16b, G16b) then
+    print "ERROR: Group not conjugate to itself in proper overgroup";
+    errors := errors + 1;
+end if;
+
+if not IsConjugate(A5, H, H^A5.2) then
+    print "ERROR: Conjugate subgroups not conjugate";
+    errors := errors + 1;
+end if;
+
+if IsConjugate(TC, TC1, TC2) then
+    print "ERROR: Non-conjugate subgroups claimed conjugate";
+    errors := errors + 1;
+end if;
+
+// IsNormal(G, H)
+
+if not IsNormal(G16, G16) then
+    print "ERROR: Group not normal in itself";
+    errors := errors + 1;
+end if;
+
+if not IsNormal(triv, triv12) then
+    print "ERROR: Index 1 subgroup not normal";
+    errors := errors + 1;
+end if;
+
+if not IsNormal(G16, G16b) then
+    print "ERROR: Index 2 subgroup not normal";
+    errors := errors + 1;
+end if;
+
+if not IsNormal(G16, G16a) then
+    print "ERROR: Normal subgroup not normal";
+    errors := errors + 1;
+end if;
+
+if IsNormal(TC, TC3) then
+    print "ERROR: Non-normal subgroup claimed normal";
+    errors := errors + 1;
+end if;
+
+if not IsNormal(tetra, NormalClosure(tetra, t1)) then
+    print "ERROR: Normal closure not normal";
+    errors := errors + 1;
+end if;
+
+// IsMaximal(G, H)
+
+if IsMaximal(J2, J2) then
+    print "ERROR: Group claimed maximal in itself";
+    errors := errors + 1;
+end if;
+
+if IsMaximal(TC, TC1) then
+    print "ERROR: Non-maximal subgroup claimed maximal";
+    errors := errors + 1;
+end if;
+
+if not IsMaximal(G16, MaximalOvergroup(G16, G16a)) then
+    print "ERROR: Maximal overgroup not maximal";
+    errors := errors + 1;
+end if;
+
+if IsMaximal(G16, G16b) ne (MaximalOvergroup(G16, G16b) eq G16) then
+    print "ERROR: Inconsistent maximal tests";
+    errors := errors + 1;
+end if;
+
+// IsSelfNormalizing
+
+if not IsSelfNormalizing(A5, A5) then
+    print "ERROR: Group is not self-normalizing in itself";
+    errors := errors + 1;
+end if;
+
+if IsSelfNormalizing(G16, G16a) then
+    print "ERROR: Normal subgroup claimed self-normalizing";
+    errors := errors + 1;
+end if;
+
+if not IsSelfNormalizing(J2, J2sub) then
+    print "ERROR: Self-normalizing subgroup not self-normalizing";
+    errors := errors + 1;
+end if;
+
+if IsSelfNormalizing(TC, TC3) then
+    print "ERROR: Non-self-normalizing subgroup claimed self-normalizing";
+    errors := errors + 1;
+end if;
+
+if errors eq 0 then
+    print "Correctness in Boolean operations on subgroups";
+else
+    print errors, " error(s) in Boolean operations on subgroups";
+end if;
+
+/*
+----------------------------------------
+	Coset Enumeration
+----------------------------------------
+*/
+
+errors := 0;
+
+TCf, TCim := CosetAction(TC, TC3);
+
+if Degree(TCim) ne Index(TC, TC3) then
+    print "ERROR: Coset image has wrong degree";
+    errors := errors + 1;
+end if;
+
+if Order(TCim) ne 10752 then
+    print "ERROR: Coset image has wrong order";
+    errors := errors + 1;
+end if;
+
+if Id(TC)@TCf ne Id(TCim) then
+    print "ERROR: Image of identity not identity under coset homomorphism";
+    errors := errors + 1;
+end if;
+
+if (TC.1)@TCf ne TCim.1 or (TC.2)@TCf ne TCim.2 then
+    print "ERROR: Generators not mapped correctly under coset homomorphism";
+    errors := errors + 1;
+end if;
+
+if (TC.2^2 * TC.1 * TC.1^TC.2)@TCf ne TCim.2^2 * TCim.1 * TCim.1^TCim.2 then
+    print "ERROR: Coset homomorphism does not obey linearity";
+    errors := errors + 1;
+end if;
+
+// Define some coset tables
+
+A5Hct := CosetTable(A5, H);
+tetra1ct := CosetTable(tetra, t1);
+TC3ct := CosetTable(TC, TC3);
+trivct := CosetTable(triv, triv13);
+J2ct := CosetTable(J2, J2sub);
+
+delete TCf, TCim;
+
+if errors eq 0 then
+    print "Correctness in coset enumeration";
+else
+    print errors, " error(s) in coset enumeration";
+end if;
+
+/*
+----------------------------------------
+    Operations on Cosets and Coset Tables
+----------------------------------------
+*/
+
+errors := 0;
+
+// #T
+
+if #A5Hct ne Index(A5, H) then
+    print "ERROR: Number of rows in coset table not index";
+    errors := errors + 1;
+end if;
+
+if #TC3ct ne 448 then
+    print "ERROR: Coset table has wrong number of rows";
+    errors := errors + 1;
+end if;
+
+// <i, w>@T
+
+if <1, Id(TC)>@TC3ct ne 1 then
+    print "ERROR: <1, Id()> not mapped to 1";
+    errors := errors + 1;
+end if;
+
+if <327, Id(TC)>@TC3ct ne 327 then
+    print "ERROR: <327, Id()> not mapped to 327";
+    errors := errors + 1;
+end if;
+
+if <<3, A5.2 * A5.1>@A5Hct, A5.1 * A5.2^-1>@A5Hct ne 3 then
+    print "ERROR: Coset not mapped back to itself by word the inverse of word";
+    errors := errors + 1;
+end if;
+
+// Coincidence(T, i, j)
+
+if #Coincidence(A5Hct, 3, 3) ne #A5Hct then
+    print "ERROR: Trivial coincidence does not return original coset table";
+    errors := errors + 1;
+end if;
+
+if #TC3ct mod #Coincidence(TC3ct, 1, 435) ne 0 then
+    print "ERROR: Coincidence produces bad coset table length";
+    errors := errors + 1;
+end if;
+
+if #Coincidence(CosetTable(TC, MaximalOvergroup(TC, TC3)), 1, 2) ne 1 then
+    print "ERROR: Coincidence for maximal subgroup not whole group";
+    errors := errors + 1;
+end if;
+
+if errors eq 0 then
+    print "Correctness in operations on cosets and coset tables";
+else
+    print errors, " error(s) in operations on cosets and coset tables";
+end if;
+
+R := RWSGroup(f2);
+h := hom< R-> f2 | f2.1, f2.2 >;
+assert h(R.1) eq f2.1;
+
+A := AutomaticGroup(f2);
+h := hom< A-> f2 | f2.1, f2.2 >;
+assert h(A.1) eq f2.1;
+
+/*
+---------------------------------------------------------------------------
+    Clean up: Delete all remaining identifiers.  There should be nothing
+    left after the deletions.
+---------------------------------------------------------------------------
+*/
+
+delete errors;
+delete f2, f3;
+delete triv, A5, tetra, G16, TC, J2, Inf;
+delete r, s, a, b, c;
+delete triv0, triv2, triv12, triv13;
+delete H, K, A5a, A5b;
+delete t1, t2;
+delete G16a, G16b;
+delete TC1, TC2, TC3;
+delete J2sub;
+delete Inf1;
+delete G16an;
+delete t1n;
+delete TCn;
+delete J2n;
+delete G16q, tq, Iq;
+delete DA5, A5xA5, A5fA5;
+delete A5Hct, tetra1ct, TC3ct, trivct, J2ct;
+

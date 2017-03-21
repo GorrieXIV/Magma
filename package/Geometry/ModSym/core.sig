@@ -1,0 +1,4 @@
+174,1
+S,ModularSymbolApply,"Apply an element g=[a,b, c,d] of GL(2,Q) to the modular symbol s, given as a sequence of tuples <coeff,[cusp1,cusp2]> (as returned by ModularSymbolRepresentation). The result is returned in the same format. The argument M plays no role and is ignored",0,3,0,0,0,0,0,0,0,82,,0,0,82,,0,0,ModSym,,82,-38,-38,-38,-38,-38
+S,ConvertFromManinSymbol,"The modular symbol in the ambient space of M associated to the 2-tuple x=<P(X,Y),[u,v]>, where P(X,Y) is homogeneous of degree k-2 and [u,v] is a sequence of 2 integers that defines an element of P^1(Z/NZ), where N is the level of M",0,2,0,0,0,0,0,0,0,303,,0,0,ModSym,,ModSymElt,-38,-38,-38,-38,-38
+S,ModularSymbolRepresentation,"The standard represenation of the modular symbol x, as a sequence of tuples <coeff,[cusp1,cusp2]>",0,1,0,0,0,0,0,0,0,ModSymElt,,82,-38,-38,-38,-38,-38

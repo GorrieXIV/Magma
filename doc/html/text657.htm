@@ -1,0 +1,358 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Operations on Matrices</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text658.htm">[Next]</A><A  HREF = "text656.htm">[Prev]</A> <A  HREF = "text658.htm">[Right]</A> <A  HREF = "text656.htm">[Left]</A> <A  HREF = "text653.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "7448">Operations on Matrices</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text657.htm#7449">Arithmetic with Matrices</A>
+<LI> <A  HREF = "text657.htm#7457">Predicates for Matrices</A>
+<LI> <A  HREF = "text657.htm#7462">Matrix Invariants</A>
+</UL>
+<H4><A NAME = "7449">Arithmetic with Matrices</A></H4>
+
+
+
+<H5><A NAME = "7450">g * h : GrpMatElt, GrpMatElt -&gt; GrpMatElt</A></H5>
+<BLOCKQUOTE>
+The product of matrix g and matrix h, where g and
+h belong to the same generic group U. If g and h both
+belong to the same proper subgroup G of U, then the result
+will be returned as an element of G; if g and h belong to
+subgroups H and K of a subgroup G of U then the product
+is returned as an element of G.  Otherwise, the product is
+returned as an element of U.
+</BLOCKQUOTE>
+<H5><A NAME = "7451">g ^ n : GrpMatElt, RngIntElt -&gt; GrpMatElt</A></H5>
+<BLOCKQUOTE>
+The n-th power of the matrix g, where n is a positive or
+negative integer.
+</BLOCKQUOTE>
+<H5><A NAME = "7452">g / h : GrpMatElt, GrpMatElt -&gt; GrpMatElt</A></H5>
+<BLOCKQUOTE>
+The product of the matrix g by the inverse of the matrix h,
+i.e. the element g * h<sup> - 1</sup>. Here g and h must belong to the same
+generic group U. The rules for determining the parent group of
+g / h are the same as for g * h.
+</BLOCKQUOTE>
+<H5><A NAME = "7453">g ^ h : GrpMatElt, GrpMatElt -&gt; GrpMatElt</A></H5>
+<BLOCKQUOTE>
+The conjugate of the matrix g by the matrix h, i.e.
+the element h<sup> - 1</sup> * g * h. Here g and h must belong to the
+same generic group U.  The rules for determining the parent
+group of g<sup>h</sup> are the same as for g * h.
+</BLOCKQUOTE>
+<H5><A NAME = "7454">(g, h) : GrpMatElt, GrpMatElt -&gt; GrpMatElt</A></H5>
+<BLOCKQUOTE>
+The commutator of the matrices g and h, i.e. the element
+g<sup> - 1</sup> * h<sup> - 1</sup> * g * h. Here g and h must belong to the same generic
+group U. The rules for determining the parent group of (g, h) are
+the same as those for g * h.
+</BLOCKQUOTE>
+<H5><A NAME = "7455">(g<sub>1</sub>, ..., g<sub>r</sub>) : GrpMatElt, ..., GrpMatElt -&gt; GrpMatElt</A></H5>
+<BLOCKQUOTE>
+Given r matrices g<sub>1</sub>, ..., g<sub>r</sub> belonging to a common group,
+return their commutator. Commutators are <I>left-normed</I>, so they are
+evaluated from left to right.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7456">Example <TT>GrpMatGen_Arithmetic (H64E7)</TT></A></H3>
+These operations will be illustrated using the group GL(3, 4).
+<P>
+<P>
+<P>
+<PRE>
+&gt; K&lt;w&gt; := FiniteField(4);
+&gt; GL34 := GeneralLinearGroup(3, K);
+&gt; x := GL34 ! [1,w,0, 0,w,1, w^2,0,1];
+&gt; y := GL34 ! [1,0,0, 1,w,0, 1,1,w];
+&gt; x;
+[  1   w   0]
+[  0   w   1]
+[w^2   0   1]
+&gt; y;
+[1 0 0]
+[1 w 0]
+[1 1 w]
+&gt; x*y;
+[w^2 w^2   0]
+[w^2   w   w]
+[  w   1   w]
+&gt; x^10;
+[  w   w   1]
+[  w   1   1]
+[  w w^2   w]
+&gt; x^-1;
+[w^2 w^2 w^2]
+[  1   w   w]
+[  w   w w^2]
+&gt; x^y;
+[w^2 w^2   0]
+[  0 w^2   1]
+[w^2 w^2   w]
+&gt; x/y;
+[  0   1   0]
+[  0 w^2 w^2]
+[  w   w w^2]
+&gt; (x, y);
+[  0   w   w]
+[  w w^2   1]
+[w^2   w w^2]
+&gt; (x,y,y);
+[w^2   w w^2]
+[w^2   w   0]
+[w^2   1   w]
+</PRE>
+Arithmetic with group elements is not limited to
+elements of finite groups. We illustrate with
+a group of degree 3 over a function field.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P&lt;a,b,c,m,x,y,z&gt; := FunctionField(RationalField(), 7);
+&gt; S := MatrixGroup&lt; 3, P | [1,a,b,0,1,c,0,0,1],    
+&gt;                          [1,0,m,0,1,0,0,0,1],   
+&gt;                          [1,x,y,0,1,z,0,0,1] &gt;;
+&gt; 
+&gt; t := S.1 * S.2;
+&gt; t;
+[    1     a b + m]
+[    0     1     c]
+[    0     0     1]
+&gt; t^-1;
+[          1          -a a*c - b - m]
+[          0           1          -c]
+[          0           0           1]
+&gt; Determinant(t); 
+1
+&gt; t^2;
+[              1             2*a a*c + 2*b + 2*m]
+[              0               1             2*c]
+[              0               0               1]
+</PRE>
+<HR>
+<H4><A NAME = "7457">Predicates for Matrices</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+
+
+<H5><A NAME = "7458">g eq h : GrpMatElt, GrpMatElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given matrices g and h belonging to the same generic group, 
+return <TT>true</TT> if g and h are the same element, <TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "7459">g ne h : GrpMatElt, GrpMatElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given matrices g and h belonging to the same generic group, 
+return <TT>true</TT> if g and h are distinct elements, <TT>false</TT> otherwise.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "7460">IsIdentity(g) : GrpMatElt -&gt; BoolElt</A></H5>
+<H5>IsId(g) : GrpMatElt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the matrix g is the identity matrix.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "7461">IsScalar(g) : GrpMatElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the matrix g is a scalar matrix.
+</BLOCKQUOTE>
+<H4><A NAME = "7462">Matrix Invariants</A></H4>
+
+<P>
+<P>
+All of the functions for computing invariants of a square matrix 
+apply to the elements of a matrix group. Here only operations 
+of interest in the context of group elements are described.  The 
+reader is referred to Chapter <A  HREF = "text247.htm#2254">MATRICES</A> for a complete list 
+of functions applicable to matrices.
+
+
+<H5><A NAME = "7463">Degree(g) : GrpMatElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The degree of the matrix g, i.e. the number of rows/columns of g.
+</BLOCKQUOTE>
+<H5><A NAME = "7464"></A><A NAME = "HasFiniteOrder">HasFiniteOrder</A>(g) : GrpMatElt -&gt; BoolElt, RngIntElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> iff the matrix g has finite order. The second 
+return value is the order if it is finite.  The function rigorously proves
+its result (i.e., the result is not probable).  Let R be the ring over
+which g is defined,
+and let the degree of the group in which g lies be n.
+If R is finite, then the first return value is trivially {<TT>true</TT>}.
+<P>
+If R is the integer ring then the function works as follows.
+Suppose first that g has finite order o.
+By a theorem of Minkowski (see Theorem 1.4 <A  HREF = "text652.htm#bib_KuzPav2002">[KP02]</A>),
+for any odd prime p, the reduction mod p of
+g has order o.
+Let f(x)&isin;R[x] be the minimal polynomial of g.  The matrix subalgebra
+generated by g is isomorphic to the quotient ring R[x]/&lt; f(x) &gt;,
+so the order o of g equals the order of x mod f(x).
+<P>
+For arbitrary g,
+the algorithm computes the order, bar(o), of the reduction of
+g modulo a small odd prime. If bar(o) is a possible order
+of an integer matrix of g's dimensions (see Theorem 2.7 <I>op. cit.</I>)
+then this is repeated with a
+larger prime. If this gives a different order, or the first attempt gave an
+impossible order, then g has infinite order. We now compute
+x^(bar(o)) mod f(x). If this is 1, then bar(o) is the order of g,
+otherwise g has infinite order.
+<P>
+If R is the rational field then a necessary condition for g to have
+finite order is that f(x) has integer coefficients, thus the above
+algorithm applies in this case.
+<P>
+If R is an algebraic number field of degree d over Q (including
+cyclotomic and quadratic fields), then the standard companion matrix
+blowup is applied to g to obtain a (nd) x (nd) matrix over
+Q, and the above algorithm is then applied to this matrix.
+</BLOCKQUOTE>
+<H5><A NAME = "7465">Order(g) : GrpMatElt -&gt; RngIntElt, BoolElt</A></H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given an element g of finite order belonging to a matrix group, 
+this function returns the order of g.  If g has infinite order, 
+a runtime error results.  In the case of a matrix group over a 
+finite field, the algorithm described in <A  HREF = "text652.htm#bib_CLG_Order">[CLG97]</A>
+is used. In all other cases, simple powering of g is used.
+<P>
+The parameter <TT>Proof</TT> is associated with the case when the 
+coefficient ring for g is a finite field. In that case, if
+<TT>Proof</TT> is set to {<TT>false</TT>}, then difficult integer factorizations 
+will not attempted. In this situation two values are returned of
+which the first is a multiple n of the order of g. and the 
+second value indicates whether n is known to be the exact order 
+of g.
+</BLOCKQUOTE>
+<H5><A NAME = "7466">FactoredOrder(g) : GrpMatElt -&gt; [ &lt;RngIntElt, RngIntElt&gt; ], BoolElt</A></H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given an element g of finite order belonging to a matrix group, 
+this function returns the order of g as a factored integer.  
+If g has infinite order, a runtime error results.
+If g has infinite order, the function generates a runtime error.  
+In the case of a matrix group over a finite field, the algorithm 
+described in <A  HREF = "text652.htm#bib_CLG_Order">[CLG97]</A> is used. In all other cases, simple 
+powering of g is used.  In that case it is more efficient to use 
+this function rather than factorizing the integer returned by 
+<TT>Order(g)</TT>. If g has infinite order, an error 
+ensues.
+<P>
+If the parameter <TT>Proof</TT> is {<TT>false</TT>}, then 
+difficult integer factorizations are not attempted and the first return 
+value F may contain composite numbers (so that the factorization expands
+to a multiple of the order of g); in any case the second return value 
+indicates whether F is known to be the exact factored order of g.
+</BLOCKQUOTE>
+<H5><A NAME = "7467">ProjectiveOrder(g) : GrpMatElt -&gt; RngIntElt, RngElt</A></H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+The projective order n of the matrix g, and a scalar s
+such that g<sup>n</sup> = sI.
+The projective order of g is the smallest n such that g<sup>n</sup> is a scalar
+matrix (not just the identity matrix), and it always divides the true
+order of A.  The parameter <TT>Proof</TT> is as for <TT>Order</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "7468">FactoredProjectiveOrder(A) : AlgMatElt -&gt; [ &lt;RngIntElt, RngIntElt&gt; ], RngElt</A></H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a square invertible matrix A over a finite field K, return
+the projective order n of A in factored form and a scalar s&isin;K such
+that A<sup>n</sup> = sI.
+The parameter <TT>Proof</TT> is as for <TT>FactoredOrder</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "7469">CentralOrder(g : parameters) : GrpMatElt -&gt; RngIntElt, BoolElt</A></H5>
+<H5>CentralOrder(g) : GrpPermElt -&gt; RngIntElt</H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Return the smallest n such that g<sup>n</sup> is central in its parent group.
+If g is a matrix and the optional parameter <TT>Proof</TT> is
+<TT>false</TT>, then accept a multiple of this value;
+the second value returned is <TT>true</TT> if the answer is exact.
+</BLOCKQUOTE>
+<H5><A NAME = "7470">Determinant(g) : GrpMatElt -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+The determinant of the matrix g.
+</BLOCKQUOTE>
+<H5><A NAME = "7471">Trace(g) : GrpMatElt -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+The trace of the matrix g.
+</BLOCKQUOTE>
+<H5><A NAME = "7472">CharacteristicPolynomial(g: parameters) : GrpMatElt -&gt; RngPolElt</A></H5>
+
+<PRE>    Al: MonStgElt                       Default: "Modular"</PRE>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a matrix g belonging to a subgroup of GL(n, R), where 
+R is a field or Euclidean Domain, return the characteristic polynomial 
+of g as an element of the univariate polynomial ring over R.  
+For details on the parameters, see the function <TT>CharacteristicPolynomial</TT>
+in the chapter on matrices.
+</BLOCKQUOTE>
+<H5><A NAME = "7473">MinimalPolynomial(g) : GrpMatElt -&gt; RngPolElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix g belonging to a subgroup of GL(n, R), where 
+R is a field or Z, return the minimal polynomial of g as an 
+element of the univariate polynomial ring over R.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7474">Example <TT>GrpMatGen_Invariants (H64E8)</TT></A></H3>
+We illustrate the matrix operations by applying them
+to some elements of GL(3, 4).
+<P>
+<P>
+<PRE>
+&gt; K&lt;w&gt; := FiniteField(4);
+&gt; GL34 := GeneralLinearGroup(3, K);
+&gt; x := GL34 ! [w,0,1, 0,1,0, 1,0,1];
+&gt; x;
+[w 0 1]
+[0 1 0]
+[1 0 1]
+&gt; Degree(x);
+3
+&gt; Determinant(x);
+w^2
+&gt; Trace(x);
+w
+&gt; Order(x);
+15
+&gt; m&lt;t&gt; := MinimalPolynomial(x);
+&gt; m;
+t^3 + w*t^2 + w^2
+&gt; Factorization(m);
+[
+    &lt;t + 1, 1&gt;,
+    &lt;t^2 + w^2*t + w^2, 1&gt;
+]
+&gt; c&lt;t&gt; := CharacteristicPolynomial(x);
+&gt; c;
+t^3 + w*t^2 + w^2
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text658.htm">[Next]</A><A  HREF = "text656.htm">[Prev]</A> <A  HREF = "text658.htm">[Right]</A> <A  HREF = "text656.htm">[Left]</A> <A  HREF = "text653.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

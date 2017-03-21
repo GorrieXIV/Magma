@@ -1,0 +1,1372 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Interactive Coset Enumeration</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text827.htm">[Next]</A><A  HREF = "text825.htm">[Prev]</A> <A  HREF = "text827.htm">[Right]</A> <A  HREF = "text825.htm">[Left]</A> <A  HREF = "text823.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "9486">Interactive Coset Enumeration</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text826.htm#9487">Introduction</A>
+<LI> <A  HREF = "text826.htm#9488">Constructing and Modifying a Coset Enumeration Process</A>
+<LI> <A  HREF = "text826.htm#9493">Starting and Restarting an Enumeration</A>
+<LI> <A  HREF = "text826.htm#9500">Accessing Information</A>
+<LI> <A  HREF = "text826.htm#9519">Induced Permutation  Representations</A>
+<LI> <A  HREF = "text826.htm#9523">Coset Spaces and Transversals</A>
+</UL>
+<H4><A NAME = "9487">Introduction</A></H4>
+
+<P>
+<P>
+<P>
+This section presents the interactive coset enumeration facility of Magma.
+This concept makes it possible to restart an enumeration after changing
+enumeration parameters or adding relators or subgroup generators, while making
+use of information obtained up to that point as much as possible.
+It is thus particularly suitable for very hard enumerations, requiring a
+careful and interactive choice of enumeration parameters or for series of
+similar enumerations.
+<P>
+<P>
+The Todd-Coxeter implementation installed in Magma is based on the stand
+alone coset enumeration programme <TT>ACE3</TT> developed by George Havas and
+Colin Ramsay at the University of Queensland.
+The reader should consult <A  HREF = "text822.htm#bib_cdhw_todd_coxeter">[CDHW73]</A> and
+<A  HREF = "text822.htm#bib_havas_todd_coxeter">[Hav91]</A> for an explanation of the terminology and a 
+general description of the algorithm. A manual for <TT>ACE3</TT> as well as the
+sources of <TT>ACE3</TT> can be found online <A  HREF = "text822.htm#bib_ace_homepage">[Ram]</A>.
+<P>
+<P>
+In Magma an interactive coset enumeration is realised as an object of the
+category <TT>GrpFPCosetEnumProc</TT> which can be created and modified, allows
+starting and restarting of coset enumerations and provides access to internal
+data like the coset table and various status information.
+
+
+<H4><A NAME = "9488">Constructing and Modifying a Coset Enumeration Process</A></H4>
+
+
+
+<H5><A NAME = "9489"></A><A NAME = "GrpFP_2:CosetEnumerationProcess">CosetEnumerationProcess</A>(G, H: parameters) : GrpFP, GrpFP -&gt; GrpFPCosetEnumProc</H5>
+<BLOCKQUOTE>
+This function creates a coset enumeration process for enumerating the cosets
+of the subgroup H of the finitely presented group G. Note that no actual
+coset enumeration is started for the created coset enumeration process. This
+can be done with the function <A  HREF = "text826.htm#GrpFP_2:StartEnumeration">StartEnumeration</A>.
+<P>
+<P>
+The user can control in detail the way a subsequent enumeration
+will be performed with the help of the following parameters. For a more
+thorough explanation of the parameters and of how they affect the coset
+enumeration, we refer to the <TT>ACE3</TT> manual.
+<P>
+<P>
+<PRE>
+     <A NAME = "GrpFP_2:Compact">Compact</A>: RngIntElt Default: 10
+</PRE>
+This parameter controls the compaction of the coset table during an
+enumeration. A compaction will be done if a new coset definition is
+required, there is no space for a new coset available in the coset table
+and the percentage of dead cosets exceeds the value of the parameter
+<TT>Compact</TT>.
+<P>
+<P>
+<PRE>
+     <A NAME = "GrpFP_2:CosetLimit">CosetLimit</A>: RngIntElt Default: 0
+</PRE>
+If <TT>CosetLimit</TT> is set to n, where n is a positive integer, then the
+coset table may have at most n rows.  In other words, a maximum of
+n cosets can be defined at any instant during the enumeration. It is ensured
+in this case, that enough memory is allocated to store the requested number of
+cosets, regardless of the value of the parameter <A  HREF = "text826.htm#GrpFP_2:Workspace">Workspace</A>.
+<P>
+If <TT>CosetLimit</TT> is set to 0 (default), the maximal number of active cosets
+is determined by the size of the coset table (cf. parameter
+<A  HREF = "text826.htm#GrpFP_2:Workspace">Workspace</A>)
+and the number of columns of the coset table (i.e. the number of group
+generators).
+<P>
+<P>
+<PRE>
+     <A NAME = "GrpFP_2:Workspace">Workspace</A>: RngIntElt Default: 4000000
+</PRE>
+The number of words allocated for the coset table. Note that if
+<A  HREF = "text826.htm#GrpFP_2:CosetLimit">CosetLimit</A> is set, at least as much memory is allocated as
+is necessary to store the requested number of cosets.
+<P>
+<P>
+<PRE>
+     <A NAME = "GrpFP_2:FillFactor">FillFactor</A>: RngIntElt Default: 0
+</PRE>
+In certain situations it is necessary to ensure that a certain proportion,
+the <I>fill fraction</I> (see Havas (1991)), of the coset table is always kept
+filled, even if <I>preferred definitions</I> are made. The parameter
+<TT>FillFactor</TT> allows the user to specify the fill fraction which is the
+reciprocal of <TT>FillFactor</TT>. The default value of 0 selects a fill factor of
+&lfloor;(5 * (c + 2))/4&rfloor;, where c is the number of columns in the
+coset table.
+<P>
+<P>
+<PRE>
+     <A NAME = "GrpFP_2:CTFactor">CTFactor</A>: RngIntElt Default: 1000
+</PRE>
+<P>
+<PRE>
+     <A NAME = "GrpFP_2:RTFactor">RTFactor</A>: RngIntElt Default: 2000/l
+</PRE>
+<P>
+<PRE>
+     <A NAME = "GrpFP_2:Style">Style</A>: MonStgElt Default: "R_CR"
+</PRE>
+These parameters control the enumeration style and the balance between coset
+table style definitions (C-style, Felsch style) and relator table style
+definitions (R-style, HLT style).
+<P>
+<P>
+The parameters <TT>CTFactor</TT> and <TT>RTFactor</TT> set the number of C-style
+coset definitions and R-style coset applications, respectively, which are
+performed in every step of the appropriate type.
+The default value for <TT>RTFactor</TT> is 2000/l, where l is the total length
+of the relators.
+<P>
+<P>
+<P>
+In style R all definitions are made via relator scans, i.e. this is HLT mode.
+<P>
+<P>
+In style C all
+definitions are made by filling the next empty position in the coset table
+and testing the new coset in all essentially different positions in the
+relators, i.e. this is Felsch mode.
+<P>
+In style R_CR  we run in
+style R until an overflow occurs, perform a lookahead on the entire table
+and then switch to style CR (see below).
+<P>
+The styles Rc and Cr are like the styles R and
+C, except that a single style C or style R pass is done
+after the initial R or style C pass, respectively.
+<P>
+<P>
+In style Rt definitions
+are made as in style R, but the new cosets are tested in all essentially
+different positions in the relators as in style C.
+<P>
+<P>
+In style CR alternate
+passes of style C and style R are performed, with all definitions
+tested in all essentially different positions in the relators as in style C.
+<P>
+<P>
+<PRE>
+     <A NAME = "GrpFP_2:Lookahead">Lookahead</A>: RngIntElt Default: 0
+</PRE>
+In HLT style enumerations, possible implications of new definitions or
+deductions made while tracing relators may not be detected until much later.
+One possible solution to this problem is to perform lookaheads occasionally,
+i.e. to process the coset table, looking for deductions or coincidences.
+A lookahead can be done using the entire table (<I>complete</I>) or only that
+part of the table above the current coset (<I>partial</I>) and it can be done
+in R-style (scanning cosets from
+the beginning of relators) or in C-style (testing all definitions in all
+essentially different relator positions). The following lookahead modes are
+supported.
+<P>
+<P>
+For <TT>Lookahead := 0</TT> (default) no lookahead is done.
+<P>
+<P>
+For <TT>Lookahead := 1</TT> a partial R-style lookahead is done.
+<P>
+<P>
+For <TT>Lookahead := 2</TT> a complete C-style lookahead is done.
+<P>
+<P>
+For <TT>Lookahead := 3</TT> a complete R-style lookahead is done.
+<P>
+<P>
+For <TT>Lookahead := 4</TT> a partial C-style lookahead is done.
+<P>
+<P>
+<PRE>
+     <A NAME = "GrpFP_2:Mendelsohn">Mendelsohn</A>: BoolElt Default: <TT>false</TT>
+</PRE>
+If <TT>Mendelsohn</TT> is set, coset applications are done at all cyclic
+permutations of the relators. This is usually very expensive but may
+nevertheless be helpful in certain cases.
+<P>
+<P>
+<PRE>
+     <A NAME = "GrpFP_2:RelationsInSubgroup">RelationsInSubgroup</A>: RngIntElt Default: -1
+</PRE>
+This parameter controls, whether relators are treated as additional subgroup
+generators, i.e. whether they are applied to coset 1 at the start of an
+enumeration. An argument of -1 (default) includes all relators, an argument
+of 0 turns this feature off and a positive argument includes the appropriate
+number of relators, in order.
+<P>
+<P>
+<PRE>
+     <A NAME = "GrpFP_2:RowFilling">RowFilling</A>: BoolElt Default: <TT>true</TT>
+</PRE>
+In R-style it is usual to scan each row of the table after its coset has been
+applied to all relators, and to make definitions to fill any holes encountered.
+Failure to do so can cause even simple enumerations to overflow. To switch
+row filling off, set the parameter <TT>RowFilling</TT> to false.
+<P>
+<P>
+<PRE>
+     <A NAME = "GrpFP_2:PrefDefMode">PrefDefMode</A>: RngIntElt Default: 3
+</PRE>
+If the argument is 0, then Felsch style definitions are made using the next
+empty position in the coset table. Otherwise, gaps of length one found during
+relator scans are preferentially filled. If the argument is 1, they are filled
+immediately, and if it is 2, the consequent deduction is also made immediately.
+If the argument is 3, then the gaps are noted in the preferred definition
+queue and the next coset definition will be made to fill the oldest gap of
+length one.
+<P>
+<P>
+<PRE>
+     <A NAME = "GrpFP_2:PrefDefSize">PrefDefSize</A>: RngIntElt Default: 8
+</PRE>
+This parameter controls the size of the preferred definition queue, which is
+implemented as a ring buffer, dropping earliest entries. Setting
+<TT>PrefDefSize</TT> to n allocates a buffer of size 2<sup>n</sup>.
+<P>
+<P>
+<PRE>
+     <A NAME = "GrpFP_2:DeductionMode">DeductionMode</A>: RngIntElt Default: 4
+</PRE>
+A completed table is only valid if every table entry has been tested in all
+essentially different relator positions. Untested deductions are stored on a
+stack. This parameter allows the user to specify how deductions should
+be handled. The possible actions are:
+<P>
+<P>
+For <TT>DeductionMode := 0</TT> : discard deductions if there is no stack space
+left.
+<P>
+<P>
+For <TT>DeductionMode := 1</TT> : as 0, but redundant cosets are purged off the
+top of the stack whenever a coincidence is found.
+<P>
+<P>
+For <TT>DeductionMode := 2</TT> : as 0, but all redundant cosets are purged from
+the stack whenever a coincidence is found.
+<P>
+<P>
+For <TT>DeductionMode := 3</TT> : discard the entire stack if it overflows.
+<P>
+<P>
+For <TT>DeductionMode := 4</TT> : if the stack overflows, then double the stack
+size and purge all redundant cosets from the stack.
+<P>
+<P>
+If deductions are discarded for any reason during an enumeration, then a final
+relator application pass will be done at the end of the enumeration
+automatically to check the result.
+<P>
+<P>
+<PRE>
+     <A NAME = "GrpFP_2:DeductionSize">DeductionSize</A>: RngIntElt Default: 1000
+</PRE>
+Sets the (initial) size of the deduction stack in words, with one deduction
+taking two words. A value of 0 selects the default size of 1000 words.
+<P>
+<P>
+<PRE>
+     <A NAME = "GrpFP_2:PathCompression">PathCompression</A>: BoolElt Default: <TT>false</TT>
+</PRE>
+Switching this option on reduces the amount of data movement during
+coincidence processing at the expense of tracing and compressing coincidence
+paths, which involves many coset table accesses. The value of this parameter
+has no effect on the result but may influence the running time.
+<P>
+<P>
+<PRE>
+     <A NAME = "GrpFP_2:TimeLimit">TimeLimit</A>: RngIntElt Default: -1
+</PRE>
+This parameter puts a time limit in seconds on the length of an enumeration.
+A value of -1 (default) means no limit. A value of 0 performs exactly one
+pass through the main enumeration loop.
+<P>
+<P>
+<PRE>
+     <A NAME = "GrpFP_2:LoopLimit">LoopLimit</A>: RngIntElt Default: 0
+</PRE>
+The core enumerator is organised as a state machine, with each step
+performing an action (e.g. lookahead, compaction) or a block of actions
+(e.g. <A  HREF = "text826.htm#GrpFP_2:CTFactor">CTFactor</A> coset definitions or <A  HREF = "text826.htm#GrpFP_2:RTFactor">RTFactor</A>
+coset applications). Using this parameter, a limit on the total number of
+steps can be imposed. A value of 0 (default) turns this feature off.
+<P>
+<P>
+<PRE>
+     <A NAME = "GrpFP_2:LowerBound">LowerBound</A>: RngIntElt Default: 1
+</PRE>
+This may be set to any known lower bound for the index. Should it happen
+that the coset table has no holes, and the number of active cosets is equal
+to the given bound, the enumeration will terminate. When the given bound is
+equal to the index, this will save tracing relators at many cosets when there
+is no possibility of finding coincidences.
+<P>
+<P>
+<PRE>
+     <A NAME = "GrpFP_2:Print">Print</A>: BoolElt Default: <TT>false</TT>
+</PRE>
+If this parameter is set to true, the enumerator prints a single message
+at the end of an enumeration and possibly some progress messages during an
+enumeration (cf. parameter <A  HREF = "text826.htm#GrpFP_2:Messages">Messages</A>).
+<P>
+<P>
+<PRE>
+     <A NAME = "GrpFP_2:Messages">Messages</A>: RngIntElt Default: 0
+</PRE>
+If the argument n of this parameter is non-zero (and <A  HREF = "text826.htm#GrpFP_2:Print">Print</A> is
+set to true), then a progress message is printed after every |n| "actions"
+(i.e. coset definitions, deductions, coincidences, etc.) A negative
+value of n turns hole monitoring on.
+<P>
+<P>
+<PRE>
+     <A NAME = "GrpFP_2:Strategy">Strategy</A>: MonStgElt Default: 
+</PRE>
+Using this parameter one of several predefined strategies can be selected.
+The effect is equivalent to selecting an appropriate combination of arguments
+for some of the parameters explained above. Any predefined strategy can be
+modified by explicitly overriding parameter values.
+<P>
+<P>
+The following predefined strategies exist:
+"<A NAME = "GrpFP_2:Default">Default</A>",
+"<A NAME = "GrpFP_2:Easy">Easy</A>",
+"<A NAME = "GrpFP_2:Hard">Hard</A>",
+"<A NAME = "GrpFP_2:Felsch">Felsch</A>",
+"<A NAME = "GrpFP_2:HLT">HLT</A>",
+"<A NAME = "GrpFP_2:CT">CT</A>",
+"<A NAME = "GrpFP_2:RT">RT</A>",
+"<A NAME = "GrpFP_2:Sims1">Sims1</A>",
+"<A NAME = "GrpFP_2:Sims3">Sims3</A>",
+"<A NAME = "GrpFP_2:Sims5">Sims5</A>",
+"<A NAME = "GrpFP_2:Sims7">Sims7</A>",
+"<A NAME = "GrpFP_2:Sims9">Sims9</A>".
+<P>
+<P>
+All predefined strategies set <A  HREF = "text826.htm#GrpFP_2:PrefDefSize">PrefDefSize</A> <TT>:= 8</TT>,
+<A  HREF = "text826.htm#GrpFP_2:DeductionSize">DeductionSize</A> <TT>:= 1000</TT>,
+<A  HREF = "text826.htm#GrpFP_2:PathCompression">PathCompression</A> <TT>:= false</TT> and
+<A  HREF = "text826.htm#GrpFP_2:LoopLimit">LoopLimit</A> <TT>:= 0</TT>. For the remaining parameter settings 
+see <A  HREF = "text1.htm#">Table 1</A>, <A  HREF = "text1.htm#">Table 2</A> and <A  HREF = "text1.htm#">Table 3</A>.
+<P>
+<PRE>
+                      Default  Easy   Hard   Felsch   HLT    CT
+Compact                 10      100    10      10     10     100
+Workspace                4       1     10       4      4      4
+FillFactor               0       1      0       0      1      1
+CTFactor               1000      0    1000    1000     0    1000
+RTFactor              2000/l   1000     1       0    1000     0
+Style                  R_CR      R     CR       C      R      C
+Lookahead                0       0      0       0      1      0
+Mendelsohn             false   false  false   false  false  false
+RelationsInSubgroup     -1       0     -1      -1      0      0
+RowFilling             true    true   true    false  true   false
+PrefDefMode              3       0      3       3      0      0
+DeductionMode            4       0      4       4      0      4           
+</PRE>
+<PRE>
+                        RT     Sims1  Sims3   Sims5  Sims7  Sims9
+Compact                100      10     10      10     10     10
+Workspace                4       4      4       4      4      4
+FillFactor               1       1      1       1      1      1
+CTFactor                 0       0      0       0      0    1000
+RTFactor               1000    1000   1000    1000   1000     0
+Style                    R       R     Rt       R     Rt      C
+Lookahead                0       0      0       0      0      0
+Mendelsohn             false   false  false   true   true   false
+RelationsInSubgroup      0       0      0       0      0      0
+RowFilling             false   true   true     true  true   false
+PrefDefMode              0       0      0       0      0      0
+DeductionMode            0       0      4       0      4      4
+</PRE>
+<P>
+<P>
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "9490"></A><A NAME = "GrpFP_2:AddRelator">AddRelator</A>(~P, w) : GrpFPCosetEnumProc, GrpFPElt -&gt;</H5>
+<BLOCKQUOTE>
+Add a word w in the generators of the group G underlying the coset
+enumeration process P to the defining relations of G. This means that a
+coset enumeration process P for the cosets of H in G is transformed into
+a coset enumeration process for the cosets of &pi;(H) in &pi;(G), where
+&pi;: G -&gt; &pi;(G) is an epimorphism with kernel &lt; w &gt;<sup>G</sup>.
+(Here &lt; w &gt;<sup>G</sup> denotes the normal closure in G of the subgroup
+of G generated by w.)
+</BLOCKQUOTE>
+<H5><A NAME = "9491"></A><A NAME = "GrpFP_2:AddSubgroupGenerator">AddSubgroupGenerator</A>(~P, w) : GrpFPCosetEnumProc, GrpFPElt -&gt;</H5>
+<BLOCKQUOTE>
+Add an element w of the group G underlying the coset enumeration process
+P to the generators of the subgroup. This means that a coset enumeration
+process P for the cosets of H in G is transformed into a coset
+enumeration process for the cosets of &lt; H, w &gt; in G, where
+&lt; H, w &gt; denotes the subgroup of G generated by H and w.
+</BLOCKQUOTE>
+<H5><A NAME = "9492"></A><A NAME = "GrpFP_2:SetProcessParameters">SetProcessParameters</A>(~P: parameters) : GrpFPCosetEnumProc -&gt;</H5>
+<BLOCKQUOTE>
+Change enumeration parameters of the coset enumeration process P. The set of
+parameters accepted by this function is the same as for the function
+<A  HREF = "text826.htm#GrpFP_2:CosetEnumerationProcess">CosetEnumerationProcess</A>; see there for a description.
+<P>
+<P>
+All parameters which are not explicitly changed or modified by selecting one
+of the predefined strategies retain their old values.
+<P>
+<P>
+It should be noted that it is not possible to decrease the workspace allocated
+by a coset enumeration process, once an enumeration has been started. However
+the workspace can be extended without invalidating any information contained
+in the process.
+</BLOCKQUOTE>
+<H4><A NAME = "9493">Starting and Restarting an Enumeration</A></H4>
+
+<P>
+<P>
+There are several ways of starting and restarting an enumeration for a coset
+enumeration process, which retain information from previous enumerations to a
+varying extent.
+
+
+<H5><A NAME = "9494"></A><A NAME = "GrpFP_2:StartEnumeration">StartEnumeration</A>(~P: parameters) : GrpFPCosetEnumProc -&gt;</H5>
+<BLOCKQUOTE>
+Start a new enumeration for P. All information in P is discarded. This
+function can be called at any time for an existing coset enumeration process.
+The enumeration parameters for P can be modified by passing parameters to
+this function. (This is equivalent to calling the function
+<A  HREF = "text826.htm#GrpFP_2:SetProcessParameters">SetProcessParameters</A> before calling <TT>StartEnumeration</TT>.)
+The set of parameters accepted by this function is the same as for the
+function <A  HREF = "text826.htm#GrpFP_2:CosetEnumerationProcess">CosetEnumerationProcess</A>; see there for a description.
+</BLOCKQUOTE>
+<H5><A NAME = "9495"></A><A NAME = "GrpFP_2:RedoEnumeration">RedoEnumeration</A>(~P: parameters) : GrpFPCosetEnumProc -&gt;</H5>
+<BLOCKQUOTE>
+Restart an enumeration for P. All information in P is retained and the
+enumeration is restarted at coset number 1. This function can be called for
+any coset enumeration process, which contains a valid coset table. (If P
+does not contain a valid coset table, a call to <TT>RedoEnumeration</TT> causes
+a runtime error. Use the function <A  HREF = "text826.htm#GrpFP_2:CanRedoEnumeration">CanRedoEnumeration</A> to check
+whether a call to <TT>RedoEnumeration</TT> is legal for a certain coset
+enumeration process.) Note that the coset table of P need not be complete
+to use this function.
+<P>
+<P>
+This function is intended for the case where additional relators and/or
+subgroup generators have been introduced. The coset table contained in P
+is still valid. However, the additional data may allow the enumeration to
+compete, or cause a collapse to a smaller index.
+<P>
+<P>
+The enumeration parameters for P can be modified by passing parameters to
+this function. (This is equivalent to calling the function
+<A  HREF = "text826.htm#GrpFP_2:SetProcessParameters">SetProcessParameters</A> before calling <TT>RedoEnumeration</TT>.)
+The set of parameters accepted by this function is the same as
+for the function <A  HREF = "text826.htm#GrpFP_2:CosetEnumerationProcess">CosetEnumerationProcess</A>; see there for a
+description.
+</BLOCKQUOTE>
+<H5><A NAME = "9496"></A><A NAME = "GrpFP_2:CanRedoEnumeration">CanRedoEnumeration</A>(P) : GrpFPCosetEnumProc -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT>, if a call to <A  HREF = "text826.htm#GrpFP_2:RedoEnumeration">RedoEnumeration</A> is legal for the
+coset enumeration process P.
+</BLOCKQUOTE>
+<H5><A NAME = "9497"></A><A NAME = "GrpFP_2:ContinueEnumeration">ContinueEnumeration</A>(~P: parameters) : GrpFPCosetEnumProc -&gt;</H5>
+<BLOCKQUOTE>
+Continue an enumeration for P, which has been interrupted because some
+limit was exceeded. All information in P is retained and the enumeration
+is restarted at the coset where the previous enumeration was stopped.
+This function can only be called for a coset enumeration process, if the
+previous enumeration produced a valid coset table and the subgroup underlying
+P has not been changed since then. (Otherwise, a call to
+<TT>ContinueEnumeration</TT> causes a runtime error. Use the function
+<A  HREF = "text826.htm#GrpFP_2:CanContinueEnumeration">CanContinueEnumeration</A> to check whether a call to
+<TT>ContinueEnumeration</TT> is legal for a certain coset enumeration process.)
+Note that the coset table of P need not be complete to use this function.
+<P>
+<P>
+This function is intended for the case where an enumeration stopped without
+producing a finite index. This function allows to continue the enumeration
+with modified enumeration parameters with the minimal possible overhead.
+<P>
+<P>
+The enumeration parameters for P can be modified by passing parameters to
+this function. (This is equivalent to calling the function
+<A  HREF = "text826.htm#GrpFP_2:SetProcessParameters">SetProcessParameters</A> before calling <TT>ContinueEnumeration</TT>.)
+The set of parameters accepted by this function is the same as
+for the function <A  HREF = "text826.htm#GrpFP_2:CosetEnumerationProcess">CosetEnumerationProcess</A>; see there for a
+description.
+</BLOCKQUOTE>
+<H5><A NAME = "9498"></A><A NAME = "GrpFP_2:CanContinueEnumeration">CanContinueEnumeration</A>(P) : GrpFPCosetEnumProc -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT>, if a call to <A  HREF = "text826.htm#GrpFP_2:ContinueEnumeration">ContinueEnumeration</A> is legal for
+the coset enumeration process P.
+</BLOCKQUOTE>
+<H5><A NAME = "9499"></A><A NAME = "GrpFP_2:ResumeEnumeration">ResumeEnumeration</A>(~P: parameters) : GrpFPCosetEnumProc -&gt;</H5>
+<BLOCKQUOTE>
+Resume or start an enumeration for P in the "cheapest" way permitted by the
+state of the coset enumeration process P. The call
+<P>
+<P>
+<P>
+<PRE>
+         ResumeEnumeration(~P : parameters);
+</PRE>
+<P>
+is equivalent to
+<P>
+<P>
+<P>
+<PRE>
+         if CanContinueEnumeration(P) then
+            ContinueEnumeration(~P : parameters);
+         elif CanRedoEnumeration(P) then
+            RedoEnumeration(~P : parameters);
+         else
+            StartEnumeration(~P : parameters);
+         end if;
+</PRE>
+<P>
+The enumeration parameters for P can be modified by passing parameters to
+this function. (This is equivalent to calling the function
+<A  HREF = "text826.htm#GrpFP_2:SetProcessParameters">SetProcessParameters</A> before calling <TT>ResumeEnumeration</TT>.)
+The set of parameters accepted by this function is the same as
+for the function <A  HREF = "text826.htm#GrpFP_2:CosetEnumerationProcess">CosetEnumerationProcess</A>; see there for a
+description.
+</BLOCKQUOTE>
+<H4><A NAME = "9500">Accessing Information</A></H4>
+
+
+
+<H5><A NAME = "9501"></A><A NAME = "GrpFP_2:CosetsSatisfying">CosetsSatisfying</A>(P : parameters) : GrpFPCosetEnumProc -&gt; { GrpFPElt }</H5>
+<H5><A NAME = "GrpFP_2:CosetSatisfying">CosetSatisfying</A>(P : parameters) : GrpFPCosetEnumProc -&gt; { GrpFPElt }</H5>
+<BLOCKQUOTE>
+Given a coset enumeration process P with underlying group G and subgroup
+H, which contains a valid coset table, these functions return a set of words
+representing cosets which satisfy the conditions defined in the parameters.
+<P>
+<P>
+A call to <TT>CosetSatisfying</TT> is equivalent to calling
+<TT>CosetsSatisfying</TT> with <A  HREF = "text826.htm#GrpFP_2:Limit">Limit</A> set to 1 and
+<A  HREF = "text826.htm#GrpFP_2:First">First</A> set to 2 (unless a higher value for
+<A  HREF = "text826.htm#GrpFP_2:First">First</A> is specified explicitly), i.e. the
+function returns when the first coset, other than H, satisfying the specified
+conditions has been found.
+<P>
+<P>
+<PRE>
+     <A NAME = "GrpFP_2:First">First</A>: RngIntElt Default: 1
+</PRE>
+This parameter determines at which coset the search for coset representatives
+satisfying the designated conditions is started. The coset H always is
+coset number 1, i.e. setting <TT>First</TT> to 2 restricts the search to
+non-trivial cosets.
+<P>
+<P>
+For the function <TT>CosetSatisfying</TT>, the minimal possible value for this
+parameter is 2; setting it to 1 does not cause an error but will be ignored.
+<P>
+<P>
+<PRE>
+     Last: RngIntElt                     Default: 0
+</PRE>
+This parameter determines at which coset the search for coset representatives
+satisfying the designated conditions is stopped. If it is set to 0 (default),
+all active cosets (starting from <A  HREF = "text826.htm#GrpFP_2:First">First</A>) are searched.
+<P>
+<P>
+<PRE>
+     <A NAME = "GrpFP_2:Limit">Limit</A>: RngIntElt Default: 0
+</PRE>
+If this parameter is set to l &gt; 0, the search for coset representatives
+is aborted as soon as l cosets satisfying the designated condition have
+been found. If it is set to 0 (default for <TT>CosetsSatisfying</TT>), no
+limit is in force.
+<P>
+<P>
+This parameter is not available for the function <TT>CosetSatisfying</TT>.
+<P>
+<P>
+<PRE>
+     Normalizing: BoolElt                Default: <TT>false</TT>
+</PRE>
+If true, select coset representatives x such that x<sup> - 1</sup>h<sub>i</sub>x is known
+to be contained in H from the information in the coset table of P for
+every generator h<sub>i</sub> of H. (I.e. x is recognised as an
+element of the normaliser of H in G.)
+<P>
+<P>
+<PRE>
+     Order: RngIntElt                    Default: 0
+</PRE>
+Select coset representatives x such that x<sup>n</sup> is known to be contained
+in H from the information in the coset table of P.
+<P>
+<P>
+<PRE>
+     Print: RngIntElt                    Default: 0
+</PRE>
+If the value of this parameter is positive, print the coset representatives
+found to satisfy the designated conditions.
+<P>
+<P>
+<P>
+<P>
+These functions can be called for any coset enumeration process, which contains
+a valid coset table. If P does not contain a valid coset table, a call to
+any of these functions causes a runtime error. You can use the function
+<A  HREF = "text826.htm#GrpFP_2:HasValidCosetTable">HasValidCosetTable</A> to check whether a call to these functions
+is legal for a certain coset enumeration process.
+</BLOCKQUOTE>
+<H5><A NAME = "9502"></A><A NAME = "GrpFP_2:CosetTable">CosetTable</A>(P) : GrpFPCosetEnumProc -&gt; Map</H5>
+<BLOCKQUOTE>
+The current coset table of P as a map
+f:{1, ..., r} x G -&gt; {0, ..., r}, where G and H are
+the finitely presented group and the subgroup underlying P, respectively,
+and r is number of active cosets. f(i, x) is the coset to which coset i
+is mapped under the action of x&isin;G. The value 0 is only included in the
+codomain if the coset table is not complete, and it denotes that the image
+of i under x is not known.
+<P>
+<P>
+This function can be called for
+any coset enumeration process, which contains a valid coset table. If P
+does not contain a valid coset table, a call to <TT>CosetTable</TT> causes
+a runtime error. Use the function <A  HREF = "text826.htm#GrpFP_2:HasValidCosetTable">HasValidCosetTable</A>
+to check whether
+a call to <TT>CosetTable</TT> is legal for a certain coset enumeration
+process. Note that the coset table of P need not be complete to use this
+function.
+</BLOCKQUOTE>
+<H5><A NAME = "9503"></A><A NAME = "GrpFP_2:HasValidCosetTable">HasValidCosetTable</A>(P) : GrpFPCosetEnumProc -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT>, if P contains a valid (but not necessarily closed) coset
+table, i.e. if a call to <A  HREF = "text826.htm#GrpFP_2:CosetTable">CosetTable</A> is legal for the coset
+enumeration process P.
+</BLOCKQUOTE>
+<H5><A NAME = "9504"></A><A NAME = "GrpFP_2:HasClosedCosetTable">HasClosedCosetTable</A>(P) : GrpFPCosetEnumProc -&gt; BoolElt</H5>
+<H5>HasCompleteCosetTable(P) : GrpFPCosetEnumProc -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT>, if P contains a closed, valid coset table.
+<P>
+<P>
+Note that if
+<TT>HasClosedCosetTable</TT> returns <TT>true</TT> for a coset enumeration process P,
+then in particular a call to <A  HREF = "text826.htm#GrpFP_2:CosetTable">CosetTable</A> is legal for P.
+</BLOCKQUOTE>
+<H5><A NAME = "9505">ExcludedConjugate(P) : GrpFPCosetEnumProc -&gt; GrpFPElt</A></H5>
+<H5>ExcludedConjugates(P) : GrpFPCosetEnumProc -&gt; { GrpFPElt }</H5>
+<BLOCKQUOTE>
+Given a coset enumeration process P with underlying group G and subgroup
+H, which contains a valid coset table, these functions return a set E 
+containing either at most one word (<TT>ExcludedConjugate</TT>) or all words
+(<TT>ExcludedConjugates</TT>) of the form g<sub>i</sub><sup> - 1</sup>h<sub>j</sub>g<sub>i</sub>, where g<sub>i</sub> is a
+generator of G and h<sub>j</sub> is a generator of H, such that g<sub>i</sub><sup> - 1</sup>h<sub>j</sub>g<sub>i</sub> is
+not known to lie in H from the information contained in the coset table
+of P.
+<P>
+<P>
+If E is empty, then H is a normal subgroup of G. Otherwise the addition
+of elements of E to the generators of H may yield a larger subgroup of
+the normal closure of H in G. In the case of a non-complete coset table
+it may happen, however, that excluded conjugates are found which actually
+lie in H.
+<P>
+<P>
+These functions can be called for any coset enumeration process, which contains
+a valid coset table. If P does not contain a valid coset table, a call to
+<TT>ExcludedConjugate</TT> or <TT>ExcludedConjugates</TT> causes a runtime error.
+You can use the function <A  HREF = "text826.htm#GrpFP_2:HasValidCosetTable">HasValidCosetTable</A> to check
+whether a call to
+these functions is legal for a certain coset enumeration process.
+</BLOCKQUOTE>
+<H5><A NAME = "9506">ExistsCosetSatisfying(P : parameters) : GrpFPCosetEnumProc -&gt; BoolElt, GrpFPElt</A></H5>
+<BLOCKQUOTE>
+Given a coset enumeration process P with underlying group G and subgroup
+H, which contains a valid coset table, return whether or not there exists a
+coset other than H, which satisfies the conditions defined in the parameters.
+If such a coset exists, a representing word is returned as second return value.
+This function accepts the same set of parameters as the function
+<A  HREF = "text826.htm#GrpFP_2:CosetSatisfying">CosetSatisfying</A>; see there for a description.
+<P>
+<P>
+This function can be called for
+any coset enumeration process, which contains a valid coset table. If P
+does not contain a valid coset table, a call to <TT>ExistsCosetSatisfying</TT>
+causes a runtime error. You can use the function
+<A  HREF = "text826.htm#GrpFP_2:HasValidCosetTable">HasValidCosetTable</A> to
+check whether a call to <TT>ExistsCosetSatisfying</TT> is legal for a certain
+coset enumeration process.
+</BLOCKQUOTE>
+<H5><A NAME = "9507">ExistsExcludedConjugate(P) : GrpFPCosetEnumProc -&gt; BoolElt, GrpFPElt</A></H5>
+<BLOCKQUOTE>
+Given a coset enumeration process P with underlying group G and subgroup
+H, which contains a valid coset table, return whether or not there exists a
+word of the form g<sub>i</sub><sup> - 1</sup>h<sub>j</sub>g<sub>i</sub>, where g<sub>i</sub> is a generator of G and h<sub>j</sub>
+is a generator of H, such that g<sub>i</sub><sup> - 1</sup>h<sub>j</sub>g<sub>i</sub> is not known to lie in H
+from the information contained in the coset table of P. If the answer is
+positive, such a word is returned as second return value.
+<P>
+<P>
+This function can be called for
+any coset enumeration process, which contains a valid coset table. If P
+does not contain a valid coset table, a call to <TT>ExistsExcludedConjugate</TT>
+causes a runtime error. You can use the function
+<A  HREF = "text826.htm#GrpFP_2:HasValidCosetTable">HasValidCosetTable</A> to
+check whether a call to <TT>ExistsExcludedConjugate</TT> is legal for a certain
+coset enumeration process.
+<P>
+<P>
+Note that the coset table of P need not be complete to call this function.
+A negative result of <TT>ExistsExcludedConjugate</TT> always implies that H
+is a normal subgroup of G, even if the coset table of P is not complete.
+In the case of a non-complete coset table it may happen, however, that excluded
+conjugates are found which actually lie in H.
+</BLOCKQUOTE>
+<H5><A NAME = "9508">ExistsNormalisingCoset(P) : GrpFPCosetEnumProc -&gt; BoolElt, GrpFPElt</A></H5>
+<H5>ExistsNormalizingCoset(P) : GrpFPCosetEnumProc -&gt; BoolElt, GrpFPElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT>, if an element of G - H which normalises H can be
+found from the coset table contained in P. (Here, G and H are
+the finitely presented group and the subgroup underlying P, respectively.) If
+the answer is positive, such an element is returned as second return value.
+<P>
+This function can be called for
+any coset enumeration process, which contains a valid coset table. If P
+does not contain a valid coset table, a call to <TT>ExistsNormalisingCoset</TT>
+causes a runtime error. You can use the function
+<A  HREF = "text826.htm#GrpFP_2:HasValidCosetTable">HasValidCosetTable</A> to
+check whether a call to <TT>ExistsNormalisingCoset</TT> is legal for a certain
+coset enumeration process.
+<P>
+<P>
+Note that the coset table of P need not be complete to call this function.
+However, no conclusion can be drawn from a negative result in the case of a
+non-complete coset table.
+</BLOCKQUOTE>
+<H5><A NAME = "9509">Group(P) : GrpFPCosetEnumProc -&gt; GrpFP</A></H5>
+<BLOCKQUOTE>
+Returns the group underlying P as a finitely presented group.
+</BLOCKQUOTE>
+<H5><A NAME = "9510"></A><A NAME = "GrpFP_2:Index">Index</A>(P) : GrpFPCosetEnumProc -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Returns the index of H in G. (Here, G and H denote the finitely
+presented group and the subgroup underlying P, respectively.)
+<P>
+<P>
+This function can only be called, if the last enumeration done for P has
+completed successfully with a finite index. Otherwise, a call to <TT>Index</TT>
+will cause a runtime error. Use the function
+<A  HREF = "text826.htm#GrpFP_2:HasValidIndex">HasValidIndex</A> to check
+whether a call to <TT>Index</TT> is legal for a certain coset enumeration process.
+</BLOCKQUOTE>
+<H5><A NAME = "9511"></A><A NAME = "GrpFP_2:HasValidIndex">HasValidIndex</A>(P) : GrpFPCosetEnumProc -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT>, if the last enumeration done for P has completed successfully
+with a finite index, i.e., if a call to <A  HREF = "text826.htm#GrpFP_2:Index">Index</A>
+is legal for the coset enumeration process P.
+</BLOCKQUOTE>
+<H5><A NAME = "9512">MaximalNumberOfCosets(P) : GrpFPCosetEnumProc -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the maximal number of cosets which were simultaneously active during
+the last enumeration done for P, or 1 if no enumeration has been done for
+P.
+<P>
+<P>
+This function may be useful for assessing the performance of a certain set of
+enumeration parameters.
+</BLOCKQUOTE>
+<H5><A NAME = "9513">Subgroup(P) : GrpFPCosetEnumProc -&gt; GrpFP</A></H5>
+<BLOCKQUOTE>
+Returns the subgroup H underlying the coset enumeration process P. H is
+returned as a subgroup of G, where G is the finitely presented group
+underlying P.
+</BLOCKQUOTE>
+<H5><A NAME = "9514">TotalNumberOfCosets(P) : GrpFPCosetEnumProc -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the total number of cosets defined during the last enumeration done
+for P, or 1 if no enumeration has been done for P.
+<P>
+<P>
+This function may be useful for assessing the performance of a certain set of
+enumeration parameters.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9515">Example <TT>GrpFP_2_ACEProc1 (H76E3)</TT></A></H3>
+In the Harada-Norton sporadic simple group
+<PRE>
+     &lt; x, a, b, c, d, e, f, g |  
+	  x^2, a^2, b^2, c^2, d^2, e^2, f^2, g^2,
+          (x,a), (x,g),
+	  (bc)^3, (bd)^2, (be)^2, (bf)^2, (bg)^2,
+          (cd)^3, (ce)^2, (cf)^2, (cg)^2,
+          (de)^3, (df)^2, (dg)^2,
+          (ef)^3, (eg)^2,
+          (fg)^3,
+          (b, xbx),
+          (a, edcb), (a,f)dcbdcd, (ag)^5,
+          (cdef, xbx), (b, xcdefx), (cdef, xcdefx) &gt;.
+</PRE>we want to construct the coset table for the subgroup generated by
+x, b, c, d, e, f, g interactively. First, we create a coset enumeration
+process. Since the index of the chosen subgroup is 1 140 000, we request a
+coset limit of 1 200 000. Then we start the enumeration.
+<P>
+<P>
+<PRE>
+&gt; HN&lt;x, a, b, c, d, e, f, g&gt; := 
+&gt;     Group&lt; x, a, b, c, d, e, f, g |
+&gt;              x^2, a^2, b^2, c^2, d^2, e^2, f^2, g^2,
+&gt;              (x, a), (x, g),
+&gt;              (b*c)^3, (b*d)^2, (b*e)^2, (b*f)^2, (b*g)^2,
+&gt;              (c*d)^3, (c*e)^2, (c*f)^2, (c*g)^2,
+&gt;              (d*e)^3, (d*f)^2, (d*g)^2,
+&gt;              (e*f)^3, (e*g)^2,
+&gt;              (f*g)^3,
+&gt;              (b, x*b*x), (a, e*d*c*b), (a, f)*d*c*b*d*c*d,
+&gt;              (a*g)^5, (c*d*e*f, x*b*x), (b, x*c*d*e*f*x),
+&gt;              (c*d*e*f, x*c*d*e*f*x) 
+&gt;           &gt;;
+&gt; H := sub&lt;HN | x,b,c,d,e,f,g &gt;; 
+&gt; P := CosetEnumerationProcess(HN, H : CosetLimit := 1200000, Print := true);
+&gt; StartEnumeration(~P);
+Overflow
+ (a=1110331 r=58605 h=101193 n=1200001;
+  l=5444 c=105.36; 
+  m=1110331 t=2001537)
+</PRE>
+The enumeration could not be completed successfully. Though P does contain a valid
+coset table, but this coset table fails to be closed.
+<P>
+<P>
+<PRE>
+&gt; HasValidCosetTable(P);
+true
+&gt; HasClosedCosetTable(P);
+false
+</PRE>
+We extract the coset table map, check its domain and its codomain, and
+determine the position of the first "hole" in the coset table.
+<P>
+<P>
+<PRE>
+&gt; ct := CosetTable(P);
+&gt; Domain(ct) : Minimal;
+Cartesian Product&lt;{ 1 .. 1110331 }, GrpFP: HN&gt;
+&gt; Codomain(ct);
+{ 0 .. 1110331 }
+&gt; row := 1;
+&gt; while forall(col){ gen : gen in {x, a, b, c, d, e, f, g}
+&gt;                        | ct(&lt;row, gen&gt;) ne 0 } do
+&gt;    row +:= 1;
+&gt; end while;
+&gt; row;
+41881
+&gt; col;
+x
+</PRE>
+We change the enumeration parameters for the process P, selecting the
+predefined strategy <A  HREF = "text826.htm#GrpFP_2:Hard">Hard</A>. Since this predefined strategy sets a
+workspace of 10 000 000, we must expressly override this, if we want
+the old value to be retained. Because the workspace size never is decreased
+once an enumeration has been started, we can retain the old value simply by
+setting <A  HREF = "text826.htm#GrpFP_2:Workspace">Workspace</A> to 0; this overrides the setting done by
+selecting
+the predefined strategy, but actually doesn't change the process' workspace.
+We then continue the enumeration with the new set of parameters, after
+checking that this is legal.
+<P>
+<P>
+<PRE>
+&gt; SetProcessParameters(~P : Strategy := "Hard",
+&gt;                           Workspace := 0);
+&gt; CanContinueEnumeration(P);
+true
+&gt; ContinueEnumeration(~P);
+INDEX = 1140000
+ (a=1140000 r=58512 h=1144534 n=1144534;
+  l=70 c=6.50;
+  m=1140000 t=2035739)
+</PRE>
+We have obtained a closed coset table. Note that the codomain of the new
+coset table map does not contain 0.
+<P>
+<P>
+<PRE>
+&gt; HasClosedCosetTable(P);
+true
+&gt; ct := CosetTable(P);
+&gt; Domain(ct) : Minimal;
+Cartesian Product&lt;{ 1 .. 1140000 }, GrpFP: HN&gt;
+&gt; Codomain(ct);
+{ 1 .. 1140000 }
+</PRE>
+<HR>
+<H3><A NAME = "9516">Example <TT>GrpFP_2_ACEProc2 (H76E4)</TT></A></H3>
+First, we create a coset enumeration process for the trivial subgroup of the
+finite group
+<PRE>
+  G := &lt; a, b  |  a^8, b^7, (a*b)^2, (a^-1*b)^3 &gt;
+</PRE>and start the enumeration.
+<P>
+<P>
+<PRE>
+&gt; F&lt;x, y&gt; := FreeGroup(2);
+&gt; G&lt;a, b&gt; := quo&lt;F | x^8, y^7, (x*y)^2, (x^-1*y)^3&gt;;
+&gt; H := sub&lt;G | &gt;;
+&gt; P := CosetEnumerationProcess(G, H : Print := true);
+&gt; StartEnumeration(~P);
+INDEX = 10752
+ (a=10752 r=57263 h=1 n=57263;
+  l=292 c=0.11;
+  m=47825t=57262)
+</PRE>
+We want to enumerate the cosets of the two non-trivial subgroups of G
+generated by a<sup> - 1</sup> * b and a<sup>2</sup>, respectively. To do this, we create two
+copies of the coset enumeration process <TT>P</TT> and use the function
+<A  HREF = "text826.htm#GrpFP_2:AddSubgroupGenerator">AddSubgroupGenerator</A> for each of them. Since the copies
+inherit all
+information contained in <TT>P</TT>, we then can call the function
+<A  HREF = "text826.htm#GrpFP_2:RedoEnumeration">RedoEnumeration</A> to enumerate the cosets of the two
+non-trivial subgroups, making use of the existing coset table.
+<P>
+<P>
+<PRE>
+&gt; P1 := P;
+&gt; AddSubgroupGenerator(~P1, a^-1*b);
+&gt; Subgroup(P1);
+Finitely presented group on 2 generators
+Generators as words in group G
+    $.1 = Id(G)
+    $.2 = a^-1 * b
+&gt; CanRedoEnumeration(P1);
+true
+&gt; RedoEnumeration(~P1);
+INDEX = 3584
+ (a=3584 r=57263 h=1 n=57263;
+  l=49 c=0.02;
+  m=47825 t=57262)
+&gt; 
+&gt; P2 := P;
+&gt; AddSubgroupGenerator(~P2, a^2);
+&gt; Subgroup(P2);
+Finitely presented group on 2 generators
+Generators as words in group G
+    $.1 = Id(G)
+    $.2 = a^2
+&gt; CanRedoEnumeration(P2);
+true
+&gt; RedoEnumeration(~P2);          
+INDEX = 2688
+ (a=2688 r=57263 h=1 n=57263;
+  l=37 c=0.02;
+  m=47825 t=57262)
+</PRE>
+Finally, we are interested in the quotient of G by the normal closure of the
+subgroup generated by a<sup>4</sup> and want to enumerate the cosets of the image of
+the subgroup generated by a<sup>2</sup> in this quotient. Since this is the subgroup
+used in <TT>P2</TT>, we create a copy of <TT>P2</TT> and add the relation a<sup>4</sup>.
+Again, we are able to make use of information obtained earlier, by continuing
+the inherited enumeration.
+<P>
+<P>
+<PRE>
+&gt; P3 := P2;
+&gt; AddRelator(~P3, a^4);
+&gt; CanContinueEnumeration(P3);
+true
+&gt; ContinueEnumeration(~P3);
+INDEX = 84
+ (a=84 r=57263 h=1 n=57263;
+ l=2 c=0.00;
+ m=47825 t=57262)
+</PRE>
+We extract the quotient and its subgroup from the process <TT>P3</TT>, using the
+appropriate access functions.
+<P>
+<P>
+<PRE>
+&gt; G3&lt;a3,b3&gt; := Group(P3);
+&gt; G3;
+Finitely presented group G3 on 2 generators
+Relations
+    a3^8 = Id(G3)
+    b3^7 = Id(G3)
+    (a3 * b3)^2 = Id(G3)
+    (a3^-1 * b3)^3 = Id(G3)
+    a3^4 = Id(G3)
+&gt; H3&lt;u3, v3&gt; := Subgroup(P3);
+&gt; H3;
+Finitely presented group H3 on 2 generators
+Generators as words in group G3
+    u3 = Id(G3)
+    v3 = a3^2
+</PRE>
+<HR>
+<H3><A NAME = "9517">Example <TT>GrpFP_2_ACEProc3 (H76E5)</TT></A></H3>
+Consider the subgroup H of the (infinite) group
+<PRE>
+  G := &lt; a, b  |  b^7, (a*b)^2, (a^-1*b)^3 &gt;
+</PRE>generated by a. We create a coset enumeration process and start an
+enumeration with the default parameters.
+<P>
+<P>
+<PRE>
+&gt; F&lt;x, y&gt; := FreeGroup(2);
+&gt; G&lt;a, b&gt; := quo&lt;F | y^7, (x*y)^2, (x^-1*y)^3&gt;;
+&gt; H := sub&lt;G | a&gt;;
+&gt; P := CosetEnumerationProcess(G, H);
+&gt; StartEnumeration(~P : Print := true);
+Overflow
+ (a=957026 r=415230 h=415230 n=999999;
+  l=3553 c=2.38;
+  m=960050 t=999998)
+</PRE>
+The enumeration produces a valid (albeit not complete) coset table.
+<P>
+<P>
+<PRE>
+&gt; HasValidCosetTable(P);
+true
+&gt; HasCompleteCosetTable(P);
+false
+</PRE>
+Even the partial coset table is sufficient to find an element in the normaliser
+of H in G.
+<P>
+<P>
+<PRE>
+&gt; found, elt := ExistsNormalisingCoset(P);
+&gt; found;
+true
+&gt; elt;
+b^-4 * a * b^-2
+</PRE>
+<HR>
+<H3><A NAME = "9518">Example <TT>GrpFP_2_ACEProc4 (H76E6)</TT></A></H3>
+Consider again the subgroup H of the (infinite) group
+<PRE>
+  G := &lt; a, b  |  b^7, (a*b)^2, (a^-1*b)^3 &gt;
+</PRE>generated by a. We create a coset enumeration process and start an
+enumeration with the default parameters.
+<P>
+<P>
+<PRE>
+&gt; F&lt;x, y&gt; := FreeGroup(2);
+&gt; G&lt;a, b&gt; := quo&lt;F | y^7, (x*y)^2, (x^-1*y)^3&gt;;
+&gt; H := sub&lt;G | a&gt;;
+&gt; P := CosetEnumerationProcess(G, H);
+&gt; StartEnumeration(~P : Print := true);
+Overflow
+ (a=957026 r=415230 h=415230 n=999999;
+  l=3553 c=2.38;
+  m=960050 t=999998)
+</PRE>
+We check, whether the coset table exhibits excluded conjugates.
+<P>
+<P>
+<PRE>
+&gt; ExistsExcludedConjugate(P);
+true a^b
+</PRE>
+It does. This means in particular, that H is not normal in G. We create a
+copy <TT>P1</TT> of the coset enumeration process <TT>P</TT>, extend the subgroup
+of <TT>P1</TT> by the excluded conjugates found in the previous step and restart
+the enumeration for <TT>P1</TT>.
+<P>
+<P>
+<PRE>
+&gt; P1 := P;
+&gt; for c in ExcludedConjugates(P) do
+&gt;   AddSubgroupGenerator(~P1, c);
+&gt; end for;
+&gt; RedoEnumeration(~P1);
+INDEX = 1 (a=1 r=2 h=2 n=2; l=2 c=0.94; m=960050 t=999998)
+</PRE>
+The new subgroup is equal to G. In particular, the normal closure of H in
+G is the whole of G.
+<P>
+<P>
+We return to the coset enumeration process <TT>P</TT> and check whether we can
+find a non-trivial element x&isin;(N)<sub>G</sub>(H) such that x<sup>2</sup> &isin;H.
+<P>
+<P>
+<PRE>
+&gt; ExistsCosetSatisfying(P : Order := 2, Normalizing := true);
+true b^-4 * a * b^-2
+</PRE>
+We can. In fact, b<sup> - 4</sup> a b<sup> - 2</sup> 
+is the only non-trivial coset which is known to satisfy this condition ... <PRE>
+&gt; CosetsSatisfying(P : Order := 2, Normalizing := true);
+{ Id(G), b^-4 * a * b^-2 }
+</PRE> ... and we can't find in a similar way a non-trivial element
+x&isin;(N)<sub>G</sub>(H) such that x<sup>3</sup> &isin;H.
+<P>
+<P>
+<PRE>
+&gt; ExistsCosetSatisfying(P : Order := 3, Normalizing := true);
+false
+</PRE>
+Note the difference in the output of <A  HREF = "text826.htm#GrpFP_2:CosetSatisfying">CosetSatisfying</A> and
+<A  HREF = "text826.htm#GrpFP_2:CosetsSatisfying">CosetsSatisfying</A>: The former takes into account only cosets
+other than
+H, whereas the latter (unless we set the parameter <A  HREF = "text826.htm#GrpFP_2:First">First</A>)
+includes
+the coset H, which obviously satisfies the specified conditions.
+<P>
+<P>
+<PRE>
+&gt; CosetSatisfying(P : Order := 3, Normalizing := true);
+
+&gt; CosetsSatisfying(P : Order := 3, Normalizing := true);
+{ Id(G) }
+</PRE>
+<HR>
+<H4><A NAME = "9519">Induced Permutation  Representations</A></H4>
+
+<P>
+<P>
+Given a finite index subgroup H of a group G, the action of G on the set
+of right cosets of H in G by right multiplication defines a permutation
+representation &rho; : G -&gt; S of G onto a suitable subgroup S of
+the symmetric group on [G:H] letters.  The kernel of &rho; is the core of
+H in G, the maximal normal subgroup of G contained in H.
+
+
+<H5><A NAME = "9520">CosetAction(P) : GrpFPCosetEnumProc -&gt; Map, GrpPerm, GrpFP</A></H5>
+<BLOCKQUOTE>
+Given a coset enumeration process P with underlying group G and subgroup
+H for which a valid finite index has been obtained, this function returns
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>The permutation representation &rho; of G, induced by the action
+of G on the set of right cosets of H in G.
+<DT>(b)</DT><DD>The image group &rho;(G).
+<DT>(c)</DT><DD>(if possible) the kernel of &rho;.
+<P>
+<P>
+<P>
+<P>
+</DL>
+This function can only be called, if the last enumeration done for P has
+completed successfully with a finite index. Otherwise, a call to
+<TT>CosetAction</TT> will cause a runtime error. Use the function
+<A  HREF = "text826.htm#GrpFP_2:HasValidIndex">HasValidIndex</A> to check whether a call to <TT>CosetAction</TT>
+is legal for a certain coset enumeration process.
+</BLOCKQUOTE>
+<H5><A NAME = "9521">CosetImage(P) : GrpFPCosetEnumProc -&gt; GrpPerm</A></H5>
+<BLOCKQUOTE>
+Given a coset enumeration process P with underlying group G and subgroup
+H for which a valid finite index has been obtained, this function returns
+the image of the permutation representation &rho; of G induced by the
+action of G on the set of right cosets of H in G as a permutation group
+on [G:H] digits.
+<P>
+<P>
+This function can only be called, if the last enumeration done for P has
+completed successfully with a finite index. Otherwise, a call to
+<TT>CosetImage</TT> will cause a runtime error. Use the function
+<A  HREF = "text826.htm#GrpFP_2:HasValidIndex">HasValidIndex</A> to check whether a call to <TT>CosetImage</TT>
+is legal for a certain coset enumeration process.
+</BLOCKQUOTE>
+<H5><A NAME = "9522">CosetKernel(P) : GrpFPCosetEnumProc -&gt; GrpFP</A></H5>
+<BLOCKQUOTE>
+Given a coset enumeration process P with underlying group G and subgroup
+H for which a valid finite index has been obtained, this function returns
+the kernel of the permutation representation &rho; of G induced by the
+action of G on the set of right cosets of H in G. This function is only
+available if the index of H in G is sufficiently small.
+<P>
+<P>
+This function can only be called, if the last enumeration done for P has
+completed successfully with a finite index. Otherwise, a call to
+<TT>CosetKernel</TT> will cause a runtime error. Use the function
+<A  HREF = "text826.htm#GrpFP_2:HasValidIndex">HasValidIndex</A> to check whether a call to <TT>CosetKernel</TT>
+is legal for a certain coset enumeration process.
+</BLOCKQUOTE>
+<H4><A NAME = "9523">Coset Spaces and Transversals</A></H4>
+
+<P>
+<P>
+The (right) indexed coset space V of the subgroup H of the group G is 
+a G-set consisting of the set of integers { 1, ..., m}, where i 
+represents some right coset c<sub>i</sub> of H in G. The action of G on 
+this G-set is that induced by the natural G-action 
+f : V x G -&gt; V
+where
+f : &lt; c<sub>i</sub>, x &gt;  = c<sub>k</sub>  iff  c<sub>i</sub> * x = c<sub>k</sub>,
+for c<sub>i</sub> &isin;V and x &isin;G.
+If certain of the products c<sub>i</sub> * x are unknown, the corresponding images 
+under f are undefined, and V is called an <I>incomplete coset space</I> 
+for H in G.
+
+
+<H5><A NAME = "9524">CosetSpace(P) : GrpFPCosetEnumProc -&gt; GrpFPCos</A></H5>
+<BLOCKQUOTE>
+The coset space defined by the current state of the coset enumeration
+process P.
+<P>
+<P>
+This function can be called for
+any coset enumeration process, which contains a valid coset table. (If P
+does not contain a valid coset table, a call to <TT>CosetSpace</TT> causes
+a runtime error. Use the function <A  HREF = "text826.htm#GrpFP_2:HasValidCosetTable">HasValidCosetTable</A>
+to check whether
+a call to <TT>CosetSpace</TT> is legal for a certain coset enumeration
+process.) Note that the coset table of P need not be complete to use this
+function.
+</BLOCKQUOTE>
+<H5><A NAME = "9525">RightCosetSpace(P) : GrpFPCosetEnumProc -&gt; GrpFPCos</A></H5>
+<H5>LeftCosetSpace(P) : GrpFPCosetEnumProc -&gt; GrpFPCos</H5>
+<BLOCKQUOTE>
+The explicit right coset space of a subgroup H of some group G 
+is a G-set containing the set of right cosets of H in G. The 
+elements of this G-set are the pairs &lt; H, x &gt;, where x 
+runs through a transversal for H in G. Similarly, the explicit left 
+coset space of H is a G-set containing the set of left cosets of 
+H in G, represented as the pairs &lt; x, H &gt;.
+<P>
+<P>
+These functions return the explicit right (left) coset space defined by the
+current state of the coset enumeration process P.
+<P>
+<P>
+This function can be called for
+any coset enumeration process, which contains a valid coset table. (If P
+does not contain a valid coset table, a call to any of these functions causes
+a runtime error. Use the function <A  HREF = "text826.htm#GrpFP_2:HasValidCosetTable">HasValidCosetTable</A>
+to check whether
+a call to these functions is legal for a certain coset enumeration
+process.) Note that the coset table of P need not be complete to use these
+functions.
+</BLOCKQUOTE>
+<H5><A NAME = "9526">Transversal(P) : GrpFPCosetEnumProc -&gt; {@ GrpFPElt  @}, Map</A></H5>
+<H5>RightTransversal(P) : GrpFPCosetEnumProc -&gt; {@ GrpFPElt  @}, Map</H5>
+<BLOCKQUOTE>
+Given a coset enumeration process P with underlying group G and subgroup
+H for which a valid finite index has been obtained, these functions return
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>An indexed set T of elements of G forming a right transversal
+for H in G; and
+<DT>(b)</DT><DD>The corresponding transversal mapping &phi;: G -&gt; T.
+If T = {@ t<sub>1</sub>, ..., t<sub>r</sub> @} and g &isin;G, then &phi; is
+defined by &phi;(g) = t<sub>i</sub>, where g&isin;H * t<sub>i</sub>.
+<P>
+<P>
+<P>
+<P>
+</DL>
+These functions can only be called, if the last enumeration done for P has
+completed successfully with a finite index. Otherwise, a call to any of these
+functions will cause a runtime error. Use the function
+<A  HREF = "text826.htm#GrpFP_2:HasValidIndex">HasValidIndex</A> to
+check whether a call to these functions is legal for a certain coset
+enumeration process.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9527">Example <TT>GrpFP_2_ACEProcTransversal (H76E7)</TT></A></H3>
+We construct a coset enumeration process for the subgroup
+H =  &lt; a<sup>2</sup>, a<sup> - 1</sup>b &gt; in the group
+G =  &lt; a, b | a<sup>8</sup>, b<sup>7</sup>, (ab)<sup>2</sup>, (a<sup> - 1</sup>b)<sup>3</sup> &gt; and start an enumeration.
+<P>
+<P>
+<PRE>
+&gt; F&lt;x, y&gt; := FreeGroup(2);
+&gt; G&lt;a, b&gt; := quo&lt;F | x^8, y^7, (x*y)^2, (x^-1*y)^3&gt;;
+&gt; H := sub&lt;G | a^2,a^-1*b&gt;;
+&gt; P := CosetEnumerationProcess(G, H);
+&gt; StartEnumeration(~P);
+</PRE>
+After checking that a finite index has been obtained, we extract a
+transversal and the corresponding transversal map from <TT>P</TT>.
+<P>
+<P>
+<PRE>
+&gt; HasValidIndex(P);
+true
+&gt; T, f := Transversal(P);
+&gt; #T;
+448
+&gt; f;
+Mapping from: GrpFP: G to SetIndx: T
+</PRE>
+Finally, we construct the permutation representation of G on the cosets
+of H in G, its image and its kernel.
+<P>
+<P>
+<PRE>
+&gt; r, S, K := CosetAction(P);
+&gt; r : Minimal;
+Homomorphism of GrpFP: G into GrpPerm: S, Degree 448, Order 2^9 *
+3 * 7
+&gt; S;
+Permutation group S acting on a set of cardinality 448
+Order = 10752 = 2^9 * 3 * 7
+&gt; K;
+Finitely presented group K
+Index in group G is 10752 = 2^9 * 3 * 7
+Subgroup of group G defined by coset table
+</PRE>
+The kernel turns out to be trivial, i.e. the permutation representation is
+faithful.
+<P>
+<P>
+<PRE>
+&gt; Order(K);
+1
+</PRE>
+<HR>
+<H3><A NAME = "9528">Example <TT>GrpFP_2_ACEProcCosetSpace (H76E8)</TT></A></H3>
+Consider the subgroup H of the (infinite) group
+<PRE>
+  G := &lt; a, b  |  b^7, (a*b)^2, (a^-1*b)^3 &gt;
+</PRE>generated by a. We create a coset enumeration process and start an
+enumeration with the default parameters.
+<P>
+<P>
+<PRE>
+&gt; F&lt;x, y&gt; := FreeGroup(2);
+&gt; G&lt;a, b&gt; := quo&lt;F | y^7, (x*y)^2, (x^-1*y)^3&gt;;
+&gt; H := sub&lt;G | a&gt;;
+&gt; P := CosetEnumerationProcess(G, H);
+&gt; StartEnumeration(~P : Print := true);
+Overflow
+ (a=957026 r=415230 h=415230 n=999999;
+  l=3553 c=2.38;
+  m=960050 t=999998)
+</PRE>
+The enumeration produces a valid (albeit not complete) coset table.
+<P>
+<P>
+<PRE>
+&gt; HasValidCosetTable(P);
+true
+&gt; HasCompleteCosetTable(P);
+false
+</PRE>
+We extract the incomplete coset space from the process.
+<P>
+<P>
+<PRE>
+&gt; V := CosetSpace(P);
+&gt; #V;
+957026
+&gt; IsComplete(V);
+false
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text827.htm">[Next]</A><A  HREF = "text825.htm">[Prev]</A> <A  HREF = "text827.htm">[Right]</A> <A  HREF = "text825.htm">[Left]</A> <A  HREF = "text823.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

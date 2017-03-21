@@ -1,0 +1,31 @@
+"Source: Text/Geometry/Scheme.text";
+"Line: 8874";
+"Date: Wed Jun  8 17:42:16 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/Scheme.text, line: 8874
+// Example: H118E65 ()
+print "Example: H118E65";
+ei := GetEchoInput();
+SetEchoInput(true);
+K := Rationals();
+R<a0,b0,b1,q0,q1,x0,x1,x2,y0,y1,y2,y3> := PolynomialRing(K,12);
+_<t> := PolynomialRing(R);
+X := t^4+t^3+x2*t^2+x1*t+x0; Y := t^5+y3*t^3+y2*t^2+y1*t+y0;
+Q := t^2+q1*t+q0; A := a0; B := b1*t+b0;
+L := X^3+A*X+B-Q*Y^2;
+COEFF:=[Coefficient(L,i) : i in [0..11]];
+S := Scheme(AffineSpace(R),COEFF);
+PTS:=IsolatedPointsFinder(S,[13]); PTS; // 13 is a random choice
+b, sol := IsolatedPointsLifter(S,PTS[1]); sol;
+_<u>:=PolynomialRing(Rationals());
+X := Polynomial([Evaluate(c,Eltseq(sol)) : c in Coefficients(X)]);
+Y := Polynomial([Evaluate(c,Eltseq(sol)) : c in Coefficients(Y)]);
+Q := Polynomial([Evaluate(c,Eltseq(sol)) : c in Coefficients(Q)]);
+A := Evaluate(A,Eltseq(sol));
+B := Polynomial([Evaluate(c,Eltseq(sol)) : c in Coefficients(B)]);
+assert X^3+A*X+B-Q*Y^2 eq 0;
+Q; // note that Q does not represent any squares, but 2*Q(1/2)=9
+B; // also need to clear 2^17 from denominators
+POLYS := [2^7*X, 2^9*Y, 2^3*Q, 2^14*A, 2^21*B]; // 2^21 in each term
+[Evaluate(f,u/2) : f in POLYS];
+SetEchoInput(ei);

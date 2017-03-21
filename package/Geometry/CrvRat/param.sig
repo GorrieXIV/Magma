@@ -1,0 +1,11 @@
+174,1
+S,Parametrization,"Parametrization of the rational curve C given a rational point or a place p on C. If provided, the projective line P will be used as the domain of this map",0,2,0,0,0,0,0,0,0,377,,0,0,371,,376,-38,-38,-38,-38,-38
+S,Parametrization,"Parametrization of the rational curve C given a rational point or a place p on C. If provided, the projective line P will be used as the domain of this map",0,2,0,0,0,0,0,0,0,232,,0,0,371,,376,-38,-38,-38,-38,-38
+S,Parametrization,"Parametrization of the rational curve C given a rational point or a place p on C. If provided, the projective line P will be used as the domain of this map",0,3,0,0,0,0,0,0,0,371,,0,0,377,,0,0,326,,376,-38,-38,-38,-38,-38
+S,Parametrization,"Parametrization of the rational curve C given a rational point or a place p on C. If provided, the projective line P will be used as the domain of this map",0,3,0,0,0,0,0,0,0,371,,0,0,377,,0,0,328,,376,-38,-38,-38,-38,-38
+S,Parametrization,"Parametrization of the rational curve C given a rational point or a place p on C. If provided, the projective line P will be used as the domain of this map",0,3,0,0,0,0,0,0,0,371,,0,0,232,,0,0,326,,376,-38,-38,-38,-38,-38
+S,Parametrization,"Parametrization of the rational curve C given a rational point or a place p on C. If provided, the projective line P will be used as the domain of this map",0,3,0,0,0,0,0,0,0,371,,0,0,232,,0,0,328,,376,-38,-38,-38,-38,-38
+S,Parametrization,"Parametrization of the rational curve C given a rational point or a place p on C. If provided, the projective line P will be used as the domain of this map",0,3,0,0,0,0,0,0,0,371,,0,0,377,,0,0,371,,376,-38,-38,-38,-38,-38
+S,Parametrization,"Parametrization of the rational curve C given a rational point or a place p on C. If provided, the projective line P will be used as the domain of this map",0,3,0,0,0,0,0,0,0,371,,0,0,232,,0,0,371,,376,-38,-38,-38,-38,-38
+S,Parametrization,"Parametrization of the conic curve C, returned as a map from the projective line to C",0,1,0,0,0,0,0,0,0,326,,376,-38,-38,-38,-38,-38
+S,Parametrization,"Parametrization of the conic curve C, returned as a map from the given projective line P to C",0,2,0,0,0,0,0,0,0,371,,0,0,326,,376,-38,-38,-38,-38,-38

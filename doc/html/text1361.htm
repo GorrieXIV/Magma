@@ -1,0 +1,328 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Global Geometry</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1362.htm">[Next]</A><A  HREF = "text1360.htm">[Prev]</A> <A  HREF = "text1362.htm">[Right]</A> <A  HREF = "text1360.htm">[Left]</A> <A  HREF = "text1356.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "15014">Global Geometry</A></H3>
+
+<P>
+<P>
+In this section functions which determine global properties of curves such as
+their genus and whether their equation has a particular form are presented.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1361.htm#15015">Genus and Singularities</A>
+<LI> <A  HREF = "text1361.htm#15025">Projective Closure and Affine  Patches</A>
+<LI> <A  HREF = "text1361.htm#15033">Special Forms of Curves</A>
+</UL>
+<H4><A NAME = "15015">Genus and Singularities</A></H4>
+
+
+
+<P>
+<P>
+<P>
+<H5><A NAME = "15016">Genus(C) : Crv -&gt; RngIntElt</A></H5>
+<H5>GeometricGenus(C) : Crv -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The topological genus of the curve C. More precisely, this is the arithmetic
+genus of the projective normalisation tilde(C), which is unique up to
+k-isomorphism, where k is the basefield of C. C must be an integral
+curve (reduced and irreducible as a scheme).
+<P>
+Note that, if k is not a perfect field, tilde(C) may have singularities
+over an inseparable extension field of k (in technical terms, tilde(C)
+is a non-singular scheme, but it may not be k-smooth), in which case
+the genus of C may drop after some (inseparable) basefield extensions.
+</BLOCKQUOTE>
+<H5><A NAME = "15017">ArithmeticGenus(C) : Crv -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The arithmetic genus of the curve C or its projective closure if C is affine.
+In the case of a plane projective curve of degree d, this number is just
+(d - 1)(d - 2)/2.
+<P>
+This is really the arithmetic genus of (projective) scheme C and not of its
+normalisation.
+</BLOCKQUOTE>
+<H5><A NAME = "15018">NumberOfPunctures(C): CrvPln -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The number of punctures of the affine plane curve C over an algebraic
+closure of its ground field, that is, the number
+of points supporting its reduced scheme at infinity.
+This is just the reduced degree of the polynomial of C at infinity.
+</BLOCKQUOTE>
+<H5><A NAME = "15019">SingularPoints(C) : Sch -&gt; SetIndx</A></H5>
+<BLOCKQUOTE>
+The singular points of the curve C which are defined over the base field of C.
+</BLOCKQUOTE>
+<H5><A NAME = "15020">HasSingularPointsOverExtension(C) : Sch -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>false</TT> if and only if the scheme of singularities of the curve C has support
+defined over the base field of C.
+This function requires that C be reduced.
+</BLOCKQUOTE>
+<H5><A NAME = "15021">Flexes(C) : Sch -&gt; Sch</A></H5>
+<H5>InflectionPoints(C) : Sch -&gt; Sch</H5>
+<BLOCKQUOTE>
+For a plane curve C, this returns the subscheme of C defined by the vanishing
+of the determinant of the Hessian matrix.  This contains the "flex points" of C,
+which by definition are the nonsingular points at which the tangent line intersects
+C with multiplicity at least 3.
+</BLOCKQUOTE>
+<H5><A NAME = "15022">C eq D : Sch,Sch -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the curves C and D are defined by identical ideals in the
+same ambient space.
+(For plane curves, this simply compares defining polynomials of the two curves
+up to a factor so Gr&ouml;bner basis calculations are avoided.)
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "15023">IsSubscheme(C,D) : Sch,Sch -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the curve C is contained 
+(scheme-theoretically) in the curve D.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15024">Example <TT>Crv_crv-genus (H120E12)</TT></A></H3>
+We take a plane affine cubic C with a single cusp and non-singular at infinity.
+Here the projective normalisation of C is isomorphic to the projective line
+with genus 0, although the arithmetic genus of C is 1.
+<P>
+<P>
+<PRE>
+&gt; A&lt;x,y&gt; := AffineSpace(GF(3),2);
+&gt; C := Curve(A,y^2 - x^3 - 1);
+&gt; Genus(C);
+0
+&gt; ArithmeticGenus(C);
+1
+</PRE>
+Now we consider a similar cubic over the non-perfect field K=k(t) with
+a single cuspidal singularity defined over an inseparable cubic extension.
+Now C is a normal and non-singular scheme (but non-smooth), which only loses
+its normality after an inseparable basefield extension. Here both the genus
+and arithmetic genus are 1.
+<P>
+<P>
+<PRE>
+&gt; K&lt;t&gt; := RationalFunctionField(GF(3));
+&gt; A&lt;x,y&gt; := AffineSpace(K,2);
+&gt; C := Curve(A,y^2 - x^3 - t);
+&gt; Genus(C);
+1
+</PRE>
+<HR>
+<H4><A NAME = "15025">Projective Closure and Affine  Patches</A></H4>
+
+<P>
+<P>
+In Magma, any affine space has a unique projective closure. This may
+be assigned different variable names just like any projective space.
+The projective closure functions applied to affine curves will
+return projective curves in the projective closure of the affine ambient.
+Conversely, a projective space has standard affine patches.
+These will also appear as the ambient spaces of the standard affine patches
+of a projective curve.
+<P>
+<P>
+
+
+<H5><A NAME = "15026">ProjectiveClosure(A): Sch -&gt; Sch</A></H5>
+<BLOCKQUOTE>
+The projective space that is the projective closure of the ambient A.
+Unless A is already expressed as a particular patch on some projective
+space, this is the standard closure defined by the homogenisation of the
+coordinate ring of A with a new coordinate and unit weights.
+</BLOCKQUOTE>
+<H5><A NAME = "15027">ProjectiveClosure(C) : Sch -&gt; Sch</A></H5>
+<BLOCKQUOTE>
+The closure of the curve C in the projective closure of its ambient affine space.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15028">Example <TT>Crv_proj-cl-commutes (H120E13)</TT></A></H3>
+Since the closure of the ambient space is unique, the ambient space
+of the closure of curves lying in a common affine space is independent
+of how it is constructed.
+Here is an odd example but one that occurs in practice when curves
+and spaces are passed between functions:
+the functions <TT>ProjectiveClosure()</TT> and <TT>AmbientSpace()</TT> commute!
+<P>
+<P>
+<PRE>
+&gt; A&lt;a,b&gt; := AffineSpace(GF(5),2);
+&gt; C := Curve(A,a^3 - b^4);
+&gt; AmbientSpace(ProjectiveClosure(C)) eq ProjectiveClosure(AmbientSpace(C));
+true
+</PRE>
+<HR>
+<H5><A NAME = "15029">LineAtInfinity(A) : Aff -&gt; CrvPln</A></H5>
+<BLOCKQUOTE>
+The line which is the complement of the affine plane
+A embedded in the projective closure of A.
+</BLOCKQUOTE>
+<H5><A NAME = "15030">PointsAtInfinity(C) : Crv -&gt; SetEnum</A></H5>
+<BLOCKQUOTE>
+The set of points at infinity defined over the base field of the curve C.
+The number of these points can also be recovered by the 
+<TT>NumberOfPunctures()</TT> function in the plane case.
+</BLOCKQUOTE>
+<H5><A NAME = "15031">AffinePatch(C,i) : Crv,RngIntElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The i-th affine patch of the projective curve C. For ordinary projective
+space,
+the first patch is the one centred on the point (0:0: ... :0:1), the second
+at the point (0:0: ... :1:0) and so on.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15032">Example <TT>Crv_second-affine-patch (H120E14)</TT></A></H3>
+Usually one looks at the first affine patch of a curve.
+If the curve is described, as below, using homogeneous coordinates x,y,z
+then this is often realised by "setting z=1".
+Note that we have to assign names to the coordinates explicitly on the affine 
+patches if we want them.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(GF(11),2);
+&gt; C := Curve(P,x^3*z^2 - y^5);
+&gt; AffinePatch(C,1);
+Curve over GF(11) defined by 10*$.1^3 + $.2^5
+&gt; C1&lt;u,v&gt; := AffinePatch(C,1);
+&gt; C1;
+Curve over GF(11) defined by 10*u^3 + v^5
+&gt; SingularPoints(C);
+{ (1 : 0 : 0), (0 : 0 : 1) }
+</PRE>
+One can also look at other patches. Indeed, sometimes it is necessary.
+In this example, the curve C has an interesting singularity "at infinity",
+the point (1 : 0 : 0).
+If we want to view it on an affine curve then we must take one of the
+other patches.
+<P>
+<P>
+<PRE>
+&gt; C3&lt;Y,Z&gt; := AffinePatch(C,3);
+&gt; C3;
+Curve over GF(11) defined by Y^5 + 10*Z^2
+&gt; IsSingular(C3 ! [0,0]);
+true
+</PRE>
+Both affine curves C1 and C3 have the projective curve C as their
+projective closure.
+<P>
+<P>
+<PRE>
+&gt; ProjectiveClosure(C1) eq ProjectiveClosure(C3);                              
+true
+</PRE>
+<HR>
+<H4><A NAME = "15033">Special Forms of Curves</A></H4>
+
+<P>
+<P>
+The functions in this section check whether a curve is written in a particular
+normal form, and also whether it belongs to one
+of the more specialised families of curve.
+
+
+<H5><A NAME = "15034">IsEllipticWeierstrass(C) : Crv -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the curve C is nonsingular plane curve of genus 1 in 
+Weierstrass form.  This tests the coefficients of the polynomial of C.
+The conditions guarantee a
+flex at the point (0:1:0) either on C or on its projective closure.
+These are precisely the conditions required by the linear equivalence algorithms
+for divisors in a later section.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "15035">IsHyperellipticWeierstrass(C) : Crv -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the curve C is a hyperelliptic curve in plane 
+Weierstrass form.  The conditions chosen are that the (a) first affine 
+patch be nonsingular, (b) the point (0:1:0) is the only point at infinity 
+and has tangent cone supported at the line at infinity and (c), the projection
+of C away from that point has degree 2.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "15036">EllipticCurve(C) : Crv -&gt; CrvEll, MapSch</A></H5>
+<H5>EllipticCurve(C,p) : Crv, Pt -&gt; CrvEll, MapSch</H5>
+<H5>EllipticCurve(C,p) : Crv, PlcCrvElt -&gt; CrvEll, MapSch</H5>
+<BLOCKQUOTE>
+See the description of <A  HREF = "text1427.htm#CrvEll:EllipticCurve">EllipticCurve</A> in Chapter <A  HREF = "text1425.htm#16075">ELLIPTIC CURVES</A>.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "15037"></A><A NAME = "Crv:isHyp">IsHyperelliptic</A>(C) : Crv -&gt; BoolElt, CrvHyp, MapSch</H5>
+
+<PRE>    Eqn: BoolElt                        Default: <TT>true</TT></PRE>
+<H5>IsGeometricallyHyperelliptic(C) : Crv -&gt; BoolElt, Crv, MapSch</H5>
+
+<PRE>    Map: BoolElt                        Default: <TT>true</TT></PRE>
+
+<PRE>    SetVerbose("IsHyp", n):             Maximum: 2</PRE>
+<BLOCKQUOTE>
+The second function determines whether the curve C is a hyperelliptic curve
+over the algebraic closure of its base field. If so and if <TT>Map</TT> is
+<TT>true</TT>, a plane conic or the projective line and a degree 2 map from
+C to it (all defined over the base field) are returned. The map is to the
+line if the genus of C is even and to a conic if the genus is odd.
+<P>
+The first function 
+determines whether the curve C is hyperelliptic over its base field
+K (ie has a degree 2 map to the projective line defined over K). 
+If so, and if the <TT>Eqn</TT> parameter is <TT>true</TT>, it also returns 
+a hyperelliptic Weierstrass model H over K and an isomorphic 
+scheme map from C to H.
+<P>
+Here, hyperelliptic entails genus &ge;2.
+<P>
+<P>
+<P>
+The basic method in both cases is to find the image of C under the
+canonical map
+(using functions to be described later) and to check if this is of
+arithmetic genus zero. If so, this image curve (which is rational normal) 
+is mapped down to a plane conic or the line by repeated adjunction maps.
+For the second function, the final equation is determined by differential
+computations in the function field of C once the explicit map to the 
+projective line, which gives the base x function, has been determined.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15038">Example <TT>Crv_is_hyperelliptic (H120E15)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; P&lt;a,b,c,d,e,f&gt; := ProjectiveSpace(Rationals(),5);
+&gt; C := Curve(P,[
+&gt; a^2 + a*c - c*e + 3*d*e + 2*d*f - 2*e^2 - 2*e*f - f^2,
+&gt; a*c - b^2,
+&gt; a*d - b*c,
+&gt; a*e - c^2,
+&gt; a*e - b*d,
+&gt; b*e - c*d,
+&gt; c*e - d^2
+&gt; ] );
+&gt; boo,hy,mp := IsHyperelliptic(C);
+&gt; boo;
+true
+&gt; hy;
+Hyperelliptic Curve defined by y^2 = x^8 + x^6 + x - 1 over Rational Field
+&gt; mp;
+Mapping from: Sch: C to CrvHyp: hy
+with equations : 
+c*e - d^2 + d*f
+-d*f + e*f + f^2
+e*f
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1362.htm">[Next]</A><A  HREF = "text1360.htm">[Prev]</A> <A  HREF = "text1362.htm">[Right]</A> <A  HREF = "text1360.htm">[Left]</A> <A  HREF = "text1356.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,40 @@
+"Source: Text/Geometry/CrvEllFldFun.text";
+"Line: 908";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/CrvEllFldFun.text, line: 908
+// Example: H129E4 ()
+print "Example: H129E4";
+ei := GetEchoInput();
+SetEchoInput(true);
+p := 1831;
+F := GF(p);
+Fe<u> := ext<F | 8>;
+K<t> := FunctionField(F);
+P2<X,Y,Z> := ProjectivePlane(K);
+// define the 8 points:
+points := [ [ u^(p^i), (u^3+u+1)^(p^i) ] : i in [0..7] ];
+M := [ [ p[1]^i*p[2]^j : i in [0..3-j], j in [0..3] ] : p in points ];
+// find the coefficients of 2 cubics that pass through the points:
+B := Basis(Kernel(Transpose(Matrix(M))));
+R<x,y> := PolynomialRing(F, 2);
+mono_aff := [ x^i*y^j : i in [0..3-j], j in [0..3] ];
+// f1 and f2 are the cubics:
+f1 := &+[ (F!B[1][i])*mono_aff[i] : i in [1..10] ];
+f2 := &+[ (F!B[2][i])*mono_aff[i] : i in [1..10] ];
+// Find the 9th intersection point, which we use as zero, to put
+// it to a nice Weierstrass model :
+P9 := Points(Scheme(Spec(R), [f1, f2]))[1];
+F1 := Homogenization(Evaluate(f1, [X, Y]), Z);
+F2 := Homogenization(Evaluate(f2, [X, Y]), Z);
+C := Curve(P2, F1 + t*F2);
+E := MinimalDegreeModel(EllipticCurve(C, C![P9[1], P9[2]]));
+KodairaSymbols(E);
+Lgeom := GeometricMordellWeilLattice(E);
+IsIsomorphic(Lgeom, Lattice("E", 8));
+assert $1;
+L, f := MordellWeilLattice(E);
+L;
+f(L.1);
+LFunction(E);
+SetEchoInput(ei);

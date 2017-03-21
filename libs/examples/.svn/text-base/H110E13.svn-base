@@ -1,0 +1,31 @@
+"Source: Text/RepThy/LieReps.text";
+"Line: 1616";
+"Date: Tue Jun  7 22:27:15 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/RepThy/LieReps.text, line: 1616
+// Example: H110E13 ()
+print "Example: H110E13";
+ei := GetEchoInput();
+SetEchoInput(true);
+R := RootDatum("D4" : Isogeny := "SC");
+v := [1,5,2,1];
+Dec1 := LieRepresentationDecomposition(R, v);
+// First, we construct the character polynomial for the
+// module with highest weight lambda
+Dom := DominantCharacter(Dec1 : InBasis := "Weight"); Dom;
+W := CoxeterGroup(R); #W; act := RootAction(W);
+domwts, dommps := WeightsAndMultiplicities(Dom);
+CP := LieRepresentationDecomposition(R);
+for i in [1..#domwts] do
+  wt := domwts[i]; mp := dommps[i];
+  wtor := WeightOrbit(W, wt : Basis := "Weight");
+  for wti in wtor do
+    AddRepresentation(~CP, wti, mp);
+  end for;
+end for;
+CP;
+time ad := AlternatingDominant(CP); ad:Maximal;
+time adalt := AlternatingDominant(CP, LongestElement(W)); 
+ad eq adalt;
+assert $1;
+SetEchoInput(ei);

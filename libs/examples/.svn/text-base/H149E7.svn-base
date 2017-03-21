@@ -1,0 +1,35 @@
+"Source: Text/Geometry/Polyhedra.text";
+"Line: 1334";
+"Date: Wed Jun  8 13:46:05 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/Polyhedra.text, line: 1334
+// Example: H149E7 ()
+print "Example: H149E7";
+ei := GetEchoInput();
+SetEchoInput(true);
+procedure classify_polygons_recurse(P,~class,allclass)
+    for v in Vertices(P) do
+        Q:=Polytope(Exclude(Points(P),v));
+        if Dimension(Q) eq 2 then
+            AffNF:=AffineNormalForm(Q);
+            if not AffNF in class and
+                    not &or[AffNF in subclass : subclass in allclass] then
+                Include(~class,AffNF);
+                $$(Q,~class,allclass);
+            end if;
+        end if;
+    end for;
+end procedure;
+function classify_polygons(N)
+    allclass:=[];
+    for i in [1..N] do
+        B:=Polytope([[0,0],[i,0],[0,i],[i,i]]);
+        class:={AffineNormalForm(B)};
+        classify_polygons_recurse(B,~class,allclass);
+        Append(~allclass,class);
+    end for;
+    return allclass;
+end function;
+classification:=classify_polygons(4);
+[#class : class in classification];
+SetEchoInput(ei);

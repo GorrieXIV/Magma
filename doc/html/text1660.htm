@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Basic Properties</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1661.htm">[Next]</A><A  HREF = "text1659.htm">[Prev]</A> <A  HREF = "text1661.htm">[Right]</A> <A  HREF = "text1659.htm">[Left]</A> <A  HREF = "text1656.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "18565">Basic Properties</A></H3>
+
+
+
+<H5><A NAME = "18566">BaseField(M) : ModFrmHil -&gt;</A></H5>
+<H5>BaseRing(M) : ModFrmHil -&gt;</H5>
+<H5>CoefficientField(M) : ModFrmHil -&gt;</H5>
+<H5>CoefficientRing(M) : ModFrmHil -&gt;</H5>
+<BLOCKQUOTE>
+The field on which the space M was defined. 
+</BLOCKQUOTE>
+<H5><A NAME = "18567">Weight(M) : ModFrmHil -&gt; SeqEnum[RngIntElt]</A></H5>
+<BLOCKQUOTE>
+The weight of the space M.
+</BLOCKQUOTE>
+<H5><A NAME = "18568">CentralCharacter(M) : ModFrmHil -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The central character of the weight representation defining the space M
+of Hilbert modular forms.  This is of significance only for higher weight
+spaces (not parallel weight 2).
+</BLOCKQUOTE>
+<H5><A NAME = "18569">Level(M) : ModFrmHil -&gt; RngOrdIdl</A></H5>
+<BLOCKQUOTE>
+The level of the space M.
+</BLOCKQUOTE>
+<H5><A NAME = "18570">DirichletCharacter(M) : ModFrmHil -&gt; GrpDrchNFElt</A></H5>
+<BLOCKQUOTE>
+The nebentypus of the space M of Hilbert modular forms.
+</BLOCKQUOTE>
+<H5><A NAME = "18571">IsCuspidal(M) : ModFrmHil -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+This is <TT>true</TT> if the space M was created as (a subspace of) a space 
+of cusp forms.  In the current implementation this is always <TT>true</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "18572">IsNew(M) : ModFrmHil -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+This is true if the space M was created as (a subspace of) a new space,
+for instance using <TT>NewSubspace</TT> or <TT>NewformDecomposition</TT>, or 
+if the space is known to satisfy <TT>NewLevel(M) = Level(M)</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "18573">NewLevel(M) : ModFrmHil -&gt; RngOrdIdl</A></H5>
+<BLOCKQUOTE>
+This returns the level at which M is known to be new. 
+(See <TT>NewSubspace</TT>.)
+</BLOCKQUOTE>
+<H5><A NAME = "18574">Dimension(M) : ModFrmHil -&gt; RngIntElt</A></H5>
+
+<PRE>    UseFormula: BoolElt                 Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+This computes the dimension of the space M of Hilbert modular forms. 
+<P>
+The dimension is determined either by using "dimension formulae"
+or else by explicitly constructing the space.  By default, formulae
+are used when available and when considered cheap to evaluate.
+The optional argument <TT>UseFormula</TT> can be set <TT>true</TT> or 
+<TT>false</TT> to override the default.  
+<P>
+Dimension formulae are implemented for spaces of parallel weight 2.
+These formulae are sums over certain cyclotomic extensions of the 
+base field of F.  
+<P>
+The results by formula are guaranteed only under GRH, since they 
+may involve class numbers that are calculated conditionally.
+If at some later point, the space is explicitly computed, 
+the dimension is will then be verified unconditionally.
+</BLOCKQUOTE>
+<H5><A NAME = "18575">QuaternionOrder(M) : ModFrmHil -&gt; AlgAssVOrd</A></H5>
+<BLOCKQUOTE>
+This returns the quaternion order that is used internally to compute 
+the space M of Hilbert modular forms. 
+</BLOCKQUOTE>
+<H5><A NAME = "18576">IsDefinite(M) : ModFrmHil -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+This indicates which of the two algorithms is used to compute 
+the space M of Hilbert modular forms.
+It is equivalent to <TT>IsDefinite(Algebra(QuaternionOrder(M)))</TT>.
+Note that calling this causes a <TT>QuaternionOrder</TT> for M
+to be chosen (if it has not been set already).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "18577">Example <TT>ModFrmHil_basic-example (H143E2)</TT></A></H3>
+We continue with the first example above. 
+<P>
+<P>
+<PRE>
+&gt; _&lt;x&gt; := PolynomialRing(Rationals());
+&gt; F := NumberField(x^2-85);
+&gt; OF := Integers(F);
+&gt; H := HilbertCuspForms(F, 1*OF);
+&gt; Norm(Level(H));
+1
+&gt; Weight(H);
+[ 2, 2 ]
+&gt; time Dimension(H); 
+6
+Time: 2.580
+&gt; IsDefinite(H);
+true
+</PRE>
+This indicates that Algorithm I (described in the introduction) was used 
+to compute the dimension.
+<P>
+<P>
+<P>
+<PRE>
+&gt; level := Factorization(3*OF)[1][1];
+&gt; H3 :=  HilbertCuspForms(F, level);
+&gt; Level(H3);
+Prime Ideal of OF
+Two element generators:
+    [3, 0]
+    [2, 2]
+&gt; time Dimension(H3);
+14
+Time: 2.370
+&gt; H3 :=  HilbertCuspForms(F, level : QuaternionOrder:=QuaternionOrder(H) );
+&gt; time Dimension(H3);
+14
+Time: 0.270
+</PRE>
+It is much faster when we recycle the same quaternion order used for the space of level 1.
+This is because the harder computations involved depend only on the quaternion order, 
+not on the level.  
+<HR>
+<PRE></PRE> <A  HREF = "text1661.htm">[Next]</A><A  HREF = "text1659.htm">[Prev]</A> <A  HREF = "text1661.htm">[Right]</A> <A  HREF = "text1659.htm">[Left]</A> <A  HREF = "text1656.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

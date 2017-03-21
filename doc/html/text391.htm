@@ -1,0 +1,412 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Ideal Class Groups</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text392.htm">[Next]</A><A  HREF = "text390.htm">[Prev]</A> <A  HREF = "text392.htm">[Right]</A> <A  HREF = "text390.htm">[Left]</A> <A  HREF = "text383.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "3872">Ideal Class Groups</A></H3>
+
+<P>
+<P>
+<P>
+This section describes functions for computing the group of ideal classes
+of the maximal order of an absolute number field.
+<P>
+The method usually employed is the <I>relation</I> method
+(<A  HREF = "text382.htm#bib_He1">[He&szlig;96]</A>, <A  HREF = "text382.htm#bib_cohen1">[Coh93]</A>), basically consisting
+of the following steps. In the first step a list of prime ideals of
+norm below a given bound is generated, the <I>factor basis</I>.
+In the second step a search is conducted to find in each of the prime
+ideals a few elements for which the principal ideals they generate
+factor completely over the factor basis. Using these <I>relations</I>,
+a generating set for the ideal class group is derived (via
+matrix echelonization), and in the final step it is verified that
+the correct orders for the generators have been found. 
+<P>
+To determine the class group or class number rigorously, one must ensure
+that all ideals having norm smaller than the Minkowski bound -- or smaller
+than the Bach bound, if one assumes the generalized Riemann hypothesis --
+are taken into consideration.
+<P>
+It should be stressed that, by default, a guaranteed result is computed
+using the Minkowski bound. Even for innocent looking fields, this may
+take considerable time. In contrast, Pari (from version 2.0), by default,
+uses a much smaller bound giving results that are not guaranteed.
+<P>
+In Magma, to perform computations comparable to Pari, the user must request
+a non-rigorous computation.  The recommended way is to globally control this
+by using <TT>SetClassGroupBounds("GRH")</TT>, before calling routines involving 
+class group calculations.  Note that it is better to give <TT>"GRH"</TT> here 
+than to give a numerical value for the bound.
+<P>
+Starting from version 2.20, a new implementation of the sieve algorithm for
+finding relations (<A  HREF = "text382.htm#bib_biasse">[Bia]</A>) is used automatically, as a subroutine,
+to the extent it is advantageous.  This method is very effective for fields
+of degree up to 5, and to a lesser extent degree 6.
+<P>
+When a class group computation has been completed, the results are stored
+with the order (to avoid repeated computation).
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text391.htm#3882">Class Group Internals</A>
+<LI> <A  HREF = "text391.htm#3890">Setting the Class Group Bounds</A>
+<LI> <A  HREF = "text391.htm#3894">Class Group Map Caching</A>
+</UL>
+<H5><A NAME = "3873"></A><A NAME = "RngOrd:ClassGroup">ClassGroup</A>(O: parameters) : RngOrd -&gt; GrpAb, Map</H5>
+<H5>ClassGroup(K: parameters) : FldNum -&gt; GrpAb, Map</H5>
+
+<PRE>    Bound: RngIntElt                    Default: MinkowskiBound</PRE>
+
+<PRE>    Proof: MonStgElt                    Default: "Full"</PRE>
+
+<PRE>    Al: MonStgElt                       Default: "Automatic"</PRE>
+
+<PRE>    SetVerbose("ClassGroup", n):        Maximum: 3</PRE>
+<BLOCKQUOTE>
+The group of ideal classes in the ring of integers O of a number field K 
+is returned as an abelian group, together with a map from this abstract group
+to the set of ideal of O.  The map is defined in both directions:
+in the inverse direction, it returns the ideal class of a given ideal of O.
+<P>
+By default, all computations are unconditionally rigorous: this means
+that a final step must be performed, checking all prime ideals up to 
+the Minkowski bound (which is impractical for many fields).
+To perform conditional computations (under "GRH", or with a smaller
+bound), the recommended approach is to set the rigour for all class groups
+by using <TT>SetClassGroupBounds("GRH")</TT> before calling <TT>ClassGroup</TT>.
+Note that it is better to give <TT>"GRH"</TT> than to give a numerical value
+for the bound.
+<P>
+The alternative approach is to use the parameters <TT>Proof</TT> and <TT>Bound</TT>,
+which have the following effect.
+<P>
+If <TT>Bound</TT> is set to some positive integer M, M is used instead of
+the Minkowski  bound. The validity of the result still depends on the
+<TT>"Proof"</TT> parameter.
+<P>
+If <TT>Proof := "GRH"</TT>, everything remains as in the default case except
+that a bound based on the GRH is used to replace the Minkowski bound.
+This bound may be enlarged setting the <TT>Bound</TT> parameter accordingly.
+The result will hence be correct under the GRH. 
+<P>
+If <TT>Proof := "Bound"</TT>, the computation stops if an independent
+set of relations between the prime ideals below the chosen bound
+is found. The relations may not be maximal.
+<P>
+If <TT>Proof := "Subgroup"</TT>, a maximal subset of the relations
+is constructed. In terms of the result, this means that the
+group returned will be a subgroup of the class group
+(i.e. the list of prime ideals considered may be to small).
+<P>
+If <TT>Proof := "Full"</TT> (the default) a guaranteed result is computed.
+This is equivalent to <TT>Bound := MinkowskiBound(K)</TT>
+and <TT>Proof := "Subgroup"</TT>.
+<P>
+If only <TT>Bound</TT> is given, the <TT>Proof</TT> defaults to <TT>"Subgroup"</TT>.
+<P>
+Finally, giving <TT>Proof := "Current"</TT> is the same as repeating the last
+call to <TT>ClassGroup()</TT>, but without the need to explicitly restate
+the value of <TT>Proof</TT> or <TT>Bound</TT>. If there was no prior call 
+to <TT>ClassGroup</TT>, a fully proven computation will be carried out.
+<P>
+For quadratic fields, alternative algorithms may be selected using the <TT>Al</TT>
+parameter.
+<P>
+In some previous versions of Magma, use of the sieve algorithm was controlled
+by setting <TT>Al</TT> to <TT>"Sieve"</TT> or to <TT>"NoSieve"</TT>.  This usage is
+deprecated, as the choice is now made internally: the sieve algorithm is called
+automatically by the main class group routine to the extent it is advantageous.
+</BLOCKQUOTE>
+<H5><A NAME = "3874">RingClassGroup(O) : RngOrd -&gt; GrpAb, Map</A></H5>
+<H5>PicardGroup(O) : RngOrd -&gt; GrpAb, Map</H5>
+<BLOCKQUOTE>
+For a (possibly non-maximal) order O, compute the ring class group (Picard 
+group) of O, ie. the group of invertible ideals in O modulo principal
+ideals. The algorithm and its implementation are due to
+Kl&uuml;ners and Pauli, <A  HREF = "text382.htm#bib_KluenersPauli2005">[PK05]</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "3875">ConditionalClassGroup(O) : RngOrd -&gt; GrpAb, Map</A></H5>
+<H5>ConditionalClassGroup(K) : FldNum -&gt; GrpAb, Map</H5>
+<BLOCKQUOTE>
+This is equivalent to calling <TT>ClassGroup(O)</TT> after
+<TT>SetClassGroupBounds("GRH")</TT> is invoked.
+</BLOCKQUOTE>
+<H5><A NAME = "3876">ClassGroupPrimeRepresentatives(O, I) : RngOrd, RngOrdIdl -&gt; Map</A></H5>
+<BLOCKQUOTE>
+For the maximal order O of some absolute number field k and an
+ideal I of O, compute a set of prime ideals in O that
+are coprime to I and represent all ideal classes. The map, mapping
+elements of the class group to the primes representing the ideal class
+is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "3877">ClassNumber(O: parameters) : RngOrd -&gt;  RngIntElt</A></H5>
+<H5>ClassNumber(K: parameters) : FldNum -&gt;  RngIntElt</H5>
+
+<PRE>    Bound: RngIntElt                    Default: MinkowskiBound</PRE>
+
+<PRE>    Proof: MonStgElt                    Default: "Full"</PRE>
+
+<PRE>    Al: MonStgElt                       Default: "Automatic"</PRE>
+
+<PRE>    SetVerbose("ClassGroup", n):        Maximum: 5</PRE>
+<BLOCKQUOTE>
+Return the class number of the ring of integers O of a number field K.
+The options for the parameters are the same as for <TT>ClassGroup</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "3878">MinkowskiBound(K) : FldNum -&gt; RngIntElt</A></H5>
+<H5>MinkowskiBound(O) : RngOrd -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+This returns the Minkowski bound for the maximal order of the given field K.
+This is an unconditional integer upper bound for norms of the generators of the
+ideal class group of the maximal order.
+</BLOCKQUOTE>
+<H5><A NAME = "3879">BachBound(K) : FldNum -&gt; RngIntElt</A></H5>
+<H5>BachBound(O) : RngOrd -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+This returns the Bach bound for the maximal order of the given field K.
+This is an integer upper bound for norms of the generators of the ideal class group
+of the maximal order which holds if the generalized Riemann hypothesis is true.
+</BLOCKQUOTE>
+<H5><A NAME = "3880">GRHBound(K) : FldNum -&gt; RngIntElt</A></H5>
+<H5>GRHBound(O) : RngOrd -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+This returns an integer upper bound, proven assuming the generalized Riemann hypothesis,
+for norms of the generators of the ideal class group of the maximal order of the given
+field K.  The function returns the best bound obtainable in Magma.  In the current 
+version, in addition to the Bach bound, the algorithm uses results of Belabas, which 
+often produce bounds that are significantly smaller than the Bach bound.  
+</BLOCKQUOTE>
+<H5><A NAME = "3881">FactorBasisVerify(O, a, b) : RngOrd, RngIntElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+This verifies that every prime ideal of the order O with norm between a and b
+is equivalent to an ideal of O with norm smaller than a.  This function requires
+that a class group computation has already been done for O.
+</BLOCKQUOTE>
+<H4><A NAME = "3882">Class Group Internals</A></H4>
+
+<P>
+<P>
+The results of a class group computation, which are stored internally on the order O,
+are a factor base, a set of relations, and the relation matrix.  (Units are also stored,
+and used in later computations.)  Access to this data is provided by functions below.
+Also listed are functions for independently producing data of the same form; these do not
+use the same code as the internal class group computation.
+
+
+<H5><A NAME = "3883">EulerProduct(O, B) : RngOrd, RngIntElt -&gt; FldReElt</A></H5>
+<BLOCKQUOTE>
+Computes an approximation to the Euler product for the order O
+using only prime ideals over prime numbers of norm &le;B.
+</BLOCKQUOTE>
+<H5><A NAME = "3884">FactorBasis(K, B) : FldNum, RngIntElt -&gt; [ RngOrdIdl ]</A></H5>
+<H5>FactorBasis(O, B) : RngOrd, RngIntElt -&gt; [ RngOrdIdl ]</H5>
+<BLOCKQUOTE>
+Given the maximal order O, or a number field K with maximal order O,
+this function returns a sequence of prime ideals of norm less than a given
+bound B.
+</BLOCKQUOTE>
+<H5><A NAME = "3885">FactorBasis(O) : RngOrd -&gt; [ RngOrdIdl ], Integer</A></H5>
+<BLOCKQUOTE>
+Given the maximal order O where the class group has previously
+been computed,
+this function returns a sequence of prime ideals that have been used as 
+factor basis for the class group computation. In addition the used upper bound
+for the factor basis is returned. This bound can be different from the
+bound passed in using the <TT>Bound := bound</TT> parameter.
+</BLOCKQUOTE>
+<H5><A NAME = "3886">RelationMatrix(O) : RngOrd -&gt; ModHomElt</A></H5>
+<BLOCKQUOTE>
+Given a maximal order O where the class group has been computed previously,
+the resulting relation matrix is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "3887">Relations(O) : RngOrd -&gt; ModHomElt</A></H5>
+<BLOCKQUOTE>
+Given a maximal order O where the class group has been computed previously,
+the vector containing the order elements used to compute the class
+group is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "3888">ClassGroupCyclicFactorGenerators(O) : RngOrd -&gt; ModHomElt</A></H5>
+<BLOCKQUOTE>
+Let a<sub>i</sub> be the generators for the cyclic factors of the class group of O.
+This function returns generators for a<sub>i</sub><sup>c<sub>i</sub></sup> where c<sub>i</sub> is the order of
+a<sub>i</sub> in the class group.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3889">Example <TT>RngOrd_ClassGroup (H38E18)</TT></A></H3>
+We give an example of a class group calculation, illustrating some of the
+functions.
+<P>
+<P>
+<PRE>
+&gt; R&lt;x&gt; := PolynomialRing(Integers());
+&gt; O := MaximalOrder(x^2-10);
+&gt; C, m := ClassGroup(O);
+&gt; C;
+Abelian Group isomorphic to Z/2
+Defined on 1 generator
+Relations:
+    2*C.1 = 0
+&gt; m(C.1);    
+Prime Ideal of O
+Two element generators:
+    [2, 0]
+    [0, 1]
+&gt; p := Decomposition(O, 31)[1][1];
+&gt; p;
+Prime Ideal of O
+Two element generators:
+    [31, 0]
+    [45, 1]
+&gt; p @@ m;
+0
+&gt; IsPrincipal(p);
+true
+&gt; p := Decomposition(O, 37)[1][1];
+&gt; p @@ m;                            
+C.1
+&gt; IsPrincipal(p);
+false
+&gt; MinkowskiBound(O);
+3
+&gt; F, B := FactorBasis(O);
+&gt; B;
+50
+</PRE>
+Note that although the <TT>MinkowskiBound</TT> is only 3, the algorithm chose
+a larger bound for the computation internally.
+<P>
+<P>
+<PRE>
+&gt; r := Relations(O);
+&gt; M := RelationMatrix(O);
+&gt; [ Valuation(r[1][1], x) : x in F];
+[ 0, 0, 0, 0, 0, 1, 1, 0 ]
+&gt; M[1];
+(0 0 0 0 0 1 1 0)
+</PRE>
+The <TT>RelationMatrix</TT> stores the valuation of the <TT>Relations</TT> at each
+prime ideal contained in the <TT>FactorBasis</TT>.
+<P>
+<P>
+<PRE>
+&gt; f,g := IsPrincipal(m(C.1)^2);
+&gt; f;
+true
+&gt; g;
+[2, 0]
+&gt; ClassGroupCyclicFactorGenerators(O);                                         
+[
+    [2, 0]
+]
+</PRE>
+Now we will consider some larger fields to demonstrate the 
+effect of the <TT>"Bound"</TT> parameter:
+<P>
+<P>
+<PRE>
+&gt; K := NumberField(x^5-14*x^4+14*x^3-14*x^2+14*x-14);
+&gt; MinkowskiBound(K);
+21106
+&gt; BachBound(K);
+7783
+&gt; GRHBound(K);
+259
+&gt; time C := ClassGroup(K); 
+Time: 0.510
+&gt; C;
+Abelian Group isomorphic to Z/10
+Defined on 1 generator
+Relations:
+    10*$.1 = 0
+</PRE>
+This is an unconditional result.  The conditional computation,
+assuming GRH, is faster.  Note that the <TT>BachBound</TT> should NOT be used
+-- the better <TT>GRHBound</TT> is much smaller.  (They both are bounds
+which guarantee the class group computation is correct assuming GRH.)
+<P>
+<P>
+<PRE>
+&gt; K := NumberField(x^5-14*x^4+14*x^3-14*x^2+14*x-14);
+&gt; time #ClassGroup(K : Proof := "GRH");
+10
+Time: 0.100
+&gt; K := NumberField(x^5-14*x^4+14*x^3-14*x^2+14*x-14);
+&gt; time #ClassGroup(K : Bound := BachBound(K)); 
+10
+Time: 0.280
+</PRE>
+<HR>
+<H4><A NAME = "3890">Setting the Class Group Bounds</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+These functions control the rigour of all subsequent of class group computations.
+The recommended way is <TT>SetClassGroupBounds("GRH")</TT>.  This is the minimum
+possible level of rigour with the current implementation -- all class groups 
+will be correct if GRH holds, regardless of all settings.
+
+
+<H5><A NAME = "3891">SetClassGroupBounds(string) : MonStgElt -&gt;</A></H5>
+<BLOCKQUOTE>
+If this is called with the string "GRH", all subsequent class group computations
+will be performed in such a way that either they are correct, or GRH does not hold.
+</BLOCKQUOTE>
+<H5><A NAME = "3892">SetClassGroupBounds(n) : RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+The integer n is the proof bound to be used in all subsequent calls to <TT>ClassGroup</TT>.
+That is, each class group computed will be correct if it is generated by ideals of norm
+at most n.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3893">Example <TT>RngOrd_class-group-bounds (H38E19)</TT></A></H3>
+We select some bounds which will then be used in all calls to <TT>ClassGroup</TT>.
+(The class group computations will be rigorous, but will use a relatively small factor
+base for the first part of the computation).
+<P>
+<P>
+<PRE>
+&gt; map1 := map&lt; PowerStructure(RngOrd) -&gt; Integers() | 
+&gt;                             order :-&gt; BachBound(order) div 10 &gt;;
+&gt; map2 := map&lt; PowerStructure(RngOrd) -&gt; Integers() | 
+&gt;                             order :-&gt; MinkowskiBound(order) &gt;;
+&gt; SetClassGroupBoundMaps( map1, map2);
+</PRE>
+<HR>
+<H4><A NAME = "3894">Class Group Map Caching</A></H4>
+
+<P>
+<P>
+<P>
+The map returned by <TT>ClassGroup</TT> can be used to compute the 
+ideal class of a given ideal.  In applications which 
+involve many repeated calls to this, it may be advantageous to store
+the results of each call (although this may also use a lot of memory).
+By default, results are not stored.
+<P>
+For example, if the order O is to be used extensively as a coefficient
+ring for class field computations, then every time discrete logarithms
+of ray class groups are computed, a discrete logarithm computation in the
+class group is triggered. In particular when investigating the cohomology
+of various extensions over O, this involves testing the same ideals over
+and over again.
+
+
+<H5><A NAME = "3895">ClassGroupGetUseMemory(O) : RngOrd -&gt; BoolElt</A></H5>
+<H5>ClassGroupSetUseMemory(O, f) : RngOrd, BoolElt -&gt;</H5>
+<BLOCKQUOTE>
+These functions access and set whether or not the map returned by 
+<TT>ClassGroup(O)</TT> stores the results of calls to the inverse map.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text392.htm">[Next]</A><A  HREF = "text390.htm">[Prev]</A> <A  HREF = "text392.htm">[Right]</A> <A  HREF = "text390.htm">[Left]</A> <A  HREF = "text383.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,39 @@
+
+SetVerbose("cbrank", 1);
+
+CDB  := CremonaDatabase();
+Nmax := LargestConductor(CDB);
+Nmax := 2700;
+Nmin := 2535;
+
+ANAL := true;
+
+time
+for N := Nmin to Nmax do
+  for _E in EllipticCurves(CDB, N) do
+    E := EllipticCurve(Coefficients(_E));
+
+    // "SEED:", GetSeed();
+
+    T, mT := TwoTorsionSubgroup(E);
+    if #T eq 1 then continue; end if;
+
+    r := #T eq 4 select 6 else Max(2, N mod 7);
+    for s in [r..r] do
+
+      printf "\n%o : %o steps\n", CremonaReference(E), s;
+      // time
+      r, A, B := TwoPowerIsogenyDescentRankBound(E, T.1 @ mT : 
+                                                 MaxSteps := s);
+      "r =", r;
+
+      if ANAL then
+        ra := AnalyticRank(E);
+        assert IsEven(r - ra);
+      end if;
+
+    end for;
+
+  end for;
+end for;
+

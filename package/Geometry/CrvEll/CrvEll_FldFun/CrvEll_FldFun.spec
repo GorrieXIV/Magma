@@ -1,0 +1,13 @@
+{
+  cassels-tate.m
+  countpoints.m
+  descent.m
+  descent2isog.m
+  descent_char2.m
+  ec_search.m
+  minmodelff.m
+  mwgroupff.m
+  pointsearch.m
+  quartlocsol.m
+  misc.m
+}

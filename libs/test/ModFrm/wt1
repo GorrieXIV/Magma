@@ -1,0 +1,81 @@
+
+// Test modular forms of weight 1
+// June 2012, SRD
+
+
+// Quadratic characters
+
+for N in [ 1 .. 40 ] do
+  Chi := DirichletGroup(N);
+  for chi in Elements(Chi) do
+    if IsEven(chi) then continue; end if;
+
+    S := CuspForms(chi, 1);
+
+    time
+    d := Dimension(S);
+    printf "N = %o, character %o : dimension %o\n", N, chi, d;
+
+    if d gt 0 then
+       time 
+       B := qExpansionBasis(S, 20);
+       print B[1]; 
+    end if;
+
+  end for;
+end for;
+
+
+// Gamma1, and check products
+// TO DO: choose good test cases
+
+for N in [ 23, 31, 39, 44 ] do 
+    print "N =", N;
+    S := CuspForms(Gamma1(N), 1);
+
+    printf "Dimension: ";
+    time
+    d := Dimension(S);
+    print "Dimension =", d;
+
+    if d gt 0 then
+       S2 := CuspForms(Gamma1(N), 2);
+       printf "Computing weight 2 cusp forms: ";
+       time
+       b := PrecisionBound(S2 : Exact);
+
+       printf "Weight 1 forms, precision %o: ", b;
+       time
+       B := qExpansionBasis(S, b);
+       assert forall{f : f in B | AbsolutePrecision(f) eq b};
+
+       printf "Testing products: ";
+       time
+       for i,j in [1..Dimension(S)] do
+          f := B[i]*B[j];
+          bool, f2 := IsCoercible(S2, f);
+          assert bool;
+          assert IsWeaklyEqual(qExpansion(f2,b), f);
+       end for;
+
+    end if;
+end for;
+
+
+// Non-dihedral example 
+
+S := CuspForms(Gamma1(124), 1);
+B := qExpansionBasis(S, 12);
+
+assert B eq
+[
+    q - q^6 - q^8 + O(q^12),
+    q^2 - q^8 - q^10 + O(q^12),
+    q^3 - q^8 - q^9 + q^10 + O(q^12),
+    q^4 - q^8 + O(q^12),
+    q^5 - q^6 + O(q^12),
+    q^7 - q^8 - q^9 + O(q^12),
+    q^11 + O(q^12)
+]
+where q is Universe(B).1;
+

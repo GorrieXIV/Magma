@@ -1,0 +1,152 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Weil Descent in Characteristic Two</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1444.htm">[Next]</A><A  HREF = "text1442.htm">[Prev]</A> <A  HREF = "text1444.htm">[Right]</A> <A  HREF = "text1442.htm">[Left]</A> <A  HREF = "text1437.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16326">Weil Descent in Characteristic Two</A></H3>
+
+<P>
+<P>
+One approach to attacking the discrete logarithm problem for elliptic
+curves over finite fields is through Weil descent. Let E have
+base field K and let k be a subfield of K. The basic idea is to
+find a higher genus curve C/k along with a non-trivial homomorphism
+from E(K) to (Jac)(C)(k) [the Jacobian of C]. This transfers the
+problem to one over a smaller field and Index Calculus methods over C
+can then be applied.
+<P>
+Magma now contains an implementation, due to Florian He&szlig;, of the
+GHS Weil Descent for ordinary (i.e., j(E) != 0) elliptic curves in
+characteristic 2 (see <A  HREF = "text1436.htm#bib_GHS">[Gau00]</A> or the chapter by F. He&szlig; in
+<A  HREF = "text1436.htm#bib_ad_ECC">[Bla05]</A>), which constructs such a C along with the divisor map
+from E to C.
+
+
+<H5><A NAME = "16327"></A><A NAME = "CrvEll:ec_weil_desc">WeilDescent</A>(E, k, c) : FldFun, FldFin, FldFinElt -&gt; CrvPln, Map</H5>
+
+<PRE>    HyperellipticImage: BoolElt         Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+The curve E/K is an ordinary elliptic curve over a finite field K of
+characteristic 2. The argument k is a subfield of K and c is a
+non-zero element of K.
+<P>
+The function uses GHS descent to construct a plane curve C/k and a
+map from E(K) to k-divisors of C. There are two possibilities:
+<P>
+<P>
+<P>
+i)  The curve C is hyperelliptic and Magma implements the group
+law on its Jacobian, (Jac)(C). In this case, C will be returned as a
+hyperelliptic curve (type <TT>CrvHyp</TT>) and the map returned will actually
+be the divisor class homomorphism from E(K) to (Jac)(C)(k) with
+points of E(K) being identified with divisor classes in the usual way:
+P -&gt; (P) - (0).
+<P>
+<P>
+<P>
+ii)  Otherwise, C is returned as a general plane curve and the
+map is from points of E(K), considered as divisors of degree 1, to
+the corresponding k-divisor of C. In this case, where specialised
+Jacobian arithmetic is not available, it may be more convenient to
+work with the effective divisors rather than degree 0 divisors.
+The user may readily convert to the degree 0 case by getting h(0)
+initially and then using h((P) - (0))=h(P) - h(0), where h is the divisor
+map.
+<P>
+<P>
+<P>
+In case ii), no reduction of the image divisor is performed by the
+divisor map and if [K:k] is large then this divisor will have high
+degree and the computation may be quite slow. h is defined by
+divisor pullback corresponding to the function field inclusion
+K(E) -&gt; K(C) followed by the trace from K down to k.
+<P>
+If the user prefers to have C and h returned as in case ii), even
+when C is hyperelliptic, the parameter <TT>HyperellipticImage</TT>
+should be set to <TT>false</TT>.
+<P>
+<P>
+<P>
+The third argument c is a parameter to specify the precise data
+for the descent. If r = surd(1/j(E)) and b = r/c,
+the function field K(E) is isomorphic to the degree 2 extension
+of the rational function field K(x) with equation
+<P>
+ y<sup>2</sup> + y = c/x + a<sub>2</sub>(E) + bx 
+<P>
+<P>
+and it is this Artin--Schreier extension that is used for the GHS descent
+as explained in the above references.
+<P>
+It is possible to work directly with
+function fields, if preferred, using the function <A  HREF = "text458.htm#FldFunG:weil_desc">WeilDescent</A>.
+However this function produces a divisor map between function fields
+rather than curves and does not give the divisor class map in case i) above.
+<P>
+The genus of C and its degree are very dependent on the choice of c.
+For a description of how to choose a good c for given E and k, see
+sections {b VIII.2.4} and {b VIII.2.5} in the chapter by He&szlig;
+cited in the introduction to this section.
+<P>
+We merely note here that c &isin;k or b &isin;k leads to a hyperelliptic
+C, though this may have very large genus and other choices, giving
+non-hyperelliptic curves, may be better.
+</BLOCKQUOTE>
+<H5><A NAME = "16328">WeilDescentGenus(E, k, c) : FldFun, FldFin, FldFinElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the genus of the Weil descent curve C produced by
+<A  HREF = "text1443.htm#CrvEll:ec_weil_desc">WeilDescent</A> for input E, k, c.
+</BLOCKQUOTE>
+<H5><A NAME = "16329">WeilDescentDegree(E, k, c) : FldFun, FldFin, FldFinElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the degree in the second variable of the plane Weil descent curve
+C produced by <A  HREF = "text1443.htm#CrvEll:ec_weil_desc">WeilDescent</A> for input E, k, c.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16330">Example <TT>CrvEllFldFin_ec_weil_desc (H127E9)</TT></A></H3>
+The following example is similar to one from the article of F. He&szlig;
+referred to above. E is defined over F_(2<sup>155</sup>) and
+C is a hyperelliptic curve of genus 31 over F_(2<sup>5</sup>).
+<P>
+<P>
+<PRE>
+&gt; K&lt;w&gt; := FiniteField(2, 155);
+&gt; k := FiniteField(2, 5);
+&gt; Embed(k, K);
+&gt; b :=  w^154 + w^152 + w^150 + w^146 + w^143 + w^142 + w^141 +
+&gt;    w^139 + w^138 + w^137 + w^136 + w^134 + w^133 + w^132 + w^131 +
+&gt;    w^127 + w^125 + w^123 + w^121 + w^117 + w^116 + w^115 + w^112 +
+&gt;    w^111 + w^109 + w^108 + w^107 + w^105 + w^104 + w^102 + w^101 +
+&gt;    w^100 + w^99 + w^98 + w^97 + w^95 + w^90 + w^89 + w^88 + w^85 +
+&gt;    w^83 + w^81 + w^80 + w^79 + w^78 + w^76 + w^75 + w^73 + w^72 +
+&gt;    w^69 + w^68 + w^62 + w^61 + w^59 + w^54 + w^52 + w^47 + w^45 +
+&gt;    w^44 + w^43 + w^40 + w^39 + w^37 + w^36 + w^34 + w^32 + w^31 +
+&gt;    w^25 + w^15 + w^13 + w^10 + w^8 + w^7 + w^6;
+&gt; E := EllipticCurve([K| 1, 0, 0, b, 0]);
+&gt; C,div_map := WeilDescent(E, k, K!1);
+&gt; C;
+Hyperelliptic Curve defined by y^2 + (k.1^16*x^32 + k.1^27*x^8 + k.1^2*x^4 +
+    k.1^29*x^2 + k.1^30*x + k.1^20)*y = k.1^30*x^32 + k.1^10*x^8 + k.1^16*x^4 +
+    k.1^12*x^2 + k.1^13*x + k.1^3 over GF(2^5)
+&gt; ptE := Points(E, w^2)[1];
+&gt; ord := Order(ptE);
+&gt; ord;
+142724769270595988105829091515089019330391026
+&gt; ptJ := div_map(ptE); // point on Jacobian(C)
+&gt; // check that order ptJ on J = order ptE on E
+&gt; J := Jacobian(C);
+&gt; ord*ptJ eq J!0;
+true
+&gt; [ (ord div p[1])*ptJ eq J!0 : p in Factorization(ord) ];
+[ false, false, false, false, false, false, false, false ]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1444.htm">[Next]</A><A  HREF = "text1442.htm">[Prev]</A> <A  HREF = "text1444.htm">[Right]</A> <A  HREF = "text1442.htm">[Left]</A> <A  HREF = "text1437.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,144 @@
+/////////////////////////////////////////////////////////////////////////
+// cones
+// $Revision: 31078 $
+// $Date: 2010-11-30 23:38:30 +1100 (Tue, 30 Nov 2010) $
+// $LastChangedBy: kasprzyk $
+/////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////
+// Toric Lattices and Cones
+/////////////////////////////////////////////////////////////////////////
+"------\nToric Lattices and Cones\n";
+
+C:=Cone([[1,0],[1,1],[1,3]]);
+assert Dimension(C) eq 2;
+C;
+MinimalRGenerators(C);
+
+D:=Dual(C);
+assert Ambient(D) eq Dual(Ambient(C));
+D:Maximal;
+
+L:=ScalarLattice();
+L0:=ToricLattice(0);
+phi:=hom< L -> L0 | ZeroMatrix(Integers(),1,0) >;
+DefiningMatrix(phi);
+
+v:=LatticeVector([1,1,1,1]);
+L4:=Parent(v);
+w:=Dual(L4) ! [12,3,4,-15];
+assert v*w eq 4;
+
+C:=Cone([[1,-1,-1,0],[1,1,1,0],[1,1,-1,0],[1,-1,1,0]]);
+assert Dimension(Ambient(ConeInSublattice(C))) eq Dimension(C);
+assert NumberOfFacets(C) eq 4;
+assert #Facets(C) eq 4;
+assert #Faces(C,1) eq 4;
+
+assert not -Random(Faces(C,2)) subset C; 
+assert Index(C) eq 4;
+Faces(C);
+
+assert IsInInterior(Ambient(C)![1,0,0,0], C);
+
+seq:=[ [ 2, 0, 1, 2, 0, 0],
+       [ 1, 0, 0, 0, 0, 0],
+       [ 1, 1, 0, 0, 0, 0],
+       [ 1, 0, 0, 0, 1, 0],
+       [ 1, 1, 0, 0, 1, 0],
+       [ 2, 0, 1, 2, 2, 0],
+       [ 2, 0, 0, 0, 0,-1],
+       [ 2, 2, 0, 0, 0,-1],
+       [ 2, 0,-1, 0, 0,-1] ];
+C:=Cone(seq);
+time F1:=Faces(C);
+C:=Cone(seq);
+time F2:=[Faces(C,i): i in [5..0 by -1] ];
+C:=Cone(seq);
+time F3:=[Faces(C,i): i in [0..5]];
+
+for i in [1..#F1] do
+  S:=Seqset(F1[i]);
+  assert S eq Seqset(F2[7-i]);
+  assert S eq Seqset(F3[i]);
+end for;
+
+assert not IsInInterior(Random(MinimalRGenerators(C)),C);
+p:=PointInInterior(C);
+assert not IsOnBoundary(p,C);
+
+assert Index(C) eq 2;
+assert Dimension(C) eq 6;
+assert #MinimalRGenerators(C) eq 9;
+assert Dimension(Dual(C)) eq 6;
+assert #ZGenerators(C) eq 15;
+
+CC:=C+C;
+assert Seqset(MinimalRGenerators(C)) eq Seqset(MinimalRGenerators(CC));
+
+/////////////////////////////////////////////////////////////////////////
+// Graded Lattices
+/////////////////////////////////////////////////////////////////////////
+"------\nGraded Lattices\n";
+
+L:=ToricLattice(3);
+grL:=GradedToricLattice(L);
+C:=Cone([grL|[2,1,1,1],[0,1,1,-2],[-1,-2,1,4],[5,2,-3,4]]);
+P1:=Polyhedron(C);
+P2:=Polyhedron(C:level:=2);
+P3:=Polyhedron(C:level:=9);
+
+assert Ambient(P1) eq L;
+assert Ambient(P2) eq L;
+assert Ambient(P3) eq L;
+
+assert Ambient(Polar(P1)) eq Dual(L);
+assert Ambient(IntegralPart(P1)) eq L;
+assert not IsPolytope(IntegralPart(P3));
+
+//2*P1 eq P2;
+
+L:=GradedToricLattice(3 :grading:=[12,3,4,2],origin:=[0,1,-1,1]);
+C:=Cone([L|[ 0, 1, 1, -3 ],
+            [ -1, 0, 3, 0 ],
+            [ 5, 2, -3, 4 ],
+            [ 0, -5, 11, 23 ],
+            [ 2, 1, 1, 1 ],
+            [ -1, -5, 13, 7 ]]);
+
+P1:=Polyhedron(C);
+
+C:=Cone([L|[ 0, 1, 1, -3 ],
+            [ -1, 0, 3, 0 ],
+            [ 1, 2, -3, 4 ],
+            [ 0, 5, 0, 1 ],
+            [ 2, 1, 1, 1 ],
+            [ 1, -1, 0, -4 ]]);
+
+P2:=Polyhedron(C:level:=2);
+P3:=Polyhedron(C:level:=9);
+
+assert Ambient(P1) eq Ambient(P2);
+assert Ambient(P3) eq Ambient(P2);
+
+assert Ambient(Polar(P1)) eq Dual(Ambient(P2));
+assert Ambient(IntegralPart(P3)) eq Ambient(P2);
+
+C:=Cone([L|[ 0, 1, 1, -3 ],
+            [ -1, 0, 3, 1 ],
+            [ 1, 2, -3, 4 ],
+            [ 0, 2, 0, 1 ],
+            [ 2, 1, 1, 1 ],
+            [ 1, -1, 0, -2 ]]);
+
+P4:=Polyhedron(C:level:=15);
+
+Ambient(IntegralPart(P4)) eq Ambient(P2);
+
+/////////////////////////////////////////////////////////////////////////
+// Finally, clear the caches
+/////////////////////////////////////////////////////////////////////////
+"------\nClearing caches\n";
+
+CacheClearToricVariety();
+CacheClearToricLattice();

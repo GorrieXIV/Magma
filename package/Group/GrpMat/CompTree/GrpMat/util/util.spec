@@ -1,0 +1,14 @@
+{
+	closure.m
+	derived.m
+	basics.m
+	order.m
+        chevalley-order.m
+	section.m
+        dihedral.m
+	forms.m
+	formula.m
+	tensor.m
+	centraliser.m
+	comptree.m
+}

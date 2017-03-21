@@ -1,0 +1,27 @@
+"Source: Text/Ring/FldFunRat.text";
+"Line: 1076";
+"Date: Tue Jun  7 22:27:15 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Ring/FldFunRat.text, line: 1076
+// Example: H43E10 ()
+print "Example: H43E10";
+ei := GetEchoInput();
+SetEchoInput(true);
+S<u> := PowerSeriesRing(Rationals());
+f := [1,u,u/(1-u^4)+u^10+O(u^16),u/(1+u^4)+u^12+O(u^16)];
+pade, padebasis, ord := PadeHermiteApproximant(f,[2,2,2,2]);
+pade, ord;
+BaseRing(Parent(pade)) eq S;
+assert $1;
+MinimalVectorSequence(f,10);
+p := 2;
+seq := MinimalVectorSequence(f,10: Distortion :=[2,2,2,2],Power := p);
+seq;
+mp:= map<S->S|  x :-> (IsWeaklyZero(x) select 0 
+    else  &+([Coefficient(x,i)*(S.1)^(p*i) :  i in Exponents(x)]))
+      + (ISA(Type(v),RngIntElt) select O((S.1)^(p*v)) 
+  else S!0 where v := AbsolutePrecision(x))>;
+sums := [&+([mp(Q[i])*f[i]: i in [1..#f]]) : Q in seq];
+[Valuation(v) : v in sums];
+sums;
+SetEchoInput(ei);

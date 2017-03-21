@@ -1,0 +1,198 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Hecke and Atkin-Lehner Operators</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1650.htm">[Next]</A><A  HREF = "text1648.htm">[Prev]</A> <A  HREF = "text1650.htm">[Right]</A> <A  HREF = "text1648.htm">[Left]</A> <A  HREF = "text1635.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "18494">Hecke and Atkin-Lehner Operators</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1649.htm#18495">Creation</A>
+<LI> <A  HREF = "text1649.htm#18500">Invariants</A>
+</UL>
+<H4><A NAME = "18495">Creation</A></H4>
+
+<P>
+<P>
+<P>
+These commands compute endomorphisms induced by the Atkin-Lehner and
+Hecke operators on modular abelian varieties.  The Atkin-Lehner
+involution W<sub>q</sub> is defined for each positive integer q that exactly
+divides the level (and is divisible by the conductor of any relevant
+character).
+
+
+<H5><A NAME = "18496">AtkinLehnerOperator(A, q) : ModAbVar, RngIntElt -&gt;  MapModAbVar, RngIntElt</A></H5>
+<BLOCKQUOTE>
+The Atkin-Lehner operator W<sub>q</sub> of index q induced on the abelian variety
+A by virtue 
+of A being modular. In general W<sub>q</sub> need not be a morphism except in 
+the category of abelian varieties up to isogeny so this intrinsic also 
+returns an integer d such that d * W<sub>q</sub> is an endomorphism of A, and 
+when W<sub>q</sub> 
+doesn't leave A invariant, returns d=0. If the ambient modular 
+symbols space of A contains a space with character of conductor r, then 
+currently an error occurs unless r divides q.  
+</BLOCKQUOTE>
+<H5><A NAME = "18497">AtkinLehnerOperator(A) : ModAbVar -&gt;  MapModAbVar</A></H5>
+<BLOCKQUOTE>
+The morphism (or morphism tensor Q) on (or from) the abelian variety
+A induced by the Atkin-Lehner operator.  
+</BLOCKQUOTE>
+<H5><A NAME = "18498">HeckeOperator(A, n) : ModAbVar, RngIntElt -&gt;  MapModAbVar</A></H5>
+<BLOCKQUOTE>
+The Hecke operator T<sub>n</sub> of index n induced on the abelian variety
+A by virtue of its 
+morphism to a modular symbols abelian variety. In general T<sub>n</sub> need not be a 
+morphism. Also, if A is contained in e.g., J<sub>0</sub>(N), then the T<sub>n</sub> on 
+J<sub>0</sub>(N) need not even leave A invariant. In that case this command composes 
+T<sub>n</sub> with a map back to A to obtain an endomorphism of A. For the 
+exact Hecke operators induced by their action on J<sub>0</sub>(N), say, use 
+the <TT>RestrictEndomorphism</TT> command.  
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "18499">Example <TT>ModAbVar_Operators-Creation (H142E112)</TT></A></H3>
+<P>
+We compute the main Atkin-Lehner operator and  the Hecke
+operator T<sub>2</sub> on J<sub>0</sub>(23).
+<P>
+<P>
+<PRE>
+&gt; A := JZero(23);
+&gt; AtkinLehnerOperator(A,23);
+Homomorphism W23 from JZero(23) to JZero(23) given on integral homology by:
+[-1  0  0  0]
+[ 0 -1  0  0]
+[ 0  0 -1  0]
+[ 0  0  0 -1]
+&gt; HeckeOperator(A,2);
+Homomorphism T2 from JZero(23) to JZero(23) given on integral homology by:
+[ 0  1 -1  0]
+[ 0  1 -1  1]
+[-1  2 -2  1]
+[-1  1  0 -1]
+</PRE>
+Next we compute w<sub>4</sub> and w<sub>25</sub> on J<sub>100</sub>, and
+note that their product equals w<sub>100</sub>.
+<P>
+<P>
+<PRE>
+&gt; A := JZero(100); A;
+Modular abelian variety JZero(100) of dimension 7 and 
+level 2^2*5^2 over Q
+&gt; w4 := AtkinLehnerOperator(A,4); 
+&gt; Factorization(CharacteristicPolynomial(w4));
+[
+    &lt;x - 1, 4&gt;,
+    &lt;x + 1, 10&gt;
+]
+&gt; w25 := AtkinLehnerOperator(A,25); 
+&gt; Factorization(CharacteristicPolynomial(w25));
+[
+    &lt;x - 1, 8&gt;,
+    &lt;x + 1, 6&gt;
+]
+&gt; w4*w25 eq AtkinLehnerOperator(A);
+true
+</PRE>
+Next we compute W<sub>25</sub> acting on J<sub>1</sub>(25).
+<P>
+<P>
+<PRE>
+&gt; A := Js(17);
+&gt; B := BaseExtend(A,CyclotomicField(17));
+&gt; w := AtkinLehnerOperator(B);
+&gt; Factorization(CharacteristicPolynomial(w));
+[
+    &lt;x - 1, 4&gt;,
+    &lt;x + 1, 6&gt;
+]
+</PRE>
+<P>
+Finally we compute Hecke operators on the quotient of a simple
+factor of J<sub>0</sub>(65) by a finite subgroup.
+<P>
+<P>
+<PRE>
+&gt; A := Decomposition(JZero(65))[2]; A;
+Modular abelian variety 65B of dimension 2, level 5*13 and conductor 
+5^2*13^2 over Q
+&gt; G := nTorsionSubgroup(A,2); G;
+Finitely generated subgroup of abelian variety with invariants 
+[ 2, 2, 2, 2 ]
+&gt; H := Subgroup([G.1]); H;
+Finitely generated subgroup of abelian variety with invariants [ 2 ]
+&gt; B := A/H; B;
+Modular abelian variety of dimension 2 and level 5*13 over Qbar
+&gt; T2 := HeckeOperator(B,2); T2;
+Homomorphism from modular abelian variety of dimension 2 to 
+modular abelian variety of dimension 2 (up to isogeny) on 
+integral homology by:
+[ -2 1/2   0   0]
+[ -2   2   0   0]
+[ -2   1  -2   1]
+[ -6   1  -1   2]
+&gt; FactoredCharacteristicPolynomial(T2);
+[
+    &lt;x^2 - 3, 2&gt;
+]
+</PRE>
+<HR>
+<H4><A NAME = "18500">Invariants</A></H4>
+
+<P>
+<P>
+<P>
+Intrinsics are provided which 
+compute characteristic polynomials, factored characteristic 
+polynomials and minimal polynomials of Hecke operators.   
+
+
+<H5><A NAME = "18501">HeckePolynomial(A, n) : ModAbVar, RngIntElt -&gt;  RngUPolElt</A></H5>
+<BLOCKQUOTE>
+The characteristic polynomial of the Hecke operator T<sub>n</sub> acting on 
+the abelian variety A.  
+</BLOCKQUOTE>
+<H5><A NAME = "18502">FactoredHeckePolynomial(A, n) : ModAbVar, RngIntElt -&gt;  RngUPolElt</A></H5>
+<BLOCKQUOTE>
+The factored characteristic polynomial of the Hecke operator T<sub>n</sub> 
+acting on the abelian variety A. This can be faster than first computing T<sub>n</sub>, then computing 
+the characteristic polynomial, and factoring, because we can take into 
+account information about the decomposition of A, in order to avoid 
+factoring.  
+</BLOCKQUOTE>
+<H5><A NAME = "18503">MinimalHeckePolynomial(A, n) : ModAbVar, RngIntElt -&gt;  RngUPolElt</A></H5>
+<BLOCKQUOTE>
+The minimal polynomial of the Hecke operator T<sub>n</sub> acting on the abelian
+variety A.  
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "18504">Example <TT>ModAbVar_Operators-Invariants (H142E113)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; FactoredHeckePolynomial(JZero(65),2);
+[
+    &lt;x + 1, 2&gt;,
+    &lt;x^2 - 3, 2&gt;,
+    &lt;x^2 + 2*x - 1, 2&gt;
+]
+&gt; HeckePolynomial(JZero(65),2);
+x^10 + 6*x^9 + 5*x^8 - 32*x^7 - 62*x^6 + 28*x^5 + 130*x^4 + 
+    48*x^3 - 51*x^2 - 18*x + 9
+&gt; MinimalHeckePolynomial(JZero(65),2);
+x^5 + 3*x^4 - 2*x^3 - 10*x^2 - 3*x + 3
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1650.htm">[Next]</A><A  HREF = "text1648.htm">[Prev]</A> <A  HREF = "text1650.htm">[Right]</A> <A  HREF = "text1648.htm">[Left]</A> <A  HREF = "text1635.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

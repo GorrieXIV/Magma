@@ -1,0 +1,300 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Advanced Examples</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1320.htm">[Next]</A><A  HREF = "text1340.htm">[Prev]</A> <A  HREF = "text1320.htm">[Right]</A> <A  HREF = "text1340.htm">[Left]</A> <A  HREF = "text1321.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "14843">Advanced Examples</A></H3>
+
+<P>
+<P>
+This section contains examples of the use of the scheme machinery that
+are broader than those brief illustrations of intrinsics in the main text.
+They show how these functions can be used in collaboration with one
+another to build computer experiments which back up mathematical intuition.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1341.htm#14844">A Pair of Twisted Cubics</A>
+<LI> <A  HREF = "text1341.htm#14846">Curves in Space</A>
+</UL>
+<H4><A NAME = "14844">A Pair of Twisted Cubics</A></H4>
+
+<P>
+<P>
+This example constructs a cluster as the intersection of two twisted
+cubics in space. It uses a pair of curves whose equations are very
+closely related. Their union admits an automorphism which interchanges
+the two curves, fixing the cluster.
+
+
+<HR>
+<H3><A NAME = "14845">Example <TT>Scheme_twisted-cubics (H118E69)</TT></A></H3>
+We start by making the two twisted cubics, C1 and C2, as the
+minors of a pair of 2 x 3 matrices.
+It is clear straight away that these curves are closely related; it is
+a shame that we lose the "format" of the equations, in fact.
+On the other hand, if one tries to make other interesting examples
+by such tricks, one does not automatically come up with something
+so slick (and Gorenstein).
+<P>
+<P>
+<PRE>
+&gt; k := Rationals();
+&gt; P&lt;x,y,z,t&gt; := ProjectiveSpace(k,3);
+&gt; M1 := Matrix(CoordinateRing(P),2,3,[y,t,x,t,x,z]);
+&gt; M2 := Matrix(CoordinateRing(P),2,3,[y,x,t,x,t,z]);
+&gt; C1 := Scheme(P,Minors(M1,2));
+&gt; C2 := Scheme(P,Minors(M2,2));
+&gt; Z := Intersection(C1,C2);
+&gt; MinimalBasis(Z);
+[
+    x*t - y*z,
+    x*z - t^2,
+    x*y - t^2,
+    -x^2 + z*t,
+    -x^2 + y*t
+]
+</PRE>
+Anyone knowing about Pfaffians can have fun trying to realise these equations
+as the five maximal Pfaffians of a skew-symmetric 5 x 5 matrix.
+Although this example is a bit degenerate, it is reasonable to think of it as a
+hyperplane section of an elliptic curve of degree 5 (living in P<sup>4</sup>)
+so the ideal of equations will be Gorenstein. Given the Buchsbaum--Eisenbud
+structure theorem for Gorenstein codimension 3 rings, we are
+not surprised to see this Pfaffian format.
+In this example we will settle for confirming that this scheme Z
+is a cluster of degree 5 and finding its support.
+<P>
+<P>
+<PRE>
+&gt; IsCluster(Z);                                                                
+true
+&gt; Degree(Z);
+5
+&gt; IsReduced(Z);
+true
+&gt; RationalPoints(Z);
+{@ (1 : 1 : 1 : 1), (0 : 0 : 1 : 0), (0 : 1 : 0 : 0) @}
+&gt; HasPointsOverExtension(Z);
+true
+</PRE>
+As expected, the scheme Z is zero-dimensional and has degree 5.
+Since it is reduced, its support will comprise five separate points over some
+extension of the base field.
+We locate these points by hand by considering the Gr&ouml;bner basis of
+the ideal of Z. The last element of a lexicographical Gr&ouml;bner basis
+usually suggests a field extension that is relevant
+to the scheme. So we extend the base field by roots of this polynomial
+and look for the support over that field.
+<P>
+<P>
+<PRE>
+&gt; GB := GroebnerBasis(ChangeOrder(Ideal(Z),"lex"));
+&gt; GB[#GB];
+z^3*t - t^4
+&gt; L&lt;w&gt; := ext&lt; k | U.1^2 + U.1 + 1 &gt; where U is PolynomialRing(k);
+&gt; RationalPoints(Z,L);
+{@ (w : -w - 1 : -w - 1 : 1), (-w - 1 : w : w : 1),
+(1 : 1 : 1 : 1), (0 : 1 : 0 : 0), (0 : 0 : 1 : 0) @}
+&gt; HasPointsOverExtension(Z,L);
+false
+</PRE>
+The final line confirms that we have found all the points of Z.
+That was already clear since Z has degree 5 and we see five points,
+but in other cases, especially when the cluster is not reduced,
+it might not be so obvious.
+<P>
+Now we look at the union of the two twisted cubics.
+<P>
+<P>
+<PRE>
+&gt; C := Union(C1,C2);
+&gt; C;
+Scheme over Rational Field defined by
+x^3 - x*y*t - x*z*t + t^3
+-x*t + y*z
+</PRE>
+This curve C is a 2, 3 complete intersection, numerology that
+is familiar from canonical curves of genus 4.
+We already know that C is not such a curve since it has two components.
+Indeed, we already know that these components are nonsingular and meet
+in five points. Clearly these points must be singular points of C.
+<P>
+<P>
+<PRE>
+&gt; SC := SingularPointsOverSplittingField(C);
+&gt; SC;
+{ (1 : 1 : 1 : 1), (-r2 - 1 : r2 : r2 : 1), (0 : 0 : 1 : 0),
+(-r1 - 1 : r1 : r1 : 1), (0 : 1 : 0 : 0) }
+&gt; Ring(Universe(SC));                   
+Algebraically closed field with 2 variables
+Defining relations:
+[
+    r2^2 + r2 + 1,
+    r1^2 + r1 + 1
+]
+</PRE>
+Magma has automatic Gr&ouml;bner basis based machinery for working
+in the algebraic closure of the rationals (the so-called <I>D5 method</I>).
+Here we see it in action.
+The roots that we made explicitly when computing with Z are the new
+symbols r1 and r2 --- they are the two conjugate roots of the
+quadratic equation list as the `Defining relations'.
+Since r1not= r2, we see that the singular points really are the
+points of Z as expected.
+<P>
+From the definition of the matrices M1 and M2 we can see that
+the union and intersection of C1 and C2 should be invariant
+under the automorphism of P which exchanges x and t.
+We realise that automorphism here and confirm what we expect by
+comparing various ideals.
+<P>
+<P>
+<PRE>
+&gt; phi := iso&lt; P -&gt; P | [t,y,z,x],[t,y,z,x] &gt;;
+&gt; IsAutomorphism(phi);
+true
+&gt; Ideal(C2) eq Ideal(phi(C1));
+true
+&gt; Z eq phi(Z);
+true
+&gt; Ideal(Z) eq Ideal(phi(Z));
+true
+</PRE>
+Note that the basic equality test `eq' for schemes returns <TT>true</TT> in
+the penultimate line, even though the two arguments were created
+independently.
+<P>
+The five points of Z obviously have (Sym)<sub>5</sub> as their permutation
+group (or (Sym)<sub>2</sub> x (Sym)<sub>3</sub> over the rationals).
+How much of that is realised by automorphisms of the union C?
+We try to realise some elements of this symmetric group.
+<P>
+<P>
+<PRE>
+&gt; S5 := SymmetricGroup(5);
+&gt; QL := RationalPoints(Z,L);
+&gt; rho := S5 ! [ Index(QL,phi(p)) : p in QL ];
+&gt; rho;
+(1, 2)
+</PRE>
+Of course, this permutation is simply the action of the Galois group of L.
+<P>
+<P>
+<PRE>
+&gt; GaloisGroup(L);
+Permutation group acting on a set of cardinality 2
+    (1, 2)
+</PRE>
+We make another automorphism: using C explicitly in the constructor
+ensures that the image of the map is contained in C.
+<P>
+<P>
+<PRE>
+&gt; psi := iso&lt; C -&gt; C | [x,z,y,t],[x,z,y,t] &gt;;
+&gt; eta := S5 ! [ Index(QL,psi(p)) : p in QL ]; 
+&gt; eta;
+(4, 5)
+&gt; G := sub&lt; S5 | rho,eta &gt;;
+&gt; #G;
+4
+</PRE>
+Since these two permutations commute and the small collection of five points
+is already partitioned by a Galois group action, this example is too simple
+to use Magma's substantial group theory machinery.
+But one can imagine at this stage finding complicated elements of G and
+realising them by compositions of the easily recognised automorphisms
+&rho; and &eta;.
+<HR>
+<H4><A NAME = "14846">Curves in Space</A></H4>
+
+<P>
+<P>
+<P>
+In this example, we construct something that we know is an elliptic
+curve in space. The point is to realise that within Magma by making
+a new curve of the right type and understanding the translation between
+the two types, at least to some degree.
+Something very similar would also works for the canonical models of curves
+of genus 4, although one has to take care handling the image of
+the natural projection.
+
+
+<HR>
+<H3><A NAME = "14847">Example <TT>Scheme_curves-in-space (H118E70)</TT></A></H3>
+The first thing to do is to make a curve in space and to choose a nonsingular
+rational point on that curve. The question of whether or not a rational point
+is part of the input or part of the algorithm is always tricky since
+finding good points is often the heart of a problem. That is certainly
+the case here, so we do not pretend that this is a particularly powerful
+example.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z,t&gt; := ProjectiveSpace(Rationals(),3);
+&gt; X := Scheme(P,[x*y-z*t,x^2 + 2*z^2 - y*t]);      
+&gt; Dimension(X);
+1
+&gt; IsNonsingular(X);                              
+true
+&gt; p := X ! [0,1,0,0];
+</PRE>
+Next we simply project from this given point p.
+<P>
+<P>
+<PRE>
+&gt; Y,pr,q := ProjectionFromNonsingularPoint(X,p);
+&gt; bool,C := IsCurve(Y);
+&gt; bool;
+true
+&gt; q := C ! q;
+&gt; q;
+(0 : 1 : 0)
+&gt; Degree(C);
+3
+&gt; IsNonsingular(C);
+true
+&gt; P2&lt;a,b,c&gt; := Ambient(C);
+&gt; C;
+Curve over Rational Field defined by
+a^3 + 2*a*b^2 - b*c^2
+</PRE>
+Since there was a conic (two, in fact) among the equations of the scheme X,
+the projection from p is necessarily birational to a plane curve.
+And since p is a nonsingular point, it has a definite rational image point
+on the projection which is called q above.
+Since we know that X has genus 1 (as an external fact) and that
+the projection is birational we already know that the image curve C
+is the plane elliptic curve we desire.
+(It is interesting to try this calculation with a curve of higher genus,
+like the canonical model of a curve of genus 4.)
+<P>
+But we have made no effort to find a good model for C.
+At this point we can use Magma intrinsics to find a better model
+for C since we have the rational point q lying on C.
+<P>
+<P>
+<PRE>
+&gt; EllipticCurve(C,q);
+Elliptic Curve defined by y^2 = x^3 + 32*x over Rational Field
+Mapping from: Crv: C to Elliptic Curve defined by y^2 = x^3 + 32*x over 
+Rational Field given by a rule
+Mapping from: Elliptic Curve defined by y^2 = x^3 + 32*x over Rational Field to
+Crv: C given by a rule
+</PRE>
+The result is a very nice model of an elliptic curve in Weierstra&szlig; form.
+The mapping types returned by this function are not yet fully integrated
+Scheme maps. But this will be added to Magma in due course, after which
+computations can be done on the good elliptic model and related to the
+original scheme X.
+<PRE></PRE> <A  HREF = "text1320.htm">[Next]</A><A  HREF = "text1340.htm">[Prev]</A> <A  HREF = "text1320.htm">[Right]</A> <A  HREF = "text1340.htm">[Left]</A> <A  HREF = "text1321.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

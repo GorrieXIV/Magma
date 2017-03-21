@@ -1,0 +1,1353 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Surfaces in P3</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1385.htm">[Next]</A><A  HREF = "text1383.htm">[Prev]</A> <A  HREF = "text1385.htm">[Right]</A> <A  HREF = "text1383.htm">[Left]</A> <A  HREF = "text1379.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "15459">Surfaces in P<sup>3</sup></A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1384.htm#15460">Introduction</A>
+<LI> <A  HREF = "text1384.htm#15461">Embedded Formal Desingularization of Curves</A>
+<LI> <A  HREF = "text1384.htm#15466">Formal Desingularization of  Surfaces</A>
+<LI> <A  HREF = "text1384.htm#15471">Adjoint Systems and Birational Invariants</A>
+<LI> <A  HREF = "text1384.htm#15477">Classification and Parameterization of Rational Surfaces</A>
+<LI> <A  HREF = "text1384.htm#15479">Reduction to Special Models</A>
+<LI> <A  HREF = "text1384.htm#15482">Parametrization of Rational Surfaces</A>
+<LI> <A  HREF = "text1384.htm#15488">Parametrization of Special  Surfaces</A>
+</UL>
+<H4><A NAME = "15460">Introduction</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+This section describes several packages of functionality developed for working
+with (hyper)surfaces in three-dimensional projective space P<sup>3</sup> which can
+have arbitrary singularities (at least in the characteristic 0 case). It was
+designed and implemented by Tobias Beck and has at its core, routines to compute a
+<B>formal desingularization</B> of a
+hypersurface X, expressed via a collection of algebraic power series giving the
+formal completion of the components of <I>some</I> desingularization lying
+over the components of the singular subscheme of the hypersurface. The algorithm is
+based on the method of Jung. It is fully described in <A  HREF = "text1378.htm#bib_TB2007">[Bec07]</A> and will be
+partly sketched out in the following two subsections.
+<P>
+As of magma V2.21, the method of resolution of singularities by local blow-up
+is also available in the case that X has only point singularities. This can
+often be faster than the formal desingularisation in practice, although the method
+is less elegant, and provides additional information (see section <A  HREF = "text1383.htm#15435">Desingularisation by Blow Up</A>).
+It is now the default method (given the point singularity restriction) when the
+general <A  HREF = "text1383.htm#resolve_singular_surface">ResolveSingularSurface</A> intrinsic is used. If desired, formal desingularisation
+can be used instead by calling that intrinsic with the <TT>UseFormalDesing</TT> parameter
+set to <TT>true</TT>, or the intrinsic <TT>FormallyResolveProjectiveHypersurface</TT> described below
+can be called. It should also be noted that formal resolution requires that the
+base field of the surface is characteristic 0. This is not required for blow-up resolution.
+<P>
+Major functionality to be described in this section, which is enabled by our resolutions,
+includes the computation of important birational invariants of <I>any</I> desingularization
+of X like the arithmetic and geometric genera and higher geometric plurigenera.
+Furthermore, we also provide an intrinsic for the computation of  <I>(i,j)-adjoint</I>
+maps as rational maps on X. For formal desingularisation, the theoretical and
+algorithmic details may be found in <A  HREF = "text1378.htm#bib_TB2007b">[BS08]</A>. Blow-up resolutions allow
+similar computations and the intrinsics for all of the above now work with
+either type of resolution data.
+<P>
+There are functions to determine whether X is of Kodaira dimension -&infin;,
+<I>i.e.,</I> birationally ruled. For the important special case of <I>rational</I>
+surfaces, there is a suite of functions to determine whether a parametrization
+exists over the base field and to explicitly construct one in the affirmative case.
+This is based on the work of Josef Schicho described in <A  HREF = "text1378.htm#bib_JS1998b">[Sch98]</A> and
+<A  HREF = "text1378.htm#bib_JS2000">[Sch00]</A>. As with the rest of the package, it was originally coded to make
+use of formal desingularisation data but now also works with blow-up resolution data.
+<P>
+A surface X is mapped to a standard model by applying an appropriate m-adjoint map.
+These are then parameterized by special case code. The main special cases are Del 
+Pezzo surfaces (including some singular cases) and line and conic bundles. The 
+functions can be called directly by the user. Apart from the previously existing 
+Del Pezzo code (for degrees 6, 8 and 9) and the special singular code for degrees 
+3 and 4, these functions were implemented by Tobias Beck and Josef Schicho. 
+
+
+<H4><A NAME = "15461">Embedded Formal Desingularization of Curves</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+A formal embedded desingularization of plane curves, as described below,
+is used in the Jung surface resolution process. The main function is available
+to the user and provides another alternative to the existing function field and
+resolution graph curve functionality.
+<P>
+Before describing the function, we introduce some terminology. Let C &sub;P be a plane algebraic curve (where P = A<sub>E</sub><sup>2</sup> or P = P<sub>E</sub><sup>2</sup> for some field E of characteristic zero) and &pi;: Q to P an <I>embedded desingularization</I>, <I>i.e.</I>, &pi; is proper birational, Q is regular and D := &pi;<sup> - 1</sup>(C) &sub;Q is a normal crossing divisor. Further let {p<sub>1</sub>, ..., p<sub>r</sub>} &isin;Q be the generic points of the decomposition of D into irreducible components and {q<sub>1</sub>, ..., q<sub>s</sub>} &isin;Q the closed points of the normal crossings of D.
+<P>
+From &pi; we can construct morphisms Spec  widehat(OO<sub>Q, p<sub>i</sub></sub>) to 
+P and Spec  widehat(OO<sub>Q, q<sub>i</sub></sub>) to P. The set of all these morphisms 
+(up to isomorphism of the domain) is called a <I>formal embedded desingularization</I> 
+of C &sub;P. Each of these morphisms has a centre on P which is defined to 
+be the image of the closed point.
+<P>
+The two classes of morphisms are represented, respectively, by homomorphisms 
+A to widehat(OO<sub>Q, p<sub>i</sub></sub>) and A to widehat(OO<sub>Q, q<sub>i</sub></sub>) (where A is 
+either the normal polynomial ring E[x, y] or the graded polynomial ring 
+E[x, y, w] and the inverse image of the maximal ideal of the completion ring 
+is the prime ideal defining the centre), and we are free to choose an isomorphic 
+representation of the codomain. We refer to the homomorphisms as &mu;<sub>i</sub> and 
+&nu;<sub>i</sub> respectively.
+
+
+<H5><A NAME = "15462"></A><A NAME = "as:res_aff_crv">ResolveAffineCurve</A>(p) : RngMPolElt -&gt; List, List, List, RngIntElt</H5>
+
+<PRE>    Factors: SeqEnum                    Default: []</PRE>
+
+<PRE>    Ps: RngMPolElt                      Default: 0</PRE>
+
+<PRE>    Focus: RngMPolElt                   Default: 0</PRE>
+
+<PRE>    ExtName: MonStgElt                  Default: "alpha"</PRE>
+
+<PRE>    ExtCount: RngIntElt                 Default: 0</PRE>
+
+<PRE>    SetVerbose("Resolve", n):           Maximum: 1</PRE>
+<BLOCKQUOTE>
+<P>
+Given the curve defined by p &isin;E[x, y] (a non-zero bivariate polynomial over a 
+number field), this intrinsic essentially computes a formal embedded resolution of 
+the curve using a succession of point blow ups. Only morphisms whose centres vanish 
+on the ideal generated by <TT>Focus</TT> are considered. Note that <TT>Focus</TT> may 
+be a single polynomial or a sequence of polynomials.
+<P>
+The three returned lists contain elements of the form (b<sub>1</sub>, (y, m<sub>11</sub>), (p<sub>1</sub>, m<sub>12</sub>)), (b<sub>2</sub>, (y, m<sub>2</sub>)) and (b<sub>2</sub>, (p<sub>3</sub>, m<sub>3</sub>)) respectively. Here b<sub>1</sub>, b<sub>2</sub> and b<sub>3</sub> are homomorphisms E[x, y] to E'[x, y] to some bivariate polynomial ring over an algebraic field extension E' over E.
+<P>
+The first list gathers normal crossings. Precisely, the extended homomorphism b<sub>1</sub>: E[x, y] to E'll x, y rr corresponds to a &nu;<sub>i</sub> from above. Moreover we have &lt; b<sub>1</sub>(p) &gt; = &lt; y<sup>m<sub>11</sub></sup>p<sub>1</sub><sup>m<sub>12</sub></sup> &gt; where y = 0 and p<sub>1</sub> = 0 have a normal crossing.
+<P>
+The second list gathers exceptional divisors. The extended homomorphism b<sub>2</sub>: E[x, y] to E'(x)ll y rr corresponds to a &mu;<sub>i</sub> from above. Moreover we have &lt; b<sub>2</sub>(p) &gt; = &lt; y<sup>m<sub>2</sub></sup> &gt; and y=0 corresponds to an exceptional divisor.
+<P>
+Finally, the last list corresponds to the components of the original curve. The extended homomorphism b<sub>3</sub>: E[x, y] to widehat(E'[x, y]<sub>&lt; p<sub>3</sub> &gt;</sub>) (where E'=E in this case) corresponds to another &mu;<sub>i</sub> from above. Moreover we have that b<sub>3</sub>(p) has multiplicity m<sub>3</sub> in widehat(E'[x, y]<sub>&lt; p<sub>3</sub> &gt;</sub>) and corresponds to an original curve component.
+<P>
+If known, a factorization of p (as returned by the <TT>Factorization</TT> command) can 
+be passed using the parameter <TT>Factors</TT> and the squarefree part of p (as returned by the <TT>SquarefreePart</TT> command) using <TT>Ps</TT>.
+<P>
+If the ground field has to be extended, the algebraic elements will be displayed as <TT>ExtName_i</TT> where <TT>i</TT> starts from <TT>ExtCount</TT>. The last return value is the value of <TT>ExtCount</TT> plus the number of field extensions that have been introduced, which can be useful for consecutive naming when making a series of
+resolution calls.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15463">Example <TT>AlgSrf_aff_crv_res (H122E14)</TT></A></H3>
+We compute an embedded resolution of an affine plane curve.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Q := Rationals();
+&gt; Qxy&lt;x,y&gt; := PolynomialRing(Q, 2, "glex");
+&gt; f := (y^2-x^3)*(x^2-y^2-y^3);
+&gt; NCs, EXs, DCs := ResolveAffineCurve(f : Factors := Factorization(f));
+&gt; #NCs, #EXs, #DCs;
+7 4 2
+&gt; NCs[2]; EXs[3]; DCs[1];
+[*
+    Mapping from: RngMPol: Qxy to RngMPol: Qxy,
+    &lt;y, 4&gt;,
+    &lt;-x^2 + 2*x + y, 1&gt;
+*]
+[*
+    Mapping from: RngMPol: Qxy to RngMPol: Qxy,
+    &lt;y, 10&gt;
+*]
+[*
+    Mapping from: RngMPol: Qxy to RngMPol: Qxy,
+    &lt;y^3 - x^2 + y^2, 1&gt;
+*]
+&gt; NCs[2][1](x), NCs[2][1](y);
+x*y - y
+y
+</PRE>
+<P>
+Here we have passed the factorization of f only for illustrative purposes. The 
+curve is the union of a cusp and a node at the origin. It has two singular points 
+over Q, the origin and another intersection point of the two curves which has 
+a residue field of degree 5 over Q.
+<P>
+We have computed the local information of a (not necessarily minimal) embedded 
+resolution and find that it contains the 2 components of the strict transform, 
+further 4 exceptional divisors and 7 normal crossings. For example, the 
+pushforward of f under the chart map x |-&gt; xy - y, y |-&gt; y is equal 
+to y<sup>4</sup>( - x<sup>2</sup> + 2x + y) up to a local unit. The corresponding germ is isomorphic 
+to a normal crossing in the embedded desingularization. We also see that one of 
+the exceptional divisors has multiplicity 10.
+<P>
+If we were only interested in a local resolution, we would do the following:
+<P>
+<P>
+<P>
+<PRE>
+&gt; NCs, EXs, DCs := ResolveAffineCurve(f : Focus := [x,y]);
+&gt; #NCs, #EXs, #DCs;
+5 3 0
+</PRE>
+<P>
+We focus on the origin, hence, any curve components are not considered . We have 
+1 less exceptional divisor and 2 less normal crossings. This is because the 
+second intersection point of the above two curve components was already a normal 
+crossing, but our algorithm has nevertheless blown it up in the previous example.
+<HR>
+<H5><A NAME = "15464">ResolveProjectiveCurve(p) : RngMPolElt -&gt; List, List, List, RngIntElt</A></H5>
+
+<PRE>    Focus: RngMPolElt                   Default: 0</PRE>
+
+<PRE>    ExtName: MonStgElt                  Default: "alpha"</PRE>
+
+<PRE>    ExtCount: RngIntElt                 Default: 0</PRE>
+
+<PRE>    SetVerbose("Resolve", n):           Maximum: 1</PRE>
+<BLOCKQUOTE>
+Given the curve defined by p &isin;E[x, y, z] (a non-zero trivariate homogeneous
+polynomial over a number field), this intrinsic essentially computes a formal 
+embedded resolution of the curve using a succession of point blow ups. This 
+is the same as <A  HREF = "text1384.htm#as:res_aff_crv">ResolveAffineCurve</A> above, but now p is a homogeneous 
+polynomial in three variables that defines a projective curve. Accordingly, 
+the b<sub>j</sub> map from the respective homogeneous coordinate ring to some E'[x, y].
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15465">Example <TT>AlgSrf_prj_crv_res (H122E15)</TT></A></H3>
+We can also desingularize the projectivisation of the above curve.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Q := RationalField();
+&gt; QXYZ&lt;X,Y,Z&gt; := PolynomialRing(Q, 3);
+&gt; F := (Y^2*Z-X^3)*(X^2*Z-Y^2*Z-Y^3);
+&gt; NCs, EXs, DCs := ResolveProjectiveCurve(F); #NCs, #EXs, #DCs;
+7 4 2
+&gt; NCs[3];
+[*
+    Mapping from: RngMPol: QXYZ to Polynomial ring of rank 2 over
+    Rational Field ...,
+    &lt;y, 4&gt;,
+    &lt;x^2 + 2*x - y, 1&gt;
+*]
+&gt; NCs[3][1](X);
+x*y + y
+&gt; NCs[3][1](Y);
+y
+&gt; NCs[3][1](Z);
+1
+</PRE>
+<P>
+The homomorphisms take a slightly different shape (because they have now Q[X, Y, Z] as domain), but otherwise they are the same. This is because the curve has no singularities at infinity.
+<HR>
+<H4><A NAME = "15466">Formal Desingularization of  Surfaces</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+For curves we have described embedded formal desingularization. For surfaces instead we produce only <I>formal desingularizations</I>. Let S &sub;P be a hypersurface (where P = A<sub>E</sub><sup>3</sup> or P = P<sub>E</sub><sup>3</sup>) and C &sub;S a closed subset (which typically contains the singular locus). Further let &pi;: T to S be a <I>desingularization</I>, <I>i.e.</I>, &pi; is proper birational and T is regular. By {p<sub>1</sub>, ..., p<sub>r</sub>} &isin;T we denote the generic points of the curve components of the decomposition of D := &pi;<sup> - 1</sup>(C) into irreducibles.
+<P>
+From &pi; we can construct morphisms Spec  widehat(OO<sub>T, p<sub>i</sub></sub>) to S. The set of all these morphisms (up to isomorphism of the domain) is called a <I>formal desingularization</I> of S over C &sub;S. Such a morphism has a centre on S which is defined as the image of the closed point (and actually is contained in C).
+<P>
+The morphisms are represented by homomorphisms A to widehat(OO<sub>T, p<sub>i</sub></sub>) (where A is either the algebra E[x, y, z]/&lt; p &gt; or the graded algebra E[x, y, z, w]/&lt; p &gt; with p a defining polynomial), and we are free to choose an isomorphic representation of the codomain. We refer to such a homomorphisms as &mu;<sub>i</sub>.
+<P>
+In the actual algorithm, C is the ramification locus of a finite projection, 
+pr, to an affine or projective plane (C contains the singular subscheme of S).
+The underlying desingularization T (which is not computed explicitly) is 
+a Jung resolution which is constructed in two stages. Firstly, an embedded 
+resolution of the image of C in the plane is performed by blow-ups and T<sub>1</sub> is taken 
+as the normalization of the pullback of this by pr. So T<sub>1</sub> then has only
+point singularities of a simple type (<I>toric singularities</I>), lying over
+the (normal-crossing) intersections of components of the embedded resolution.
+These are resolved by a finite succession of blow-ups on T<sub>1</sub> to give T.
+<P>
+The algorithm computes the formal desingularization, as described above,
+corresponding to T, using the embedded formal desingularization for curves
+followed by algebraic power series operations for the normalization and
+final resolution of the toric singularities. This is described fully in
+<A  HREF = "text1378.htm#bib_TB2007">[Bec07]</A>. The &mu;<sub>i</sub> homomorphisms are defined by algebraic power
+series images of the variables of P.
+<P>
+It is important to note that the Jung desingularization T is not a minimal
+desingularization and, in any case, the set of morphisms returned for the
+formal desingularization generally contain some elements whose centre on S is
+already non-singular (because, for example, components of C are often
+generically non-singular). However, there is a parameter option with the main
+function <A  HREF = "text1384.htm#as:res_prj_srf">FormallyResolveProjectiveHyperSurface</A>, which removes "non-singular" morphisms
+and possibly others that have no effect on the computation of birational
+invariants and m-adjoint maps. 
+
+
+<H5><A NAME = "15467"></A><A NAME = "as:res_aff_srf">ResolveAffineMonicSurface</A>(s) : RngUPolElt -&gt; List, RngIntElt</H5>
+
+<PRE>    Focus: RngMPolElt                   Default: 0</PRE>
+
+<PRE>    ExtName: MonStgElt                  Default: "alpha"</PRE>
+
+<PRE>    ExtCount: RngIntElt                 Default: 0</PRE>
+
+<PRE>    SetVerbose("Resolve", n):           Maximum: 1</PRE>
+<BLOCKQUOTE>
+The main user resolution function <A  HREF = "text1384.htm#as:res_prj_srf">FormallyResolveProjectiveHyperSurface</A> is for projective 
+hypersurfaces.
+This affine version, however, may be useful in some circumstances. The input is
+a monic, squarefree polynomial s &isin;E[x, y][z] where E is a number field (<I>i.e.</I>, s is univariate over a bivariate polynomial ring). Let S &sub;A<sub>E</sub><sup>3</sup> denote the surface defined by it and C &sub;S the closed subset defined by disc<sub>z</sub>(s) (<I>i.e.</I>, the intersection of S with the cylinder over the discriminant curve when considering the projection S to A<sub>E</sub><sup>2</sup> in z-direction). The function computes a formal desingularization of S over C
+(see above). 
+<P>
+The first return value is a list of elements of the form ((X, Y, Z), o) where X, Y, Z &isin;F ll t rr are univariate power series (over some field extension F of transcendence degree 1 over E) s.t. s(X, Y, Z)=0 and o is an integer. The induced homomorphism E[x, y][z]/(s) to F ll t rr corresponds to a &mu;<sub>i</sub> from above and o is its <I>adjoint order</I>, <I>i.e.</I>, the negation of the order of a special differential form (see Section <A  HREF = "text1384.htm#15471">Adjoint Systems and Birational Invariants</A>).
+<P>
+One can specify a focus ideal FF &sub;E[x, y] by passing a single generator
+or sequence of generators in <TT>Focus</TT> (as for <A  HREF = "text1384.htm#as:res_aff_crv">ResolveAffineCurve</A>). In this case C is taken to be the intersection of S and the cylinder over the zero set of FF + &lt; disc<sub>z</sub>(s) &gt;.
+<P>
+If the ground field has to be extended, the algebraic elements will be displayed as <TT>ExtName_i</TT> where <TT>i</TT> starts from <TT>ExtCount</TT>. The last return value is the value of <TT>ExtCount</TT> plus the number of field extensions that have been introduced, which can be useful for consecutive naming when making a series of
+resolution calls. A transcendental element will always be displayed as <TT>s</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15468">Example <TT>AlgSrf_aff_res (H122E16)</TT></A></H3>
+We compute a formal desingularization for the affine surface z<sup>2</sup> - xy = 0.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Q := Rationals();
+&gt; Qxy&lt;x,y&gt; := PolynomialRing(Q, 2, "glex");
+&gt; Qxyz&lt;z&gt; := PolynomialRing(Qxy);
+&gt; f := z^2 - x*y;
+&gt; desing := ResolveAffineMonicSurface(f); #desing;
+3
+</PRE>
+<P>
+We have computed 3 morphisms. Two of them are centred over the coordinate axes x=0 and y=0. But they might not be of interest, because the surface is normal and has an isolated singularity over the origin.
+<P>
+<P>
+<P>
+<PRE>
+&gt; #ResolveAffineMonicSurface(f : Focus := [x,y]);
+1
+</PRE>
+<P>
+The only remaining morphism corresponds to the exceptional divisor obtained by blowing up the singularity.
+<P>
+Elements in the returned list which define the morphisms of the formal
+desingularization are examined more closely in the projective surface
+example below.
+<HR>
+<H5><A NAME = "15469"></A><A NAME = "as:res_prj_srf">FormallyResolveProjectiveHyperSurface</A>(S): Srfc -&gt; List, RngIntElt</H5>
+
+<PRE>    AdjComp: BoolElt                    Default: <TT>false</TT></PRE>
+
+<PRE>    ExtName: MonStgElt                  Default: "gamma"</PRE>
+
+<PRE>    ExtCount: RngIntElt                 Default: 0</PRE>
+
+<PRE>    SetVerbose("Resolve", n):           Maximum: 1</PRE>
+<BLOCKQUOTE>
+The main intrinsic is now <A  HREF = "text1383.htm#resolve_singular_surface">ResolveSingularSurface</A> for resolution of singularities on surfaces 
+and this can be forced to produce a formal resolution (if possible) by calling it with the parameter
+<TT>UseFormalDesing</TT> set to <TT>true</TT>. That is essentially equivalent to calling this intrinsic directly.
+<P>
+This gives a direct option to get the formal resolution and allows the use of the <TT>ExtName</TT> and
+<TT>ExtCount</TT> parameters. 
+<P>
+It is similar in description to <A  HREF = "text1384.htm#as:res_aff_srf">ResolveAffineMonicSurface</A> above. The argument is 
+a projective surface S &sub;P<sub>E</sub><sup>3</sup> over a field of characteristic 0.
+Computes and returns a formal desingularization (see above) of S.
+It will be a formal 
+desingularization over an automatically chosen subset C &sub;S (using again 
+the cylinder over the discriminant curve w.r.t. a nice projection onto some 
+P<sub>E</sub><sup>2</sup>). Accordingly the elements of the return list of formal
+desingularization data are now of the form ((X, Y, Z, W), o).
+<P>
+If <TT>AdjComp</TT> is <TT>true</TT>, then only a sublist is returned that is still sufficient for the computation of birational invariants and adjoint spaces (see Section <A  HREF = "text1384.htm#15471">Adjoint Systems and Birational Invariants</A>). The parameters <TT>ExtName</TT> and <TT>ExtCount</TT> and the second return value have the same meaning as in the affine case.
+<P>
+As stated above, the algorithm is based on formally computing a Jung resolution
+and is described in <A  HREF = "text1378.htm#bib_TB2007">[Bec07]</A>.
+<P>
+The returned resolution list is also cached on S in a surface attribute (alongside any
+blow-up desingularisation data that has been computed). Thus, it will not be recomputed on a further
+call to this intrinsic or on calls to any other intrinsics using formal desingularisation data.
+The only time it may be recomputed is when this (or <A  HREF = "text1383.htm#resolve_singular_surface">ResolveSingularSurface</A>) is first called
+with <TT>AdjComp</TT> <TT>true</TT> and then called again with <TT>AdjComp</TT> <TT>false</TT>. S can cache <I>both</I>
+an `adjcomp only' formal desingularisation list and a general one and the cached data is labelled
+correspondingly.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15470">Example <TT>AlgSrf_prj_res (H122E17)</TT></A></H3>
+Computing a formal desingularization is easy. We also see that setting <TT>AdjComp</TT> to <TT>true</TT> 
+produces fewer formal divisors needed to only compute birational invariants or adjoint spaces.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z,w&gt; := ProjectiveSpace(Rationals(), 3);
+&gt; F := w^3*y^2*z+(x*z+w^2)^3;
+&gt; S := Surface(P, F);
+&gt; #FormallyResolveProjectiveHypersurface(S : AdjComp := true);
+18
+&gt; desing := FormallyResolveProjectiveHypersurface(S); #desing;
+26
+&gt; // could have used ResolveSingularSurface(S : UseFormalDesing := true);
+</PRE>
+<P>
+Hence, the formal desingularization of the projective surface defined by <TT>F</TT> contains 26 morphisms. They are represented by tuples of power series that vanish on <TT>F</TT>. We have a closer look at the first morphism.
+<P>
+<P>
+<P>
+<PRE>
+&gt; prm, ord := Explode(desing[1]);
+&gt; IsZero(AlgComb(F, prm)); ord;
+true
+4
+&gt; X, Y, Z, W := Explode(prm);
+&gt; Expand(X, 6); Expand(Y, 6); Expand(Z, 6); Expand(W, 6);
+true 1
+true -s*t^2
+true -t^2
+true -1/64*s^2*gamma_0*t^5 + 1/2*gamma_0^2*t^3 + gamma_0*t^2 + t
+&gt; Domain(W);
+Polynomial ring of rank 1 over Algebraic function field defined
+over Univariate rational function field over Rational Field
+by $.1^3 - 1/8*s^2
+Graded Lexicographical Order
+Variables: t
+</PRE>
+<P>
+One of the morphisms is of type Spec Q(s)[gamma<sub>0</sub>]ll t rr to 
+Proj Q[x, y, z, w] / &lt; F &gt; where gamma<sub>0</sub><sup>3</sup> - 1/8 s<sup>2</sup> = 0. In particular, Q(s)[gamma<sub>0</sub>] is isomorphic to the residue field of the corresponding prime divisor on the desingularization. From this one can for example deduce that it is a rational curve. The morphism is given by the ring homomorphism x |-&gt; 1, y |-&gt; - st<sup>2</sup>, z |-&gt; - t<sup>2</sup> and w |-&gt; t + gamma<sub>0</sub>t<sup>2</sup> + 1/2gamma<sub>0</sub><sup>2</sup>t<sup>3</sup> - 1/64s<sup>2</sup>gamma<sub>0</sub>t<sup>5</sup> + ... .
+<P>
+The adjoint order for this morphism is 4. Consider the chart x != 0. The special differential form (see Section <A  HREF = "text1384.htm#15471">Adjoint Systems and Birational Invariants</A>) in this chart obtained by dehomogenizing is
+<P>
+ frac(x<sup>5</sup>)((&part;F / &part;w)(x, y, z, w)) d y/x ^ d z/x.
+<P>
+Substituting the values  <TT>X</TT>, <TT>Y</TT>, <TT>Z</TT> and <TT>W</TT> we see that it is 
+mapped to
+<P>
+<P>
+frac(X<sup>5</sup>)((&part;F / &part;w)(X, Y, Z, W)) d Y/X ^ d Z/X
+<P>
+<P>
+=  frac(1)((&part;F / &part;w)(X, Y, Z, W)) d ( - st<sup>2</sup>) ^ d ( - t<sup>2</sup>)
+<P>
+<P>
+=  frac(1)((&part;F / &part;w)(X, Y, Z, W)) (2st d t +  t<sup>2</sup> d s) ^ 2t d t
+<P>
+<P>
+=  frac(1)((&part;F / &part;w)(X, Y, Z, W)) 2t<sup>3</sup> d s ^ d t
+<P>
+<P>
+The adjoint order is minus the overall order of this expression, hence, -3 plus the order of (&part;F / &part;w)(X, Y, Z, W). We check the computation.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Order(AlgComb(Derivative(F,w), prm));
+7
+</PRE>
+<HR>
+<H4><A NAME = "15471">Adjoint Systems and Birational Invariants</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+In this section we describe computation of adjoint spaces. Let S &sub;P<sub>E</sub><sup>3</sup> be a surface defined by a homogeneous irreducible polynomial F &isin;E[x<sub>0</sub>, x<sub>1</sub>, x<sub>2</sub>, x<sub>3</sub>] of degree d and &Omega;<sub>E(S) | E</sub> the vector space of rational differential forms of the function field (over the ground field E of characteristic zero). We can consider &Omega;<sub>E(S) | E</sub> a constant sheaf of OO<sub>S</sub>-modules. Let U<sub>i</sub> &sub;S be the affine open subsets of the standard covering w.r.t. this choice of variables.
+<P>
+Let &omega;<sub>S</sub><sup>0</sup> &sub;&Omega;<sub>E(S) | E</sub><sup>^ 2</sup> be the subsheaf which is locally generated on U<sub>i</sub> by
+<P>
+<P>
+(frac(&part;F/ &part;x<sub>j</sub>)(x<sub>i</sub><sup>d - 1</sup>))<sup> - 1</sup> bigwedge_(k &isin;{0, ..., 3} - {i, j}) d frac(x<sub>k</sub>)(x<sub>i</sub>)
+<P>
+<P>
+<P>
+(for an arbitrary choice of j != i). By sending this generator to x<sub>i</sub><sup>d - 4</sup> one finds that &omega;<sub>S</sub><sup>0</sup> isomorphic to OO<sub>S</sub>(d - 4). Further let FF<sub>S, m</sub> &sub;(&Omega;<sub>E(S) | E</sub><sup>^ 2</sup>)<sup> tensor m</sup> be the subsheaf of those forms whose pullbacks are regular on some desingularization of S. It is called the <I>sheaf of m-adjoints</I>. It is in fact well-defined, <I>i.e.</I>, doesn't depend on any specific desingularization, when m &ge;0, and one can show FF<sub>S, m</sub> &sube;(&omega;<sub>S</sub><sup>0</sup>)<sup> tensor m</sup>. For more details we refer to <A  HREF = "text1378.htm#bib_TB2007b">[BS08]</A>.
+<P>
+Now since FF<sub>S, m</sub> is a coherent sheaf on the projective scheme S
+&sub;P<sub>E</sub><sup>3</sup> it can be defined by its associated graded module
+M<sub>S, m</sub> and by the above discussion FF<sub>S, m</sub> is isomorphic to a
+subsheaf of OO<sub>S</sub>(m(d - 4)). The module M<sub>S, m</sub>  is thus naturally a
+graded submodule of (E[x<sub>0</sub>, x<sub>1</sub>, x<sub>2</sub>, x<sub>3</sub>]/&lt; F &gt;)(m(d - 4)). The
+n-th graded piece of M<sub>S, m</sub>, a linear subsystem of the standard
+linear system of degree n + m(d - 4) homogeneous polynomials on S,
+corresponds to global sections of the Serre twist FF<sub>S, m</sub>(n). This,
+under pullback, corresponds to the space of global sections of the twisted
+m-adjoint sheaf (&omega;<sub>X</sub>)<sup> tensor m</sup>(n) for any desingularization X
+of S, where (n) now signifies twisting by the n-th tensor power of
+LL, the invertible sheaf on X which gives the map into projective
+space projecting X down onto S.
+<P>
+These adjoint linear systems immediately give the plurigenera of any 
+desingularization X as well as an explicit representation of the important
+twisted m-adjoint maps into projective space as rational maps from S 
+(defined by the sequence of homogeneous polynomials forming a basis of the
+adjoint system). These maps are used to take any rational hypersurface to a standard
+model, as described in the next section. The untwisted m-adjoint map is just the
+the <I>m-pluri-canonical</I> map when m &gt; 0 and the <I>(-m)-pluri-anticanonical</I>
+map when m &lt; 0.
+<P>
+Note that the computations are all valid for m &lt; 0 but in that case, the adjoint
+and twisted adjoint linear systems <I>do</I> depend on the desingularisation, so
+the results are not birationally invariant but are specific to the particular
+formal or blow-up desingularisation that has been computed.
+<P>
+The intrinsics below have all been updated so that they can either use formal
+desingularisation data or the newer blow-up desingularisation data. Once a singularity
+resolution has been computed, the desingularisation data is cached with
+the hypersurface X and so will not need to be recomputed.
+
+
+<H5><A NAME = "15472"></A><A NAME = "as:hom_adj">HomAdjoints</A>(m,n,S) : RngIntElt, RngIntElt, Srfc -&gt; SeqEnum</H5>
+
+<PRE>    UseFormalDesing: BoolElt            Default: <TT>false</TT></PRE>
+
+<PRE>    SetVerbose("Classify", n):          Maximum: 1</PRE>
+<BLOCKQUOTE>
+Given a surface S of degree d in P<sup>3</sup> defined over a number field E together
+with integers m and n, the intrinsic returns a basis for the vector space of the 
+degree-n graded summand of the graded ring associated to FF<sub>S, m</sub> 
+(<I>i.e.</I>, &Gamma;(S, OO<sub>S</sub>(n) tensor FF<sub>S, m</sub>)) as a subspace of the
+ homogeneous forms in E[x<sub>0</sub>, x<sub>1</sub>, x<sub>2</sub>, x<sub>3</sub>] (the coordinate ring of the P<sup>3</sup> 
+ambient) of degree n + m(d - 4) (see above).
+<P>
+The intrinsic needs desingularisation data to work with and can use either formal
+desingularisation data or blow-up desingularisation data. It will first try to use
+desingularisation data (of either type) cached on the surface. If there is no cached
+precomputed data, it will call <A  HREF = "text1383.htm#resolve_singular_surface">ResolveSingularSurface</A> at the beginning to get
+such data (which will then have been cached with X). Use/generation of blow-up
+desingularisation data is now the default when S has only point singularities.
+To force the use of formal desingularisation data, the <TT>UseFormalDesing</TT> parameter
+should be set to <TT>true</TT>.
+<P>
+When using formal data, the intrinsic computes the adjoint space as a linear
+subspace of homogeneous polynomials of the appropriate degree by using the formal
+divisor morphisms
+of the formal desingularization to give additional linear conditions at the
+singular places of S. This is explained fully in <A  HREF = "text1378.htm#bib_TB2007b">[BS08]</A>.
+<P>
+When using blow-up data, the same linear conditions are computed with the
+<TT>LinearSystemDivisorRestriction</TT> and <TT>DifferentialMultiplicities</TT>
+intrinsics described in section <A  HREF = "text1383.htm#15435">Desingularisation by Blow Up</A>. 
+</BLOCKQUOTE>
+<H5><A NAME = "15473"></A><A NAME = "as:hyp-gg">GeometricGenusOfDesingularization</A>(S) : Srfc -&gt; RngIntElt</H5>
+
+<PRE>    UseFormalDesing: BoolElt            Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a hypersurface S in P<sup>3</sup>, the intrinsic returns the geometric genus 
+of (any) desingularization of S. The function just computes the dimension of
+the (1, 0) adjoint space. The parameter is the same as for <TT>HomAdjoints</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "15474"></A><A NAME = "as:hyp-pg">PlurigenusOfDesingularization</A>(S,m) : Srfc, RngIntElt -&gt; RngIntElt</H5>
+
+<PRE>    UseFormalDesing: BoolElt            Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a hypersurface S in P<sup>3</sup>, the intrinsic returns the m-th plurigenus 
+of (any) desingularization, X, of S. This is the dimension of the global
+sections of the sheaf (&omega;<sub>X</sub>)<sup> tensor m</sup> and is just computed
+as the dimension of the (m, 0) adjoint space.The parameter is the same as for
+<TT>HomAdjoints</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "15475"></A><A NAME = "as:hyp-ag">ArithmeticGenusOfDesingularization</A>(S) : Srfc -&gt; RngIntElt</H5>
+
+<PRE>    UseFormalDesing: BoolElt            Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a hypersurface S in P<sup>3</sup>, the intrinsic returns the arithmetic genus 
+of (any) desingularization of S. This is computed from a simple formula
+coming from the Riemann-Roch theorem,  involving the dimension of the (1,1)-adjoints
+and the degree of S. The parameter is the same as for <TT>HomAdjoints</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15476">Example <TT>AlgSrf_adj_ex (H122E18)</TT></A></H3>
+We compute several adjoint spaces of a surface. We compute the resolution at the start,
+after which it is cached for the <TT>HomAdjoints</TT> calls. The resolution computes a formal
+desingularisation since the surface has a singular subscheme of dimension 1.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z,w&gt; := ProjectiveSpace(Rationals(), 3);
+&gt; F := w^3*y^2*z+(x*z+w^2)^3;
+&gt; S := Surface(P,F);
+&gt; desing := ResolveSingularSurface(S : AdjComp := true);
+&gt; #desing;
+18
+&gt; HomAdjoints(1, 0, S);
+[]
+&gt; HomAdjoints(1, 1, S);
+[
+    x*z*w + w^3
+]
+&gt; HomAdjoints(1, 2, S);
+[
+    x^2*z^2 - w^4, x^2*z*w + x*w^3, x*y*z*w, x*z^2*w + z*w^3,
+    x*z*w^2 + w^4, y*z*w^2, y*w^3
+]
+&gt; HomAdjoints(1, 3, S);
+[
+    x^3*z^2 - x*w^4, x^2*y*z^2, x^2*z^3 - z*w^4,
+    x^3*z*w + x^2*w^3, x^2*y*z*w, x*y^2*z*w, x^2*z^2*w - w^5,
+    x*y*z^2*w, x*z^3*w + z^2*w^3, x^2*z*w^2 + x*w^4, x*y*z*w^2,
+    y^2*z*w^2, x*z^2*w^2 + z*w^4, y*z^2*w^2, x*y*w^3, y^2*w^3,
+    x*z*w^3 + w^5, y*z*w^3, y*w^4
+]
+&gt; 
+&gt; HomAdjoints(2, 0, S);
+[]
+&gt; HomAdjoints(2, 1, S);
+[]
+&gt; HomAdjoints(2, 2, S);
+[
+    x^2*z^2*w^2 + 2*x*z*w^4 + w^6
+]
+&gt; HomAdjoints(2, 3, S);
+[
+    x^3*z^2*w^2 + 2*x^2*z*w^4 + x*w^6, x^2*y*z^2*w^2 - y*w^6,
+    x^2*z^3*w^2 + 2*x*z^2*w^4 + z*w^6,
+    x^2*z^2*w^3 + 2*x*z*w^5 + w^7, x*y*z^2*w^3 + y*z*w^5,
+    x*y*z*w^4 + y*w^6, y^2*z*w^4
+]
+</PRE>
+<HR>
+<H4><A NAME = "15477">Classification and Parameterization of Rational Surfaces</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+This section contains intrinsics for the recognition of rational surfaces
+in Prj<sup>3</sup>,
+the classification and transformation to standard models using appropriate
+m-adjunction maps and, finally, special case code for these standard
+models, to determine a parametrization of the original hypersurface.
+<P>
+The intrinsic to test whether a surface is rational actually also applies
+to surfaces in higher-dimensional ordinary projective spaces as long
+as the surface model has no worse than simple singularities. 
+<P>
+A <I>non-singular</I> surface in Prj<sup>r</sup> with r &ge;4
+may be transformed to a standard model using 
+the intrinsic <TT>MinimalModelRationalSurface</TT> 
+(see Section <A  HREF = "text1382.htm#15415">Minimal Models</A>).
+
+
+<H5><A NAME = "15478">IsRational(X) : Srfc -&gt; BoolElt</A></H5>
+
+<PRE>    UseFormalDesing: BoolElt            Default: <TT>false</TT></PRE>
+
+<PRE>    CheckADE: BoolElt                   Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the ordinary projective surface X is (geometrically) rational,
+i.e. birationally isomorphic to the projective plane over the algebraic closure
+of its base field. This simply uses the Castelnuevo criterion that X is
+rational if and only if both the arithmetic genus and second plurigenus of
+any desingularization are zero.
+<P>
+If the ambient of X is P<sup>3</sup>, there is no assumption
+about the singularity of X and a formal or blow-up desingularisation will be used
+to compute  plurigenera, as long as either the characteristic of the base field is 0
+or the singular subscheme is of dimension 0. 
+Otherwise, X should have at worst simple (A-D-E) singularities
+and the algorithms of the first section are used for the computations. In this latter
+case, the singularity status is assumed by default. To force a check for
+only A-D-E singularities, the user should set the parameter <TT>CheckADE</TT> to
+<TT>true</TT>. This can be a very heavy verification in higher dimensional ambients. 
+<P>
+In the first case, a desingularisation is computed if one is not already cached
+with X. As usual, blow-up desingularisation is the default (when it can be computed).
+To force the use of formal desingularisation, parameter <TT>UseFormalDesing</TT>
+should be set to <TT>true</TT>.
+</BLOCKQUOTE>
+<H4><A NAME = "15479">Reduction to Special Models</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+In this section, we describe the function for the birational transformation over the 
+base field of a rational hypersurface in Prj<sup>3</sup> into a special model of one of the
+types in the standard classification as listed by Josef Schicho in <A  HREF = "text1378.htm#bib_JS1998b">[Sch98]</A>.
+He enumerates 5 basic cases <A  HREF = "text1378.htm#bib_JS1998b">[Sch98, p. 17 and Lem. 5.2-5.7]</A> and splits 
+the last case in two, choosing labels "1", "2", "3", "4", "5A" and "5B". 
+The lemmas describing cases 3 and 5A involve a further case distinction. Also, a 
+label "0" is useful for the non-rational case. From this, we get the label set 
+<P>
+LL := {"0", "1", "2", "3a", "3b", "4", "5Aa", "5Ab",
+ "5Ac", "5B"}
+<P>
+Let S be a surface in Prj<sup>3</sup>. In each of the above cases the author specifies a set of
+adjoint spaces defining interesting maps, either birationally to a special surface or to a
+rational normal curve (giving a pencil of rational curves on the surface). More precisely,
+the maps can be computed using V<sub>n, m</sub> := <TT>HomAdjoints</TT> (m, n, S) for certain
+choices of m and n. Let &mu; to be the smallest integer s.t. V<sub>1, &mu; + 1</sub> != [ ].
+Then the important V<sub>n, m</sub> for the different cases are as follows:
+<P>
+<P>
+<P>
+vbox{tabskip=0pt offinterlineskip
+halign {#&amp; vrule#tabskip=1em plus2em&amp;
+  hfil#&amp; vrule#&amp; hfil#hfil&amp; vrule#&amp;
+  hfil#&amp; vrule#&amp; hfil#hfil&amp; vrule#&amp;
+  hfil#&amp; vrule#&amp; hfil#&amp; vrule#tabskip=0pt cr tablerule
+  &amp;&amp;omit hidewidth 0hidewidth&amp;&amp;omit hidewidth 1hidewidth&amp;&amp;
+  omit hidewidth 2hidewidth&amp;&amp;omit hidewidth 3a hidewidth&amp;&amp;
+  omit hidewidth 3b hidewidth&amp;&amp;omit hidewidth 4hidewidth&amp;cr tablerule
+  &amp;&amp;[ ]&amp;&amp;[V<sub>1, &mu;</sub>]&amp;&amp;[V<sub>1, &mu;</sub>]&amp;&amp;[V<sub>2, 2&mu; + 1</sub>, V<sub>1, &mu;</sub>]&amp;&amp; 
+  [V<sub>2, 2&mu; + 1</sub>]&amp;&amp;[V<sub>1, &mu;</sub>, V<sub>2, 2&mu; - 1</sub>]&amp;cr tablerule}}
+<P>
+<P>
+<P>
+vbox{tabskip=0pt offinterlineskip
+halign {#&amp; vrule#tabskip=1em plus2em&amp;
+  hfil#&amp; vrule#&amp; hfil#hfil&amp; vrule#&amp;
+  hfil#&amp; vrule#&amp; hfil#&amp; vrule#tabskip=0pt cr tablerule
+  &amp;&amp;omit hidewidth 5Aa hidewidth&amp;&amp;omit hidewidth 5Ab hidewidth&amp;&amp;
+  omit hidewidth 5Ac hidewidth&amp;&amp;omit hidewidth 5B hidewidth&amp;cr tablerule
+  &amp;&amp;[V<sub>1, &mu; - 1</sub>]&amp;&amp;[V<sub>1, &mu; - 1</sub>, V<sub>2, 2&mu; - 2</sub>]&amp;&amp; 
+  [V<sub>1, &mu; - 1</sub>, V<sub>2, 2&mu; - 2</sub>, V<sub>3, 3&mu; - 3</sub>]&amp;&amp;[V<sub>2, 1</sub>]&amp;cr tablerule}}
+<P>
+<P>
+<P>
+The function to find a parameterization of a rational hypersurface, which
+uses the reduction function below as a first stage, is described in the
+next section. 
+
+
+<H5><A NAME = "15480"></A><A NAME = "as:class_prj">ClassifyRationalSurface</A>(S) : Srfc -&gt; Srfc, List, MonStgElt</H5>
+
+<PRE>    UseFormalDesing: BoolElt            Default: <TT>false</TT></PRE>
+
+<PRE>    SetVerbose("Classify", n):          Maximum: 1</PRE>
+<BLOCKQUOTE>
+Given an ordinary projective surface S in Prj<sup>3</sup> over a number field, the intrinsic
+returns the special rational surface type to which S is birationally equivalent and 
+associated data.
+If S is not (geometrically) rational, the return values are S itself, a list containing
+only the identity map on S and the string "Not rational".
+<P>
+If S is rational and Schicho's algorithm reduces it to a standard surface Y over the
+base field k, Y is the first return value. The second return value is a list of one
+or two scheme maps.  The first is always a birational map from S to Y. There is a
+second map if and only if Y is a rational scroll or conic bundle. Then S (and Y)
+have fibration maps to a rational normal curve such that the general fibre is a 
+rational curve (and a line or conic for Y). The fibration map on S is the
+second return value. Note that, if the base field is <B>Q</B>, in these cases, S can 
+be parameterized by calling <TT>ParametrizePencil</TT> with the fibration map as argument.
+<P>
+The third return value is a string describing the type of Y. It is "P2" (for the projective
+plane!), "Quadric surface" (for a degree 2 surface in Prj<sup>3</sup>), "Rational scroll",
+"Conic bundle" or "Del Pezzo of degree d" where 1 &le;d &le;9. The Del Pezzos might be
+degenerate (with simple singularities) and are anticanonically embedded in Prj<sup>d</sup>
+except for degrees 1 and 2 when they have their standard weighted-projective embeddings.
+<P>
+If formal or blow-up desingularisation data has not already been cached with S, it is
+computed at the start. Parameter <TT>UseFormalDesing</TT> is as for earlier intrinsics.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15481">Example <TT>AlgSrf_class (H122E19)</TT></A></H3>
+Here are a few examples.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z,w&gt; := ProjectiveSpace(Rationals(),3);
+</PRE>
+<P>
+The first surface:
+<P>
+<P>
+<P>
+<PRE>
+&gt; p1 := x^4 + y^4 - z^2*w^2;
+&gt; _,_,typ := ClassifyRationalSurface(Surface(P,p1));
+&gt; typ;
+Not rational
+</PRE>
+<P>
+The second surface:
+<P>
+<P>
+<P>
+<PRE>
+&gt; p2 := 2*x + y + 8*z + 5*w;
+&gt; Y,_,typ := ClassifyRationalSurface(Surface(P,p2));
+&gt; typ; Y;
+P^2
+Surface over Rational Field defined by
+0
+</PRE>
+<P>
+The third surface:
+<P>
+<P>
+<P>
+<PRE>
+&gt; p3 := x^2 - 4*x*z + 3*x*w + y*z - y*w + 2*z^2 - 3*z*w + w^2;
+&gt; _,_,typ := ClassifyRationalSurface(Surface(P,p3));
+&gt; typ;
+Quadric surface
+</PRE>
+<P>
+The fourth surface:
+<P>
+<P>
+<P>
+<PRE>
+&gt; p4 := (y^2 - w*z)*(w^2 - y*x) + (x*z - y*w)^2;
+&gt; S := Surface(P,p4);
+&gt; Y,mps,typ := ClassifyRationalSurface(S);
+&gt; typ;
+Rational scroll
+&gt; mps[2]; // the fibration map
+Mapping from: Srfc: S to Scheme over Rational Field defined by
+$.1*$.2 - $.3^2
+with equations : 
+x*y - w^2
+y^2 - z*w
+x*z - y*w
+</PRE>
+<P>
+The fifth surface:
+<P>
+<P>
+<P>
+<PRE>
+&gt; p5 := x^3*y - 4*x^3*z - 6*x^3*w - 3*x^2*y^2 - 2*x^2*y*z
+&gt;     - 3*x^2*y*w + 50*x^2*z^2 + 146*x^2*z*w + 108*x^2*w^2
+&gt;     - 11*x*y^2*z + 2*x*y^2*w + 61*x*y*z^2 + 149*x*y*z*w
+&gt;     + 65*x*y*w^2 + 68*x*z^3 + 228*x*z^2*w + 260*x*z*w^2
+&gt;     + 112*x*w^3 + 4*y^4 - 13*y^3*z - 19*y^3*w + 20*y^2*z^2
+&gt;     + 77*y^2*z*w + 55*y^2*w^2 + 40*y*z^3 + 106*y*z^2*w
+&gt;     + 58*y*z*w^2 - 2*y*w^3 + 22*z^4 + 84*z^3*w + 130*z^2*w^2
+&gt;     + 108*z*w^3 + 38*w^4;
+&gt; S := Surface(P,p5);
+&gt; _,mps,typ := ClassifyRationalSurface(S);
+&gt; typ;
+P2
+&gt; mps[1]; //birational map from Y to P2
+Mapping from: Srfc: S to Surface over Rational Field defined by
+0
+with equations : 
+x^2-1114/45*x*z-232/15*y*z-241/15*z^2-1543/45*x*w-319/15*y*w-1327/45*z*w-
+    457/45*w^2
+x*y-182/45*x*z-11/15*y*z-38/15*z^2-284/45*x*w-17/15*y*w-266/45*z*w-146/45*w^2
+y^2-16/45*x*z-28/15*y*z-4/15*z^2-22/45*x*w-61/15*y*w+32/45*z*w+92/45*w^2
+</PRE>
+<P>
+The sixth surface:
+<P>
+<P>
+<P>
+<PRE>
+&gt; p6 := x^2*y^2 + 8*x^3*y + 4*x^4 + x*y*z^2 - x^2*z^2 - y^2*w^2
+&gt;     - 7*x*y*w^2 + 8*x^2*w^2;
+&gt; S := Surface(P,p6);
+&gt; Y,mps,typ := ClassifyRationalSurface(S);
+&gt; typ; Y;
+Conic bundle
+Surface over Rational Field defined by
+$.1^2 + 2*$.1*$.2 + 1/4*$.1*$.3 - 1/4*$.4^2 + 1/4*$.4*$.5 + 
+    2*$.6^2 - 7/4*$.6*$.7 - 1/4*$.7^2,
+$.2^2 - $.1*$.3,
+$.2*$.4 - $.1*$.5,
+$.3*$.4 - $.2*$.5,
+$.2*$.6 - $.1*$.7,
+$.3*$.6 - $.2*$.7,
+$.5*$.6 - $.4*$.7
+&gt; mps[2]; //the fibration map
+Mapping from: Srfc: S to Projective Space of dimension 1 over Rational Field
+Variables: $.1, $.2
+with equations : 
+x
+y
+</PRE>
+<P>
+The seventh surface:
+<P>
+<P>
+<P>
+<PRE>
+&gt; p7 := x^2*w^3 + y^3*w^2 + z^5;
+&gt; Y,_,typ := ClassifyRationalSurface(Surface(P,p7));
+&gt; typ; Y; Ambient(Y);
+Del Pezzo degree 1
+Surface over Rational Field defined by
+$.1^5*$.2 + $.3^3 + $.4^2
+Projective Space of dimension 3 over Rational Field
+Variables: $.1, $.2, $.3, $.4
+The grading is:
+    1, 1, 2, 3
+</PRE>
+<P>
+The eighth surface:
+<P>
+<P>
+<P>
+<PRE>
+&gt; p8 := w^3*y^2*z + (x*z + w^2)^3;
+&gt; Y,_,typ := ClassifyRationalSurface(Surface(P,p8));
+&gt; typ; Y;
+Del Pezzo degree 6
+Surface over Rational Field defined by
+$.1^2 - 4*$.5^2 + $.3*$.6 - 3*$.6*$.7,
+$.1*$.2 + 2*$.2*$.5 + $.3*$.7,
+$.1*$.4 + 2*$.4*$.5 + $.6^2,
+$.2*$.4 + $.5^2 + $.6*$.7,
+$.3*$.4 - $.1*$.6 - $.4*$.7,
+$.1*$.5 + 2*$.5^2 + $.6*$.7,
+$.3*$.5 - $.1*$.7 - $.5*$.7,
+$.2*$.6 - $.1*$.7 - $.5*$.7,
+$.5*$.6 - $.4*$.7
+</PRE>
+<HR>
+<H4><A NAME = "15482">Parametrization of Rational Surfaces</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+The package also includes functions to directly parametrize rational surfaces
+(over Q). These use the reduction to special type, described in the
+last section, followed by specialised algorithms for the special cases, which are 
+described in the following sections and the section on Del Pezzo surfaces.
+There is a version for hypersurfaces in P<sup>3</sup> and one
+for more general rational surfaces which are first birationally projected to a
+hypersurface. Note, however, that the projection method can be very inefficient
+because it often introduces nasty singularities that cause the resolution
+process to hang. If it is known that the surface S is non-singular, it is
+usually much better to use <A  HREF = "text1382.htm#srfc-mm-rat">MinimalModelRationalSurface</A> to get a birational map from
+S to a standard model Y and call the relevant special case parametrization
+routine for Y directly.
+
+
+<H5><A NAME = "15483">ParametrizeProjectiveHypersurface(X, P2) : Srfc, Prj -&gt; BoolElt, MapSch</A></H5>
+
+<PRE>    UseFormalDesing: BoolElt            Default: <TT>false</TT></PRE>
+
+<PRE>    SetVerbose("Classify", n):          Maximum: 1</PRE>
+<BLOCKQUOTE>
+Given a surface X  in P<sub>Q</sub><sup>3</sup> and a projective plane P2 over Q, 
+the intrinsic returns <TT>false</TT> if the surface is not rational over Q, otherwise 
+returns <TT>true</TT> and a birational parameterization P2 -&gt; X.
+<P>
+The intrinsic begins by mapping X, as in  <A  HREF = "text1384.htm#as:class_prj">ClassifyRationalSurface</A>, to a surface of special type.
+Then specialised parametrization routines are called depending on the type.
+<P>
+It is assumed that X is defined over Q because some of the special type
+routines assume this, partly for simplicity. This will probably be
+generalised in future releases.
+<P>
+As usual, if formal or blow-up desingularisation data has not already been cached with S, it
+is computed at the start. Parameter <TT>UseFormalDesing</TT> is as for earlier intrinsics.
+</BLOCKQUOTE>
+<H5><A NAME = "15484">ParametrizeProjectiveSurface(X, P2) : Srfc, Prj -&gt; BoolElt, MapSch</A></H5>
+
+<PRE>    SetVerbose("Classify", n):          Maximum: 1</PRE>
+<BLOCKQUOTE>
+Given an ordinary projective surface X in Prj<sub>Q</sub><sup>n</sup> 
+for some n &ge;2 and a projective 
+plane P2 over Q, returns <TT>false</TT> if the surface is not rational over Q, 
+otherwise return <TT>true</TT> and a birational parametrization P2 -&gt; X.
+<P>
+The function finds a birational projection to a hypersurface in P<sup>3</sup> and then
+calls <TT>ParametrizeProjectiveHypersurface</TT>.
+<P>
+It should be noted that the birational projection may produce a very singular
+hypersurface defined by a polynomial with large coefficients. Then, the 
+desingularisation, classification and special parameterization routines may
+each be very slow. As noted above, it may be better to try to use
+<A  HREF = "text1382.htm#srfc-mm-rat">MinimalModelRationalSurface</A> followed by one of the specialised parametrization
+routines for a non-singular rational X for larger n.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15485">Example <TT>AlgSrf_prm (H122E20)</TT></A></H3>
+We try to parameterize the hypersurfaces given by polynomials
+<TT>p1</TT> - <TT>p8</TT> from the previous example.
+<P>
+<P>
+The surface defined by p1:
+<P>
+<P>
+<P>
+<PRE>
+&gt; P2&lt;X,Y,W&gt; := ProjectiveSpace(Rationals(), 2);
+&gt; ParametrizeProjectiveHypersurface(Surface(P, p1), P2);
+false
+</PRE>
+<P>
+The surface defined by p2:
+<P>
+<P>
+<P>
+<PRE>
+&gt; ParametrizeProjectiveHypersurface(Surface(P, p2), P2);
+true Mapping from: Prj: P2 to Surface over Rational Field
+defined by 2*x + y + 8*z + 5*w
+with equations : 
+-1/2*X - 4*Y - 5/2*W
+X
+Y
+W
+</PRE>
+<P>
+The surface defined by p3:
+<P>
+<P>
+<P>
+<PRE>
+&gt; ParametrizeProjectiveHypersurface(Surface(P, p3), P2);
+true Mapping from: Prj: P2 to Surface over Rational Field
+defined by x^2 - 4*x*z + 3*x*w + y*z - y*w + 2*z^2 - 3*z*w + w^2
+with equations : 
+X^2 - 2*X*W
+X^2 + X*Y - 4*X*W - Y*W + 2*W^2
+X^2 - 3*X*W + Y*W
+X^2 - 4*X*W + Y*W + 2*W^2
+</PRE>
+<P>
+The surface defined by p4:
+<P>
+<P>
+<P>
+<PRE>
+&gt; ParametrizeProjectiveHypersurface(Surface(P, p4), P2);
+true Mapping from: Prj: P2 to Surface over Rational Field
+defined by x^2*z^2 - x*y^3 - x*y*z*w + 2*y^2*w^2 - z*w^3
+with equations : 
+2*X^2*Y^2*W^2 - Y*W^5
+X^4*Y^2 - X^2*Y*W^3
+X^3*Y*W^2
+X^3*Y^2*W
+</PRE>
+<P>
+The surface defined by p5:
+<P>
+<P>
+<P>
+<PRE>
+&gt; ParametrizeProjectiveHypersurface(Surface(P, p5), P2);
+true Mapping from: Prj: P2 to Surface over Rational Field
+defined by ...
+with equations : 
+-1/4*X^2 + 9/2*X*Y + 1/2*X*W - 69/4*Y^2 - 87/8*Y*W + 1/2*W^2
+1/2*X*Y + 11/4*X*W - 5/8*Y^2 - 131/8*Y*W - 63/8*W^2
+-11/8*X*Y + 7/8*X*W + 13/4*Y^2 - 11/2*W^2
+X*Y - 1/8*X*W - 23/8*Y^2 + 4*W^2
+</PRE>
+<P>
+The surface defined by p6:
+<P>
+<P>
+<P>
+<PRE>
+&gt; ParametrizeProjectiveHypersurface(Surface(P, p6), P2);
+true Mapping from: Prj: P2 to Surface over Rational Field
+defined by 4*x^4 + 8*x^3*y + x^2*y^2 - x^2*z^2 + 8*x^2*w^2
+            + x*y*z^2 - 7*x*y*w^2 - y^2*w^2
+with equations : 
+-3/8*X^2*Y^2*W - 2*X^2*Y*W^2 - 8/3*X^2*W^3 - 59/24*X*Y^2*W^2
+    - 38/3*X*Y*W^3 - 16*X*W^4 + 17/6*Y^2*W^3 + 44/3*Y*W^4
+    + 56/3*W^5
+-3/8*X^3*Y^2 - 2*X^3*Y*W - 8/3*X^3*W^2 - 59/24*X^2*Y^2*W
+    - 38/3*X^2*Y*W^2 - 16*X^2*W^3 + 17/6*X*Y^2*W^2
+    + 44/3*X*Y*W^3 + 56/3*X*W^4
+-1/8*X^2*Y^2*W - 4/3*X^2*Y*W^2 - 8/3*X^2*W^3 - 1/12*X*Y^2*W^2
+    - 16/3*X*Y*W^3 - 40/3*X*W^4 + 19/3*Y^2*W^3 + 104/3*Y*W^4
+    + 48*W^5
+-3/8*X^2*Y^2*W - 2*X^2*Y*W^2 - 8/3*X^2*W^3 - 8/3*X*Y^2*W^2
+    - 14*X*Y*W^3 - 56/3*X*W^4 + Y^2*W^3 + 20/3*Y*W^4 + 32/3*W^5
+</PRE>
+<P>
+The surface defined by p7:
+<P>
+<P>
+<P>
+<PRE>
+&gt; ParametrizeProjectiveHypersurface(Surface(P, p7), P2);
+true Mapping from: Prj: P2 to Surface over Rational Field defined by
+z^5 + y^3*w^2 + x^2*w^3
+with equations : 
+-X^362*Y^144*W^79 - 9*X^363*Y^141*W^81 - 36*X^364*Y^138*W^83 - 
+    84*X^365*Y^135*W^85 - 126*X^366*Y^132*W^87 - 126*X^367*Y^129*W^89 - 
+    84*X^368*Y^126*W^91 - 36*X^369*Y^123*W^93 - 9*X^370*Y^120*W^95 - 
+    X^371*Y^117*W^97
+X^359*Y^148*W^78 + 10*X^360*Y^145*W^80 + 45*X^361*Y^142*W^82 + 
+    120*X^362*Y^139*W^84 + 210*X^363*Y^136*W^86 + 252*X^364*Y^133*W^88 + 
+    210*X^365*Y^130*W^90 + 120*X^366*Y^127*W^92 + 45*X^367*Y^124*W^94 + 
+    10*X^368*Y^121*W^96 + X^369*Y^118*W^98
+-X^357*Y^150*W^78 - 11*X^358*Y^147*W^80 - 55*X^359*Y^144*W^82 - 
+    165*X^360*Y^141*W^84 - 330*X^361*Y^138*W^86 - 462*X^362*Y^135*W^88 - 
+    462*X^363*Y^132*W^90 - 330*X^364*Y^129*W^92 - 165*X^365*Y^126*W^94 - 
+    55*X^366*Y^123*W^96 - 11*X^367*Y^120*W^98 - X^368*Y^117*W^100
+X^354*Y^153*W^78 + 12*X^355*Y^150*W^80 + 66*X^356*Y^147*W^82 + 
+    220*X^357*Y^144*W^84 + 495*X^358*Y^141*W^86 + 792*X^359*Y^138*W^88 + 
+    924*X^360*Y^135*W^90 + 792*X^361*Y^132*W^92 + 495*X^362*Y^129*W^94 + 
+    220*X^363*Y^126*W^96 + 66*X^364*Y^123*W^98 + 12*X^365*Y^120*W^100 + 
+    X^366*Y^117*W^102
+and inverse
+z^4*w^8
+y*z^2*w^9
+x*z*w^10
+</PRE>
+<P>
+The surface defined by p8:
+<P>
+<P>
+<P>
+<PRE>
+&gt; ParametrizeProjectiveHypersurface(Surface(P, p8), P2);
+true Mapping from: Prj: P2 to Surface over Rational Field defined by
+x^3*z^3 + 3*x^2*z^2*w^2 + 3*x*z*w^4 + y^2*z*w^3 + w^6
+with equations :
+2*X^20*Y^3*W - 4*X^19*Y^3*W^2 + 4*X^17*Y^3*W^4 - 2*X^16*Y^3*W^5
+4*X^19*Y^4*W - 8*X^18*Y^4*W^2 + 4*X^17*Y^4*W^3
+1/2*X^16*Y^7*W - X^15*Y^7*W^2 + 1/2*X^14*Y^7*W^3
+-X^18*Y^5*W + 3*X^17*Y^5*W^2 - 3*X^16*Y^5*W^3 + X^15*Y^5*W^4
+&gt; IsRational(Surface(P, p7));
+true
+</PRE>
+<P>
+Here are two easy examples of parameterizing non-hypersurfaces. 
+<P>
+<P>
+<P>
+<PRE>
+&gt; P4&lt;u,v,w,x,y&gt; := ProjectiveSpace(Rationals(),4);
+&gt; P2&lt;X,Y,Z&gt; := ProjectiveSpace(Rationals(), 2);
+&gt; S := Surface(P4,[u^2 + v^2 + w^2 - x^2, y - x]);
+&gt; ParametrizeProjectiveSurface(S, P2);
+true Mapping from: Prj: P2 to Srfc: S
+with equations : 
+-2*X*Z + 2*Z^2
+-2*Y*Z
+X^2 + Y^2 - 2*X*Z
+-X^2 - Y^2 + 2*X*Z - 2*Z^2
+-X^2 - Y^2 + 2*X*Z - 2*Z^2
+and inverse
+u + w + y
+v
+w + x
+</PRE>
+<P>
+Here we parametrize a particularly easy surface -- P<sup>2</sup> itself!
+<P>
+<P>
+<P>
+<PRE>
+&gt; S := Surface(P2,[]);
+&gt; ParametrizeProjectiveSurface(S, P2);
+true Mapping from: Prj: P2 to Srfc: S
+with equations : 
+X
+Y
+Z
+and inverse
+X
+Y
+Z
+</PRE>
+<HR>
+<H5><A NAME = "15486">Solve(p, F) : RngMPolElt, FldFunRat -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+For convenience, this intrinsic provides a purely algebraic version of
+parameterization of an affine hypersurface.
+<P>
+Given a polynomial p &isin;Q[x, y, z], the equation of a (not necessarily 
+irreducible affine hypersurface S) and a two-variable rational function field
+F = Q(u, v), the function finds birational parameterizations of the irreducible
+components of S (that are parametrizable over Q).
+<P>
+A sequence of triples (X, Y, Z) &isin;F<sup>3</sup> is returned such that p(X, Y, Z) = 0 and 
+each triple gives an isomorphism of F to the function field of a component of
+S.
+<P>
+The routine may again result in a runtime error if it involves parameterizations
+of special surface types that are not yet implemented, as for the preceding
+functions.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15487">Example <TT>AlgSrf_prm2 (H122E21)</TT></A></H3>
+The following affine hypersurface has three irreducible factors: one not
+rational and two that are rational and parameterizable over Q.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Q := RationalField();
+&gt; P&lt;x,y,z&gt; := PolynomialRing(Q, 3);
+&gt; F&lt;s,t&gt; := RationalFunctionField(Q, 2);
+&gt; p := (x^4+y^4-z^2)*(2*x + y + 8*z + 5)
+&gt;       *(x^2 - 4*x*z + 3*x + y*z - y + 2*z^2 - 3*z + 1);
+&gt; Solve(p, F);
+[
+    [ -1/2*s - 4*t - 5/2, s, t ],
+    [
+        (s^2 - 2*s)/(s^2 - 4*s + t + 2),
+        (s^2 + s*t - 4*s - t + 2)/(s^2 - 4*s + t + 2),
+        (s^2 - 3*s + t)/(s^2 - 4*s + t + 2)
+    ]
+]
+</PRE>
+<HR>
+<H4><A NAME = "15488">Parametrization of Special  Surfaces</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+In this section we describe routines for the explicit parameterization of the 
+special classes of rational surfaces that arise from the reduction of the 
+general case via m-adjoint maps. The algorithms are the work of Josef
+Schicho, in collaboration with others in some cases. The functions are used in
+the general parameterization routines but can also be called directly by the
+user.
+
+
+<H5><A NAME = "15489">ParametrizeQuadric(X,P2) : Sch, Prj -&gt; BoolElt, MapSch</A></H5>
+<BLOCKQUOTE>
+Suppose the scheme X &sub;P<sub>Q</sub><sup>3</sup> is a geometrically irreducible quadric 
+(degree 2) projective hypersurface and P2 is a projective plane. The intrinsic
+returns <TT>false</TT> if X is not parametrizable over the rationals, otherwise
+it returns <TT>true</TT> together with a birational parameterization P2 -&gt; X.
+<P>
+Given a rational point p on X, the intrinsic is based on a simple, 
+well-known algorithm (see <A  HREF = "text1378.htm#bib_JS1998b">[Sch98, Sec. 3.1]</A>). Finding the point p 
+is equivalent to finding a non-trivial isotropic vector for F, the quadric 
+form in four variables defining X. This is achieved by a reduction to the 
+solution of two quadrics in three variables, which is performed using standard 
+lattice methods. The solubility routines here assume that the quadric is 
+defined over Q.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15490">Example <TT>AlgSrf_solve_quad (H122E22)</TT></A></H3>
+<P>
+We give a few simple examples.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Q := Rationals();
+&gt; P2&lt;X,Y,W&gt; := ProjectiveSpace(Q, 2);
+&gt; P3&lt;x,y,z,w&gt; := ProjectiveSpace(Q, 3);
+&gt; X1 := Scheme(P3, x^2 + y^2 + z^2 + w^2);
+&gt; X2 := Scheme(P3, x^2 + y^2 + z^2 - w^2);
+&gt; X3 := Scheme(P3, x^2 + y^2 + z^2);
+&gt; X4 := Scheme(P3, x^2 + y^2 - z^2);
+&gt; X5 := Scheme(P3, x^2 - 4*x*z + 3*x*w + y*z - y*w + 2*z^2
+&gt;                   - 3*z*w + w^2);
+&gt; ParametrizeQuadric(X1, P2);
+false
+&gt; ParametrizeQuadric(X2, P2);
+true Mapping from: Prj: P2 to Sch: X2
+with equations : 
+2*X*W
+2*Y*W
+-X^2 - Y^2 + W^2
+X^2 + Y^2 + W^2
+&gt; ParametrizeQuadric(X3, P2);
+false
+&gt; ParametrizeQuadric(X4, P2);
+true Mapping from: Prj: P2 to Sch: X4
+with equations : 
+X*Y
+-1/2*X^2 + 1/2*Y^2
+1/2*X^2 + 1/2*Y^2
+Y*W
+&gt; ParametrizeQuadric(X5, P2);
+true Mapping from: Prj: P2 to Sch: X5
+with equations : 
+X^2 - 2*X*W
+X^2 + X*Y - 4*X*W - Y*W + 2*W^2
+X^2 - 3*X*W + Y*W
+X^2 - 4*X*W + Y*W + 2*W^2
+</PRE>
+<HR>
+<H5><A NAME = "15491">ParametrizePencil(phi, P2) : MapSch, Prj -&gt; BoolElt, MapSch</A></H5>
+<BLOCKQUOTE>
+Let X be an ordinary projective birationally ruled surface, given as the 
+domain of a rational pencil &phi; defined over Q (<I>i.e.</I>, a rational 
+map X -&gt; P<sub>Q</sub><sup>n</sup> for some n with image a rational normal curve) 
+and P2 is a projective plane over Q. The intrinsic returns <TT>false</TT> if 
+X is not parameterizable over the rationals. Otherwise, it returns <TT>true</TT> 
+and a birational parameterization P2 -&gt; X.
+<P>
+These intrinsics take care of rational scrolls and conic bundles in the 
+classification of special surfaces. The algorithm is described in 
+<A  HREF = "text1378.htm#bib_JS2000">[Sch00]</A>. The scheme X is not assumed to be non-singular.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15492">Example <TT>AlgSrf_ruled_ex (H122E23)</TT></A></H3>
+We start with a (singular) degree 4 hypersurface X in P<sup>3</sup> and construct 
+a pencil from P<sup>2</sup> to X.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Q := Rationals();
+&gt; P3&lt;x,y,z,w&gt; := ProjectiveSpace(Q, 3);
+&gt; P2&lt;X,Y,Z&gt; := ProjectiveSpace(Q, 2);
+&gt; X := Scheme(P3, x^2*z^2 - x*y^3 - x*y*z*w + 2*y^2*w^2 - z*w^3);
+&gt; pencil := map&lt;X -&gt; P2 | [x*y - w^2, y^2 - z*w, x*z - y*w]&gt;;
+&gt; DefiningPolynomial(Image(pencil));
+X*Y - Z^2
+&gt; ParametrizePencil(pencil, P2);
+true Mapping from: Prj: P2 to Sch: X
+with equations :
+-X^4*Y + 2*X^2*Z^3
+-X^2*Y*Z^2 + Z^5
+X*Y*Z^3
+X*Z^4
+</PRE>
+<HR>
+<H5><A NAME = "15493"></A><A NAME = "as:prmDP">ParametrizeDelPezzo</A>(X, P2) : Sch, Prj -&gt; BoolElt, MapSch</H5>
+<BLOCKQUOTE>
+The argument X should be a (anticanonically-embedded) Del Pezzo surface 
+(of type <TT>Sch</TT> or <TT>Srfc</TT> and P2 a projective plane both defined 
+over Q. The function returns <TT>false</TT> if X is not parametrizable over 
+the rationals and returns <TT>true</TT> and a birational parameterization 
+P2 -&gt; X otherwise.
+<P>
+This intrinsic is the main interface to a suite of functions parameterizing 
+Del Pezzo surfaces (over Q). These include the anticanonically Del Pezzos
+of degrees 1 and 2, which lie in non-trivially weighted projective spaces.
+A degree d Del Pezzo surface refers to a rational surface that is
+embedded in projective space by its anti-canonical divisor. For degrees
+1 and 2 this means an <I>ample</I> embedding into weighted projective space.
+For 3 &lt;= d &lt;= 9, this is a very-ample embedding giving X as a degree d
+surface in ordinary projective space of dimension d. 
+<P>
+It should be noted that not only do the routines handle the usual non-singular
+cases, but they also deal with degenerate singular cases (arising in degrees 
+d &gt;= 3. In the latter case, rather than blowing up 9 - d <I>distinct</I> 
+points in the plane, some of the blown-up points are "infinitely near" 
+points: lying on the exceptional curves corresponding to already blown-up 
+points). This is important as these degenerate cases can arise in the general 
+parameterization of hypersurfaces in P<sup>3</sup>.
+</BLOCKQUOTE>
+<P>
+The package contains routines to find and blow down sets (defined over Q)
+of exceptional curves, reducing to a DelPezzo of degree d, 5 &lt;= d &lt;= 9.
+After this reduction, these cases are handled by the  Magma routines described
+in Section <A  HREF = "text1385.htm#15500">Parametrization of Del Pezzo  Surfaces</A> (which now also handle singular Del Pezzos).
+There is an exception to the above rule. For <I>singular</I> degree 3 and degree 4
+Del Pezzo surfaces, it is more efficient to apply special case code directly
+rather than trying to blow down lines to get to higher degree. Starting in V2.17,
+special functions are provided do this that can be called directly for a 
+singular anti-canonical degree 3 or 4 surface and are described in the next
+section.
+<P>
+The routines are not yet fully documented. For the location of exceptional curves
+and the blowing-down, some details may be found in <A  HREF = "text1378.htm#bib_JS1998b">[Sch98, Sec. 3.5]</A> 
+while <A  HREF = "text1378.htm#bib_man_cub_forms">[Man86]</A> contains the general theory. There are also 
+implementation notes in the appendix of the software documentation report 
+<A  HREF = "text1378.htm#bib_TB2008">[Bec08]</A> from which this documentation has been adapted. For the nonsingular 
+degrees 6, 8 and 9 cases, which use the Lie algebra method and the degree 5 case, 
+see the references in Section <A  HREF = "text1385.htm#15500">Parametrization of Del Pezzo  Surfaces</A>.
+<PRE></PRE> <A  HREF = "text1385.htm">[Next]</A><A  HREF = "text1383.htm">[Prev]</A> <A  HREF = "text1385.htm">[Right]</A> <A  HREF = "text1383.htm">[Left]</A> <A  HREF = "text1379.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

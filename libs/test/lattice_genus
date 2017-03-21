@@ -1,0 +1,53 @@
+
+// Tests GenusRepresentatives, ThetaSeries, and modular forms
+// SRD, Dec 2011
+
+SetVerbose("Genus", 1);
+
+LD := LatticeDatabase();
+
+for n in [2 .. 8 by 2], i in [1..NumberOfLattices(LD,n)] do
+
+    L := Lattice(LD, n, i);
+    D := Determinant(L);
+
+    p := 1; repeat p := NextPrime(p); until GCD(p,D) eq 1; 
+
+    if not IsIntegral(L) or p^n gt 2^12 then
+       continue;
+    end if;
+
+    printf "\nn = %o, i = %o, D = %o, %o\n", 
+              n, i, D, IsEven(L) select "even" else "odd";
+
+    T0<q> := L`ThetaSeries;
+    if IsEven(L) then
+       prec := AbsolutePrecision(T0);
+       T0 := &+ [Coefficient(T0,i) * q^(i div 2) 
+                : i in [0 .. prec-1 by 2]] 
+             + O(q^Ceiling(prec/2));
+    end if;
+
+    M := ThetaSeriesModularFormSpace(L);
+    f0 := M! T0;
+    E0 := EisensteinProjection(f0);
+    printf "Theta series = %o lives in \n%o\n", T0, M;
+
+    print "Genus:";
+    time
+    genus := Representatives(Genus(L));
+    print "Genus has size", #genus;
+
+    for LL in Remove(genus, 1) do
+        if assigned LL`ThetaSeries then
+          print "ThetaSeries known to precision", AbsolutePrecision(LL`ThetaSeries);
+        end if;
+        T := ThetaSeries(LL, Dimension(M) + 3 : 
+             ExponentConstant := IsOdd(L) select 1 else 1/2);
+        f := M! T;
+        E := EisensteinProjection(f);
+        assert E eq E0;
+    end for; 
+
+end for;
+

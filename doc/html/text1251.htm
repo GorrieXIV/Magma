@@ -1,0 +1,178 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Rings and Fields of Fractions of Affine Algebras</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1254.htm">[Next]</A><A  HREF = "text1250.htm">[Prev]</A> [_____] <A  HREF = "text1250.htm">[Left]</A> <A  HREF = "text1244.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "13774">Rings and Fields of Fractions of Affine Algebras</A></H3>
+
+<P>
+<P>
+Given any affine algebra Q = K[x<sub>1</sub>, ..., x<sub>n</sub>]/J, where K is a field,
+one may create the <I>ring of fractions</I> R of
+Q.  This is the set of fractions a/b, where a, b&isin;Q and
+b is invertible, and it forms a ring.
+<P>
+The defining ideal J does not need to be zero-dimensional.
+The ring of fractions R is itself represented internally
+by an affine algebra over an appropriate rational function field, but
+has the appearance to the user of the set of fractions, so one may
+access the numerator and denominator of elements of R, for example.
+<P>
+If the ideal J is prime, then R is the field of fractions of A
+and may be used with any algorithms in
+Magma which work over fields.  For example, factorization of
+polynomials over such fields of fractions is supported
+(in any characteristic).
+<P>
+Rings of fractions have type <A NAME = "RngFunFrac"><TT>RngFunFrac</TT></A> and their elements 
+<A NAME = "RngFunFracElt"><TT>RngFunFracElt</TT></A>.
+
+
+<H5><A NAME = "13775">RingOfFractions(Q) : RngMPolRes -&gt; RngFunFrac</A></H5>
+<H5>FieldOfFractions(Q) : RngMPolRes -&gt; RngFunFrac</H5>
+<BLOCKQUOTE>
+Given an affine algebra Q over a field K, return the ring
+of fractions of Q.  The only difference between the two functions
+is that for <TT>FieldOfFractions</TT>, the defining ideal of Q
+must be prime.
+</BLOCKQUOTE>
+<H5><A NAME = "13776">Numerator(a) : RngFunFracElt -&gt; RngMPolResElt</A></H5>
+<H5>Denominator(a) : RngFunFracElt -&gt; RngMPolResElt</H5>
+<BLOCKQUOTE>
+Given an element a from the ring of fractions of an affine algebra
+Q, return the numerator (resp. denominator) of a as an element of Q.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13777">Example <TT>AlgAff_FieldOfFractions (H114E7)</TT></A></H3>
+We create the field of fractions of an affine algebra and note
+the basic operations.
+<P>
+<P>
+<PRE>
+&gt; A&lt;x,y&gt; := AffineAlgebra&lt;RationalField(), x,y | y^2 - x^3 - 1&gt;;
+&gt; IsField(A);
+false
+&gt; F&lt;a,b&gt; := FieldOfFractions(A);
+&gt; F; 
+Ring of Fractions of Affine Algebra of rank 2 over Rational Field
+Lexicographical Order
+Variables: x, y
+Quotient relations:
+[
+    x^3 - y^2 + 1
+]
+&gt; a;   
+a
+&gt; b;
+b
+&gt; a^-1;
+&gt; a^-1;
+1/(b^2 - 1)*a^2
+&gt; b^-1;
+1/b
+&gt; c := b/a;
+&gt; c;
+b/(b^2 - 1)*a^2
+&gt; Numerator(c);
+x^2*y
+&gt; Denominator(c);
+y^2 - 1
+&gt; P&lt;X&gt; := PolynomialRing(F);
+&gt; time Factorization(X^3 - b^2 + 1);
+[
+    &lt;X - a, 1&gt;,
+    &lt;X^2 + a*X + a^2, 1&gt;
+]
+Time: 0.000
+&gt; P&lt;X,Y&gt; := PolynomialRing(F, 2);
+&gt; time Factorization((X + Y)^3 - b^2 + 1);
+[
+    &lt;X + Y - a, 1&gt;,
+    &lt;X^2 + 2*X*Y + a*X + Y^2 + a*Y + a^2, 1&gt;
+]
+Time: 0.030
+&gt; time Factorization((b*X^2 - a)*(a*Y^3 - b + 1)*(X^3 - b^2 + 1));
+[
+    &lt;Y^3 - 1/(b + 1)*a^2, 1&gt;,
+    &lt;X - a, 1&gt;,
+    &lt;X^2 - 1/b*a, 1&gt;,
+    &lt;X^2 + a*X + a^2, 1&gt;
+]
+Time: 0.010
+</PRE>
+<HR>
+<H3><A NAME = "13778">Example <TT>AlgAff_Extension (H114E8)</TT></A></H3>
+This example shows the internal operations underlying the method
+of constructing the field of fractions.  If the ideal of
+relations has dimension d, then the sequence L of d
+maximally independent variables is passed to the extension/contraction
+construction, which creates a rational function field with d
+variables such that the ideal of relations over this field now
+becomes zero dimensional.  Appropriate maps are set up, too.
+<P>
+<P>
+<PRE>
+&gt; Q := RationalField();
+&gt; A&lt;x,y&gt; := AffineAlgebra&lt;RationalField(), x,y | y^2 - x^3 - 1&gt;;  
+&gt; IsField(A);  
+false
+&gt; I := DivisorIdeal(A);
+&gt; I;
+Ideal of Polynomial ring of rank 2 over Rational Field
+Lexicographical Order
+Variables: x, y
+Groebner basis:
+[
+    x^3 - y^2 + 1
+]
+&gt; d, L := Dimension(I);
+&gt; d;
+1
+&gt; L;
+[ 2 ]
+&gt; E, f := Extension(I, L);
+&gt; E;
+Ideal of Polynomial ring of rank 1 over Multivariate rational function
+    field of rank 1 over Integer Ring
+Graded Reverse Lexicographical Order
+Variables: x
+Basis:
+[
+    x^3 - y^2 + 1
+]
+&gt; F := Generic(E)/E;             
+Affine Algebra of rank 1 over Multivariate rational function field of 
+    rank 1 over Integer Ring
+Graded Reverse Lexicographical Order
+Variables: x
+Quotient relations:
+[
+    x^3 - y^2 + 1
+]
+&gt; g := map&lt;A -&gt; F | x :-&gt; F!f(x)&gt;;
+&gt;      
+&gt; g(x);   
+x
+&gt; g(y);
+y
+&gt; g(x)^-1;
+1/(y^2 - 1)*x^2
+&gt; g(y)^-1;
+1/y
+&gt; g(x^2 + x*y);
+x^2 + y*x
+&gt; g(x^2 + x*y)^-1;
+y^2/(y^5 + y^4 - y^3 - 2*y^2 + 1)*x^2 + 1/(y^3 + y^2 - 1)*x - y/
+    (y^3 + y^2 - 1)
+&gt; $1 * $2;
+1
+</PRE>
+<PRE></PRE> <A  HREF = "text1254.htm">[Next]</A><A  HREF = "text1250.htm">[Prev]</A> [_____] <A  HREF = "text1250.htm">[Left]</A> <A  HREF = "text1244.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

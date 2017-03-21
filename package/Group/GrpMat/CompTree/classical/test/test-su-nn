@@ -1,0 +1,34 @@
+/* test rewriting for non-natural irreducible repns of Sp */
+
+import "../recognition/standard.m": SUChosenElements;
+
+SetEchoInput (true);
+
+NmrElements := 10;
+fct := SymmetricPower;
+fct := ExteriorPower;
+power := 2;
+for d in [2..11 by 1] do
+for q in [2,3,4, 5,7,8, 9,11,16,25,27] do 
+G := SU(d, q);
+MA := MatrixAlgebra (GF(q^2), d);
+QQ := SUChosenElements(G);
+Q := [fct(MA!QQ[i], power): i in [1..#QQ]];
+n := Nrows(Q[1]);
+Q := [GL(n, q^2) ! x : x in Q];
+A := Random(GL(n, q^2));
+Q := Q^A;
+E := sub<GL(n, q^2)|Q>;
+qq := q;
+if IsIrreducible (E) and IsTrivial (E) eq false then 
+   for i in [1..NmrElements] do
+       d, q, i;
+       g:=Random (E);
+      f,w := int_SUAltRepWordInGen (E, Q, g,d, qq^2);
+      assert f;
+      x:=Evaluate (w, Q);
+     assert x eq g;
+   end for;
+end if;
+end for;
+end for;

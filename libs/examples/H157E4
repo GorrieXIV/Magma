@@ -1,0 +1,82 @@
+"Source: Text/Incidence/Network.text";
+"Line: 1068";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Incidence/Network.text, line: 1068
+// Example: H157E4 ()
+print "Example: H157E4";
+ei := GetEchoInput();
+SetEchoInput(true);
+G := Graph< 7 | [ {5, 7}, {6, 7}, {4, 5, 6},
+{3}, {1, 3}, {2, 3}, {1, 2} ] : SparseRep := true >;
+assert IsBipartite(G);
+P := Bipartition(G);
+P;
+G +:= 2;
+G;
+s := Order(G)-1;
+t := Order(G);
+
+E1 := { [s, Index(u)] : u in P[1] };
+E2 := { [Index(u), t] : u in P[2] };
+E3 := { [Index(u), Index(v)] : u in P[1], v in P[2] };
+
+N := MultiDigraph< Order(G) | E1, E2, E3 >;
+N;
+E := EdgeSet(N);
+for e in E do
+    AssignCapacity(~N, e, 1);
+end for;
+V := VertexSet(N);
+F := MaximumFlow(V!s, V!t);
+S := MinimumCut(V!s, V!t);
+F;
+assert $1 eq 3;
+S;
+c := 0;
+for u in S do
+    for v in OutNeighbours(u) do
+       if not v in S then
+          c +:= Capacity(u, v);
+          assert Capacity(u, v) eq Flow(u, v);
+       end if;
+    end for;
+end for;
+assert c eq F;
+M := [];
+for e in E3 do
+    u := V!e[1];
+    v := V!e[2];
+    if Flow(u, v) eq 1 then
+        E := Edges(u, v);
+        assert #E eq 1;
+        Append(~M, EndVertices(E[1]));
+    end if;
+end for;
+assert #M eq F;
+M;
+for e in EdgeSet(N) do
+    u := EndVertices(e)[1];
+    v := EndVertices(e)[2];
+
+    assert Flow(u, v) le Capacity(u, v);
+    assert Flow(u, v) eq  -Flow(v, u);
+end for;
+s := V!s;
+t := V!t;
+for u in V do
+    if not u eq s and not u eq t then
+        f := 0;
+        for v in OutNeighbours(u) do
+            E := Edges(u, v);
+            f +:= Flow(E[1]);
+        end for;
+        for v in InNeighbours(u) do
+            E := Edges(v, u);
+            f -:= Flow(E[1]);
+        end for;
+
+        assert f eq 0;
+    end if;
+end for;
+SetEchoInput(ei);

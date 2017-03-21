@@ -1,0 +1,211 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Introduction</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text511.htm">[Next]</A><A  HREF = "text509.htm">[Prev]</A> <A  HREF = "text511.htm">[Right]</A> [____] <A  HREF = "text509.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "5516">Introduction</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+This chapter describes the operations on formal power,
+Laurent and Puiseux series available in Magma.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text510.htm#5517">Kinds of Series</A>
+<LI> <A  HREF = "text510.htm#5518">Puiseux Series</A>
+<LI> <A  HREF = "text510.htm#5519">Representation of Series</A>
+<LI> <A  HREF = "text510.htm#5520">Precision</A>
+<LI> <A  HREF = "text510.htm#5521">Free and Fixed Precision</A>
+<LI> <A  HREF = "text510.htm#5522">Equality</A>
+<LI> <A  HREF = "text510.htm#5523">Polynomials over Series Rings</A>
+</UL>
+<H4><A NAME = "5517">Kinds of Series</A></H4>
+
+<P>
+<P>
+Internally Magma has only one kind of formal series, where general fractional
+exponents are allowed, but externally there are three kinds of series:
+power, Laurent and Puiseux.  Power series must have a non-negative integral
+valuation and integral exponents, Laurent series must have an integral
+valuation and integral exponents (possibly negative), while Puiseux
+series may have a general rational valuation and general rational exponents.
+The main reason for the
+three kinds is simply to supply error checking for operations illegal
+to a specific kind, so the user will not move into the next kind
+of exponents inadvertently.  Apart from these error checks,
+there is no difference at all between the different kinds of series,
+so one can simply use Puiseux series always if the restrictions on
+exponents are not desired, and this will cause no loss of efficiency
+or functionality at all even if all exponents remain integral or
+integral and non-negative.
+<P>
+In Magma, the set of all power series over a given base ring R is
+called a power series ring (denoted by R[[x]]) and
+the category names are <TT>RngSerPow</TT> for the ring and
+<TT>RngSerPowElt</TT> for the elements.
+The set of all Laurent series over a given base ring R is
+called a Laurent series ring (denoted by R((x))) and
+the category names are <TT>RngSerLaur</TT> for the ring and
+<TT>RngSerLaurElt</TT> for the elements.
+Finally, the set of all Puiseux series over a given base ring R is
+called a Puiseux series ring (denoted by R&lt; &lt; x &gt; &gt;) 
+and
+the category names are <TT>RngSerPuis</TT> for the ring and
+<TT>RngSerPuisElt</TT> for the elements.
+For the rest of this chapter, the term "series ring" refers to any of
+the above rings and the corresponding virtual category name is <TT>RngSer</TT>; the term "series" refers to any of the above series kinds
+and the corresponding virtual category name is <TT>RngSerElt</TT>.
+
+
+<H4><A NAME = "5518">Puiseux Series</A></H4>
+
+<P>
+<P>
+Puiseux series in a variable x are often mathematically defined to
+be Laurent series in another variable y say, where y=x<sup>1/d</sup>, for
+a fixed positive integer d; this d is usually fixed for all the
+series under consideration.  Magma is more general, in that
+although each series is internally represented in this way (i.e.,
+its valuation, exponents and precision are thought to be divided by
+a single denominator associated with it), different Puiseux series may have
+different exponent denominators and may be freely mixed (for example,
+in addition, where the exponent denominator of the result will be
+derived from that of the arguments).
+Thus there is no restriction whatsoever to a fixed exponent denominator
+for a given Puiseux series ring.
+
+
+<H4><A NAME = "5519">Representation of Series</A></H4>
+
+<P>
+<P>
+Formal series are stored in truncated form, unless only finitely
+many terms are non-zero.  If a series has precision p, that means
+that its coefficients are unknown from exponent p onwards.
+This truncated form is similar to the floating point representation of
+real numbers except for one significant difference: because for series
+terms do not "carry" in arithmetic operations like they do in integer
+and real arithmetic, error propagation common in floating point methods
+does not occur.  Consequently, given a result of any sequence of arithmetic
+operations with formal series, the coefficients of the known terms
+(the ones up to the given precision) will always be <I>exactly correct</I>,
+with no error (assuming the coefficient ring has exact arithmetic for
+its elements of course).
+<P>
+Elements
+c<sub>v</sub>x<sup>v</sup> + c<sub>v + 1</sub>x<sup>v + 1</sup> + ... (with v&isin;Q and r<sub>v</sub> != 0)
+of series ring
+over a commutative ring R are stored in the form of approximations
+c<sub>v</sub>x<sup>v</sup> + c<sub>v + 1</sub>x<sup>v + 1</sup> + ... + O(x<sup>p</sup>)
+to a certain <I>precision</I> p&ge;v. The O(x<sup>p</sup>) notation is used
+to refer to terms of degree at least the precision p in x.
+For Laurent series v must be an integer and for power series
+v must be a non-negative integer.
+Note that for Puiseux series the above element is actually internally stored
+in the form
+c<sub>w</sub>x<sup>w/d</sup> + c<sub>w + 1</sub>x<sup>(w + 1)/d</sup> + ... + O(x<sup>q/d</sup>)
+where v=w/d and p=q/d and d (the exponent denominator) is minimal.
+
+
+<H4><A NAME = "5520">Precision</A></H4>
+
+<P>
+<P>
+Associated with any series there are two types of precision: the
+<I>absolute precision</I> and the <I>relative precision</I>.
+For the element
+c<sub>v</sub>x<sup>v</sup> + c<sub>v + 1</sub>x<sup>v + 1</sup> + ... + O(x<sup>p</sup>)
+(with v&isin;Q and r<sub>v</sub> != 0),
+the absolute precision is p and the relative precision is p - v.
+<P>
+The absolute precision
+indicates the largest known term, and the relative precision indicates
+the size of the range over which terms are known. The two types of
+precision and the <I>valuation</I> of the series, which equals v in
+the above, are therefore always related via p=v + r.
+
+
+<H4><A NAME = "5521">Free and Fixed Precision</A></H4>
+
+<P>
+<P>
+For each type of series ring, there are two sub-kinds:  a <I>free
+precision</I> ring (the usual case), where elements of the ring have arbitrary
+precision, and a <I>fixed precision</I> ring, where all elements of
+the ring have a fixed precision.  In the latter case, for power series
+rings the fixed precision is absolute, while for Laurent and Puiseux
+series ring the fixed precision is relative.
+<P>
+The free precision rings most closely resemble the mathematical objects
+R[[x]] and R((x)); elements in these free rings and fields carry
+their own precision with them. Operations usually return results to a
+precision that is maximal given the input (and the nature of the
+operation).  Operations which are given infinite precision series
+but which must return finite precision series (e.g., division)
+return series whose precision is the <I>default</I> precision
+for the series ring (this is different from the fixed precision of
+fixed precision rings); the default precision is 20 by default
+but may be set to another value at creation by a parameter (see below).
+Elements of free structures that have finite series
+expansion (i.e., polynomials) can be created and stored exactly, with
+infinite (absolute and relative) precision.  Also note that the
+relative precision will be 0 for approximations to 0.
+<P>
+The structures with fixed precision, which we will sometimes refer to
+as <I>quotient</I> structures, behave differently.
+All elements in a <I>power</I> series ring of fixed precision have the same
+fixed <I>absolute</I> precision p, and the relative precision may be
+anything from 0 to p. This means that the ring with fixed precision
+p behaves like a quotient of a polynomial ring, R[x]/x<sup>p</sup>.
+All elements in a <I>Laurent</I> or <I>Puiseux</I> series ring of
+fixed precision have the same fixed <I>relative</I> precision;
+the only exception to this rule is that 0 in the
+ring is stored as zero with infinite absolute precision.  The
+absolute precision of elements in a free Laurent or Puiseux series
+ring can be anything.
+
+
+<H4><A NAME = "5522">Equality</A></H4>
+
+<P>
+<P>
+Since a given series ring will contain
+series truncated at arbitrary precision, care has to be taken as to
+the meaning of equality of two elements.
+Two series are considered equal iff they are identical
+(the equality operator <TT>eq</TT> follows this convention).
+But we call two series A and B in
+the same ring <I>weakly equal</I> if and only if their coefficients are the
+same whenever both are defined, that is, if and only if
+for every n&le;p the coefficients A<sub>n</sub> and B<sub>n</sub> are equal, where
+p is the minimum of the precisions of A and B.
+Thus, for example, A=3 + x + O(x<sup>2</sup>) and B=3 + x + 17x<sup>2</sup> + O(x<sup>4</sup>) are the same,
+but C=3 + x + 17x<sup>2</sup> + x<sup>3</sup> + O(x<sup>4</sup>) is different from B. Note that
+A and C are equal under this definition, and hence weak equality is
+not transitive!
+
+
+<H4><A NAME = "5523">Polynomials over Series Rings</A></H4>
+
+<P>
+<P>
+For a discussion of operations for polynomials over series rings see
+Chapter <A  HREF = "text548.htm#5802">NEWTON POLYGONS</A> and Section <A  HREF = "text516.htm#5608">Polynomials over Series Rings</A>.
+
+
+<PRE></PRE> <A  HREF = "text511.htm">[Next]</A><A  HREF = "text509.htm">[Prev]</A> <A  HREF = "text511.htm">[Right]</A> [____] <A  HREF = "text509.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

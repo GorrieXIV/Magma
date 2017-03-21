@@ -1,0 +1,1149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Del Pezzo Surfaces</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1378.htm">[Next]</A><A  HREF = "text1384.htm">[Prev]</A> <A  HREF = "text1378.htm">[Right]</A> <A  HREF = "text1384.htm">[Left]</A> <A  HREF = "text1379.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "15494">Del Pezzo Surfaces</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1385.htm#15495">Introduction</A>
+<LI> <A  HREF = "text1385.htm#15496">Creation of General Del Pezzos</A>
+<LI> <A  HREF = "text1385.htm#15500">Parametrization of Del Pezzo  Surfaces</A>
+<LI> <A  HREF = "text1385.htm#15513">Minimization and Reduction of Surfaces</A>
+<LI> <A  HREF = "text1385.htm#15521">Cubic Surfaces over Finite  Fields</A>
+<LI> <A  HREF = "text1385.htm#15526">Construction of Cubic Surfaces</A>
+<LI> <A  HREF = "text1385.htm#15530">Invariant Theory of Cubic Surfaces</A>
+<LI> <A  HREF = "text1385.htm#15546">The Pentahedron of a Cubic Surface</A>
+</UL>
+<H4><A NAME = "15495">Introduction</A></H4>
+
+<P>
+<P>
+<P>
+This section contains a collection of geometric and arithmetic routines
+for Del Pezzo surfaces in their anti-canonical embeddings (the full
+weighted projective anticanonical embedding for degrees 1 and 2).
+<P>
+There are routines for creation, parametrization, minimisation and reduction,
+construction, computation of invariants for degree 3, and point-counting
+for degree 3 surfaces over a finite field.
+<P>
+There is a specialised type for Del Pezzos, <TT>SrfDelPezzo</TT>, which is a
+subtype of type <TT>Srfc</TT>. Some intrinsics use this type for arguments
+while some use the more general <TT>Srfc</TT> (or even <TT>Sch</TT>).
+
+
+<H4><A NAME = "15496">Creation of General Del Pezzos</A></H4>
+
+
+
+<H5><A NAME = "15497">DelPezzoSurface(P,L) : Prj,List -&gt; SrfDelPezzo</A></H5>
+<H5>DelPezzoSurface(S) : Setq[Pt] -&gt; SrfDelPezzo</H5>
+<H5>DelPezzoSurface(Z) : Clstr -&gt; SrfDelPezzo</H5>
+<BLOCKQUOTE>
+The Del Pezzo surface of degree 9 - d, embedded by its
+anticanonical system, which arises by blowing up the
+projective plane P in the d points.
+The arguments are either plane P and a list of points L,
+the set of points Q,
+or the length d zero-dimensional scheme Z defining
+the points.
+If the points are not in sufficiently general
+position (so that the anticanonical image is not smooth)
+then an error is reported.
+</BLOCKQUOTE>
+<H5><A NAME = "15498">DelPezzoSurface(f) : RngMPolElt -&gt; SrfDelPezzo</A></H5>
+<BLOCKQUOTE>
+The argument f should be a degree three homogeneous polynomial
+in a 4-variable polynomial ring P (with grevlex ordering).
+Creates the degree 3 Del Pezzo surface with defining polynomial f
+inside Prj<sup>3</sup> = (Proj)(P). If this surface is not smooth an
+error is reported.
+</BLOCKQUOTE>
+<H5><A NAME = "15499">IsDelPezzo(Y) : Sch -&gt; BoolElt, SrfDelPezzo, MapSch</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if scheme Y in ordinary projective space
+is an abstract Del Pezzo surface.
+If so, it also returns the image X of the standard 
+(pluri-)anticanonical embedding of Y, and the map Y -&gt; X.
+Note that this can be a computationally very heavy function
+if Y is in a reasonably high-dimensional ambient.
+</BLOCKQUOTE>
+<H4><A NAME = "15500">Parametrization of Del Pezzo  Surfaces</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+Del Pezzo surfaces are a special type of non-singular projective surface.
+A good reference for their general properties is <A  HREF = "text1378.htm#bib_man_cub_forms">[Man86]</A>.
+A Del Pezzo surface X has a degree 1 &le;d &le;9. For d &ge;3, the
+standard  representation is as a degree d surface in P<sup>d</sup> for which a
+hyperplane section is an anti-canonical divisor. When we talk about Del
+Pezzos in this section, we mean a surface in that anti-canonical form.
+<P>
+Del Pezzo surfaces are birationally equivalent to the projective plane
+P<sup>2</sup> over an algebraically-closed field. That is, there exists an
+invertible scheme map from P<sup>2</sup> to X : a <I>parametrization</I>. 
+Most of the functions in this section are concerned with the existence 
+of parametrizations of X over a number field.
+<P>
+The significance of Del Pezzo surfaces comes from <I>adjunction theory</I>
+(see <A  HREF = "text1378.htm#bib_somm_ven_adj_map">[SvdV87]</A>). The adjunction map for surfaces is a 
+general construct that contracts certain lines, known as exceptional lines,
+to points. Repeated application of the adjunction map to a rational surface
+results in a reduction to a surface in one of a small number of families,
+including the Del Pezzos. For a non-singular ordinary projective surface Y,
+the intrinsic <A  HREF = "text1382.htm#srfc-mm-rat">MinimalModelRationalSurface</A> is now available to produce the
+birational map from Y to one of the special, terminal cases that include
+the Del Pezzos.
+<P>
+Hence the parametrization problem for general
+rational surfaces reduces via adjunction (a purely algebraic construction)
+to parametrization of surfaces in the specific families, which is an 
+arithmetic problem (ie dependent on the ground field). This is the surface
+analog of the simpler situation for curves. Any rational curve can be
+algebraically reduced to the projective line or a plane conic and the
+parametrization of plane conics is also an arithmetic problem.
+<P>
+Thus, the parametrization of Del Pezzo surfaces is an important component
+in that of general rational surfaces. General parametrization code for
+rational hypersurfaces in P<sup>3</sup> is described in the previous section
+and it makes use of the routines described here.
+<P>
+<P>
+<P>
+If X is parametrizable with d &ge;3, then we can blow down (contract)
+exceptional lines on it to arrive at a surface with d=5, 6, 8 or 9.
+The functions described here deal with
+parametrization in those cases using computational methods based around
+the Lie algebra of the automorphism group of X. For the theory behind
+these algorithms, see <A  HREF = "text1378.htm#bib_dp_deg9">[dG06]</A>, <A  HREF = "text1378.htm#bib_dp_deg8">[dGP]</A>, <A  HREF = "text1378.htm#bib_dp_deg6">[HS06]</A>
+and <A  HREF = "text1378.htm#bib_dp_deg5">[GSHPBS12]</A>.
+In one of the examples, we parametrize a cubic hypersurface (degree 3
+Del Pezzo) by blowing down to a degree 6 surface.
+<P>
+Although reduction to degree 9 is always possible, for d=7 it is more
+efficient to work directly using the Lie algebra method. There is now
+also an intrinsic for d=7 provided by Josef Schicho. Schicho has also
+written code for the d=5 case, minimal or not, that uses the more
+geometrical method described in the above reference and a corresponding  
+intrinsic is provided.
+<P>
+Furthermore, the degree 5 - 8 intrinsics now also cover degenerate cases of
+singular Del Pezzos in their anticanonical projective embeddings. The
+additional code for the singular cases is also due to Josef Schicho.
+<P>
+A feature (from V2.17) is the provision of special case code for degree 3 and 
+degree 4 singular Del Pezzos. For some of these, it is not possible to blow
+down any exceptional lines over the base field but the surface is still
+parametrizable. Additionally, it is usually much more efficient to handle
+these cases directly without blowing down curves to get to higher degree.
+<P>
+A general intrinsic <A  HREF = "text1384.htm#as:prmDP">ParametrizeDelPezzo</A> for parametrizing any Del Pezzo surface
+of degree d &ge;1
+in its anticanonical weighted embedding (for d = 1, 2 the anticanonical 
+divisor is no longer very ample, but gives an ample embedding into weighted 
+projective space) is described in the previous section. This blows down
+exceptional lines to reach degree d &ge;5 and then invokes one of the 
+intrinsics described in this section. It is more efficient to call the 
+appropriate intrinsic directly if the starting point is either the 
+d &ge;5 case or the d = 3,  4 singular cases.  
+
+
+<H5><A NAME = "15501">SetVerbose("ParamDP", v) : MonStgElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Set the verbose printing level for the Del Pezzo parametrizing functions.
+Currently the legal values for v are <TT>true</TT>, <TT>false</TT>, 0, 1 and
+2 (<TT>false</TT> is the same as 0, and <TT>true</TT> is the same as 1).
+</BLOCKQUOTE>
+<H5><A NAME = "15502">ParametrizeDegree9DelPezzo(X) : Sch -&gt; BoolElt, MapIsoSch</A></H5>
+<BLOCKQUOTE>
+Let X be a degree 9 Del Pezzo surface anticanonically embedded in
+9-dimensional projective space. For this function the base field
+should be Q. The surface X is defined by 27 degree 2 polynomials. 
+The function performs only basic checks that the input X is valid.
+<P>
+If X is parametrizable over Q then there is a parametrization
+&phi;: P<sup>2</sup> -&gt; X which is everywhere-defined and given
+by cubic polynomials in the variables of P<sup>2</sup>. The function
+returns whether such a &phi; exists and, if so, &phi; also.
+<P>
+In V2.19, LLL reductions have been applied to give simpler bases
+for the initial Lie algebra and the corresponding associative
+algebra. Also, the algorithm for splitting the latter has been
+changed to the one used with degree 3 homogeneous spaces of
+elliptic curves. This has greatly speeded up the computation.
+</BLOCKQUOTE>
+<H5><A NAME = "15503">ParametrizeDegree8DelPezzo(X) : Sch -&gt; BoolElt, MapSch</A></H5>
+<BLOCKQUOTE>
+Let X be a degree 8 Del Pezzo surface anticanonically embedded in
+8-dimensional projective space over a number field.  The surface X 
+is defined by 20 degree 2 polynomials. The function performs only 
+basic checks that the input X is valid.
+<P>
+For degree 8, there are two types of non-singular Del Pezzo surface, the
+second type splitting into subfamilies:
+<P>
+<P>
+<P>
+ 1)     X is isomorphic to P<sup>2</sup> with a single rational 
+point blown up.
+<P>
+<P>
+<P>
+ 2i)    X is isomorphic to T<sub>1</sub> x T<sub>2</sub> with T<sub>i</sub> Galois
+twists of P<sup>1</sup>.
+<P>
+<P>
+<P>
+ 2ii)   X is isomorphic to a Galois twist of P<sup>1</sup> x P<sup>1</sup>
+where Galois acts transitively on the two P<sup>1</sup> factors.
+<P>
+<P>
+<P>
+<P>
+In case 1), X is always parametrizable.
+<P>
+<P>
+In case 2i), X is parametrizable &lt;=&gt; both T<sub>i</sub> are
+trivial twists of P<sup>1</sup> &lt;=&gt; X is isomorphic to 
+P<sup>1</sup> x P<sup>1</sup>.
+<P>
+<P>
+In case 2ii), there is an infinite family of parametrizable X<sub>a</sub>
+classified by a &isin;Q<sup> * </sup>/Q<sup> * 2</sup>. The scheme X<sub>a</sub> is isomorphic 
+(properly, not just birationally) to the surface in P<sup>3</sup> given by the
+equation x<sub>0</sub><sup>2</sup> - ax<sub>1</sub><sup>2</sup>=x<sub>2</sub>x<sub>3</sub>.
+<P>
+The main function determines whether X is parametrizable over Q.
+If so, there is a parametrization &phi;: P<sup>2</sup> -&gt; X (given
+by cubic polynomials in case 1 and by degree 4 polynomials in case
+2) and this is also returned.
+<P>
+The intrinsic also handles the degenerate case of a singular degree 8 
+Del Pezzo surface. This case is recognised directly from the 
+Lie algebra computation which is part of the main routine and an
+appropriate adaptation of the general method is used. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15504">Example <TT>AlgSrf_del-pezzo-ex-8 (H122E24)</TT></A></H3>
+In this example, we parametrize an anticanonical sphere X<sub>2</sub>, in the
+above notation. This is obviously an artificial illustration, as we
+start with X<sub>2</sub> in the form F=x<sub>0</sub><sup>2</sup> - 2x<sub>1</sub><sup>2</sup> - x<sub>2</sub>x<sub>3</sub>=0, which is
+trivial to parametrize directly! The surface in this form is embedded
+anticanonically in P<sup>8</sup> by any 9-dimensional vector space complement
+of &lt;F&gt; in the 10-dimensional linear system of all degree 2 polynomials
+in x<sub>0</sub> ... x<sub>3</sub>. The parametrizing map is undefined at precisely 2
+points of the plane. Geometrically, the map consists of a blowup of
+these 2 points followed by a blowdown of the line joining them.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P3&lt;x0,x1,x2,x3&gt; := ProjectiveSpace(Rationals(),3);
+&gt; X2 := Scheme(P3,x0^2-2*x1^2-x2*x3);
+&gt; L := LinearSystem(P3,2);
+&gt; L := LinearSystemTrace(L,X2);
+&gt; P8&lt;x1,x2,x3,x4,x5,x6,x7,x8,x9&gt; := ProjectiveSpace(Rationals(),8);
+&gt; X := map&lt;X2-&gt;P8|Sections(L)&gt;(X2); X;
+Scheme over Rational Field defined by
+x1^2 - 2*x4^2 - x4*x8,
+x1*x2 - 2*x4*x5 - x5*x8,
+x2^2 - 2*x4*x7 - x7*x8,
+x1*x3 - 2*x4*x6 - x5*x9,
+x2*x3 - 2*x4*x8 - x7*x9,
+x3^2 - 2*x4*x9 - x8*x9,
+-x1*x5 + x2*x4,
+-x1*x6 + x3*x4,
+-x1*x7 + x2*x5,
+-x1*x8 + x3*x5,
+-x4*x7 + x5^2,
+-x1*x8 + x2*x6,
+-x1*x9 + x3*x6,
+-x4*x8 + x5*x6,
+-x4*x9 + x6^2,
+-x2*x8 + x3*x7,
+-x5*x8 + x6*x7,
+-x2*x9 + x3*x8,
+-x5*x9 + x6*x8,
+-x7*x9 + x8^2
+&gt; boo,prm := ParametrizeDegree8DelPezzo(X);
+&gt; boo;
+true
+&gt; prm;
+Mapping from: Prj: P2 to Sch: X
+with equations :
+-1/4*U*V*W^2
+-1/16*V*W^3
+2*U^2*V*W - 4*V^3*W
+-1/8*U^2*W^2
+-1/32*U*W^3
+U^3*W - 2*U*V^2*W
+-1/128*W^4
+1/4*U^2*W^2 - 1/2*V^2*W^2
+-8*U^4 + 32*U^2*V^2 - 32*V^4
+&gt; bs := ReducedSubscheme(BaseScheme(prm)); bs;
+Scheme over Rational Field defined by
+U^2 - 2*V^2,
+W
+</PRE>
+<HR>
+<H5><A NAME = "15505">ParametrizeDegree7DelPezzo(X) : Sch -&gt; MapIsoSch</A></H5>
+<BLOCKQUOTE>
+Let X be a degree 7 Del Pezzo surface anticanonically embedded in
+7-dimensional projective space over a number field. We allow that X 
+can be a degenerate (singular) Del Pezzo surface here. The scheme X 
+is always parametrizable over the base field and this intrinsic returns 
+such a parametrisation without reduction to degree 8 or 9 but directly 
+from the Lie Algebra method.
+</BLOCKQUOTE>
+<H5><A NAME = "15506">ParametrizeDegree6DelPezzo(X) : Sch -&gt; BoolElt, MapIsoSch</A></H5>
+
+<PRE>    ExistenceOnly: BoolElt              Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Let X be a degree 6 Del Pezzo surface anticanonically embedded in
+6-dimensional projective space. For this function the base field K
+may be Q or a number field. The surface X is defined by nine 
+degree 2 polynomials.
+The function performs only basic checks that the input X is valid.
+<B>NB:</B> This intrinsic only handles the non-singular case. For a
+singular (degenerate) degree 6 Del Pezzo, use the intrinsic that
+follows.
+<P>
+The connected component of the automorphism group of X is a 
+2-dimensional torus over K. For any of the possible tori, there
+is a family of degree 6 Del Pezzos which correspond to principal
+homogeneous spaces of the torus up to isomorphism. The 
+parametrizability of X is equivalent to X corresponding to 
+the trivial homogeneous space of its torus.
+<P>
+The function determines whether a parametrization
+&phi;: P<sup>2</sup> -&gt; X exists over K and returns one when this
+is the case. The degree of the polynomials defining a "minimal" &phi;
+(one which is undefined at the smallest number of points) is 3,4 or 6
+depending on the torus type. The parametrization returned is always of
+this minimal degree.
+<P>
+The surface X is parametrizable if and only if it contains a point over K. 
+Furthermore, it satisfies the local-global principle: it has a point over
+K &lt;=&gt; it has a point over each p-adic completion of
+K. (These statements are also true for degree 8 and 9 Del Pezzos)
+<P>
+The <TT>ExistenceOnly</TT> option allows the function to just perform
+this local solubility check, deciding upon the existence of a parametrization
+without explicitly constructing one. Depending on the torus type,
+simultaneous norm equations over a degree 6 field extension of K or
+a single norm equation over a degree 3 extension of K may have to be
+solved to construct a parametrization. This is a hard computation, especially
+if K is not Q, whereas the pure existence check is quite fast.
+</BLOCKQUOTE>
+<H5><A NAME = "15507">Degree6DelPezzoType2_1(K,pt) : FldNum, Pt -&gt; Sch</A></H5>
+<H5>Degree6DelPezzoType2_2(K,pt) : FldNum, Pt -&gt; Sch</H5>
+<H5>Degree6DelPezzoType2_3(K,pt) : FldNum, Pt -&gt; Sch</H5>
+<H5>Degree6DelPezzoType3(K,pt) : FldNum, Pt -&gt; Sch</H5>
+<H5>Degree6DelPezzoType4(K,K1,pt) : FldNum, Fld, Pt -&gt; Sch</H5>
+<H5>Degree6DelPezzoType6(K,pt) : FldNum, Pt -&gt; Sch</H5>
+<BLOCKQUOTE>
+These functions generate the parametrizable degree 6 Del Pezzo
+surface X whose (connected) automorphism group is the torus T, 
+which comes from field data K, and which contains point pt.
+<P>
+The point pt must be in 6-dimensional projective space over the 
+base field k of a number field K. Its first projective 
+coordinate may not be 0 and, depending on the torus type, certain 
+of its other coordinates must also be non-zero.
+<P>
+The torus types and corresponding fields K for the various
+functions are as follows (pt = [a<sub>0</sub>, ..., a<sub>6</sub>]):
+<P>
+<P>
+<P>
+ <TT>Type2_1</TT>. K/k should be a quadratic extension. T(k)=K<sup> * </sup>
+and T acts on P<sup>6</sup> to give an X with degree 3 minimal parametrization.
+pt satisfies not( a<sub>1</sub>=a<sub>2</sub>=0 or a<sub>3</sub>=a<sub>4</sub>=0 or a<sub>5</sub>=0 or a<sub>6</sub>=0 ).
+<P>
+<P>
+<P>
+ <TT>Type2_2</TT>. K/k should be a quadratic extension. T(k)=K<sup> * </sup>
+and T acts on P<sup>6</sup> to give an X with degree 4 minimal parametrization.
+pt satisfies not( a<sub>1</sub>=a<sub>2</sub>=0 or a<sub>3</sub>=a<sub>4</sub>=0 or a<sub>5</sub>=a<sub>6</sub>=0 ).
+<P>
+<P>
+<P>
+ <TT>Type2_3</TT>. K/k should be a quadratic extension. 
+T(k)=K<sup> * N<sub>K/k</sub>=1</sup> x K<sup> * N<sub>K/k</sub>=1</sup>.
+pt satisfies not( a<sub>1</sub>=a<sub>2</sub>=0 or a<sub>3</sub>=a<sub>4</sub>=0 or a<sub>5</sub>=a<sub>6</sub>=0 ).
+<P>
+<P>
+<P>
+ <TT>Type3</TT>. K/k should be a cubic extension. 
+T(k)=K<sup> * N<sub>K/k</sub>=1</sup>.
+pt satisfies not( a<sub>1</sub>=a<sub>2</sub>=a<sub>3</sub>=0 or a<sub>4</sub>=a<sub>5</sub>=a<sub>6</sub>=0 ).
+<P>
+<P>
+<P>
+ <TT>Type4</TT>. K/k and K1/k should be distinct quadratic
+extensions. T(k)=L<sup> * N<sub>L/K</sub>=1</sup> where L is K.K1.
+pt satisfies not( a<sub>1</sub>=a<sub>2</sub>=a<sub>3</sub>=a<sub>4</sub>=0 or a<sub>5</sub>=a<sub>6</sub>=0 ).
+<P>
+<P>
+<P>
+ <TT>Type6</TT>. K/k should be a degree 6 extension which contains
+cubic and quadratic subextensions K<sub>3</sub> and K<sub>2</sub>. For simplicity, the 
+precise condition is that the generator y=K.1 must have minimal polynomial
+of the form x<sup>6</sup> + 2ax<sup>4</sup> + a<sup>2</sup>x<sup>2</sup> - d and then K<sub>3</sub>=k(y<sup>2</sup>) and K<sub>2</sub>=k(y<sup>3</sup> + ay).
+T(k)=K<sup> * N<sub>K/K<sub>3</sub></sub>=N<sub>K/K<sub>2</sub></sub>=1</sup>.
+pt satisfies not( a<sub>1</sub>=a<sub>2</sub>=a<sub>3</sub>=a<sub>4</sub>=a<sub>5</sub>=a<sub>6</sub>=0 ).
+</BLOCKQUOTE>
+<H5><A NAME = "15508">ParametrizeDelPezzoDeg6(X) : Sch -&gt; BoolElt, MapIsoSch</A></H5>
+<BLOCKQUOTE>
+This variant for parametrizing a degree 6 Del Pezzo also handles the
+degenerate (singular) case. Note however, that it doesn't recognise
+singularity from the Lie algebra computation as occurs for degrees 7
+and 8. It tests for singularity at the start using the generic
+non-singularity computation that can be very slow. Therefore for
+known non-degenerate Del Pezzos of degree 6, it is always better to
+use the above <TT>ParametrizeDegree6DelPezzo</TT> directly.
+<P>
+That is also used here, if X turns out to be non-singular. Otherwise,
+projection from a singular point to P<sup>5</sup> reduces the problem to that
+of parametrizing a rational scroll.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15509">Example <TT>AlgSrf_del-pezzo-ex-6 (H122E25)</TT></A></H3>
+In the this example, we start with a degree 3 Del Pezzo surface - a
+non-singular hypersurface in P<sup>3</sup> - which contains the 3 disjoint lines
+x=y=0, z=t=0 and x=z, y=t. These are blown down to give a degree 6
+Del Pezzo surface, the parametrisation of which gives a parametrisation 
+of the original surface. As well as demonstrating the degree 6 code, this
+is a nice example of blowing down exceptional lines on surfaces,
+something for which more general code will be added at a future date.
+<P>
+<P>
+<P>
+<PRE>
+&gt; R3&lt;x,y,z,t&gt; := PolynomialRing(Rationals(),4,"grevlex");
+&gt; P3 := Proj(R3);
+&gt; //equation of the degree 3 surface:
+&gt; F := -x^2*z + x*z^2 - y*z^2 + x^2*t - y^2*t - y*z*t + x*t^2 + y*t^2;
+&gt; X3 := Scheme(P3,F);
+&gt; // get the ideal defining the union of the 3 lines:
+&gt; I1 := ideal&lt;R3|[x,y]&gt;;
+&gt; I2 := ideal&lt;R3|[z,t]&gt;;
+&gt; I3 := ideal&lt;R3|[x-z,y-t]&gt;;
+&gt; I := I1*I2*I3;
+&gt; I := Saturation(I);
+</PRE>
+<P>
+General surface theory tells us that if H is the hyperplane divisor
+on X<sub>3</sub>, then the blowing down is given by the projective map associated
+to the divisor H + L<sub>1</sub> + L<sub>2</sub> + L<sub>3</sub>, where the L<sub>i</sub> are our 3 lines. We need
+the global sections of the sheaf of this: if L<sub>1</sub> + L<sub>2</sub> + L<sub>3</sub> ~2H - D 
+(linear equivalence of divisors) for an effective divisor D, then
+the space of  global sections" is" the degree 3 graded part of the
+ideal of D (mod the equation of X<sub>3</sub>). The ideal I<sub>D</sub> of a suitable 
+D is computed by requiring that
+ID &cap;I = (F, F<sub>2</sub>) with F<sub>2</sub> a degree 2 polynomial in I.
+<P>
+<P>
+<P>
+<PRE>
+&gt; F2 := Basis(I)[5]; F2;
+y*z - x*t
+&gt; ID := ColonIdeal(ideal&lt;R3|[F,F2]&gt;,I);
+&gt; ideal&lt;R3|[F,F2]&gt; eq (ID meet I);
+true
+&gt; // get basis of degree 3 graded part of ID
+&gt; ID3 := ID meet ideal&lt;R3|Setseq(MonomialsOfDegree(R3,3))&gt;;
+&gt; B3 := MinimalBasis(ID3);
+&gt; B3;
+[
+    y*z*t - x*t^2,
+    z^3 - z^2*t + t^3,
+    y*z^2 - x*z*t,
+    x*z^2 - x*z*t + y*t^2,
+    y^2*z - x*y*t,
+    x*y*z - x^2*t,
+    x^2*z - x^2*t + y^2*t,
+    x^3 - x^2*y + y^3
+]
+&gt; // and a complementary subspace of F
+&gt; F in ideal&lt;R3|Remove(B3,7)&gt;;
+false
+&gt; B3 := Remove(B3,7);
+&gt; // now map to the degree 6 Del Pezzo
+&gt; P6&lt;a,b,c,d,e,f,g&gt; := ProjectiveSpace(Rationals(),6);
+&gt; blow_down := map&lt;X3-&gt;P6|B3&gt;;
+&gt; X6 := blow_down(X3);
+&gt; Dimension(X6); Degree(X6);
+2
+6
+</PRE>
+<P>
+We also need the inverse of blow down. The general <TT>IsInvertible</TT>
+function could be used here but again the general theory tells us that
+the inverse is given by linear equations and it is faster to find
+them directly by a Grobner basis plus linear algebra computation. We
+omit this for brevity and just assume the result.
+<P>
+<P>
+<P>
+<PRE>
+&gt; X3toX6 := iso&lt;X3-&gt;X6|B3,[f,e,c,a]&gt;;
+&gt; // now parametrise X6
+&gt; boo,prm := ParametrizeDegree6DelPezzo(X6);
+&gt; boo;
+true
+&gt; p2toX3 := Expand(prm*Inverse(X3toX6));
+&gt; p2toX3; 
+Mapping from: Projective Space of dimension 2
+Variables : $.1, $.2, $.3 to Sch: X3
+with equations :
+-77/9*$.1^3 + 59/6*$.1^2*$.2 + 10/3*$.1^2*$.3 + 8/9*$.1*$.2^2 -
+    73/18*$.1*$.2*$.3 - 113/18*$.1*$.3^2 - 59/9*$.2^3 + 383/18*$.2^2*$.3 -
+    259/9*$.2*$.3^2 + 329/18*$.3^3
+253/18*$.1^3 - 193/6*$.1^2*$.2 - 17/3*$.1^2*$.3 + 695/18*$.1*$.2^2 -
+    244/9*$.1*$.2*$.3 + 353/18*$.1*$.3^2 - 151/9*$.2^3 + 185/9*$.2^2*$.3 -
+    41/9*$.2*$.3^2 - 79/9*$.3^3
+-11/6*$.1^3 + 37/6*$.1^2*$.2 + 10/3*$.1^2*$.3 - 28/3*$.1*$.2^2 + 4*$.1*$.2*$.3 -
+    7*$.1*$.3^2 + 8/3*$.2^3 + 8/3*$.2^2*$.3 - 11/2*$.2*$.3^2 + 9/2*$.3^3
+11/18*$.1^3 + 8/3*$.1^2*$.2 - 1/6*$.1^2*$.3 - 28/9*$.1*$.2^2 - 2/9*$.1*$.2*$.3 -
+    59/18*$.1*$.3^2 - 2/9*$.2^3 + 34/9*$.2^2*$.3 - 53/18*$.2*$.3^2 + 53/18*$.3^3
+and inverse
+-884/23043*x^3 + 884/23043*x^2*y - 884/23043*y^3 - 4436/23043*x*y*z -
+    4334/23043*y^2*z + 6902/23043*x*z^2 - 3560/7681*y*z^2 - 4420/23043*z^3 +
+    4436/23043*x^2*t + 4334/23043*x*y*t + 3778/23043*x*z*t + 4420/23043*y*z*t +
+    4420/23043*z^2*t - 4420/23043*x*t^2 + 6902/23043*y*t^2 - 4420/23043*t^3
+-442/23043*x^3 + 442/23043*x^2*y - 442/23043*y^3 - 3544/23043*x*y*z -
+    6808/23043*y^2*z + 8800/23043*x*z^2 - 4392/7681*y*z^2 - 6290/23043*z^3 +
+    3544/23043*x^2*t + 6808/23043*x*y*t + 4376/23043*x*z*t + 8744/23043*y*z*t +
+    6290/23043*z^2*t - 8744/23043*x*t^2 + 8800/23043*y*t^2 - 6290/23043*t^3
+-884/23043*x^3 + 884/23043*x^2*y - 884/23043*y^3 - 458/23043*x*y*z -
+    5660/23043*y^2*z + 5828/23043*x*z^2 - 2854/7681*y*z^2 - 3910/23043*z^3 +
+    458/23043*x^2*t + 5660/23043*x*y*t + 2734/23043*x*z*t + 6208/23043*y*z*t +
+    3910/23043*z^2*t - 6208/23043*x*t^2 + 5828/23043*y*t^2 - 3910/23043*t^3
+and alternative inverse equations:
+... 
+</PRE>
+<HR>
+<H5><A NAME = "15510">ParametrizeDegree5DelPezzo(X) : Sch -&gt; MapIsoSch</A></H5>
+<BLOCKQUOTE>
+Let X be a degree 5 Del Pezzo surface anticanonically embedded in
+5-dimensional projective space over a number field. We allow that X can be a
+degenerate (singular) Del Pezzo here. The scheme X is always parametrizable
+over the base field and this intrinsic returns such a parametrisation
+without reduction to higher degree.
+<P>
+The scheme X has a finite automorphism group in this case, so the Lie Algebra
+method cannot be applied. However, there is a more geometric method
+using projections that works well for degree 5 and that is used here.
+</BLOCKQUOTE>
+<H5><A NAME = "15511">ParametrizeSingularDegree3DelPezzo(X,P2) : Sch, Prj -&gt; BoolElt, MapIsoSch</A></H5>
+<H5>ParametrizeSingularDegree4DelPezzo(X,P2) : Sch, Prj -&gt; BoolElt, MapIsoSch</H5>
+<BLOCKQUOTE>
+These two intrinsics compute whether a degree 3 (resp. 4) anticanonically
+embedded <I>singular</I> Del Pezzo X has a parametrization over the base number
+field k and, if so, return such a parametrization as a scheme map with
+inverse from P2 to X. A projective plane P2 over the same base field k
+is the second argument of the intrinsic and will be used as the domain of the
+map returned.
+<P>
+The conditions on X mean that is an irreducible degree 3 hypersurface in P<sup>3</sup> in the first
+case or an irreducible complete intersection of 2 quadrics in P<sup>4</sup> in the second case,
+having only a finite number of singularities that are canonical A-D-E type in either case.
+The condition that there is a finite non-empty set of singularities is checked but whether
+these singularities are canonical is not checked. In the unlikely event that a degree 3 
+hypersurface or degree 4 complete intersection has finitely many singularities but one
+is non-canonical, the functions will fail at some point.
+<P>
+If there is a singular point p defined over the base field, projection from p gives
+an immediate inverse parametrization of X in the degree 3 case and maps X onto
+a line or conic bundle in P<sup>3</sup> in the degree 4 case, which is then parameterized by
+the special routines for those cases. There remain a small number of configurations of
+conjugate singularities in the contrary case, corresponding to certain special root 
+subsytems of E<sub>6</sub> or D<sub>5</sub>. For these, individual methods have been devised and 
+implemented.  These include an adaptation of the Lie algebra method for the degree 
+3 and 4 singular Del Pezzo surfaces that are actually toric.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15512">Example <TT>AlgSrf_del-pezzo-ex-3-sing (H122E26)</TT></A></H3>
+The following is an example of a degree 3 hypersurface in P<sup>3</sup> over Q, that is a
+singular Del Pezzo with 4 conjugate A<sub>1</sub> singularities. It is handled very easily
+by the special case code.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Q := RationalField();
+&gt; P2&lt;a,b,c&gt; := ProjectiveSpace(Q,2);
+&gt; P3&lt;x,y,z,t&gt; := ProjectiveSpace(Q,3);
+&gt; X := Scheme(P3, -4*x^2*y + 16*x*y^2 - y^3 + 2*x^2*z - 2*x*y*z +
+&gt;     7/2*y^2*z - 252*x*z^2 + 16*y*z^2 - 55*z^3 + 10*x^2*t + 14*x*y*t -
+&gt;     61/2*y^2*t - 3400*x*z*t + 216*y*z*t - 261*z^2*t - 11468*x*t^2 +
+&gt;     728*y*t^2 + 3987*z*t^2 + 21889*t^3);
+&gt; ParametrizeSingularDegree3DelPezzo(X,P2);
+true Mapping from: Prj: P2 to Sch: X
+with equations : 
+1/4*a^3 + 435/2*a^2*b - 4743/4*a*b^2 + 968*b^3 + 257/16*a^2*c + 183/8*a*b*c - 
+    3647/16*b^2*c + 8*a*c^2 - 8*b*c^2 + c^3
+-257/32*a^3 + 2547/32*a^2*b - 10419/32*a*b^2 + 8129/32*b^3 - 4*a^2*c + 22*a*b*c 
+    - 66*b^2*c - 1/2*a*c^2 + 1/2*b*c^2
+-57/32*a^3 - 173*a^2*b + 26459/32*a*b^2 - 1529/16*b^3 - 29/2*a^2*c + 83/4*a*b*c 
+    - 25/4*b^2*c - 7/2*a*c^2 + b*c^2
+-1/32*a^3 + 457/16*a^2*b - 4081/32*a*b^2 + 33/2*b^3 + 2*a^2*c - 7/4*a*b*c - 
+    1/4*b^2*c + 1/2*a*c^2
+and inverse
+x*y*z - 2*y^2*z + 63/2*z^3 + 2*x^2*t - 9*x*y*t + 35/2*y^2*t + 299/2*z^2*t - 
+    4567/2*z*t^2 - 25075/2*t^3
+x^2*z - 1/4*y^2*z + 4*z^3 + 7*x^2*t - 2*x*y*t + 9/4*y^2*t + 19*z^2*t - 290*z*t^2
+    - 1593*t^3
+x^3 - 63/4*x*y^2 + y^3 + 256*x*z^2 - 65/4*y*z^2 + 3454*x*z*t - 439/2*y*z*t + 
+    11650*x*t^2 - 2957/4*y*t^2
+</PRE>
+<HR>
+<H4><A NAME = "15513">Minimization and Reduction of Surfaces</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+Given an algebraic variety defined by several polynomials with integer 
+coefficients, <I>reduction</I> asks for another embedding of this Z-scheme, 
+such that the defining polynomials have smaller coefficients.  <I>Minimization</I> 
+asks for an isomorphic Q-scheme with minimal invariants. Many 
+constructions of algebraic varieties lead to very bad models and thus 
+it becomes necessary to perform minimization and reduction. Otherwise,
+subsequent calculations become impractical. The result of the minimization 
+process is usually not unique. 
+<P>
+Minimization is done locally for each prime of bad reduction. The local 
+minimization routines and the reduction routines are directly accessible. 
+They may be helpful for local computations or if the computation of all 
+bad primes is too slow. Note that these subroutines do not check for 
+semi-stability (in the sense of Mumford's geometric invariant theory). 
+Unstable varieties may lead to infinite loops. As smooth hypersurfaces 
+are known to be stable the initial computation of the bad primes will 
+fail if an unstable variety is given.
+<P>
+In this section, minimization and reduction routines are described for 
+Del Pezzo surfaces of degrees 3 (cubic surfaces) and 4.
+<P>
+Minimization and reduction is also available for various kinds of genus 
+one curves (see Section <A  HREF = "text1474.htm#16695">Minimisation and Reduction</A>) and plane quartics 
+(see Section <A  HREF = "text1368.htm#15280">Minimization and Reduction</A>).
+
+
+<H5><A NAME = "15514">MinimizeCubicSurface(f, p) : RngMPolElt, RngIntElt -&gt; RngMPolElt, Mtrx</A></H5>
+
+<PRE>    SetVerbose("MinRedCubSurf", n):     Maximum: 2</PRE>
+<BLOCKQUOTE>
+Given a cubic surface f as a homogeneous polynomial with integer 
+coefficients, this routine performs a minimization at the place p.
+The new equation and the transformation matrix are returned.
+No checks of stability are done so that an unstable surface will 
+lead to an infinite loop.
+</BLOCKQUOTE>
+<H5><A NAME = "15515">ReduceCubicSurface(f) : RngMPolElt -&gt; RngMPolElt, Mtrx</A></H5>
+
+<PRE>    SetVerbose("MinRedCubSurf", n):     Maximum: 2</PRE>
+<BLOCKQUOTE>
+Given a cubic surface f as a homogeneous polynomial with integral 
+coefficients, this function computes a reduction of the surface. 
+The second returned value is the transformation used.
+</BLOCKQUOTE>
+<H5><A NAME = "15516">MinimizeReduceCubicSurface(f) : MPolElt -&gt; RngMPolElt, Mtrx</A></H5>
+
+<PRE>    SetVerbose("MinRedCubSurf", n):     Maximum: 2</PRE>
+<BLOCKQUOTE>
+Given a smooth cubic surface f as a homogeneous polynomial with 
+integer coefficients, this function computes a minimized and reduced 
+model of the surface.  The second return value is the transformation 
+matrix.  The transformation matrix applied to f will evaluate to a 
+scalar multiple of the returned polynomial.
+<P>
+The algorithm is based on <A  HREF = "text1378.htm#bib_elsenhans_good_models">[Els]</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "15517">MinimizeDeg4delPezzo(f, p) : SeqEnum, RngIntElt -&gt; SeqEnum, Mtrx</A></H5>
+
+<PRE>    SetVerbose("MinRedDeg4delPezzo", n):  Maximum: 1</PRE>
+<BLOCKQUOTE>
+Given a degree 4 del Pezzo surface f as a sequence of two quadrics 
+with integer coefficients, this function will compute a partially 
+local minimized model for the place p.  The second return
+value is the transformation matrix.
+</BLOCKQUOTE>
+<H5><A NAME = "15518">MinimizeReduceDeg4delPezzo(f) : SeqEnum -&gt; SeqEnum, Mtrx</A></H5>
+
+<PRE>    SetVerbose("MinRedDeg4delPezzo", n):  Maximum: 1</PRE>
+<BLOCKQUOTE>
+Given a degree 4 del Pezzo surface as a sequence of two quadrics 
+with integral coefficients, this function computes a practically 
+minimized and reduced model of the surface. The second return
+value is the transformation matrix.
+<P>
+The transformation matrix applied to the initial polynomials will 
+evaluate to polynomials defining the same Q scheme as that 
+defined by the returned quadrics.
+<P>
+For the reduction step, <TT>ReduceQuadrics</TT> is called.
+</BLOCKQUOTE>
+<H5><A NAME = "15519">MinimizeReduce(S) : SrfDelPezzo -&gt;  SrfDelPezzo, Mtrx</A></H5>
+
+<PRE>    SetVerbose("MinRedCubSurf", n):     Maximum: 2</PRE>
+
+<PRE>    SetVerbose("MinRedDeg4delPezzo", n):  Maximum: 1</PRE>
+<BLOCKQUOTE>
+Given a del Pezzo surface S of degree 3 or 4 this function will 
+call the minimization and reduction routines described above and 
+converts the output scheme X to a del Pezzo surface. The second
+returned value is the matrix hat maps S to the result.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15520">Example <TT>AlgSrf_dp34 (H122E27)</TT></A></H3>
+This example demonstrates minimization and reduction on del Pezzo surfaces 
+of degree 3 and 4 obtained by blowing up rational points.
+<P>
+<P>
+<PRE>
+&gt; P2 := ProjectiveSpace(RationalField(),2);
+&gt; pts := [P2| [-5,-10,-8], [-4,10,-4], [8,-2,-5], [0,-10,0], [1,5,7], [-7,-8,-6]];
+&gt; S := DelPezzoSurface(pts);
+&gt; _&lt;W, X, Y, Z&gt; := AmbientSpace(S); // give names to the variables
+&gt; S;
+Del Pezzo Surface of degree 3 over Rational Field defined by
+-W*X^2 + 318827/104630*X^3 + 46774615/29003436*W*X*Y - 
+    2039633371/290034360*X^2*Y - 2588798/7250859*W*Y^2 + 
+    246700427/58006872*X*Y^2 - 4904503/7250859*Y^3 + W^2*Z - 
+    318827/104630*W*X*Z + 34829/52315*X^2*Z + 117476057/58006872*W*Y*Z - 
+    2004449/27622320*X*Y*Z + 4769241/12890416*Y^2*Z - 34829/52315*W*Z^2 - 
+    44696243/72508590*Y*Z^2
+&gt; MinimizeReduce(S);
+Del Pezzo Surface of degree 3 over Rational Field defined by
+-22*W^2*X + 38*W*X^2 - 4*X^3 - 28*W^2*Y + 103*W*X*Y - 48*X^2*Y + 44*W*Y^2 - 
+    59*X*Y^2 - 24*Y^3 + 24*W^2*Z + 80*W*X*Z + 44*X^2*Z - 57*W*Y*Z + 73*X*Y*Z 
+    - 59*Y^2*Z - 79*W*Z^2 - 21*X*Z^2 - 5*Y*Z^2
+</PRE>
+Now we consider the surface of degree 4 obtained by blowing up only the first five points.
+<P>
+<P>
+<PRE>
+&gt; T := DelPezzoSurface(pts[1..5]);
+&gt; _&lt;V, W, X, Y, Z&gt; := AmbientSpace(T);
+&gt; T;
+Del Pezzo Surface of degree 4 over Rational Field defined by
+-W^2 + 7031/194432*X^2 + V*Y + 10877/13888*X*Y + 47/280*W*Z + 412801/277760*X*Z 
+     - 78153/138880*Y*Z - 86217/9721600*Z^2,
+-W*X + 1693/6944*X^2 + 23/496*X*Y + V*Z + 26763/9920*X*Z - 4003/4960*Y*Z 
+     - 233411/347200*Z^2
+&gt; MinimizeReduce(T);
+Del Pezzo Surface of degree 4 over Rational Field defined by
+-5*V^2 + 4*V*W + 8*W^2 + V*X - 8*X^2 - 8*V*Y + 3*W*Y + 3*X*Y + 15*Y^2 - 
+    2*V*Z - 16*X*Z - 10*Y*Z,
+-2*V^2 + V*W + 3*W^2 + 2*V*X + 2*W*X - 6*X^2 + 3*V*Y + 3*W*Y - 17*X*Y - 
+    5*Y^2 + 5*V*Z - 22*X*Z - Y*Z + 13*Z^2
+</PRE>
+<HR>
+<H4><A NAME = "15521">Cubic Surfaces over Finite  Fields</A></H4>
+
+<P>
+<P>
+<P>
+In this section all cubic surface are represented by a homogeneous polynomial of
+degree 3 in a rank 4 polynomial ring. The coefficients are elements of a 
+finite field.
+
+
+<P>
+<H5><A NAME = "15522">NumberOfPointsOnCubicSurface(f) : RngMPolElt -&gt; RngIntElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a smooth cubic surface f over a finite field this routine computes the 
+Frobenius action on the lines. The return values are the number of points 
+of the surface and the Swinnerton-Dyer number of conjugacy class of the 
+Weil group W(E<sub>6</sub>) that contains the Frobenius. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15523">Example <TT>AlgSrf_numptscubic (H122E28)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; p := NextPrime(3^100);
+&gt; r&lt;x,y,z,w&gt; := PolynomialRing(GF(p),4);
+&gt; S := x^3 + 2* y^3 + 7* z^3 + 11 * w^3 - 5 * (-x-y-z-w)^3; 
+&gt; NumberOfPointsOnCubicSurface(S);
+2656139888758747693387813220357796268292334528059462421112503157258849853119260\
+    79714208525578202 
+13
+</PRE>
+So we get a large number of points and the Frobenius has Swinnerton-Dyer number 13.
+<HR>
+<H5><A NAME = "15524">IsIsomorphicCubicSurface(f,g) : MPolElt, MPolElt -&gt; BoolElt, List</A></H5>
+
+<PRE>    UseLines: BoolElt                   Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given cubic surfaces f and g defined over finite fields, the intrinsic
+returns <TT>true</TT> if the surfaces are isomorphic. If f and G are isomorphic, 
+there is a second return value comprising a list of matrices such that
+g<sup>m</sup> will evaluate to a scalar multiple of f for each matrix m in the list. 
+In the case where there are several isomorphisms over the algebraic
+closure of the basefield, one matrix for each isomorphism is returned. 
+<P>
+Note that an isomorphism of smooth cubic surfaces is always given by a linear map.
+<P>
+The computation is based on an analysis of a finite set of points associated 
+to the surface.  Here we used the singularities of the hessian. If the hessian 
+degenerates, the 135 intersection points of the lines are used. Setting 
+<TT>UseLines</TT> to <TT>true</TT> indicates that the second algorithm is to be used.
+<P>
+As the algorithm involves huge field extensions it is only practical for 
+surfaces over finite fields.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15525">Example <TT>AlgSrf_isisocubic (H122E29)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; _&lt;x,y,z,w&gt; := PolynomialRing(GF(101),4);
+&gt; S := x^3 + y^3 + z^3 + w^3 - (x+y+z+w)^3;
+&gt; time a,b := IsIsomorphicCubicSurface(S, S);
+Time: 0.530
+&gt; #b;
+120
+&gt; S := x^3 + 2*y^3 + 7*z^3 + 5*w^3 - y*z*w + x^2*w + 2*y*z^2;
+&gt; time a,b := IsIsomorphicCubicSurface(S, S);
+Time: 0.480
+&gt; #b;
+1
+&gt; S := x^3 + y^3 + z^3 + w^3;
+&gt; time a,b := IsIsomorphicCubicSurface(S, S);
+Time: 22.830
+&gt; #b;
+648
+</PRE>
+Thus the diagonal cubic surface has 648 automorphisms and the Clebsch cubic surface has 120.
+Both examples are exceptional, a general cubic surface has a trivial automorphism group. 
+The first example is much slower because the hessian degenerates and the 27 lines are used.
+<HR>
+<H4><A NAME = "15526">Construction of Cubic Surfaces</A></H4>
+
+
+
+<H5><A NAME = "15527">CubicSurfaceByHexahedralCoefficients(p) : RngUPolElt -&gt; RngMPolElt</A></H5>
+<BLOCKQUOTE>
+Given a separable polynomial p of degree 6 this intrinsic constructs 
+a cubic surface having the roots of the p as hexahedral coefficients. 
+These surfaces automatically have a Galois invariant set of 12 lines.
+<P>
+See <A  HREF = "text1378.htm#bib_elsenhans_jahnel_double_six">[EJ10]</A> for details.
+</BLOCKQUOTE>
+<H5><A NAME = "15528">CoblesRadicand(p) : RngUPolElt -&gt; FldElt</A></H5>
+<BLOCKQUOTE>
+Given a separable polynomial p of degree 6 this routine evaluates the 
+Cobles quartic at the roots of p. Up to a square factor this value 
+is the discriminant of the cubic surface constructed using hexahedral 
+coefficients.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15529">Example <TT>AlgSrf_hex (H122E30)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; q&lt;tt&gt; := PolynomialRing(RationalField());
+&gt; p6 := tt^6 + 34*tt^4 + 180*tt^3 + 458*tt^2 + 524*tt + 212;
+&gt; CoblesRadicand(p6);
+-676
+&gt; eqn := CubicSurfaceByHexahedralCoefficients(p6);
+&gt; Max([AbsoluteValue(c) : c in Coefficients(eqn)]);
+1302161870313141409337256000 20
+</PRE>
+We have to use minimization and reduction to make further computations faster.
+<P>
+<P>
+<PRE>
+&gt; S := MinimizeReduce(DelPezzoSurface(eqn));
+&gt; Equation(S);
+6*y[1]^3 - 14*y[1]^2*y[2] + 6*y[1]*y[2]^2 - 6*y[2]^3 - 14*y[1]^2*y[3] + 
+    9*y[1]*y[2]*y[3] + 11*y[2]^2*y[3] - 21*y[1]*y[3]^2 + 14*y[2]*y[3]^2 + 
+    3*y[3]^3 - 3*y[1]*y[2]*y[4] + 10*y[2]^2*y[4] + 8*y[1]*y[3]*y[4] - 
+    53*y[2]*y[3]*y[4] + 40*y[3]^2*y[4] + 9*y[1]*y[4]^2 + 39*y[2]*y[4]^2 - 
+    23*y[3]*y[4]^2 - 16*y[4]^3
+&gt; M := PicardGaloisModule(S);
+&gt; Order(Group(M));
+72
+&gt; CohomologyGroup( CohomologyModule(Group(M),M), 1);
+Full Quotient RSpace of degree 2 over Integer Ring
+Column moduli:
+[ 2, 2 ]
+</PRE>
+Here the hexahedral approach gives us a cubic surface with nontrivial cohomology.
+<HR>
+<H4><A NAME = "15530">Invariant Theory of Cubic Surfaces</A></H4>
+
+<P>
+<P>
+<P>
+For background on this classical topic we refer to <A  HREF = "text1378.htm#bib_MR1438547">[Hun96, Appendix B]</A> 
+and <A  HREF = "text1378.htm#bib_MR0094753">[Sal58]</A>.
+<P>
+In this section a cubic surface is represented by a homogeneous polynomial of
+degree 3 in a rank 4 polynomial ring.
+
+
+<H5><A NAME = "15531">Invariants</A></H5>
+
+<P>
+<P>
+<P>
+By a theorem of Clebsch the ring of invariants of a cubic surface is 
+generated by 5 invariants having degrees 8, 16, 24, 32 and 40. An explicit 
+system of generators was found by Salmon. 
+By Geometric Invariant Theory, stable cubic surfaces are isomorphic if and only 
+if their invariants determine the same point in the weighted projective space 
+(P)(1, 2, 3, 4, 5).
+<P>
+
+
+<H5><A NAME = "15532">ClebschSalmonInvariants(f) : RngMPolElt -&gt; SeqEnum, RngElt</A></H5>
+<BLOCKQUOTE>
+Computes a sequence of the numerical values of Salmon's 
+invariants of the cubic surface given by the polynomial f. 
+The second returned value is the discriminant of the surface.
+</BLOCKQUOTE>
+<H5><A NAME = "15533">SkewInvariant100(f) : RngMPolElt -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+Computes the numerical value a degree 100 skew invariant I<sub>100</sub> 
+of the cubic surface f. 
+The square of I<sub>100</sub> is an element of Clebsch invariant ring. 
+It vanishes if and only if the cubic surface has an Eckardt point. 
+</BLOCKQUOTE>
+<H5><A NAME = "15534">CubicSurfaceFromClebschSalmon(inv) : SeqEnum -&gt; RngMPolElt</A></H5>
+<BLOCKQUOTE>
+Computes a cubic surface whose invariants are equal to the given 
+sequence.  The algorithm requires the last invariant to be non-zero. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15535">Example <TT>AlgSrf_inv_cub (H122E31)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; r4&lt;x,y,z,w&gt; := PolynomialRing(Rationals(),4);
+&gt; surf := r4!CubicSurfaceFromClebschSalmon([1,2,3,4,5]);
+&gt; surf := r4!MinimizeReduceCubicSurface(surf);
+&gt; surf;
+-79*x^3 - 64*x^2*y + 228*x^2*z - 197*x^2*w + 320*x*y^2 - 470*x*y*z + 492*x*y*w 
+  - 180*x*z^2 - 94*x*z*w - 242*x*w^2 - 125*y^3 + 100*y^2*z + 94*y^2*w + 530*y*z^2 
+  - 886*y*z*w + 390*y*w^2 - 235*z^3 + 526*z^2*w - 825*z*w^2 +  279*w^3
+&gt; inv := ClebschSalmonInvariants(surf);
+&gt; inv;
+[ 976235771549603375/3, 1906072563306098780753436239622781250/9, 
+930388109734329783009461918136480101451041525943359375/9, 
+3633112616588281944217451032208493848831995668840667046827293985351562500/81, 
+443346812297707471151312&#8802;5953470580778533302801673727424367422761364246\
+35758514404296875/243 ]
+&gt; [inv[i] / inv[1]^i : i in [1..5]];
+[ 1, 2, 3, 4, 5 ]
+&gt; SkewInvariant100(surf);
+-1474765875168770247752210363977205595498018662672331422683943150206680481\
+86921012313818705064245354658498892851426776914304662591690689504117661282\
+58105510099234779123372779972973056799912669452615967667952645570039749145\
+50781250/531441
+</PRE>
+Thus the constructed surface has equivalent invariants (as they are in 
+(P)(1, 2, 3, 4, 5)) and no Eckardt points.
+<HR>
+<H5><A NAME = "15536">Covariants</A></H5>
+
+<P>
+<P>
+<P>
+A covariant is in the same ambient space as the initial surface. 
+For example the equation itself is a covariant. 
+In the case of a cubic surface this gives a degree 1 order 3 covariant.
+Products of covariants are again covariants.
+They form a ring over the ring of invariants.
+
+
+<H5><A NAME = "15537">LinearCovariants(f) : RngMPolElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The intrinsic constructs a sequence containing Salmon's 4 linear 
+covariants for the cubic surface f.
+</BLOCKQUOTE>
+<H5><A NAME = "15538">ClassicalCovariantsOfCubicSurface(f) : RngMPolElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The intrinsic constructs a sequence containing the 4 classical covariants 
+of the cubic surface f. The first one is the hessian. The next two are 
+classically known as T and &Theta;. The last one is a degree 9 surface, 
+which intersects f precisely in its 27 lines.
+</BLOCKQUOTE>
+<H5><A NAME = "15539">Contravariants</A></H5>
+
+<P>
+<P>
+<P>
+A contravariant is in the dual projective space of the initial surface. 
+All contravariants form a ring over the ring of invariants.
+Contravariants can be constructed from invariants of varieties of the 
+same degree but dimension one less by the Clebsch transfer principle.
+
+
+<H5><A NAME = "15540">NumericClebschTransfer(f, inv, p) : RngMPolElt,  UserProgram,  SeqEnum -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+Given a form f and a user program <TT>inv</TT> that evaluates an invariant 
+of a form of the same degree but one variable less, this function evaluates 
+the corresponding contravariant of f at the point p.
+If this is repeated using sufficiently many different knots, it is
+possible to reconstruct a polynomial representation of the contravariant 
+by interpolation.
+</BLOCKQUOTE>
+<H5><A NAME = "15541">ContravariantsOfCubicSurface(f) : RngMPolElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Computes a sequence of 3 contravariants of the cubic surface f. By 
+Clebsch transfer they correspond to the invariants S, T, and the 
+discriminant of plane cubic curves.  Thus the first one describes all 
+hyperplanes such that the intersection with f=0 gives a cubic curve 
+with j-invariant equal to zero.  The second gives all hyperplanes 
+intersecting f=0 in a cubic curve with j-invariant 1728 (as long 
+as the intersection is smooth).
+The last one is S<sup>2</sup> - 6T. This is the degree 12 polynomial of the (formal) dual surface. 
+It describes all hyperplanes such that the intersection with f=0 is singular. 
+For smooth surfaces this is equivalent to tangency.
+If f=0 is singular the result will be reducible or even zero.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15542">Example <TT>AlgSrf_cayley_dual (H122E32)</TT></A></H3>
+This is the Cayley cubic surface. It has 4 singularities of type 
+A<sub>1</sub> and each results in a linear factor of multiplicity two in 
+the (formal) dual surface. 
+<P>
+<P>
+<P>
+<PRE>
+&gt; r4&lt;x,y,z,w&gt; := PolynomialRing(Rationals(),4);
+&gt; surf := x*y*z + x*y*w + x*z*w + y*z*w;
+&gt; cont := ContravariantsOfCubicSurface(surf);
+&gt; Factorization(cont[3]);
+[
+    &lt;w, 2&gt;,
+    &lt;z, 2&gt;,
+    &lt;y, 2&gt;,
+    &lt;x, 2&gt;,
+    &lt;x^4 - 4*x^3*y - 4*x^3*z - 4*x^3*w + 6*x^2*y^2 + 4*x^2*y*z + 4*x^2*y*w 
+     + 6*x^2*z^2 + 4*x^2*z*w + 6*x^2*w^2 - 4*x*y^3 + 4*x*y^2*z + 4*x*y^2*w 
+     + 4*x*y*z^2 - 40*x*y*z*w + 4*x*y*w^2 - 4*x*z^3 + 4*x*z^2*w + 4*x*z*w^2 
+     - 4*x*w^3 + y^4 - 4*y^3*z - 4*y^3*w + 6*y^2*z^2 + 4*y^2*z*w + 6*y^2*w^2 
+     - 4*y*z^3 + 4*y*z^2*w + 4*y*z*w^2 - 4*y*w^3 + z^4 - 4*z^3*w + 6*z^2*w^2 
+     - 4*z*w^3 + w^4, 1&gt;
+]
+</PRE>
+<HR>
+<H5><A NAME = "15543">Interaction of Covariants and Contravariants</A></H5>
+
+<P>
+<P>
+<P>
+One can apply a contravariant to a covariant (or vice versa). 
+The result is a new covariant (resp. contravariant) or an invariant.
+Its degree is the sum of the degrees of the arguments. 
+The order is the difference of the two orders. 
+If the order of the result is zero, it is an invariant.
+<P>
+One way to define the action is to interpret the contravariant as 
+a differential operator, i.e. x<sub>i</sub><sup>k</sup> acts as frac(&part;<sup>k</sup>)(&part;x<sub>i</sub><sup>k</sup>).
+Then one applies this differential operator to the covariant.
+
+
+<H5><A NAME = "15544">ApplyContravariant(c, d) : MPolElt, MPolElt -&gt; MPolElt</A></H5>
+<BLOCKQUOTE>
+Given a covariant c and a polynomial d, this intrinsic 
+interprets d as a differential operator (i.e., x is 
+replaced by d/dx). It applies this operator to the 
+polynomial c and returns the resulting polynomial.
+<P>
+In invariant theory d is a contravariant and c is a covariant.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15545">Example <TT>AlgSrf_co_cont (H122E33)</TT></A></H3>
+Here we compute Salmon's first invariant by applying a degree 4 
+order 4 contravariant to the hessian which is a degree 4 order 4 
+covariant.
+<P>
+<P>
+<P>
+<PRE>
+&gt; r4&lt;x,y,z,w&gt; := PolynomialRing(RationalField(),4);
+&gt; surf := x^3 + 2*y^3 + 3*z^3 + 5*w^3 - 2*x*y*(z-w) + (x+y+z+w)^3;
+&gt; cont := ContravariantsOfCubicSurface(surf);
+&gt; cov := ClassicalCovariantsOfCubicSurface(surf);
+&gt; ApplyContravariant(cont[1],cov[1]) / (2^11 * 3^9);
+1438753/729
+&gt; ClebschSalmonInvariants(surf)[1];
+1438753/729
+</PRE>
+<HR>
+<H4><A NAME = "15546">The Pentahedron of a Cubic Surface</A></H4>
+
+<P>
+<P>
+<P>
+A general cubic surface can be written as a sum of 5 cubes of linear forms. These are
+unique up to scaling by third roots of unity and permutation. Thus we can associate 5 points in 
+the dual projective space to a given cubic surface. They are called the faces of its
+pentahedron.
+In general the faces of the pentahedron are defined over a larger field.
+<P>
+The algorithm is described in <A  HREF = "text1378.htm#bib_MR1780430">[RS00]</A>.
+
+
+<H5><A NAME = "15547"></A><A NAME = "srfc:pent-ideal">PentahedronIdeal</A>(f) : RngMPolElt -&gt; RngMPol</H5>
+<BLOCKQUOTE>
+Computes the ideal of the faces of the pentahedron of the cubic surface f. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15548">Example <TT>AlgSrf_penta (H122E34)</TT></A></H3>
+The first example is a randomly chosen cubic surface. By construction it has a
+proper rational pentahedron. 
+<P>
+<P>
+<PRE>
+&gt; r4&lt;x,y,z,w&gt; := PolynomialRing(Rationals(),4);
+&gt; surf := x^3 + (x-y+2*z)^3 + (y-w)^3 + z^3 + (x - 3*y-2*z-7*w)^3;
+&gt; p_id := PentahedronIdeal(surf);
+&gt; Points(Cluster(ProjectiveSpace(Rationals(),3),Basis(p_id)));
+{@ (-1/7 : 3/7 : 2/7 : 1), (0 : -1 : 0 : 1), (0 : 0 : 1 : 0), 
+   (1/2 : -1/2 : 1 : 0), (1 : 0 : 0 : 0) @}
+</PRE>
+<P>
+The next example shows that the pentahedron of 
+the diagonal cubic surface degenerates. 
+<P>
+<P>
+<PRE>
+&gt; diag := x^3 + y^3 + z^3 + w^3;
+&gt; p_id2 := PentahedronIdeal(diag);
+&gt; Points(Cluster(ProjectiveSpace(Rationals(),3),Basis(p_id2)));
+{@ (0 : 0 : 0 : 1), (0 : 0 : 1 : 0), (0 : 1 : 0 : 0), (1 : 0 : 0 : 0) @}
+</PRE>
+<P>
+The final example is a surface without a pentahedron.
+<P>
+<P>
+<PRE>
+&gt; degen := x^3+y^3+z^3 + x*y*z+ w^3;
+&gt; p_id3 := PentahedronIdeal(degen);
+&gt; Points(Cluster(ProjectiveSpace(Rationals(),3),Basis(p_id3)));
+{@ (0 : 0 : 0 : 1) @}
+</PRE>
+<PRE></PRE> <A  HREF = "text1378.htm">[Next]</A><A  HREF = "text1384.htm">[Prev]</A> <A  HREF = "text1378.htm">[Right]</A> <A  HREF = "text1384.htm">[Left]</A> <A  HREF = "text1379.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

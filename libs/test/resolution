@@ -1,0 +1,477 @@
+/*
+AKS, June 05.
+*/
+
+
+SetQuitOnError(false);
+
+ClearVerbose();
+SetVerbose("Resolution", 0);
+
+procedure test_res(C)
+    //"Test BoundaryMaps";
+    B := BoundaryMaps(C);
+    time for i := 1 to #B - 1 do
+        if Ncols(B[i]) le 100 then
+            //i;
+            assert IsZero(B[i]*B[i + 1]);
+        end if;
+    end for;
+end procedure;
+
+function BettiGE(B1, B2)
+    return #B1 ge #B2 and forall{i: i in [1 .. #B2] | B1[i] ge B2[i]};
+end function;
+
+procedure test_module(M, name: DT := 0, MBT := 0)
+
+    ZEIT := Cputime();
+
+    "%%%%%%%%%";
+    name;
+
+    printf "Module with basis length %o, degree %o\n", #Basis(M), Degree(M);
+
+    time C := FreeResolution(M);
+    C;
+    T := BettiTable(M);
+
+    test_res(C);
+
+    // DimensionsOfTerms(C);
+    // T;
+    BettiNumbers(M);
+
+    if DT cmpne 0 then
+	assert DimensionsOfTerms(C) eq DT;
+	//BettiNumbers(M), [d: d in DT | d ne 0];
+	assert BettiNumbers(M) eq Reverse([d: d in DT | d ne 0]);
+    end if;
+    if MBT cmpne 0 then
+	assert T eq MBT;
+    end if;
+
+    assert BettiNumbers(M) eq
+	[&+[T[i, j]: i in [1..#T]]: j in [1..#T[1]]];
+
+    if IsHomogeneous(M) then
+	H<t> := HilbertSeries(M);
+	denom := HilbertNumerator(M)/H;
+
+	maxi := #T[1] + 1;
+	maxj := #T + maxi;
+	//maxi, maxj;
+	numer := &+[
+	    (-1)^i*BettiNumber(M, i, j)*t^j:
+		j in [0 .. maxj], i in [0 .. maxi]
+	];
+	// "HN:", HilbertNumerator(M);
+	numer;
+	"HN:", HilbertNumerator(M);
+	assert numer eq HilbertNumerator(M);
+    end if;
+
+    if 0 eq 1 then
+	time FreeResolution(M: Limit := 2);
+	test_res($1);
+    end if;
+
+    "Total Time:", Cputime(ZEIT);
+    "";
+end procedure;
+
+procedure test_ideal(I, name: DT := 0, MBT := 0)
+    M := QuotientModule(I);
+    test_module(M, name: DT := DT, MBT := MBT);
+end procedure;
+
+for K in <GF(17), GF(32003), RationalField()> do
+
+    "\n*******";
+    K;
+    "";
+
+    /////////////////////////////////////
+
+    al := 1;
+    be := 1;
+    a := 2;
+    b := 1;
+    c := 1;
+    wts := [b,-a+3*b+al*c,-2*a+5*b+2*al*c,-5*a+12*b+5*al*c,
+	 a,a-b+be*c,a-2*b+2*be*c,2*a-5*b+5*be*c,c];
+    n := 9;
+    R<v_1,v_2,v_3,v_4,w_0,w_1,w_2,w_3,u> := PolynomialRing(K,wts);
+    R<v_1,v_2,v_3,v_4,w_0,w_1,w_2,w_3,u> := PolynomialRing(K,#wts);
+    I := ideal< R |
+	 v_2*w_0 - v_1^3*u^al,
+	 v_1*v_3 - v_2^2,
+	 v_2*v_4 - v_3^3,
+	 v_3*w_3 - u^(2*al+5*be),
+	 v_1*w_1 - w_0*u^be,
+	 w_0*w_2 - w_1^2,
+	 w_1*w_3 - w_2^3,
+	 v_4*w_2 - v_3^2*u^(al+2*be),
+	 v_1*w_2 - w_1*u^be,
+	 v_1*w_3 - w_2^2*u^be,
+	 v_1*v_4 - v_2*v_3^2,
+	 v_2*w_1 - v_1^2*u^(al+be),
+	 v_2*w_2 - v_1*u^(al+2*be),
+	 v_2*w_3 - w_2*u^(al+3*be),
+	 v_3*w_0 - v_1^2*v_2*u^al,
+	 v_3*w_1 - v_1*v_2*u^(al+be),
+	 v_3*w_2 - v_2*u^(al+2*be),
+	 v_4*w_0 - v_1^2*v_3^2*u^al,
+	 v_4*w_1 - v_1*v_3^2*u^(al+be),
+	 w_0*w_3 - w_1*w_2^2 >;
+
+    test_ideal(I, "Gavin 1":
+	DT := [ 0, 1, 20, 64, 90, 64, 20, 1, 0 ],
+	MBT := [
+	    [ 1, 0, 0, 0, 0, 0, 0 ],
+	    [ 0, 16, 0, 0, 0, 0, 0 ],
+	    [ 0, 4, 2, 0, 0, 0, 0 ],
+	    [ 0, 0, 17, 2, 0, 0, 0 ],
+	    [ 0, 0, 17, 13, 2, 0, 0 ],
+	    [ 0, 0, 4, 13, 2, 0, 0 ],
+	    [ 0, 0, 12, 18, 14, 2, 0 ],
+	    [ 0, 0, 2, 2, 2, 0, 0 ],
+	    [ 0, 0, 10, 23, 8, 3, 0 ],
+	    [ 0, 0, 0, 11, 10, 1, 0 ],
+	    [ 0, 0, 0, 8, 16, 3, 0 ],
+	    [ 0, 0, 0, 0, 10, 8, 0 ],
+	    [ 0, 0, 0, 0, 0, 2, 0 ],
+	    [ 0, 0, 0, 0, 0, 1, 0 ],
+	    [ 0, 0, 0, 0, 0, 0, 1 ]
+	]
+    );
+
+    /////////////////////////////////////
+
+    a := 5;
+    b := 3;
+    wx0 := 1;
+    wy1 := 1;
+    wu := 1;
+    wt := 1;
+    wx1 := wx0 - wy1 + a*wu;
+    wx2 := 2*wx1 - wx0;
+    wx3 := 2*wx2 - wx1;
+    wx4 := 2*wx3 - wx2;
+    wy0 := 3*wy1 - wx0 + b*wu;
+    wts := [ wx0,wx1,wx2,wx3,wx4,wy0,wy1,wu,wt];
+    l := wu*(3*a+b) - wx4;
+    m := wu*a + wx3 - 3*wy0;
+    R<x0,x1,x2,x3,x4,y0,y1,u,t> := PolynomialRing(K,wts);
+    A := u^a;
+    B := u^b;
+    L := t^l;
+    M := t^m;
+    eqns := [
+	 x0*y0 - y1^3*B - x1*L,
+	 x1*y1 - x0*A - L^3*M,
+	 x0*x2 - x1^2 - y1^2*B*L^2*M,
+	 x1*x3 - x2^2 - y0*y1*A*B*L*M,
+	 x2*x4 - x3^2 - y0^2*A^2*B*M,
+	 x3*y0 - A^3*B - x4*L,
+	 x4*y1 - x3*A - y0^3*M,
+	 x0*x3 - x1*x2 - y1*B*L*M*(A*L+y0*y1),
+	 x0*x4 - x2^2 - A*B*L*M*(A*L+y0*y1),
+	 x1*x4 - x2*x3 - y0*A*B*M*(A*L+y0*y1),
+	 x1*y0 - y1^2*A*B - x2*L,
+	 x2*y0 - y1*A^2*B - x3*L,
+	 x2*y1 - x1*A - y0*L^2*M,
+	 x3*y1 - x2*A - y0^2*L*M
+	 ];
+    I := ideal< R | eqns >;
+
+    test_ideal(I, "Gavin 2":
+	DT := [ 0, 1, 8, 29, 58, 76, 72, 45, 14, 1, 0 ],
+	MBT :=
+	    [
+		[ 1, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 2, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 3, 3, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 3, 5, 1, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 4, 6, 3, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 1, 5, 4, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 6, 2, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 1, 5, 3, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 3, 9, 3, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 3, 3, 1, 0, 0, 0, 0 ],
+		[ 0, 0, 3, 10, 6, 1, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 1, 2, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 3, 12, 12, 3, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 2, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 1, 7, 12, 5, 1, 0, 0 ],
+		[ 0, 0, 0, 4, 2, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 1, 6, 10, 5, 1, 0, 0 ],
+		[ 0, 0, 0, 0, 6, 3, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 3, 6, 8, 3, 0, 0 ],
+		[ 0, 0, 0, 0, 5, 5, 1, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 1, 2, 1, 2, 1, 0 ],
+		[ 0, 0, 0, 0, 6, 9, 3, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 2, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 2, 8, 5, 1, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 1, 7, 5, 1, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 3, 7, 3, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 1, 2, 1 ]
+	    ]
+    );
+
+    /////////////////////////////////////
+
+    R<[x]> := PolynomialRing(K,15);
+    I := ideal< R |
+	x[10]*x[15] - x[11]*x[14] + x[12]*x[13],
+	-x[7]*x[15] + x[8]*x[14] - x[9]*x[13],
+	x[6]*x[15] - x[8]*x[12] + x[9]*x[11],
+	-x[6]*x[14] + x[7]*x[12] - x[9]*x[10],
+	x[6]*x[13] - x[7]*x[11] + x[8]*x[10],
+	-x[3]*x[15] + x[4]*x[14] - x[5]*x[13],
+	x[2]*x[15] - x[4]*x[12] + x[5]*x[11],
+	-x[2]*x[14] + x[3]*x[12] - x[5]*x[10],
+	x[2]*x[13] - x[3]*x[11] + x[4]*x[10],
+	-x[1]*x[15] + x[4]*x[9] - x[5]*x[8],
+	x[1]*x[14] - x[3]*x[9] + x[5]*x[7],
+	-x[1]*x[13] + x[3]*x[8] - x[4]*x[7],
+	x[1]*x[12] - x[2]*x[9] + x[5]*x[6],
+	-x[1]*x[11] + x[2]*x[8] - x[4]*x[6],
+	x[1]*x[10] - x[2]*x[7] + x[3]*x[6]>;
+
+    test_ideal(I, "Gorenstein 1":
+	DT := [ 0, 1, 15, 35, 42, 35, 15, 1, 0 ],
+	MBT :=
+	    [
+		[ 1, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 15, 35, 21, 0, 0, 0 ],
+		[ 0, 0, 0, 21, 35, 15, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 1 ]
+	    ]
+    );
+
+    /////////////////////////////////////
+
+    P<x,y,z,t> := PolynomialRing(K, 4, "grevlex");
+    B := [
+	-x^2 + y*t, -y*z + x*t, x*z - t^2,
+	x*y - t^2, -y*z + x*t, -x^2 + z*t
+    ];
+    I:=Ideal(B);
+    test_ideal(I, "Simple 1":
+	DT := [ 0, 1, 5, 5, 1, 0 ],
+	MBT :=
+	    [
+		[ 1, 0, 0, 0 ],
+		[ 0, 5, 5, 0 ],
+		[ 0, 0, 0, 1 ]
+	    ]
+    );
+
+    /////////////////////////////////////
+
+    P<w,x,y,z> := PolynomialRing(K, 4, "grevlex");
+    B := [
+	w^2 - x*z , w*x - y*z, x^2 - w*y, x*y - z^2, y^2 - w*z
+    ];
+    I:=Ideal(B);
+    test_ideal(I, "Schreyer 1991":
+	DT := [ 0, 1, 5, 5, 1, 0 ],
+	MBT :=
+	    [
+		[ 1, 0, 0, 0 ],
+		[ 0, 5, 5, 0 ],
+		[ 0, 0, 0, 1 ]
+	    ]
+    );
+
+    /////////////////////////////////////
+
+    P<x,y,z,t,u,H> := PolynomialRing(K, 5+1, "grevlex");
+    I := ideal<P |
+    x + y + z + t + u,
+    x*y + y*z + z*t + t*u + u*x,
+    x*y*z + y*z*t + z*t*u + t*u*x + u*x*y,
+    x*y*z*t + y*z*t*u + z*t*u*x + t*u*x*y + u*x*y*z,
+    x*y*z*t*u - H^5>;
+    test_ideal(I, "Cyclic 5 Homog":
+	DT := [ 0, 1, 5, 10, 10, 5, 1, 0 ],
+	MBT :=
+	    [
+		[ 1, 1, 0, 0, 0, 0 ],
+		[ 0, 1, 1, 0, 0, 0 ],
+		[ 0, 1, 1, 0, 0, 0 ],
+		[ 0, 1, 2, 1, 0, 0 ],
+		[ 0, 1, 2, 1, 0, 0 ],
+		[ 0, 0, 2, 2, 0, 0 ],
+		[ 0, 0, 1, 2, 1, 0 ],
+		[ 0, 0, 1, 2, 1, 0 ],
+		[ 0, 0, 0, 1, 1, 0 ],
+		[ 0, 0, 0, 1, 1, 0 ],
+		[ 0, 0, 0, 0, 1, 1 ]
+	    ]
+    );
+
+end for;
+
+/*******************************************************************************
+*******************************************************************************/
+
+R := InvariantRing(CyclicGroup(4), GF(2));
+M := Module(R);
+test_module(M, "Invar: C_4 over GF(2)");
+
+////
+
+K := GF(5);
+G := MatrixGroup<5,K | [1,0,0,0,0, 1,1,0,0,0, 0,1,1,0,0,
+                         0,0,1,1,0, 0,0,0,1,1]>;
+R := InvariantRing(G);
+M := Module(R);
+test_module(M, "Invar: Jordan 5, GF(5)":
+    DT := [ 0, 1, 5, 20, 0 ],
+    MBT := [
+	[ 1, 0, 0 ],
+	[ 0, 0, 0 ],
+	[ 0, 0, 0 ],
+	[ 4, 0, 0 ],
+	[ 3, 1, 0 ],
+	[ 4, 0, 0 ],
+	[ 4, 2, 0 ],
+	[ 2, 1, 1 ],
+	[ 1, 1, 0 ],
+	[ 1, 0, 0 ]
+    ]
+);
+
+////
+
+K := GF(7);
+G := MatrixGroup<5,K | [1,0,0,0,0, 1,1,0,0,0, 0,1,1,0,0,
+                         0,0,1,1,0, 0,0,0,1,1]>;
+R := InvariantRing(G);
+M := Module(R);
+test_module(M, "Invar: Jordan 5, GF(7)":
+    DT := [ 0, 1, 7, 30, 0 ],
+    MBT := [
+	[ 1, 0, 0 ],
+	[ 0, 0, 0 ],
+	[ 0, 0, 0 ],
+	[ 2, 0, 0 ],
+	[ 2, 0, 0 ],
+	[ 4, 0, 0 ],
+	[ 3, 1, 0 ],
+	[ 4, 0, 0 ],
+	[ 4, 1, 0 ],
+	[ 3, 1, 0 ],
+	[ 3, 2, 0 ],
+	[ 2, 1, 1 ],
+	[ 1, 1, 0 ],
+	[ 1, 0, 0 ]
+    ]
+);
+
+/////////
+
+K := RationalField();
+PL<x,y,z,w> := PolynomialRing(K, 4, "grevlex");
+B := [x^2 - z^10 - z^20, x*y^3 - z^10 - z^30, y^6 - x*y^3*w^40];
+I := Ideal(B);
+test_ideal(I, "Gr ideal");
+
+K := RationalField();
+PL<x,y,z,w> := LocalPolynomialRing(K, 4);
+B := [x^2 - z^10 - z^20, x*y^3 - z^10 - z^30, y^6 - x*y^3*w^40];
+I := Ideal(B);
+test_ideal(I, "Gr local ideal");
+
+/////////
+
+P<x,y,z> := PolynomialRing(RationalField(), 3);
+I := Ideal([x, y, z]);
+test_ideal(I, "Simple Koszul");
+M := Module(P, 1);
+S := sub<M | [[f]: f in Basis(I)]>;
+test_module(S, "Simple Koszul (embedded)");
+
+
+
+Q := RationalField();
+
+P<x,y,z> := PolynomialRing(RationalField(), 3);
+I := Ideal([x, y, z]);
+A<x,y,z> := AffineAlgebra<Q, x,y,z | x*y, z^2>;
+I := ideal<A|([x, y, z+1])>;
+M := Module(A, 1);
+S := sub<M | [[f]: f in [x, y, z]]>;
+FreeResolution(S: Limit := 5);
+
+/////
+
+P<x, y, z> := PolynomialRing(RationalField(), 3, "grevlex");
+M := RModule(P, 3);
+B := [[x*y, x^2, z], [x*z^3, x^3, y], [y*z, z, x], [z, y*z, x], [y, z, x]];
+S:=quo<M|B>;
+L:=Localization(S);
+assert BettiNumbers(L) eq [ 3, 5, 3, 1 ];
+assert BettiGE(BettiNumbers(S), [ 3, 5, 3, 1 ]);
+S:=quo<M|B>;
+L:=Localization(S);
+assert BettiNumbers(L: Homogenize:=false) eq [ 3, 5, 3, 1 ];
+assert BettiGE(BettiNumbers(S: Homogenize:=false), [ 3, 5, 3, 1 ]);
+
+
+A<x,y,z> := AffineAlgebra<Q, x,y,z | x*y + z^2, x^3*y^3>;
+M := Module(A, 1);
+S := sub<M | [[f]: f in [x+y, y^2, y*z]]>;
+FreeResolution(S: Limit := 10);
+M := Module(A, 2);
+S := sub<M | [z^2 + z, y^2], [x+y, z]>;
+S;
+FreeResolution(S: Limit := 10);
+
+C := $1;
+Hom(C, S);
+
+/////

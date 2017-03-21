@@ -1,0 +1,179 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Construction of Group Algebras and their Elements</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text961.htm">[Next]</A><A  HREF = "text959.htm">[Prev]</A> <A  HREF = "text961.htm">[Right]</A> <A  HREF = "text959.htm">[Left]</A> <A  HREF = "text958.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "10811">Construction of Group Algebras and their Elements</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text960.htm#10812">Construction of a Group Algebra</A>
+<LI> <A  HREF = "text960.htm#10815">Construction of a Group Algebra Element</A>
+</UL>
+<H4><A NAME = "10812">Construction of a Group Algebra</A></H4>
+
+<P>
+<P>
+<P>
+There are two different representations of group algebra
+elements used in Magma.  Which is most suitable depends on
+the group G and on the operations required, and must be
+decided upon when the algebra is created.
+<P>
+The first representation, which requires that G is not too large,
+is to choose (once and for all) an ordering (g<sub>1</sub>, g<sub>2</sub>, ..., g<sub>n</sub>)
+of the elements of G (where n = |G|), and then to store elements
+of the group algebra A = R[G]
+as coefficient vectors relative to the basis (g<sub>1</sub>, g<sub>2</sub>, ..., g<sub>n</sub>) of A. 
+So an element a = a<sub>1</sub> * g<sub>1</sub> + a<sub>2</sub> * g<sub>2</sub> + ... + a<sub>n</sub> * g<sub>n</sub> (a<sub>i</sub> &isin;R) of
+A will be stored as the vector (a<sub>1</sub>, a<sub>2</sub>, ..., a<sub>n</sub>).
+This makes for fast arithmetic and allows the use of matrix
+echelonization for dealing with subalgebras and ideals
+(if R has a matrix echelon algorithm).
+<P>
+<P>
+The alternative representation, necessary when dealing with
+large groups, stores an element a &isin;A = R[G] as a pair of parallel
+arrays giving the terms of the element. One array contains the
+nonzero coefficients of the element and the
+other contains their associated group elements.
+This representation allows group algebras to be defined over any group in 
+which the elements have a canonical form, including potentially infinite
+matrix groups over a ring of characteristic 0 or even free groups.
+Note however, that operations in such algebras are limited, as the length
+of the representing arrays may grow exponentially with the number of
+multiplications performed.
+
+
+<H5><A NAME = "10813">GroupAlgebra( R, G: parameters ) : Rng, Grp -&gt; AlgGrp</A></H5>
+<H5>GroupAlgebra&lt; R, G: parameters &gt; : Rng, Grp -&gt; AlgGrp</H5>
+
+<PRE>    Rep: MonStgElt                      Default: </PRE>
+
+<PRE>    Table: BoolElt                      Default: </PRE>
+<BLOCKQUOTE>
+Given a unital ring R and a group G (which is not a finitely
+presented group), create the group algebra 
+R[G]. There are two optional arguments associated with this
+creation function.
+<P>
+<P>
+The optional parameter <TT>Rep</TT> can be used to specify which
+representation should be chosen for elements of the algebra.
+Its possible values are <TT>"Vector"</TT> and <TT>"Terms"</TT>.
+If <TT>Rep</TT> is not assigned, then Magma chooses the vector representation
+if |G| &le;1000 and the term representation otherwise.
+If <TT>Rep</TT> is set to <TT>"Vector"</TT>, Magma has to compute the order of
+G. If it does not succeed in that or the order is too large to construct
+vectors of this size, then an error message is displayed.
+<P>
+<P>
+The second optional parameter <TT>Table</TT> can be used to specify
+whether or not the multiplication table of the group should be
+computed and stored upon creation of the algebra. Storing the 
+multiplication table makes multiplication of algebra elements
+(and all other group algebra operations using this) much faster.
+Building this table does, however, increase the time needed to
+create the algebra.
+The table can only be stored if the vector representation of elements is used. 
+If the <TT>Table</TT> parameter is not set, then Magma stores the 
+multiplication table only if G &le;200.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "10814">Example <TT>AlgGrp_creation (H89E1)</TT></A></H3>
+We first construct the default group algebra A = R[G] where
+R is the ring of integers and G is the symmetric group on three points.
+<P>
+<P>
+<PRE>
+&gt; G := SymmetricGroup(3);
+&gt; R := Integers();
+&gt; A := GroupAlgebra( R, G );
+&gt; A;
+Group algebra with vector representation and stored multiplication table
+Coefficient ring: Integer Ring
+Group: Permutation group G acting on a set of cardinality 3
+    Order = 6 = 2 * 3
+        (1, 2, 3)
+        (1, 2)
+</PRE>
+<P>
+Next we construct the group algebra A = R[G] where R = GF(5) and
+G is the dihedral group of order 100, given as a polycyclic group. 
+This time we specify that the term representation should be used for elements.
+<P>
+<P>
+<PRE>
+&gt; G := PCGroup( DihedralGroup(50) );
+&gt; A := GroupAlgebra( GF(5), G: Rep := "Terms" ); 
+&gt; A;
+Group algebra with terms representation
+Coefficient ring: Finite field of size 5
+Group: GrpPC : G of order 100 = 2^2 * 5^2
+    PC-Relations:
+        G.1^2 = Id(G), 
+        G.2^2 = Id(G), 
+        G.3^5 = G.4, 
+        G.4^5 = Id(G), 
+        G.3^G.1 = G.3^4 * G.4^4, 
+        G.4^G.1 = G.4^4
+</PRE>
+<HR>
+<H4><A NAME = "10815">Construction of a Group Algebra Element</A></H4>
+
+
+
+<H5><A NAME = "10816">elt&lt; A | r, g &gt; : AlgGrp, RngElt, GrpElt -&gt; AlgGrpElt</A></H5>
+<BLOCKQUOTE>
+Given a group algebra A = R[G], a ring element r &isin;R and
+a group element g &isin;G, create the element r * g of A.
+</BLOCKQUOTE>
+<H5><A NAME = "10817">A ! g : AlgGrp, GrpElt -&gt; AlgGrpElt</A></H5>
+<BLOCKQUOTE>
+Given a group element g &isin;G create the element 1<sub>R</sub> * g of
+the group algebra A = R[G].
+</BLOCKQUOTE>
+<H5><A NAME = "10818">A ! r : AlgGrp, RngElt -&gt; AlgGrpElt</A></H5>
+<BLOCKQUOTE>
+Given a ring element r &isin;R, create the element r * 1<sub>G</sub> of
+the group algebra A = R[G].
+</BLOCKQUOTE>
+<H5><A NAME = "10819">A ! [c<sub>1</sub>, ..., c<sub>n</sub>] : AlgGrp, SeqEnum -&gt; AlgGrpElt</A></H5>
+<BLOCKQUOTE>
+Given a group algebra A = R[G] in vector representation and a sequence
+[c<sub>1</sub>, ..., c<sub>n</sub>] of n = |G| elements of R, create the element
+c<sub>1</sub> * g<sub>1</sub> + ... + c<sub>n</sub> * g<sub>n</sub>, where (g<sub>1</sub>, ..., g<sub>n</sub>) is the fixed
+basis of A.
+</BLOCKQUOTE>
+<H5><A NAME = "10820">Eta(A) : AlgGrp -&gt; AlgGrpElt</A></H5>
+<BLOCKQUOTE>
+For a group algebra A = R[G] in vector representation, create the element 
+&sum;<sub>g &isin;G</sub> 1<sub>R</sub> * g of A.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "10821">Example <TT>AlgGrp_el-creation (H89E2)</TT></A></H3>
+<P>
+We check that Eta(A)/|G| is an idempotent in A (provided the characteristic
+of R does not divide the order of G).
+<P>
+<P>
+<PRE>
+&gt; G := Alt(6);
+&gt; A := GroupAlgebra( GF(7), G );
+&gt; e := Eta(A) / #G;
+&gt; e^2 - e;
+0
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text961.htm">[Next]</A><A  HREF = "text959.htm">[Prev]</A> <A  HREF = "text961.htm">[Right]</A> <A  HREF = "text959.htm">[Left]</A> <A  HREF = "text958.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,449 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Isomorphisms and  Transformations</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1491.htm">[Next]</A><A  HREF = "text1489.htm">[Prev]</A> <A  HREF = "text1491.htm">[Right]</A> <A  HREF = "text1489.htm">[Left]</A> <A  HREF = "text1483.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16856">Isomorphisms and  Transformations</A></H3>
+
+<P>
+<P>
+A hyperelliptic curve isomorphism is defined by a linear fractional 
+transformation t(x:z) = (ax + bz:cx + dz), a scale factor e, and a 
+polynomial u(x) of degree at most g + 1, where g is the genus of 
+the curve.  This data defines the isomorphism of weighted projective 
+points 
+<P>
+(x : y : z) |-&gt; (ax + bz : ey + tilde(u)(x, z) : cx + dz),
+<P>
+where tilde(u) is the degree g + 1 homogenization of u.  
+When not specified, the values of e and u are by default taken 
+to be 1 and 0, respectively.
+<P>
+An isomorphism can be created from the parent structures by coercing a 
+tuple &lt; [a, b, c, d], e, u &gt; into the structure of isomorphisms 
+between two hyperelliptic curves, or by creating it as a transformation 
+of a given curve, i.e. creating the codomain curve together with the 
+isomorphism from the given data.
+<P>
+Note that due to the projective weighting of the ambient space of the 
+curve, two equal isomorphisms may have different representations.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1490.htm#16857">Creation of Isomorphisms</A>
+<LI> <A  HREF = "text1490.htm#16862">Arithmetic with Isomorphisms</A>
+<LI> <A  HREF = "text1490.htm#16869">Invariants of Isomorphisms</A>
+<LI> <A  HREF = "text1490.htm#16873">Automorphism Group and  Isomorphism Testing</A>
+</UL>
+<H4><A NAME = "16857">Creation of Isomorphisms</A></H4>
+
+
+
+<H5><A NAME = "16858">Aut(C) : CrvHyp -&gt; PowAutSch</A></H5>
+<BLOCKQUOTE>
+Given a hyperelliptic curve C, this returns the structure of all 
+automorphisms of the curve.
+</BLOCKQUOTE>
+<H5><A NAME = "16859">Iso(C1, C2) : CrvHyp, CrvHyp -&gt; PowIsoSch</A></H5>
+<BLOCKQUOTE>
+Given hyperelliptic curves C1 and C2 of the same genus and base 
+field, this returns the structure of all isomorphisms between them.
+</BLOCKQUOTE>
+<H5><A NAME = "16860">Transformation(C, t) : CrvHyp, [RngElt]  -&gt; CrvHyp, MapIsoSch</A></H5>
+<H5>Transformation(C, u) : CrvHyp, RngUPolElt -&gt; CrvHyp, MapIsoSch</H5>
+<H5>Transformation(C, e) : CrvHyp, RngElt -&gt; CrvHyp, MapIsoSch</H5>
+<H5>Transformation(C, e, u) : CrvHyp, RngElt, RngUPolElt  -&gt; CrvHyp, MapIsoSch</H5>
+<H5>Transformation(C, t, e, u) : CrvHyp, [RngElt], RngElt, RngUPolElt -&gt; CrvHyp, MapIsoSch</H5>
+<BLOCKQUOTE>
+Returns the hyperelliptic curve C' which is the codomain of the 
+isomorphism from the hyperelliptic curve C
+specified by the sequence of ring elements t, the ring element e and 
+the polynomial u, followed by the 
+the isomorphism to the curve. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16861">Example <TT>CrvHyp_Transformation (H131E13)</TT></A></H3>
+We create the hyperelliptic curve y<sup>2</sup>=x<sup>5</sup> - 7 and apply a transformation
+to it.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x&gt; := PolynomialRing(Rationals());
+&gt; H1 := HyperellipticCurve(x^5-7);
+&gt; H2, phi := Transformation(H1, [0,1,1,0], 1/2, x^2+1);                   
+&gt; H2;
+Hyperelliptic Curve defined by y^2 + (-2*x^2 - 2)*y = -7/4*x^6 - x^4 - 2*x^2 + 
+    1/4*x - 1 over Rational Field
+&gt; phi;
+(x : y : z) :-&gt; (z : 1/2*y + x^2*z + z^3 : x)
+&gt; IsIsomorphic(H1, H2);                                                   
+true (x : y : z) :-&gt; (z : 1/2*y + x^3 + x*z^2 : x)
+</PRE>
+<HR>
+<H4><A NAME = "16862">Arithmetic with Isomorphisms</A></H4>
+
+<P>
+<P>
+Hyperelliptic curve isomorphisms can be evaluated, inverted, and 
+composed on points as right operators.  Note that the functional 
+notation f(P) is not presently available for these maps of curves. 
+However the available map syntax <TT>@</TT> is more consistent with 
+functions as operating on the right (which determines and is 
+apparent from the way composition is defined).
+
+
+<H5><A NAME = "16863">f * g : MapIsoSch, MapIsoSch -&gt; MapIsoSch</A></H5>
+<BLOCKQUOTE>
+The composition of the maps f and g as right operators.
+</BLOCKQUOTE>
+<H5><A NAME = "16864">Inverse(f) : MapIsoSch -&gt; MapIsoSch</A></H5>
+<BLOCKQUOTE>
+The inverse of the hyperelliptic curve isomorphism f.
+</BLOCKQUOTE>
+<H5><A NAME = "16865">f in M : MapIsoSch, PowIsoSch -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given an isomorphism of hyperelliptic curves f, and the structure 
+of isomorphisms M between two hyperelliptic curves, this returns <TT>true</TT> if 
+and only if they share the same domains and codomains.
+</BLOCKQUOTE>
+<H5><A NAME = "16866">P @ f : PtHyp, MapIsoSch -&gt; PtHyp</A></H5>
+<H5>Evaluate(f,P) : MapIsoSch, PtHyp -&gt; PtHyp</H5>
+<BLOCKQUOTE>
+Returns the evaluation of f at a point P in its domain.
+The same functions apply equally to points in the Jacobian of 
+the domain curve and, in the case of genus 2,
+to points on the associated Kummer surface.
+</BLOCKQUOTE>
+<H5><A NAME = "16867">P @@ f : PtHyp, MapIsoSch -&gt; PtHyp</A></H5>
+<H5>Pullback(f,P) : MapIsoSch, PtHyp -&gt; PtHyp</H5>
+<BLOCKQUOTE>
+Returns the inverse image of the isomorphism f at a point P 
+in its codomain.  The same functions apply equally to points in 
+the Jacobian of the codomain curve and, in the case of genus 2,
+to points on the associated Kummer surface. 
+</BLOCKQUOTE>
+<H5><A NAME = "16868">f eq g : MapIsoSch, MapIsoSch -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given isomorphisms f and g of hyperelliptic curves having the
+same domain and codomain, this function returns <TT>true</TT> if and only if 
+they are equal.  Note that two isomorphisms may be equal even if 
+their defining data are distinct (see example below).
+</BLOCKQUOTE>
+<H4><A NAME = "16869">Invariants of Isomorphisms</A></H4>
+
+
+
+<H5><A NAME = "16870">Parent(f) : MapIsoSch -&gt; PowIsoSch</A></H5>
+<BLOCKQUOTE>
+The "parent structure" of an isomorphism between two hyperelliptic curves
+(which contains all isomorphisms with the same domain and codomain as the given
+isomorphism).
+</BLOCKQUOTE>
+<H5><A NAME = "16871">Domain(f) : MapIsoSch -&gt; CrvHyp</A></H5>
+<BLOCKQUOTE>
+The curve which is the domain of the given isomorphism.
+</BLOCKQUOTE>
+<H5><A NAME = "16872">Codomain(f) : MapIsoSch -&gt; CrvHyp</A></H5>
+<BLOCKQUOTE>
+The curve which is the target of the given isomorphism.
+</BLOCKQUOTE>
+<H4><A NAME = "16873">Automorphism Group and  Isomorphism Testing</A></H4>
+
+<P>
+<P>
+This section details the features for computing isomorphisms between 
+two curves and determining the group of automorphisms.  The function 
+<TT>IsGL2Equivalent</TT> plays a central role in the isomorphism testing,
+and is documented here due to its central role in these computations.
+<P>
+The genus 2 package of Lercier and Ritzenthaler provides a function to
+determine the geometric automorphism group of a genus 2 curve in any 
+characteristic by working with Cardona-Quer-Nart-Pujola invariants 
+(see Subsection <A  HREF = "text1486.htm#16790">Igusa Invariants</A>). This replaces the old
+function that only worked in odd (or 0) characteristics. They also
+provide a function that returns a list of all possible geometric
+automorphism groups for genus 2 curves over a given finite field
+and the number of isomorphism classes of curves with each possible
+group.
+<P>
+Lercier and Ritzenthaler's genus 3 package provides the same
+for genus 3 hyperelliptic curves, working with Shioda invariants.
+Here, the characteristic has to be 0 or &ge;11.
+
+
+<H5><A NAME = "16874">IsGL2Equivalent(f, g, n) : RngUPolElt, RngUPolElt, RngIntElt -&gt; BoolElt, SeqEnum</A></H5>
+<BLOCKQUOTE>
+This function returns <TT>true</TT> if and only if f and g are in the same GL<sub>2</sub>(k)-orbit,
+where k is the coefficient field of their parent, modulo scalars. 
+The polynomials are considered as homogeneous polynomials of degree 
+n, where n must be at least 4.  The second return value is 
+the sequence of all matrix entries [a, b, c, d] such that g(x) is 
+a constant times f((ax + b)/(cx + d)) (cx + d)<sup>n</sup>. 
+</BLOCKQUOTE>
+<H5><A NAME = "16875">IsIsomorphic(C1, C2) : CrvHyp, CrvHyp -&gt; BoolElt, MapIsoSch</A></H5>
+
+<PRE>    SetVerbose("CrvHypIso", n):         Maximum: 3</PRE>
+<BLOCKQUOTE>
+This function returns <TT>true</TT> if and only if the hyperelliptic curves C1 and C2
+are isomorphic <I>as hyperelliptic curves (i.e. preserving the involution)</I>
+over their common base field.
+If the curves are isomorphic, an isomorphism is returned.   
+</BLOCKQUOTE>
+<H5><A NAME = "16876">AutomorphismGroup(C) : CrvHyp -&gt; GrpPerm, Map, Map</A></H5>
+<BLOCKQUOTE>
+Given a hyperelliptic curve C of characteristic different from 2,
+the function returns a permutation group followed by an isomorphism to the group 
+of automorphisms of the curve over its base ring.  The curve must 
+be of genus at least one, and the automorphism group is defined to 
+consist of those automorphisms which commute with the hyperelliptic 
+involution, i.e. which induce a well-defined automorphism of its 
+quotient projective line.  A third return value gives the action 
+C x G -&gt; C.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16877">Example <TT>CrvHyp_Automorphism_Group (H131E14)</TT></A></H3>
+We give an example of the computation of the automorphism group of a 
+genus one hyperelliptic curve. 
+<P>
+<P>
+<PRE>
+&gt; P&lt;x&gt; := PolynomialRing(GF(3));
+&gt; C1 := HyperellipticCurve(x^3+x);
+&gt; G1, m1 := AutomorphismGroup(C1);
+&gt; #G1;
+&gt; [ m1(g) : g in G1 ];
+[
+    (x : y : z) :-&gt; (x : y : z),
+    (x : y : z) :-&gt; (x : -y : z),
+    (x : y : z) :-&gt; (z : y : x),
+    (x : y : z) :-&gt; (z : -y : x)
+]
+</PRE>
+We note that due to the weighted projective space, the same map 
+may have a non-unique representation, however the equality function 
+is able to identify equivalence on representations.
+<P>
+<P>
+<PRE>
+&gt; f := m1(G1.3);
+&gt; f;
+(x : y : z) :-&gt; (z : y : x)
+&gt; g := Inverse(f);
+&gt; g;
+(x : y : z) :-&gt; (2*z : y : 2*x)
+&gt; f eq g;
+true
+</PRE>
+We see that the geometric automorphism group is much larger. 
+By base extending the curve to a quadratic extension, we find the 
+remaining automorphisms of the curve. 
+<P>
+<P>
+<PRE>
+&gt; K&lt;t&gt; := GF(3,2);
+&gt; C2 := BaseExtend(C1, K);
+&gt; G2, m2 := AutomorphismGroup(C2);
+&gt; #G2;
+48
+&gt; O := C2![1,0,0];
+&gt; auts := [ m2(g) : g in G2 ];
+&gt; [ f : f in auts | O@f eq O ];
+[
+    (x : y : z) :-&gt; (x : y : z),
+    (x : y : z) :-&gt; (x : -y : z),
+    (x : y : z) :-&gt; (x : t^2*y : 2*z),
+    (x : y : z) :-&gt; (x + t^6*z : t^2*y : 2*z),
+    (x : y : z) :-&gt; (x + t^6*z : y : z),
+    (x : y : z) :-&gt; (x + t^2*z : y : z),
+    (x : y : z) :-&gt; (x + t^2*z : t^2*y : 2*z),
+    (x : y : z) :-&gt; (x : t^6*y : 2*z),
+    (x : y : z) :-&gt; (x + t^6*z : t^6*y : 2*z),
+    (x : y : z) :-&gt; (x + t^6*z : -y : z),
+    (x : y : z) :-&gt; (x + t^2*z : -y : z),
+    (x : y : z) :-&gt; (x + t^2*z : t^6*y : 2*z)
+]
+&gt; #$1;
+12
+</PRE>
+Note that this curve is an example of a supersingular elliptic 
+curve in characteristic 3.  In the final computation we restrict
+to the automorphisms as an elliptic curve, i.e. those which fix the 
+point at infinity --- the identity element of the group law.  
+<P>
+In the context of hyperelliptic curves of genus one, the group of 
+automorphisms must stabilize the ramification points of the 
+hyperelliptic involution. These are precisely the 2-torsion elements 
+as an elliptic curve.  So we have a group extension by the 2-torsion 
+elements, acting by translation.  Converting to an elliptic curve, 
+we find that there are two 2-torsion elements over F<sub>3</sub>:
+<P>
+<P>
+<PRE>
+&gt; E1 := EllipticCurve(C1);
+&gt; A1 := AbelianGroup(E1);
+&gt; A1;
+Abelian Group isomorphic to Z/4
+Defined on 1 generator
+Relations:
+    4*$.1 = 0
+</PRE>
+We see that two of the 2-torsion elements are defined over F<sub>3</sub>, 
+and the remaining ones appear over the quadratic extension.  So in 
+the former case the automorphism group is an extension of the 
+elliptic curve automorphism group (of order 2) by Z/2Z, and in 
+latter case the automorphism group is an extension (of the group of 
+order 12) by the abelian group isomorphic to Z/2Z x Z/2Z.  
+<P>
+Note that there exist other curve automorphisms given by translations 
+by other torsion points (under the addition as an elliptic curve), but 
+that do not commute with the hyperelliptic involution, hence do not 
+enter into the hyperelliptic automorphism group.  
+<HR>
+<H5><A NAME = "16878">GeometricAutomorphismGroup(C) : CrvHyp -&gt; GrpFP</A></H5>
+<H5>GeometricAutomorphismGroup(GI) : SeqEnum -&gt; GrpFP</H5>
+<BLOCKQUOTE>
+Given a hyperelliptic curve C of genus 2 or 3 the function returns a 
+finitely-presented group isomorphic to the geometric automorphism group,
+i.e. the automorphism group of the curve over an algebraic closure of its
+base field.
+<P>
+The method used for genus 2 is to compute the Cardona-Quer-Nart-Pujola invariants 
+(see Subsection <A  HREF = "text1486.htm#16790">Igusa Invariants</A>) of C and use the
+classification of the possible automorphism groups in terms of the invariants.
+See <A  HREF = "text1482.htm#bib_shaska1">[SV01]</A> and <A  HREF = "text1482.htm#bib_cardona">[CQ05]</A> for the odd (and 0) characteristic case
+and <A  HREF = "text1482.htm#bib_CaNaPu_g2">[CNP05]</A> for characteristic 2.
+<P>
+The method used for genus 3 is to compute the Shioda invariants 
+(see Subsection <A  HREF = "text1486.htm#16807">Shioda Invariants</A>) of C and use the
+classification of the possible automorphism groups in terms of the invariants.
+For this case, the base field must have characteristic 0 or &ge;11.
+<P>
+There is also a genus 2 version where the argument is the sequence GI of
+Cardona-Quer-Nart-Pujola invariants of a curve rather than the actual
+curve. This avoids actually constructing the curve, in case the user is
+starting from the invariants.
+<P>
+The functions are part of packages for genus 2 and 3 curves contributed by
+Reynald Lercier and Christophe Ritzenthaler.
+</BLOCKQUOTE>
+<H5><A NAME = "16879">GeometricAutomorphismGroupFromShiodaInvariants(JI) : SeqEnum -&gt; GrpPerm</A></H5>
+<BLOCKQUOTE>
+There is a variant of the last intrinsic for genus 3 curves where the argument
+is the sequence JI of
+Shioda invariants of a curve rather than the actual
+curve. This avoids actually constructing the curve, in case the user is
+starting from the invariants. The same restrictions on the
+characteristic of the base field apply.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16880">Example <TT>CrvHyp_Geometric_Automorphism_Group (H131E15)</TT></A></H3>
+We give examples of the computation of the geometric automorphism group of a 
+genus two and a genus three hyperelliptic curve. 
+<P>
+<P>
+<PRE>
+&gt; P&lt;x&gt; := PolynomialRing(RationalField());
+&gt; f := x^6+x^3+13;
+&gt; C := HyperellipticCurve(f);
+&gt; time GeometricAutomorphismGroup(C);
+Permutation group acting on a set of cardinality 6
+Order = 12 = 2^2 * 3
+    (1, 2, 3, 4, 5, 6)
+    (1, 6)(2, 5)(3, 4)
+Time: 0.010
+&gt; f := x^8-1;
+&gt; C1 := HyperellipticCurve(f);
+&gt; GeometricAutomorphismGroup(C1);
+GrpPC of order 32 = 2^5
+PC-Relations:
+    $.1^2 = $.4, 
+    $.3^2 = $.5, 
+    $.2^$.1 = $.2 * $.3, 
+    $.3^$.1 = $.3 * $.5, 
+    $.3^$.2 = $.3 * $.5
+</PRE>
+Note that <TT>AutomorphismGroup</TT> can be used to retrieve the same
+(and more!) information but this can be much slower.
+<P>
+<P>
+<PRE>
+&gt; aut := AutomorphismGroup(C);
+&gt; aut;
+Symmetric group aut acting on a set of cardinality 2
+Order = 2
+  (1, 2)
+  Id(aut)
+</PRE>
+We need to extend the field!
+<P>
+<P>
+<PRE>
+&gt; Qbar := AlgebraicClosure();
+&gt; Cbar := BaseChange(C, Qbar);
+&gt; time autbar := AutomorphismGroup(Cbar);
+Time: 332.290
+&gt; autbar;
+Permutation group autbar acting on a set of cardinality 12
+Order = 12 = 2^2 * 3
+  (1, 2)(3, 4)(5, 6)(7, 8)(9, 10)(11, 12)
+  Id(autbar)
+  (1, 3)(2, 4)(5, 7)(6, 8)(9, 11)(10, 12)
+  (1, 5, 9)(2, 6, 10)(3, 11, 7)(4, 12, 8)
+  (1, 7)(2, 8)(3, 9)(4, 10)(5, 11)(6, 12)
+  (1, 9, 5)(2, 10, 6)(3, 7, 11)(4, 8, 12)
+  (1, 11)(2, 12)(3, 5)(4, 6)(7, 9)(8, 10)
+&gt; IdentifyGroup(autbar);
+&lt;12, 4&gt;
+</PRE>
+<HR>
+<H5><A NAME = "16881">GeometricAutomorphismGroupGenus2Classification(F) : FldFin -&gt; SeqEnum,SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a finite field F (of any characteristic), the function returns two
+sequences. The first gives a list of all possible geometric automorphism
+groups for genus 2 curves defined over F and the second gives the
+corresponding number of isomorphism (over bar(F), the algebraic closure of
+F) classes of F-curves having the given automorphism group. The groups
+are represented as finitely-presented groups.
+<P>
+This function is part of a package for genus 2 curves contributed by
+Reynald Lercier and Christophe Ritzenthaler and is based on the
+classification analysis in <A  HREF = "text1482.htm#bib_card_ng2">[Car03]</A> and <A  HREF = "text1482.htm#bib_CaNaPu_g2">[CNP05]</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "16882">GeometricAutomorphismGroupGenus3Classification(F) : FldFin -&gt; SeqEnum,SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a finite field F of characteristic &ge;11, the function returns two
+sequences. The first gives a list of all possible geometric automorphism
+groups for genus 3 curves defined over F and the second gives the
+corresponding number of isomorphism (over bar(F), the algebraic closure of
+F) classes of F-curves having the given automorphism group. The groups
+are represented as permutation groups.
+<P>
+This function is part of a package for genus 3 curves contributed by
+Reynald Lercier and Christophe Ritzenthaler.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16883">Example <TT>CrvHyp_aut_class (H131E16)</TT></A></H3>
+We determine the possible (geometric) automorphism groups for genus
+2 curves over F<sub>2</sub>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; gps,ncls :=  GeometricAutomorphismGroupGenus2Classification(GF(2));
+&gt; [#gp : gp in gps];
+[ 2, 12, 32, 160 ]
+&gt; ncls;
+[ 5, 1, 1, 1 ]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1491.htm">[Next]</A><A  HREF = "text1489.htm">[Prev]</A> <A  HREF = "text1491.htm">[Right]</A> <A  HREF = "text1489.htm">[Left]</A> <A  HREF = "text1483.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

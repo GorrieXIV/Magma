@@ -1,0 +1,344 @@
+/////////////////////////////////////////////////////////////////////////
+// variety
+// $Revision: 31078 $
+// $Date: 2010-11-30 23:38:30 +1100 (Tue, 30 Nov 2010) $
+// $LastChangedBy: kasprzyk $
+/////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////
+// Toric Varieties and Multivalued Sections
+/////////////////////////////////////////////////////////////////////////
+"------\nToric Varieties and Multivalued Sections\n";
+
+R<x,y>:=PolynomialRing(Rationals(),2);
+xi:=Power((36*y),(1/3))*(2)*(x^3)*Power((x^2*y + y),(2/3));
+Factorisation(xi);
+
+xi1:=Power(x,(1/2));
+xi2:=Power(y,(1/2));
+assert Parent(xi1) eq Parent(xi2);
+S:=[xi1,xi2];
+&*S;
+
+X<x1,x2>:=WPS(Rationals(),[1,1]);
+assert Dimension(X) eq 1;
+assert IsQFactorial(X);
+assert IsGorenstein(X);
+assert IsFano(X);
+assert IsNonsingular(X);
+X;
+
+Y<y1,y2,y3>:=WPS(Rationals(),[1,1,2]);
+assert Dimension(Y) eq 2;
+assert IsQFactorial(Y);
+assert IsGorenstein(Y);
+assert IsFano(Y);
+assert not IsNonsingular(Y);
+assert not IsTerminal(Y);
+assert IsCanonical(Y);
+Y;
+
+R:=CoordinateRing(X);
+RR:=CoordinateRing(Y);
+
+Xi:=FamilyOfMultivaluedSections(R);
+S:=[Xi|Power(x1,(1/2)), 0 , x2];
+psi:=ToricVarietyMap(X,Y,S);
+assert IsRegular(psi);
+
+NX:=OneParameterSubgroupsLattice(X);
+NY:=OneParameterSubgroupsLattice(Y);
+phi:=hom<NX -> NY | Matrix([[1,2]])>;
+psi2:=ToricVarietyMap(X,Y,phi);
+GoodDescription(psi2);
+assert IsRegular(psi2);
+
+phii:=hom<NX->NY|Matrix([[1,0]])>;
+psii2:=ToricVarietyMap(X,Y,phii);  
+GoodDescription(psii2); 
+assert IsRegular(psii2);
+
+Xi2:=FamilyOfMultivaluedSections(RR);
+S2:=[Xi2| y1,y2];
+psi3:=ToricVarietyMap(Y,X,S2);
+GoodDescription(psi3);
+assert not IsRegular(psi3);
+
+psi4:=psi*psi3;
+GoodDescription(psi4);
+assert IsRegular(psi4);
+
+S:=GoodDescription(psi2);
+psi5:=ToricVarietyMap(X,Y,S);
+bool,phi2:=IsTorusInvariant(psi5);
+assert bool;
+DefiningMatrix(phi2);
+assert IsRegular(psi5);
+
+D:=Divisor(Y,[3/5,2,1]);
+Pullback(psi,D);
+CoordinateSubvariety(Y,[1]);
+
+C:=Cone([[1,1,1],[1,0,0],[1,1,0],[1,0,1]]);
+F:=Fan(C);
+Resolution(F);
+
+X<x,y,z,w>:=ToricVariety(Rationals(),F);
+S:=Scheme(X, [x,y,z,w]);
+assert not IsEmpty(S);
+assert Dimension(S) eq 0;
+
+P1<t,s>:=WPS(Rationals(), [1,1]);
+psi1:=ToricVarietyMap(P1,X,[CoordinateRing(P1)|0,0,0,0]);
+psi2:=ToricVarietyMap(P1,X,[CoordinateRing(P1)|t,0,0,s]);
+psi2;
+GoodDescription(psi2);
+
+P<a,b,c,d,e,f,g,h,i,j,k,l,m,n>:=WPS(Rationals(),[1 : i in [1..14]]);                                                                                      
+M:=Matrix([[0,0,e,g,h,i,a],[0,0,-d,j,-g,l,b],[-e,d,0,m,n,k,c],[-g,-j,-m,0,0,-b,d],[-h,g,-n,0,0,a,e],[-i,-l,-k,b,-a,0,f],[-a,-b,-c,-d,-e,-f,0]]);
+
+pfaf:=Pfaffians(M,4);                                                          
+Z:=Scheme(P,pfaf);
+
+X<x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13>, psi:=BinomialToricEmbedding(Z);                                                                  
+PP:=Ambient(X);
+psi2:=ToricVarietyMap(PP,PP,[PP.i : i in [1..5]] cat [-PP.6] cat [PP.i : i in [7..13]]);
+time X2:=X@@psi2;           // now only approx 0.2s! (was 3s before!)
+
+X3<[x]>,psi3:=BinomialToricEmbedding(X2);                                                                                                       
+coord:=psi3*(psi2*(psi*f));
+psi4:=psi3*psi2*psi;
+assert psi4*f eq coord;
+
+P5,psi5:=CoordinateSubvariety(Ambient(X3),[7]);
+X4<[y]>:=X3@@psi5;
+X4<[y]>:=Scheme(Ambient(X3), MinimalBasis(X3))@@psi5;
+X6<[z]>, psi6:=BinomialToricEmbedding(X4);
+Ambient(X6);
+MinimalBasis(X6);
+PicardLattice(Ambient(X6));
+F:=Fan(Ambient(X6));
+bool, ample:=IsProjective(Ambient(X6));
+assert bool;
+time IsRegular(psi4);
+time IsRegular(psi5);
+time IsRegular(psi6);
+
+time psi7:=(psi6*psi5)*psi4;       // approx 1.3s
+time psi8:=psi6*(psi5*psi4);       // approx 1.5s
+assert psi7 eq psi8;
+
+D:=Pullback(psi8,Divisor(P,1));
+
+assert IsCartier(D);
+assert IsAmple(D);
+PP:=Polyhedron(D);
+assert #Points(PP) eq 13;
+assert AreLinearlyEquivalent(D,ample);
+
+// todo
+// assert psi7 eq psi8;
+ 
+// Compute the degree of an ample divisor. 
+X := WPS(Rationals(),[1,2,3,4,5]);
+A := -CanonicalDivisor(X);
+assert Degree(A) eq 3375/8;
+
+/////////////////////////////////////////////////////////////////////////
+// Cox Rings
+/////////////////////////////////////////////////////////////////////////
+"------\nCox Rings\n";
+
+F:=ZeroFan(ToricLattice(0));
+assert IsComplete(F);
+K:=RationalFunctionField(Rationals(),45);
+X:=ToricVariety(K,F);
+assert IsProjective(X);
+
+// Construct the scroll and see its Cox ring.
+F0:=FanOfWPS([1,1,1]);
+F1:=Blowup(F0,Rays(F0)[1] + Rays(F0)[2]);
+X1:=ToricVariety(Rationals(),F1);
+CoxRing(X1);
+
+// Construct the 1/3(1,1,2) and see its Cox ring.
+F2:=FanOfAffineSpace(3);
+assert IsNonsingular(F2);
+L2:=Ambient(F2);
+_,phi:=AddVectorToLattice(1/3 * L2 ! [1,1,2]);
+F3:=Image(phi,F2);
+X3:=ToricVariety(Rationals(),F3);
+assert not IsNonsingular(X3);
+assert IsTerminal(X3);
+CoxRing(X3);
+
+// On P(1,2,3,4) we consider O(10), the anticanonical divisor.
+X4 := WPS(Rationals(),[1,2,3,4]);
+assert Gradings(X4) eq [[1,2,3,4]];
+D := -CanonicalDivisor(X4);
+X5 := ResolveLinearSystem(D);
+assert NumberOfGradings(X5) eq 3;
+assert NumberOfQuotientGradings(X5) eq 0;
+Fan(X4);
+Fan(X5);
+CoxRing(X5);
+
+R:=[ [1,2,5], [-2,-1,-1], [1,2,4],
+      [1,1,3], [-1,-1,-1], [1,1,0],
+      [0,0,-1], [1,0,0], [-1,0,2],
+      [0,1,4], [0,1,0], [-1,0,-1] ];
+C:=[ [1,2,3,9,10,11,12],
+      [1,3,4,6,8], [1,4,10],
+      [2,5,7,12], [2,5,9], [3,6,11],
+      [4,5,8,9,10], [5,7,8],
+      [6,7,8], [6,7,11,12] ];
+F:=Fan(R,C);
+CoxRing(Rationals(),F); 
+
+
+P:=RandomPolytope(4,7,2);
+F:=DualFan(P);
+X:=ToricVariety(Rationals(), F: positive:=false);
+R:=CoordinateRing(X);
+time I:=IrrelevantComponents(X);
+X:=ToricVariety(R, I , Gradings(X), QuotientGradings(X));
+time FF:=Fan(X);
+assert Seqset(ConeIndices(FF)) eq Seqset(ConeIndices(F));
+
+/////////////////////////////////////////////////////////////////////////
+// Work Over a Non-Rationals() Base
+/////////////////////////////////////////////////////////////////////////
+"------\nWork Over a Non-Rationals() Base\n";
+
+k:=GF(101);
+X<a,b,c>:=WPS(k,[1,1,2]);
+assert CoefficientRing(X) eq k;
+
+
+/////////////////////////////////////////////////////////////////////////
+// Virtual Rays
+/////////////////////////////////////////////////////////////////////////
+"------\nVirtual Rays\n";
+
+// I am trying to construct P(1,1,2) times C^* times C^*.
+// Rays number 1, 2, and 4 should give the P(1,1,2) (note that third and fourth
+// vectors are not primitive, but that is fine).
+// The third ray should give a virtual ray. I'm letting Magma decide where to
+// place the fifth ray.
+// In the first try I give wrong third ray, since it does not \Z-generate an
+// appropriate quotient lattice.
+
+L:=ToricLattice(4);
+rays:=[ L | [1,1,2,3], [1,1,4,5], [2,2,0,2], [-2,-2,-6,-8] ];
+cones:=[ [1,2], [2,4], [4,1] ];
+// This _SHOULD_ give an error:
+// F:=Fan(rays,cones);
+
+// The correct form is:
+rays:=[ L | [1,1,2,3], [1,1,4,5], [2,0,0,2], [-2,-2,-6,-8] ];
+F:=Fan(rays,cones);
+assert #Rays(F) eq 4;
+assert #VirtualRays(F) eq 2;
+
+// Here is our toric variety (over GF(101) for fun)
+X:=ToricVariety(GF(101),F);
+// If we try to take the coordinate subvariety X.3=0 we _SHOULD_ get an error, 
+// since X.3 is in the irrelevant ideal:
+// CoordinateSubvariety(X,[3]);
+
+// X.4=0 works fine:
+Y,phi:=CoordinateSubvariety(X,[4]);
+
+// X.2=0 is something we know well:
+Y,phi:=CoordinateSubvariety(X,[2]);
+Y;
+
+D2:=Divisor(X,2);
+assert not IsPrincipal(D2);
+D3:=Divisor(X,3);
+assert IsPrincipal(D3);
+
+pullback:=Pullback(phi, D3);
+assert IsCartier(pullback);
+
+// Here is a small doubt... 
+// Does MMP work (mathematically) for C^* times something?
+// It currently returns a trivial result:
+MMP(X);
+// The explanation is this: the set of curves mod linear equiv. are trivial
+// since every curve can be pushed to the infinity with C^* action. So every
+// divisor is nef, because D*C is always 0.
+NefCone(X);
+// So there is no extremal rays to contract!
+AllCones(F);
+PicardLattice(X);
+
+F2:=Fan([L|[1,1,0,0],[1,1,0,1],[1,1,1,0],[1,1,1,1],[-2,-2,-1,-1]],
+           [[1,2,3,4],[1,2,5],[1,3,5],[3,4,5],[4,2,5]]);
+Y:=ToricVariety(GF(101),F2);
+assert Length(Y) eq 6;
+psi:=ToricVarietyMap(X,Y);
+GoodDescription(psi);
+IndeterminacyLocus(psi);
+assert not IsRegular(psi);
+
+/////////////////////////////////////////////////////////////////////////
+// Product via fans
+/////////////////////////////////////////////////////////////////////////
+"------\nProduct via fans\n";
+
+X := WPS(Rationals(),[1,2,3]);
+Y := WPS(Rationals(),[3,4,5]);
+FX := Fan(X);
+FY := Fan(Y);
+FZ := Fan(FX,FY);
+Z := ToricVariety(Rationals(),FZ);
+assert Dimension(Z) eq Dimension(X) + Dimension(Y);
+assert IsProjective(Z);
+Z1 := X * Y;
+assert Dimension(Z1) eq Dimension(X) + Dimension(Y);
+assert IsProjective(Z1);
+assert Ambient(Fan(Z)) eq Ambient(Fan(Z1));
+assert Fan(Z) eq Fan(Z1);
+assert not Z1 eq Z; // this is because the coordinate rings are not the same rings!
+assert Dimension(PicardLattice(Z1)) eq 2;
+
+/////////////////////////////////////////////////////////////////////////
+// Toric ideal simplifies subscheme
+/////////////////////////////////////////////////////////////////////////
+"------\nToric ideal simplifies subscheme\n";
+
+P<x,y,z> := ProjectiveSpace(Rationals(),2);
+C := Curve(P,x^8 + x^4*y^3*z + z^8);
+assert Genus(C) eq 8;
+eqns := Sections(CanonicalLinearSystem(C));
+X<[a]> := ToricVariety(Rationals(),7);
+f := map< P -> X | eqns >;
+V := f(C);
+W,g := BinomialToricEmbedding(V);
+Y<[b]> := Domain(g);
+assert #Basis(Saturation(DefiningIdeal(W),IrrelevantIdeal(CoxRing(Y)))) eq 1;
+
+/////////////////////////////////////////////////////////////////////////
+// Weights of flip
+/////////////////////////////////////////////////////////////////////////
+"------\nWeights of flip\n";
+
+R<u,v,w,s,x,y,z,t> := PolynomialRing(Rationals(),8);
+B := [ideal<R|G> : G in [[u,v,w],[s,x,y,z],[t,w],[t,x],[u,v,s,y,z]]];
+Z := [[1,1,0,1,0,1,1,-1], [1,1,1,0,-1,-1,-1,0], [0,0,0,1,1,1,1,0]];
+X := ToricVariety(R,B,Z);
+time types:=TypesOfContractions(X: divisor:=ZeroDivisor(X),inequality:="weak");
+    // 7.9s
+time I:=[i: i in [1..#types]| types[i] eq "flop"];
+weights:={WeightsOfFlip(X,i: divisor:=ZeroDivisor(X),inequality:="weak"): i in I};
+assert weights eq {[[ 1, 1, 0, -1, 0, 0, -1 ],[ 0, 0, 1, 1, 1, 1, 0 ]],
+                   [[ 1, 1, 1, -1, -1, -1 ]]};
+
+/////////////////////////////////////////////////////////////////////////
+// Finally, clear the caches
+/////////////////////////////////////////////////////////////////////////
+"------\nClearing caches\n";
+
+CacheClearToricVariety();
+CacheClearToricLattice();

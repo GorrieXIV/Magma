@@ -1,0 +1,65 @@
+//
+// Benchmark of Ree stabiliser calculation
+
+ClearVerbose();
+
+// Number of executions for each field size
+nTests := StringToInteger(nTests);
+
+function testReeCopy(G)
+
+    G := DerivedGroupMonteCarlo(G);
+    G`RandomProcess := RandomProcessWithWords(G : WordGroup := WordGroup(G), Scramble := 1);
+    P := ReeFindOrbitPoint(G : CheckInput := false,
+	Randomiser := G`RandomProcess);
+    
+    SetAssertions(false);
+    testTime := Cputime();
+    _, logTime, slpTime, sl2Time := ReeStabiliser(G, P : CheckInput := false,
+	Randomiser := G`RandomProcess);
+    testTime := Cputime(testTime);
+    SetAssertions(true);
+
+    delete G;
+    return testTime, logTime, slpTime, sl2Time;
+end function;
+
+reals := RealField();
+F := GF(3, 2 * StringToInteger(m) + 1 : Optimize := false);
+G := Ree(F);
+
+printf "Testing field: %o\n", F;
+
+fieldTime := Cputime();
+for i in [1 .. 1000000] do
+    _ := Random(F) * Random(F);
+end for;
+fieldTime := Cputime(fieldTime);
+
+// Initial run to initialise discrete log
+_ := testReeCopy(G);
+
+testTime := 0;
+logTime  := 0;
+slpTime  := 0;
+sl2Time  := 0;
+
+for i in [1 .. nTests] do
+    G := RandomConjugate(G);
+    
+    curTestTime, curLogTime, curSLPTime, curSL2Time := testReeCopy(G);
+    testTime +:= curTestTime;
+    logTime  +:= curLogTime;
+    slpTime +:= curSLPTime;
+    sl2Time  +:= curSL2Time;
+end for;
+
+SetAutoColumns(false);
+SetColumns(0);
+
+printf "%o %o %o %o %o %o\n", char, m,
+    reals ! (testTime / (nTests * fieldTime)),
+    reals ! (logTime / (nTests * fieldTime)),
+    reals ! (slpTime / (nTests * fieldTime)),
+    reals ! (sl2Time / (nTests * fieldTime));
+quit;

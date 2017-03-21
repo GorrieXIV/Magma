@@ -1,0 +1,203 @@
+SetDebugOnError(true);
+procedure check_subfields_simple(f, no_gal_check)
+    F := FunctionField(f);
+    if Characteristic(F) eq 0 then
+        time S := Subfields(F);
+    else
+        time S, L := Subfields(F);
+    end if;
+    // check subfields are actually subfields
+    for s in S do
+        assert Evaluate(DefiningPolynomial(s[1]), F!s[1].1) eq 0;
+        assert Evaluate(DefiningPolynomial(s[1]), s[2](s[1].1)) eq 0;
+    end for;
+    if assigned L then
+        // check subfields are distinct (by block system)
+        BS := {x[2] : x in L`Fields};
+        assert #BS eq #L`Fields;
+    end if;
+    //What can I say about #S?
+    // How can I use galois groups?
+    if not no_gal_check then
+        G := GaloisGroup(F : SubfieldsComplete := false);
+        assert #AllPartitions(G) + 1 eq #S;
+    end if;
+end procedure;
+F<t> := FunctionField(Rationals());
+P<x> := PolynomialRing(F);
+check_subfields_simple(x^2 + 3, false);
+check_subfields_simple(x^2 + t, false);
+check_subfields_simple(x^2 + t + 1, false);
+check_subfields_simple(x^4 + 3, false);
+check_subfields_simple(x^4 + t, false);
+check_subfields_simple(x^4 + t + 1, false);
+check_subfields_simple(x^4 - t + 1, false);
+check_subfields_simple(x^8 + F.1+1, true);
+check_subfields_simple(x^2 + x + 1, false);
+check_subfields_simple(x^3 + x + 1, false);
+check_subfields_simple(x^5 + x^4 + x^3 + x + 1, false);
+check_subfields_simple(x^8 + x^7 + t*x^6 + x^5 + t*x^2 + x + 1, false);
+F<t> := FunctionField(GF(5));
+P<x> := PolynomialRing(F);
+check_subfields_simple(x^2 + 3, false);
+check_subfields_simple(x^2 + t, false);
+check_subfields_simple(x^2 + t + 1, false);
+check_subfields_simple(x^4 + 3, false);
+check_subfields_simple(x^4 + t, false);
+check_subfields_simple(x^4 + t + 1, false);
+check_subfields_simple(x^4 - t + 1, false);
+F := FunctionField(GF(7));
+P<x> := PolynomialRing(F);
+check_subfields_simple(x^8 + F.1+1, false);
+F<t> := FunctionField(GF(2));
+P<x> := PolynomialRing(F);
+check_subfields_simple(x^2 + t*x + 1, false);
+check_subfields_simple(x^3 + t*x + 1, false);
+check_subfields_simple(x^5 + x^4 + t*x^3 + x + 1, false);
+check_subfields_simple(x^8 + x^7 + x^6 + t*x^5 + x^2 + t*x + 1, false);
+Cputime();
+procedure check_subfields(F, A)
+    check_subfields_simple(DefiningPolynomial(F), false);
+end procedure;
+k := GF(5);
+kt<t> := FunctionField(k);
+p := Places(kt, 1) cat Places(kt, 2);
+D := 2*Random(p) + 2*Random(p);
+R, mR := RayClassGroup(D);
+U := 5*R; repeat U := sub<R|Random(R), U>; until #quo<R|U> eq 5;
+A := AbelianExtension(D, U);
+DA := DiscriminantDivisor(A);
+F := FunctionField(A);
+F := FunctionField(Polynomial(kt, DefiningPolynomials(F)[1]));
+check_subfields(F, A);
+procedure check_subfields(f) 
+    F := NumberField(f);
+    // this may do the old subfields algorithm for non char p function fields
+    // and number fields
+    time S, L := Subfields(F : Al := "KluenersvanHoeij");
+    // check subfields are actually subfields
+    for s in S do
+        assert Evaluate(DefiningPolynomial(s[1]), F!s[1].1) eq 0;
+        assert Evaluate(DefiningPolynomial(s[1]), s[2](s[1].1)) eq 0;
+    end for;
+    // check subfields are distinct (by block system)
+    BS := {x[2] : x in L`Fields};
+    assert #BS eq #L`Fields;
+    //What can I say about #S?
+    // How can I use galois groups?
+    time G := GaloisGroup(F : Subfields := false);
+    G;
+    #AllPartitions(G) + 1, #S;
+    assert #AllPartitions(G) + 1 eq #S;
+end procedure;
+P<x> := PolynomialRing(Rationals());
+FF<a> := NumberField(x^2 + 5);
+P<x> := PolynomialRing(FF);
+check_subfields(x^2 + 3);
+check_subfields(x^2 + a);
+check_subfields(x^2 + a + 1);
+check_subfields(x^4 + 3);
+check_subfields(x^4 + a*5);
+check_subfields(x^4 + a + 1);
+P<x> := PolynomialRing(Rationals());
+FF<a> := NumberField(x^2 + 7);
+P<x> := PolynomialRing(FF);
+check_subfields(x^8 + 7 + 1);
+check_subfields(x^8 + FF.1+1);
+P<x> := PolynomialRing(Rationals());
+FF<a> := NumberField(x^3 + 4);
+P<x> := PolynomialRing(FF);
+check_subfields(x^2 + a*x + 1);
+check_subfields(x^5 + a*x^4 + 3*x^3 + x + 1);
+check_subfields(x^8 + x^7 + x^6 + a*x^5 + x^2 + 2*x + 1);
+P<x> := PolynomialRing(Rationals());
+K<a> := NumberField(x^2 + 2);
+_<x> := PolynomialRing(K);
+KK<aa> := NumberField(x^2 + a);
+_<x> := PolynomialRing(KK);
+KKK<aaa> := NumberField(x^4 + aa);
+Subfields(KKK);
+GeneratingSubfields(KKK);
+P<x> := PolynomialRing(Rationals());
+check_subfields(x^4 + 3);
+check_subfields(x^20 + 5);
+Cputime();
+procedure check_subfields(f, no_gal_check)
+    F := FunctionField(f);
+    // this may do the old subfields algorithm for non char p function fields
+    // and number fields
+    time S, L := Subfields(F); 
+    // check subfields are actually subfields
+    for s in S do
+        assert Evaluate(DefiningPolynomial(s[1]), F!s[1].1) eq 0;
+        assert Evaluate(DefiningPolynomial(s[1]), s[2](s[1].1)) eq 0;
+    end for;
+    // check subfields are distinct (by block system)
+    BS := {x[2] : x in L`Fields};
+    assert #BS eq #L`Fields;
+    //What can I say about #S?
+    // How can I use galois groups?
+    if not no_gal_check then
+        time G := GaloisGroup(F : SubfieldsComplete := false);//, ProofEffort := 5);
+        //time G := GaloisGroup(F : SubfieldsComplete);
+        assert #AllPartitions(G) + 1 eq #S;
+    end if;
+end procedure;
+F<t> := FunctionField(GF(5));
+P<x> := PolynomialRing(F);
+FF<a> := FunctionField(x^2 + t);
+P<x> := PolynomialRing(FF);
+check_subfields(x^2 + 3, false);
+check_subfields(x^2 + a, false);
+check_subfields(x^2 + a + 1, false);
+check_subfields(x^4 + 3, false);
+check_subfields(x^4 + a*t, false);
+check_subfields(x^4 + a + 1, false);
+check_subfields(x^4 - t + 1, false);
+F := FunctionField(GF(7));
+P<x> := PolynomialRing(F);
+FF<a> := FunctionField(x^2 + F.1);
+P<x> := PolynomialRing(FF);
+check_subfields(x^8 + F.1+1, false);
+check_subfields(x^8 + FF.1+1, false);
+F<t> := FunctionField(GF(2)); 
+P<x> := PolynomialRing(F);
+FF<a> := FunctionField(x^3 + t);
+P<x> := PolynomialRing(FF);
+check_subfields(x^2 + a*x + 1, false);
+check_subfields(x^3 + t*x + 1, false);
+check_subfields(x^5 + a*x^4 + t*x^3 + x + 1, false);
+check_subfields(x^8 + x^7 + x^6 + a*x^5 + x^2 + t*x + 1, false);
+P<t> := RationalFunctionField(GF(5));
+P<y> := PolynomialRing(P);
+F<c> := FunctionField(y^3 + t);
+PP<yy> := PolynomialRing(F);
+FF<cc> := FunctionField(yy^4 + c);
+Subfields(FF);
+procedure check_subfields(F, A)
+    S, L := Subfields(F);
+    for s in S do
+        assert Evaluate(DefiningPolynomial(s[1]), F!s[1].1) eq 0;
+        assert Evaluate(DefiningPolynomial(s[1]), s[2](s[1].1)) eq 0;
+    end for;
+    // check subfields are distinct (by block system)
+    BS := {x[2] : x in L`Fields};
+    assert #BS eq #L`Fields;
+    //What can I say about #S?
+    // How can I use galois groups?
+    G := GaloisGroup(F : SubfieldsComplete := false);
+    assert #AllPartitions(G) + 1 eq #S;
+    // Can I use A in any way?
+end procedure;
+k := GF(5);
+kt<t> := FunctionField(k);
+p := Places(kt, 1) cat Places(kt, 2);
+D := 2*Random(p) + 2*Random(p);
+R, mR := RayClassGroup(D);
+U := 5*R; repeat U := sub<R|Random(R), U>; until #quo<R|U> eq 5;
+A := AbelianExtension(D, U);
+DA := DiscriminantDivisor(A);
+F := FunctionField(A);
+F := FunctionField(DefiningPolynomials(F)[1]);
+check_subfields(F, A);
+

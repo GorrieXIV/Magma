@@ -1,0 +1,123 @@
+
+
+function MultPolFacts(f) 
+//Multiplies the factors with multiplicities
+    if #f eq 0 then
+	return Universe(f)[1]!1;
+    end if;
+
+    return &*[T[1]^(T[2]) : T in f];
+end function;
+
+P<t> := PowerSeriesRing(GF(101), 50);
+R<x> := PolynomialRing(P);
+f := Factorization((x^2 + 2)*(x - 1));
+assert MultPolFacts(f) eq (x^2 + 2)*(x - 1);
+Factorization((x^2 + 2)*(x - 1) : Certificates);
+Factorization((x^2 + 2)*(x - 1) : Certificates, Extensions);
+f := Factorization((x - t)*(x + t));
+assert IsZero(MultPolFacts(f) - (x^2 - t^2));
+Factorization((x - t)*(x + t) : Extensions);
+f := Factorization(x^5 + t*x^4 - t^2*x^3 + (1 + t^20)*x^2 + t*x + t^6 : 
+Extensions);
+assert IsZero(MultPolFacts(f) - (x^5 + t*x^4 - t^2*x^3 + (1 + t^20)*x^2 + t*x + t^6));
+f := Factorization(x^2 + t*x + t : Extensions);
+assert MultPolFacts(f) eq x^2 + t*x + t;
+
+U<u> := UnramifiedExtension(P, x^2 + 2);
+Y<y> := PolynomialRing(U);
+f := Factorization((y - 1)*(y - 3));
+assert MultPolFacts(f) eq (y - 1)*(y - 3);
+Factorization((y - 1)*(y - 3) : Certificates, Extensions);
+f := Factorization((y - u)*(y^3 + 3));
+assert MultPolFacts(f) eq (y - u)*(y^3 + 3);
+f := Factorization((y^4 + 3) : Certificates, Extensions);
+assert MultPolFacts(f) eq y^4 + 3;
+f := Factorization((y^4 + u) : Certificates, Extensions);
+assert MultPolFacts(f) eq y^4 + u;
+f := Factorization(y^2 + t*y + t : Certificates, Extensions);
+assert MultPolFacts(f) eq y^2 + t*y + t;
+f := Factorization(y^6 + t*y^4 + (1 + t)*y^3 + t^5*y^2 + t : Certificates, 
+Extensions);
+assert MultPolFacts(f) eq y^6 + t*y^4 + (1 + t)*y^3 + t^5*y^2 + t;
+
+P<t> := PowerSeriesRing(GF(101), 50);
+PP<pt> := PowerSeriesRing(GF(101));
+R<x> := PolynomialRing(PP);
+T<tt> := TotallyRamifiedExtension(P, x^2 + pt*x + pt : MaxPrecision := 100);
+Y<y> := PolynomialRing(T);
+f := Factorization((y - 1)*(y - 2));
+assert MultPolFacts(f) eq (y - 1)*(y - 2);
+f := Factorization((y - 1)*(y - t));
+assert MultPolFacts(f) eq (y - 1)*(y - t);
+f := Factorization((y - 1)*(y - T.1));
+assert MultPolFacts(f) eq (y - 1)*(y - T.1);
+f := Factorization(y^2 + t*y + t);
+assert MultPolFacts(f) eq y^2 + t*y + t;
+f := Factorization(y^5 + (tt + t)*y^4 + t*tt*y^3 + t*y^2 + tt*y + tt^10 : 
+Certificates);
+assert IsZero(MultPolFacts(f) - (y^5 + (tt + t)*y^4 + t*tt*y^3 + t*y^2 + tt*y + tt^10));
+Factorization(y^5 + (tt + t)*y^4 + t*tt*y^3 + t*y^2 + tt*y + tt^10 : 
+Extensions);
+
+Y<y> := PolynomialRing(U);
+T<tt> := TotallyRamifiedExtension(U, y^2 + t*y + t : MaxPrecision := 200);
+Y<y> := PolynomialRing(T);
+f := Factorization((y - 1)*(y - 2));
+assert MultPolFacts(f) eq (y - 1)*(y - 2);
+f := Factorization((y - 1)*(y - t));
+assert MultPolFacts(f) eq (y - 1)*(y - t);
+f := Factorization((y - 1)*(y - tt));
+assert MultPolFacts(f) eq (y - 1)*(y - tt);
+f := Factorization((y - u)*(y - tt));
+assert MultPolFacts(f) eq (y - u)*(y - tt);
+f := Factorization(y^2 + t*y + t);
+assert MultPolFacts(f) eq y^2 + t*y + t;
+f := Factorization(y^5 + (tt + t + u)*y^4 + t*tt*u*y^3 + t*y^2 + tt^10*y + u^10 : 
+Certificates);
+assert MultPolFacts(f) eq y^5 + (tt + t + u)*y^4 + t*tt*u*y^3 + t*y^2 + tt^10*y + u^10;
+Factorization(y^5 + (tt + t + u)*y^4 + t*tt*u*y^3 + t*y^2 + tt^10*y + u^10 : 
+Extensions);
+
+//Test inseparable polynomials
+k<a> := GF(4);
+K<t> :=  PowerSeriesRing(k, 300);
+R<x> := PolynomialRing(K);
+f := (1 + t^2)*x^2 + 1;
+g := (1 + t^3)*x^2 + 1;
+h := (t^2 + t^3 + t^4 + t^6 + t^7 + t^8)*x^4 + (t^3 + t^4 + t^5 + t^6 + t^7 +
+t^8)*x^3 + (1 + t + t^2 + t^3 + t^4 + t^5)*x^2 + t^3*x + 1;
+H, c := Factorization(h);
+assert IsZero(c*MultPolFacts(H) - h);
+Factorization(h : Extensions);
+F, c := Factorization(f);
+assert IsZero(c*MultPolFacts(F) - f);
+Factorization(f : Extensions);
+G, c := Factorization(g);
+assert IsZero(c*MultPolFacts(G) - g);
+//Factorization(g : Extensions);
+FG, c := Factorization(f*g);
+assert IsZero(c*MultPolFacts(FG) - f*g);
+//Factorization(f*g : Extensions);
+assert MultPolFacts(Factorization((x^2 + 1)*(x^2 + x+ 1))) - (x^2 + 1)*(x^2 + x+ 1) eq 0;
+Factorization((x^2 + 1)*(x^2 + x+ 1) : Extensions);
+assert MultPolFacts(Factorization((x^2 + 1)^2*(x^2 + x+ 1))) - (x^2 + 1)^2*(x^2 + x+ 1) eq 0;
+assert MultPolFacts(Factorization((x^2 + 1)^3*(x^2 + x+ 1))) - (x^2 + 1)^3*(x^2 + x+ 1) eq 0;
+assert MultPolFacts(Factorization((x^2 + 1)*(x^2 + x + 1)^2)) - (x^2 + 1)*(x^2 + x + 1)^2 eq 0;
+assert MultPolFacts(Factorization((x^2 + 1)*(x^2 + x + 1)^3)) - (x^2 + 1)*(x^2 + x + 1)^3 eq 0;
+assert MultPolFacts(Factorization((x^2 + 1)^5*(x^2 + x + 1)^3)) - (x^2 + 1)^5*(x^2 + x + 1)^3 eq 0;
+
+assert MultPolFacts(Factorization((x^2 + t)*(x^2 + t^2))) - (x^2 + t)*(x^2 + t^2) eq 0;
+//Factorization((x^2 + t)*(x^2 + t^2) : Extensions);
+
+U := UnramifiedExtension(K, x^2 + (t + a)*x + 1);
+T := TotallyRamifiedExtension(U, x^2 + t^2*x + t);
+R<x> := PolynomialRing(T);
+
+
+k<a> := GF(3);
+K<t> := PowerSeriesRing(k, 100);
+R<x> := PolynomialRing(K);
+
+assert MultPolFacts(Factorization((x^3 + t)*(x^3 + t^3))) - (x^3 + t)*(x^3 + t^3) eq 0;
+//Factorization((x^3 + t)*(x^3 + t^3) : Extensions);

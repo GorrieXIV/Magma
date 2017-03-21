@@ -1,0 +1,168 @@
+    This database contains one representative of each conjugacy class of
+irreducible soluble subgroups of GL(n,p), p prime, for n > 1  and p^n < 256.
+
+    The other main feature is a function for constructing the semidirect
+product of a finite vector space and an irreducible matrix group over that
+space:
+
+    Getvecs(G)
+	This function takes a matrix group G over a finite prime field
+	and returns a sequence, VECS say, containing all the vectors of the
+	natural module for G.  The ordering of VECS does NOT depend on G, but
+	only on its natural module.
+
+    Semidir(G, VECS)
+	Given an irreducible matrix group G of degree n and over a
+	finite prime field of character p and the sequence VECS obtained
+	from Getvecs, this function returns the permutation group H of
+	degree p^n that is the semidirect product of G with its natural
+	module.  H acts on the set {1 .. p^n} and G is isomorphic to
+	each of the point stabilizers.  It is well known that H is primitive,
+	and that every primitive permutation group with soluble socle
+	arises in this way.
+	Note that if Semidir is to be called more than once for subgroups
+	of the same GL(n, p), then Getvecs need only be called on the first
+	occasion, since the ordering of VECS depends only on n and p.
+	This is why the call to Getvecs is not made by Semidir itself.
+
+
+The Irreducible Soluble Subgroups of GL(n, p).
+----------------------------------------------
+
+    Each group is labelled according to the dimension of the matrices
+and the size of the coefficient field.  For example, the label of
+the 4th group of 3-dimensional matrices over GF(5) is 3, 5, 4.
+
+    The groups are stored internally in a compact representation, so a little
+setting up must be done to generate a complete matrix group.  Some
+information about each group is also stored, so there are several ways
+of searching for groups with particular properties.
+
+    The groups are accessed through the following functions only.
+
+    IsolGroup(n, p, i)
+	This function returns the i-th group of degree n over GF(p).
+
+    IsolNumberOfDegreeField(n, p)
+	This function returns the number of groups of degree n over GF(p)
+	stored in the database.
+
+    IsolInfo(n, p, i)
+	This function returns a string which gives some information
+	about a group given its label.  In particular, it contains the
+	order and primitivity information.
+    
+    IsolDegree(n, p, i)
+	This function returns the degree of a group given its label (i.e., n).
+    
+    IsolCharacteristic(n, p, i)
+	This function returns the characteristic of the coefficient
+	ring given its label (i.e., p).
+
+    IsolOrder(n, p, i)
+	This function returns the order of a group given its label.
+
+    IsolMinBlockSize(n, p, i)
+	This function returns the minimal block size of a group given
+	its label.  If it is primitive, it returns 0.
+
+    IsolIsPrimitive(n, p, i)
+	This function returns whether a group is primitive given its label.
+
+    IsolGuardian(n, p, i)
+	This function returns the "guardian" of a group given its label
+	(i.e., the maximal subgroup of GL(n, p) of which the group is
+	a subgroup).
+
+    A predicate for a group in this database is one of the following:
+	(a) A function f: (<GrpMat>) --> BoolElt (which may either be an
+	    intrinsic function or a user defined function).
+	(b) A tuple of one function <g>,
+	    where g: (<RngIntElt>, <RngIntElt>, <RngIntElt>) --> BoolElt
+	    (again, either intrinsic or user defined).  This returns a
+	    boolean given the label of a group.
+	(c) A tuple of two functions <g, f> where g, f as above.
+	    In this case, the tested predicate will be
+		g(n, p, i) and f(IsolGroup(n, p, i)).
+	    This form is introduced to avoid expanding the group from
+	    its label until absolutely necessary.
+
+    IsolGroupSatisfying(f)
+	Given a predicate f, return a group satisfying f(G).
+	This function runs through all the stored groups and applies
+	the predicate f until it finds a suitable one.
+	If no group is found, an error message is printed.
+
+    IsolGroupOfDegreeSatisfying(d, f)
+	As IsolGroupSatisfying(f), except it only runs through the groups
+	of degree d.
+
+    IsolGroupOfDegreeFieldSatisfying(d, p, f)
+	As IsolGroupSatisfying(f), except it only runs through the groups
+	of degree d and defined over GF(p).
+
+    IsolGroupsSatisfying(f)
+	As IsolGroupSatisfying(f), except a sequence of all such groups
+	is returned.
+
+    IsolGroupsOfDegreeSatisfying(d, f)
+	As IsolGroupOfDegreeSatisfying(d, f), except a sequence of all
+	such groups is returned.
+
+    IsolGroupsOfDegreeFieldSatisfying(d, p, f)
+	As IsolGroupOfDegreeFieldSatisfying(d, p, f), except a sequence of all
+	such groups is returned.
+
+    IsolProcess()
+	Return a "process" for looping over all the stored groups.
+	Initially it points to the first group (of degree 2 and over GF(2)).
+
+    A specifier for degree or field is one of:
+	(a) A valid degree (field size)
+	(b) A tuple <lo, hi> of valid degrees (field sizes) which is
+	    interpreted to mean all degrees (prime field sizes) in [lo, hi].
+
+    IsolProcessOfDegree(d)
+	Return a "process" for looping over all the stored groups with
+	degree specifier d.  Initially it points to the first such group.
+
+    IsolProcessOfDegreeField(d, p)
+	Return a "process" for looping over all the stored groups with
+	degree specifier d and field specifier p.  Initially it points
+	to the first such group (the principal key is the degree).
+
+    IsolProcessOfField(p)
+	Return a "process" for looping over all the stored groups with
+	degree specifier p.  Initially it points to the first such group
+	(sorted again by degree first).
+
+    IsolProcessIsEmpty(P)
+	Return whether the process P currently points to a group.
+
+    IsolProcessGroup(P)
+	Given a process P which currently points to a group, return that
+	group.
+
+    IsolProcessInfo(P)
+	Given a process P which currently points to a group, return the
+	associated information string.
+    
+    IsolProcessLabel(P)
+	Given a process P which currently points to a group, return
+	the label n, p, i of the group.
+    
+    IsolProcessNext(~P)
+	Given a process P which currently points to a group, modify it
+	so that it points to the next group if there is one or make it
+	empty if there is not.
+    
+A fairly typical use of a process to loop over groups would look
+something like this:
+
+    P := IsolProcessOfDegree(2);
+    while not IsolProcessIsEmpty(P) do
+	G := IsolProcessGroup(P);
+	... do stuff with G ...
+	IsolProcessNext(~P);
+    end while;
+

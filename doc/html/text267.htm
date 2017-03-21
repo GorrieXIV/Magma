@@ -1,0 +1,240 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Creation of Sparse Matrices</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text268.htm">[Next]</A><A  HREF = "text266.htm">[Prev]</A> <A  HREF = "text268.htm">[Right]</A> <A  HREF = "text266.htm">[Left]</A> <A  HREF = "text265.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "2463">Creation of Sparse Matrices</A></H3>
+
+<P>
+<P>
+This section describes the constructs provided for creating sparse matrices.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text267.htm#2464">Construction of Initialized Sparse  Matrices</A>
+<LI> <A  HREF = "text267.htm#2468">Construction of Trivial Sparse Matrices</A>
+<LI> <A  HREF = "text267.htm#2471">Construction of Structured Matrices</A>
+<LI> <A  HREF = "text267.htm#2478">Parents of Sparse Matrices</A>
+</UL>
+<H4><A NAME = "2464">Construction of Initialized Sparse  Matrices</A></H4>
+
+
+
+<H5><A NAME = "2465">SparseMatrix(R, m, n, Q) : Rng, RngIntElt, RngIntElt, [ &lt;RngIntElt, RngIntElt, RngElt&gt; ] -&gt; MtrxSprs</A></H5>
+<H5>SparseMatrix(m, n, Q) : RngIntElt, RngIntElt, [ &lt;RngIntElt, RngIntElt, RngElt&gt; ] -&gt; MtrxSprs</H5>
+<BLOCKQUOTE>
+Given a ring R (optional), integers m, n&ge;0 and a sequence Q, return the
+m x n sparse matrix over R whose non-zero entries are those
+specified by Q, coerced into R.  If R is not given, it is derived
+from the entries in Q.
+Either of m and n may be 0, in which case Q must have length 0
+(and may be null if R is given), and the m x n zero sparse matrix over
+R is returned.
+There are two possibilities for Q:
+<P>
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>The sequence Q is a sequence of tuples, each of the form <TT>&lt;i, j, x&gt;</TT>, where 1&le;i&le;m, 1&le;j&le;n, and x&isin;S
+    for some ring S.  Such a tuple specifies that the (i, j)-th
+    entry of the matrix is x.  If R is given, then x is coerced
+    into R; otherwise the matrix is created over S.
+    If an entry position
+    is not given then its value is zero, while if an entry position is
+    repeated then the last value overrides any previous values.
+<P>
+<DT>(b)</DT><DD>The sequence Q is a "flat" sequence of integers, giving the
+    entries of the matrix in compact form.  To be precise, Q
+    begins with the number of non-zero entries n for the first row,
+    then 2.n integers giving column-entry pairs for the first row, and
+    this format is immediately followed for the second row and so on.
+    A zero row is specified by a zero value for n.
+    If R is given, the integer entries are coerced into R; otherwise
+    the matrix is defined over Z.  (Thus this method will not allow elements
+    of R which cannot be created by coercing integers into R alone;
+    another way of saying this is that the entries must all lie in the prime
+    ring of R).
+    This allows a very compact way to create (and store) sparse matrices.
+    The examples below illustrate this format.</DL>
+</BLOCKQUOTE>
+<H5><A NAME = "2466">SparseMatrix(R, m, n) : Rng, RngIntElt, RngIntElt -&gt; MtrxSprs</A></H5>
+<BLOCKQUOTE>
+Given a ring R, and integers m, n&ge;0, create the m x n
+sparse matrix over R.
+</BLOCKQUOTE>
+<H5><A NAME = "2467">SparseMatrix(m, n) : RngIntElt, RngIntElt -&gt; MtrxSprs</A></H5>
+<BLOCKQUOTE>
+Given integers m, n&ge;0, create the m x n sparse matrix over
+the integer ring Z.
+</BLOCKQUOTE>
+<H4><A NAME = "2468">Construction of Trivial Sparse Matrices</A></H4>
+
+
+
+<H5><A NAME = "2469">SparseMatrix(R) : Rng -&gt; MtrxSprs</A></H5>
+<H5>SparseMatrix() : -&gt; MtrxSprs</H5>
+<BLOCKQUOTE>
+Create the 0 x 0 sparse matrix over R.
+If R is omitted (so there are no arguments), then R is taken
+to be the integer ring Z.
+These functions will usually be called when the user wishes to
+create a sparse matrix whose final dimensions are initially unknown,
+and for which the <A  HREF = "text269.htm#Smat:SetEntry">SetEntry</A> procedure below will be
+used to extend the matrix automatically, as needed.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2470">Example <TT>SMat_Create (H27E1)</TT></A></H3>
+This example demonstrates simple ways of creating matrices using
+the general <TT>SparseMatrix(R, m, n, Q)</TT> function.
+Sparse matrices may be displayed in the sparse representation 
+using the <TT>Magma</TT> print-format.  Also, the function 
+<A  HREF = "text271.htm#Smat:Matrix">Matrix</A> (described below) takes a sparse matrix
+and returns a normal (dense-representation) matrix, so this 
+function provides a means of printing a small sparse matrix 
+as a normal matrix.
+<P>
+<P>
+<P>
+(a) A sparse 2 x 2 matrix is defined over Z, using the 
+first (sequence of tuples) method.  We specify that there is a 3
+in the (1, 2) position and a -1 in the (2, 3) position.
+The ring need not be given since the entries are in Z already.
+<P>
+<P>
+<P>
+<PRE>
+&gt; A := SparseMatrix(2, 3, [&lt;1,2,3&gt;, &lt;2,3,-1&gt;]);
+&gt; A;
+Sparse matrix with 2 rows and 3 columns over Integer Ring
+&gt; Matrix(A);
+[ 0  3  0]
+[ 0  0 -1]
+</PRE>
+<P>
+(b) The same matrix is now defined over GF(23).  We could also 
+coerce the 3rd component of each tuple into GF(23) and thus 
+omit the first argument.
+<P>
+<P>
+<P>
+<PRE>
+&gt; A := SparseMatrix(GF(23), 2, 3, [&lt;1,2,3&gt;, &lt;2,3,-1&gt;]);  
+&gt; A;
+Sparse matrix with 2 rows and 3 columns over GF(23)
+&gt; Matrix(A);
+[ 0  3  0]
+[ 0  0 22]
+</PRE>
+<P>
+(c) A similar sparse matrix is defined over GF(2<sup>4</sup>).  When
+A is printed in <TT>Magma</TT> format, the sequence-of-tuples 
+form is used (because the entries cannot be printed as integers).
+<P>
+<P>
+<P>
+<PRE>
+&gt; K&lt;w&gt; := GF(2^4);
+&gt; A := SparseMatrix(K, 2, 3, [&lt;1,2,3&gt;, &lt;2,3,w&gt;]);     
+&gt; A;
+Sparse matrix with 2 rows and 3 columns over GF(2^4)
+&gt; Matrix(A);
+[   0    1    0]
+[   0    0    w]
+&gt; A: Magma;
+SparseMatrix(GF(2, 4), 2, 3, [
+    &lt;1, 2, 1&gt;, 
+    &lt;2, 3, w&gt;
+])
+</PRE>
+<P>
+(d) A sparse 4 x 5 matrix A is defined over Z, using 
+the second (flat integer sequence) method.  Here row 1 has one 
+non-zero entry: -1 at column 3; then row 2 has three non-zero 
+entries: 9 at column 2, 7 at column 3, and -3 at column 4; 
+row 3 has no non-zero entries (so we give a 0 at this point); 
+and finally row 4 has one non-zero entry 3 at column 4.
+Note that when A is printed in <TT>Magma</TT> format, this time the
+compact "flat" sequence of integers form is used, since this is
+possible.
+<P>
+<P>
+<P>
+<PRE>
+&gt; A := SparseMatrix(4,5, [1,3,-1, 3,2,9,3,7,4,-3, 0, 1,4,3]);
+&gt; A;
+Sparse matrix with 4 rows and 5 columns over Integer Ring
+&gt; Matrix(A);
+[ 0  0 -1  0  0]
+[ 0  9  7 -3  0]
+[ 0  0  0  0  0]
+[ 0  0  0  3  0]
+&gt; A: Magma;
+SparseMatrix(4, 5, \[
+    1, 3,-1,
+    3, 2,9, 3,7, 4,-3,
+    0,
+    1, 4,3
+])
+</PRE>
+<HR>
+<H4><A NAME = "2471">Construction of Structured Matrices</A></H4>
+
+
+
+<H5><A NAME = "2472">IdentitySparseMatrix(R, n) : Rng, RngElt -&gt; MtrxSprs</A></H5>
+<BLOCKQUOTE>
+Given a ring R, and an integer n&ge;0, return the n x n
+identity sparse matrix over R.
+</BLOCKQUOTE>
+<H5><A NAME = "2473">ScalarSparseMatrix(n, s) : RngIntElt, RngElt -&gt; MtrxSprs</A></H5>
+<BLOCKQUOTE>
+Given an integer n&ge;0 and an element s of a ring R, return the
+n x n scalar sparse matrix over R which has s on the diagonal and
+zeros elsewhere.  The argument n may be 0, in which case the 0 x 0 sparse matrix over R is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "2474">ScalarSparseMatrix(R, n, s) : Rng, RngIntElt, RngElt -&gt; MtrxSprs</A></H5>
+<BLOCKQUOTE>
+Given a ring R, an integer n&ge;0 and an element s of a ring S,
+return the n x n scalar sparse matrix over R which has s,
+coerced into R, on the diagonal and zeros elsewhere.  n may be 0,
+in which case in which case the 0 x 0 sparse matrix over R
+is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "2475">DiagonalSparseMatrix(R, n, Q) : Rng, RngIntElt, [ RngElt ] -&gt; MtrxSprs</A></H5>
+<BLOCKQUOTE>
+Given a ring R, an integer n&ge;0 and a sequence Q of n ring elements,
+return the n x n diagonal sparse matrix over R whose diagonal entries
+correspond to the entries of Q, coerced into R.
+</BLOCKQUOTE>
+<H5><A NAME = "2476">DiagonalSparseMatrix(R, Q) : Rng, [ RngElt ] -&gt; MtrxSprs</A></H5>
+<BLOCKQUOTE>
+Given a ring R and a sequence Q of n ring elements,
+return the n x n diagonal sparse matrix over R whose diagonal entries
+correspond to the entries of Q, coerced into R.
+</BLOCKQUOTE>
+<H5><A NAME = "2477">DiagonalSparseMatrix(Q) : [ RngElt ] -&gt; MtrxSprs</A></H5>
+<BLOCKQUOTE>
+Given a sequence Q of n elements from a ring R,
+return the n x n diagonal sparse matrix over R whose diagonal entries
+correspond to the entries of Q.
+</BLOCKQUOTE>
+<H4><A NAME = "2478">Parents of Sparse Matrices</A></H4>
+
+
+
+<H5><A NAME = "2479">SparseMatrixStructure(R) : [ Rng ] -&gt; MtrxSprsStr</A></H5>
+<BLOCKQUOTE>
+Create the structure containing all sparse matrices (of any shape)
+over ring R.  This structure does not need to be created explicitly
+by the user (it will be the parent of any sparse matrix over R),
+but it may be useful to create it in this way occasionally.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text268.htm">[Next]</A><A  HREF = "text266.htm">[Prev]</A> <A  HREF = "text268.htm">[Right]</A> <A  HREF = "text266.htm">[Left]</A> <A  HREF = "text265.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

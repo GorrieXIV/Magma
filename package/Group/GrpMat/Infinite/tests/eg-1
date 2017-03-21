@@ -1,0 +1,45 @@
+AttachSpec ("../infmat.spec");
+
+// generators for UT(n, R)
+UT := function (n, R)
+   MA := MatrixAlgebra (R, n);
+   p := Characteristic (R);
+   L := [];
+   for i in [1..n-1] do
+      for j in [1..n-i] do
+         r := Identity (MA);
+         r[j][i+j] := 1;
+         Append (~L, r);
+      end for;
+   end for;
+   return [GL(n, R) ! l: l in L];
+end function;
+
+SetEchoInput (true);
+SetVerbose ("Infinite", 1);
+R<x> := PolynomialRing(Rationals());
+K<i> := ext<Rationals () | x^2 +1>;
+G1 := sub<GL(2, K) | [0,1,3+i,0], [0,1,i - 7/5, 0]>;
+IsAbelian (G1);
+IsAbelianByFinite (G1);
+IsIrreducible (GModule (G1));
+
+DB := RationalMatrixGroupDatabase ();
+G2 := Group (DB, 5, 2);
+G2 := sub<GL(5, K) | [G2.i: i in [1..Ngens (G2)]]>;
+H := [KroneckerProduct (G1.0, G2.i): i in [1..Ngens (G2)]]
+cat [KroneckerProduct (G1.i, G2.0): i in [1..Ngens (G1)]];
+H:=sub<GL(10, K) | H>;
+H;
+IsIrreducible (GModule (H));
+IsSolubleByFinite (H);
+IsCompletelyReducible (H);
+IsSoluble (H);
+IsAbelianByFinite (H);
+time HirschNumber(H);
+
+time L:=sub<H | H.2 * H.1 * H.2, H.3 * H.4, H.5>;
+time IsSolubleByFinite (L);
+time HirschNumber (L);
+time HasFiniteIndex (H, L);
+

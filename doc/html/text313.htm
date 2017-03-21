@@ -1,0 +1,972 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Minima and Element Enumeration</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text314.htm">[Next]</A><A  HREF = "text312.htm">[Prev]</A> <A  HREF = "text314.htm">[Right]</A> <A  HREF = "text312.htm">[Left]</A> <A  HREF = "text305.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "2980">Minima and Element Enumeration</A></H3>
+
+<P>
+<P>
+<P>
+The functions in this section are all based on one algorithm which
+enumerates all vectors of a lattice in a specified
+hyperball <A  HREF = "text304.htm#bib_FiPo83">[FP83]</A>, <A  HREF = "text304.htm#bib_Kannan83">[Kan83]</A>, <A  HREF = "text304.htm#bib_SchnorrEuchner">[SE94]</A>. 
+As the underlying computational problems (the Shortest and Closest
+Lattice Vector Problems) are hard <A  HREF = "text304.htm#bib_Ajtai98">[Ajt98]</A>, <A  HREF = "text304.htm#bib_Emde81">[vEB81]</A>, the general
+application of this algorithm is restricted to lattices of moderate
+dimension (up to 50 or 60).  However, some tasks like finding a couple
+of short vectors or finding the minimum of a lattice without symmetry
+may still be feasible in higher dimensions.  The
+function <TT>EnumerationCost</TT> provides an estimate of the cost of
+running the enumeration algorithm on a specified input. This allows
+to know beforehand if the computation is likely to terminate within a
+reasonable amount of time.
+<P>
+<P>
+For each function which enumerates short vectors of a lattice L,
+there is a corresponding function which enumerates vectors of L
+which are close to a given vector w (which usually lies outside
+L).  Note that if one wishes to enumerate short vectors of the coset
+L + w of the lattice L, where w is any vector of degree compatible
+with L, one can simply enumerate vectors v&isin;L close to -w and
+then just take the vectors v + w for each v as the short vectors of
+the coset.
+<P>
+<P>
+<P>
+<P>
+The enumeration routine underlying all the functions described below
+relies on floating-point approximations. However, it can be run in a
+rigorous way in some cases, see <A  HREF = "text304.htm#bib_PuSt08">[PS08]</A>. By default, the outputs
+of the functions <TT>Minimum</TT>, <TT>PackingRadius</TT>, <TT>HermiteNumber</TT>, <TT>CentreDensity</TT>, <TT>Density</TT>, <TT>KissingNumber</TT>, <TT>ShortestVectors</TT>, <TT>ShortestVectorsMatrix</TT>, <TT>ShortVectors</TT>, <TT>ShortVectorsMatrix</TT>
+and <TT>ThetaSeries</TT> are guaranteed to be correct. This correctness
+guarantee can be turned off by setting the optional parameter <TT>Proof</TT> to <TT>false</TT>. However, this comes virtually for free, the
+additional computations being most often negligible. In the present
+version of Magma, the outputs of all other functions are only likely
+to be correct.
+<P>
+<P>
+<P>
+The enumeration algorithm from <A  HREF = "text304.htm#bib_FiPo83">[FP83]</A>, <A  HREF = "text304.htm#bib_Kannan83">[Kan83]</A>, <A  HREF = "text304.htm#bib_SchnorrEuchner">[SE94]</A>
+can be interpreted as a search within a large tree. This can be
+extremely time-consuming. Schnorr, Euchner and
+H&ouml;rner <A  HREF = "text304.htm#bib_SchnorrEuchner">[SE94]</A>, <A  HREF = "text304.htm#bib_SchnorrHorner">[SH95]</A> introduced techniques to
+prune the latter tree: the correct output might be missed, but the
+execution of the algorithm is likely to terminate faster. A new
+pruning strategy is available for the functions <TT>Minimum</TT>, <TT>PackingRadius</TT>, <TT>HermiteNumber</TT>, <TT>CentreDensity</TT>, <TT>Density</TT>, <TT>KissingNumber</TT>, <TT>ShortestVectors</TT>, <TT>ShortestVectorsMatrix</TT>, <TT>ShortVectors</TT>, <TT>ShortVectorsMatrix</TT>
+and <TT>ThetaSeries</TT>.  Naturally, if the pruning strategy is used,
+the result cannot be guaranteed to be correct
+anymore. Let (b<sub>1</sub>, b<sub>2</sub>, ..., b<sub>d</sub>) be a basis of a lattice L,
+let (b<sub>1</sub><sup> * </sup>, b<sub>2</sub><sup> * </sup>, ..., b<sub>d</sub><sup> * </sup>) denote its Gram-Schmidt
+orthogonalisation, and let &mu;<sub>i, j</sub> = (b<sub>i</sub>, b<sub>j</sub><sup> * </sup>)/|b<sub>j</sub><sup> * </sup>|<sup>2</sup>
+for i &ge;j. Suppose we are interested in finding all vectors
+in L of norm &le;u. The enumeration algorithm considers the
+equations: 
+ | &sum;<sub>j=i</sub><sup>d</sup> ( &sum;<sub>k=j</sub><sup>d</sup> &mu;<sub>k, j</sub> x<sub>k</sub>
+) b<sub>j</sub><sup> * </sup> |<sup>2</sup> &le;u,  for i=d, d - 1, ..., 1,
+<P>
+<P>
+<P>
+where the x<sub>k</sub>'s are integers. If the <TT>Prune</TT> optional parameter
+is set to [p<sub>1</sub>, ..., p<sub>d</sub>], then the equations above will be
+replaced by: 
+<P>
+<P>
+| &sum;<sub>j=i</sub><sup>d</sup> ( &sum;<sub>k=j</sub><sup>d</sup> &mu;<sub>k, j</sub>
+x<sub>k</sub> ) b<sub>j</sub><sup> * </sup> |<sup>2</sup> &le;p<sub>i</sub> u,  for i=d, d - 1, ..., 1.
+<P>
+<P>
+  The p<sub>i</sub>'s must belong to the
+interval [0, 1]. For a given input ((b<sub>1</sub>, ..., b<sub>d</sub>), u) to the
+enumeration procedure, it is possible to heuristically estimate both
+the running-time gain and the probability of missing a solution. See
+Subsection <A  HREF = "text313.htm#3013">Lattice Enumeration Utilities</A> for more details.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text313.htm#2981">Minimum, Density and Kissing Number</A>
+<LI> <A  HREF = "text313.htm#2990">Shortest and Closest Vectors</A>
+<LI> <A  HREF = "text313.htm#2996">Short and Close Vectors</A>
+<LI> <A  HREF = "text313.htm#3003">Short and Close Vector Processes</A>
+<LI> <A  HREF = "text313.htm#3008">Successive Minima and Theta Series</A>
+<LI> <A  HREF = "text313.htm#3013">Lattice Enumeration Utilities</A>
+</UL>
+<H4><A NAME = "2981">Minimum, Density and Kissing Number</A></H4>
+
+<P>
+<P>
+The functions in this subsection compute invariants of a lattice which
+are all related to its minimum.  See <A  HREF = "text304.htm#bib_ConwaySloane">[JC98]</A> for
+background about minimum, density and kissing numbers.
+
+
+<H5><A NAME = "2982">Minimum(L) : Lat -&gt; RngElt</A></H5>
+<H5>Min(L) : Lat -&gt; RngElt</H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Prune: SeqEnum                      Default: [1.0, ...,1.0]</PRE>
+<BLOCKQUOTE>
+Return the minimum of the lattice L, i.e., the minimal norm of a
+non-zero vector in the lattice. Note that this is in general a hard
+problem and may be very time consuming. See also the attributes
+section below for how to assert the minimum of a lattice.
+</BLOCKQUOTE>
+<H5><A NAME = "2983">PackingRadius(L) : Lat -&gt; FldReElt</A></H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Prune: SeqEnum                      Default: [1.0, ...,1.0]</PRE>
+<BLOCKQUOTE>
+The packing radius is half the square root of the minimum of the 
+non-zero lattice L.
+</BLOCKQUOTE>
+<H5><A NAME = "2984">HermiteConstant(n) : RngIntElt -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+Return the n-th Hermite constant raised to the power of n.  The 
+exact value is provided if n &le;8 or n=24, and otherwise an upper bound
+is returned. The n-th Hermite constant is defined as the maximum of
+Min(L)/Determinant(L) over all n-dimensional
+lattices L.
+</BLOCKQUOTE>
+<H5><A NAME = "2985">HermiteNumber(L) : Lat -&gt; FldReElt</A></H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Prune: SeqEnum                      Default: [1.0, ...,1.0]</PRE>
+<BLOCKQUOTE>
+Return the Hermite number of the non-zero lattice L, i.e., Min(L)/Determinant(L).
+</BLOCKQUOTE>
+<H5><A NAME = "2986">CentreDensity(L) : Lat -&gt; FldReElt</A></H5>
+<H5>CenterDensity(L) : Lat -&gt; FldReElt</H5>
+<H5>CentreDensity(L, K) : Lat, Fld -&gt; FldElt</H5>
+<H5>CenterDensity(L, K) : Lat, Fld -&gt; FldElt</H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Prune: SeqEnum                      Default: [1.0, ...,1.0]</PRE>
+<BLOCKQUOTE>
+The center density of the lattice L, as an element of the real field
+K. This is defined to be the square root of (Min(L)/4)^(Rank(L))/(Determinant(L)).  The
+argument for the real field K may be omitted, in which case K is
+taken to be the current default real field.
+<P>
+<P>
+The product of the centre density by the volume of a sphere of 
+radius 1 in n-dimensional space gives the density of the 
+lattice-centered sphere packing of L, called the density of 
+the lattice. 
+</BLOCKQUOTE>
+<H5><A NAME = "2987">Density(L) : Lat -&gt; FldReElt</A></H5>
+<H5>Density(L, K) : Lat, Fld -&gt; FldReElt</H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Prune: SeqEnum                      Default: [1.0, ...,1.0]</PRE>
+<BLOCKQUOTE>
+The density of the lattice L, as an element of the real field K,
+i.e., the density of the lattice-centered sphere packing.  If the
+argument for the real field K is omitted, the field K is taken to
+be the default real field.
+</BLOCKQUOTE>
+<H5><A NAME = "2988">KissingNumber(L) : Lat -&gt; RngElt</A></H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Prune: SeqEnum                      Default: [1.0, ...,1.0]</PRE>
+<BLOCKQUOTE>
+Return the kissing number of the lattice L, which equals the number
+of vectors of minimal non-zero norm (twice the length of the sequence returned
+by <TT>ShortestVectors(L)</TT> since that returns only normalized
+vectors).  This is the maximum number of nonoverlapping spheres of
+diameter <TT>Minimum(L)</TT> with centres at lattice points which touch a
+fixed sphere of the same diameter with centre at a lattice point.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2989">Example <TT>Lat_Leech (H30E12)</TT></A></H3>
+We create the Leech lattice &Lambda;<sub>24</sub> and compute its minimum
+(4), density, and kissing number (196560).  Note that the computation
+of the minimum is very fast since the lattice is even and at least one
+basis element has norm 4; one has only to prove that there are no
+vectors of norm 2.
+<P>
+<P>
+<PRE>
+&gt; L := Lattice("Lambda", 24);
+&gt; IsEven(L), Norm(L.2);
+true 4
+&gt; time Minimum(L);
+4
+Time: 0.020
+&gt; Density(L);
+0.00192957430940392304790334556369
+&gt; time KissingNumber(L);
+196560
+Time: 0.180
+</PRE>
+<HR>
+<H4><A NAME = "2990">Shortest and Closest Vectors</A></H4>
+
+
+
+<H5><A NAME = "2991">ShortestVectors(L) : Lat -&gt; [ LatElt ]</A></H5>
+
+<PRE>    Max: RngIntElt                      Default: &infin;</PRE>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Prune: SeqEnum                      Default: [1.0, ...,1.0]</PRE>
+<BLOCKQUOTE>
+Return the shortest non-zero vectors of the lattice L, i.e., the
+vectors v&isin;L such that (v, v) is minimal, as a sorted sequence
+Q.  The vectors are computed up to sign (so only one of v and -v
+appears in Q) and normalized so that the first non-zero entry in
+each vector is positive, and Q is sorted with respect to
+lexicographic order.  By default, all the (normalized) vectors are
+computed; the optional parameter <TT>Max</TT> allows the user to specify
+the maximal number of computed vectors.  Note that unless the minimum
+of the lattice is already known, it has to be computed by this
+function, which may be very time consuming.
+</BLOCKQUOTE>
+<H5><A NAME = "2992">ShortestVectorsMatrix(L) : Lat -&gt; ModMatRngElt</A></H5>
+
+<PRE>    Max: RngIntElt                      Default: &infin;</PRE>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Prune: SeqEnum                      Default: [1.0, ...,1.0]</PRE>
+<BLOCKQUOTE>
+Return the shortest non-zero vectors of the lattice L as the rows of
+a matrix.  This is more efficient or convenient for some applications
+than forming the sequence of vectors.  Note that the matrix will lie
+in the appropriate matrix space and the inner product for L will not
+be related to the rows of the matrix (which will lie in the
+appropriate R-space).  By default, all the (normalized) vectors are
+computed; the optional parameter <TT>Max</TT> allows the user to specify
+the maximal number of computed vectors.
+</BLOCKQUOTE>
+<H5><A NAME = "2993">ClosestVectors(L, w) : Lat, ModTupRngElt -&gt; [ LatElt ], RngElt</A></H5>
+<H5>ClosestVectors(L, w) : Lat, LatElt -&gt; [ LatElt ], RngElt</H5>
+
+<PRE>    Max: RngIntElt                      Default: &infin;</PRE>
+<BLOCKQUOTE>
+Return the vectors of the lattice L which are closest to the vector
+w, together with the minimal squared distance d.
+w may be any element of a lattice of degree n or an R-space of degree
+n compatible with L, where n is the degree of L.
+The closest vectors are those vectors v&isin;L
+such that the squared distance (v - w, v - w) between v and w
+(and thus the distance between v and w) is minimal;
+this minimal squared distance is the second return value d.
+The vectors are returned as a sequence Q, sorted with respect to
+lexicographic order.  Note that the closest vectors are <I>not</I>
+symmetrical with respect to sign (while the shortest vectors are) so the
+returned closest vectors are not normalized.
+By default, all the closest vectors are computed; the optional parameter
+<TT>Max</TT> allows the user to specify the maximal number of computed vectors.
+</BLOCKQUOTE>
+<H5><A NAME = "2994">ClosestVectorsMatrix(L, w) : Lat, ModTupRngElt -&gt; ModMatRngElt, RngElt</A></H5>
+<H5>ClosestVectorsMatrix(L, w) : Lat, LatElt -&gt; ModMatRngElt, RngElt</H5>
+
+<PRE>    Max: RngIntElt                      Default: &infin;</PRE>
+<BLOCKQUOTE>
+Return the vectors of the lattice L which are closest to the vector
+w as a matrix, together with the squared distance d.
+w may be any element of a lattice of degree n or an R-space of degree
+n compatible with L, where n is the degree of L.
+Note that the matrix will
+lie in the appropriate matrix space and the inner product for L will
+not be related to the rows of the matrix (which will lie in the appropriate
+R-space).
+The vectors are returned as sequence Q, sorted with respect to
+lexicographic order.
+Note that the closest vectors are <I>not</I>
+symmetrical with respect to sign (while the shortest vectors are) so the
+returned closest vectors are not normalized.
+By default, all the closest vectors are computed; the optional parameter
+<TT>Max</TT> allows the user to specify the maximal number of computed vectors.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2995">Example <TT>Lat_Closest (H30E13)</TT></A></H3>
+We create the Gosset lattice L=E<sub>8</sub> and find the shortest vectors of
+L.  There are 120 normalized vectors so the kissing number is 240,
+and the minimum is 2.
+<P>
+<P>
+<PRE>
+&gt; L := Lattice("E", 8);
+&gt; S := ShortestVectors(L);
+&gt; #S;
+120
+&gt; KissingNumber(L);
+240
+&gt; { Norm(v): v in S };
+{ 2 }
+&gt; Minimum(L);
+2
+</PRE>
+We note that the rank of the space generated by the shortest vectors is
+8 so that the successive minima of L are [2, 2, 2, 2, 2, 2, 2, 2]
+(see the function <TT>SuccessiveMinima</TT> below).
+<P>
+<P>
+<PRE>
+&gt; Rank(ShortestVectorsMatrix(L));
+8
+</PRE>
+We next find the vectors in L
+which are closest to a certain vector in the Q-span of L.
+The vector is an actual hole of L and the square
+of its distance from L is 8/9.
+<P>
+<P>
+<PRE>
+&gt; w := RSpace(RationalField(), 8) !
+&gt;   [ -1/6, 1/6, -1/2, -1/6, 1/6, -1/2, 1/6, -1/2 ];
+&gt; C, d := ClosestVectors(L, w);
+&gt; C;
+[
+    (-1/2 -1/2 -1/2 -1/2  1/2 -1/2  1/2 -1/2),
+    (-1/2  1/2 -1/2 -1/2 -1/2 -1/2  1/2 -1/2),
+    (-1/2  1/2 -1/2 -1/2  1/2 -1/2 -1/2 -1/2),
+    (-1/2  1/2 -1/2  1/2  1/2 -1/2  1/2 -1/2),
+    ( 1/2  1/2 -1/2 -1/2  1/2 -1/2  1/2 -1/2),
+    ( 0  0 -1  0  0 -1  0  0),
+    ( 0  0 -1  0  0  0  0 -1),
+    ( 0  0  0  0  0 -1  0 -1),
+    (0 0 0 0 0 0 0 0)
+]
+&gt; d;
+8/9
+&gt; { Norm(v): v in C };
+{ 0, 2 }
+</PRE>
+We verify that the squared distance of the vectors in C from w is
+8/9.
+<P>
+<P>
+<PRE>
+&gt; { Norm(v - w): v in C };
+{ 8/9 }
+</PRE>
+We finally notice that these closest vectors are in fact amongst the
+shortest vectors of the lattice (together with the zero vector).
+<P>
+<P>
+<PRE>
+&gt; Set(C) subset (Set(S) join {-v: v in S} join { L!0 }); 
+true
+</PRE>
+<HR>
+<H4><A NAME = "2996">Short and Close Vectors</A></H4>
+
+
+
+<H5><A NAME = "2997">ShortVectors(L, u) : Lat, RngElt -&gt; [ &lt;LatElt, RngElt&gt; ]</A></H5>
+<H5>ShortVectors(L, l, u) : Lat, RngElt, RngElt -&gt; [ &lt;LatElt, RngElt&gt; ]</H5>
+
+<PRE>    Max: RngIntElt                      Default: &infin;</PRE>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Prune: SeqEnum                      Default: [1.0, ...,1.0]</PRE>
+<BLOCKQUOTE>
+Return the vectors of the lattice L with norm within the prescribed
+range, together with their norms, as a sorted sequence Q.  The
+sequence Q contains tuples of the form &lt;v, r&gt; where v is a vector
+and r its norm.  Either one positive number u can be given,
+specifying the range (0, u], or a pair l, u of positive numbers,
+specifying the range [l, u].  The vectors are computed up to sign (so
+only one of v and -v appears in Q) and normalized so that the
+first non-zero entry in each vector is positive, and Q is sorted
+with respect to first the norms and then the lexicographic order for
+the vectors.  By default, all the (normalized) vectors with norm in
+the prescribed range are computed. The optional parameter <TT>Max</TT>
+allows the user to specify the maximal number of computed vectors.
+</BLOCKQUOTE>
+<H5><A NAME = "2998">ShortVectorsMatrix(L, u) : Lat, RngElt -&gt; ModMatRngElt</A></H5>
+<H5>ShortVectorsMatrix(L, l, u) : Lat, RngElt, RngElt -&gt; ModMatRngElt</H5>
+
+<PRE>    Max: RngIntElt                      Default: &infin;</PRE>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Prune: SeqEnum                      Default: [1.0, ...,1.0]</PRE>
+<BLOCKQUOTE>
+This is very similar to <TT>ShortVectors</TT>, but returns the vectors of
+the lattice L with norm within the prescribed range as the rows of a
+matrix S rather than as a sequence of tuples.  This is more
+efficient or convenient for some applications than forming the
+sequence.  By default, all the (normalized) vectors with norm in the
+prescribed range are computed.  The optional parameter <TT>Max</TT>
+allows the user to specify the maximal number of computed vectors.
+Note that the matrix will lie in the appropriate matrix space and the
+inner product for L will not be related to the rows of the matrix
+(which will lie in the appropriate R-space).
+</BLOCKQUOTE>
+<H5><A NAME = "2999">CloseVectors(L, w, u) : Lat, ModTupRngElt, RngElt -&gt; [ &lt;LatElt, RngElt&gt; ]</A></H5>
+<H5>CloseVectors(L, w, l, u) : Lat, ModTupRngElt, RngElt, RngElt -&gt; [ &lt;LatElt, RngElt&gt; ]</H5>
+<H5>CloseVectors(L, w, u) : Lat, LatElt, RngElt -&gt; [ &lt;LatElt, RngElt&gt; ]</H5>
+<H5>CloseVectors(L, w, l, u) : Lat, LatElt, RngElt, RngElt -&gt; [ &lt;LatElt, RngElt&gt; ]</H5>
+
+<PRE>    Max: RngIntElt                      Default: &infin;</PRE>
+<BLOCKQUOTE>
+<P>
+Return the vectors of the lattice L whose squared distance from the
+vector w is within the prescribed range, together with their squared
+distances, as a sorted sequence Q.  The returned sequence Q
+contains tuples of the form &lt;v, d&gt; where v is a vector from L and
+d=(v - w, v - w) is its squared distance from w.  w may be any
+element of a lattice of degree n or an R-space of degree n
+compatible with L, where n is the degree of L.  Either one
+positive number u can be given, specifying the range (0, u], or a
+pair l, u of positive numbers, specifying the range [l, u].  Note
+that close vectors are <I>not</I> symmetrical with respect to sign
+(while short vectors are) so the returned close vectors are not
+normalized.  Q is sorted with respect to first the squared distances
+and then the lexicographic order for the vectors.  By default, all the
+vectors with squared distance in the prescribed range are computed.
+The optional parameter <TT>Max</TT> allows the user to specify the
+maximal number of computed vectors.  
+</BLOCKQUOTE>
+<H5><A NAME = "3000">CloseVectorsMatrix(L, w, u) : Lat, ModTupRngElt, RngElt -&gt; ModMatRngElt</A></H5>
+<H5>CloseVectorsMatrix(L, w, l, u) : Lat, ModTupRngElt, RngElt, RngElt -&gt; ModMatRngElt</H5>
+<H5>CloseVectorsMatrix(L, w, u) : Lat, LatElt, RngElt -&gt; ModMatRngElt</H5>
+<H5>CloseVectorsMatrix(L, l, u) : Lat, LatElt, RngElt, RngElt -&gt; ModMatRngElt</H5>
+
+<PRE>    Max: RngIntElt                      Default: &infin;</PRE>
+<BLOCKQUOTE>
+This is very similar to <TT>CloseVectors</TT>, but returns the vectors of
+the lattice L whose squared distance from the vector w is within
+the prescribed range as the rows of a matrix C rather than as a
+sequence of tuples.  This is more efficient or convenient for some
+applications than forming the sequence.  w may be any element of a
+lattice of degree n or an R-space of degree n compatible with
+L, where n is the degree of L.  By default, all the close
+vectors are computed. The optional parameter <TT>Max</TT> allows the user
+to specify the maximal number of computed vectors.  
+Note that the matrix will lie in the appropriate matrix space and the
+inner product for L will not be related to the rows of the matrix
+(which will lie in the appropriate R-space).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3001">Example <TT>Lat_Knapsack (H30E14)</TT></A></H3>
+Let Q=[a<sub>1</sub>, ..., a<sub>n</sub>] be a sequence of (not necessarily distinct)
+positive integers and let s be a positive integer.
+We wish to find all solutions to the equation
+&sum;<sub>i=1</sub><sup>n</sup> x<sub>i</sub> a<sub>i</sub> = s with x<sub>i</sub> &isin;{0, 1}.
+This is known as the <I>Knapsack</I> problem.  The following lattice-based
+solution is due to Schnorr and Euchner (op. cit., at the beginning
+of this chapter).
+To solve the problem, we create the lattice L of rank n + 1 and
+degree n + 2 with the following basis:
+<PRE>
+	    b_1 = (2, 0, ..., 0, n a_1, 0)
+	    b_2 = (0, 2, ..., 0, n a_2, 0)
+	          ...
+	    b_n = (0, 0, ..., 2, n a_2, 0)
+	b_(n+1) = (1, 1, ..., 1, n s,   1).
+</PRE>Then every vector v = (v_1, ..., v_(n+2)) in L such that the norm of
+v is n+1 and v_1, ..., v_n, v_(n+2) in {+-1}, v_(n+1)=0, yields the
+solution x_i = | v_i - v_(n+2) | / 2
+for i=1, ..., n to the original equation.
+<P>
+<P>
+We first write a function <TT>KnapsackLattice</TT> which, given the
+sequence Q and sum s, creates a matrix X representing the above
+basis and returns the lattice generated by the rows of X.
+Note that the <TT>Lattice</TT> creation function will automatically
+LLL-reduce the matrix X as it creates the lattice.
+<P>
+<P>
+<PRE>
+&gt; function KnapsackLattice(Q, s)
+&gt;     n := #Q;
+&gt;     X := RMatrixSpace(IntegerRing(), n + 1, n + 2) ! 0;
+&gt;     for i := 1 to n do
+&gt;         X[i][i] := 2;
+&gt;         X[i][n + 1] := n * Q[i];
+&gt;         X[n + 1][i] := 1;
+&gt;     end for;
+&gt;     X[n + 1][n + 1] := n * s;
+&gt;     X[n + 1][n + 2] := 1;
+&gt;     return Lattice(X);
+&gt; end function;
+</PRE>
+We next write a function <TT>Solutions</TT> which uses the function
+<TT>ShortVectors</TT>
+to enumerate all vectors of the lattice L having norm exactly n + 1 and thus
+to find all solutions to the Knapsack problem associated with L.
+(Note that the minimum of the lattice may be less than n + 1.)
+The function returns each solution as a sequence of indices for Q.
+<P>
+<P>
+<PRE>
+&gt; function KnapsackSolutions(L)
+&gt;     n := Rank(L) - 1;
+&gt;     M := n + 1;
+&gt;     S := ShortVectors(L, M, M);
+&gt;     return [
+&gt;         [i: i in [1 .. n] | v[i] ne v[n + 2]]: t in S |
+&gt;             forall{i: i in [1 .. n] cat [n + 2] | Abs(v[i]) eq 1} and
+&gt;                 v[n + 1] eq 0 where v is t[1]
+&gt;     ];
+&gt; end function;
+</PRE>
+We now apply our functions to a sequence Q of 12 integers each less than
+1000 and the sum 2676.  There are actually 4 solutions.  We verify
+that each gives the original sum.
+<P>
+<P>
+<PRE>
+&gt; Q := [ 52, 218, 755, 221, 574, 593, 172, 771, 183, 810, 437, 137 ];
+&gt; s := 2676;
+&gt; L := KnapsackLattice(Q, s);
+&gt; L;
+Lattice of rank 13 and degree 14
+Determinant: 1846735827632128
+Basis:
+( 0  0  0  0 -2  0  0  0  0  0  2  2  0  0)
+( 1  1 -1 -1 -1  1 -1 -1 -1  1  1  1  0  1)
+( 1 -1 -1 -1 -1  1  1 -1  1  1  1 -1  0  1)
+( 1  1  1  1 -3  1  1 -1 -1  1 -1 -1  0  1)
+( 1 -1 -3  1  1 -1 -1  1 -1  1  1  1  0  1)
+( 2  2  0  0  0 -2  2  2 -2  0 -2  0  0  0)
+( 3 -1  1  1 -1  1 -1 -1 -1 -1  1  1  0  1)
+( 1 -1  1  1  1  1  3 -1 -1 -1 -1  1  0 -1)
+(-1 -1 -1 -1  1  1  1  1 -1 -1 -1  1  0  1)
+( 2  0  0  2  0  2  0  0  0  0 -2  0  0 -2)
+(-1 -1 -1  1  1 -1 -1  1 -1  1  1 -3  0 -1)
+(-1 -1  1 -1 -1  1 -1 -1 -1  3 -1  1  0 -3)
+( 0 -2  0  0  2  0 -2  0 -2  0  0  0 12  0)
+&gt; S := KnapsackSolutions(L);
+&gt; S;
+[
+    [ 2, 3, 4, 5, 8, 12 ],
+    [ 3, 4, 5, 7, 8, 9 ],
+    [ 3, 4, 7, 8, 9, 11, 12 ],
+    [ 1, 2, 3, 4, 9, 10, 11 ]
+]
+&gt; [&amp;+[Q[i]: i in s]: s in S];
+[ 2676, 2676, 2676, 2676 ]
+</PRE>
+Finally, we apply our method to a larger example.  We let Q be a sequence
+consisting of 50 random integers in the range [1, 2<sup>1000</sup>].  We
+let I be a random subset of {1 ... 50} and let s be the sum
+of the elements of Q indexed by I.  We then solve the Knapsack problem
+with input (Q, s) and this time obtain I as the only answer.
+<P>
+<P>
+<PRE>
+&gt; b := 1000;    
+&gt; n := 50;      
+&gt; SetSeed(1);
+&gt; Q := [Random(1, 2^b): i in [1 .. n]];
+&gt; I := { };
+&gt; while #I lt n div 2 do
+&gt;     Include(~I, Random(1, n));
+&gt; end while;
+&gt; I := Sort(Setseq(I)); I;
+[ 1, 3, 4, 7, 10, 11, 13, 14, 18, 20, 22, 23, 26, 28, 29, 34, 35, 37, 40, 41,
+42, 45, 48, 49, 50 ]
+&gt; s := &amp;+[Q[i]: i in I]; Ilog2(s);
+1003
+&gt; time L := KnapsackLattice(Q, s);
+Time: 0.570
+&gt; [Ilog2(Norm(b)): b in Basis(L)];
+[ 5, 46, 46, 45, 47, 47, 46, 46, 46, 46, 46, 46, 46, 45, 47, 46, 46, 46, 46, 
+47,46, 46, 45, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 45, 46, 46, 
+45, 45, 46, 46, 46, 46, 46, 45, 46, 46, 46, 46, 46 ]
+&gt; time KnapsackSolutions(L);
+[
+    [ 1, 3, 4, 7, 10, 11, 13, 14, 18, 20, 22, 23, 26, 28, 29, 34, 35, 37, 40,
+    41, 42, 45, 48, 49, 50 ]
+]
+Time: 0.040
+</PRE>
+<HR>
+<H3><A NAME = "3002">Example <TT>Lat_SingularElements (H30E15)</TT></A></H3>
+In this example we demonstrate how short vectors of lattices can be used
+to split homogeneous components of integral representations. 
+We first define an integral matrix group of degree 8. The group is isomorphic
+to A<sub>5</sub> and the representation contains the 4-dimensional irreducible
+representation of A<sub>5</sub> with multiplicity 2.
+<P>
+<P>
+<PRE>
+&gt; G := MatrixGroup&lt; 8, Integers() |
+&gt;   [ -673,  -291,  -225,  -316,   250,   -32,    70,  -100,
+&gt;      252,   274,   349,   272,  -156,   -94,  -296,   218,
+&gt;     2532,  1159,   609,  5164, -1450,  -181,   188,   742,
+&gt;     -551,   163,   629, -1763,   285,  -162,  -873,   219,
+&gt;    -2701,  -492,   411, -3182,  1062,  -397, -1195,   151,
+&gt;    -5018, -1112,  1044,-12958,  2898,  -153, -2870,  -454,
+&gt;     2581,    90, -1490,  8197, -1553,   261,  2556,  -149,
+&gt;    -3495, -2776, -3218, -2776,  1773,   652,  2459, -1910],
+&gt;   [ 2615,  1314,  1633,   400,  -950, -1000, -2480,  1049,
+&gt;      161,   159,   347,  -657,     2,  -385,  -889,   230,
+&gt;    -2445, -1062, -1147,   269,   744,  1075,  2441,  -795,
+&gt;     1591,   925,  1454, -1851,  -350, -1525, -3498,   982,
+&gt;    10655,  5587,  7476, -1751, -3514, -5575,-13389,  4873,
+&gt;     6271,  3253,  4653, -6126, -1390, -5274,-11904,  3219,
+&gt;    -3058, -1749, -2860,  5627,   392,  3730,  8322, -2009,
+&gt;     4875,  1851,  1170,  5989, -2239,   625,  1031,   692] &gt;;
+&gt; Order(G);
+60
+</PRE>
+Since the group is small enough we can generate elements in the
+endomorphism ring by averaging over the group elements.
+<P>
+<P>
+<PRE>
+&gt; M := MatrixRing(Integers(), 8);
+&gt; e := [ &amp;+[ M!g * MatrixUnit(M, i, i) * M!(g^-1) : g in G ] : i in [1..4] ];
+&gt; E := sub&lt;M | e&gt;;
+&gt; Dimension(E);
+4
+</PRE>
+We now transform E into a lattice of dimension 4 and degree 64 and rescale the
+basis vectors so that they have lengths of the same order of magnitude.
+<P>
+<P>
+<PRE>
+&gt; L := Lattice(64, &amp;cat[ Eltseq(b) : b in Basis(E) ]);
+&gt; LL := sub&lt;L | [ Round( Norm(L.4)/Norm(L.i) ) * L.i : i in [1..4] ]&gt;;
+&gt; Minimum(LL);
+910870284600
+&gt; SV := ShortVectors(LL, 100*Minimum(LL));
+&gt; #SV;
+46
+&gt; Sing := [ X : v in SV | Determinant(X) eq 0 where X is M!Eltseq(v[1]) ];
+&gt; #Sing;
+3
+</PRE>
+We thus have found three singular elements amongst the 46 shortest vectors 
+and use the kernel of the first of these to get the representation on a
+subspace of dimension 4.
+<P>
+<P>
+<PRE>
+&gt; ker := LLL( KernelMatrix(Sing[1]) );
+&gt; ker;
+[ 10   0  -9   5  -2   0   5  -4]
+[ -3  -4   1 -16   3   5   4  -3]
+[ -8 -11 -10  -1   4   0   6  -5]
+[-13   3   4  10   1   5   8   2]
+&gt; H := MatrixGroup&lt;4, Integers() | [Solution(ker, ker*g) : g in Generators(G)]&gt;;
+&gt; H;
+MatrixGroup(4, Integer Ring)
+Generators:
+    [ 1  0  0  0]
+    [-3 -2 -4 -5]
+    [-2 -3 -3 -4]
+    [ 2  3  4  5]
+
+    [-1 -1 -1 -1]
+    [ 2  1  2  2]
+    [-4 -2 -1 -2]
+    [ 3  2  1  2]
+&gt; #H;
+60
+</PRE>
+<HR>
+<H4><A NAME = "3003">Short and Close Vector Processes</A></H4>
+
+
+
+<H5><A NAME = "3004">ShortVectorsProcess(L, u) : Lat, RngElt -&gt; LatEnumProc</A></H5>
+<H5>ShortVectorsProcess(L, l, u) : Lat, RngElt, RngElt -&gt; LatEnumProc</H5>
+<BLOCKQUOTE>
+Given a lattice L and a range, create a corresponding
+short vectors lattice enumeration process P.
+This process provides the environment for enumerating each vector
+v&isin;L with norm within the range.
+Either a positive number u can be given, specifying the range (0, u],
+or a pair l, u of positive numbers, specifying the range [l, u].
+Successive calls to <TT>NextVector</TT> (see below) will result in the
+enumeration of the vectors.
+</BLOCKQUOTE>
+<H5><A NAME = "3005">CloseVectorsProcess(L, w, u) : Lat, ModTupRngElt, RngElt -&gt; LatEnumProc</A></H5>
+<H5>CloseVectorsProcess(L, w, l, u) : Lat, ModTupRngElt, RngElt, RngElt -&gt; LatEnumProc</H5>
+<H5>CloseVectorsProcess(L, w, u) : Lat, LatElt, RngElt -&gt; LatEnumProc</H5>
+<H5>CloseVectorsProcess(L, w, l, u) : Lat, LatElt, RngElt, RngElt -&gt; LatEnumProc</H5>
+<BLOCKQUOTE>
+Given a lattice L, a vector w
+and a range, create a corresponding close vectors
+lattice enumeration process P.
+This process provides the environment for enumerating each vector
+v&isin;L such its squared distance (v - w, v - w) from w is within the range.
+w may be any element of a lattice of degree n or an R-space of degree
+n compatible with L, where n is the degree of L.
+Either a positive number u can be given, specifying the range (0, u],
+or a pair l, u of positive numbers, specifying the range [l, u].
+Successive calls to <TT>NextVector</TT> (see below) will result in the
+enumeration of the vectors.
+</BLOCKQUOTE>
+<H5><A NAME = "3006">NextVector(P) : LatEnumProc -&gt; LatElt, RngElt</A></H5>
+<BLOCKQUOTE>
+Given a lattice enumeration process P as created by
+<TT>ShortVectorsProcess</TT> or <TT>CloseVectorsProcess</TT>, return
+the next element found in the enumeration.
+<P>
+If the process is for short vectors, the next short vector of the specified
+region of the lattice is returned together with its norm, or the zero vector
+together with -1, indicating that the enumeration process has been completed.
+The vectors are computed up to sign
+(so that only one of v and -v will be enumerated) and normalized
+so that the first non-zero entry in each vector is positive.
+<P>
+If the process is for the vectors close to w, the next close
+vector v whose squared distance d=(v - w, v - w) from w is in the
+specified range is returned together with d, or the zero vector
+together with -1, indicating that the enumeration process has been completed.
+The close vectors are <I>not</I>
+symmetrical with respect to sign (while short vectors are) so the
+returned close vectors are not normalized.  Note also that to
+test for completion the second return value should be tested for
+equality with -1 (or, preferably, the next function <TT>IsEmpty</TT>
+should be used) since the zero vector could be a valid close vector.
+<P>
+Note that the order of the vectors returned by this function in each
+case is arbitrary, unlike the previous functions where the resulting
+sequence or matrix is sorted.
+</BLOCKQUOTE>
+<H5><A NAME = "3007">IsEmpty(P) : LatEnumProc -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a lattice enumeration process P, return
+whether the process P has found all short or close vectors.
+</BLOCKQUOTE>
+<H4><A NAME = "3008">Successive Minima and Theta Series</A></H4>
+
+
+
+<H5><A NAME = "3009">SuccessiveMinima(L) : Lat -&gt; [ RngIntElt ], [ LatElt ]</A></H5>
+<H5>SuccessiveMinima(L, k) : Lat, RngIntElt -&gt; [ RngIntElt ], [ LatElt ]</H5>
+<BLOCKQUOTE>
+Return the first k successive minima of lattice L, or all of the
+m successive minima of L if k is omitted, where m is the rank of L.
+The first k successive minima M<sub>1</sub>, ..., M<sub>k</sub>
+of a lattice L are defined by the property 
+that M<sub>1</sub>, ..., M<sub>k</sub> are minimal such that there exist linearly independent 
+vectors l<sub>1</sub>, ..., l<sub>k</sub> in L with (l<sub>i</sub>, l<sub>i</sub>) = M<sub>i</sub> for 1 &le;i &le;k.
+The function returns a sequence containing the minima M<sub>i</sub> and a sequence 
+containing the vectors l<sub>i</sub>.
+The lattice L must be an exact lattice (over Z or Q).
+Note that the minima are unique but the vectors are not.
+</BLOCKQUOTE>
+<H5><A NAME = "3010">ThetaSeries(L, n) : Lat, RngIntElt -&gt; RngSerElt</A></H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Prune: SeqEnum                      Default: [1.0, ...,1.0]</PRE>
+<BLOCKQUOTE>
+Given an integral lattice L and a small positive integer n, return
+the Theta series &Theta;<sub>L</sub>(q) of L as a formal power series in q
+to precision n (i.e., up to and including the coefficient of q<sup>n</sup>).
+The coefficient of q<sup>k</sup> in &Theta;<sub>L</sub>(q) is defined to be the number
+of vectors of norm k in L.  Note that this function needs to
+enumerate all vectors of L having norm up to and including n, so
+its application is restricted to lattices where the number of these
+vectors is reasonably small.  The lattice L must be an exact lattice
+(over Z or Q).  Note that the angle bracket notation should be
+used to assign a name to the indeterminate for the returned Theta
+series (e.g., <TT>T&lt;q&gt; := ThetaSeries(L);</TT>).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3011">Example <TT>Lat_ThetaSeries (H30E16)</TT></A></H3>
+We show how a lattice enumeration process can be used to compute the
+Theta series of a lattice.  We write a simple function <TT>Theta</TT>
+which takes a lattice L and precision n and returns the Theta
+series of L up to the term q<sup>n</sup> just as in the function <TT>ThetaSeries</TT>.
+The function assumes that the lattice L is integral.  We simply
+loop over the non-zero vectors of norm up to n and count the number of
+vectors for each norm.
+<P>
+<P>
+<PRE>
+&gt; function Theta(L, n)
+&gt;     Z := IntegerRing();
+&gt;     P := ShortVectorsProcess(L, n);
+&gt;     C := [1] cat [0: i in [1 .. n]];
+&gt;     while not IsEmpty(P) do
+&gt;         v, norm := NextVector(P);
+&gt;         C[Z!norm + 1] +:= 2;
+&gt;     end while;
+&gt;     return PowerSeriesRing(IntegerRing()) ! C;
+&gt; end function;
+</PRE>
+We now compute the Theta series up to norm 10 of the Gosset lattice E<sub>8</sub>
+using the function <TT>Theta</TT>.
+We compare this Magma-language version with the builtin function
+<TT>ThetaSeries</TT> (which is much faster of course because of the lack
+of interpreter overhead etc.).
+<P>
+<P>
+<PRE>
+&gt; L := Lattice("E", 8);
+&gt; time T&lt;q&gt; := Theta(L, 10);
+Time: 0.050
+&gt; T;
+1 + 240*q^2 + 2160*q^4 + 6720*q^6 + 17520*q^8 + 30240*q^10 
+&gt; time TT&lt;r&gt; := ThetaSeries(L, 10);
+Time: 0.000
+&gt; TT;
+1 + 240*q^2 + 2160*q^4 + 6720*q^6 + 17520*q^8 + 30240*q^10 + O(q^11)
+</PRE>
+<HR>
+<H5><A NAME = "3012">ThetaSeriesIntegral(L, n) : Lat, RngIntElt -&gt; RngSerElt</A></H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Prune: SeqEnum                      Default: [1.0, ...,1.0]</PRE>
+<BLOCKQUOTE>
+Restriction of <TT>ThetaSeries</TT> to integral lattices.
+</BLOCKQUOTE>
+<H4><A NAME = "3013">Lattice Enumeration Utilities</A></H4>
+
+
+
+<H5><A NAME = "3014">SetVerbose("Enum", v) : MonStgElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+(Procedure.)  
+Set the verbose printing level for the lattice enumeration algorithm
+to be v.  Currently the legal values for v are <TT>true</TT>, <TT>false</TT>, 0,
+and 1 (<TT>false</TT> is the same as 0, and <TT>true</TT> is the same as 1).  When
+the verbose level is non-zero, some information about the current
+status of the enumeration algorithm is printed out every 15 seconds.
+This concerns the functions <TT>Minimum</TT>, <TT>CentreDensity</TT>, <TT>CenterDensity</TT>, <TT>Density</TT>, <TT>KissingNumber</TT>, <TT>ShortestVectors</TT>, <TT>ShortestVectorsMatrix</TT>, <TT>ShortVectors</TT>,
+<TT>ShortVectorsMatrix</TT> and <TT>ThetaSeries</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "3015">EnumerationCost(L) : Lat -&gt;  FldReElt</A></H5>
+<H5>EnumerationCost(L, u) : Lat, FldReElt -&gt;  FldReElt</H5>
+
+<PRE>    Prune: SeqEnum                      Default: [1.0, ...,1.0]</PRE>
+<BLOCKQUOTE>
+Estimate the number of nodes in the tree to be visited during the
+execution of the enumeration algorithm, for the lattice L and an
+hyperball of squared radius u. If u is not provided, an upper
+bound to the lattice minimum is used. Since the cost per tree node is
+relatively constant, this function can be used to obtain a heuristic
+estimate of the running-time of the enumeration algorithm. Note that
+in some cases the enumeration may run faster than expected, because
+the tree to be visited may be shrunk during the execution, as
+described in <A  HREF = "text304.htm#bib_SchnorrEuchner">[SE94]</A>.  Contrary to the enumeration
+itself, this function runs in time polynomial in the input bit-size
+(if the value of the <TT>Prune</TT> optional parameter is the default
+one). It relies on the Gaussian heuristic, which consists in
+estimating the number of integral points within an n-dimensional
+body by its volume (see <A  HREF = "text304.htm#bib_HaSt07">[HS07]</A> for more details).
+<P>
+If the <TT>Prune</TT> parameter is set to [p<sub>1</sub>, ..., p<sub>d</sub>], then <TT>EnumerationCost</TT> estimates the cost of the tree pruned with the
+strategy described in the introduction of the present section, with
+pruning coefficients p<sub>1</sub>, ..., p<sub>d</sub>. Although the enumeration itself
+is likely to terminate faster, the estimation of the cost may be
+significantly more time-consuming.
+</BLOCKQUOTE>
+<H5><A NAME = "3016">EnumerationCostArray(L) : Lat -&gt;  ModTupFldElt</A></H5>
+<H5>EnumerationCostArray(L, u) : Lat, FldReElt -&gt;  ModTupFldElt</H5>
+
+<PRE>    Prune: SeqEnum                      Default: [1.0, ...,1.0]</PRE>
+<BLOCKQUOTE>
+Estimate the number of nodes in each layer of the tree to be visited
+during the execution of the enumeration algorithm, for the lattice L
+and a hyperball of squared radius u. If u is not provided, an
+upper bound to the lattice minimum is used.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3017">Example <TT>Lat_EnumerationCost (H30E17)</TT></A></H3>
+The algorithm that enumerates short lattice vectors may be very
+time-consuming. The <TT>EnumerationCost</TT> and <TT>EnumerationCostArray</TT> functions allow one to estimate the running-time
+on a given enumeration instantiation, before actually running the
+algorithm. If the running-time estimate is too high, then it is
+unlikely that the execution will terminate within a reasonable amount
+of time.  A good strategy then consists in reducing the input lattice
+basis further. If the running-time estimate remains too high, then
+pruning the enumeration tree should be considered. Both the
+running-time gain and the "probability" of missing a solution can be
+estimated.
+<P>
+<P>
+<P>
+<PRE>
+&gt;  B:=RMatrixSpace(IntegerRing(), 50, 51) ! 0;
+&gt;  for i := 1 to 50 do B[i][1] := RandomBits(1000); end for;
+&gt;  for i := 1 to 50 do B[i][i+1] := 1; end for;
+&gt;  B := LLL(B);  
+&gt;  EnumerationCost (Lattice(B));
+4.06E18
+</PRE>
+<P>
+The value above is an estimate of the number of nodes in the
+enumeration tree that corresponds to the computation of the shortest
+non-zero vectors in the lattice spanned by the rows of B. This is
+much too high to have a chance to terminate. Reducing B further
+allows us to compute these shortest non-zero vectors.
+<P>
+<P>
+<P>
+<PRE>
+&gt; B:=LLL(B:Delta:=0.999);
+&gt; EnumerationCost(Lattice(B));
+1.03E13
+&gt; B:=LLL(B:Delta:=0.999, DeepInsertions);
+&gt; EnumerationCost(Lattice(B));
+7.43E7
+&gt; time _:=ShortestVectors(Lattice(B));
+3.660
+</PRE>
+<P>
+In larger dimensions, reducing the lattice further may not prove
+sufficient to make the enumeration reasonably tractable. Then pruning
+the enumeration tree can be considered.
+<P>
+<P>
+<P>
+<PRE>
+&gt;  B:=RMatrixSpace(IntegerRing(), 65, 66) ! 0;
+&gt;  for i := 1 to 65 do B[i][1] := RandomBits(1000); end for;
+&gt;  for i := 1 to 65 do B[i][i+1] := 1; end for;
+&gt;  B := LLL(B:Delta:=0.999);  
+&gt;  B := LLL(B:Delta:=0.999, DeepInsertions);
+&gt;  EnumerationCost(Lattice(B));
+2.77E12
+&gt; p:=[1.0: i in [1..65]];
+&gt; for i:=10 to 55 do p[i] := (100-i)/90.; end for; 
+&gt; for i:=56 to 65 do p[i]:=0.5; end for;
+&gt; EnumerationCost(Lattice(B):Prune:=p);
+1.75E10
+&gt; time _:=ShortestVectors(Lattice(B):Prune:=p);
+Time: 422.120
+</PRE>
+<P>
+Assuming that the number of visited tree nodes per time unit remains
+roughly constant, the execution would have taken around 18 hours
+without pruning.  It is possible to estimate the likeliness of not
+missing the optimal solution, by looking at the first coefficient
+returned by <TT>EnumerationCostArray</TT>. Assuming the Gaussian
+heuristic, this is the ratio between the first coefficients of <TT>EnumerationCostArray</TT> with and without the pruning table.
+<P>
+<P>
+<P>
+<PRE>
+&gt;  t1:= EnumerationCostArray(Lattice(B):Prune:=p)[1];
+&gt;  t2:= EnumerationCostArray(Lattice(B))[1];
+&gt;  t1/t2;
+0.992
+</PRE>
+<P>
+Experimentally, it seems that pruning coefficients that decrease
+linearly (except for the first and last indices) provide good
+trade-offs between efficiency gain and success likeliness.  
+<HR>
+<PRE></PRE> <A  HREF = "text314.htm">[Next]</A><A  HREF = "text312.htm">[Prev]</A> <A  HREF = "text314.htm">[Right]</A> <A  HREF = "text312.htm">[Left]</A> <A  HREF = "text305.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

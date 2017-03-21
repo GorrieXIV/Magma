@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Procedure Expressions</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text64.htm">[Next]</A><A  HREF = "text62.htm">[Prev]</A> <A  HREF = "text64.htm">[Right]</A> <A  HREF = "text62.htm">[Left]</A> <A  HREF = "text56.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "554">Procedure Expressions</A></H3>
+
+<P>
+<P>
+So far we have only discussed function expressions, these being a
+mechanism for computing new values from the values of identifiers in 
+the current context. Together with assignment this provides us with a
+means of changing the current context -- to compute a new value for an 
+identifier in the current context, we call a function and then
+re-assign the identifier with the result of this function. That is
+we do
+<P>
+<P>
+<PRE>
+&gt; X := f(Y);
+</PRE>
+where Y is a list of arguments possibly including the current value of
+X.
+<P>
+At times however using re-assignment to change the value associated with
+an identifier can be both un-natural and inefficient. Take the problem
+of computing some reduced form of a matrix. We could write a function
+that looked something like this,
+<P>
+<P>
+<P>
+<P>
+<P>
+<PRE>
+reduce := 
+   function( m )
+      local lm;
+      ...
+      lm := m;
+      while not reduced do
+         ...
+         lm := some_reduction(m);
+         ...
+      end while;
+   ...
+   end function;
+</PRE>
+Note that the local <TT>lm</TT> is necessary since we cannot assign to the
+function's formal argument <TT>m</TT> since it stands for a value (and
+values cannot be assigned to). Note also that the function is inefficient 
+in its space usage since at any 
+given point in the program there are at least two different copies of the
+matrix (if the function was recursive then there would be more than two
+copies!). 
+<P>
+Finally the function is also un-natural. It
+is perhaps more natural to think of writing a program that takes a given 
+matrix and <I>changes</I> that matrix into its reduced form (i.e., the original
+matrix is lost). To accommodate for this style of programming, Magma
+includes a mechanism, the <I>procedure expression</I> with its <I>reference
+arguments</I>, for changing an association of an identifier and a value
+<I>in place</I>. 
+<P>
+Before examining procedure expressions further, it is useful to
+look at a simple example of a procedure expression. Say we type:
+<P>
+<P>
+<PRE>
+&gt; a := 5; b := 6;
+</PRE>
+giving the context <TT>[ (a,5), (b,6) ]</TT>.  Say we now type the following:
+<P>
+<P>
+<PRE>
+&gt; p := procedure( x, ~y ) y := x; end procedure;
+</PRE>
+This gives us a context that looks like <TT>[ (a,5), (b,6), 
+(p, PROC(x,~y : y := x;)) ]</TT>, using a notation analogous to the <TT>FUNC</TT>
+notation.
+<P>
+Say we now type the following <I>statement</I>,
+<P>
+<P>
+<PRE>
+&gt; p(a, ~b);
+</PRE>
+This is known as a <I>call of the procedure p</I> (strictly it should be
+known as a call to the <I>procedure value</I> associated with the identifier
+p, since like functions, procedures in Magma are first class values!).
+Its effect is to <I>change</I> the current context to <TT>[ (a,5), (b,5), 
+(p, PROC(a,~b : b := a;)) ]</TT>. a and x are called <I>actual</I> and <I>formal value 
+arguments</I> respectively since they are not prefixed by a ~, while b and y
+are called <I>actual</I> and <I>formal reference arguments</I>
+respectively because they 
+are prefixed by a ~.
+<P>
+This example illustrates the defining attribute of procedures, namely that
+rather than returning a value, a procedure changes the context in which 
+it is called. In this case the value of b was changed by the call to p.
+Observe however that <I>only</I> b was changed by the call to p as <I>only</I>
+b in the call, and its corresponding formal argument y in the definition,
+are reference arguments (i.e., prefixed with a ~).
+A procedure may therefore 
+only change that part of the context associated with its reference arguments!
+All other parts of the context are left unchanged. In this case a and p 
+were left unchanged!
+<P>
+Note that apart from reference arguments (and the corresponding fact that
+that procedures do not return values), procedures are exactly like 
+functions. In particular: 
+<DL COMPACT class='compact'>
+<DT>a)</DT><DD>procedures are first class values that can be assigned to identifiers, passed as arguments, returned from functions, etc.
+<DT>b)</DT><DD>procedure expressions are evaluated in the same way that function 
+expressions are.
+<DT>c)</DT><DD>procedure value arguments (both formal and actual) behave exactly like 
+function arguments (both formal and actual). Thus procedure value arguments
+obey the standard substitution semantics.
+<DT>d)</DT><DD>procedures employ the same notion of scope as functions.
+<DT>e)</DT><DD>procedure calling behaves like function application.
+<DT>f)</DT><DD>procedures may be declared `forward' to allow for (mutual) recursion.
+<DT>g)</DT><DD>a procedure may be assigned to an identifier in the initial context.
+<P>
+<P>
+</DL>
+The remainder of this section will thus restrict itself to looking at
+reference arguments, the point of difference between procedures and 
+functions.
+
+
+<PRE></PRE> <A  HREF = "text64.htm">[Next]</A><A  HREF = "text62.htm">[Prev]</A> <A  HREF = "text64.htm">[Right]</A> <A  HREF = "text62.htm">[Left]</A> <A  HREF = "text56.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

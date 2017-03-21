@@ -1,0 +1,120 @@
+/*
+CODES FOR INDEPENDANT TESTING FUNCTIONS:
+a prestored - order(symmet(4))=24;
+b necc condns - invari(normal(g,h),h);
+c sufft condns - order(G) = sum over transv of card cosets.
+d 2 cayley fns - central = fetch(...;centraliser);
+e 'simulate' cayley fn - Z = intersection over gens central.
+
+Generally useful functions, procedures:
+*/
+
+// Defaults.
+
+inflev := 9;
+
+inform := procedure(strg, level)
+    if inflev ge level then
+	s := strg;
+	for i := 1 to level do
+	    s := "  " cat s;
+	end for;
+	print s;
+    end if;
+end procedure;
+
+w := procedure(cndn, strg)
+/*
+Deal with error message.
+*/
+    if cndn then
+	print "          ERROR: ", strg;
+    else
+	inform(strg, 5);
+    end if;
+end procedure;
+
+function cHom(G, f)
+    I := Image(f);
+    fq := FactoredOrder(I);
+    if I ne sub<Codomain(f) | {f(x) : x in Generators(G)}> then
+	return true;
+    end if;
+    for j := 1 to #fq do
+	if not IsConjugate(
+	    I, SylowSubgroup(I,fq[j][1]), f(SylowSubgroup(G,fq[j][1]))
+	) then
+	    return true;
+	end if;
+    end for;
+    return false;
+end function;
+
+bHom := func<G, f |
+    not IsConjugate(
+	Image(f),
+	SylowSubgroup(Image(f), FactoredOrder(Image(f))[1][1]),
+	f(SylowSubgroup(G, FactoredOrder(Image(f))[1][1]))
+    ) or Image(f) ne sub<Codomain(f) | {f(x) : x in Generators(G)}>
+>;
+
+cKer := func<G, f | Order(G) ne Order(Kernel(f))*Order(Image(f)) or
+		   Order(f(Kernel(f))) ne 1>;
+
+CmpSeqs := function(a,b)
+/*
+Are the sequences a and b identical?
+*/
+    if #a ne #b then
+	return false;
+    end if;
+    for i := 1 to #a do
+	if a[i] ne b[i] then
+	    return false;
+	end if;
+    end for;
+    return true;
+end function;
+
+Fdiv := function(a, b)
+/*
+Divide the factor sequences.  Return empty if not b div a.
+*/
+    j := 1;
+    q := [];
+    for i := 1 to #b do
+	if a[j][1] ne b[i][1] then
+	    if a[j][1] lt b[i][1] then 
+		Append(~q, a[j]);
+		j +:= 1;
+	    else
+		return 0;
+	    end if;
+	else
+	    if a[j][2] lt b[i][2] then
+		return 0;
+	    else
+		dif := a[j][2] - b[i][2];
+		if dif ne 0 then
+		    Append(~q, <b[i][1], dif>);
+		end if;
+	    end if;
+	    j +:= 1;
+	end if;
+    end for;
+    if j le #a then
+	q := q cat a[[j .. #a]];
+    end if;
+    return q;
+end function;
+
+Fpdt := function(a)
+/*
+Find the integer value of the factor sequence.
+*/
+    p := 1;
+    for i := 1 to #a do
+	p *:= a[i][1]^a[i][2];
+    end for;
+    return p;
+end function;

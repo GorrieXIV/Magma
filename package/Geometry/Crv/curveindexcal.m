@@ -1,0 +1,275 @@
+freeze;
+
+declare verbose CurveIndexcal,1;
+
+
+intrinsic MultiplyDivisor(n::RngIntElt, D::DivCrvElt , D0::DivCrvElt) -> DivCrvElt
+{  Effective divisor E of minimal degree such that E-Deg(E)*D0 is equivalent to n*(D-Deg(D)*D0). }
+  E:=Parent(D0)!0;
+  repeat
+    if IsOdd(n) then E := Reduction(E+D,D0); end if;
+    D := Reduction(2*D,D0);
+    n div:=2;
+  until IsZero(n);
+  return E;
+end intrinsic;
+
+supportisfinitesmooth:=function(D)
+  points := Points(Cluster(D));
+  for p in points do
+    if IsSingular(p) then 
+      return false;
+    end if;
+    if Eltseq(p)[3] eq 0 then 
+      return false;
+    end if;
+  end for;
+  return true;
+end function;
+
+
+intrinsic IndexCalculusMatrix(D1::DivCrvElt , D2::DivCrvElt, D0::DivCrvElt, n::RngIntElt, rr::RngIntElt) -> MtrxSprs, SeqEnum
+  { Matrix for index calculus to find the dlog of D2-Deg(D2)*D0 with base D1-Deg(D1)*D0. Use a factor base of size approximately n, and try to find rr relations. Return M,pos,fb,Da,Db,a,b where M is the matrix with relations. Da and Db are divisors that split over the factor base, and Da-Deg(Da)*D0 and Db-Deg(Db)-D0 are linearly equivalent to a*(D1-Deg(D1)*D0) and b*(D2-Deg(D2)*D0), respectively. fb is a sequence of points that contains the support of Da, Db and D0. pos is a sequence of integers that indicates the position of the points of fb in the factor base. The last two rows of M correspond to the divisors Da-Deg(Da)*D0 and Db-Deg(Db)*D0. }
+
+  error if Type(BaseRing(Curve(D1))) ne FldFin, "\nBase field not finite\n";
+  
+  supD1 := Support(D1);
+  if Max([Degree(p) : p in supD1]) gt 1 then
+    vprintf CurveIndexcal, 1: "\nFind splitting multiple of first input\n";
+    D1:=Reduction(D1,D0);
+    Da:=Parent(D1)!0;
+    a:=0;
+    repeat
+      a+:=1;
+      nextDa := Da + D1;
+      Da:=Reduction(nextDa,D0);
+      if GCD(n,a) eq 1 then
+        supDa:=Support(Da);
+        c := Max([Degree(p) : p in supDa]) le 1;
+        if c then 
+	     c and:= supportisfinitesmooth(Da);
+        end if;
+      else 
+        c := false;
+      end if;
+    until c;  
+  else
+    vprintf CurveIndexcal, 1: "\nFirst input divisor already splits.\n";
+    Da := D1;
+    a := 1;
+  end if;
+
+  supD2 := Support(D2);
+  if Max([Degree(p) : p in supD2]) gt 1 then
+
+    vprintf CurveIndexcal, 1: "\nFind splitting multiple of second input\n";
+    D2:=Reduction(D2,D0);
+    Db:=Parent(D2)!0;
+    b:=0;
+    repeat
+      b+:=1;
+      nextDb := Db + D2;
+      Db:=Reduction(nextDb,D0);
+      if GCD(n,b) eq 1 then
+        supDb:=Support(Db);
+        c := Max([Degree(p) : p in supDb]) le 1;
+        if c then
+	     c and:= supportisfinitesmooth(Db);
+        end if;
+      else
+        c := false;
+      end if;
+    until c; 
+  else
+    vprintf CurveIndexcal, 1: "\nSecond input divisor already splits.\n";
+    Db := D2;
+    b := 1; 
+  end if;
+
+  
+  pointsa:=&join{Points(Cluster(p)) : p in Support(Da) };
+  pointsb:=&join{Points(Cluster(p)) : p in Support(Db) };
+
+  
+  vprintf CurveIndexcal, 1: "\nFirst index calculus input: %o\n", Da;
+  vprintf CurveIndexcal, 1: "Multiple of original input: %o\n",a;
+  vprintf CurveIndexcal, 1: "\nSecond index calculus input: %o\n",Db;
+  vprintf CurveIndexcal, 1: "Multiple of original input: %o\n",b;
+
+
+  D0point:=Points(Cluster(D0))[1];
+  allpoints := pointsa join pointsb join Points(Cluster(D0));
+
+  allpointsseq := [[Eltseq(p)[1],Eltseq(p)[2]] : p in allpoints];
+  fb := [p[1] : p in allpointsseq] cat [p[2] : p in allpointsseq];
+
+
+
+  Fproj:=DefiningPolynomial(Curve(D1));
+  k:=CoefficientRing(Parent(Fproj));
+  q := #k;
+  R<X,Y>:=PolynomialRing(k,2);
+  F:=Evaluate(Fproj,[X,Y,1]);
+  S:=[UnivariatePolynomial(f) : f in Coefficients(F,1)];
+
+
+  
+
+  vprintf CurveIndexcal, 1: "\nSieving\n";
+  M,pos:=InternalIndexcal(S,n,rr,fb);	
+
+  C := Curve(D1);
+  nrows:=NumberOfRows(M);
+  fbdiv2 := (#fb) div 2;
+  for i in [1..fbdiv2] do
+    p := C![fb[i], fb[i+fbdiv2]];
+    if p in pointsa then
+      SetEntry(~M,nrows+1,pos[i],Valuation(Da,Place(p)));
+    end if;
+    if p in pointsb then
+      SetEntry(~M,nrows+2,pos[i],Valuation(Db,Place(p)));
+    end if;
+    if p eq D0point then
+      SetEntry(~M,nrows+1,pos[i],-Degree(Da));
+      SetEntry(~M,nrows+2,pos[i],-Degree(Db));
+    end if;
+
+  end for;
+
+return M,pos,fb,Da,Db,a,b;
+
+end intrinsic;
+
+
+
+dlp_smallprimes := function (D1,D2,D0,grpord)
+
+  if grpord eq 1 then
+    return 0;
+  end if;
+
+  grpord_factored:=Factorisation(grpord);
+
+  primepowers:=[IntegerRing()|];
+  dlp:=[IntegerRing()|];
+  zerodiv:=Parent(D1)!0;
+  for f in grpord_factored do
+    p := f[1];
+    e := f[2];
+    a1 := MultiplyDivisor(grpord div p^e,D1,D0);
+    b1 := MultiplyDivisor(grpord div p^e,D2,D0);
+    a1seq := [a1];
+    b1seq := [b1];
+    e1:=0;
+    while a1 ne zerodiv do
+      a1 := MultiplyDivisor(p,a1,D0);
+      e1 +:=1;
+      error if e1 gt e, "\nOrder of D1 does not divide group order\n";
+      b1 := MultiplyDivisor(p,b1,D0);
+      Append(~a1seq,a1);
+      Append(~b1seq,b1);
+    end while;
+    error if b1 ne zerodiv, "\nD2 not in group generated by D1\n";
+
+    Append(~primepowers,p^e1);
+
+    j:=0;
+    for i in [e1..1 by -1] do
+      if IsZero(j) or (a1seq[i] eq zerodiv) then
+        a1 := zerodiv;
+      else
+        a1 := MultiplyDivisor(j,a1seq[i],D0);
+      end if;
+      k:=0;
+      while b1seq[i] ne a1 do
+        a1 := Reduction(a1+a1seq[e1],D0);
+        k +:=1;
+        error if k ge p,"\nD2 not in group generated by D1\n";
+      end while;
+      j+:=k*p^(e1-i);
+    end for;
+    Append(~dlp,j);
+  end for;
+
+  return ChineseRemainderTheorem(dlp,primepowers);
+
+end function;
+
+
+
+intrinsic IndexCalculus(D1::DivCrvElt , D2::DivCrvElt, D0::DivCrvElt, np::RngIntElt, n::RngIntElt, rr::RngIntElt) -> RngIntElt
+  { Find dlog of D1-Deg(D1)*D0 with base D2-Deg(D2)*D0. Assumes D0 has degree 1. The group order np must be given. Optionally, the approximate size of the factor base n and the number of required relations rr can be given.}
+  
+  M,pos,fb,Da,Db,a,b := IndexCalculusMatrix(D1,D2,D0,n,rr);
+
+  vprintf CurveIndexcal, 1:"\nNumber of relations found: %o\n",NumberOfRows(M)-2;
+
+  vprintf CurveIndexcal, 1:"Number of elements in factor base: %o\n",NumberOfColumns(M);
+
+  error if NumberOfRows(M) lt NumberOfColumns(M),"\nNot enough relations found\n";
+
+  vprintf CurveIndexcal, 1: "\nFind element of kernel of matrix\n";
+  k:=Eltseq(ModularSolution(Transpose(M),np));  
+
+  vprintf CurveIndexcal, 1: "Found kernel element\n";
+  
+
+  indexa := k[#k-1];
+  indexb := k[#k];
+  error if IsZero(indexb), "\nElement of kernel found can not be used to determine the DLog. Try to repeat the sieving with manual parameters. Enlarge factor base in order to increase the number of relations in the matrix.\n";
+
+  f1 := GCD(np,indexb);
+
+  f1fac := Factorisation(f1);
+  subgrpsolved := np div f1;
+
+  for f in f1fac do
+    while IsDivisibleBy(subgrpsolved,f[1]) do
+      subgrpsolved div:=f[1]; 
+    end while;
+  end for;
+
+  dlsubgrp1:=-indexa*Modinv(indexb,subgrpsolved) mod subgrpsolved;
+  
+  vprintf CurveIndexcal, 1: "\nDLP mod %o: %o\n",subgrpsolved,dlsubgrp1*a*Modinv(b,np) mod np;
+  
+
+  cofactor := np div subgrpsolved;
+
+  if cofactor ne 1 then
+    DaCoGrp := MultiplyDivisor(subgrpsolved,Da,D0);
+    DbCoGrp := MultiplyDivisor(subgrpsolved,Db,D0);  
+    dlsubgrp2:=dlp_smallprimes(DaCoGrp,DbCoGrp,D0,cofactor);
+  else
+    dlsubgrp2:=0;
+  end if;
+
+  dl := ChineseRemainderTheorem([dlsubgrp1,dlsubgrp2],[subgrpsolved,cofactor]);
+  dl *:= a*Modinv(b,np);
+
+  return dl mod np;
+end intrinsic;
+
+
+
+intrinsic IndexCalculus(D1::DivCrvElt , D2::DivCrvElt, D0::DivCrvElt, np::RngIntElt) -> RngIntElt
+  { Find dlog of D1-Deg(D1)*D0 with base D2-Deg(D2)*D0. Assumes D0 has degree 1. The group order np must be given.}
+  
+  F:=BaseRing(Curve(D1));
+  error if Type(F) ne FldFin, "\nBase field not finite\n";
+
+  q := #F;
+  d := Degree(AffinePatch(Curve(D1),1));
+
+  error if (1.0-(1-(Log(Factorial(d)))/Log(q))/(d-1)) gt 1, "\nField too small with respect to degree. There won't be enough lines to find the required number of relations.\n";
+
+  rmin:=1.0-(1-(Log(1.05)+Log(Factorial(d)))/Log(q))/(d-1);
+  n:=Ceiling(q^rmin);
+  rr:=Ceiling(1.01*n);
+
+  vprintf CurveIndexcal, 1: "\nTry to find factor base of size %o\n",n; 
+  vprintf CurveIndexcal, 1: "Try to find %o relations.\n",rr; 
+
+
+  return IndexCalculus(D1,D2,D0,np,n,rr);
+end intrinsic;

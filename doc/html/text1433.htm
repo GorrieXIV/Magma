@@ -1,0 +1,456 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Morphisms</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1434.htm">[Next]</A><A  HREF = "text1432.htm">[Prev]</A> <A  HREF = "text1434.htm">[Right]</A> <A  HREF = "text1432.htm">[Left]</A> <A  HREF = "text1425.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16181">Morphisms</A></H3>
+
+<P>
+<P>
+Four types of maps between elliptic curves may be constructed: isogenies,
+isomorphisms, translations, and rational maps.  Isogenies and isomorphisms
+are by far the most important and have the most functions associated
+to them. Isogenies are always surjective as scheme maps, even though the
+Magma parlance of a map from E(Q) -&gt; F(Q) may seem to indicate
+that (for instance) the multiplication-by-two map is not surjective.
+There is an internal limit that the degrees of the polynomials defining
+an isogeny cannot be more than 10<sup>7</sup>.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1433.htm#16182">Creation Functions</A>
+<LI> <A  HREF = "text1433.htm#16203">Predicates on Isogenies</A>
+<LI> <A  HREF = "text1433.htm#16206">Structure Operations</A>
+<LI> <A  HREF = "text1433.htm#16215">Endomorphisms</A>
+<LI> <A  HREF = "text1433.htm#16223">Automorphisms</A>
+</UL>
+<H4><A NAME = "16182">Creation Functions</A></H4>
+
+
+
+<HR>
+<H3><A NAME = "16183">Example <TT>CrvEll_Isogeny (H126E16)</TT></A></H3>
+The following example gives a construction of a 2-isogeny between
+elliptic curves.  This example follows Example III 4.5 of
+Silverman
+<A  HREF = "text1424.htm#bib_silverman-arith">[Sil86]</A>,
+and demonstrates a parametrised family of 2-isogenies of elliptic
+curves together with its dual.
+<P>
+<P>
+<PRE>
+&gt; FF := FiniteField(167);
+&gt; a := FF!2; b := FF!3; r := a^2 - 4*b;
+&gt; E1 := EllipticCurve([0, a, 0, b, 0]);
+&gt; E2 := EllipticCurve([0, -2*a, 0, r, 0]);
+&gt; _&lt;x&gt; := PolynomialRing(BaseRing(E1));
+&gt; Ff, f := IsogenyFromKernel(E1, x);
+&gt; Fg, g := IsogenyFromKernel(E2, x);
+&gt; b, m1 := IsIsomorphic(Ff, E2); assert b;
+&gt; b, m2 := IsIsomorphic(Fg, E1); assert b;
+&gt; // Verify that f and g are dual isogenies of degree 2
+&gt; &amp;and[ m2(g(m1(f(P)))) eq 2*P : P in RationalPoints(E1) ];
+true
+&gt; &amp;and[ m1(f(m2(g(Q)))) eq 2*Q : Q in RationalPoints(E2) ];
+true
+</PRE>
+<HR>
+<H5><A NAME = "16184">Isomorphism(E, F, [r, s, t, u]) : CrvEll, CrvEll, SeqEnum -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Given elliptic curves E and F defined over the same field K,
+and four elements r, s, t, u of K with u &ne;0,
+this function returns the isomorphism E -&gt; F mapping
+O<sub>E</sub> |-&gt; O<sub>F</sub> and mapping
+(x, y) |-&gt; (u<sup>2</sup>x + r, u<sup>3</sup>y + su<sup>2</sup>x + t).
+This function returns an error if the values passed do not define
+such an isomorphism.
+</BLOCKQUOTE>
+<H5><A NAME = "16185">Isomorphism(E, F) : CrvEll, CrvEll -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Given elliptic curves E and F defined over the same field K,
+this function computes and returns an isomorphism from E to F
+where such an isomorphism exists.  The map returned will be the same
+as the second return value of <TT>IsIsomorphic</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "16186">Automorphism(E, [r, s, t, u]) : CrvEll, SeqEnum -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E defined over a field K,
+and four elements r, s, t, u of K with u &ne;0,
+this function returns the automorphism E -&gt; E mapping
+O<sub>E</sub> |-&gt; O<sub>E</sub> and mapping
+(x, y) |-&gt; (u<sup>2</sup>x + r, u<sup>3</sup>y + su<sup>2</sup>x + t).
+This function returns an error if the values passed do not define
+such an automorphism.
+</BLOCKQUOTE>
+<H5><A NAME = "16187">IsomorphismData(I) : Map -&gt; [ RngElt ]</A></H5>
+<BLOCKQUOTE>
+The sequence [r, s, t, u] of elements defining the isomorphism I.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16188">Example <TT>CrvEll_Isomorphisms (H126E17)</TT></A></H3>
+We illustrate the isomorphism routines with some simple examples.
+<P>
+<P>
+<PRE>
+&gt; K := GF(73);
+&gt; E1 := EllipticCurve([K | 3, 4, 2, 5, 1]);
+&gt; E2 := EllipticCurve([K | 8, 2, 29, 45, 28]);
+&gt; IsIsomorphic(E1, E2);
+true
+&gt; m := Isomorphism(E1, E2, [3, 2, 1, 4]);
+&gt; m;
+Elliptic curve isomorphism from: CrvEll: E1 to CrvEll: E2
+Taking (x : y : 1) to (16*x + 3 : 64*y + 32*x + 1 : 1)
+&gt; P1 := Random(E1);
+&gt; P2 := Random(E1);
+&gt; m(P1 + P2) eq m(P1) + m(P2);
+true
+</PRE>
+From the isomorphism data we can apply the map by hand if desired:
+<P>
+<P>
+<PRE>
+&gt; r, s, t, u := Explode(IsomorphismData(Inverse(m)));
+&gt; P3 := E2![ 69, 64 ];
+&gt; x, y := Explode(Eltseq(P3));
+&gt; E1 ! [ u^2*x + r, u^3*y + s*u^2*x + t ];
+(68 : 32 : 1)
+&gt; m($1) eq P3;
+true
+</PRE>
+<HR>
+<H5><A NAME = "16189">IsIsomorphism(I) : Map -&gt; BoolElt, Map</A></H5>
+<BLOCKQUOTE>
+This function returns <TT>true</TT> if and only if the isogeny I has the
+same action as some isomorphism;
+if so, the isomorphism is also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "16190">IsomorphismToIsogeny(I) : Map -&gt; Map</A></H5>
+<BLOCKQUOTE>
+This function takes a map I of type isomorphism
+and returns an equivalent map with type isogeny.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16191">Example <TT>CrvEll_Isomorphism (H126E18)</TT></A></H3>
+An example of how to use the previous two functions to transform
+isogenies to isomorphisms and vice versa.
+<P>
+<P>
+<PRE>
+&gt; FF := FiniteField(23);
+&gt; E0 := EllipticCurve([FF | 1, 1]);
+&gt; E1 := EllipticCurve([FF | 3, 2]);
+&gt; b, iso := IsIsomorphic(E0, E1);
+&gt; b;
+true
+&gt; iso;
+Elliptic curve isomorphism from: CrvEll: E0 to CrvEll: E1
+Taking (x : y : 1) to (16*x : 18*y : 1)
+&gt; isog := IsomorphismToIsogeny(iso);
+&gt; isog;
+Elliptic curve isogeny from: CrvEll: E0 to CrvEll: E1
+taking (x : y : 1) to (16*x : 18*y : 1)
+&gt; b, new_iso := IsIsomorphism(isog);
+&gt; b;
+true
+&gt; inv := Inverse(new_iso);
+&gt; P := Random(E0);
+&gt; inv(isog(P)) eq P;
+true
+</PRE>
+<HR>
+<H5><A NAME = "16192">TranslationMap(E, P) : CrvEll, PtEll -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Given a rational point P on the elliptic curve
+E, this function returns the morphism
+t<sub>P</sub> : E -&gt; E defined by t<sub>P</sub>(Q) = P + Q
+for all rational points Q of E.
+</BLOCKQUOTE>
+<H5><A NAME = "16193">RationalMap(i, t) : Map, Map -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Let i be an isogeny and t be a translation map
+t<sub>P</sub>: E -&gt; E where t<sub>P</sub>(Q) = P + Q for some
+rational point P &isin;E.  This function returns
+the rational map &phi; : E -&gt; F
+obtained by composing i and t (applying t first).
+Any rational map E -&gt; F can be represented
+in this form.
+</BLOCKQUOTE>
+<H5><A NAME = "16194">TwoIsogeny(P) : PtEll -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Given a 2-torsion point P of the elliptic curve
+E, this function returns a 2-isogeny on E
+with P as its kernel.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16195">Example <TT>CrvEll_Map (H126E19)</TT></A></H3>
+One may, of course, also define maps between elliptic curves using the
+generic map constructors, as the following examples show.
+<P>
+<P>
+<PRE>
+&gt; E1 := EllipticCurve([ GF(23) | 1, 1 ]);
+&gt; E2 := EllipticCurve([ GF(23, 2) | 1, 1 ]);
+</PRE>
+The doubling map on E<sub>1</sub> lifted to E<sub>2</sub>:
+<P>
+<P>
+<PRE>
+&gt; f := map&lt;E1 -&gt; E2 | P :-&gt; 2*P&gt;;
+</PRE>
+Two slightly different ways to define
+the negation map on E<sub>1</sub> lifted to E<sub>2</sub>:
+<P>
+<P>
+<PRE>
+&gt; f := map&lt;E1 -&gt; E2 | P :-&gt; E2![ P[1], -P[2], P[3] ]&gt;;
+&gt; f := map&lt;E1 -&gt; E2 | P :-&gt; (P eq E1!0) select E2!0
+&gt;                           else E2![ P[1], -P[2], 1 ]&gt;;
+</PRE>
+<HR>
+<H5><A NAME = "16196">IsogenyFromKernel(G) : SchGrpEll -&gt; CrvEll, Map</A></H5>
+<BLOCKQUOTE>
+Let G be a subgroup scheme of an elliptic curve E. There is a
+separable isogeny f: E -&gt; E<sub>f</sub> to some other
+elliptic curve E<sub>f</sub>, which has kernel G.  This function returns
+the curve E<sub>f</sub> and the map f using Velu's formulae.
+</BLOCKQUOTE>
+<H5><A NAME = "16197">IsogenyFromKernelFactored(G) : SchGrpEll -&gt; CrvEll, Map</A></H5>
+<BLOCKQUOTE>
+Returns a sequence of isogenies whose product is the isogeny returned
+by the invocation <TT>IsogenyFromKernel(G)</TT>.
+These isogenies have either degree 2 or odd degree.
+This function was introduced because composing isogenies can be
+computationally expensive. The generic <TT>Expand</TT> function on
+a composition of maps can then be used if desired.
+</BLOCKQUOTE>
+<H5><A NAME = "16198">IsogenyFromKernel(E, psi) : CrvEll, RngUPolElt -&gt; CrvEll, Map</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E and a univariate polynomial psi which
+defines a subgroup scheme of E,
+compute an isogeny using Velu's formulae as above.
+</BLOCKQUOTE>
+<H5><A NAME = "16199">IsogenyFromKernelFactored(E, psi) : SchGrpEll, RngUPolElt -&gt; CrvEll, Map</A></H5>
+<BLOCKQUOTE>
+Returns a sequence of isogenies whose product is the isogeny returned
+by the invocation <TT>IsogenyFromKernel(E, psi)</TT>.
+These isogenies have either degree 2 or odd degree.
+This function was introduced because composing isogenies can be
+computationally expensive. The generic <TT>Expand</TT> function on
+a composition of maps can then be used if desired.
+</BLOCKQUOTE>
+<H5><A NAME = "16200">PushThroughIsogeny(I, v) : Map, RngUPolElt -&gt; RngUPolElt</A></H5>
+<H5>PushThroughIsogeny(I, G) : Map, SchGrpEll -&gt; SchGrpEll</H5>
+<BLOCKQUOTE>
+Given an isogeny I and a subgroup G which contains the kernel of I,
+find the image of G under the action of I.  The subgroup G may be
+replaced by its defining polynomial v.
+</BLOCKQUOTE>
+<H5><A NAME = "16201">DualIsogeny(phi) : Map -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Given an isogeny &phi; : E<sub>1</sub> -&gt; E<sub>2</sub>, the function returns another
+isogeny &phi;<sup> * </sup> : E<sub>2</sub> -&gt; E<sub>1</sub> such that &phi;<sup> * </sup> <IMG SRC="open.gif" ALT="" WIDTH=7 HEIGHT=7> &phi; is
+multiplication by the degree of &phi;. The result is remembered and
+<TT>DualIsogeny(DualIsogeny(phi))</TT> returns <TT>phi</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16202">Example <TT>CrvEll_DualIsogeny (H126E20)</TT></A></H3>
+We exhibit one way of calculating the dual of an isogeny.
+First we create a curve and an isogeny f with kernel equal
+to the full 5-torsion polynomial.
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([GF(97) | 2, 3]);
+&gt; E1, f := IsogenyFromKernel(E, DivisionPolynomial(E, 5));
+</PRE>
+The image curve E<sub>1</sub> is isomorphic, but not equal, to the
+original curve E.  We proceed to find the dual of f.
+<P>
+<P>
+<PRE>
+&gt; deg := Degree(f);
+&gt; psi := DivisionPolynomial(E, deg);
+&gt; f1 := PushThroughIsogeny(f, psi);
+&gt; E2, g := IsogenyFromKernel(E1, f1);
+&gt; // Velu's formulae give an isomorphic curve, not the curve itself.
+&gt; IsIsomorphic(E2, E);
+true
+&gt; h := Isomorphism(E2, E);
+&gt; f_dual := g*IsomorphismToIsogeny(h);
+</PRE>
+The latter isogeny is the dual of f, as we verify:
+<P>
+<P>
+<PRE>
+&gt; &amp;and [ f_dual(f(P)) eq deg*P : P in RationalPoints(E) ];
+true
+</PRE>
+A simpler way to verify this is just to check equality (note that both 
+constructions of the dual involved an arbitrary choice of isomorphism):
+<P>
+<P>
+<PRE>
+&gt; f_dual eq DualIsogeny(f);
+true
+&gt; f_dual eq DualIsogeny(f) * NegationMap(E);
+false;
+</PRE>
+<HR>
+<H4><A NAME = "16203">Predicates on Isogenies</A></H4>
+
+
+
+<H5><A NAME = "16204">IsZero(I) : Map -&gt; BoolElt</A></H5>
+<H5>IsConstant(I) : Map -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the image of the isogeny I is the zero element
+of its codomain.
+</BLOCKQUOTE>
+<H5><A NAME = "16205">I eq J : Map, Map -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the isogenies I and J are equal.
+</BLOCKQUOTE>
+<H4><A NAME = "16206">Structure Operations</A></H4>
+
+<P>
+
+
+<H5><A NAME = "16207">IsogenyMapPsi(I) : Map -&gt; RngUPolElt</A></H5>
+<BLOCKQUOTE>
+Returns the univariate polynomial &psi; used in defining the isogeny I.
+The roots of &psi; determine the kernel of I.
+</BLOCKQUOTE>
+<H5><A NAME = "16208">IsogenyMapPsiMulti(I) : Map -&gt; RngUPolElt</A></H5>
+<BLOCKQUOTE>
+Returns the polynomial &psi; used in defining the isogeny I as a
+multivariate polynomial.
+</BLOCKQUOTE>
+<H5><A NAME = "16209">IsogenyMapPsiSquared(I) : Map -&gt; RngUPolElt</A></H5>
+<BLOCKQUOTE>
+Returns the denominator of the fraction giving the image of the x-coordinate
+of a point under the isogeny I (the numerator is returned by
+<TT>IsogenyMapPhi(I)</TT>).
+</BLOCKQUOTE>
+<H5><A NAME = "16210">IsogenyMapPhi(I) : Map -&gt; RngUPolElt</A></H5>
+<BLOCKQUOTE>
+Returns the univariate polynomial &phi; used in defining the isogeny I.
+</BLOCKQUOTE>
+<H5><A NAME = "16211">IsogenyMapPhiMulti(I) : Map -&gt; RngUPolElt</A></H5>
+<BLOCKQUOTE>
+Returns the polynomial &phi; used in defining the isogeny I as a
+multivariate polynomial.
+</BLOCKQUOTE>
+<H5><A NAME = "16212">IsogenyMapOmega(I) : Map -&gt; RngMPolElt</A></H5>
+<BLOCKQUOTE>
+Returns the multivariate polynomial &omega; used in defining the isogeny I.
+</BLOCKQUOTE>
+<H5><A NAME = "16213">Kernel(I) : Map -&gt; SchGrpEll</A></H5>
+<BLOCKQUOTE>
+Returns the subgroup of the domain consisting of the elements that map to zero
+under the isogeny I.
+</BLOCKQUOTE>
+<H5><A NAME = "16214">Degree(I) : Map -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the degree of the morphism I.
+</BLOCKQUOTE>
+<H4><A NAME = "16215">Endomorphisms</A></H4>
+
+<P>
+<P>
+Let E be an elliptic curve defined over the field K.  The set
+of endomorphisms (End)(E) of E to itself forms a ring under
+composition and addition of maps.
+<P>
+The endomorphism ring of E always contains a subring isomorphic
+to Z.  A curve E whose endomorphism ring contains additional
+isogenies is said to have <I>complex multiplication</I>.
+If E is defined over a finite field then E always has complex
+multiplication.  The endomorphism ring of E is isomorphic to an
+order in either a quadratic number field or a quaternion algebra.
+
+
+<H5><A NAME = "16216">MultiplicationByMMap(E, m) : CrvEll, RngIntElt -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Returns the multiplication-by-m endomorphism [m] : E -&gt; E of the elliptic
+curve E,
+such that [m](P) = m * P.
+</BLOCKQUOTE>
+<H5><A NAME = "16217">IdentityIsogeny(E) : CrvEll -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Returns the identity map E -&gt; E of the elliptic curve E as an isogeny.
+</BLOCKQUOTE>
+<H5><A NAME = "16218">IdentityMap(E) : CrvEll -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Returns the identity map E -&gt; E of the elliptic curve E as an isomorphism.
+The defining coefficients are [r, s, t, u] = [0, 0, 0, 1].
+</BLOCKQUOTE>
+<H5><A NAME = "16219">NegationMap(E) : CrvEll -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Returns the isomorphism of the elliptic curve E which maps P to -P, for all P &isin;E.
+</BLOCKQUOTE>
+<H5><A NAME = "16220">FrobeniusMap(E, i) : CrvEll, RngIntElt -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Returns the Frobenius isogeny (x : y : 1) |-&gt; (x<sup>p<sup>i</sup></sup> : y<sup>p<sup>i</sup></sup> : 1)
+of an elliptic curve E defined over a finite field of characteristic p.
+</BLOCKQUOTE>
+<H5><A NAME = "16221">FrobeniusMap(E) : CrvEll -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Equivalent to <TT>FrobeniusMap(E, 1)</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16222">Example <TT>CrvEll_Frobenius (H126E21)</TT></A></H3>
+We check the action of the <TT>FrobeniusMap</TT> function.
+<P>
+<P>
+<P>
+<PRE>
+&gt; p := 23;
+&gt; FF1 := FiniteField(p);
+&gt; FF2 := FiniteField(p, 2);
+&gt; E1 := EllipticCurve([FF1 | 1, 3]);
+&gt; E2 := BaseExtend(E1, FF2);
+&gt; frob := FrobeniusMap(E2, 1);
+&gt; #{ E1!P : P in RationalPoints(E2) | P eq frob(P) } eq #E1;
+true
+</PRE>
+<HR>
+<H4><A NAME = "16223">Automorphisms</A></H4>
+
+<P>
+<P>
+The functions in this section deal with automorphisms in the category
+of elliptic curves.  For an elliptic curve E
+these are the automorphisms of the underlying curve that also preserve
+the group structure (equivalently, that send the identity O<sub>E</sub> to itself).
+<P>
+<I>Warning:</I> The behaviour of these functions depends on the type of the
+input curve.  For a general curve in Magma (an object that is a <TT>Crv</TT>
+but not a <TT>CrvEll</TT>) over a finite field, <TT>AutomorphismGroup</TT>
+and <TT>Automorphisms</TT> give automorphisms in the category of curves.
+
+
+<H5><A NAME = "16224">AutomorphismGroup(E) : CrvEll -&gt; Grp, Map</A></H5>
+<BLOCKQUOTE>
+For an elliptic curve E over a general field K, this function
+determines the group of automorphisms of E that are defined over K.
+It returns an abstract group A (an abelian group or a polycyclic group),
+together with a map which sends elements of A to actual automorphisms of E
+(maps of schemes with domain and codomain E).
+</BLOCKQUOTE>
+<H5><A NAME = "16225">Automorphisms(E) : CrvEll -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+For an elliptic curve E over a general field K, this function returns a
+sequence containing the elements of the <TT>AutomorphismGroup</TT> of E.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text1434.htm">[Next]</A><A  HREF = "text1432.htm">[Prev]</A> <A  HREF = "text1434.htm">[Right]</A> <A  HREF = "text1432.htm">[Left]</A> <A  HREF = "text1425.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

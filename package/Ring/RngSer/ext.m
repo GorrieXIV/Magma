@@ -1,0 +1,54 @@
+freeze;
+
+intrinsic OptimizedRepresentation(SE::RngSerExt) -> RngSer, Map
+{Return the unramified extension SE as a series ring over the residue class field};
+
+    require Type(CoefficientRing(SE)) eq RngSerPow : "Extension must be of a power series ring";
+
+    RF := ResidueClassField(SE);
+    require DefiningPolynomial(RF) eq DefiningPolynomial(SE) : "Extension must be unramified and have the same defining polynomial as its residue class field";
+
+    S := PowerSeriesRing(RF, Precision(SE));
+    m := map<SE -> S | x :-> &+[Evaluate(c[i], S.1)*RF.1^(i - 1) : i in [1 .. #c]] where c is Coefficients(x), y :-> &+[SE!Coefficient(y, i)*UniformizingElement(SE)^i : i in [0 .. AbsolutePrecision(y) - 1]]>;
+
+    return S, m;
+
+end intrinsic;
+
+/*
+To C : otherwise coefficient ring of output is not the input and this 
+is annoying!!!
+
+intrinsic UnramifiedExtension(S::RngSerLaur[FldFin], f::RngUPolElt) -> RngSerExt
+{The unramified extension of S by the inertial polynomial f};
+
+    RS := RingOfIntegers(S);
+    require IsCoercible(PolynomialRing(RS), f) : 
+                "Argument 2 must be coercible over the integers of argument 1";
+
+    require IsInertial(Polynomial(S, f)) : "Argument 2 must be an inertial polynomial";
+    return FieldOfFractions(UnramifiedExtension(RS, f));
+
+end intrinsic;
+
+intrinsic TotallyRamifiedExtension(S::RngSerLaur[FldFin], f::RngUPolElt : MaxPrecision := -1) -> RngSerExt
+{The totally ramified extension of S by the eisenstein polynomial f};
+
+    RS := RingOfIntegers(S);
+    require IsCoercible(PolynomialRing(RS), f) : 
+                "Argument 2 must be coercible over the integers of argument 1";
+
+    require Type(MaxPrecision) eq RngIntElt : "Parameter MaxPrecision must be an integer";
+
+    if MaxPrecision eq -1 then 
+        MaxPrecision := Precision(S);
+    end if;
+
+    require MaxPrecision ge Precision(S) : 
+        "Parameter MaxPrecision must be at least the precision of argument 1";
+
+    require IsEisenstein(Polynomial(S, f)) : "Argument 2 must be an eisenstein polynomial";
+    return FieldOfFractions(TotallyRamifiedExtension(RS, f : MaxPrecision := MaxPrecision));
+
+end intrinsic;
+*/

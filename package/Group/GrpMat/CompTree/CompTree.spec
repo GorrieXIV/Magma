@@ -1,0 +1,18 @@
+{
+        reduce
+	{
+	        +reduce.spec
+	}
+	classical
+	{
+		+classical.spec
+	}
+	recog
+	{
+		+recog.spec
+	}
+        GrpMat
+        {
+	        +GrpMat.spec
+        }
+}

@@ -1,0 +1,32 @@
+"Source: Text/Geometry/HypGeomMot.text";
+"Line: 808";
+"Date: Wed Jun  8 14:02:19 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/HypGeomMot.text, line: 808
+// Example: H132E6 ()
+print "Example: H132E6";
+ei := GetEchoInput();
+SetEchoInput(true);
+H := HypergeometricData([1/2,1/2,1/2,1/2],[0,0,0,0]);
+Lf := LSeries(Newforms(ModularForms(8,4))[1][1]);
+T := PolynomialRing(Integers()).1; // dummy variable
+f3 := EulerFactor(Lf,3 : Integral)*(1-3*T); // make it a poly
+f5 := EulerFactor(Lf,5 : Integral)*(1-5*T); // via Integral
+f17 := EulerFactor(Lf,17 : Integral)*(1-17*T);
+f2 := 1+T+6*T^2+8*T^3+64*T^4; // determined by Tornaria
+BP := [<2,0,f2>,<3,1,f3>,<5,1,f5>,<17,1,f17>];
+L := LSeries(H,256 : BadPrimes:=BP);
+Conductor(L);
+assert $1 eq 255;
+assert Abs(CFENew(L)) lt 10^(-28);
+H := HypergeometricData([1/2,1/2,1/2,1/2],[0,0,0,0]);
+MValue(H);
+assert $1 eq 256;
+t := 1/2^8; // makes v_2(Mt)=0
+f2 := EulerFactor(H,t,2 : Fake);
+f2;
+L := LSeries(H,t : BadPrimes:=[<2,0,f2>]);
+Conductor(L);
+assert $1 eq 255;
+assert Abs(CFENew(L)) lt 10^(-28);
+SetEchoInput(ei);

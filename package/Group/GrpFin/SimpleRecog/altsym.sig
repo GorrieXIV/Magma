@@ -1,0 +1,9 @@
+174,1
+A,Grp,1,AltSymData
+S,GuessAltsymDegree,G is a finite irreducible matrix group known to be isomorphic to (2.)Sym(n) or (2.)Alt(n) for some n > 6. Returns a guess at alternating or symmetric and n,0,1,0,0,0,0,0,0,0,-27,,36,298,148,-38,-38,-38
+S,RecogniseAlternating,"Constructive recognition of a group G known to be isomorphic to Alt(n) using the Bratus-Pak algorithm. If Extension is true, then G is known to be isomorphic to Alt(n) or 2.Alt(n)",0,2,0,0,0,0,0,0,0,148,,0,0,-27,,36,175,175,175,175,36
+S,RecogniseSymmetric,"Constructive recognition of a group G known to be isomorphic to Sym(n) using the Bratus-Pak algorithm. If Extension is true, then G is known to be isomorphic to Sym(n) or 2.Sym(n)",0,2,0,0,0,0,0,0,0,148,,0,0,-27,,36,175,175,175,175,36
+S,SymmetricElementToWord,"If g is an element of group G which has been constructively recognised to be isomorphic to (2.)Sym(n), then return true and element of word group for g, else return false",0,2,0,0,0,0,0,0,0,-28,,0,0,-27,,36,137,-38,-38,-38,-38
+S,SymmetricElementToStandardWord,"If g is an element of group G which has been constructively recognised to be isomorphic to (2.)Sym(n), then return true and element of word group for g in the standard generators (1,2),(1,2,3,...,n), else return false",0,2,0,0,0,0,0,0,0,-28,,0,0,-27,,36,137,-38,-38,-38,-38
+S,AlternatingElementToWord,"If g is an element of group G which has been constructively recognised to be isomorphic to (2.)Alt(n), then return true and element of word group for g, else return false",0,2,0,0,0,0,0,0,0,-28,,0,0,-27,,36,137,-38,-38,-38,-38
+S,AlternatingElementToStandardWord,"If g is an element of group G which has been constructively recognised to be isomorphic to (2.)Alt(n), then return true and element of word group for g in the standard generators (1,2,3),((1,)2,3,...,n), else return false",0,2,0,0,0,0,0,0,0,-28,,0,0,-27,,36,137,-38,-38,-38,-38

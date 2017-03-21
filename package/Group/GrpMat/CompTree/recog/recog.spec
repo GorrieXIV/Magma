@@ -1,0 +1,26 @@
+magma
+{
+	recog.m
+	node.m
+	leaf.m
+	mathom.m
+	permhom.m
+	kernel.m
+	unipotent.m
+	classical.m
+	classical-bb.m
+	twisted.m
+	exceptional.m
+	sporadic.m
+	sporadics.m
+	present.m
+	comp-series.m
+	centre.m
+	alt.m
+	c9.m
+	c8.m
+	c9-altsym.m
+	extraspecial.m
+	defrepdata.m
+        standard-sporadics.m
+}

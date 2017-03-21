@@ -1,0 +1,34 @@
+"Source: Text/Ring/RngPowAlg.text";
+"Line: 608";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Ring/RngPowAlg.text, line: 608
+// Example: H51E5 ()
+print "Example: H51E5";
+ei := GetEchoInput();
+SetEchoInput(true);
+Q := Rationals(); Qs<s> := FunctionField(Q);
+Qxy<x,y> := PolynomialRing(Q, 2, "glex");
+Qxyz<z> := PolynomialRing(Qxy);
+Qst<t> := PolynomialRing(Qs, 1, "glex");
+Qstu<u> := PolynomialRing(Qst);
+s1 := ImplicitFunction(z*(1 - x - y) - x - y);
+defpol := (1+5*y+10*y^3+10*y^2+5*y^4+y^5)*z^5+(-20*y^3*x-
+ 30*y^2*x-5*y^4*x-5*x-20*y*x)*z^4+(10*x^2+30*y^2*x^2+10*y^3*x^2+
+ 30*x^2*y)*z^3+(-20*y*x^3-10*x^3-10*y^2*x^3)*z^2+
+ (5*y*x^4+5*x^4)*z-x^5-x^2*y;
+Gamma := Lattice(RMatrixSpace(Integers(), 2, 2) ! [1,-2, 2,1]);
+init := x^2*y;
+s2 := AlgebraicPowerSeries(defpol, init, Gamma, 5);
+Expand(ScaleGenerators(s2, [3,4]), 15);
+assert $1;
+Qi<i> := NumberField(R.1^2 + 1) where R is PolynomialRing(Q);
+Qiuv<u,v> := PolynomialRing(Qi, 2, "glex");
+h4 := ChangeRing(s1, Qiuv);
+Expand(h4, 4); Domain(h4);
+h1 := Add(s1, PolyToSeries(One(Qxy)));
+h2 := Mult(h1, PolyToSeries(1 - x - y));
+h3 := Add(h2, PolyToSeries(-One(Qxy)));
+SimplifyRep(h3 : Factorizing := true);
+DefiningPolynomial($1);
+SetEchoInput(ei);

@@ -1,0 +1,1820 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Curves over the Rationals</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1450.htm">[Next]</A><A  HREF = "text1448.htm">[Prev]</A> <A  HREF = "text1450.htm">[Right]</A> <A  HREF = "text1448.htm">[Left]</A> <A  HREF = "text1447.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16339">Curves over the Rationals</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1449.htm#16340">Local Invariants</A>
+<LI> <A  HREF = "text1449.htm#16351">Kodaira Symbols</A>
+<LI> <A  HREF = "text1449.htm#16358">Complex Multiplication</A>
+<LI> <A  HREF = "text1449.htm#16360">Isogenous Curves</A>
+<LI> <A  HREF = "text1449.htm#16364">Heights and Height Pairing</A>
+<LI> <A  HREF = "text1449.htm#16385">Heegner Points</A>
+<LI> <A  HREF = "text1449.htm#16400">Analytic Information</A>
+<LI> <A  HREF = "text1449.htm#16423">Integral and S-integral Points</A>
+<LI> <A  HREF = "text1449.htm#16435">Elliptic Curve Database</A>
+</UL>
+<H4><A NAME = "16340">Local Invariants</A></H4>
+
+
+
+<H5><A NAME = "16341">Conductor(E) : CrvEll -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The conductor of the elliptic curve E defined over Q.
+</BLOCKQUOTE>
+<H5><A NAME = "16342">BadPrimes(E) : CrvEll -&gt; [ RngIntElt ]</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E defined over Q, return the sequence of
+primes dividing the minimal discriminant of E.
+These are the primes at which the minimal model for E has bad reduction;
+note that there may be other primes dividing the discriminant of the given
+model of E.
+</BLOCKQUOTE>
+<H5><A NAME = "16343">TamagawaNumber(E, p) : CrvEll, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E defined over Q and a prime number p,
+this function returns the local Tamagawa number of E at p, which
+is the index in E(Q<sub>p</sub>) of the subgroup E<sup>0</sup>(Q<sub>p</sub>) of points with
+nonsingular reduction modulo p.  For any prime p that is of good
+reduction for E, this function returns 1.
+</BLOCKQUOTE>
+<H5><A NAME = "16344">TamagawaNumbers(E) : CrvEll -&gt; [ RngIntElt ]</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E defined over Q, this function returns
+the sequence of Tamagawa numbers at each of the bad primes of E, as
+defined above.
+</BLOCKQUOTE>
+<H5><A NAME = "16345">LocalInformation(E, p) : CrvEll, RngIntElt    -&gt; &lt;RngIntElt, RngIntElt, RngIntElt, RngIntElt, SymKod, BoolElt&gt;, CrvEll</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E defined over Q and a prime number p,
+this function returns the local information
+at the prime p as a tuple of the form 
+&lt;P, vpd, fp, c<sub>p</sub>, K, split&gt;, consisting of p, its multiplicity
+in the discriminant, its multiplicity in the conductor, the Tamagawa
+number at p, the Kodaira symbol, and finally a boolean which is false iff
+the curve has nonsplit multiplicative reduction. The second object returned
+is a local minimal model for E at p.
+</BLOCKQUOTE>
+<H5><A NAME = "16346">LocalInformation(E) : CrvEll -&gt; [ Tup ]</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E this function returns a sequence of
+tuples of the kind described above, for the primes dividing the
+discriminant of E.
+</BLOCKQUOTE>
+<H5><A NAME = "16347">ReductionType(E, p) : CrvEll, RngIntElt -&gt; MonStgElt</A></H5>
+<BLOCKQUOTE>
+Returns a string describing the reduction type of E at p; the
+possibilities are "Good", "Additive", "Split multiplicative"
+or "Nonsplit multiplicative".
+These correspond to the type of singularity (if any) on the reduced curve.
+This function is necessary as the Kodaira symbols (see below) do not
+distinguish between split and unsplit multiplicative reduction.
+</BLOCKQUOTE>
+<H5><A NAME = "16348">TraceOfFrobeniusDirect(E, p) : CrvEll, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+This function provides an efficient way to obtain the trace of Frobenius
+of a rational elliptic curve E at a prime p.
+The argument p is <B>not</B> checked to be prime.
+</BLOCKQUOTE>
+<H5><A NAME = "16349">TracesOfFrobenius(E, B) : CrvEll, RngIntElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+This function provides an efficient way to obtain the traces of Frobenius 
+a<sub>p</sub>(E) of the reduction mod p of E, for all primes p up to B.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16350">Example <TT>CrvEllQNF_frobenius-traces (H128E1)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([ 0, 1, 1, 3, 5 ]);
+&gt; T := TracesOfFrobenius(E, 100); T;
+[ 0, 1, -3, -2, -5, 1, -3, -1, 5, 6, 8, -1, -6, 7, -2, 1, 14, -1, -12,
+16, -16, -7, 6, 12, 2 ]
+&gt; time T := TracesOfFrobenius(E, 10^6);
+Time: 5.600
+</PRE>
+<HR>
+<H4><A NAME = "16351">Kodaira Symbols</A></H4>
+
+<P>
+<P>
+Kodaira symbols have their own type <TT>SymKod</TT>. Apart from the
+two functions that determine symbols for elliptic curves, there is
+a special creation function and a comparison operator to test
+Kodaira symbols.
+
+
+<H5><A NAME = "16352">KodairaSymbol(E, p) : CrvEll, RngIntElt -&gt; SymKod</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E defined over Q and a prime number p,
+this function returns the reduction type
+of E modulo p in the form of a Kodaira symbol.
+</BLOCKQUOTE>
+<H5><A NAME = "16353">KodairaSymbols(E) : CrvEll -&gt; [ SymKod ]</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E defined over Q,
+this function returns the reduction types
+of E modulo the bad primes in the form of a sequence of
+Kodaira symbols.
+</BLOCKQUOTE>
+<H5><A NAME = "16354">KodairaSymbol(s) : MonStgElt -&gt; SymKod</A></H5>
+<BLOCKQUOTE>
+Given a string s, return the Kodaira symbol it represents.
+The values of s that are allowed are:
+<TT>"I0"</TT>, <TT>"I1"</TT>, <TT>"I2"</TT>, ..., <TT>"In"</TT>, <TT>"II"</TT>,
+<TT>"III"</TT>, <TT>"IV"</TT>, and <TT>"I0*"</TT>, <TT>"I1*"</TT>,
+<TT>"I2*"</TT>, ..., <TT>"In*"</TT>, <TT>"II*"</TT>, <TT>"III*"</TT>, <TT>"IV*"</TT>.
+The dots stand for <TT>"Ik"</TT> with k a positive integer.
+The `generic' type <TT>"In"</TT> allows the matching of
+types <TT>"In"</TT> for any integer n&gt;0 (and similarly for <TT>"In*"</TT>).
+</BLOCKQUOTE>
+<H5><A NAME = "16355">h eq k : SymKod, SymKod -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given two Kodaira symbols h and k, this function returns <TT>true</TT> if
+and only if either both are identical, or one is generic (of the form
+<TT>"In"</TT>, or <TT>"In*"</TT>) and the other is specific of the same type:
+<TT>"In"</TT> will compare equal with any of <TT>"I1"</TT>, <TT>"I2"</TT>,
+<TT>"I3"</TT>, etc., and <TT>"In*"</TT> will compare equal with any of
+<TT>"I1*"</TT>, <TT>"I2*"</TT>, <TT>"I3*"</TT>, etc.
+Note however that <TT>"In"</TT> and <TT>"I3"</TT> are different from the
+point of view of set creation.
+</BLOCKQUOTE>
+<H5><A NAME = "16356">h ne k : SymKod, SymKod -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+The logical negation of <TT>eq</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16357">Example <TT>CrvEllQNF_Kodaira (H128E2)</TT></A></H3>
+We search for curves with a particular reduction type `<TT>I0*</TT>' in
+a family of curves.
+<P>
+<P>
+<PRE>
+&gt; S := [ ];
+&gt; for n := 2 to 100 do
+&gt;    E := EllipticCurve([n, 0]);
+&gt;    for p in BadPrimes(E) do
+&gt;       if KodairaSymbol(E, p) eq KodairaSymbol("I0*") then
+&gt;          Append(~S, &lt;p, n&gt;);
+&gt;       end if;
+&gt;    end for;
+&gt; end for;
+&gt; S;
+[ &lt;3, 9&gt;, &lt;3, 18&gt;, &lt;5, 25&gt;, &lt;3, 36&gt;, &lt;3, 45&gt;, &lt;7, 49&gt;, &lt;5, 50&gt;,
+&lt;3, 63&gt;, &lt;3, 72&gt;, &lt;5, 75&gt;, &lt;3, 90&gt;, &lt;7, 98&gt;, &lt;3, 99&gt;, &lt;5, 100&gt; ]
+</PRE>
+<HR>
+<H4><A NAME = "16358">Complex Multiplication</A></H4>
+
+
+
+<H5><A NAME = "16359">HasComplexMultiplication(E) : CrvEll -&gt; BoolElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E over the rationals (or a number field), the
+function determines whether the curve has complex multiplication or not and,
+if so, also returns the discriminant of the CM quadratic order. 
+The algorithm uses fairly straightforward analytic methods,
+which are not suited to very high degree j-invariants with CM
+by orders with discriminants more than a few thousand.
+</BLOCKQUOTE>
+<H4><A NAME = "16360">Isogenous Curves</A></H4>
+
+
+
+<H5><A NAME = "16361">IsogenousCurves(E) : CrvEll[FldRat] -&gt; SeqEnum, RngIntElt</A></H5>
+<BLOCKQUOTE>
+The set of curves Q-isogenous to a rational elliptic curve E.
+The method used is to proceed prime-by-prime. Mazur's Theorem restricts
+the possibilities to a short list, and j-invariant considerations leave
+only p-isogenies for p = 2, 3, 5, 7, 13 to be considered. For p = 2 
+or 3, the method proceeds by finding the rational roots of the p-th 
+division polynomial for the curve E. From these roots, one can then 
+recover the isogenous curves.  The question as to whether or not there 
+is a p-isogeny is entirely a
+function of the j-invariant of the curve, and this idea is used for
+p = 5, 7, 13. In these cases the algorithm first takes a minimal twist
+of the elliptic curve, and then finds rational roots of the polynomial
+of degree (p + 1) that comes from a fibre of X<sub>0</sub>(p). The isogenous curves
+of the minimal twist corresponding to these roots are then computed,
+and then these curves are twisted back to get the isogenous curves of E.
+In all cases, if the conductor is squarefree, some small values of the
+Frobenius traces are checked mod p to ensure the feasibility of a
+p-isogeny. Other similar ideas involving checking congruences are
+also used to try to eliminate the possibility of a p-isogeny without
+finding roots. Tree-based methods are used to extend the isogeny tree
+from (say) 2-isogenies to 4-isogenies to 8-isogenies, etc. The integer
+returned as a second argument corresponds to the largest degree of a
+cyclic isogeny between two curves in the isogeny class. The ordering
+of the list of curves returned is well-defined; the first curve is
+always the curve of minimal Faltings height, and the heights generically
+increase upon going down the list. However, when there are isogenies
+of two different prime degrees, a different ordering is used. In the
+case where there is a 4-isogeny (or a certain type of 9-isogeny),
+there is an arbitrary choice made on the bottom tree leaves in order
+to make the ordering consistent.
+</BLOCKQUOTE>
+<H5><A NAME = "16362">FaltingsHeight(E) : CrvEll[FldRat] -&gt; FldReElt</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Compute the Faltings height of a rational elliptic curve.
+This is given by -(1/2)log(Vol)(E) where (Vol)(E)
+is the volume of the fundamental parallelogram.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16363">Example <TT>CrvEllQNF_isog-curves (H128E3)</TT></A></H3>
+First we compute isogenous curves using <TT>DivisionPolynomial</TT>;
+in this special case we obtain the entire isogeny class by
+considering only 3-isogenies directly from E.
+<P>
+<P>
+<PRE>
+&gt; E:=EllipticCurve([1,-1,1,1,-1]);
+&gt; F:=Factorization(DivisionPolynomial(E,3));
+&gt; I:=IsogenyFromKernel(E,F[1][1]); I;
+Elliptic Curve defined by y^2 + x*y + y = x^3 - x^2 - 29*x - 53 over Rational
+Field
+&gt; I:=IsogenyFromKernel(E,F[2][1]); I;
+Elliptic Curve defined by y^2 + x*y + y = x^3 - x^2 - 14*x + 29 over Rational
+Field
+</PRE>
+Alternatively, we can get the <TT>IsogenousCurves</TT> directly.
+Note that <TT>IsogenyFromKernel</TT> also returns the map between
+the isogenous curves as a second argument.
+<P>
+<P>
+<PRE>
+&gt; IsogenousCurves(E);
+[
+    Elliptic Curve defined by y^2 + x*y + y = x^3 - x^2 + x - 1 over Rational
+    Field,
+    Elliptic Curve defined by y^2 + x*y + y = x^3 - x^2 - 29*x - 53 over
+    Rational Field,
+    Elliptic Curve defined by y^2 + x*y + y = x^3 - x^2 - 14*x + 29 over
+    Rational Field
+]
+9
+</PRE>
+<HR>
+<H4><A NAME = "16364">Heights and Height Pairing</A></H4>
+
+<P>
+<P>
+These functions require that the corresponding elliptic curve
+has integral coefficients.
+
+
+<H5><A NAME = "16365">NaiveHeight(P) : PtEll -&gt; FldPrElt</A></H5>
+<H5>WeilHeight(P) : PtEll -&gt; FldPrElt</H5>
+<BLOCKQUOTE>
+Given a point P=(a/b, c/d, 1) on an elliptic curve E defined over Q
+with integral coefficients,
+this function returns the naive (or Weil) height h(P)
+whose definition is
+h(P) = log max {|a|, |b|}.
+</BLOCKQUOTE>
+<H5><A NAME = "16366">Height(P: parameters) : PtEll -&gt; NFldComElt</A></H5>
+<H5>CanonicalHeight(P: parameters) : PtEll -&gt; NFldComElt</H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Given a point P on an elliptic curve E defined over Q
+with integral coefficients,
+this function returns the canonical height of P. 
+<P>
+One definition of
+<PRE>
+the canonical height is the limit as n goes to infinity of h(2^n*P) / 4^n,
+</PRE>although this is of limited computational use.
+A more useful computational definition is as the sum of local heights:
+<PRE>
+the canonical height of P = sum(h_p(P)),
+</PRE>where the sum ranges
+over each prime p and the so-called `infinite prime'.  Each of these
+local heights can be evaluated fairly simply, and in fact most of them
+are 0. The function <I>always</I> uses a minimal model for the elliptic 
+curve internally, as otherwise the local height computation could fail.
+The computation at the infinite prime uses a slight improvement over the
+&sigma;-function methods given in Cohen, with the implementation being
+based on an AGM-trick due to Mestre.
+</BLOCKQUOTE>
+<H5><A NAME = "16367">LocalHeight(P, p) : PtEll, RngIntElt -&gt; FldComElt</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+
+<PRE>    Check: BoolElt                      Default: <TT>false</TT></PRE>
+
+<PRE>    Renormalization: BoolElt            Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a point P on an elliptic curve E defined over Q
+with integral coefficients,
+this function returns
+the local height of P at p as described in <TT>Height</TT> above.
+The integer p must be either a prime number or 0; in
+the latter case the height at the infinite prime is returned.
+The <TT>Check</TT> parameter determines whether to check if the second
+argument is prime. The <TT>Renormalization</TT> parameter changes what
+definition of heights is used. Without this flag,
+a factor of (1/6)log &Delta;<sub>v</sub> is added at every place.
+</BLOCKQUOTE>
+<H5><A NAME = "16368">HeightPairing(P, Q: parameters) : PtEll, PtEll -&gt; FldComElt</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Given two points P, Q on the same elliptic curve defined over
+Q with integral coefficients, this function returns the height pairing
+of P and Q, which is defined by h(P, Q) = (h(P + Q) - h(P) - h(Q))/2, where h denotes the canonical height. 
+</BLOCKQUOTE>
+<H5><A NAME = "16369">HeightPairingMatrix(S: parameters) : [PtEll]  -&gt; AlgMat</A></H5>
+<H5>HeightPairingMatrix(E: parameters) : CrvEll  -&gt; AlgMat</H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Given a sequence of points on an elliptic curve
+defined over Q with integral coefficients,
+this function returns the height pairing matrix.
+If an elliptic curve is passed to it, the corresponding matrix
+for the Mordell--Weil generators is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "16370">Regulator(S) : [ PtEll ] -&gt; FldComElt</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Given a sequence of points S on an elliptic curve E over Q,
+this function returns the determinant of the N&eacute;ron-Tate height 
+pairing matrix of the sequence.
+</BLOCKQUOTE>
+<H5><A NAME = "16371">Regulator(E) : CrvEll -&gt; FldComElt</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Given 
+an elliptic curve E 
+this function
+returns the regulator of E; i.e., the determinant of the N&eacute;ron-Tate 
+height pairing matrix of a basis of the free quotient of the Mordell--Weil 
+group.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16372">Example <TT>CrvEllQNF_FunWithHeights (H128E4)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([0,0,1,-7,6]);
+&gt; P1, P2, P3 := Explode(Generators(E));
+&gt; Height(P1);
+0.6682051656519279350331420509
+&gt; IsZero(Abs(Height(2*P1) - 4*Height(P1)));
+true
+&gt; BadPrimes(E);
+[ 5077 ]
+</PRE>
+The local height of a point P at a prime is 0 except possibly at the
+bad primes of E, the `infinite' prime, and those primes dividing the
+denominator of the x-coordinate of P.  Since these generators have
+denominator 1 we see that only two local heights need to be computed to
+find the canonical heights of these points.
+<P>
+<P>
+<PRE>
+&gt; P2;
+(2 : 0 : 1)
+&gt; LocalHeight(P2, 0);
+-0.655035947159686182497278069814
+&gt; LocalHeight(P2, 5077); // 0 + Log(5077)/6
+1.42207930249123238829272871637
+&gt; LocalHeight(P2, 0 : Renormalization);
+0.767043355331546205795450646552
+&gt; LocalHeight(P2, 5077 : Renormalization);
+0.000000000000000000000000000000
+&gt; Height(P2);
+0.7670433553315462057954506466
+</PRE>
+The above shows that the local height at a bad prime may still be zero,
+at least in the renormalised value.
+<HR>
+<H5><A NAME = "16373">SilvermanBound(H) : SetPtEll -&gt; FldPrElt</A></H5>
+<H5>SilvermanBound(E) : CrvEll -&gt; FldPrElt</H5>
+<BLOCKQUOTE>
+Given an elliptic curve E over Q with integral coefficients,
+this function returns the Silverman bound B of E.
+For any point P on E we will have <TT>NaiveHeight(P) - Height(P)</TT> &le;B. 
+</BLOCKQUOTE>
+<H5><A NAME = "16374">SiksekBound(H: parameters) : SetPtEll -&gt; FldPrElt</A></H5>
+<H5>SiksekBound(E: parameters) : CrvEll -&gt; FldPrElt</H5>
+
+<PRE>    Torsion: BoolElt                    Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given an elliptic curve E over Q which is a minimal model,
+this function returns a real number B such that for any point 
+P on E <TT>NaiveHeight(P) - Height(P)</TT> &le;B. 
+In many cases, the Siksek bound is much better than the Silverman bound.
+<P>
+If the parameter <TT>Torsion</TT> is <TT>true</TT> then a potentially
+better bound B<sub>Tor</sub> is computed, such that for any point P on E
+there exists a torsion point T so that <TT>NaiveHeight(P + T) - Height(P)</TT> &le;B<sub>Tor</sub>. 
+Note that <TT>Height(P + T) = Height(P)</TT>. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16375">Example <TT>CrvEllQNF_Bounds (H128E5)</TT></A></H3>
+We demonstrate the improvement of the Siksek bound over the Silverman
+bound for the three example curves from Siksek's paper <A  HREF = "text1446.htm#bib_Siksek">[Sik95]</A>.
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([0, 0, 0, -73705, -7526231]);  
+&gt; SilvermanBound(E);
+13.00022113685530200655193
+&gt; SiksekBound(E);   
+0.82150471924479497959096194911
+&gt; E := EllipticCurve([0, 0, 1, -6349808647, 193146346911036]);
+&gt; SilvermanBound(E);
+21.75416864448061105008
+&gt; SiksekBound(E);
+0.617777290687848386342334921728509577480
+&gt; E := EllipticCurve([1, 0, 0, -5818216808130, 5401285759982786436]);
+&gt; SilvermanBound(E);
+27.56255914401769757660
+&gt; SiksekBound(E);
+15.70818965430290161142481294545
+</PRE>
+This last curve has a torsion point, so we can further improve the
+bound:
+<P>
+<P>
+<PRE>
+&gt; T := E![ 1402932, -701466 ];
+&gt; Order(T);
+2
+&gt; SiksekBound(E : Torsion := true);
+11.0309876231179839831829512652688
+</PRE>
+Here is a point which demonstrates the applicability of the modified
+bound.
+<P>
+<P>
+<PRE>
+&gt; P := E![ 14267166114 * 109, -495898392903126, 109^3 ];
+&gt; NaiveHeight(P) - Height(P);    
+12.193000709615680011116868901084
+&gt; NaiveHeight(P + T) - Height(P);                      
+2.60218831527724007036
+</PRE>
+<HR>
+<H5><A NAME = "16376">IsLinearlyIndependent(P, Q) : PtEll, PtEll  -&gt; BoolElt, ModTupElt</A></H5>
+<BLOCKQUOTE>
+Given points P and Q on an elliptic curve E, this function
+returns <TT>true</TT> if and only if P and Q are independent 
+free elements of the group of rational points of an elliptic 
+curve (modulo torsion points).  If <TT>false</TT>, the function 
+returns a vector v = (r, s) as a second value such that 
+rP + sQ is a torsion point.
+</BLOCKQUOTE>
+<H5><A NAME = "16377">IsLinearlyIndependent(S) : [ PtEll ]  -&gt; BoolElt, ModTupElt</A></H5>
+<BLOCKQUOTE>
+Given a sequence of points S belonging to an elliptic curve E, 
+this function returns <TT>true</TT> if and only if the points in S 
+are linearly independent (modulo torsion).  If <TT>false</TT>, the
+function returns a vector v in the kernel of the height pairing 
+matrix, i.e. giving a torsion point as a linear combination of 
+the points in S.
+</BLOCKQUOTE>
+<H5><A NAME = "16378">ReducedBasis(S) : [ PtEll ]  -&gt;  [ PtEll ]</A></H5>
+<BLOCKQUOTE>
+Given a sequence of points S belonging to an elliptic curve E 
+over the rationals, the function returns a sequence of points that 
+are independent modulo the torsion subgroup (equivalently, 
+they have non-degenerate height pairing), and which generate the 
+same subgroup of E(Q)/E<sub>tors</sub>(Q) as points of S.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16379">Example <TT>CrvEllQNF_LinearIndependence (H128E6)</TT></A></H3>
+We demonstrate the linear independence test on an example curve
+with an 8-torsion point and four independent points.  The torsion
+point is easily recognized and we establish the independence of
+the remaining points using the height function.
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([0,1,0,-95549172512866864, 11690998742798553808334900]);
+&gt; P0 := E![ 39860582, 2818809365988 ];
+&gt; P1 := E![ 144658748, -946639447182 ];
+&gt; P2 := E![ 180065822, 569437198932 ];
+&gt; P3 := E![ -339374593, 2242867099638 ];
+&gt; P4 := E![ -3492442669/25, 590454479818404/125 ];
+&gt; S0 := [P0, P1, P2, P3, P4];
+&gt; IsLinearlyIndependent(S0);
+false (1 0 0 0 0)
+&gt; Order(P0);
+8
+&gt; S1 := [P1, P2, P3, P4];
+&gt; IsLinearlyIndependent(S1);
+true
+</PRE>
+<P>
+We now demonstrate the process of solving for a nontrivial linear 
+dependence among points on an elliptic curve by constructing a 
+singular matrix, forming the corresponding linear combination of 
+points, and establishing that the dependence is in the matrix kernel.
+<P>
+<P>
+<P>
+<PRE>
+&gt; M := Matrix(4, 4, [-3,-1,2,-1,3,3,3,-2,3,0,-1,-1,0,2,1,1]);
+&gt; Determinant(M);
+0
+&gt; S2 := [ &amp;+[ M[i, j]*S1[j] : j in [1..4] ] : i in [1..4] ];
+&gt; IsLinearlyIndependent(S2);
+false ( 5 -3  8  7)
+&gt; Kernel(M);
+RSpace of degree 4, dimension 1 over Integer Ring
+Echelonized basis:
+( 5 -3  8  7)
+</PRE>
+<P>
+Despite the moderate size of the numbers which appear in the
+matrix M, we note that height is a quadratic function in the
+matrix coefficients.  Since height is a logarithmic function of
+the coefficient size of the points, we see that the sizes of the
+points in this example are very large:
+<P>
+<P>
+<P>
+<PRE>
+&gt; [ RealField(16) | Height(P) : P in S2 ];
+[ 137.376951049198, 446.51954933694, 52.724183282292, 59.091649046171 ]
+&gt; Q := S2[2];
+&gt; Log(Abs(Numerator(Q[1])));
+467.6598587040659411808117253
+&gt; Log(Abs(Denominator(Q[1])));
+449.2554587727840583949442765
+</PRE>
+<HR>
+<H5><A NAME = "16380">pAdicHeight(P, p) : PtEll, RngIntElt -&gt; FldPadElt</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: 0</PRE>
+
+<PRE>    E2: FldPadElt                       Default: 0</PRE>
+<BLOCKQUOTE>
+Given a point P on an elliptic curve defined on the rationals
+and a prime p&ge;5 of good ordinary reduction, this function computes
+the p-adic height of P to the desired precision.
+The value of the <TT>EisensteinTwo</TT> function
+for the curve can be passed as a parameter. The algorithm dates back
+to <A  HREF = "text1446.htm#bib_mazur-tate-padic">[MT91]</A> with improvements
+due to <A  HREF = "text1446.htm#bib_mazur-stein-tate">[MST06]</A> and <A  HREF = "text1446.htm#bib_harvey-padic">[Har08]</A>.
+The normalization is that of the last-named paper and is 2p
+(or -2p in some cases) as large as in other papers.
+</BLOCKQUOTE>
+<H5><A NAME = "16381">pAdicRegulator(S, p) : [PtEll], RngIntElt -&gt; FldPadElt</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: 0</PRE>
+
+<PRE>    E2: FldPadElt                       Default: 0</PRE>
+<BLOCKQUOTE>
+Given a set of points S on an elliptic curve defined over the rationals
+and a prime p&ge;5 of good ordinary reduction, this function computes
+the p-adic height regulator of S to the desired precision.
+Here the normalization divides out a power of p from the individual heights.
+</BLOCKQUOTE>
+<H5><A NAME = "16382">EisensteinTwo(E, p) : CrvEll, RngIntElt -&gt; FldPadElt</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: 0</PRE>
+<BLOCKQUOTE>
+Given an elliptic curve over the rationals
+and a prime p&ge;5 of good ordinary reduction, this function computes the
+value of the Eisenstein series E<sub>2</sub> using the Monsky-Washnitzer techniques
+via Kedlaya's algorithm. See <TT>pAdicHeight</TT> above for references.
+</BLOCKQUOTE>
+<H5><A NAME = "16383">FrobeniusMatrix(E, p) : CrvEll, RngIntElt -&gt; Mtrx</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: 10</PRE>
+<BLOCKQUOTE>
+Given an elliptic curve over the rationals and a prime p&ge;5
+of good reduction, this function computes the matrix corresponding
+to the action of Frobenius, to the given precision.
+The basis used is {dx/y, x(dx/y)}.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16384">Example <TT>CrvEllQNF_padic-height (H128E7)</TT></A></H3>
+We give examples for computing p-adic heights.
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve("5077a");
+&gt; P1 := E ! [2, 0];
+&gt; P2 := E ! [1, 0];
+&gt; P3 := E ! [-3, 0];
+&gt; assert P1+P2+P3 eq E!0; // the three points sum to zero
+&gt; for p in PrimesInInterval(5,30) do pAdicHeight(P1, p); end for;
+4834874647277 + O(5^20)
+5495832406058373*7 + O(7^20)
+-12403985313704524674*11 + O(11^20)
+616727731594753360389*13 + O(13^20)
+53144975867434108754867*17 + O(17^20)
+651478754033733420744924*19 + O(19^20)
+1382894029404692415656094*23^2 + O(23^20)
+-2615503441214747688800993518*29 + O(29^20)
+&gt; pAdicHeight(P1, 37); // 37 is not ordinary for this curve
+&gt;&gt; pAdicHeight(P1, 37); // 37 is not ordinary for this curve
+Runtime error in 'pAdicHeight': p cannot be supersingular
+&gt; for p in PrimesInInterval(5,30) do pAdicRegulator([P1, P2], p); end for;
+-263182161797834*5^-2 + O(5^20)
+-35022392779944725 + O(7^20)
+-331747503271490921584 + O(11^20)
+246446095809126124462 + O(13^20)
+-1528527915797227515067270 + O(17^20)
+333884275695653846729970*19 + O(19^20)
+412978398356115570280760602 + O(23^20)
+-45973362301048046561945193743 + O(29^20)
+&gt; pAdicRegulator([P1, P2, P3], 23); // dependent points
+O(23^20)
+&gt; eisen_two := EisensteinTwo(E, 13 : Precision:=40); eisen_two;
+25360291252705414983472710631099471724343012 + O(13^40)
+&gt; pAdicRegulator([P1, P2], 13 : Precision:=40, E2:=eisen_two);
+85894629213918025547455609490608727790695215 + O(13^40)
+</PRE>
+<HR>
+<H4><A NAME = "16385">Heegner Points</A></H4>
+
+<P>
+<P>
+For an elliptic curve of rank 1, it is possible to compute a
+generator by an analytic process; the elliptic logarithm of some
+multiple nP of the generator is the sum of the values of the modular
+parameterization at a series of points in the upper half-plane
+corresponding to a full set of class representatives for an
+appropriately-chosen quadratic field.
+There is no such thing as a free lunch, sadly; the calculation
+requires computing O(hN) terms to a precision of O(h) digits, so in
+practice it works best for curves contrived to have small conductors.
+<P>
+The calculation proceeds in three stages: choosing the quadratic field
+Q(Sqrt( - d)), evaluating the modular parameterization, and recovering
+the generator from the elliptic logarithm value.
+Essentially, this is an implementation of the method of Gross and Zagier
+<A  HREF = "text1446.htm#bib_GroZag">[GZ86]</A>; Elkies performed some substantial
+computations using this method in 1994, and much of the work required
+to produce this implementation was done by Cremona and Womack.
+An array of tricks have been added, and are described to some extent
+in some notes of Watkins.
+
+
+<H5><A NAME = "16386">HeegnerPoint(E : parameters) : CrvEll -&gt; BoolElt, PtEll</A></H5>
+
+<PRE>    NaiveSearch: RngIntElt              Default: 1000</PRE>
+
+<PRE>    Discriminant: RngIntElt             Default: </PRE>
+
+<PRE>    Cover: Crv                          Default: </PRE>
+
+<PRE>    DescentPossible: BoolElt            Default: <TT>true</TT></PRE>
+
+<PRE>    IsogenyPossible: BoolElt            Default: <TT>true</TT></PRE>
+
+<PRE>    Traces: SeqEnum                     Default: []</PRE>
+
+<PRE>    SetVerbose("Heegner", n):           Maximum: 1</PRE>
+<BLOCKQUOTE>
+Attempts to find a point on a rank 1 rational elliptic curve E using the
+method of Heegner points, returning  <TT>true</TT> and the point if it finds one,
+otherwise <TT>false</TT>. The parameter <TT>NaiveSearch</TT> indicates to what height
+the algorithm does a preliminary search for points on E (using <TT>Points</TT>).
+The <TT>Discriminant</TT> parameter allows the user to
+specify an auxiliary discriminant; this must satisfy the Heegner hypothesis,
+and the corresponding quadratic twist must have rank 0. The <TT>Cover</TT>
+option allows the user to specify a 2-cover or 4-cover (perhaps obtained
+from <TT>TwoDescent</TT> or <TT>FourDescent</TT>) to speed the calculation.
+This should be either a hyperelliptic curve or a quadric intersection,
+and there must be a map from the cover to the given elliptic curve.
+If the <TT>DescentPossible</TT> option is true, then the algorithm might
+perform such a descent in any case. If the <TT>IsogenyPossible</TT> option
+is true, then the algorithm will first try to guess the best isogenous
+curve on which to do the calculation --- if a <TT>Cover</TT> is passed to
+the algorithm, it will be ignored if E is not the best isogenous curve.
+The <TT>Traces</TT> option takes an array of integers which correspond to
+the first however-many traces of Frobenius for the elliptic curve,
+thus saving having to recompute them.
+<P>
+The algorithm assumes that the Manin constant of the given elliptic curve
+is 1 (which is conjectured in this case), and does not return a generator
+for the Mordell--Weil group, but a point whose height is that given by
+a conjectural extension of the Gross--Zagier formula. This should be
+Sqrt(Sha) times a generator.
+</BLOCKQUOTE>
+<H5><A NAME = "16387">HeegnerPoint(C : parameters) : CrvHyp -&gt; BoolElt, PtHyp</A></H5>
+<H5>HeegnerPoint(f : parameters) : RngUPolElt -&gt; BoolElt, PtHyp</H5>
+<H5>HeegnerPoint(C : parameters) : Crv -&gt; BoolElt, Pt</H5>
+
+<PRE>    NaiveSearch: RngIntElt              Default: 10000</PRE>
+
+<PRE>    Discriminant: RngIntElt             Default: </PRE>
+
+<PRE>    Traces: SeqEnum                     Default: []</PRE>
+
+<PRE>    SetVerbose("Heegner", n):           Maximum: 3</PRE>
+<BLOCKQUOTE>
+These are utility functions for the above.
+The input is either a hyperelliptic curve given by a polynomial
+of degree 4, or this quartic polynomial --- in both
+cases the quartic should have no rational roots --- or
+a nonsingular intersection of two quadrics in P<sup>3</sup>.
+These functions call <TT>HeegnerPoint</TT> on the underlying elliptic curve.
+They then map the computed point back to the given covering curve.
+The rational reconstruction step of the <TT>HeegnerPoint</TT> algorithm
+can be quite time-consuming for some coverings, especially if the
+index is large. Also, if a cover corresponds to an element of the
+Tate--Shafarevich group, the algorithm will likely enter an infinite loop.
+These functions have not been as extensively tested as the ordinary
+<TT>HeegnerPoint</TT> function, and thus occasionally might fail due to
+unforeseen problems.
+</BLOCKQUOTE>
+<H5><A NAME = "16388">ModularParametrization(E, z, B : parameters) : CrvEll[FldRat], FldComElt, RngIntElt -&gt; FldComElt</A></H5>
+<H5>ModularParametrisation(E, z, B : parameters) : CrvEll[FldRat], FldComElt, RngIntElt -&gt; FldComElt</H5>
+<H5>ModularParametrization(E, z : parameters) : CrvEll[FldRat], FldComElt -&gt; FldComElt</H5>
+<H5>ModularParametrisation(E, z : parameters) : CrvEll[FldRat], FldComElt -&gt; FldComElt</H5>
+<H5>ModularParametrization(E, Z, B : parameters) : CrvEll[FldRat], [FldComElt], RngIntElt -&gt; [FldComElt]</H5>
+<H5>ModularParametrisation(E, Z, B : parameters) : CrvEll[FldRat], [FldComElt], RngIntElt -&gt; [FldComElt]</H5>
+<H5>ModularParametrization(E, Z : parameters) : CrvEll[FldRat], [FldComElt] -&gt; [FldComElt]</H5>
+<H5>ModularParametrisation(E, Z : parameters) : CrvEll[FldRat], [FldComElt] -&gt; [FldComElt]</H5>
+
+<PRE>    Traces: SeqEnum                     Default: []</PRE>
+<H5>ModularParametrization(E, f, B : parameters) : CrvEll[FldRat], QuadBinElt, RngIntElt -&gt; FldComElt</H5>
+<H5>ModularParametrisation(E, f, B : parameters) : CrvEll[FldRat], QuadBinElt, RngIntElt -&gt; FldComElt</H5>
+<H5>ModularParametrization(E, f : parameters) : CrvEll[FldRat], QuadBinElt -&gt; FldComElt</H5>
+<H5>ModularParametrisation(E, f : parameters) : CrvEll[FldRat], QuadBinElt -&gt; FldComElt</H5>
+<H5>ModularParametrization(E, F, B : parameters) : CrvEll[FldRat], [QuadBinElt], RngIntElt -&gt; [FldComElt]</H5>
+<H5>ModularParametrisation(E, F, B : parameters) : CrvEll[FldRat], [QuadBinElt], RngIntElt -&gt; [FldComElt]</H5>
+<H5>ModularParametrization(E, F : parameters) : CrvEll[FldRat], [QuadBinElt] -&gt; [FldComElt]</H5>
+<H5>ModularParametrisation(E, F : parameters) : CrvEll[FldRat], [QuadBinElt] -&gt; [FldComElt]</H5>
+
+<PRE>    Traces: SeqEnum                     Default: []</PRE>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Given a rational elliptic curve E and a point z in the upper-half-plane,
+compute the modular parametrization int<sub>z</sub>^&infin;f<sub>E</sub>(&tau;) d&tau;
+where f<sub>E</sub> is the modular form associated to E. The version with a
+bound B uses the first B terms of the q-expansion, while the other
+version determines how many terms are needed. The optional parameter
+<TT>Traces</TT> allows the user to pass the first however-many traces
+of Frobenius. There are also versions which take an array Z of complex
+points, and versions which take positive definite binary quadratic forms f
+(or an array F) rather than points in
+the upper-half-plane (a <TT>Precision</TT> can be specified with the latter). 
+</BLOCKQUOTE>
+<H5><A NAME = "16389">HeegnerDiscriminants(E,lo,hi) : CrvEll[FldRat], RngIntElt, RngIntElt -&gt; SeqEnum</A></H5>
+
+<PRE>    Fundamental: BoolElt                Default: <TT>false</TT></PRE>
+
+<PRE>    Strong: BoolElt                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a rational elliptic curve and a range from lo to hi, compute
+the negative fundamental discriminant in this range that satisfies the
+Heegner hypothesis for the curve. The <TT>Fundamental</TT> option restricts
+to fundamental discriminants. The <TT>Strong</TT> option restricts to discriminants
+that satisfy a stronger Heegner hypothesis, namely that a<sub>p</sub>= - 1 for all
+primes p that divide gcd(D, N).
+</BLOCKQUOTE>
+<H5><A NAME = "16390">HeegnerForms(E,D  : parameters) : CrvEll[FldRat], RngIntElt -&gt; SeqEnum</A></H5>
+
+<PRE>    UsePairing: BoolElt                 Default: <TT>false</TT></PRE>
+
+<PRE>    UseAtkinLehner: BoolElt             Default: <TT>true</TT></PRE>
+
+<PRE>    Use_wQ: BoolElt                     Default: <TT>true</TT></PRE>
+
+<PRE>    IgnoreTorsion: BoolElt              Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a rational elliptic curve of conductor N 
+and a negative discriminant that meets the Heegner hypothesis for N, 
+the function computes representatives for
+the complex multiplication points on X<sub>0</sub>(N). 
+<P>
+In general the return value is a sequence of 3-tuples (Q, m, T)
+where Q is a quadratic form, m is a multiplicity,
+and T is a torsion point on E.
+Letting &phi; be the modular parametrization map,
+the sum on E of  the values m(&phi;(Q) + T) is a Heegner point in E(Q).
+When the number of these values equals the class number h=h(D) 
+(and the multiplicities are all 1 or -1) then they are actually 
+the images on E of the CM points on X<sub>0</sub>(N).
+(They all correspond to a single choice of square root of D modulo 4N.)
+<P>
+If <TT>UsePairing</TT> is added, then CM points that give conjugate values
+under the modular parametrisation map are combined.
+If <TT>UseAtkinLehner</TT> is added, then more than one 
+square root of D modulo 4N can be used.
+If <TT>Use_wQ</TT> is added, then forms can appear with extra multiplicity,
+due to primes that divide the GCD of the conductor and the fundamental
+discriminant.
+If <TT>IgnoreTorsion</TT> is added, then the fact that Atkin-Lehner can
+change the result by a torsion point will be ignored. The <TT>UsePairing</TT>
+option requires that <TT>IgnoreTorsion</TT> be true.
+<P>
+This function requires (so as not to confuse the user) that the
+<TT>ManinConstant</TT> of the curve be equal to 1.
+</BLOCKQUOTE>
+<H5><A NAME = "16391">HeegnerForms(N,D  : parameters) : RngIntElt, RngIntElt -&gt; SeqEnum</A></H5>
+
+<PRE>    AtkinLehner: [RngIntElt]            Default: []</PRE>
+<BLOCKQUOTE>
+Given a level N and a discriminant that meets the Heegner hypothesis
+for the level, the function returns a sequence of binary quadratic
+forms which correspond to the Heegner points. The Atkin-Lehner option
+takes a sequence of q with gcd(q, N/q)=1 and has the effect of
+allowing more than one square root of D modulo 4N to be used.
+</BLOCKQUOTE>
+<H5><A NAME = "16392">ManinConstant(E) : CrvEll[FldRat] -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Compute the Manin constant of a rational elliptic curve. This is in most
+cases simply a conjectural value (and most often just 1).
+</BLOCKQUOTE>
+<H5><A NAME = "16393">HeegnerTorsionElement(E, Q) : CrvEll[FldRat], RngIntElt -&gt; PtEll</A></H5>
+<BLOCKQUOTE>
+Given a rational elliptic curve and an integer Q corresponding to
+an Atkin-Lehner involution (so that gcd(Q, N/Q)=1), this function
+computes the torsion point on the curve corresponding to the period
+given by the integral from i&infin; to w<sub>Q</sub>(i&infin;).
+</BLOCKQUOTE>
+<H5><A NAME = "16394">HeegnerPoints(E, D : parameters) : CrvEll[FldRat], RngIntElt -&gt; Tup, PtEll</A></H5>
+
+<PRE>    ReturnPoint: BoolElt                Default: <TT>false</TT></PRE>
+
+<PRE>    Precision: RngIntElt                Default: 100</PRE>
+
+<PRE>    SetVerbose("Heegner", n):           Maximum: 1</PRE>
+<BLOCKQUOTE>
+Given an elliptic curve E over Q, and a suitable discriminant D
+(of a quadratic field)
+this function computes the images on E under the modular parametrization 
+of the CM points on X<sub>0</sub>(N) associated to D.
+It returns a tuple &lt; p<sub>D</sub>, m &gt;,
+where p<sub>D</sub> is an irreducible polynomial 
+whose roots are the x-coordinates of these images,
+and where m is the multiplicity of each of these images 
+(the number of CM points on X<sub>0</sub>(N) mapping to a given point on E).
+These x-coordinates lie in the ring class field of Q(Sqrt(D)), and 
+the class number h(D) must equal either m deg(p<sub>D</sub>) or 2m deg(p<sub>D</sub>).
+<P>
+The conductor of the order Q(Sqrt(D)) is required
+to be coprime to the conductor of E.
+<P>
+The second object returned by the function is one of the conjugate points, 
+as an element of the point set E(H) where H is the field defined by p<sub>D</sub>,
+or a quadratic extension of it. This step can be time consuming; if 
+<TT>ReturnPoint</TT> is set to <TT>false</TT>, the point is not computed. 
+<P>
+<B>Warning:</B> The computation is not rigorous,
+as it involves computing over the complex numbers,
+and then recognising the coefficients of the polynomial as rationals.
+However, the program performs a heuristic check:
+it checks that the polynomial has the correct splitting at
+some small primes (sufficiently many to be sure that wrong answers
+will not occur in practice).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16395">Example <TT>CrvEllQNF_Heegner (H128E8)</TT></A></H3>
+<P>
+<P>
+<P>
+<PRE>
+&gt; time HeegnerPoint(EllipticCurve([1,0,0,312,-3008])); //uses search
+true (12 : -56 : 1)
+Time: 0.240
+&gt; time HeegnerPoint(EllipticCurve([0,0,1,-22787553,-41873464535]));
+true (11003637829478432203592984661004129/1048524607168660222036584535396 : 
+-1004181871409718654255966342764883958203316448270339/10736628855783147946
+99393270058310986889998056 : 1)
+Time: 1.380
+</PRE>
+<HR>
+<H3><A NAME = "16396">Example <TT>CrvEllQNF_Heegner2 (H128E9)</TT></A></H3>
+<P>
+Here are some more complicated examples.
+In the first one, the curve has a 163-isogenous curve, which the
+algorithm uses to speed the computation. This occurs automatically,
+with most of the time taken being in computing the isogeny map.
+<P>
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([0,0,1,-57772164980,-5344733777551611]);
+&gt; b, pt:= HeegnerPoint(E);
+&gt; Height(pt);
+373.478661569142379884077480412
+</PRE>
+<HR>
+<H3><A NAME = "16397">Example <TT>CrvEllQNF_Heegner3 (H128E10)</TT></A></H3>
+In this next example, we first use descent to get a covering on which
+the desired point will have smaller height.
+<P>
+<P>
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([0,-1,0,-71582788120,-7371563751267600]);
+&gt; T := TwoDescent(E : RemoveTorsion)[1];
+&gt; T;
+Hyperelliptic Curve defined by y^2 = -2896*x^4 - 57928*x^3 - 202741*x^2
+ + 868870*x - 651725 over Rational Field
+&gt; S := FourDescent(T : RemoveTorsion)[1];
+&gt; b, pt := HeegnerPoint(S);
+&gt; pt;
+(-34940281640330765977951793/72963317481453011430052232 : 
+46087465795237503244048957/72963317481453011430052232 : 
+82501230298438806677528297/72963317481453011430052232 : 1)
+</PRE>
+<P>
+We obtain a point on S, not on the original curve.
+We map it to E using the descent machinery.
+<P>
+<P>
+<P>
+<PRE>
+&gt; _, m := AssociatedEllipticCurve(S);
+&gt; PT := m(pt);
+&gt; PT;
+(26935643239674824824611869793601774003477303945223677741244455058753
+924460587724041316046901475913814274843012625394997597714766923750555
+669810857471061235926971161094484197799515212721830555528087646969545
+65/837619099331786545303500955405701693904657590793269053332825491870
+645799230089011267382251975387071464373622714525213870033427638236014
+22&equiv;2504288439077587496501436920044109243898570190931925860244164 : 
+410189886613094359515065087530226951251222017120181558101276037601794
+678635473792334597914052557787798899390943937170051840037860568689664
+871351793404398352109768736545284569745952273382778021947446766526118
+621612003004627401344216069791103330332004546699363266079516476593864
+98538303998567379869974143259174395/766601839981278884919411893932635
+388671474045058772153268571977045787439290021029065740244648077391646
+579430077900352635000328805236464794479797855430820809227462762666048
+009219642700664370632930446228302292313415544188481623273194456758440
+446505454248062292834244615276350323795396202280072306278575288 : 1)
+&gt; Height(PT);
+476.811182818720336949724781780
+&gt; ConjecturalRegulator(E : Precision := 5);
+476.81 1
+</PRE>
+<HR>
+<H3><A NAME = "16398">Example <TT>CrvEllQNF_Heegner4 (H128E11)</TT></A></H3>
+Finally, we do some Heegner point calculation with the curve 43A
+and the discriminant -327. Note that the obtained trace down
+to the rationals is 3-divisible, but the point over the Hilbert
+class field is not.
+<P>
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([0,1,1,0,0]);
+&gt; HeegnerDiscriminants(E,-350,-300);
+[ -347, -344, -340, -335, -331, -328, -327, -323, -319, -308, -303 ]
+&gt; HF := HeegnerForms(E,-327); HF;
+[ &lt;&lt;43,19,4&gt;, 1, (0 : 1 : 0)&gt;, &lt;&lt;43,67,28&gt;, 1, (0 : 1 : 0)&gt;,
+&lt;&lt;86,105,33&gt;, 1, (0 : 1 : 0)&gt;, &lt;&lt;86,153,69&gt;, 1, (0 : 1 : 0)&gt;,
+&lt;&lt;129,105,22&gt;, 1, (0 : 1 : 0)&gt;, &lt;&lt;129,153,46&gt;, 1, (0 : 1 : 0)&gt;,
+&lt;&lt;172,67,7&gt;, 1, (0 : 1 : 0)&gt;, &lt;&lt;258,363,128&gt;, 1, (0 : 1 : 0)&gt;,
+&lt;&lt;258,411,164&gt;, 1, (0 : 1 : 0)&gt;, &lt;&lt;301,67,4&gt;, 1, (0 : 1 : 0)&gt;,
+&lt;&lt;473,621,204&gt;, 1, (0 : 1 : 0)&gt;, &lt;&lt;473,841,374&gt;, 1, (0 : 1 : 0)&gt; ]
+&gt; H := [x[1] : x in HF]; mul := [x[2] : x in HF];
+&gt; params := ModularParametrization(E,H : Precision := 10);
+&gt; wparams := [ mul[i]*params[i] : i in [1..#H]];
+&gt; hgpt := EllipticExponential(E,&amp;+wparams); 
+&gt; hgpt;
+[ 1.000000002 - 1.098466121E-9*I, 1.000000003 - 1.830776870E-9*I ]
+&gt; HeegnerPt := E![1,1]; 
+&gt; DivisionPoints(HeegnerPt, 3); 
+[ (0 : -1 : 1) ]
+</PRE>
+So the Heegner point is 3 times (0, - 1) in E(Q). 
+We now find algebraically one of the points (of which we took
+the trace to get HeegnerPt). This point will be defined
+over a subfield of the class field of Q(Sqrt( - 327)),
+and will have degree dividing the class number. 
+The poly below is the minimal polynomial of the x-coordinate.
+<P>
+<P>
+<PRE>
+&gt; ClassNumber(QuadraticField(-327));
+12
+&gt; poly, pt := HeegnerPoints(E, -327 : ReturnPoint);
+&gt; poly;
+&lt;t^12 + 10*t^11 + 76*t^10 - 1150*t^9 + 475*t^8 - 4823*t^7 +
+ 997*t^6 - 5049*t^5 - 2418*t^4 - 468*t^3 - 3006*t^2 + 405*t - 675, 1&gt;
+&gt; pt;
+(u : 1/16976844562625*(58475062076*u^11 + 568781661961*u^10 +
+ 4238812569862*u^9 - 68932294336288*u^8 + 42534102728187*u^7 -
+ 238141610215111*u^6 + 134503848441911*u^5 - 122884262733563*u^4 -
+ 58148031982456*u^3 + 129014145075851*u^2 -
+ 68190988248855*u + 40320643901175) : 1)
+&gt; DivisionPoints(pt,3);
+[]
+</PRE>
+<P>
+Here is another example of Heegner points over class fields.
+<HR>
+<H3><A NAME = "16399">Example <TT>CrvEllQNF_Heegner5 (H128E12)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([0,-1,0,-116,-520]);
+&gt; Conductor(E);
+1460
+&gt; ConjecturalRegulator(E);
+4.48887474770666173576726806264 1
+&gt; HeegnerDiscriminants(E,-200,-100);
+[ -119, -111 ]
+&gt; P := HeegnerPoints(E,-119);
+&gt; P;
+&lt;1227609449333996689*t^10 - 106261506377143984603*t^9 + 
+    2459826667693945203684*t^8 - 12539974356047058417320*t^7 - 
+    298524708823654411408343*t^6 + 4440876684434597926161175*t^5 + 
+    7573549099120618979833241*t^4 - 393938048860406386108113130*t^3 - 
+    215318107135691628298668863*t^2 + 13958289016298162706904004974*t 
+    + 38624559371249968900024945369, 1&gt;
+</PRE>
+The function automatically performs a heuristic check that the polynomial
+has the right properties, using reduction mod small primes.
+A more expensive check is the following.
+<P>
+<P>
+<PRE>
+&gt; G := GaloisGroup( P[1] );
+&gt; IsIsomorphic(G,DihedralGroup(10)); 
+true
+</PRE>
+The extension of Q( - 119) defined by the polynomial 
+is the class field. We now obtain a nice representation of it, 
+and use this to compute the height of the point (which is 
+a bit quicker than computing the height directly).
+<P>
+<P>
+<PRE>
+&gt; K&lt;u&gt; := NumberField(P[1]); 
+&gt; L&lt;v&gt;, m := OptimizedRepresentation(K);
+&gt; _&lt;y&gt; := PolynomialRing(Rationals());  // use 'y' for printing
+&gt; DefiningPolynomial(L);
+y^10 + 2*y^9 - y^8 - 7*y^7 - 7*y^6 + 10*y^5 + 13*y^4 - 9*y^3 - 5*y^2 +
+    5*y - 1
+&gt; PT := Points(ChangeRing(E,L),m(u))[1];  // y-coord is defined over L
+&gt; Height(PT);
+6.97911761109714376876370533
+
+</PRE>
+<HR>
+<H4><A NAME = "16400">Analytic Information</A></H4>
+
+
+
+<H5><A NAME = "16401">Periods(E: parameters) : CrvEll -&gt; [ FldComElt ]</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Returns the sequence of periods of the Weierstrass wp-function
+associated to the (rational) elliptic curve E, to <TT>Precision</TT> digits.  
+The first element of the sequence is the real period. The function 
+accepts a non-minimal model, and returns the periods corresponding
+to that model. As with many algorithms involving analytic information
+on elliptic curves, the implementation exploits an AGM-trick due to Mestre.
+There is some functionality for elliptic curves over number fields
+(package level code), though the exact normalisation is not always given.
+</BLOCKQUOTE>
+<H5><A NAME = "16402">Periods(E, k) : CrvEll, RngIntElt -&gt; [ FldComElt ]</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Given an elliptic curve over a number field an integer denoting
+the kth real embedding, calculate the periods. This uses the C
+implementation after turning the coefficients of the defining equation
+into real numbers. Again the first period in the returned array should
+be real.
+</BLOCKQUOTE>
+<H5><A NAME = "16403">EllipticCurveFromPeriods(om: parameters) : [ FldComElt ] -&gt; CrvEll</A></H5>
+
+<PRE>    Epsilon: FldReElt                   Default: 0.001</PRE>
+<BLOCKQUOTE>
+Given two complex numbers &omega;<sub>1</sub>, &omega;<sub>2</sub> such that &omega;<sub>2</sub>/&omega;<sub>1</sub>
+is in the upper half-plane that correspond to an integral model of an
+elliptic curve over (Q), return such a minimal model of such a curve.
+This uses the classical <TT>Eisenstein</TT> series, with the parameter <TT>Epsilon</TT>
+indicating how close to integers the computed -27c<sub>4</sub> and -54c<sub>6</sub> need to be.
+</BLOCKQUOTE>
+<H5><A NAME = "16404">RealPeriod(E: parameters) : CrvEll -&gt; FldReElt</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Returns the real period of the Weierstrass wp-function associated
+to the elliptic curve E to <TT>Precision</TT> digits.
+</BLOCKQUOTE>
+<H5><A NAME = "16405">EllipticExponential(E, z) : CrvEll, FldComElt -&gt; [ FldComElt ]</A></H5>
+<BLOCKQUOTE>
+Given a rational elliptic curve E and a complex number z, the function
+computes the pair [wp(z), wp'(z)] where wp(s) is the Weierstrass 
+wp-function. A nonminimal model may be given, though it should be integral.
+The algorithm used is taken from <A  HREF = "text1446.htm#bib_cohen1">[Coh93]</A> for small precision, and 
+Newton iteration on <TT>EllipticLogarithm</TT> is used for high precision.
+The function returns a sequence rather than a point on the curve.
+</BLOCKQUOTE>
+<H5><A NAME = "16406">EllipticExponential(E, k, z) : CrvEll, RngIntElt, FldComElt -&gt; [ FldComElt ]</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E over a number field,
+an integer denoting the kth real embedding, and a complex number z,
+the function computes the pair [wp(z), wp'(z)] where wp(s)
+is the Weierstrass  wp-function. As with <TT>Periods</TT>, the function
+proceeds by using the C implementation over the reals.
+There is no restriction that the curve equation be integral.
+The function returns a sequence rather than a point on the curve.
+</BLOCKQUOTE>
+<H5><A NAME = "16407">EllipticExponential(E, S) : CrvEll, [ FldRat ] -&gt; [ FldComElt ]</A></H5>
+<BLOCKQUOTE>
+Given a rational elliptic curve E and a sequence S = [p, q], where
+p and q are rational numbers, this function computes the elliptic 
+exponential of p times the <TT>RealPeriod</TT> and q times the imaginary 
+period.
+</BLOCKQUOTE>
+<H5><A NAME = "16408">EllipticLogarithm(P): PtEll[FldRat] -&gt; FldComElt</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Denote by &omega;<sub>1</sub>, &omega;<sub>2</sub> the periods of the Weierstrass
+wp-function related to E. This function returns the elliptic
+logarithm &phi;(P) of the point P,
+such that -&omega;<sub>1</sub>/2&le;((Re))(&phi;(P))
+&lt; &omega;<sub>1</sub>/2 and -&omega;<sub>2</sub>/2&le;((Im))(&phi;(P)) &lt; &omega;<sub>2</sub>/2.
+The value is returned to <TT>Precision</TT> digits. As with <TT>Periods</TT>,
+a non-minimal model can be given (though the model must be integral),
+and the <TT>EllipticLogarithm</TT> will be computed with respect to it.
+The algorithm is again an AGM-trick due to Mestre.
+</BLOCKQUOTE>
+<H5><A NAME = "16409">EllipticLogarithm(P, k): PtEll[FldNum], RngIntElt -&gt; FldComElt</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Given an elliptic curve over a number field and a point on it,
+return the elliptic logarithm associated to the kth real embedding.
+There is no restriction that the model be integral.
+</BLOCKQUOTE>
+<H5><A NAME = "16410">EllipticLogarithm(E, S):  CrvEll, [ FldComElt ] -&gt; FldComElt</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given an elliptic curve E and a sequence S = [z<sub>1</sub>, z<sub>2</sub>], where
+z<sub>1</sub> and z<sub>2</sub> are complex numbers approximating a point P on E,
+this function returns the elliptic logarithm &phi;(P). For details see
+the previous intrinsic. 
+When <TT>Check</TT> is false, z<sub>1</sub> and z<sub>2</sub>  need not have any relation 
+to a point on the curve, in which case only the x-coordinate matters 
+up to (essentially) a choice of sign in the resulting logarithm.
+</BLOCKQUOTE>
+<H5><A NAME = "16411">pAdicEllipticLogarithm(P, p: parameters): PtEll, RngIntElt -&gt; FldLocElt</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: 50</PRE>
+<BLOCKQUOTE>
+For a point P on an elliptic curve E which is a minimal model and
+a prime p, returns the p-adic elliptic logarithm of P to
+<TT>Precision</TT> digits.  The order of P must not be a power of p.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16412">Example <TT>CrvEllQNF_ell-exp (H128E13)</TT></A></H3>
+Verify that <TT>EllipticExponential</TT> and <TT>EllipticLogarithm</TT> are inverses.
+<P>
+<P>
+<PRE>
+&gt; C&lt;I&gt;:=ComplexField(96);
+&gt; E:=EllipticCurve([0,1,1,0,0]);
+&gt; P:=EllipticExponential(E,0.571+0.221*I); P;
+[ 1.656947605210186238868298175 + -1.785440180067681418618695947*I,
+-2.417077284700315330385200257 + 3.894153792661208360153853530*I ]
+&gt; EllipticLogarithm(E,P);
+0.5710000000000000000000000000 + 0.2210000000000000000000000000*I
+
+</PRE>
+<P>
+Add points on a curve via Napier's method.
+<P>
+<P>
+<PRE>
+&gt; E:=EllipticCurve([0,0,1,-7,6]);
+&gt; P1:=E![0,2]; P2:=E![2,0]; P3:=E![1,0];
+&gt; L:=EllipticLogarithm(E!P1)+EllipticLogarithm(E!P2)+EllipticLogarithm(E!P3);
+&gt; L;
+0.521748219757790769853120197937 + 1.48054826824141499330733111064*i
+&gt; P:=EllipticExponential(E,L);
+&gt; [Round(Real(x)) : x in P];
+[ 4, -7 ]
+&gt; P1+P2+P3;
+(4 : -7 : 1)
+</PRE>
+<HR>
+<H3><A NAME = "16413">Example <TT>CrvEllQNF_ellexp-nf (H128E14)</TT></A></H3>
+Verify that the use of real embeddings works with <TT>Periods</TT>.
+<P>
+<P>
+<PRE>
+&gt; Q := RationalsAsNumberField();
+&gt; E := EllipticCurve([0,1,1,0,0]);
+&gt; Periods (E : Precision:=15);
+[ 5.46868952996758, 2.73434476498379 + 1.36318241817043*$.1 ]
+&gt; EQ := BaseChange (E, Q);
+&gt; Periods (EQ,1 : Precision:=15);
+[ 5.46868952996758, 2.73434476498379 + 1.36318241817043*$.1 ]
+&gt; _&lt;s&gt; := QuadraticField(5);
+&gt; E := EllipticCurve([s+1,1,-1,-s,2]);
+&gt; Periods (E,1 : Precision:=15);
+[ 3.87725004777908, 1.93862502388954 + 0.697984279657861*$.1 ]
+&gt; Periods (E,2 : Precision:=15);
+[ 3.20379220349709, 1.60189610174854 + 1.31468730940820*$.1 ]
+</PRE>
+And go back-and-forth with exponentials and logarithms.
+<P>
+<P>
+<PRE>
+&gt; K&lt;s&gt; := QuadraticField(5);
+&gt; E := EllipticCurve([s+1,1,-1,-s,2]);
+&gt; P := Points(E,1)[1];
+&gt; Q := Points(E,1/2*(-9*s+11))[1];
+&gt; R := Points(E,1/2*(25*s + 55))[1];
+&gt; lP1 := EllipticLogarithm(P,1); lP1;
+0.786501754500788971333154830602
+&gt; P1 := EllipticExponential(E,1,lP1); P1;
+ 0.999999999999999999999999999998 - 8.09833458701901575572176176187E-40*i,
+-2.85410196624968454461376050309 - 5.80398551230662251457732924835E-40*i ]
+&gt; Abs(Conjugates(P[2])[1]-P1[2]); // y-coord diff is close to 0
+3.15544362088404722170029225148E-30
+&gt; lQ2 := EllipticLogarithm(Q,2);
+&gt; lR2 := EllipticLogarithm(R,2);
+&gt; QR2 := EllipticExponential(E,2,lQ2+lR2);
+[ 0.236067977499789696409173668732 - 9.28794630103153670720620051679E-40*i,
+-1.09016994374947424102293417183 - 2.95168486889455241068806426790E-39*i ]
+&gt; Abs(Conjugates((Q+R)[1])[2]-QR2[1]);  // compare x-coords
+1.18329135783151770848210977742E-30
+</PRE>
+<HR>
+<H5><A NAME = "16414">RootNumber(E) : CrvEll -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Calculates the global root number of an elliptic curve E defined
+over Q.
+This is equal to the sign in the
+functional equation of the L-series associated to the curve.
+The method used is to take
+a product of local root numbers over the primes of bad reduction.
+</BLOCKQUOTE>
+<H5><A NAME = "16415">RootNumber(E, p) : CrvEll, RngIntElt  -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Calculates the local root number at a prime p
+of an elliptic curve E.
+The method used is due to Halberstadt; for p &gt; 3 it is a straightforward
+calculation involving the valuation of the discriminant, while for p = 2, 3
+it involves a more careful analysis of the reduction type.
+</BLOCKQUOTE>
+<H5><A NAME = "16416">AnalyticRank(E) : CrvEll -&gt; RngIntElt, FldReElt</A></H5>
+
+<PRE>    SetVerbose("AnalyticRank", n):      Maximum: 1</PRE>
+
+<PRE>    Precision: RngIntElt                Default: 5</PRE>
+<BLOCKQUOTE>
+Determine the analytic rank of the rational elliptic curve E. The algorithm
+used is heuristic, computing derivatives of the L-function L(E, s) at
+s=1 until one appears to be nonzero. Local power series methods are
+used to compute the special functions used for higher derivatives.
+The function returns the first nonzero derivative L<sup>(r)</sup>(1)/r! as a
+second argument. The precision is optional, and is taken to be 17 bits
+if omitted; the time taken can increase dramatically if this is increased
+much beyond 50 digits as the time to compute the special functions
+then starts to dominate the running time.
+</BLOCKQUOTE>
+<H5><A NAME = "16417">ConjecturalRegulator(E) : CrvEll -&gt; FldReElt, RngIntElt</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Using the <TT>AnalyticRank</TT> function, this function calculates an 
+approximation, assuming that the Birch--Swinnerton-Dyer conjecture holds, 
+to the product of the regulator of the elliptic curve E and the order 
+of the Tate--Shafarevich group.  The (assumed) analytic rank is returned 
+as a second value.
+</BLOCKQUOTE>
+<H5><A NAME = "16418">ConjecturalRegulator(E, v) : CrvEll, FldReElt -&gt; FldReElt</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E with L-function L(E, s) and the value v of 
+the first nonzero derivative L<sup>(r)</sup>(1)/r!, this function calculates an
+approximation, assuming that the Birch--Swinnerton-Dyer conjecture holds,
+to the product of the regulator of the elliptic curve E and the order
+of its Tate--Shafarevich group.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16419">Example <TT>CrvEllQNF_analytic-rank (H128E15)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; E:=EllipticCurve([1,1,0,-2582,48720]);
+&gt; time r, Lvalue := AnalyticRank(E : Precision:=9); r,Lvalue;
+Time: 17.930
+6 320.781164
+&gt; ConjecturalRegulator(E,Lvalue);
+68.2713770
+&gt; time G, map := MordellWeilGroup(E : HeightBound := 8); G;
+Time: 21.540
+Abelian Group isomorphic to Z (6 copies)
+Defined on 6 generators (free)
+&gt; Regulator([map(g): g in OrderedGenerators(G)]);
+68.2713769
+</PRE>
+<HR>
+<H3><A NAME = "16420">Example <TT>CrvEllQNF_conjectural-regulator (H128E16)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; ConjecturalRegulator(EllipticCurve([0,-1,1,0,0]) : Precision := 8);
+1.0000000 0
+&gt; ConjecturalRegulator(EllipticCurve([0,-1,1,0,0]) : Precision := 21);
+1.00000000000000000000 0
+&gt; ConjecturalRegulator(EllipticCurve([0,-1,1,0,0]) : Precision := 35);
+1.0000000000000000000000000000000000 0
+&gt; ConjecturalRegulator(EllipticCurve([0,-1,1,0,0]) : Precision := 50);
+1.0000000000000000000000000000000000000000000000000 0
+</PRE>
+<HR>
+<H5><A NAME = "16421">ModularDegree(E) : CrvEll -&gt; RngIntElt</A></H5>
+
+<PRE>    SetVerbose("ModularDegree", n):     Maximum: 1</PRE>
+<BLOCKQUOTE>
+Determine the modular degree of a rational elliptic curve E.
+The algorithm used is described in <A  HREF = "text1446.htm#bib_Wat2003">[Wat02]</A>. One computes
+the special value L(Sym<sup>2</sup> E, 2) of the motivic symmetric-square
+L-function of the elliptic curve, and uses the formula
+deg(phi)=L(Sym<sup>2</sup> E, 2)/(2 * Pi * &Omega;) * (Nc<sup>2</sup>) * E<sub>p</sub>(2)
+where &Omega; is the area of the fundamental parallelogram of the
+curve, N is the conductor, c is the Manin constant, and E<sub>p</sub>(2)
+is a product over primes whose square divides the conductor.
+The Manin constant is assumed to be 1 except in the cases
+described in <A  HREF = "text1446.htm#bib_StWat2002">[SW02]</A>, where it is conjectured
+that the optimal curves for parameterizations from X<sub>1</sub>(N) and X<sub>0</sub>(N)
+are different. A warning is given in these cases. The optimal curve
+for parameterizations from X<sub>1</sub>(N) is assumed to be the curve in the
+isogeny class of E that has minimal Faltings height (maximal &Omega;).
+The algorithm is based upon a sequence of real-number approximations
+converging to an integer --- the use of verbose printing
+for <TT>ModularDegree</TT> allows the user to see the sequence of approximations.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16422">Example <TT>CrvEllQNF_mod-deg (H128E17)</TT></A></H3>
+First we define a space of ModularForms.
+<P>
+<P>
+<PRE>
+&gt; M:=ModularForms(Gamma0(389),2);
+</PRE>
+The first of the newforms associated to M corresponds to an elliptic curve.
+<P>
+<P>
+<PRE>
+&gt; f := Newform(M,1); f; 
+q - 2*q^2 - 2*q^3 + 2*q^4 - 3*q^5 + 4*q^6 - 5*q^7 + q^9 + 6*q^10 - 4*q^11 + 
+O(q^12)
+&gt; E := EllipticCurve(f); E;
+Elliptic Curve defined by y^2 + y = x^3 + x^2 - 2*x over Rational Field
+</PRE>
+We can compute the modular degree of this using modular symbols.
+<P>
+<P>
+<PRE>
+&gt; time ModularDegree(ModularSymbols(f));
+40
+Time: 0.200
+</PRE>
+Or via the algorithm based on elliptic curves.
+<P>
+<P>
+<PRE>
+&gt; time ModularDegree(E);
+40
+Time: 0.000
+</PRE>
+The elliptic curve algorithm is capable of handling examples of high level,
+particularly when bad primes have multiplicative reduction.
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([0,0,0,0,-(10^4+9)]); 
+&gt; Conductor(E);
+14425931664
+&gt; time ModularDegree(E);
+6035544576
+Time: 3.100
+</PRE>
+<HR>
+<H4><A NAME = "16423">Integral and S-integral Points</A></H4>
+
+<P>
+<P>
+Let E be an elliptic curve defined over the rational numbers Q
+and denote by S={p<sub>1</sub>, ..., p<sub>s - 1</sub>, &infin;} a finite set of primes
+containing the prime at infinity.
+There are only finitely many S-integral points on E.  (That is, points
+where the denominators of the coordinates are only supported by primes
+in S.)  Note that the point at infinity on E is never returned, since
+it is supported at every prime.
+<P>
+The following algorithms use the technique of linear forms in complex
+and p-adic elliptic logarithms.
+<P>
+The main routine here is <TT>(S)IntegralPoints</TT> for an elliptic curves.
+The functions listed afterwards, for determining integral points on
+various other kinds of genus one curves, are applications of the main
+routine.
+
+
+<H5><A NAME = "16424">IntegralPoints(E) : CrvEll -&gt; [ PtEll ]</A></H5>
+
+<PRE>    FBasis: [ PtEll ]                   Default: </PRE>
+
+<PRE>    SafetyFactor: RngIntElt             Default: 1</PRE>
+<BLOCKQUOTE>
+Given an elliptic curve E over Q, this returns a sequence containing all
+the integral points on E, up to sign (only one of P and -P is listed).
+<P>
+The algorithm involves first computing generators of the Mordell-Weil group,
+using the tools available in Magma for this.  
+Alternatively, the user may precompute generators and pass them to 
+<TT>IntegralPoints</TT> as the optional parameter <TT>FBasis</TT>.
+This should be a sequence of points on E that are independent modulo torsion
+(for instance, as returned by <TT>ReducedBasis</TT>).
+<TT>IntegralPoints</TT> will then find all integral points on E that are in 
+the group generated by <TT>FBasis</TT> and torsion.
+<P>
+If the optional argument <TT>SafetyFactor</TT> is specified, the search phase
+at the final step is extended as a safety check.  (The number of points
+checked is increased by approximately this factor.)
+</BLOCKQUOTE>
+<H5><A NAME = "16425">SIntegralPoints(E, S) : CrvEll, SeqEnum -&gt; [ PtEll ]</A></H5>
+
+<PRE>    FBasis: [ PtEll ]                   Default: </PRE>
+
+<PRE>    SafetyFactor: RngIntElt             Default: 1</PRE>
+<BLOCKQUOTE>
+Given an elliptic curve E over the rationals and a set S of finite primes,
+returns the sequence of all S-integral points, up to sign (only one of
+P and -P is listed).  
+<P>
+The optional parameters <TT>FBasis</TT> and <TT>SafetyFactor</TT> have the same meaning
+as in <TT>IntegralPoints</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16426">Example <TT>CrvEllQNF_IntegralPoints (H128E18)</TT></A></H3>
+We find all integral points on a certain elliptic curve:
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([0, 17]);
+&gt; Q, reps := IntegralPoints(E);
+&gt; Q;
+[ (-2 : -3 : 1), (8 : 23 : 1), (43 : -282 : 1), (4 : 9 : 1),
+(2 : -5 : 1), (-1 : 4 : 1), (52 : -375 : 1), (5234 : 378661 : 1) ]
+&gt; reps;
+[
+    [ &lt;(-2 : -3 : 1), 1&gt; ],
+    [ &lt;(-2 : -3 : 1), 2&gt; ],
+    [ &lt;(-2 : -3 : 1), 1&gt;, &lt;(4 : -9 : 1), -2&gt; ],
+    [ &lt;(4 : -9 : 1), -1&gt; ],
+    [ &lt;(-2 : -3 : 1), 1&gt;, &lt;(4 : -9 : 1), -1&gt; ],
+    [ &lt;(-2 : -3 : 1), 1&gt;, &lt;(4 : -9 : 1), 1&gt; ],
+    [ &lt;(-2 : -3 : 1), 2&gt;, &lt;(4 : -9 : 1), 1&gt; ],
+    [ &lt;(-2 : -3 : 1), 1&gt;, &lt;(4 : -9 : 1), 3&gt; ]
+]
+</PRE>
+We see here that the chosen basis consists of the points
+( - 2 : - 3 : 1) and (4 : - 9 : 1), and that coefficients which are
+zero are omitted.
+<HR>
+<H3><A NAME = "16427">Example <TT>CrvEllQNF_SIntegralPoints (H128E19)</TT></A></H3>
+We find all S-integral points on an elliptic curve of rank 2, for
+the set of primes S = {2, 3, 5, 7}.
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([-228, 848]);
+&gt; Q := SIntegralPoints(E, [2, 3, 5, 7]);
+&gt; for P in Q do P; end for;    // Print one per line
+(4 : 0 : 1)
+(-11 : 45 : 1)
+(16 : 36 : 1)
+(97/4 : -783/8 : 1)
+(-44/9 : -1160/27 : 1)
+(857/4 : -25027/8 : 1)
+(6361/400 : -282141/8000 : 1)
+(534256 : -390502764 : 1)
+(946/49 : -20700/343 : 1)
+(-194/25 : -5796/125 : 1)
+(34/9 : 172/27 : 1)
+(814 : 23220 : 1)
+(13 : 9 : 1)
+(-16 : 20 : 1)
+(1/4 : -225/8 : 1)
+(52 : -360 : 1)
+(53 : 371 : 1)
+(16/49 : 9540/343 : 1)
+(-16439/1024 : -631035/32768 : 1)
+(34 : 180 : 1)
+(-2 : 36 : 1)
+(-14 : -36 : 1)
+(14 : -20 : 1)
+(754 : -20700 : 1)
+(94/25 : -828/125 : 1)
+(2 : 20 : 1)
+(94 : 900 : 1)
+(-818/49 : 468/343 : 1)
+(49/16 : -855/64 : 1)
+(196 : -2736 : 1)
+(629/25 : 13133/125 : 1)
+(1534/81 : -42020/729 : 1)
+(8516/117649 : -1163623840/40353607 : 1)
+</PRE>
+<HR>
+<H5><A NAME = "16428">IntegralQuarticPoints(Q) : [ RngIntElt ] -&gt; [ SeqEnum ]</A></H5>
+<BLOCKQUOTE>
+If Q is a sequence of five integers [a, b, c, d, e] where e is a
+square, this function returns all integral points (modulo negation)
+on the curve y<sup>2</sup>=ax<sup>4</sup> + bx<sup>3</sup> + cx<sup>2</sup> + dx + e.
+</BLOCKQUOTE>
+<H5><A NAME = "16429">IntegralQuarticPoints(Q, P) : [ RngIntElt ], [ RngIntElt ] -&gt; [ SeqEnum ]</A></H5>
+<BLOCKQUOTE>
+If Q is a list of five integers [a, b, c, d, e] defining the
+hyperelliptic quartic y<sup>2</sup>=ax<sup>4</sup> + bx<sup>3</sup> + cx<sup>2</sup> + dx + e and P is a
+sequence representing a rational point [x, y], this function
+returns all integral points on Q.
+</BLOCKQUOTE>
+<H5><A NAME = "16430">SIntegralQuarticPoints(Q, S) : [ RngIntElt ], [ RngIntElt ] -&gt; [ SeqEnum ]</A></H5>
+<BLOCKQUOTE>
+Given a sequence of integers Q = [a, b, c, d, e] where a is a square,
+this function returns all S-integral points on the quartic
+curve y<sup>2</sup> = ax<sup>4</sup> + bx<sup>3</sup> + cx<sup>2</sup> + dx + e for the set S of finite primes.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16431">Example <TT>CrvEllQNF_IntegralPointsSequence (H128E20)</TT></A></H3>
+We find all integral points (modulo negation) on the curve
+y<sup>2</sup> = x<sup>4</sup> - 8x<sup>2</sup> + 8x + 1.  Since the constant term is a square we
+can use the first form and do not have to provide a point as well.
+<P>
+<P>
+<PRE>
+&gt; IntegralQuarticPoints([1, 0, -8, 8, 1]);
+[
+    [ 2, -1 ],
+    [ -6, 31 ],
+    [ 0, 1 ]
+]
+</PRE>
+<HR>
+<H5><A NAME = "16432">SIntegralLjunggrenPoints(Q, S) : [ RngIntElt ], [ RngIntElt ]  -&gt; [ SeqEnum ]</A></H5>
+<BLOCKQUOTE>
+Given a sequence of integers Q = [a, b, c, d], this function
+returns all S-integral points on the curve
+C: ay<sup>2</sup> = bx<sup>4</sup> + cx<sup>2</sup> + d for the set S of finite primes, provided that C is nonsingular.
+</BLOCKQUOTE>
+<H5><A NAME = "16433">SIntegralDesbovesPoints(Q, S) : [ RngIntElt ], [ RngIntElt ] -&gt; [ SeqEnum ]</A></H5>
+<BLOCKQUOTE>
+Given a sequence of integers Q = [a, b, c, d], this function
+returns all S-integral points on C: ay<sup>3</sup> + bx<sup>3</sup> + cxy + d=0 for the set S of finite primes,
+provided that C is nonsingular.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16434">Example <TT>CrvEllQNF_Desboves (H128E21)</TT></A></H3>
+We find the points supported by [2, 3, 5, 7] on the curve
+9y<sup>3</sup> + 2x<sup>3</sup> + xy + 8 = 0.
+<P>
+<P>
+<PRE>
+&gt; S := [2, 3, 5, 7];
+&gt; SIntegralDesbovesPoints([9, 2, 1, 8], S);
+[
+    [ 1, -1 ],
+    [ -94/7, 172/21 ],
+    [ -11/7, 2/7 ],
+    [ 5, -3 ],
+    [ 2, -4/3 ],
+    [ 2/7, -20/21 ],
+    [ -8/5, -2/15 ]
+]
+</PRE>
+<HR>
+<H4><A NAME = "16435">Elliptic Curve Database</A></H4>
+
+<P>
+<P>
+Magma includes John Cremona's database of all elliptic curves over
+Q of small conductor (up to 359 999 as of May 2015).
+This section defines the interface to that database.
+<P>
+For each conductor in the range stored in the database the curves with that
+conductor are stored in a number of isogeny classes.  Each curve in an
+isogeny class is isogenous (but not isomorphic) to the other curves in that
+class.  Isogeny classes are referred to by number rather than the alphabetic
+form given in the Cremona tables.
+<P>
+All of the stored curves are global minimal models.
+
+
+<H5><A NAME = "16436">EllipticCurveDatabase(: parameters) : -&gt; DB</A></H5>
+<H5>CremonaDatabase(: parameters) : -&gt; DB</H5>
+
+<PRE>    BufferSize: RngIntElt               Default: 10000</PRE>
+<BLOCKQUOTE>
+This function returns a database object which contains information about
+the elliptic curve database and is used in the functions which access it.
+The optional parameter <TT>BufferSize</TT> controls the size of an internal
+buffer --- see the description of <TT>SetBufferSize</TT> for more information.
+</BLOCKQUOTE>
+<H5><A NAME = "16437">SetBufferSize(D, n) : DB, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+The elliptic curve database D uses an internal buffer to cache disk reads;
+if the buffer is large enough then the entire file can be cached and will
+not need to be read from the disk more than once.  On the other hand, if
+only a few curves will be accessed then a large buffer is not especially
+useful.
+<TT>SetBufferSize</TT> can be used to set the size n (in bytes) of this buffer.
+There are well defined useful minimum and maximum sizes for this buffer,
+and values outside this range will be treated as the nearest useful value.
+</BLOCKQUOTE>
+<H5><A NAME = "16438">LargestConductor(D) : DB -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the largest conductor of any elliptic curve stored in the database.
+It is an error to attempt to refer to larger conductors in the database.
+</BLOCKQUOTE>
+<H5><A NAME = "16439">ConductorRange(D) : DB -&gt; RngIntElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the smallest and largest conductors stored in the database.  It
+is an error to attempt to refer to conductors outside of this range.
+</BLOCKQUOTE>
+<H5><A NAME = "16440"># D : DB -&gt; RngIntElt</A></H5>
+<H5>NumberOfCurves(D) : DB -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Returns the number of elliptic curves stored in the database.
+</BLOCKQUOTE>
+<H5><A NAME = "16441">NumberOfCurves(D, N) : DB, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the number of elliptic curves stored in the database for
+conductor N.
+</BLOCKQUOTE>
+<H5><A NAME = "16442">NumberOfCurves(D, N, i) : DB, RngIntElt, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the number of elliptic curves stored in the database in
+the i-th isogeny class for conductor N.
+</BLOCKQUOTE>
+<H5><A NAME = "16443">NumberOfIsogenyClasses(D, N) : DB, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the number of isogeny classes stored in the database for
+conductor N.
+</BLOCKQUOTE>
+<H5><A NAME = "16444">EllipticCurve(D, N, I, J): DB, RngIntElt, RngIntElt, RngIntElt -&gt; CrvEll</A></H5>
+<H5>EllipticCurve(D, N, S, J): DB, RngIntElt, MonStgElt, RngIntElt -&gt; CrvEll</H5>
+<BLOCKQUOTE>
+Returns the J-th elliptic curve of the I-th isogeny class of
+conductor N from the database.  I may be specified either as an
+integer (first form) or as a label like <TT>"A"</TT> (second form).
+</BLOCKQUOTE>
+<H5><A NAME = "16445">EllipticCurve(D, S): DB, MonStgElt -&gt; CrvEll</A></H5>
+<H5>EllipticCurve(S): MonStgElt -&gt; CrvEll</H5>
+<BLOCKQUOTE>
+Returns a representative elliptic curve with label S
+(e.g., <TT>"101a"</TT> or <TT>"101a1"</TT>) from the specified database
+(or if not specified, from the Cremona database).
+</BLOCKQUOTE>
+<H5><A NAME = "16446">Random(D) : DB -&gt; CrvEll</A></H5>
+<BLOCKQUOTE>
+Returns a random curve from the database.
+</BLOCKQUOTE>
+<H5><A NAME = "16447">CremonaReference(D, E) : DB, CrvEll -&gt; MonStgElt</A></H5>
+<H5>CremonaReference(E) : CrvEll -&gt; MonStgElt</H5>
+<BLOCKQUOTE>
+Returns the database reference to the minimal model for E
+(e.g., <TT>"101a1"</TT>).  E must be defined over Q and its conductor
+must lie within the range of the database.  The second form of this
+function must open the database for each call, so if it is being used
+many times the database should be created once and the first form used
+instead.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16448">Example <TT>CrvEllQNF_ecdb1 (H128E22)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; D := CremonaDatabase();
+&gt; #D;
+2247187
+&gt; minC, maxC := ConductorRange(D);
+&gt; minC, maxC;
+1 359999
+&gt; &amp;+[ NumberOfCurves(D, C) : C in [ minC .. maxC ] ];
+2247187
+</PRE>
+The conductor in that range with the most curves is 235200.
+<P>
+<P>
+<PRE>
+&gt; S := [ NumberOfCurves(D, C) : C in [ minC .. maxC ] ];
+&gt; cond := maxval + minC - 1 where _,maxval := Max(S);
+&gt; cond;
+235200
+&gt; NumberOfCurves(D, cond);
+1336
+&gt; NumberOfIsogenyClasses(D, cond);
+754
+</PRE>
+The unique curve of conductor 5077 has rank 3.
+<P>
+<P>
+<PRE>
+&gt; NumberOfCurves(D, 5077);
+1
+&gt; E := EllipticCurve(D, 5077, 1, 1);
+&gt; E;
+Elliptic Curve defined by y^2 + y = x^3 - 7*x + 6 over Rational Field
+&gt; CremonaReference(D, E);
+5077a1
+&gt; Rank(E);
+3
+</PRE>
+<HR>
+<H5><A NAME = "16449">EllipticCurves(D, N, I) : DB, RngIntElt, RngIntElt -&gt; [ CrvEll ]</A></H5>
+<H5>EllipticCurves(D, N, S) : DB, RngIntElt, MonStgElt -&gt; [ CrvEll ]</H5>
+<BLOCKQUOTE>
+Returns the sequence of elliptic curves in the I-th isogeny class
+for conductor N from the database.  I may be specified either as
+an integer (first form) or as a label like <TT>"A"</TT> (second form).
+</BLOCKQUOTE>
+<H5><A NAME = "16450">EllipticCurves(D, N) : DB, RngIntElt -&gt; [ CrvEll ]</A></H5>
+<BLOCKQUOTE>
+The sequence of elliptic curves for conductor N from
+the database.
+</BLOCKQUOTE>
+<H5><A NAME = "16451">EllipticCurves(D, S) : DB, MonStgElt -&gt; [ CrvEll ]</A></H5>
+<BLOCKQUOTE>
+The sequence of elliptic curves with label S from the database.
+S may specify just a conductor (like <TT>"101"</TT>), or both a
+conductor and an isogeny class (like <TT>"101A"</TT>).
+</BLOCKQUOTE>
+<H5><A NAME = "16452">EllipticCurves(D) : DB -&gt; [ CrvEll ]</A></H5>
+<BLOCKQUOTE>
+The sequence of elliptic curves stored in the database.  Note: this
+function is extremely slow due to the number of curves involved.  Where
+possible it would be much better to iterate through the database instead
+(see example).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16453">Example <TT>CrvEllQNF_ecdb2 (H128E23)</TT></A></H3>
+Here are two ways to iterate through the database:
+<P>
+<P>
+<PRE>
+&gt; D := CremonaDatabase();
+&gt; &amp;+[ Discriminant(E) : E in D ];
+-1289510191052242707326465794849798850533213480828
+&gt; sum := 0;
+&gt; for E in D do sum +:= Discriminant(E); end for;
+&gt; sum;
+-1289510191052242707326465794849798850533213480828
+</PRE>
+Now we choose a random curve from the database, and look up the other curves
+in the same isogeny class.  (Note: when this input is entered, the random curve
+will probably be different to the example shown here!)
+<P>
+<P>
+<PRE>
+&gt; E := Random(D);
+&gt; E;
+Elliptic Curve defined by y^2 = x^3 - 225*x over Rational Field
+&gt; r := CremonaReference(E);
+&gt; r;
+7200bg1
+// remove the numeric characters from the end of the string r
+&gt; while r[#r] in "0123456789" do Prune(~r); end while;
+&gt; r;
+7200bg
+&gt; EllipticCurves(D, r);
+[
+    Elliptic Curve defined by y^2 = x^3 - 225*x over Rational Field,
+    Elliptic Curve defined by y^2 = x^3 - 2475*x - 47250 over Rational Field,
+    Elliptic Curve defined by y^2 = x^3 - 2475*x + 47250 over Rational Field,
+    Elliptic Curve defined by y^2 = x^3 + 900*x over Rational Field
+]
+&gt; E in $1;
+true
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1450.htm">[Next]</A><A  HREF = "text1448.htm">[Prev]</A> <A  HREF = "text1450.htm">[Right]</A> <A  HREF = "text1448.htm">[Left]</A> <A  HREF = "text1447.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

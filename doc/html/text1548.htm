@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Extended Example</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1538.htm">[Next]</A><A  HREF = "text1547.htm">[Prev]</A> <A  HREF = "text1538.htm">[Right]</A> <A  HREF = "text1547.htm">[Left]</A> <A  HREF = "text1539.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "17397">Extended Example</A></H3>
+
+<P>
+<P>
+<P>
+We give an example that combines functionality for small modular curves with Magma's machinery for
+curve quotients and elliptic curves to compute the j-invariant of a special class of elliptic curves
+over <B>Q</B> up to quadratic twist. This class of curves arose in Wiles' original paper on Fermat's
+Last Theorem and the Shimura-Tanayama-Weil (STW) conjecture.
+
+
+<HR>
+<H3><A NAME = "17398">Example <TT>SmallModCrv_big_ex (H135E7)</TT></A></H3>
+In the Breuil-Conrad-Diamond-Taylor-Wiles proof of the STW conjecture, a couple of special cases
+arise that lead to a finite number of classes of elliptic curves up to bar(Q)-isomorphism
+that have to be determined and then checked directly for modularity. If E[p] is the p-torsion
+subgroup of E considered as a (Gal)(bar(Q)/(Q))-module, these are cases where
+E[3] and E[5] are both reducible,
+E[3] is reducible and E[5] is irreducible but absolutely reducible as a
+(Gal)(bar(Q)/(Q)(Sqrt(5)))-module,
+or E[5] is reducible and E[3] is irreducible but absolutely reducible as a
+(Gal)(bar(Q)/(Q)(Sqrt( - 3)))-module. The first case corresponds to non-cuspidal rational points 
+on X<sub>0</sub>(15) and leads, up to isogeny, to one class of twists with j= - 25/2 as may easily be verified
+using the intrinsics here. The second case corresponds
+to non-cuspidal rational points on a quotient of X<sub>0</sub>(75) and leads to curves with j=0.
+We consider the third case in this example, showing
+that, up to isogeny, there is one class (up to quadratic twist) with j-invariant (11/2)<sup>3</sup>.
+<P>
+<P>
+<P>
+The curves we want are precisely those that have a cyclic subgroup of order 5 rational over <B>Q</B>
+and for which the image of (Gal)(bar(Q)/(Q)) in GL<sub>2</sub>((F)<sub>3</sub>), giving the action on E[3],
+is the normaliser of a split Cartan subgroup.
+<P>
+Curves just satisfying the E[3] condition are classified by non-cuspidal rational points on X<sub>0</sub>(9)/w<sub>9</sub>
+that are not the image of a rational point of X<sub>0</sub>(9). Such a point p lifts to a point p<sub>1</sub> on X<sub>0</sub>(9)
+defined over some quadratic field K such that p<sub>1</sub><sup>&sigma;</sup> = w<sub>9</sub>(p<sub>1</sub>) where &sigma; is the nontrivial
+automorphism of K over <B>Q</B>. If (E, C) is an elliptic curve/K with cyclic subgroup C=&lt; P &gt;
+rational over K that is represented by the moduli point p<sub>1</sub>, then E<sub>1</sub>=E/&lt; 3P &gt; can be defined
+over <B>Q</B> so that the order 3 subgroups C/&lt; 3P &gt; and (C/&lt; 3P &gt;)<sup>&sigma;</sup> generate
+E<sub>1</sub>[3], are rational over K and are swapped by &sigma;.
+<P>
+In the same way, adding the extra condition that there is a rational subgroup of order 5 leads to curves
+classified by non-cuspidal rational points of X<sub>0</sub>(45)/w<sub>9</sub>. These do not lift to rational points because
+X<sub>0</sub>(45) has no non-cuspidal rational points. X<sub>0</sub>(45)/w<sub>9</sub> is <B>Q</B>-isogenous to the rank 0 elliptic
+curve X<sub>0</sub>(15) so only has finitely many rational points. If p<sub>1</sub> is a lift, the image of p<sub>1</sub>
+under the 3-projection map X<sub>0</sub>(45) -&gt; X<sub>0</sub>(5) (z |-&gt; 3z on complex points) is a rational
+point that corresponds to the desired curve E<sub>1</sub> (with its cyclic 5-subgroup). We could apply
+the 3-projection all the way down to X<sub>0</sub>(1) of course, but it is slightly more efficient to just project
+to level 5 and remove duplicate images before computing j-invariants.
+<P>
+<P>
+<P>
+<PRE>
+&gt; X45&lt;x,y,z&gt; := SmallModularCurve(45);
+&gt; w9 := AtkinLehnerInvolution(X45,45,9);
+&gt; G := AutomorphismGroup(X45,[w9]);
+&gt; C,prjC := CurveQuotient(G);
+&gt; c_inf := Cusp(X45,45,45);
+&gt; ptE := prjC(c_inf);
+&gt; E1,mp1 := EllipticCurve(C,ptE);
+&gt; E,mp2 := MinimalModel(E1);
+&gt; prjE := Expand(prjC*mp1*mp2);
+</PRE>
+<P>
+E is a minimal model for X<sub>0</sub>(45)/w<sub>9</sub> and prjE is the projection from X<sub>0</sub>(45) to E that takes
+the cusp &infin; to the zero point of E. We compute the image of the cusps under prjE so as to
+discount these when we find all the rational points on E. Since p and w<sub>9</sub>(p) map to the same point
+under prjE, we only need consider cusps up to w<sub>9</sub> equivalence. The non-rational conjugate cusps
+&#8723; 1/3 are defined over (Q)(Sqrt( - 3)) and are swapped by w<sub>9</sub>, so map to the same rational
+point. The same holds for the cusps &#8723; 1/15.
+<P>
+<P>
+<P>
+<PRE>
+&gt; i0 := prjE(Cusp(X45,45,1));
+&gt; K := QuadraticField(-3);
+&gt; c3 := Cusp(X45,45,3);
+&gt; c3p := X45(K)!Representative(Support(c3,K));
+&gt; i3 := E!(prjE(c3p));
+&gt; c15 := Cusp(X45,45,15);
+&gt; c15p := X45(K)!Representative(Support(c15,K));
+&gt; i15 := E!(prjE(c15p));
+&gt; Ecusps := [E!0,i0,i3,i15];
+</PRE>
+<P>
+E has rank zero, so we can recover all of its rational points using <TT>TorsionSubgroup</TT>.
+There are 8 in all, 4 of which are images of cusps. We find the 4 non-cuspidal ones and 
+compute the pullbacks of them to X<sub>0</sub>(45). In each case, the pull back is a pair of
+conjugate points defined over a quadratic field. It is easiest to work with places here
+(and we don't have to worry about the base scheme of prjE). The pullback of 
+each point gives a single place corresponding to the two conjugate points.
+<P>
+<P>
+<P>
+<PRE>
+&gt; T,mp := TorsionSubgroup(E);
+&gt; Epts := [mp(g) : g in T];
+&gt; Eptsnc := [P : P in Epts | P notin Ecusps];
+&gt; plcs := [Support(Pullback(prjE,Place(p)))[1] : p in Eptsnc];
+</PRE>
+<P>
+We now perform the 3-projection to X<sub>0</sub>(5) on these places and discard duplicate
+images.
+<P>
+<P>
+<P>
+<PRE>
+&gt; X5 := SmallModularCurve(5);
+&gt; prj3 := ProjectionMap(X45,45,X5,5,3);
+&gt; prj3 := Expand(prj3);
+&gt; plcs5 := [Support(Pushforward(prj3,p))[1] : p in plcs];
+&gt; plcs5 := Setseq(Seqset(plcs5));
+</PRE>
+<P>
+We compute the j-invariants of the two images and verify that they
+represent isogenous curves under the cyclic 5-isogeny coming from the rational
+5-subgroup (i.e. they are images of each other under w<sub>5</sub>).
+<P>
+<P>
+<P>
+<PRE>
+&gt; js := [jInvariant(p,5) : p in plcs5];
+&gt; js;
+[ -1680914269/32768, 1331/8 ]
+&gt; w5 := AtkinLehnerInvolution(X5,5,5);
+&gt; Pullback(w5,plcs5[1]) eq plcs5[2];
+true
+</PRE>
+<P>
+Finally, we can use Magma intrinsics to check that the elliptic curves
+with these j-invariants actually do satisfy the property that the image of
+the action of Galois on 3-torsion is the normaliser of a split Cartan
+subgroup (D<sub>8</sub>). As this property remains true for quadratic twists and
+is unchanged by images under a rational 5-isogeny, we only need check it
+for one curve over <B>Q</B> with one of the j-invariants. We also check
+that a minimal twist has conductor 338 from which modularity can be
+checked explicitly.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Ej := EllipticCurveWithjInvariant(js[2]);
+&gt; Ej := MinimalModel(MinimalTwist(Ej));
+&gt; Conductor(Ej);
+338
+&gt; ThreeTorsionType(Ej);
+Dihedral
+</PRE>
+<PRE></PRE> <A  HREF = "text1538.htm">[Next]</A><A  HREF = "text1547.htm">[Prev]</A> <A  HREF = "text1538.htm">[Right]</A> <A  HREF = "text1547.htm">[Left]</A> <A  HREF = "text1539.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

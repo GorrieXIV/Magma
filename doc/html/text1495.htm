@@ -1,0 +1,1041 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Jacobians over Number Fields or Q</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1496.htm">[Next]</A><A  HREF = "text1494.htm">[Prev]</A> <A  HREF = "text1496.htm">[Right]</A> <A  HREF = "text1494.htm">[Left]</A> <A  HREF = "text1483.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16962">Jacobians over Number Fields or Q</A></H3>
+
+<P>
+<P>
+Some functions in this section work for general number fields
+(notably <A  HREF = "text1495.htm#TwoSelmerGroup">TwoSelmerGroup</A>),
+while many are only implemented over Q.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1495.htm#16963">Searching For Points</A>
+<LI> <A  HREF = "text1495.htm#16965">Torsion</A>
+<LI> <A  HREF = "text1495.htm#16970">Heights and Regulator</A>
+<LI> <A  HREF = "text1495.htm#16980">Saturation</A>
+<LI> <A  HREF = "text1495.htm#16983">The 2-Selmer Group</A>
+</UL>
+<H4><A NAME = "16963">Searching For Points</A></H4>
+
+
+
+<H5><A NAME = "16964">Points(J) : JacHyp -&gt; SetIndx</A></H5>
+<H5>RationalPoints(J) : JacHyp -&gt; SetIndx</H5>
+
+<PRE>    Bound: RngInt                       Default: 0</PRE>
+<BLOCKQUOTE>
+Given a Jacobian J of a genus 2 hyperelliptic curve 
+defined by an integral model over the rationals, 
+determine all rational points on the Jacobian J whose 
+naive height on the associated Kummer surface is 
+less than or equal to Bound.  
+</BLOCKQUOTE>
+<H4><A NAME = "16965">Torsion</A></H4>
+
+
+
+<H5><A NAME = "16966"></A><A NAME = "TwoTorsionSubgroup">TwoTorsionSubgroup</A>(J) : JacHyp -&gt; GrpAb, Map</H5>
+<BLOCKQUOTE>
+Given the Jacobian J of a hyperelliptic curve C 
+which is either of genus 2 or has odd degree defined over a number 
+field K, the function returns J(K)[2] as an abstract group, together 
+with a map sending elements of the abstract group to points on J.  
+The curve C must be given in the simplified form y<sup>2</sup>=f(x).
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "16967">TorsionBound(J, n) : JacHyp, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given the Jacobian J of a hyperelliptic curve defined over the 
+rationals, this function returns a bound on the size of the rational 
+torsion subgroup of the Jacobian. The bound is obtained by examining 
+the group J(F<sub>p</sub>) for the first n good primes p.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "16968">TorsionSubgroup(J) : JacHyp  -&gt; GrpAb, Map</A></H5>
+<BLOCKQUOTE>
+Given the Jacobian J of a genus 2 curve defined over the 
+rationals, this function returns the rational torsion subgroup 
+of J, and the map from the group into J.  The curve must have 
+the form y<sup>2</sup> = f(x) with integral coefficients.   
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16969">Example <TT>CrvHyp_TorsionGroups (H131E29)</TT></A></H3>
+For the curve 
+ C : y<sup>2</sup>= (x + 3)(x + 2)(x + 1)x(x - 1)(x - 2), 
+the only Q-rational torsion on the Jacobian is 2-torsion.
+<P>
+<P>
+<PRE>
+&gt; _&lt;x&gt; := PolynomialRing(Rationals());
+&gt; C := HyperellipticCurve(&amp;*[x-n : n in [-3..2]]);
+&gt; J := Jacobian(C);
+&gt; T, m := TwoTorsionSubgroup(J);
+&gt; T;
+Abelian Group isomorphic to Z/2 + Z/2 + Z/2 + Z/2
+Defined on 4 generators
+Relations:
+    2*P[1] = 0
+    2*P[2] = 0
+    2*P[3] = 0
+    2*P[4] = 0
+&gt; [ m(T.i) : i in [1..4] ];
+[ (x^2 - 3*x + 2, 0, 2), (x^2 - 2*x, 0, 2), (x^2 - x - 2, 0, 2),
+(x^2 - 4, 0, 2) ]
+&gt; #T eq #TorsionSubgroup(J);
+true
+</PRE>
+The Jacobian for the following curve has torsion subgroup Z/24 over Q.
+<P>
+<P>
+<PRE>
+&gt; C := HyperellipticCurve((2*x^2-2*x-1)*(2*x^4-10*x^3+7*x^2+4*x-4));
+&gt; J := Jacobian(C);
+&gt; T, m := TwoTorsionSubgroup(J);
+&gt; T;
+Abelian Group isomorphic to Z/2
+Defined on 1 generator
+Relations:
+    2*P[1] = 0
+&gt; m(T.1);
+(x^2 - x - 1/2, 0, 2)
+&gt; A,h := TorsionSubgroup(J);
+&gt; #T eq #A;
+false
+&gt; A;
+Abelian Group isomorphic to Z/24
+Defined on 1 generator
+Relations:
+    24*P[1] = 0
+&gt; P := h(A.1);
+&gt; P;
+(x^2 - 1/2, -1, 2)
+&gt; Order(P);
+24
+&gt; 12 * P eq m(T.1);
+true
+</PRE>
+<HR>
+<H4><A NAME = "16970">Heights and Regulator</A></H4>
+
+<P>
+<P>
+This section pertains to height functions on the Mordell--Weil group 
+of the Jacobian of hyperelliptic curves over a number field k. However, 
+naive heights and height constants are currently only implemented for 
+Jacobians of genus 2 curves defined over Q.
+<P>
+In the case of genus two curves defined over Q, the canonical height 
+is computed using the algorithm of Flynn and Smart<A  HREF = "text1482.htm#bib_FlynSmart97">[FS97]</A>
+ with improvements by Stoll<A  HREF = "text1482.htm#bib_Stoll99">[Sto99]</A>. This algorithm computes the 
+canonical height using local error functions on the associated Kummer 
+surface.
+<P>
+In all other cases the algorithm described in chapter 5 of 
+<A  HREF = "text1482.htm#bib_mueller_thesis">[M&uuml;l10a]</A> is used. It is based on a theorem due to Faltings 
+and Hriljac which expresses the canonical height pairing in terms of 
+Arakelov intersection theory and works as follows:
+<P>
+We find divisors D<sub>P</sub> and D<sub>Q</sub> of degree zero on the curve
+representing P and Q, respectively. For this we use the canonical
+representative of P and Q (see Section <A  HREF = "text1493.htm#16900">Points on the Jacobian</A>); 
+if P=Q, then the canonical representatives for P and -P are used. 
+Since the canonical representatives have common support at infinity, 
+we subtract the divisor of a function x - &lambda; from one of them.
+These ideas are due to David Holmes <A  HREF = "text1482.htm#bib_holmes10">[Hol06]</A>.
+If there are points at infinity in the positive support of P or Q, then
+we might have to also subtract the divisor of a function x - &mu; 
+from the other representatives. 
+<P>
+The actual Arakelov intersection computations are performed locally using 
+regular models of the curve (see Section <A  HREF = "text1368.htm#15273">Regular Models of Arithmetic Surfaces</A>) at the 
+relevant  primes and Groebner bases over p-adic quotient rings in the 
+non-archimedean case. The algorithm requires factorisation of polynomials 
+over non-archimedean local fields.
+For archimedean places the intersections multiplicities can be expressed
+using theta functions with respect to the analytic Jacobian. This relies 
+heavily on several functions described in Section <A  HREF = "text1501.htm#17058">Analytic Jacobians of Hyperelliptic Curves</A>.
+<P>
+If the genus is less than 4, the most expensive archimedean operations 
+are usually applications of the Abel-Jacobi map ToAnalyticJacobian. In
+larger genus, the computation of theta functions, whose running time 
+grows exponentially in the genus is more expensive. 
+<P>
+Regarding the non-archimedean computations, the main bottleneck is 
+integer factorisation which is required to find out which primes may 
+yield non-trivial intersection multiplicities. 
+<P>
+<P>
+<P>
+<P>
+<I>Applications:</I> Heights are a useful tool for studying
+rational points on varieties. The most standard applications
+concerning points on Jacobians are 
+<DL COMPACT class='compact'>
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>proving independence of points in J(k)/J<sub>tors</sub>(k) 
+(in particular, the regulator is defined in terms of the canonical 
+height), and
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>proving non-divisibility:  
+given P &isin;J(k) and n &isin;Z,
+proving that P is not of the form nR for some R &isin;J(k).
+<P>
+</DL>
+The heights in this section are logarithmic, and they measure the 
+size of the coordinates of the image of P on the Kummer variety
+associated to J (embedded in (P)<sup>2<sup>g</sup> - 1</sup>, where g is the
+genus of the curve). The naive height h 
+is simply the height of the image of P in (P)<sup>2<sup>g</sup> - 1</sup> using an 
+explicit embedding, which is currently only available for g=2.
+One can refine this, taking advantage of the group law on J, 
+defining a <I>canonical height</I> which has nice properties with 
+respect to the group law, for instance hat(h)(nP) = n<sup>2</sup> hat(h)(P). 
+In particular, hat(h)(P) = 0 if and only if P is a torsion 
+point.
+The function h - hat(h) is bounded on J(k).
+Computationally, one generally wants an upper bound on this, 
+because then one can find all points up to a given canonical height 
+by doing a search for points of bounded naive height.
+
+
+<H5><A NAME = "16971">NaiveHeight(P) : JacHypPt -&gt; FldPrElt</A></H5>
+<H5>NaiveHeight(P) : SrfKumPt -&gt; FldPrElt</H5>
+<BLOCKQUOTE>
+Given a point P on the Jacobian of a curve of genus 2 (or on the 
+associated Kummer surface), 
+the function returns the logarithmic height of the image of P in (P)<sup>3</sup>
+under the maps J -&gt; K -&gt; (P)<sup>3</sup>.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "16972">Height(P: parameters) : JacHypPt -&gt; FldPrElt</A></H5>
+<H5>Height(P: Precision) : SrfKumPt -&gt; FldPrElt</H5>
+<H5>CanonicalHeight(P: parameters) : JacHypPt  -&gt; FldPrElt</H5>
+<H5>CanonicalHeight(P: Precision) : SrfKumPt -&gt; FldPrElt</H5>
+
+<PRE>    lambda: RngIntElt                   Default: 1</PRE>
+
+<PRE>    mu: RngIntElt                       Default: 0</PRE>
+
+<PRE>    LocalPrecision: RngIntElt           Default: 0</PRE>
+
+<PRE>    UseArakelov: BoolElt                Default: <TT>false</TT></PRE>
+
+<PRE>    Precision: RngIntElt                Default: 0</PRE>
+<BLOCKQUOTE>
+The canonical height of a point P on the Jacobian of a 
+hyperelliptic curve over a number field or over the rationals.
+If the genus is 2 and the ground field is Q, then this
+computes the canonical height on the associated Kummer surface. 
+Otherwise this function simply computes the height pairing of
+P with itself using Arakelov intersection theory.
+</BLOCKQUOTE>
+<H5><A NAME = "16973">HeightConstant(J: parameters) : JacHyp -&gt; FldPrElt, FldPrElt</A></H5>
+
+<PRE>    Effort: RngIntElt                   Default: 0</PRE>
+
+<PRE>    Factor: BoolElt                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given the Jacobian J of a genus 2 curve over Q of 
+the form y<sup>2</sup> = f(x) with integral coefficients, this computes a 
+real number c such that h(P) &le;hat(h)(P) + c for all P in J(Q), 
+where h is the naive height and hat(h) is the canonical height.
+<P>
+The parameter <TT>Effort</TT> (which can be 0, 1 or 2) 
+indicates how much effort should be put 
+into finding a good bound.  The second value returned is a bound 
+for &mu;_&infin;, the contribution from the infinite place.  
+If the parameter <TT>Factor</TT> is <TT>true</TT>, then
+the discriminant will be factored, and its prime divisors will be 
+considered individually, usually resulting in an improvement of 
+the bound.
+</BLOCKQUOTE>
+<H5><A NAME = "16974">HeightPairing(P, Q: parameters) : JacHypPt, JacHypPt -&gt; FldPrElt</A></H5>
+
+<PRE>    lambda: RngIntElt                   Default: 1</PRE>
+
+<PRE>    mu: RngIntElt                       Default: 0</PRE>
+
+<PRE>    LocalPrecision: RngIntElt           Default: 0</PRE>
+
+<PRE>    UseArakelov: BoolElt                Default: <TT>false</TT></PRE>
+
+<PRE>    Precision: RngIntElt                Default: 0</PRE>
+<BLOCKQUOTE>
+The value of the canonical height pairing for rational points P and Q 
+on the Jacobian of a hyperelliptic curve defined over a number field. 
+The pairing can be defined as &lt; P, Q &gt; := (hat(h)(P + Q)
+- hat(h)(P) - hat(h)(Q))/2 and if the genus is 2 and the ground 
+field is Q, the pairing is computed using this definition. Otherwise 
+the pairing is computed using Arakelov intersection theory.
+<P>
+Sometime these fail due to insufficient precision; if this 
+happens, the parameter <TT>LocalPrecision</TT> should be changed accordingly.
+<P>
+Changing the parameters <TT>lambda</TT> and <TT>mu</TT> (see the introduction above)
+can sometimes speed up the computations because some of the required 
+integer factorisations might be significantly easier for some values 
+of &lambda; and &mu; than for others. Note that the parameter <TT>mu</TT> 
+is only used if it is nonzero.
+<P>
+The parameter <TT>UseArakelov</TT> indicates whether the algorithm based on
+Arakelov intersection theory should be used in genus 2.
+</BLOCKQUOTE>
+<H5><A NAME = "16975">HeightPairingMatrix(S: Precision) : [JacHypPt] -&gt; AlgMat</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: 0</PRE>
+<BLOCKQUOTE>
+Given a sequence [P<sub>1</sub>, ... P<sub>n</sub>] of points on the Jacobian J of a 
+hyperelliptic curve defined over a number field, this function 
+returns the matrix with entries &lt; P<sub>i</sub>, P<sub>j</sub> &gt;,
+where the latter denotes the canonical height pairing between P<sub>i</sub> 
+and P<sub>j</sub>.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "16976">Regulator(S: Precision) : [JacHypPt] -&gt; FldPrElt</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: 0</PRE>
+<BLOCKQUOTE>
+Given a sequence S of points on the Jacobian J of a hyperelliptic
+curve defined over a number field k, the function returns the 
+determinant of the height pairing matrix of S. The regulator is 
+equal to zero when the points are dependent in the Mordell--Weil 
+group, and otherwise is equal to the square of the
+volume of the parallelotope spanned by the points in the subgroup of 
+the free quotient of J(k) generated by S.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "16977">ReducedBasis(S: Precision) : [JacHypPt] -&gt; SeqEnum, AlgMatElt</A></H5>
+<H5>ReducedBasis(S: Precision) : @JacHypPt@ -&gt; SeqEnum, AlgMatElt</H5>
+<H5>ReducedBasis(S: Precision) : JacHypPt -&gt; SeqEnum, AlgMatElt</H5>
+
+<PRE>    Precision: RngIntElt                Default: 0</PRE>
+<BLOCKQUOTE>
+Given a sequence of points on the Jacobian J of a hyperelliptic
+curve defined over a number field k, this function returns an LLL-
+reduced basis for the subgroup of J(k)/J<sub>tors</sub>(k) generated by the 
+given points (that is,the function reduces the real lattice formed by 
+the points, under the positive definite quadratic form given by the
+canonical height pairing).
+The height pairing matrix of the sequence is returned as a second value.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16978">Example <TT>CrvHyp_HeightPairing (H131E30)</TT></A></H3>
+This example illustrates some basic properties of heights, 
+and proves that a certain point in J(Q) is not a nontrivial multiple 
+of any other point in J(Q).
+<P>
+Let J be the Jacobian of y<sup>2</sup> = x<sup>6</sup> + x<sup>2</sup> + 2.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x&gt; := PolynomialRing(Rationals());
+&gt; C := HyperellipticCurve(x^6+x^2+2);
+&gt; J := Jacobian(C);
+</PRE>
+Find some small points on C and map them to J:
+<P>
+<P>
+<PRE>
+&gt; ptsC := Points(C : Bound:=1000); 
+&gt; ptsJ := [ ptsC[i] - ptsC[1] : i in [2,3,4,5,6] ];
+&gt; ptsJ;
+[ (1, x^3, 2), (x + 1, x^3 - 1, 2), (x + 1, x^3 + 3, 2), (x - 1, x^3 - 3, 2), 
+(x - 1, x^3 + 1, 2) ]
+</PRE>
+The canonical heights of these five points:
+<P>
+<P>
+<PRE>
+&gt; [ Height(P) : P in ptsJ ];
+[ 0.479839797450405152023279542502, 0.000000000000000000000000000000, 
+0.479839797450405152023279542491, 0.479839797450405152023279542491, 
+0.000000000000000000000000000000 ]
+</PRE>
+<P>
+We see that two of them are torsion (hat(h) = 0), and the others are 
+probably equal or inverse to each other modulo torsion, because they appear 
+to have the same canonical height.  If so, they would generate a subgroup 
+of rank 1 in J(Q)/J<sub>tors</sub>(Q).  The next command verifies this.
+<P>
+<P>
+<P>
+<PRE>
+&gt; ReducedBasis(ptsJ);
+[ (x + 1, x^3 + 3, 2) ]
+
+[0.479839797450405152023279542491]
+&gt; P := ptsJ[3]; 
+&gt; P;
+(x + 1, x^3 + 3, 2)
+</PRE>
+<P>
+So this point (which is the third point in our list) generates the others. 
+We proceed to check that the other two non-torsion points in our list 
+are equal to P + T or -P + T for some torsion point T.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Jtors, maptoJ := TorsionSubgroup(J); 
+&gt; {ptsJ[1], ptsJ[4]} subset { pt + maptoJ(T) : pt in {P,-P}, T in Jtors }; 
+true
+</PRE>
+<P>
+Now we check the property hat(h)(nP) = n<sup>2</sup> hat(h)(P) for n=23.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Height(23*P)/Height(P);
+529.000000000000000000000000000
+</PRE>
+Of course, the naive height does not behave so nicely, 
+but at least h - hat(h) should be bounded by the height constant.
+<P>
+<P>
+<PRE>
+&gt; HC := HeightConstant(J : Effort:=2, Factor); 
+&gt; HC;
+3.73654623288305720113473940376
+</PRE>
+In particular, all torsion points should have naive height less than this.
+<P>
+<P>
+<PRE>
+&gt; for T in Jtors do
+&gt;     NaiveHeight(maptoJ(T));
+&gt; end for;
+0.000000000000000000000000000000
+0.693147180559945309417232121458
+0.693147180559945309417232121458
+0.693147180559945309417232121458
+0.693147180559945309417232121458
+0.693147180559945309417232121458
+0.693147180559945309417232121458
+0.693147180559945309417232121458
+&gt; // Does the inequality hold for 23*P?
+&gt; NaiveHeight(23*P) - Height(23*P) le HeightConstant(J);
+true
+</PRE>
+Finally, we show that P is not a nontrivial multiple of
+another point in J(Q)/J<sub>tors</sub>(Q) (implying that P
+generates J(Q)/J<sub>tors</sub>(Q) if this has rank 1).
+For suppose that P = n Q + T for some Q &isin;J(Q), T &isin;J<sub>tors</sub>(Q).
+Then hat(h)(Q) = (1/n<sup>2</sup>) hat(h)(P) &lt; hat(h)(P), 
+and the following search shows there is no Q satisfying this bound.
+<P>
+<P>
+<PRE>
+&gt; LogarithmicBound := Height(P) + HeightConstant(J);  // Bound on the naive h(Q)
+&gt; AbsoluteBound := Ceiling(Exp(LogarithmicBound));
+&gt; PtsUpToAbsBound := Points(J : Bound:=AbsoluteBound );  
+&gt; ReducedBasis( [ pt : pt in PtsUpToAbsBound ]);
+[ (x^2 + 1/2*x + 1/2, 1/4*x - 5/4, 2) ]
+
+[0.479839797450405152023279542491]
+</PRE>
+If Q exists, it would have to be in the set <TT>PtsUpToAbsBound</TT>.
+But the results of the final command indicate that the group generated by 
+<TT>PtsUpToAbsBound</TT> is also
+generated by a single point of canonical height 
+0.479839797450405152023279542491, so there are no
+nontorsion points Q in <TT>PtsUpToAbsBound</TT> with hat(h)(Q) &lt; hat(h)(P).
+<P>
+This example is continued in Example <A  HREF = "text1497.htm#17003">H131E38</A>,
+where we prove that J(Q) has rank 1,
+and then use the fact that P generates J(Q)/J<sub>tors</sub>(Q) 
+to find all rational points on C.
+<HR>
+<H3><A NAME = "16979">Example <TT>CrvHyp_HeightPairing2 (H131E31)</TT></A></H3>
+We compute a reduced basis for a set of points on the Jacobian J 
+on the genus two curve C: y<sup>2</sup> = x<sup>6</sup> + x<sup>2</sup> + 1.  
+<P>
+<P>
+<PRE>
+&gt; P&lt;x&gt; := PolynomialRing(Rationals());
+&gt; C := HyperellipticCurve(x^6+x^2+1);         
+&gt; J := Jacobian(C);
+</PRE>
+<P>
+We construct some points on C:
+<P>
+<P>
+<P>
+<PRE>
+&gt; Z := PointsAtInfinity(C);
+&gt; Z;
+{@ (1 : -1 : 0), (1 : 1 : 0) @}
+&gt; P1 := Z[1]; 
+&gt; P2 := Z[2]; 
+&gt; P3 := C![1/2,9/8,1];
+&gt; P4 := C![-1/2,9/8,1];
+</PRE>
+<P>
+We now map them to J (for example Q1 is the divisor P1 - P2): 
+<P>
+<P>
+<P>
+<PRE>
+&gt; Q1 := J![P1, P2];
+&gt; Q2 := J![P1, P3];
+&gt; Q3 := J![P3, P4];
+&gt; B, M := ReducedBasis([Q1, Q2, Q3] : Precision := 12);   
+&gt; B;  // This will be a basis for &lt;Q1, Q2, Q3&gt;
+[ (1, -x^3, 2), (x^2, 1, 2) ]
+&gt; M;  // The height pairing matrix for the new basis B
+[0.2797317933688278287667056839      -5.005347463630776922E-17]
+[     -5.005347463630776922E-17 0.9524462128097307697800077959]
+&gt; Determinant(M);
+0.2664294871966142247655164984
+</PRE>
+Since (Det)(M) is nonzero, the two generators in B are independent.
+<HR>
+<H4><A NAME = "16980">Saturation</A></H4>
+
+
+
+<H5><A NAME = "16981">IsDivisibleBy(P, n) : JacHypPt, RngIntElt -&gt; BoolElt, JacHypPt</A></H5>
+<BLOCKQUOTE>
+For a Q-rational point P on the Jacobian of a curve over Q,
+this returns whether P is divible by n, i.e., whether there exists
+a Q-rational point Q such that n Q = P.  If so, the point Q
+is also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "16982">Saturation(bas, p) : [ JacHypPt ] , RngIntElt -&gt; [ JacHypPt ]</A></H5>
+<BLOCKQUOTE>
+For a sequence of Q-rational points on a Jacobian J, this finds
+the p-saturation in J(Q) of the group generated by the points,
+i.e.  the smallest group containing the points and closed in J(Q)
+under division by p.  The function returns a sequence of generators
+for the saturated group modulo its torsion subgroup.
+</BLOCKQUOTE>
+<H4><A NAME = "16983">The 2-Selmer Group</A></H4>
+
+<P>
+<P>
+<P>
+The principal functions in this section provide information about
+the Mordell-Weil group J(K) of a hyperelliptic Jacobian
+defined over the rationals or a number field. Two descent 
+provides an upper bound (since J(K)/(2J(K)) embeds in the
+2-Selmer group of J). Finer information is provided by
+<TT>HasSquareSha</TT>, which determines the parity of the 
+2-rank of the Shafarevich--Tate group, and <TT>RankBounds</TT>
+collects together all the information that is computable in Magma.
+<P>
+In Magma 2.13, a simpler interface was introduced for computing
+2-Selmer groups. The two implementations that were previously 
+accessible still exist internally.  A third has been added since.
+When <A  HREF = "text1495.htm#TwoSelmerGroup">TwoSelmerGroup</A> is called, it chooses which implementation 
+to use, unless the user specifies this by setting parameter.
+<P>
+<P>
+<P>
+<P>
+<P>
+
+
+<H5><A NAME = "16984">BadPrimes(C) : CrvHyp  -&gt; SeqEnum</A></H5>
+<H5>BadPrimes(J) : JacHyp -&gt; SeqEnum</H5>
+
+<PRE>    Badness: RngIntElt                  Default: 1</PRE>
+<BLOCKQUOTE>
+Given a hyperelliptic curve C with integral coefficients 
+defined over a number field (or the Jacobian of such a curve),
+the function returns a sequence containing the primes where the given 
+model has bad reduction. 
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "16985">HasSquareSha(J) : JacHyp -&gt; BoolElt</A></H5>
+<H5>IsEven(J) : JacHyp -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Given the Jacobian of a hyperelliptic curve over Q
+or a number field, and assuming that 
+the Shafarevich-Tate group of J is finite,
+this returns <TT>true</TT> if and only if the order of the Shafarevich-Tate group 
+is a square. (Otherwise, the order is twice a square, as shown by 
+Poonen and Stoll in <A  HREF = "text1482.htm#bib_poonen-stoll">[PS99]</A>). The order is square 
+if and only if the number of "deficient" primes for C is even
+(see below).
+</BLOCKQUOTE>
+<H5><A NAME = "16986">IsDeficient(C, p) : CrvHyp, RngIntElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+For a genus 2 curve defined over Q or a number field,
+this returns <TT>true</TT> if C is "deficient" at p. 
+By definition, the curve is deficient if there are no points on C defined over
+any extension of odd degree over Q<sub>p</sub> (when p is a prime) 
+or over R (when p is 0). Equivalently, C is deficient 
+if there is no Q<sub>p</sub>-rational divisor of odd degree on C. 
+</BLOCKQUOTE>
+<H5><A NAME = "16987">HasIndexOne(C,p) : CrvHyp, RngIntElt -&gt; BoolElt</A></H5>
+<H5>HasIndexOne(C,p) : CrvHyp, RngOrdIdl -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Given a hyperelliptic curve C over Q or a number field, this returns
+true if and only if there is a divisor of odd degree on C which is 
+defined over the completion at the prime p. An even genus curve is 
+deficient at p if and only if it does not have index one at p.
+</BLOCKQUOTE>
+<H5><A NAME = "16988">HasIndexOneEverywhereLocally(C) : CrvHyp -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns true if and only if C has index one over all completions of
+its base field (including real completions).
+</BLOCKQUOTE>
+<H5><A NAME = "16989"></A><A NAME = "TwoSelmerGroup">TwoSelmerGroup</A>(J) : JacHyp -&gt; GrpAb, Map, Any, Any</H5>
+
+<PRE>    Al: MonStgElt                       Default: </PRE>
+
+<PRE>    Fields: SetEnum                     Default: </PRE>
+
+<PRE>    ReturnFakeSelmerData: BoolElt       Default: <TT>false</TT></PRE>
+
+<PRE>    ReturnRawData: BoolElt              Default: <TT>false</TT></PRE>
+
+<PRE>    SetVerbose("Selmer", n):            Maximum: 3</PRE>
+<BLOCKQUOTE>
+The 2-Selmer group of the Jacobian of a hyperelliptic curve defined over Q
+or a number field. If the curve is not defined over Q then it must have a single
+rational point at infinity (for curves in the simplified form y<sup>2</sup>=f(x), this 
+is equivalent to f(x) having odd degree), The algorithm may work better when 
+an integral model of the curve is given (or better yet, a minimal model).
+<P>
+The Selmer group is returned as a finite abelian group S, together with a
+map from S to some affine algebra A, which represents the standard map
+from the Selmer group to A<sup> * </sup>/(A<sup> * </sup>)<sup>2</sup> or to A<sup> * </sup>/(A<sup> * </sup>)<sup>2</sup>Q<sup> * </sup> (depending 
+whether the degree of f is odd or even).
+<P>
+Three separate implementations exist internally in Magma. 
+(Prior to V2.13 two of these were available as
+the intrinsics <TT>TwoSelmerGroup</TT> and <TT>TwoSelmerGroupData</TT>).
+The user can specify which implementation is used by setting the 
+optional parameter <TT>Al</TT> to <TT>"TwoSelmerGroupOld"</TT>, <TT>"TwoSelmerGroupNew"</TT>
+or to <TT>"TwoSelmerGroupData"</TT>; otherwise, an appropriate choice is made
+automatically.
+<P>
+Much of the computation time is usually spent on class group and unit calculations.  
+These computations can be speeded up by using non-rigorous bounds, and there are two
+ways to control which bounds are used. The recommended way is to
+preset them using one of the intrinsics <TT>SetClassGroupBounds</TT>
+or <TT>SetClassGroupBoundMaps</TT> (see <A  HREF = "text391.htm#3890">Setting the Class Group Bounds</A>).
+The other way is to precompute the class groups of the fields involved
+(with the desired optional parameters in <TT>ClassGroup</TT>),
+and then pass these fields to <TT>TwoSelmerGroup</TT> via the optional parameter <TT>Fields</TT>.
+The class group data is stored, and if <TT>TwoSelmerGroup</TT> 
+requires a field that is isomorphic to one of the given <TT>Fields</TT>,
+the stored data will automatically be used. 
+The relevant fields are those given by the roots of f, where y<sup>2</sup>=f(x) 
+is the <TT>SimplifiedModel</TT> of the curve. 
+<P>
+When called with <TT>ReturnFakeSelmerData</TT>, the program returns an additional 
+item, which specifies the "fake Selmer group" in the terminology of 
+<A  HREF = "text1482.htm#bib_Stoll01">[Sto01]</A>. (This is only relevant to the even degree case.)
+The returned object is a tuple &lt; B<sub>1</sub>, B<sub>2</sub>, B<sub>3</sub> &gt;, where B<sub>1</sub> 
+is a sequence of elements in A that span a subgroup S<sub>1</sub> of 
+A<sup> * </sup>/(A<sup> * </sup>)<sup>2</sup>, and B<sub>2</sub> and B<sub>3</sub> are 
+sequences of integers that span subgroups S<sub>2</sub> and S<sub>3</sub> 
+of Q<sup> * </sup>/(Q<sup> * </sup>)<sup>2</sup>.  The fake Selmer group S is then 
+determined by the exact sequence 0 -&gt; S<sub>3</sub> -&gt; S<sub>2</sub> -&gt; S<sub>1</sub> -&gt; S -&gt; 0. See <A  HREF = "text1482.htm#bib_Stoll01">[Sto01]</A> for 
+a full explanation of this.
+<P>
+When called with <TT>ReturnRawData</TT>, 
+the program additionally returns a third item <TT>expvecs</TT> and a fourth item <TT>factorbase</TT>. 
+These specify the images in A<sup> * </sup>/(A<sup> * </sup>)<sup>2</sup> of the Selmer group generators (in unexpanded form). 
+The <TT>factorbase</TT> is a sequence of elements f<sub>j</sub> of A, and <TT>expvecs</TT> is a sequence
+of vectors in Z<sup>F</sup>, where F is the number of elements in the <TT>factorbase</TT>.
+The image in A<sup> * </sup>/(A<sup> * </sup>)<sup>2</sup> of the ith Selmer group generator is then the 
+sum over j of f<sub>j</sub><sup>e<sub>j</sub></sup> where (e<sub>j</sub>) is the ith exponent vector.
+</BLOCKQUOTE>
+<H5><A NAME = "16990">RankBound(J) : JacHyp -&gt; RngIntElt</A></H5>
+<H5>RankBounds(J) : JacHyp -&gt; RngIntElt, RngIntElt</H5>
+<BLOCKQUOTE>
+An upper, or a lower and an upper bound, on the rank of the Mordell-Weil group
+of J, which should be the Jacobian of a hyperelliptic curve over the rationals
+or a number field. <TT>RankBound</TT> can be computed provided both <A  HREF = "text1495.htm#TwoSelmerGroup">TwoSelmerGroup</A>
+and <A  HREF = "text1495.htm#TwoTorsionSubgroup">TwoTorsionSubgroup</A> are implemented for J, while <TT>RankBounds</TT> is only
+implemented for Jacobians defined over Q.
+<P>
+For curves of even degree and odd genus it is not always possible to compute an 
+upper bound for the rank. One can compute instead an upper bound for the rank
+of the subgroup of the Mordell-Weil group consisting of points which can be represented
+by rational divisors. When the curve has index one everywhere locally, every rational
+divisor class can be represented by a rational divisor. <TT>RankBound</TT> and <TT>RankBounds</TT>
+check if this condition is satisfied and print a warning if it is not.
+<P>
+An initial upper bound is furnished by computing the 2-Selmer group. 
+For even degree hyperelliptic curves this can potentially be sharpened by determining
+if the torsor T parameterizing divisor classes of degree 1 on the curve represents a
+nontrivial element of Sha[2]. This can be achieved in two ways. If Sha does not
+have square order (see <TT>HasSquareSha</TT>) then T is nontrivial and the bound
+can be decreased by 1. If there are rational divisor classes of degree 1 everywhere
+locally, then T lies in Sha[2], and <TT>RankBounds</TT> will
+attempt to determine whether T is divisible by 2 in Sha using the 
+algorithm described in <A  HREF = "text1482.htm#bib_CreutzANTSX">[Cre12]</A>. When T is not divisible by 2, 
+the bound may be lowered by 2. Examples of both phenomena are given below.
+<P>
+The lower bound is computed by searching for points on the Jacobian, then determining
+their independence using either the height pairing machinery or by considering their
+images in J(Q)/2J(Q).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16991">Example <TT>CrvHyp_2-selmer-group (H131E32)</TT></A></H3>
+In this example, we find out as much as we can 
+about the Mordell-Weil group of the Jacobian of 
+ y<sup>2</sup> =  x(x + 1344<sup>2</sup>)(x + 10815<sup>2</sup>)(x + 5406<sup>2</sup>)(x + 2700<sup>2</sup>). 
+First define the curve and its Jacobian: 
+<P>
+<P>
+<PRE>
+&gt; _&lt;x&gt; := PolynomialRing(Rationals());
+&gt; pol := x*(x+1344^2)*(x+10815^2)*(x+5406^2)*(x+2700^2);
+&gt; C := HyperellipticCurve( pol );
+&gt; J := Jacobian(C);
+&gt; J;
+Jacobian of Hyperelliptic Curve defined by 
+y^2 = x^5 + 155285397*x^4 + 4761213301312596*x^3 + 33018689414366470785600*x^2 
++ 45012299099933971943424000000*x over Rational Field
+</PRE>
+<P>
+We can search for points on C (with x-coordinate up to Bound):
+<P>
+<P>
+<P>
+<PRE>
+&gt; ptsC := Points(C : Bound := 10^6);
+&gt; ptsC;
+{@ (1 : 0 : 0), (0 : 0 : 1), (43264 : -44828581639628800 : 1), 
+(43264 : 44828581639628800 : 1) @}
+&gt; pointAtInfinity := ptsC[1];
+</PRE>
+<P>
+This <TT>pointAtInfinity</TT> (1 : 0 : 0) might not seem to lie on C, but 
+recall that in Magma, a hyperelliptic curve lives in a weighted projective plane.
+We can also search for points on the Jacobian, which takes longer:
+<P>
+<P>
+<P>
+<PRE>
+&gt; time ptsJ := Points(J : Bound := 2000);
+Time: 0.670
+&gt; ptsJ;
+{@ (1, 0, 0), (x, 0, 1) @}
+</PRE>
+The notation for points on J is explained in the section
+"Points on the Jacobian" in this chapter.
+The points appearing above are the trivial point on J, and the point
+corresponding to the divisor 
+(0:0:1) - (1:0:0)
+on C.
+<P>
+<P>
+<PRE>
+&gt; ptsJ[1] eq J!0;  // Is the first point equal to 0 on J?
+true
+&gt; Order( ptsJ[2] );
+2
+</PRE>
+So far, we have only found some trivial points on J.
+In fact, we can see from the equation that J has full 2-torsion, which we now confirm.
+<P>
+<P>
+<PRE>
+&gt; Jtors, map := TorsionSubgroup(J);
+&gt; Jtors;
+Abelian Group isomorphic to Z/2 + Z/2 + Z/2 + Z/4
+Defined on 4 generators
+Relations:
+2*P[1] = 0
+2*P[2] = 0
+2*P[3] = 0
+4*P[4] = 0
+</PRE>
+<TT>Jtors</TT> is an abstract group, and <TT>map</TT> converts 
+elements of <TT>Jtors</TT> to actual points on J. 
+Here are the generator of the Z/4 and its inverse.
+<P>
+<P>
+<PRE>
+&gt; map(Jtors.4); 
+&gt; map(3*Jtors.4);
+(x^2 + 32963094*x - 212161021632000, 94792247622*x - 2005558137487296000, 2)
+(x^2 + 32963094*x - 212161021632000, -94792247622*x + 2005558137487296000, 2)
+</PRE>
+Looking at the points on C we found above,
+the third of them looks nontrivial, so we find its order on J:
+<P>
+<P>
+<PRE>
+&gt; P := ptsC[3];
+&gt; PJ := J![ P, pointAtInfinity ];
+&gt; PJ;
+(x - 43264, -44828581639628800, 1)
+&gt; Order(PJ);
+0
+</PRE>
+This means PJ has infinite order on J.
+Now we do two-descent on J:
+<P>
+<P>
+<PRE>
+&gt; #TwoSelmerGroup(J);
+64
+</PRE>
+We already knew that J(Q)[2] has order 16, and that the rank of J(Q) is at least 1,
+so we now know that the rank is either 1 or 2.
+We now ask whether the order of Sha(J) is a square or twice a square
+(assuming it is finite):
+<P>
+<P>
+<PRE>
+&gt; HasSquareSha(J);
+true
+</PRE>
+It follows (assuming Sha(J) is finite) 
+that Sha(J) has square order, and that J(Q) has rank 2,
+even though the other generator of J(Q) is probably not easy to find,
+especially if does not come from a point on C.
+<P>
+For more examples of Selmer group computations, see the next section.
+<HR>
+<H3><A NAME = "16992">Example <TT>CrvHyp_nonsquare-sha (H131E33)</TT></A></H3>
+We produce some Jacobians for which the order of the Tate-Shafarevich
+group is twice a square (assuming it is finite).
+We then observe how this affects the rank bounds.
+<P>
+A good source of examples are curves 
+y<sup>2</sup> = 3(x<sup>6</sup> - x<sup>2</sup> + a) for a = 1 mod 3, 
+since these curves are "deficient" at 3 (for the definition, see above); 
+this can be proved by elementary arguments. 
+We now list those (for a up to 50) which have nonsquare Sha. 
+<P>
+<P>
+<PRE>
+&gt; _&lt;x&gt; := PolynomialRing(Rationals());
+&gt; for a := 1 to 50 do 
+&gt;    if a mod 3 eq 1 then
+&gt;       Ca :=  HyperellipticCurve( 3*(x^6-x^2+a) ); 
+&gt;       assert IsDeficient(Ca,3);  
+&gt;          // (This causes a failure if our assertion is wrong.)
+&gt;       if not HasSquareSha(Jacobian(Ca)) then print Ca; end if;
+&gt;    end if;
+&gt; end for;
+Hyperelliptic Curve defined by y^2 = 3*x^6 - 3*x^2 + 12 over Rational Field
+Hyperelliptic Curve defined by y^2 = 3*x^6 - 3*x^2 + 21 over Rational Field
+Hyperelliptic Curve defined by y^2 = 3*x^6 - 3*x^2 + 30 over Rational Field
+Hyperelliptic Curve defined by y^2 = 3*x^6 - 3*x^2 + 48 over Rational Field
+Hyperelliptic Curve defined by y^2 = 3*x^6 - 3*x^2 + 57 over Rational Field
+Hyperelliptic Curve defined by y^2 = 3*x^6 - 3*x^2 + 66 over Rational Field
+Hyperelliptic Curve defined by y^2 = 3*x^6 - 3*x^2 + 84 over Rational Field
+Hyperelliptic Curve defined by y^2 = 3*x^6 - 3*x^2 + 93 over Rational Field
+Hyperelliptic Curve defined by y^2 = 3*x^6 - 3*x^2 + 102 over Rational Field
+Hyperelliptic Curve defined by y^2 = 3*x^6 - 3*x^2 + 129 over Rational Field
+Hyperelliptic Curve defined by y^2 = 3*x^6 - 3*x^2 + 138 over Rational Field
+</PRE>
+Aside: we could have tried simply y<sup>2</sup> = 3(x<sup>6</sup> + a) for a = 1 mod 3, 
+but this won't produce any examples: it's a cute exercise to show that
+for these curves, the number of deficient primes is always even.
+<P>
+Now consider the Mordell-Weil rank of the second curve listed (where a=7), 
+<P>
+<P>
+<PRE>
+&gt; C7 :=  HyperellipticCurve( 3*(x^6-x^2+7) );
+&gt; J := Jacobian(C7);
+&gt; #TwoTorsionSubgroup(J);
+1
+&gt; #TwoSelmerGroup(J);
+2
+&gt; RankBound(J);
+0
+</PRE>
+There is no nontrivial 2-torsion in J(Q), and the Selmer group has order 2.
+The program has checked that the order of the Tate-Shafarevich group is twice
+a square (hence the 2-rank of Sha is exactly 1), and therefore it has returned
+a <TT>RankBound</TT> indicating that J(Q) has rank 0.
+This rank bound is unconditional. In fact, the computation
+proves that there is a subgroup Z/2 in Sha modulo the subgroup of infinitely
+divisible elements; therefore one may also deduce unconditionally that
+the 2-power part of Sha is finite cyclic (since if there was an infinitely 
+2-divisible part, it would still contribute to the 2-Selmer group).
+<HR>
+<H3><A NAME = "16993">Example <TT>CrvHyp_sha_visibility (H131E34)</TT></A></H3>
+We demonstrate a non-trivial Tate-Shafarevich group on the Jacobian of a genus
+2 curve. We consider the following Jacobian.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x&gt;:=PolynomialRing(Rationals());
+&gt; C:=HyperellipticCurve(-x^6 + 2*x^5 + 3*x^4 + 2*x^3 - x - 3);
+&gt; JC:=Jacobian(C);
+</PRE>
+We determine an upper bound on its Mordell-Weil rank
+<P>
+<P>
+<PRE>
+&gt; RankBound(JC);
+3
+</PRE>
+But we can only find one independent rational point on this Jacobian.
+<P>
+<P>
+<PRE>
+&gt; V:=RationalPoints(JC,x^2 + 83/149*x + 313/596,2);
+&gt; B:=ReducedBasis(V);
+&gt; #B;
+1
+</PRE>
+We test if there is a quadratic twist of our curve that does have high
+Mordell-Weil rank.
+<P>
+<P>
+<PRE>
+&gt; d:=-1;
+&gt; Cd:=QuadraticTwist(C,d);
+&gt; JCd:=Jacobian(Cd);
+&gt; Vd:=RationalPoints(JCd:Bound:=100);
+&gt; Bd:=ReducedBasis(Vd);
+&gt; #Bd;
+4
+</PRE>
+This shows that the Mordell-Weil rank of (Jac)(C<sub>d</sub>)(Q) is at least four.
+<P>
+Note that 
+(rank )(Jac)(C)(Q(Sqrt(d))) = 
+ (rank )(Jac)(C)(Q) + (rank )(Jac)(C<sub>d</sub>)(Q), 
+so if we can find an upper bound on
+the Mordell-Weil rank of (Jac)(C) over Q(Sqrt(d)) then we also find an
+upper bound on (rank )(Jac)(C<sub>d</sub>)(Q). We first try this with unproven
+class group data.
+<P>
+<P>
+<PRE>
+&gt; SetClassGroupBounds("GRH");
+&gt; K:=QuadraticField(d);
+&gt; CK:=BaseChange(C,K);
+&gt; JCK:=Jacobian(CK);
+&gt; NumberOfGenerators(TwoSelmerGroup(JCK));
+5
+</PRE>
+We find that (rank)(Jac)(C)(Q(Sqrt(d)))&le;5, which means that (Jac)(C) must indeed have Mordell-Weil rank 1 over Q. To make the class
+group computation unconditional, we must check up to the Minkowski bound for
+each of the number fields utilized in the computation
+<P>
+<P>
+<PRE>
+&gt; Aa:=AbsoluteAlgebra(JCK`Algebra);
+&gt; L:=Aa[1];
+&gt; MinkowskiBound(L);
+3763009
+</PRE>
+The command <TT>FactorBasisVerify(IntegerRing(L),1000,MinkowskiBound(L))</TT> would
+perform the required check, but will take considerable time to complete.
+<HR>
+<H3><A NAME = "16994">Example <TT>CrvHyp_BetterRankBounds (H131E35)</TT></A></H3>
+In this example we compute the Mordell-Weil rank of a genus 3 
+hyperelliptic Jacobian J with nontrivial 2-torsion in Sha using
+a different method. Namely we perform a 2-descent on the
+torsor parameterizing divisor classes of degree one on the curve
+as described in <A  HREF = "text1482.htm#bib_CreutzANTSX">[Cre12]</A>.
+<P>
+<P>
+<PRE>
+&gt; f := Polynomial([Rationals()| 30, 10, 30, 20, 10, 10, 10, 30, 10 ]);
+&gt; f;
+10*x^8 + 30*x^7 + 10*x^6 + 10*x^5 + 10*x^4 + 20*x^3 + 30*x^2 + 10*x + 30
+&gt; X := HyperellipticCurve(f);
+&gt; J := Jacobian(X);
+&gt; SetClassGroupBounds("GRH");
+&gt; S := TwoSelmerGroup(J);
+&gt; #S;
+4
+&gt; TorsionBound(J,5);
+1
+</PRE>
+Here the 2-Selmer rank is 2 and there is no nontrivial 2-torsion. 
+So the 2-descent on J gives an upper bound of 2 for the Mordell-Weil rank.
+However, one can do better. 
+<P>
+<P>
+<PRE>
+&gt; J`TwoSelmerSet;
+
+</PRE>
+Calling <A  HREF = "text1495.htm#TwoSelmerGroup">TwoSelmerGroup</A> also computes the 2-Selmer set of the 
+torsor T parameterizing rational divisor classes of degree 1
+(because C is everywhere locally solvable, the parameter
+<TT>Al := "TwoSelmerGroupNew"</TT> was used). This extra information
+allows us to deduce a better bound for the rank. 
+<P>
+<P>
+<PRE>
+&gt; RankBounds(J);
+0 0
+</PRE>
+In this example the 2-Selmer set is empty, which implies
+that T is not divisible by 2 in Sha. Consequently Sha[2] has rank at
+least 2 (because of well known properties of the Cassels-Tate pairing).
+The theory behind these computations is described in <A  HREF = "text1482.htm#bib_CreutzANTSX">[Cre12]</A>.
+<HR>
+<H3><A NAME = "16995">Example <TT>CrvHyp_DisregardTheWarning (H131E36)</TT></A></H3>
+For hyperelliptic curves of even degree and odd genus it is
+not always possible to obtain an upper bound for the Mordell-Weil
+rank. When the curve does not have index one everywhere locally,
+it may not be the case that every rational divisor class can be
+represented by a rational divisor. 
+<P>
+<P>
+Here we provide an example of an even degree odd genus curve 
+which does not have index one everywhere locally, but for which
+we can still compute an upper bound for the Mordell-Weil rank.
+The use of <TT>SetClassGroupBounds</TT> speeds up the computation, but is not
+necessary.
+<P>
+<P>
+<PRE>
+&gt; f := Polynomial([Rationals()|-9, 8, 8, 1, -8, -8, -7, -2, -7 ]);
+&gt; C := HyperellipticCurve(f);
+&gt; Genus(C);
+3
+&gt; Degree(C);
+8
+&gt; J := Jacobian(C);
+&gt; SetClassGroupBounds("GRH");
+&gt; RankBound(J);
+WARNING: upper bound is only an upper bound for the rank of Pic^0(X).
+2
+</PRE>
+The warning appears because C does not have index one everywhere locally.
+In fact it is easy to see C has no real points. So over the reals it
+has no rational divisors of odd degree. However C has points locally
+at all nonarchimedean primes. This means C fails to have index 1 at
+exactly one prime. The obstruction to a rational divisor class being
+represented by a rational divisor is an element of the Brauer group.
+It follows from reciprocity in the Brauer group that every Q-rational 
+divisor class is represented by a Q-rational divisor. 
+In particular Pic<sup>0</sup>(C) =J(Q). So we can disregard the warning.
+<P>
+<P>
+<P>
+<PRE>
+&gt; HasIndexOneEverywhereLocally(C);
+false 0
+&gt; Roots(f,RealField(50));
+[]
+&gt; Evaluate(f,0) lt 0;
+true
+&gt; &amp;and[ HasIndexOne(C,p) : p in BadPrimes(C) ];
+true
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1496.htm">[Next]</A><A  HREF = "text1494.htm">[Prev]</A> <A  HREF = "text1496.htm">[Right]</A> <A  HREF = "text1494.htm">[Left]</A> <A  HREF = "text1483.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

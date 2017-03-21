@@ -1,0 +1,235 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Operations on Curves</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1429.htm">[Next]</A><A  HREF = "text1427.htm">[Prev]</A> <A  HREF = "text1429.htm">[Right]</A> <A  HREF = "text1427.htm">[Left]</A> <A  HREF = "text1425.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16123">Operations on Curves</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1428.htm#16124">Elementary Invariants</A>
+<LI> <A  HREF = "text1428.htm#16133">Associated Structures</A>
+<LI> <A  HREF = "text1428.htm#16136">Predicates on Elliptic Curves</A>
+</UL>
+<H4><A NAME = "16124">Elementary Invariants</A></H4>
+
+
+
+<H5><A NAME = "16125">aInvariants(E) : CrvEll -&gt; [ RngElt ]</A></H5>
+<H5>Coefficients(E) : CrvEll -&gt; [ RngElt ]</H5>
+<H5>ElementToSequence(E) : CrvEll -&gt; [ RngElt ]</H5>
+<H5>Eltseq(E) : CrvEll -&gt; [ RngElt ]</H5>
+<BLOCKQUOTE>
+Given an elliptic curve E, this function returns a sequence consisting
+of the Weierstrass coefficients of E; this is the sequence
+[a<sub>1</sub>, a<sub>2</sub>, a<sub>3</sub>, a<sub>4</sub>, a<sub>6</sub>] such that E is defined by
+y<sup>2</sup>z + a<sub>1</sub>xyz + a<sub>3</sub>yz<sup>2</sup>=x<sup>3</sup> + a<sub>2</sub>x<sup>2</sup>z + a<sub>4</sub>xz<sup>2</sup> + a<sub>6</sub>z<sup>3</sup>.
+Note that this function returns the five coefficients
+even if E was defined by a sequence [a, b] of length two
+(the first three coefficients are zero in such a case).
+</BLOCKQUOTE>
+<H5><A NAME = "16126">bInvariants(E) : CrvEll -&gt; [ RngElt ]</A></H5>
+<BLOCKQUOTE>
+This function returns a sequence of length 4 containing the
+b-invariants of the elliptic curve E, namely
+[b<sub>2</sub>, b<sub>4</sub>, b<sub>6</sub>, b<sub>8</sub>]. In terms of the coefficients
+of E these
+are defined by
+<PRE>
+b_2 = a_1^2 + 4*a_2
+b_4 = a_1*a_3 + 2*a_4
+b_6 = a_3^2 + 4*a_6
+b_8 = a_1^2*a_6 + 4*a_2*a_6 - a_1*a_3*a_4 + a_2*a_3^2 - a_4^2.
+</PRE>
+</BLOCKQUOTE>
+<H5><A NAME = "16127">cInvariants(E) : CrvEll -&gt; [ RngElt ]</A></H5>
+<BLOCKQUOTE>
+This function returns a sequence of length 2 containing the
+c-invariants of the elliptic curve E, namely
+[c<sub>4</sub>, c<sub>6</sub>]. In terms of the b-invariants
+of E these
+are defined by
+<PRE>
+c_4 = b_2^2 - 24*b_4
+c_6 = -b_2^3 + 36*b_2*b_4 - 216*b_6.
+</PRE>
+</BLOCKQUOTE>
+<H5><A NAME = "16128">Discriminant(E) : CrvEll -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+This function returns the discriminant d 
+of the elliptic curve E.
+In terms of the b-invariants of E it is defined by
+<PRE>
+d = -b_2^2*b_8 - 8*b_4^3 - 27*b_6^2 + 9*b_2*b_4*b_6
+</PRE>and there is also the relationship 1728*d = c_4^3 - c_6^2. 
+</BLOCKQUOTE>
+<H5><A NAME = "16129">jInvariant(E) : CrvEll -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+Return the j-invariant of the elliptic curve E.  In terms of
+the c-invariants and the discriminant of E it is defined by j = c_4^3 / d. 
+Two elliptic curves defined over the same base field are isomorphic
+over some extension field exactly when their j-invariants are equal.
+</BLOCKQUOTE>
+<H5><A NAME = "16130">HyperellipticPolynomials(E) : CrvEll -&gt; RngUPolElt, RngUPolElt</A></H5>
+<BLOCKQUOTE>
+Returns polynomials x<sup>3</sup> + a<sub>2</sub> x<sup>2</sup> + a<sub>4</sub> x + a<sub>6</sub> and a<sub>1</sub> x + a<sub>3</sub>,
+formed from the invariants of the elliptic curve E.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16131">Example <TT>CrvEll_Invariants (H126E10)</TT></A></H3>
+Here are a few simple uses of the above functions.
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([0, -1, 1, 1, 0]);
+&gt; E;
+Elliptic Curve defined by y^2 + y = x^3 - x^2 + x over Rational Field
+&gt; aInvariants(E);
+[ 0, -1, 1, 1, 0 ]
+&gt; Discriminant(E);
+-131
+&gt; c4, c6 := Explode(cInvariants(E));
+&gt; jInvariant(E) eq c4^3 / Discriminant(E);
+true
+</PRE>
+<HR>
+<H3><A NAME = "16132">Example <TT>CrvEll_GenericCurve (H126E11)</TT></A></H3>
+By constructing a generic elliptic curve we can see that the
+relationships described above hold.
+<P>
+<P>
+<PRE>
+&gt; F&lt;a1, a2, a3, a4, a6&gt; := FunctionField(Rationals(), 5);
+&gt; E := EllipticCurve([a1, a2, a3, a4, a6]);
+&gt; E;
+Elliptic Curve defined by y^2 + a1*x*y + a3*y = x^3 + a2*x^2 + a4*x + a6
+over F
+&gt; aInvariants(E);
+[
+    a1,
+    a2,
+    a3,
+    a4,
+    a6
+]
+&gt; bInvariants(E);
+[
+    a1^2 + 4*a2,
+    a1*a3 + 2*a4,
+    a3^2 + 4*a6,
+    a1^2*a6 - a1*a3*a4 + a2*a3^2 + 4*a2*a6 - a4^2
+]
+&gt; b2,b4,b6,b8 := Explode(bInvariants(E));
+&gt; cInvariants(E);
+[
+    a1^4 + 8*a1^2*a2 - 24*a1*a3 + 16*a2^2 - 48*a4,
+    -a1^6 - 12*a1^4*a2 + 36*a1^3*a3 - 48*a1^2*a2^2 + 72*a1^2*a4 +
+        144*a1*a2*a3 - 64*a2^3 + 288*a2*a4 - 216*a3^2 - 864*a6
+]
+&gt; c4,c6 := Explode(cInvariants(E));
+&gt; c4 eq b2^2 - 24*b4;
+true
+&gt; c6 eq -b2^3 + 36*b2*b4 - 216*b6;
+true
+&gt; d := Discriminant(E);
+&gt; d;
+-a1^6*a6 + a1^5*a3*a4 - a1^4*a2*a3^2 - 12*a1^4*a2*a6 + a1^4*a4^2 +
+    8*a1^3*a2*a3*a4 + a1^3*a3^3 + 36*a1^3*a3*a6 - 8*a1^2*a2^2*a3^2 -
+    48*a1^2*a2^2*a6 + 8*a1^2*a2*a4^2 - 30*a1^2*a3^2*a4 + 72*a1^2*a4*a6 +
+    16*a1*a2^2*a3*a4 + 36*a1*a2*a3^3 + 144*a1*a2*a3*a6 - 96*a1*a3*a4^2 -
+    16*a2^3*a3^2 - 64*a2^3*a6 + 16*a2^2*a4^2 + 72*a2*a3^2*a4 +
+    288*a2*a4*a6 - 27*a3^4 - 216*a3^2*a6 - 64*a4^3 - 432*a6^2
+&gt; d eq -b2^2*b8 - 8*b4^3 - 27*b6^2 + 9*b2*b4*b6;
+true
+&gt; 1728*d eq c4^3 - c6^2;
+true
+</PRE>
+vskip-2pt
+<HR>
+<H4><A NAME = "16133">Associated Structures</A></H4>
+
+
+
+<H5><A NAME = "16134">Category(E) : CrvEll -&gt; Cat</A></H5>
+<H5>Type(E) : CrvEll -&gt; Cat
+</H5>
+<BLOCKQUOTE>
+Returns the category of elliptic curves, <TT>CrvEll</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "16135">BaseRing(E) : CrvEll -&gt; Rng</A></H5>
+<H5>CoefficientRing(E) : CrvEll -&gt; Rng
+</H5>
+<BLOCKQUOTE>
+The base ring of the elliptic curve E;
+that is, the parent of its coefficients and the
+coefficient ring of the default point set of E.
+</BLOCKQUOTE>
+<H4><A NAME = "16136">Predicates on Elliptic Curves</A></H4>
+
+
+
+<H5><A NAME = "16137">E eq F : CrvEll, CrvEll -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the elliptic curves E and F are defined over the same
+ring and have the same coefficients.
+</BLOCKQUOTE>
+<H5><A NAME = "16138">E ne F : CrvEll, CrvEll -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+The logical negation of <TT>eq</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "16139">IsIsomorphic(E, F) : CrvEll, CrvEll -&gt; BoolElt, Map</A></H5>
+<BLOCKQUOTE>
+Given two elliptic curves E and F this function returns <TT>true</TT> if
+there exists an isomorphism between E and F over the base field,
+and <TT>false</TT> otherwise.  If E and F are isomorphic then the
+isomorphism is returned as a second value.  This function requires being
+able to take roots in the base field.
+</BLOCKQUOTE>
+<H5><A NAME = "16140">IsIsogenous(E, F) : CrvEll[FldRat], CrvEll[FldRat] -&gt; BoolElt, Map</A></H5>
+<H5>IsIsogenous(E, F) : CrvEll[FldFin], CrvEll[FldFin] -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Given two elliptic curves E and F defined over the rationals or a
+finite field, this function returns <TT>true</TT> if the curves E and F
+are isogenous over this field and <TT>false</TT> otherwise.
+In the rational case, if the curves are isogenous then the isogeny
+will be returned as the second value.
+For finite fields the isogeny computation operates via point counting
+and thus no isogeny is returned.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16141">Example <TT>CrvEll_Twists2 (H126E12)</TT></A></H3>
+We return to the curves in the earlier quadratic twist example.  By
+definition, these curves are not isomorphic over their base field, but
+are isomorphic over a quadratic extension.
+<P>
+<P>
+<PRE>
+&gt; K := GF(13);
+&gt; E := EllipticCurve([K | 3, 1]);
+&gt; E5 := QuadraticTwist(E, 5);
+&gt; IsIsomorphic(E, E5);
+false
+&gt; IsIsomorphic(BaseExtend(E, 2), BaseExtend(E5, 2));
+true
+</PRE>
+Since they are isomorphic over an extension, their j-invariants must
+be the same.
+<P>
+<P>
+<PRE>
+&gt; jInvariant(E) eq jInvariant(E5);
+true
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1429.htm">[Next]</A><A  HREF = "text1427.htm">[Prev]</A> <A  HREF = "text1429.htm">[Right]</A> <A  HREF = "text1427.htm">[Left]</A> <A  HREF = "text1425.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

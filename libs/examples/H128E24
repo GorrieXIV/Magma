@@ -1,0 +1,39 @@
+"Source: Text/Geometry/CrvEllQNF.text";
+"Line: 2575";
+"Date: Wed Jun  8 13:49:36 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/CrvEllQNF.text, line: 2575
+// Example: H128E24 ()
+print "Example: H128E24";
+ei := GetEchoInput();
+SetEchoInput(true);
+_<z> := PolynomialRing(Rationals());
+K<zeta> := NumberField(z^4-z^3+z^2-z+1);
+OK := IntegerRing(K);
+d := 2*zeta^3-2*zeta^2-2;
+E<X,Y,Z> := EllipticCurve(
+        [ 0, (-3*zeta^3-zeta+1)*d, 0, (-zeta^2-zeta-1)*d^2, 0 ]);
+success, G, GtoEK := PseudoMordellWeilGroup(E);
+G;
+success;
+assert $1;
+P1 := ProjectiveSpace(Rationals(),1);
+u := map< E->P1 | [-X + (zeta^3 - 1)*d*Z, X+(-zeta^3-zeta)*d*Z] >;
+V, R := Chabauty( GtoEK, u);
+V;
+R;
+assert PrimeDivisors($1) subset {2,3,5}; // even that may change?
+V2, R := Chabauty( GtoEK, u: IndexBound:= 2);
+V eq V2;
+assert $1;
+R;
+assert PrimeDivisors($1) eq [2];
+u := Extend(u);
+[ u( GtoEK(P) ) : P in V ];           
+N, V, R, C := Chabauty( GtoEK, u, 3);
+N;
+assert $1 eq 5;
+V;
+R;
+assert $1 eq 4;
+SetEchoInput(ei);

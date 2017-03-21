@@ -1,0 +1,264 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Residue Class Rings</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text176.htm">[Next]</A><A  HREF = "text174.htm">[Prev]</A> <A  HREF = "text176.htm">[Right]</A> <A  HREF = "text174.htm">[Left]</A> <A  HREF = "text171.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "1382">Residue Class Rings</A></H3>
+
+<P>
+<P>
+<P>
+The ring Z/mZ consists of representatives for the residue classes
+<P>
+of integers modulo m &gt; 1. 
+This online help node and the nodes below it describe
+the operations in Magma for such rings and their elements.
+<P>
+<P>
+At any stage during a session, Magma will have at most one copy of
+Z/mZ present, for any m&gt;1. In other words, different names for the 
+same residue class ring will in fact be different references to the
+same structure. This saves memory and avoids confusion about different 
+but isomorphic structures.
+<P>
+<P>
+If m is a prime number, the ring Z/mZ forms a field; however,
+Magma has special functions for dealing with finite fields.
+The operations described here should <I>not</I> be used for
+<P>
+finite field calculations: the implementation of finite field
+arithmetic in Magma 
+takes full advantage of the special structure of finite fields 
+and leads to superior performance.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text175.htm#1383">Creation</A>
+<LI> <A  HREF = "text175.htm#1390">Coercion</A>
+<LI> <A  HREF = "text175.htm#1392">Elementary Invariants</A>
+<LI> <A  HREF = "text175.htm#1395">Structure Operations</A>
+<LI> <A  HREF = "text175.htm#1400">Ring Predicates and Booleans</A>
+<LI> <A  HREF = "text175.htm#1401">Homomorphisms</A>
+</UL>
+<H4><A NAME = "1383">Creation</A></H4>
+
+<P>
+<P>
+In addition to the general quotient constructor, a number
+of abbreviations are provided for computing residue class rings.
+
+
+<H5><A NAME = "1384">quo&lt;Z | I&gt; : RngInt, RngInt -&gt; RngIntRes</A></H5>
+<BLOCKQUOTE>
+Given the ring of integers Z, and an ideal I, create the
+residue class ring modulo the ideal.
+<P>
+Note that Z/I does <B>not</B> give this residue ring, but rather,
+in compatibility with Z as a number field order, returns
+the ideal quotient, namely Z itself
+(see Section <A  HREF = "text174.htm#1373">Z as a Number Field Order</A> above,
+and the example in Sections <A  HREF = "text173.htm#1370">Ideals of Z</A>).
+</BLOCKQUOTE>
+<H5><A NAME = "1385">quo&lt;Z | m&gt; : RngInt, RngIntElt -&gt; RngIntRes</A></H5>
+<BLOCKQUOTE>
+Given the ring of integers Z, and an integer m &ne;0, create 
+the residue class ring Z/mZ.
+</BLOCKQUOTE>
+<H5><A NAME = "1386">ResidueClassRing(m) : RngIntElt -&gt; RngIntRes, Map</A></H5>
+<H5>IntegerRing(m) : RngIntElt -&gt; RngIntRes</H5>
+<H5>Integers(m) : RngIntElt -&gt; RngIntRes</H5>
+<H5>RingOfIntegers(m) : RngIntElt -&gt; RngIntRes</H5>
+<BLOCKQUOTE>
+Given an integer greater than zero, create the residue class 
+ring Z/mZ and also returns the map from Z into Z/mZ.
+</BLOCKQUOTE>
+<H5><A NAME = "1387">ResidueClassField(p) : RngIntElt -&gt; FldFin, Map</A></H5>
+<BLOCKQUOTE>
+Given a prime integer p construct the residue class field F<sub>p</sub> and the map from
+Z into F<sub>p</sub>.
+</BLOCKQUOTE>
+<H5><A NAME = "1388">ResidueClassRing(Q) : RngIntEltFact -&gt; RngIntRes</A></H5>
+<H5>IntegerRing(Q) : RngIntEltFact -&gt; RngIntRes</H5>
+<H5>Integers(Q) : RngIntEltFact -&gt; RngIntRes</H5>
+<BLOCKQUOTE>
+Create the residue class ring Z/mZ, where m is the integer
+corresponding to the factorization sequence Q.  This is more 
+efficient than creating the ring by m alone, since the 
+factorization Q will be stored so it can be reused later.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "1389">Example <TT>RngIntRes_residue-ring (H19E2)</TT></A></H3>
+We construct a residue ring having modulus the largest prime not 
+exceeding 2<sup>16</sup>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; p := PreviousPrime(2^16);
+&gt; p;
+65521
+&gt; R := ResidueClassRing(p);
+Residue class ring of integers modulo 65521
+</PRE>
+<P>
+Now we try to find an element x in R such that x<sup>3</sup> = 23.
+<P>
+<P>
+<P>
+<PRE>
+&gt; exists(t){x : x in R | x^3 eq 23};
+true
+&gt; t;
+12697
+</PRE>
+<HR>
+<H4><A NAME = "1390">Coercion</A></H4>
+
+<P>
+ Automatic
+coercion takes place between Z/mZ and Z so that a binary operation
+like + applied to an element of Z/mZ and an integer will result in a
+residue class from Z/mZ.
+<P>
+Using <TT>!</TT>, elements from a prime field GF(p) can be coerced
+into Z/pZ, and elements from Z/pZ can be coerced into GF(p<sup>r</sup>).
+Also, transitions between Z/mZ and Z/nZ can be made using <TT>!</TT>
+provided that m divides n or n divides m. In cases where there
+is a choice -- such as when an element r from Z/mZ is coerced into
+Z/nZ with m dividing n -- the result will be the residue class
+containing the representative for r.
+
+
+<HR>
+<H3><A NAME = "1391">Example <TT>RngIntRes_Coercion (H19E3)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; r := ResidueClassRing(3) ! 5;
+&gt; r;
+2
+&gt; ResidueClassRing(6) ! r;
+2
+</PRE>
+So the representative 2 of 5 mod 3
+is mapped to the residue class 2 mod 6,
+and not to 5 mod 6.
+<HR>
+<H4><A NAME = "1392">Elementary Invariants</A></H4>
+
+
+
+<H5>Characteristic(R) : RngIntRes -&gt; RngIntResElt</H5>
+
+<H5># R : RngIntRes -&gt; RngIntResElt</H5><P>
+
+
+
+<H5><A NAME = "1393">Modulus(R) : RngIntRes -&gt; RngInt</A></H5>
+<BLOCKQUOTE>
+Given a residue class ring R=Z/mZ, this function returns the common
+modulus m for the elements of R.
+</BLOCKQUOTE>
+<H5><A NAME = "1394">FactoredModulus(R) : RngIntRes -&gt; RngIntEltFact</A></H5>
+<BLOCKQUOTE>
+Given a residue class ring R=Z/mZ, this function returns the 
+factorization of the common modulus m for the elements of R.
+</BLOCKQUOTE>
+<H4><A NAME = "1395">Structure Operations</A></H4>
+
+
+
+<H5>Category(R) : RngIntRes -&gt; Cat</H5>
+
+<H5>Parent(R) : RngIntRes -&gt; PowerStructure</H5>
+
+<H5>PrimeRing(R) : RngIntRes -&gt; RngIntRes</H5><P>
+
+<H5>Center(R) : RngIntRes -&gt; RngIntRes</H5><P>
+
+
+
+<H5><A NAME = "1396">AdditiveGroup(R) : RngIntRes -&gt; GrpAb, Map</A></H5>
+<BLOCKQUOTE>
+Given R=Z/mZ, create the abelian group of integers modulo m under addition.
+This returns the finite additive abelian group A (of order m) together
+with a map from A to the ring Z/mZ, sending A.1 to 1.
+</BLOCKQUOTE>
+<H5><A NAME = "1397">MultiplicativeGroup(R) : RngIntRes -&gt; GrpAb, Map</A></H5>
+<H5>UnitGroup(R) : RngIntRes -&gt; GrpAb, Map</H5>
+<BLOCKQUOTE>
+Given R=Z/mZ, create the multiplicative group of R as an abelian group.
+This returns an (additive) abelian group A of order &phi;(m), together
+with a map from A to R.
+</BLOCKQUOTE>
+<H5><A NAME = "1398">sub&lt; R | n &gt; : RngIntRes, RngIntResElt -&gt; RngIntRes</A></H5>
+<BLOCKQUOTE>
+Given R, the ring of integers modulo m or an ideal of it, and an element
+n of R create the ideal of R generated by n.
+</BLOCKQUOTE>
+<H5><A NAME = "1399">Set(R) : RngIntRes -&gt; SetEnum</A></H5>
+<BLOCKQUOTE>
+Create the enumerated set consisting of the elements of the residue class 
+ring R.
+</BLOCKQUOTE>
+<H4><A NAME = "1400">Ring Predicates and Booleans</A></H4>
+
+
+
+<H5>IsCommutative(R) : RngIntRes -&gt; BoolElt</H5>
+
+<H5>IsUnitary(R) : RngIntRes -&gt; BoolElt</H5><P>
+
+<H5>IsFinite(R) : RngIntRes -&gt; BoolElt</H5>
+
+<H5>IsOrdered(R) : RngIntRes -&gt; BoolElt</H5><P>
+
+<H5>IsField(R) : RngIntRes -&gt; BoolElt</H5>
+
+<H5>IsEuclideanDomain(R) : RngIntRes -&gt; BoolElt</H5><P>
+
+<H5>IsPID(R) : RngIntRes -&gt; BoolElt</H5>
+
+<H5>IsUFD(R) : RngIntRes -&gt; BoolElt</H5><P>
+
+<H5>IsDivisionRing(R) : RngIntRes -&gt; BoolElt</H5>
+
+<H5>IsEuclideanRing(R) : RngIntRes -&gt; BoolElt</H5><P>
+
+<H5>IsPrincipalIdealRing(R) : RngIntRes -&gt; BoolElt</H5>
+
+<H5>IsDomain(R) : RngIntRes -&gt; BoolElt</H5><P>
+
+<H5>R eq R : RngIntRes, Rng -&gt; BoolElt</H5>
+
+<H5>R ne R : RngIntRes, Rng -&gt; BoolElt</H5><P>
+
+
+<H4><A NAME = "1401">Homomorphisms</A></H4>
+
+<P>
+<P>
+Ring homomorphisms with domain Z/mZ are completely determined
+by the image of 1. As usual,
+we require our homomorphisms to map 1 to 1. Therefore, the general
+homomorphism constructor with domain Z/mZ needs no arguments.
+
+
+<H5><A NAME = "1402">hom&lt; R -&gt; S |  &gt; : RngIntRes, Rng -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Given a residue class ring R, and a ring S,
+create a homomorphism from R to S, determined by f(1<sub>R</sub>) = 1<sub>S</sub>.
+Note that it is the responsibility of the user that the map defines
+a homomorphism!
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text176.htm">[Next]</A><A  HREF = "text174.htm">[Prev]</A> <A  HREF = "text176.htm">[Right]</A> <A  HREF = "text174.htm">[Left]</A> <A  HREF = "text171.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

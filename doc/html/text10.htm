@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>The where ... is Construction</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text11.htm">[Next]</A><A  HREF = "text9.htm">[Prev]</A> <A  HREF = "text11.htm">[Right]</A> <A  HREF = "text9.htm">[Left]</A> <A  HREF = "text3.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "53">The <TT>where ... is</TT> Construction</A></H3>
+
+<P>
+<P>
+By the use of the <TT>where ... is</TT> construction, one can within an
+expression 
+temporarily assign an identifier to a sub-expression.  This allows for compact 
+code and efficient re-use of common sub-expressions.
+
+
+<H5><A NAME = "54">expression<sub>1</sub> where identifier is expression<sub>2</sub></A></H5>
+<H5>expression<sub>1</sub> where identifier := expression<sub>2</sub></H5>
+<BLOCKQUOTE>
+This construction is an expression that temporarily assigns the identifier to 
+the second expression and then
+yields the value of the first expression.  The identifier may be referred
+to in the first expression and it will equal the value of the second
+expression.
+The token <TT>:=</TT> can be used as a synonym for <TT>is</TT>.
+The scope of the identifier is the <TT>where ... is</TT> construction
+alone except for when the construction is part of an expression list --- see
+below.
+<P>
+The <TT>where</TT> operator is left-associative.  This means that there
+can be multiple uses of <TT>where ... is</TT> constructions and each 
+expression can refer to variables bound in the enclosing constructions.
+<P>
+Another important feature is found in a set or sequence constructor.
+If there are <TT>where ... is</TT> constructions in the predicate, then any variables bound in
+them may be referred to in the expression at the beginning of the constructor.
+If the whole predicate is placed in parentheses, then any variables bound
+in the predicate do not extend to the expression at the beginning of
+the constructor.
+<P>
+The <TT>where</TT> operator also extends left in expression lists.
+That is, if there is an expression E in a expression list which is a
+<TT>where</TT> construction (or chain of where constructions), the identifiers
+bound in that where construction (or chain) will be defined in all
+expressions in the list
+which are to the left of E.  Expression lists commonly arise as argument
+lists to functions or procedures, return arguments, print statements
+(with or without the word `print') etc.
+A where construction also overrides (hides) any where construction to the
+right of it in the same list.
+Using parentheses around a where expression ensures that the identifiers
+bound within it are not seen outside it.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "55">Example <TT>State_where (H1E9)</TT></A></H3>
+The following examples illustrate simple uses of <TT>where ... is</TT>.
+<P>
+<P>
+<PRE>
+&gt; x := 1;
+&gt; x where x is 10; 
+10
+&gt; x;
+1
+&gt; Order(G) + Degree(G) where G is Sym(3);
+9
+</PRE>
+Since <TT>where</TT> is left-associative we may have multiple uses of it.
+The use of parentheses, of course, can override the usual associativity.
+<P>
+<P>
+<PRE>
+&gt; x := 1;
+&gt; y := 2;
+&gt; x + y where x is 5 where y is 6;
+11
+&gt; (x + y where x is 5) where y is 6; // the same
+11
+&gt; x + y where x is (5 where y is 6);
+7
+&gt; x + y where x is y where y is 6;   
+12
+&gt; (x + y where x is y) where y is 6; // the same
+12
+&gt; x + y where x is (y where y is 6);
+8
+</PRE>
+We now illustrate how the left expression in a set or sequence constructor
+can reference the identifiers of <TT>where</TT> constructions in the predicate.
+<P>
+<P>
+<PRE>
+&gt; { a: i in [1 .. 10] | IsPrime(a) where a is 3*i + 1 };
+{ 7, 13, 19, 31 }
+&gt; [&lt;x, y&gt;: i in [1 .. 10] | IsPrime(x) and IsPrime(y)
+&gt;    where x is y + 2 where y is 2 * i + 1];
+[ &lt;5, 3&gt;, &lt;7, 5&gt;, &lt;13, 11&gt;, &lt;19, 17&gt; ]
+</PRE>
+We next demonstrate the semantics of <TT>where</TT> constructions inside 
+expression lists.
+<P>
+<P>
+<PRE>
+&gt; // A simple use:
+&gt; [a, a where a is 1];
+[ 1, 1 ]
+&gt; // An error: where does not extend right
+&gt; print [a where a is 1, a];
+User error: Identifier 'a' has not been declared
+&gt; // Use of parentheses:
+&gt; [a, (a where a is 1)] where a is 2;
+[ 2, 1 ]
+&gt; // Another use of parentheses:
+&gt; print [a, (a where a is 1)];
+User error: Identifier 'a' has not been declared
+&gt; // Use of a chain of where expressions:
+&gt; [&lt;a, b&gt;, &lt;b, a&gt; where a is 1 where b is 2];
+[ &lt;1, 2&gt;, &lt;2, 1&gt; ]
+&gt; // One where overriding another to the right of it:
+&gt; [a, a where a is 2, a where a is 3];
+[ 2, 2, 3 ]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text11.htm">[Next]</A><A  HREF = "text9.htm">[Prev]</A> <A  HREF = "text11.htm">[Right]</A> <A  HREF = "text9.htm">[Left]</A> <A  HREF = "text3.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

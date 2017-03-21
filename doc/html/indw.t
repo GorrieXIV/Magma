@@ -1,0 +1,9 @@
+W-key 0
+weierstrass 1
+weight 2
+WeightOneHalfData 3
+weil 4
+Wildly 5
+witt 6
+WordInStrongGenerators 7
+WriteBinary 8

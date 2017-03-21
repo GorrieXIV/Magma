@@ -1,0 +1,32 @@
+"Source: Text/Geometry/Scheme.text";
+"Line: 9038";
+"Date: Wed Jun  8 17:42:16 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/Scheme.text, line: 9038
+// Example: H118E67 ()
+print "Example: H118E67";
+ei := GetEchoInput();
+SetEchoInput(true);
+P<w,x,y,z> := AffineSpace(Rationals(),4);
+f1 := w*x*y - 6*w*x - 7*w*y*z + w*y - 6*w*z - 3*x*y + y + 6*z;
+f2 := 10*w*x*y*z - 4*w*y*z + 2*w*y - 9*w - x*y*z - 10*x*z + y*z - 7*y;
+f3 := 10*w*x*y*z - 6*w*x*y + 8*w*x*z - 4*w*y*z - 6*w*z - x*z + 9*x + 8*y;
+f4 := 6*w*x*y*z + 3*w*x*z + 19*w*y*z - 7*w*z + 8*x*y*z - 2*x*z + 6;
+S := Scheme(P,[f1,f2,f3,f4]);
+SetVerbose("IsolatedPoints",1);
+PTS := IsolatedPointsFinder(S,[5]);
+Degree(S);
+assert $1 eq 22;
+b,POLYS := IsolatedPointsLiftToMinimalPolynomials
+                   (S,PTS[1] : DegreeBound:=22,LiftingBound:=10);  
+POLYS[1];
+time V := Variety(Ideal(S),AlgebraicClosure()); // about 15s
+MinimalPolynomial(V[22][4]); // deg 22, all coeffs about 25 digits
+MinimalPolynomial(V[22][3]); // deg 22, all coeffs about 25 digits
+V[22][4]; // given simply as r22, all 22 conjugates are found
+V[22][3]; // third coordinate in terms of the fourth
+K := NumberField(POLYS[1]); // first coordinate
+_<xx,yy,zz> := PolynomialRing(K,3);
+E := [Evaluate(e,[K.1,xx,yy,zz]) : e in DefiningEquations(S)];
+Variety(Ideal(E)); // about 2 seconds
+SetEchoInput(ei);

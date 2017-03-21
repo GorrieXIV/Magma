@@ -1,0 +1,89 @@
+% $Id:: crisis.tex 1330 2008-10-31 14:51:44Z jbaa004                         $:
+
+\magnification 1200
+\centerline{\bf Crisis management}
+A crisis occurs when we discover that we do not have a full generating set for a left child that
+is not the node being processed, but is some ancestor of that node.
+
+I assume that a result confirmed by the mandarins is in fact true.  The probability that this fails
+is so very small that in theory one should simply start the whole computation again from the
+beginning; but in practice one should suspect a bug.
+
+The reason for having good crisis management is that we can then take greater risks.  That is
+to say, we can keep the number of generators used down to a reasonably small number.
+With unipotent leaves we may need many generators; I have some suggestions on how to
+deal with this problem, dealt with elsewhere.
+
+If the crisis management follows the lines suggested here the effect of a crisis will
+be to leave the part of the tree already constructed almost completely unaltered.
+
+When we process the left child of a node $N$, the right child of $N$ is mandarin checked.  
+It follows that if we do not have a full generating set for $N$ the error has occurred when
+we constructed an inadequate generating set for an ancestor of $N$ that is a left child.
+
+The first step will be to consider in turn ancestors of $N$ that are left children, working upwards
+towards the root, until we find a node $M$ where a new generator will give rise to an element in
+$N$ that covers the error.  That is to say, an element that points to an error at $N$, probably
+the same error that the mandarin noticed.
+
+Say that a node that lies on the path from $M$ to $N$ a relevant node.
+
+The fix will consist of adding a new generator to each relevant node.
+
+If $P$ is a relevant node, the right child of $P$ has been processed and mandarin checked;
+the left child of $P$ has not been constructed.
+
+Let $P$ be a relevant node with a relevant child $Q$.
+
+If $Q$ is the left child of $P$ then the new generator of $P$ will map to the identity in the
+right child of $P$; in other words, it will already lie in the group defined at $Q$.  This means
+that the right child of $P$, which has been checked, is now given a new generator that is
+the identity, and may, for technical reasons,  have to be propagated downwards to the right until it disappears as the identity in a leaf.
+
+Here is the simple algorithm that achieves this.
+
+Locate the the node $M$.  This implies that we have found a new generator $g$ that we can
+add to $M$ that gives rise to a useful element in $N$; that is to an element that points to the error.
+We assume that this is the youngest ancestor of $N$ that has this property.
+
+We now apply a procedure Fix.  Fix has as parameters a relevant node $Q$, and an extra
+generator $h$ for the group at $Q$.  The relevant ancestors of $Q$ also have one extra generator
+each.  These extra generators will be updated from time to time.  If $P$ is the relevant
+parent of $Q$ (assuming that $Q$ is not $M$) then either $Q$ is the right child of $P$ and
+the extra generator of $P$ maps to the extra generator of $Q$, or $Q$ is the left child of
+$P$ and the extra generator for $P$ is the extra generator for $Q$.  The extra generators
+come with the appropriate SLP's.
+
+Fix terminates when the node parameter $Q$ is $N$.
+
+if the relevant child of $Q$ is the right child $R$, take the image of the extra generator for
+$Q$ to be the extra generator for $R$, and apply Fix to $R$;
+
+if the relevant child of $Q$ is the left child $L$ then
+
+if the extra generator of $Q$ lies in $L$ apply Fix to $L$ with this extra generator;
+
+else write the image of the extra generator in $R$ as an SLP $w$ in the generators of $R$, and
+apply AdjustExtraGenerators, with parameters $M$, $Q$ and $w$.  This changes the 
+extra generators in the relevant nodes between $M$ and $Q$;
+
+apply Fix with parameters $Q$ and the new extra generator for $Q$;
+
+end else;
+
+end Fix;
+
+AdjustExtraGenerators divides the extra generator by $w$ evaluated on the generators of the 
+appropriate node.  This is straightforward when going from right child to parent.
+When going from left child to parent the generators of the left child are SLP's in the
+generators of the parent, so at this stage the SLP $w$ is replaced by a longer SLP
+on the generators of the parent.
+
+Note that AdjustExtraGenerators multiplies the extra generators by elements of the
+old generators of $M$.  Thus the property of not pointing to the problem in $N$
+is preserved.  If $M$ has been incorrectly identified, in that a younger ancestor
+of $N$ would suffice, there is a small risk that the extra generator returned by Fix
+will in fact not fix.  If this happens one should simply start fixing the crisis again from
+scratch, perhaps noting that one needs to find a younger node for $M$.
+
+\bye

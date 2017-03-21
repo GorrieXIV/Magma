@@ -1,0 +1,46 @@
+"Source: Text/Geometry/CrvHyp.text";
+"Line: 6142";
+"Date: Wed Jun  8 17:42:16 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/CrvHyp.text, line: 6142
+// Example: H131E44 ()
+print "Example: H131E44";
+ei := GetEchoInput();
+SetEchoInput(true);
+_<x>:=PolynomialRing(Rationals());
+f := 3*(x^2+1)*(x^2+17)*(x^2-17);
+pts := RationalPoints(f,3 : Bound:=100);
+pts;
+assert #$1 eq 2;
+K<th> := NumberField(x^2-17);
+factor := Factorisation(x^2-17,K)[1,1];
+time selmerset, algebra:=qCoverPartialDescent(
+ 3*(x^2+1)*(x^2+17)*(x^2-17),[*x^2+1,x^2+17,factor*],3
+ : KnownPoints := pts, PrimeBound := 1000 );
+selmerset;
+assert #selmerset eq 2;
+delta := <1,9,2+2*th>;
+P2<x,v,w>:=ProjectivePlane(K);
+C:=Curve(P2, -(delta[3])*v^3 + (x^2+w^2)*(x-th*w) );
+E,CtoE:=EllipticCurve(C);
+twotors := TorsionSubgroup(E);
+#twotors;
+assert $1 eq 1;
+covers,coverstoE:=TwoDescent(E);
+#covers;
+assert $1 eq 1;
+cover:=covers[1];
+covertoE:=coverstoE[1];
+pts:={@pt@covertoE : pt in RationalPoints(cover : Bound:=100)@};
+pts;
+gen := pts[1];
+A:=FreeAbelianGroup(1);
+AtoE:=map<A -> E | elt :-> Eltseq(elt)[1]*gen >;
+P1:=ProjectiveSpace(Rationals(),1);
+CtoE;
+EtoP1:=map<E -> P1 | [th*E.2,E.2 + 1/128*(1377*th - 12393)*E.3]>;
+Chabauty(AtoE,EtoP1);
+Chabauty(AtoE,EtoP1 : IndexBound:=126);
+pointC:= (-A.1)@AtoE@@CtoE;
+pointC;
+SetEchoInput(ei);

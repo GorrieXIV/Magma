@@ -1,0 +1,350 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Cliques, Independent Sets</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1803.htm">[Next]</A><A  HREF = "text1801.htm">[Prev]</A> <A  HREF = "text1803.htm">[Right]</A> <A  HREF = "text1801.htm">[Left]</A> <A  HREF = "text1782.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "19948">Cliques, Independent Sets</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+The functions given here are not applicable to digraphs.
+<P>
+A <I>clique</I> of a graph G 
+  is a complete subgraph of G.
+A <I>maximal clique</I> 
+  is a clique which is not contained in any other
+  clique.
+A <I>maximum clique</I> is a maximal 
+  clique of largest size. 
+<P>
+An <I>independent set</I> of G is 
+  an empty subgraph of G.
+A <I>maximal</I> (<I>maximum</I>) <I>independent set</I>
+  is defined is the same way 
+  as a maximal (maximum) clique.
+Note that an independent set of size k in the graph G
+  is a clique of size  k in the complement graph of G.
+<P>
+<P>
+The clique and independent set functions presented below are implemented
+  using one of two algorithms, called here <I>BranchAndBound</I>
+  and <I>Dynamic</I>.
+The algorithms <I>BranchAndBound</I> and <I>Dynamic</I> are briefly 
+  described here.
+<P>
+<P>
+<P>
+<I>BranchAndBound</I> : The algorithm is an implementation
+  of the   branch and bound algorithm by 
+  Bron and Kerbosch <A  HREF = "text1781.htm#bib_BronKerb73">[BK73]</A>.
+<P>
+<P>
+The algorithm is designed to find maximal cliques and  it has been 
+  adapted here to also find cliques of specific size 
+  which may not be maximal.
+It attempts to  build a maximal clique by trying to expend the
+  current maximal clique.
+Some heuristics are built into the algorithm which enable
+  to prune the search tree.
+<P>
+<P>
+<P>
+<I>Dynamic</I> : The algorithm finds a clique of 
+  size exactly k, not necessarily maximal, 
+  in the graph G by using recursion and dynamic programming.
+If a clique of size k exists in G, then, for a given 
+  vertex v of G, there is either a clique of size k - 1
+  in the subgraph induced by the neighbours of v,
+  or there is a clique of size k in the graph G - v.
+This is the recursive step.
+The <I>Dynamic</I> algorithm applies a different strategy
+  (sorting of vertices and
+  selection of vertices to consider)
+  according to the order and density of the subgraph
+  considered at the current  level of recursion.
+This is achieved by dynamic programming, hence the name.
+This algorithm is due to 
+Wendy Myrvold <A  HREF = "text1781.htm#bib_Myrv">[WM]</A>.
+<P>
+<P>
+<P>
+<B>Comment</B>: When comparing both algorithms
+  in the situation 
+  where the problem   is to find a maximum clique 
+  one observes that in general
+  <I>BranchAndBound</I> does better.
+However <I>Dynamic</I> outperforms <I>BranchAndBound</I> when the graphs
+  under consideration are large (more then 400 vertices) random graphs 
+  with high density (larger than 0.5%).
+So far, it can only be said that
+  the comparative behaviour of both algorithms is highly 
+  dependent on the   structure of
+  the graphs.
+
+
+<H5><A NAME = "19949">HasClique(G, k) : GrphUnd, RngIntElt -&gt; BoolElt, { GrphVert }</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the graph G has a maximal clique of size k.
+If <TT>true</TT>, returns such a clique as the second argument.
+</BLOCKQUOTE>
+<H5><A NAME = "19950">HasClique(G, k, m : parameters) : GrphUnd, RngIntElt, BoolElt -&gt; BoolElt, { GrphVert }</A></H5>
+
+<PRE>    Al: MonStgElt                       Default: "BranchAndBound"</PRE>
+<BLOCKQUOTE>
+If m is <TT>true</TT>, the function is <TT>true</TT> if and only 
+  if the graph G has a maximal clique of size k.
+If m is <TT>false</TT>, the function is <TT>true</TT> if and only if the graph G 
+  has a --- not necessarily maximal ---  clique of size k.
+If the function is <TT>true</TT>, an appropriate clique is 
+  returned  as the second argument.
+When m is <TT>false</TT>, the parameter <TT>Al</TT> enables the user 
+  to select the algorithm  which is to be used.
+When m is <TT>true</TT>, the parameter <TT>Al</TT> is ignored.
+<P>
+<P>
+The parameter <TT>Al</TT> enables the user to select the algorithm
+  which is to be used:
+<TT>Al := "BranchAndBound"</TT> or <TT>Al := "Dynamic"</TT>.
+  See the description given at the 
+    beginning of this section.
+The default is <TT>"BranchAndBound"</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "19951">HasClique(G, k, m, f : parameters) : GrphUnd, RngIntElt, BoolElt, RngIntElt -&gt; BoolElt, { GrphVert }</A></H5>
+
+<PRE>    Al: MonStgElt                       Default: "BranchAndBound"</PRE>
+<BLOCKQUOTE>
+If m is <TT>true</TT> and f=0, the function is <TT>true</TT> if and only 
+  if the graph G has a maximal clique of size k.
+If m is <TT>true</TT> and f=1, the function is <TT>true</TT> if and only 
+  if the graph G has a maximal clique of size larger than 
+  or equal to  k.
+If m is <TT>true</TT> and f= - 1, the function is <TT>true</TT> if and only 
+  if the graph G has a maximal clique of size smaller than 
+  or equal to  k.
+If m is <TT>false</TT>, the function is <TT>true</TT> if and only if the graph G 
+  has a --- not necessarily maximal ---  clique of size k.
+If the function is <TT>true</TT>, an appropriate clique is 
+  returned  as the second argument.
+When m is <TT>false</TT>, the parameter <TT>Al</TT> enables the user 
+  to select the algorithm  which is to be used.
+When m is <TT>true</TT> the parameter <TT>Al</TT> is ignored,
+  and when m is <TT>false</TT>, the flag f is ignored.
+<P>
+<P>
+The parameter <TT>Al</TT> enables the user to select the algorithm
+  which is to be used:
+<TT>Al := "BranchAndBound"</TT> or <TT>Al := "Dynamic"</TT>.
+  See the description given at the 
+    beginning of this section.
+The default is <TT>"BranchAndBound"</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "19952">MaximumClique(G : parameters) : GrphUnd -&gt; { GrphVert }</A></H5>
+
+<PRE>    Al: MonStgElt                       Default: "BranchAndBound"</PRE>
+<BLOCKQUOTE>
+Finds a maximum clique in the graph  G.
+The clique is returned as a set of vertices.
+<P>
+The parameter <TT>Al</TT> enables the user to select the algorithm
+  which is to be used.
+For a description of the algorithm used when 
+<TT>Al := "BranchAndBound"</TT> see the 
+  beginning of this section.
+When <TT>Al := "Dynamic"</TT>, two steps are required.
+<P>
+<P>
+<DL COMPACT class='compact'>
+<DT>Step 1</DT><DD>Finding a lowerbound on  the size of a maximum clique.
+This is achieved by using the <I>dsatur</I> colouring
+  (<I>dsatur</I> stands for saturation degree) due to 
+  Br&eacute;laz <A  HREF = "text1781.htm#bib_Brel79">[Bre79]</A>.
+The <I>dsatur</I> colouring gives a reasonably good approximation
+  to the size of a maximum clique, usually with a penalty of 2 to 3.
+<P>
+<DT>Step 2</DT><DD>Assume that the lowerbound found in Step 1 if l.
+Then a maximum clique is found by finding 
+  the largest possible clique of size k&ge;l using the
+  Dynamic algorithm.
+<P>
+<P>
+<P>
+</DL>
+The default is <TT>"BranchAndBound"</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "19953">CliqueNumber(G : parameters) : GrphUnd -&gt; RngIntElt</A></H5>
+
+<PRE>    Al: MonStgElt                       Default: "BranchAndBound"</PRE>
+<BLOCKQUOTE>
+Finds the size of a maximum clique in the graph  G.
+The parameter <TT>Al</TT> enables the user to select the algorithm
+which is to be used.
+For a description of the algorithm used when <TT>Al := "BranchAndBound"</TT> see the 
+  beginning of this section.
+For a description of the algorithm used when <TT>Al := "Dynamic"</TT> see the function 
+  <TT>MaximumClique</TT>.
+The default is <TT>"BranchAndBound"</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "19954">AllCliques(G : parameters) : GrphUnd  -&gt; SeqEnum</A></H5>
+
+<PRE>    Limit: RngIntElt                    Default: 0</PRE>
+<BLOCKQUOTE>
+Returns all maximal cliques   of the graph G 
+  as a sequence of sets  of vertices.
+If <TT>Limit</TT> is set to a positive integer, 
+   returns <TT>Limit</TT> maximal cliques of G.
+</BLOCKQUOTE>
+<H5><A NAME = "19955">AllCliques(G, k : parameters) : GrphUnd, RngIntElt  -&gt; SeqEnum</A></H5>
+
+<PRE>    Limit: RngIntElt                    Default: 0</PRE>
+<BLOCKQUOTE>
+Returns all maximal cliques  of size k of the graph G 
+  as a sequence of sets  of vertices.
+If <TT>Limit</TT> is set to a positive integer, 
+   returns <TT>Limit</TT> maximal cliques of size k of G.
+</BLOCKQUOTE>
+<H5><A NAME = "19956">AllCliques(G, k, m : parameters) : GrphUnd, RngIntElt, BoolElt  -&gt; SeqEnum</A></H5>
+
+<PRE>    Limit: RngIntElt                    Default: 0</PRE>
+
+<PRE>    Al: MonStgElt                       Default: "BranchAndBound"</PRE>
+<BLOCKQUOTE>
+If m is <TT>true</TT>, returns all maximal cliques of 
+  size k in the graph G.
+If m is <TT>false</TT>,  returns all --- not necessarily maximal ---
+   cliques of size k.
+When m is <TT>false</TT>, the parameter <TT>Al</TT> enables the user 
+  to select the algorithm  which is to be used.
+When m is <TT>true</TT>, the parameter <TT>Al</TT> is ignored.
+<P>
+The parameter <TT>Al</TT> enables the user to select the algorithm
+which is to be used:
+<TT>Al := "BranchAndBound"</TT> or <TT>Al := "Dynamic"</TT>.
+  See the description given at the 
+    beginning of this section.
+The default is <TT>"BranchAndBound"</TT>.
+<P>
+Except in the case where m is <TT>false</TT> and <TT>Al</TT> is <TT>"Dynamic"</TT>, the parameter <TT>Limit</TT>, if set to a positive integer,
+  limits the number of cliques returned.
+</BLOCKQUOTE>
+<P>
+Maximal independent sets or 
+ independent sets of a given size k
+ in a graph G can be easily
+ found by finding maximal cliques or cliques 
+ of size k in the complement 
+ of G.
+Only two functions which are concerned with 
+  independent sets are provided: one 
+  finds a maximum independent set and the other
+  returns the independence number of a graph.
+<H5><A NAME = "19957">MaximumIndependentSet(G: parameters) : GrphUnd -&gt; { GrphVert }</A></H5>
+
+<PRE>    Al: MonStgElt                       Default: "BranchAndBound"</PRE>
+<BLOCKQUOTE>
+Finds a maximum independent set in the graph  G.
+The  maximum independent set is returned as a set of vertices.
+<P>
+The parameter <TT>Al</TT> enables the user to select the algorithm
+  which is to be used:
+<TT>Al := "BranchAndBound"</TT> or <TT>Al := "Dynamic"</TT>.
+ See  the 
+    function <TT>MaximumClique</TT>.
+The default is <TT>"BranchAndBound"</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "19958">IndependenceNumber(G: parameters) : GrphUnd -&gt; RngIntElt</A></H5>
+
+<PRE>    Al: MonStgElt                       Default: "BranchAndBound"</PRE>
+<BLOCKQUOTE>
+Finds the size of a maximum  
+  independent set in the graph  G.
+<P>
+The parameter <TT>Al</TT> enables the user to select the algorithm
+which is to be used:
+<TT>Al := "BranchAndBound"</TT> or <TT>Al := "Dynamic"</TT>.
+ See  the function <TT>CliqueNumber</TT>.
+The default is <TT>"BranchAndBound"</TT>.
+<P>
+<P>
+<P>
+<P>
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19959">Example <TT>Graph_Cliques (H155E16)</TT></A></H3>
+We illustrate the use of the clique 
+  functions with the following graph:
+<P>
+<P>
+<PRE>
+&gt; G := Graph&lt; 9 | [ {4,5,6,7,8,9}, {4,5,6,7,8,9}, {4,5,6,7,8,9},
+&gt;                   {1,2,3,7,8,9}, {1,2,3,7,8,9}, {1,2,3,7,8,9},
+&gt;                   {1,2,3,4,5,6}, {1,2,3,4,5,6}, {1,2,3,4,5,6} ]&gt;;
+&gt; HasClique(G, 2);
+false
+&gt; HasClique(G, 2, true);
+false
+&gt; HasClique(G, 2, false);
+true { 1, 4 }
+&gt; HasClique(G, 2, true: Al := "Dynamic");
+false
+&gt; HasClique(G, 2, false: Al := "Dynamic");
+true { 1, 9 }
+&gt; HasClique(G, 2, true, 1);
+true { 1, 4, 7 }
+&gt; MaximumClique(G);
+{ 1, 4, 7 }
+&gt; AC := AllCliques(G);
+&gt; #AC;
+27
+&gt; AC3 := AllCliques(G,3);
+&gt; #AC3;
+27
+&gt; AC eq AC3;    
+true
+&gt; AllCliques(G, 2, true);
+[]
+&gt; AllCliques(G, 2, false);
+[
+  { 1, 4 },
+  { 1, 5 },
+  { 1, 6 },
+  { 1, 7 },
+  { 1, 8 },
+  { 1, 9 },
+  { 2, 4 },
+  { 2, 5 },
+  { 2, 6 },
+  { 2, 7 },
+  { 2, 8 },
+  { 2, 9 },
+  { 3, 4 },
+  { 3, 5 },
+  { 3, 6 },
+  { 3, 7 },
+  { 3, 8 },
+  { 3, 9 },
+  { 4, 7 },
+  { 4, 8 },
+  { 4, 9 },
+  { 5, 7 },
+  { 5, 8 },
+  { 5, 9 },
+  { 6, 7 },
+  { 6, 8 },
+  { 6, 9 }
+]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1803.htm">[Next]</A><A  HREF = "text1801.htm">[Prev]</A> <A  HREF = "text1803.htm">[Right]</A> <A  HREF = "text1801.htm">[Left]</A> <A  HREF = "text1782.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

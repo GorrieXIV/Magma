@@ -1,0 +1,88 @@
+"Source: Text/Geometry/AlgSrf.text";
+"Line: 2297";
+"Date: Wed Jun  8 13:59:58 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/AlgSrf.text, line: 2297
+// Example: H122E11 ()
+print "Example: H122E11";
+ei := GetEchoInput();
+SetEchoInput(true);
+P<x,y,z,t> := ProjectiveSpace(Rationals(),3);
+S := Surface(P,
+z^2*t^7-x^8*t-8*x^7*t*y-4*x^6*t^2*y-24*x^6*t*y^2-24*x^5*t^2*y^2-
+4*x^6*y^3-32*x^5*t*y^3-52*x^4*t^2*y^3-24*x^5*y^4-32*x^4*t*y^4-
+48*x^3*t^2*y^4-52*x^4*y^5-64*x^3*t*y^5-16*x^2*t^2*y^5-48*x^3*y^6-
+96*x^2*t*y^6-16*x^2*y^7-64*x*t*y^7-16*t*y^8);
+dsds,typ := ResolveSingularSurface(S);
+typ;  // resolution of blow-up type
+#dsds; // 5 conjugacy classes of singular points
+IntersectionMatrix(dsds[1]); // 2 conjugate A3 singularities
+IntersectionMatrix(dsds[2]); // 2 conjugate A1 singularities
+IntersectionMatrix(dsds[3]); // 2 more conjugate A1 singularities
+IntersectionMatrix(dsds[4]); // 11-component singular point
+ // 38-component singular point
+IntersectionMatrix(dsds[5] : get_self_ints := false);
+GeometricGenusOfDesingularization(S);
+HomAdjoints(1,0,S);
+P1<u,v> := Curve(ProjectiveSpace(Rationals(),1));
+fib_map := map<S->P1|[x,y]>;
+bs := ReducedSubscheme(BaseScheme(fib_map));
+bs;
+// bs is just the two rational singular points
+f1 := Complement((P1![1,1])@@fib_map,bs);
+GroebnerBasis(f1);
+IsIrreducible(f1); IsReduced(f1);
+Genus(Curve(f1));
+imats := [*IntersectionMatrix(dsds[i]) : i in [1..4]*];
+imat5 := IntersectionMatrix(dsds[5] : get_self_ints := false);
+imat5 := imat5 + DiagonalMatrix([-2 : i in [1..33]] cat [-3,-3,-3,-4,-3]);
+Append(~imats,imat5);
+dms := [DifferentialMultiplicities(dsd) : dsd in dsds];
+i2 := &+[(m*imats[i]*Transpose(m))[1,1] where m is Matrix(Vector(dms[i])) :
+             i in [1..5]];
+d := Degree(S); // d=9
+K2 := d*(d-4)^2+i2;
+K2;
+Dt := Scheme(P,t); Dx := Scheme(P,x); Dy := Scheme(P,y);
+divs1 := IrreducibleComponents(ReducedSubscheme(S meet Dt));
+divs1;
+divs2 := IrreducibleComponents(ReducedSubscheme(S meet Dx meet Dy)); 
+[Dimension(D) : D in divs2];
+// divs2 gives no curve components - it's just the two singular points!
+// Now get the relevant components over the singular points. We could
+// ignore the simple singularities by general theory, but may as well
+// do the computation for them (which excludes them)
+mults_t := [*Vector(Multiplicities(S,dsd,S meet Dt)) : dsd in dsds*];
+mults_x := [*Vector(Multiplicities(S,dsd,S meet Dx)) : dsd in dsds*];
+mults_y := [*Vector(Multiplicities(S,dsd,S meet Dy)) : dsd in dsds*];
+m_t3x2w := [Eltseq(3*mults_t[i]+2*mults_x[i]+Vector(dms[i])) : 
+               i in [1..5]];
+m_t3xyw := [Eltseq(3*mults_t[i]+mults_x[i]+mults_y[i]+
+               Vector(dms[i])) : i in [1..5]];
+m_t3y2w := [Eltseq(3*mults_t[i]+2*mults_y[i]+Vector(dms[i])) :
+               i in [1..5]];
+m_min := [[Min([m[i][j] : m in [m_t3x2w,m_t3xyw,m_t3y2w]]) : 
+             j in [1..#(m_t3x2w[i])]] : i in [1..5]];
+m_min;
+[i : i in [1..38] | m_min[5][i] gt 0];
+C,_,mp := BlowUpDivisor(S,dsds[4],11);
+mp := Restriction(mp,C,S : Check := false);
+fmpC := Expand(mp*fib_map);
+// manually remove common factors from defining equations to
+// get the fibre map from C to P^1
+fmpC := map<C->P1|[e div g : e in DefiningPolynomials(fmpC)]> where
+  g is GCD(DefiningPolynomials(fmpC));
+C; fmpC;
+Image(fmpC); // It's onto!
+C,_,mp := BlowUpDivisor(S,dsds[5],34);
+mp := Restriction(mp,C,S : Check := false);
+fmpC := Expand(mp*fib_map);
+fmpC := map<C->P1|[e div g : e in DefiningPolynomials(fmpC)]> where
+  g is GCD(DefiningPolynomials(fmpC));
+C; fmpC;
+Image(fmpC); // C maps to [-2:1]
+// |H+K| divisor map is the (1,1)-adjoint map : HomAdjoints gives
+// defining polynomials
+HKeqns := HomAdjoints(1,1,S);
+#HKeqns; // It's into P^30
+SetEchoInput(ei);

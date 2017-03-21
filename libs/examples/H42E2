@@ -1,0 +1,44 @@
+"Source: Text/Ring/FldAC.text";
+"Line: 399";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Ring/FldAC.text, line: 399
+// Example: H42E2 ()
+print "Example: H42E2";
+ei := GetEchoInput();
+SetEchoInput(true);
+Z := IntegerRing();
+function SwinnertonDyer(n)
+    P := [2];
+    for i := 2 to n do
+        Append(~P, NextPrime(P[#P]));
+    end for;
+    A := AlgebraicClosure();
+    S := [Sqrt(A ! p): p in P];
+    P<z> := PolynomialRing(A);
+    f := &*[z + &+[t[i]*S[i]: i in [1..n]]: t in CartesianPower({-1, 1}, n)];
+    return PolynomialRing(Z) ! f;
+end function;
+P<x> := PolynomialRing(Z);
+[SwinnertonDyer(i): i in [1..5]];
+function GSD(Q)
+    n := #Q;
+    A := AlgebraicClosure();
+    S := [Sqrt(A ! x): x in Q];
+    z := PolynomialRing(A).1;
+    f := &*[z + &+[t[i]*S[i]: i in [1..n]]: t in CartesianPower({-1, 1}, n)];
+    return PolynomialRing(Z) ! f;
+end function;
+GSD([2, 3, 5]);
+GSD([-2, -3, -5]);
+GSD([-2, 3, 5]);
+GSD([2, -3, 5]);
+GSD([2, 3, -5]);
+f := GSD([2, 3, 5, 7, 11, 13])*GSD([-2, -3, -5, -7, -11, -13]);            
+Degree(f);
+assert $1 eq 128;
+Max([Abs(x): x in Coefficients(f)]);  
+time L:=Factorization(f);
+[Degree(t[1]): t in L];
+Max([Abs(x): x in Coefficients(L[1,1])]);
+SetEchoInput(ei);

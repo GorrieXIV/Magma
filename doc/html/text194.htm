@@ -1,0 +1,215 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Discrete Logarithms</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text195.htm">[Next]</A><A  HREF = "text193.htm">[Prev]</A> <A  HREF = "text195.htm">[Right]</A> <A  HREF = "text193.htm">[Left]</A> <A  HREF = "text188.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "1683">Discrete Logarithms</A></H3>
+
+<P>
+<P>
+Let K be a field of cardinality q=p<sup>k</sup>, with p prime.
+Magma contains several advanced algorithms for computing
+discrete logarithms of elements of K.
+The two main kinds of algorithms used are as follows:
+(1) <I>Pohlig-Hellman</I> <A  HREF = "text187.htm#bib_PohligHellman">[PH78]</A>:
+    The running time is usually proportional to the square root of the
+    largest prime l dividing q - 1; this is combined with the Shanks
+    baby-step/giant-step algorithm (when l is very small) or the
+    Pollard-&rho; algorithm.
+(2) <I>Index-Calculus</I>:
+    There is first a precomputation stage which computes and stores
+    all the logarithms
+    of a <I>factor base</I> (all the elements of the field corresponding
+    to irreducible polynomials up to some bound) and then each subsequent
+    individual logarithm is computed by expressing the given element in
+    terms of the factor base.
+<P>
+<P>
+<P>
+<P>
+The different kinds of finite fields in Magma are handled as follows
+(in this order):
+<P>
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD><I>Small Fields (any characteristic)</I>:
+<P>
+<P>
+<DT></DT><DD>If the largest prime l dividing q - 1 is reasonably small
+    (typically, less than 2<sup>36</sup>), the Pohlig-Hellman algorithm
+    is used (the characteristic p is irrelevant).
+<P>
+<DT>(b)</DT><DD><I>Large Prime </I>:
+<P>
+<P>
+<DT></DT><DD>Suppose K is a prime field (so q=p).
+    Then the <I>Gaussian integer sieve</I> <A  HREF = "text187.htm#bib_COS_Log">[COS86]</A>, <A  HREF = "text187.htm#bib_LO_Log">[LO91a]</A> is
+    used if p has at least 4 bits but no more than 400 bits,
+    p - 1 is not a square, and one of the following is a quadratic
+    residue modulo p: -1, -2, -3, -7, or -11.
+    If the Gaussian integer sieve cannot
+    be used and if p is no more than 300-bits,
+    then the <I>linear sieve</I> <A  HREF = "text187.htm#bib_COS_Log">[COS86]</A>, <A  HREF = "text187.htm#bib_LO_Log">[LO91a]</A> is used.
+    The precomputation stage always takes place and typically requires
+    a lot more time than for computing individual logarithms (and may
+    also require a lot of memory for large fields).  Thus, the first
+    call to the function <TT>Log</TT> below may take much more time than for
+    subsequent calls.  Also, for large prime fields, in comparison to the
+    Gaussian method the linear sieve requires much more time and memory
+    than the Gaussian method for the precomputation stage, and therefore
+    it is only used when the Gaussian integer algorithm cannot be used.
+    See the example <A  HREF = "text278.htm#2572">H27E3</A> in the chapter on sparse matrices
+    for an explanation of the basic linear sieve algorithm and for more
+    information on the sparse linear algebra techniques employed.
+<P>
+<DT>(c)</DT><DD><I>Small Characteristic, Non-prime </I>:
+<P>
+<P>
+<DT></DT><DD>Since V2.19, if K is a finite field of characteristic p, where p is
+    less than 2<sup>30</sup>, then an implementation by Allan Steel of 
+    Coppersmith's index-calculus algorithm <A  HREF = "text187.htm#bib_Coppersmith84">[Cop84]</A>, <A  HREF = "text187.htm#bib_GoMc93">[GM93]</A>, <A  HREF = "text187.htm#bib_Thome01">[Tho01]</A>
+    is used.   (Strictly speaking, Coppersmith's algorithm is for the case
+    p=2 only, but a straightforward generalization is used when p&gt;2.)
+    A suite of external auxiliary tables boost the algorithm so that the
+    precomputation stage computation to determine the logarithms of a
+    factor base
+    can be avoided for a large number of fields of very small characteristic.
+    This means that logarithms of individual elements can be computed
+    immediately if a relevant table is present for the specific field.
+    By default, tables are included in the standard Magma distribution
+    at least for all fields of characteristic 2, 3, 5 or 7 with
+    cardinality up to 2<sup>200</sup>.  The user can optionally download a
+    much larger suite of tables from the Magma optional downloads
+    page
+    <TT>http://magma.maths.usyd.edu.au/magma/download/db/</TT> (files <TT>FldFinLog_2.tar.gz</TT>, etc.; about 5GB total).
+<P>
+<DT>(d)</DT><DD><I>Large Characteristic, Non-prime </I>:
+<P>
+<P>
+<DT></DT><DD>In all other cases, the Pohlig-Hellman algorithm is used.</DL>
+
+
+<H5><A NAME = "1684">Log(x) : FldFinElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The discrete logarithm of the non-zero element x from the 
+field F, i.e., the unique integer k such that x = w<sup>k</sup> and
+0 &le;k &lt; (#F - 1), where w is the primitive element
+of F (as returned by <TT>PrimitiveElement</TT>).
+Default parameters are automatically chosen if an index-calculus
+method is used (use <A  HREF = "text194.htm#FF:Sieve">Sieve</A> below to set parameters).
+See also the procedure <A  HREF = "text190.htm#FF:SetPrimitiveElement">SetPrimitiveElement</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "1685">Log(b, x) : FldFinElt, FldFinElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The discrete logarithm to the base b of the non-zero element x from
+the field F, i.e., the unique integer k such that x = b<sup>k</sup> and
+0 &le;k &lt; (#F - 1).  If b is not a primitive element, then in
+some unusual cases the algorithm may take much longer than normal.
+</BLOCKQUOTE>
+<H5><A NAME = "1686">ZechLog(K, n) : FldFin, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The Zech logarithm Z(n) of the integer n for the field F, which
+equals the logarithm to base w of w<sup>n</sup> + 1, where w
+is the primitive element of F.  If w<sup>n</sup> is the minus one element
+of K, then -1 is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "1687"></A><A NAME = "FF:Sieve">Sieve</A>(K) : FldFin -&gt;</H5>
+
+<PRE>    Lanczos: BoolElt                    Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+(Procedure.)
+Call the Gaussian integer sieve on the prime finite field K if
+possible; otherwise call the linear sieve on K (assuming K is not
+too small).
+<P>
+If the parameter <TT>Lanczos</TT> is set to <TT>true</TT>, then the <I>Lanczos</I> algorithm <A  HREF = "text187.htm#bib_LO_SLinAlg">[LO91b, Sec. 3]</A> will be used for the
+linear algebra phase.
+This is generally <I>very much slower</I> than the default method
+(often 10 to 50 times slower), but it will take considerably less
+memory, so may be preferable for extremely large fields.
+See also the function <A  HREF = "text278.htm#Smat:ModularSolution">ModularSolution</A> in the
+chapter on sparse matrices for more information.
+</BLOCKQUOTE>
+<H5><A NAME = "1688">SetVerbose("FFLog", v) : MonStgElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+(Procedure.)
+Set the verbose printing level for the finite field logarithm
+algorithm to be v.  Currently the legal values for v are 0, 1, and
+2.
+If the level is 1, information is printed whenever the logarithm of an element
+is computed (unless the field is very small, in which case a lookup table
+is used).
+The value of 2 will print a very large amount of information.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "1689">Example <TT>FldFin_Log (H21E5)</TT></A></H3>
+We demonstrate the <TT>Log</TT> function.
+<P>
+<P>
+<PRE>
+&gt; F&lt;z&gt; := FiniteField(7^4);
+&gt; PrimitiveElement(F);
+z;
+&gt; Log(z);
+1
+&gt; Log(z^2);
+2
+&gt; Log(z + 1);
+419
+&gt; z^419 eq z + 1;
+true
+&gt; b := z + 1;
+&gt; b;
+z^419
+&gt; Log(b, b);
+1
+&gt; Log(b, z);
+779
+&gt; b^779 eq z;
+true
+</PRE>
+We now do similar things for a larger field of characteristic 2, which
+will use Coppersmith's algorithm to compute the logarithms.
+<P>
+<P>
+<PRE>
+&gt; F&lt;z&gt; := GF(2, 73);
+&gt; Factorization(#F-1);
+[ &lt;439, 1&gt;, &lt;2298041, 1&gt;, &lt;9361973132609, 1&gt; ]
+&gt; PrimitiveElement(F);
+z
+&gt; time Log(z + 1);
+4295700317032218908392
+Time: 5.400
+&gt; z^4295700317032218908392;
+z + 1
+&gt; time Log(z + 1);             
+4295700317032218908392
+Time: 0.000
+&gt; time Log(z^2);
+2
+Time: 0.000
+&gt; time Log(z^2134914112412412);
+2134914112412412
+Time: 0.000
+&gt; b := z + 1;
+&gt; b;
+z + 1
+&gt; time Log(b, b);
+1
+Time: 0.010
+&gt; time Log(b, z);
+2260630912967574270198
+Time: 0.000
+&gt; b^2260630912967574270198;
+z
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text195.htm">[Next]</A><A  HREF = "text193.htm">[Prev]</A> <A  HREF = "text195.htm">[Right]</A> <A  HREF = "text193.htm">[Left]</A> <A  HREF = "text188.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

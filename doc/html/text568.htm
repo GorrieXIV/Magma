@@ -1,0 +1,228 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Advanced Examples</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text560.htm">[Next]</A><A  HREF = "text567.htm">[Prev]</A> <A  HREF = "text560.htm">[Right]</A> <A  HREF = "text567.htm">[Left]</A> <A  HREF = "text561.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "6081">Advanced Examples</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text568.htm#6082">Example: Local and Global Epsilon Factors for Dirichlet Characters</A>
+<LI> <A  HREF = "text568.htm#6084">Example: Reconstructing a Galois Representation from its Euler Factors</A>
+</UL>
+<H4><A NAME = "6082">Example: Local and Global Epsilon Factors for Dirichlet Characters</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+
+
+<P>
+<P>
+<HR>
+<H3><A NAME = "6083">Example <TT>GalRep_galrep-funeq (H56E52)</TT></A></H3>
+<P>
+We illustrate the relation between local and global epsilon-factors for 
+Dirichlet characters (or Artin representations). 
+Pick any Dirichlet character &chi;; in this example we take the unique odd one
+of conductor 5.19, order 6 and Im &chi;(2)&gt;0. 
+<P>
+<P>
+<PRE>
+
+&gt; D:=FullDirichletGroup(5*19);
+&gt; L:=[chi: chi in Elements(D) | (Order(chi) eq 6) and 
+&gt;   (Conductor(chi) eq 5*19) and IsOdd(chi) and (Imaginary(chi(2)) ge 0)];
+&gt; assert #L eq 1;
+&gt; chi:=L[1];
+</PRE>
+<P>
+We compute its local Galois representations at all the bad places: 5, 19 
+and &infin;. (See Para<A  HREF = "text1522.htm#17249">Hodge Structure</A> for Hodge structures at &infin;.)
+<P>
+<P>
+<PRE>
+
+&gt; G5:=GaloisRepresentation(chi,5); G5;
+1-dim Galois representation (1,-1,-zeta(3)_3-1,zeta(3)_3,zeta(3)_3+1,-zeta(3)_3)
+   with G=C6, I=C2, conductor 5^1 over Q5[40]
+&gt; G19:=GaloisRepresentation(chi,19); G19;
+1-dim Galois representation (1,-1,zeta(3)_3,-zeta(3)_3-1,zeta(3)_3+1,-zeta(3)_3)
+   with G=C6, I=C6, conductor 19^1 over Q19[40]
+&gt; Ginfty:=HodgeStructure(ArtinRepresentation(chi)); Ginfty;
+Hodge structure of weight 0 given by &lt;0,0,1&gt;
+</PRE>
+<P>
+Now compute the corresponding local root numbers - the way the conventions
+are set up for Artin representations, 
+at &infin; it is the root
+number of the Hodge structure that enters the functional equation.
+<P>
+<P>
+<PRE>
+
+&gt; localrootno:=[ComplexField()| RootNumber(G5),RootNumber(G19),
+&gt;               RootNumber(Ginfty)];
+&gt; globalrootno:=&amp;*localrootno;
+</PRE>
+<P>
+The global root number is the sign of the L-series of &chi;, 
+and we check that it agrees with the one determined numerically 
+from the functional equation:
+<P>
+<P>
+<PRE>
+
+&gt; L:=LSeries(chi);
+&gt; ok:=CheckFunctionalEquation(L);
+&gt; Sign(L);
+0.910747215816471738723996800097 + 0.412964294924567358770699943664*I
+&gt; globalrootno;
+0.910747215816471738723996800108 + 0.412964294924567358770699943647*I
+</PRE>
+<P>
+<HR>
+<H4><A NAME = "6084">Example: Reconstructing a Galois Representation from its Euler Factors</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<HR>
+<H3><A NAME = "6085">Example <TT>GalRep_galrep-reconstruction (H56E53)</TT></A></H3>
+Every semisimple Galois representation A over a p-adic field K can be 
+uniquely recovered from its Euler factors over the extensions of K 
+(<A  HREF = "text560.htm#bib_DDWeil15">[DD15, Thm. 1]</A>). We illustrate this with a Galois representation 
+attached to an elliptic curve
+<P>
+  E/K: y<sup>2</sup> = x<sup>3</sup> - 26x, qquad K=Q<sub>13</sub>.
+<P>
+<P>
+<P>
+<PRE>
+
+&gt; K:=pAdicField(13,20);           
+&gt; E:=EllipticCurve([K|-26,0]);    
+&gt; A:=GaloisRepresentation(E);
+&gt; Degree(A),IsSemisimple(A);
+2 true
+</PRE>
+<P>
+Without looking at A, let us reconstruct it from its Euler factors
+over extensions of K. First we determine the inertia group 
+<TT>InertiaGroup(A)</TT> by looking for a field over which A is unramified
+(i.e. E has good reduction). As the residue characteristic is &gt;3,
+one of the fields Q<sub>13</sub>(root d of(13)) will do, for d=1, 2, 3, 4 or 6.
+<P>
+<P>
+<PRE>
+
+&gt; R&lt;x&gt;:=PolynomialRing(K);
+&gt; [EulerFactor(BaseChange(A,ext&lt;K|x^d-13&gt;)): d in [1,2,3,4,6]];
+[ 1, 1, 1, 13*x^2 + 4*x + 1, 1 ]
+</PRE>
+<P>
+We see that the representation becomes unramified over L=Q<sub>13</sub>(root 4of(13)),
+a cyclic extension of degree 4, but not over its subfields. 
+So the inertia group must be C<sub>4</sub>,
+<P>
+  (InertiaGroup)(A)   isomorphic to   I<sub>L/K</sub> 
+      =  Gal(L/K)   isomorphic to   C<sub>4</sub>.
+<P>
+Over L the representation U=Res<sub>L</sub> A is unramified, 
+and there it is determined by its Euler factor. It is a sum of two unramified 
+characters, Frob<sub>L</sub><sup> - 1</sup> |-&gt; - 2&#8723; 3i.
+<P>
+<P>
+<PRE>
+
+&gt; L:=ext&lt;K|x^4-13&gt;;
+&gt; f1:=EulerFactor(BaseChange(A,L));
+&gt; U:=UnramifiedRepresentation(L,f1); U; 
+2-dim unramified Galois representation Unr(1+4*x+13*x^2) over
+   ext&lt;Q13[20]|x^4-13&gt;
+&gt; Decomposition(U);
+[
+1-dim unramified Galois representation Unr(-2+3*i) over ext&lt;Q13[20]|x^4-13&gt;,
+1-dim unramified Galois representation Unr(-2-3*i) over ext&lt;Q13[20]|x^4-13&gt;
+]
+</PRE>
+<P>
+We are ready to reconstruct A. Its restriction to inertia is a 
+faithful 2-dimensional representation of C<sub>4</sub>, of determinant 1 
+(as it comes from an elliptic curve), so it must be &sigma; direct-sum &sigma;<sup> - 1</sup>
+where &sigma; is one of the faithful 1-dimensional characters of C<sub>4</sub>.
+<P>
+<P>
+<PRE>
+
+&gt; GroupName(InertiaGroup(A)),IsUnramified(Determinant(A));  // just checking
+C4 true
+&gt; list:=GaloisRepresentations(x^4-13);
+&gt; sigma:=[g: g in list | Order(Character(g)) eq 4][1];
+&gt; sigma;
+1-dim Galois representation (1,-1,zeta(4)_4,-zeta(4)_4) with G=C4, I=C4,
+   conductor 13^1 over Q13[20]
+</PRE>
+<P>
+Since Frob<sub>K</sub>=Frob<sub>L</sub> commutes with inertia in the Galois group 
+<P>
+  Gal(K<sup>nr</sup>(root 4 of(13))/K) isomorphic to Gal(K<sup>nr</sup>/K) x Gal(L/K) isomorphic to hatZ x C<sub>4</sub>
+<P>
+through which A factors, A(Frob<sub>K</sub>) and A(&sigma;) are simultaneously 
+diagonalizable in GL<sub>2</sub>(C), so A must be one of the 
+following two representations A<sub>1</sub> and A<sub>2</sub>:
+<P>
+<P>
+<PRE>
+
+&gt; Qi&lt;i&gt;:=CyclotomicField(4);
+&gt; A1 := sigma * UnramifiedCharacter(K,-2-3*i) + 
+&gt;       sigma^(-1)*UnramifiedCharacter(K,-2+3*i);
+&gt; A2 := sigma * UnramifiedCharacter(K,-2+3*i) + 
+&gt;       sigma^(-1)*UnramifiedCharacter(K,-2-3*i);
+</PRE>
+<P>
+Finally, to determine which one it is, we pick <I>another</I> extension of K
+where A becomes unramified and compare the Euler factors. 
+Then we see that A must be A<sub>2</sub>.
+<P>
+<P>
+<PRE>
+
+&gt; L2:=ext&lt;K|x^4-26&gt;;
+&gt; EulerFactor(BaseChange(A,L2));
+13*x^2 - 6*x + 1
+&gt; EulerFactor(BaseChange(A1,L2));
+13*x^2 + 6*x + 1
+&gt; EulerFactor(BaseChange(A2,L2));
+13*x^2 - 6*x + 1
+&gt; A eq A2;
+true
+</PRE>
+<P>
+<PRE></PRE> <A  HREF = "text560.htm">[Next]</A><A  HREF = "text567.htm">[Prev]</A> <A  HREF = "text560.htm">[Right]</A> <A  HREF = "text567.htm">[Left]</A> <A  HREF = "text561.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

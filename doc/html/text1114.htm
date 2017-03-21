@@ -1,0 +1,319 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>W-graphs</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1115.htm">[Next]</A><A  HREF = "text1113.htm">[Prev]</A> <A  HREF = "text1115.htm">[Right]</A> <A  HREF = "text1113.htm">[Left]</A> <A  HREF = "text1101.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "12501">W-graphs</A></H3>
+
+<P>
+<P>
+<P>
+Given a Coxeter system (W, S), a W-graph is a (directed or undirected) graph
+with vertex labels and edge weights. The label attached to a vertex v is a 
+subset of S (called the <I>descent set</I> of v)
+and the edge weights are scalars (usually integers). 
+<P>
+A W-graph must determine a representation of the Hecke algebra H = 
+H&lt; q &gt; of the associated Coxeter system. The vertices of the 
+W-graph can be identified with basis elements of the representation space, 
+and by the conventions adopted here the action of the generator T<sub>s</sub> of H 
+associated with an element s&isin;S on a basis element v is given by
+<P>
+  v * T<sub>s</sub> = cases(
+    ( - q<sup> - 1</sup>) * v &amp; if s is in the descent set of v, cr
+    q * v + &sum;' (m * u)&amp;if s is not in the descent set of v, cr)
+<P>
+where &sum;' indicates the sum over all edges with terminal vertex
+equal to v for which s is in the descent set of the initial
+vertex u, and m is the weight of the edge.
+<P>
+For the Coxeter group calculations involved in these functions
+we need to know how the generators s&isin;S act on the set of
+elementary roots (see <A  HREF = "text1100.htm#bib_Brink98">[Bri98]</A>).
+<P>
+Magma has a function <TT>ReflectionTable</TT> that provides the necessary
+information. Specifically, let W be a finitely presented Coxeter
+group with N elementary roots (numbered from 1 to N) and r
+simple reflections (numbered 1 to r). If we define
+<P>
+<P>
+<P>
+  {<TT>eltroots:=ReflectionTable(W);</TT>}
+<P>
+<P>
+<P>
+<P>
+then for i&isin;{1, ..., r} and j&isin;{1, ..., N},
+  <TT>eltroots[i,j] = k</TT>
+if the i-th simple reflection takes the j-th elementary root to
+the k-th elementary root, or to a non-elementary root if k = 0,
+or to a negative root if k &lt; 0. (This last alternative occurs if
+and only if j = i and k = - i.) Knowing the table <TT>eltroots</TT> makes
+it quick and easy to do symbolic computation with elements of W,
+represented as sequences of integers in {1, ..., r} (corresponding
+to words in S).
+
+
+<P>
+<P>
+<P>
+<P>
+The functions defined in this section 
+are mainly concerned with W-graph posets. The
+motivating example for this concept is the set of all standard
+tableaux corresponding to a given partition, the partial order
+being dominance. By definition, if P is a W-graph poset then P
+must be in one-to-one correspondence with a basis for an H-module
+V (where H is the Hecke algebra associated with the given
+Coxeter system). In the standard tableaux example, this module
+is the Specht module; hence in the general case we refer to the
+module V as GSM(P) (for generalized Specht module). For each
+v&isin;P the set S must be the disjoint union of two sets A(v) and
+D(v), the ascents and descents of v. There must be a function
+(s, v) |-&gt; sv from S x P to P such that the action of H on 
+GSM(P) satisfies the following rules (for all s &isin;S and v &isin;P):
+v * T<sub>s</sub> = cases(
+  sv                   &amp;if sv &gt; v, cr
+  sv + (q - q<sup> - 1</sup>) * v    &amp;if sv &lt; v, cr
+  - q<sup> - 1</sup> * v            &amp;if sv = v and s&isin;D(v), cr
+  q * v + q * &lt; earlier &gt; &amp;if sv = v and s &isin;A(v), cr)
+<P>
+where &lt; earlier &gt; denotes a linear combination of 
+{u &isin;P | u &lt; v}
+with coefficients that are polynomials in q. For each s &isin;A(v) either sv = v or sv &gt; v, and for each s &isin;D(v) either
+sv &lt; v or sv = v. This (admittedly strange) definition is
+motivated by the fact that Specht modules satisfy it. If v is
+a standard tableau corresponding to a partition of n then a number
+i in {1, ..., n - 1} is an ascent of v if i + 1 is in a later column
+of t than i, and is a descent of v if i + 1 is in a lower row
+of t than i. The fact that Specht modules satisfy the formulas
+above is proved in the literature (e.g. Mathas' book), except
+that in the "weak ascent" case (sv = v and s &isin;A(v)) it is
+not proved that the polynomial coefficients of {u &isin;P | u &lt; v}
+are all divisible by q. The fact that they are is a theorem of
+V. M. Nguyen (PhD thesis, University of Sydney, 2010). It turns
+out that there is an algorithm by which a W-graph may be
+constructed from a W-graph poset, the W-graph being uniquely
+determined by the function (s, v) |-&gt; sv from S x P to P
+and the descent/ascent sets. The polynomial coefficients in the
+weak ascent case are not required. Of course the H-module
+determined by the resulting W-graph is isomorphic to GSM(P).
+which should cause the word <TT>true</TT> to be printed 66 times
+(as the defining relations of the Hecke algebra are checked).
+<P>
+Given a Coxeter system (W, S) and an element w&isin;W, let P be
+the set 
+{x&isin;W | length(wx<sup> - 1</sup>) = length(w) - length(x)},
+considered as a poset under the Bruhat order on W. Given also a
+subset J of {t&isin;S | length(wt) &gt; length(w)}, 
+for each x&isin;P we define D(x) to be union of 
+{s&isin;S | length(sx) &lt; length(x)} and
+{s &isin;S | sx = xt  for some  t &isin;J }. If P is now a 
+W-graph 
+poset with the sets D(x) as the descent sets then we say that w is a
+W-graph determining element relative to J. 
+<P>
+For example, suppose
+that (W, S) is of type A<sub>n</sub>, and given a partition of n + 1 let
+t be the (unique) standard tableau whose column group is
+generated by a subset of S. Let w be the maximal length element
+such that the tableau wt is standard. Then w is a W-graph
+determining element with respect to the set J consisting of
+those s &isin;S that are in the column stabilizer of t. 
+<P>
+Other examples (for any Coxeter system with finite W) are provided by
+the distinguished left coset representatives of maximal length
+for standard parabolic subgroups W<sub>K</sub> (where the set J may be
+taken to be either K or the empty set).
+<H5><A NAME = "12502">SetVerbose("WGraph", v) : MonStgElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Set the verbose printing to level v for all W-graph related functions.
+A level of 2 means that informative messages and progress information
+will be printed durng a computation.
+</BLOCKQUOTE>
+<P>
+<P>
+<P>
+<P>
+Sometimes it is convenient to use `mij-sequences' to specify Coxeter
+groups. The mij-sequence consists of the on or below diagonal
+entries in the Coxeter matrix. Thus if <TT>seq</TT> is the mij-sequence
+and M the Coxeter matrix then
+<P>
+  <TT>M := SymmetricMatrix(seq);</TT>
+<P>
+ and
+<P>
+  <TT>seq := &amp;cat[[M[i,j] : j in [1..i]] : i in [1..Rank(W)]];</TT>
+<P>
+<H5><A NAME = "12503">Mij2EltRootTable(seq) : SeqEnum -&gt; SeqEnum[SeqEnum[RngIntElt]]</A></H5>
+<BLOCKQUOTE>
+Return the elementary root action table for the Coxeter 
+group defined by the given mij-sequence.
+</BLOCKQUOTE>
+<H5><A NAME = "12504">Name2Mij(name) : MonStgElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The mij-sequence of the Coxeter groups of type name.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "12505">Example <TT>GrpCox_mijseq (H104E32)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; e6:=[1,3,1,2,3,1,2,3,2,1,2,2,2,3,1,2,2,3,2,2,1];
+&gt; E6 := CoxeterGroup(GrpFPCox, SymmetricMatrix(e6) );
+&gt; ReflectionTable(E6) eq Mij2EltRootTable(e6);
+
+true
+</PRE>
+<HR>
+<H5><A NAME = "12506">Partition2WGtable(pi) : SeqEnum -&gt; SeqEnum, GrpFPCox</A></H5>
+<BLOCKQUOTE>
+Returns the W-graph table and the Weyl group for the partition <TT>pi</TT>, where
+<TT>pi</TT> is a nonincreasing sequence [a<sub>1</sub>, a<sub>2</sub>, ..., a<sub>k</sub>]
+of positive  integers. It returns the table corresponding to
+the W-graph poset of standard tableaux of the given shape and
+the finitely presented Coxeter group of type A<sub>n</sub>, where n + 1 = &sum;a<sub>i</sub>.
+</BLOCKQUOTE>
+<H5><A NAME = "12507">WGtable2WG(table) : SeqEnum -&gt; GrphUnd</A></H5>
+<BLOCKQUOTE>
+Convert a W-graph table to a W-graph.
+</BLOCKQUOTE>
+<H5><A NAME = "12508">TestWG(W,wg) : GrpFPCox, GrphUnd -&gt; .</A></H5>
+<H5>TestWG(W,wg) : GrpFPCox, GrphDir -&gt; .</H5>
+<H5>TestWG(tp,wg) : MonStgElt, GrphDir -&gt; .</H5>
+<H5>TestWG(tp,wg) : MonStgElt, GrphDir -&gt; .</H5>
+<BLOCKQUOTE>
+This procedure can be used to test whether a presumed undirected or directed
+W-graph is indeed a W-graph, where W is a finitely presented Coxeter
+group of type <TT>tp</TT>. Two input values are required: the Coxeter group 
+W (or its type) and the W-graph. When applied to the W-graph produced 
+by the <TT>WGtable2WG</TT> function, this tests whether the input table did 
+genuinely correspond to a W-graph poset.
+<P>
+<P>
+<P>
+For example,
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "12509">Example <TT>GrpCox_SpechtWgraph (H104E33)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; SetVerbose("WGraph",2);
+&gt; wtable, W :=Partition2WGtable([4,4,3,1]);
+&gt; wg := WGtable2WG(wtable);
+&gt; TestWG(W,wg);
+</PRE>
+<HR>
+<H5><A NAME = "12510">WGelement2WGtable(g,K) : GrpFPCoxElt, SetEnum -&gt; SeqEnum, SeqEnum</A></H5>
+<BLOCKQUOTE>
+Returns the W-graph table and W-graph ideal of a W-graph 
+determining element g, subset K.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "12511">Example <TT>GrpCox_B5Wgraph (H104E34)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; b5 := [1,4,1,2,3,1,2,2,3,1,2,2,2,3,1];
+&gt; b5mat := SymmetricMatrix(b5);
+&gt; W := CoxeterGroup(GrpFPCox, b5mat );
+&gt; table, _ := WGelement2WGtable(W![5,4,3,2,1,2,3,4,5],);
+&gt; wg := WGtable2WG(table);
+&gt; TestWG(W,wg);
+
+true &lt;1, 2&gt; 4
+true &lt;2, 3&gt; 3
+true &lt;3, 4&gt; 3
+true &lt;4, 5&gt; 3
+</PRE>
+<HR>
+<H5><A NAME = "12512">GetCells(wg) : GrphUnd -&gt; SeqEnum</A></H5>
+<H5>GetCells(wg) : GrphDir -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Return the cells of the W-graph.
+</BLOCKQUOTE>
+<H5><A NAME = "12513">InduceWG(W,wg,seq) : GrpFPCox, GrphUnd, SeqEnum -&gt; GrphUnd</A></H5>
+<H5>InduceWG(W,wg,seq) : GrpFPCox, GrphDir, SeqEnum -&gt; GrphDir</H5>
+<BLOCKQUOTE>
+Induce a W-graph from a standard parabolic subgroup.
+</BLOCKQUOTE>
+<H5><A NAME = "12514">InduceWGtable(J, table, W) : SeqEnum, SeqEnum, GrpFPCox -&gt; SeqEnum[SeqEnum[RngIntElt]]</A></H5>
+<BLOCKQUOTE>
+Returns the table of the W-graph induced from the table of a 
+parabolic subgroup defined by J.
+</BLOCKQUOTE>
+<H5><A NAME = "12515">IsWGsymmetric(dwg) : GrphDir -&gt; BoolElt, GrphDir</A></H5>
+<BLOCKQUOTE>
+Test a W-graph for symmetry.  If the graph is symmetric
+the second return value is the undirected version of the
+W-graph.
+</BLOCKQUOTE>
+<H5><A NAME = "12516">MakeDirected(uwg) : GrphUnd -&gt; GrphDir</A></H5>
+<BLOCKQUOTE>
+Convert an undirected W-graph to a directed W-graph.
+</BLOCKQUOTE>
+<H5><A NAME = "12517">TestHeckeRep(W,r) : GrpFPCox, SeqEnum -&gt; .</A></H5>
+<BLOCKQUOTE>
+Tests whether the matrices in r satisfy the defining relations of the
+Hecke algebra of the Coxeter group W.
+</BLOCKQUOTE>
+<H5><A NAME = "12518">WG2GroupRep(wg) : GrphUnd -&gt; SeqEnum</A></H5>
+<H5>WG2GroupRep(wg) : GrphDir -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+The matrix representation of a W-graph.
+</BLOCKQUOTE>
+<H5><A NAME = "12519">WG2HeckeRep(W,wg) : GrpFPCox, GrphUnd -&gt; SeqEnum</A></H5>
+<H5>WG2HeckeRep(W,wg) : GrpFPCox, GrphDir -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Returns a sequence of sparse matrices that satisfy the
+defining relations of the Hecke algebra.
+</BLOCKQUOTE>
+<H5><A NAME = "12520">WGidealgens2WGtable(dgens,K) : SeqEnum, SetEnum -&gt; SeqEnum[SeqEnum[RngIntElt]], SetIndx</A></H5>
+<BLOCKQUOTE>
+Returns the W-graph table and W-graph ideal of a W-graph determining 
+generators dgens and subset K.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "12521">Example <TT>GrpCox_WgraphIdeal (H104E35)</TT></A></H3>
+In type E<sub>6</sub> we start with a rank 3 standard  parabolic subgroup. The 
+set of minimal coset representatives is a (single-generator) W-graph ideal,
+corresponding to the representation induced from the trivial representation 
+of the parabolic. We compute the W-graph and find the cells. The bottom 
+cell is necessarily an ideal in the weak order. It turns out that 3 elements 
+are required to generate it; we can use them to test the function
+texttt{WGidealgens2WGtable}.
+<P>
+<P>
+<P>
+<PRE>
+&gt; mij:=[1,3,1,2,3,1,2,3,2,1,2,2,2,3,1,2,2,3,2,2,1];
+&gt; E6 := CoxeterGroup(GrpFPCox, SymmetricMatrix(mij) );
+&gt; J := {1,3,5};
+&gt; drs := Transversal(E6,J);
+&gt; ttt := WGidealgens2WGtable([drs[1398],drs[156],drs[99]],J);
+&gt; nwg := WGtable2WG(ttt);
+&gt; TestWG(E6,nwg);
+
+true &lt;1, 2&gt; 3
+true &lt;2, 3&gt; 3
+true &lt;2, 4&gt; 3
+true &lt;4, 5&gt; 3
+true &lt;3, 6&gt; 3
+</PRE>
+<HR>
+<H5><A NAME = "12522">WriteWG(file,uwg) : MonStgElt, GrphUnd -&gt; .</A></H5>
+<H5>WriteWG(file,dwg) : MonStgElt, GrphDir -&gt; .</H5>
+<BLOCKQUOTE>
+Writes the W-graph to a file.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text1115.htm">[Next]</A><A  HREF = "text1113.htm">[Prev]</A> <A  HREF = "text1115.htm">[Right]</A> <A  HREF = "text1113.htm">[Left]</A> <A  HREF = "text1101.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

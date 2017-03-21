@@ -1,0 +1,203 @@
+/*
+Test Groebner bases over small finite fields with field relations.
+AKS, May 2004.
+*/
+
+SetVerbose("Groebner", 0);
+
+DIM_BOUND := 100000;
+VAR_BOUND := 500;
+
+function rand_mon(P, d)
+    S := {i: i in {1 .. Rank(P)}};
+    assert #S ge d;
+    m := P!1;
+    for i := 1 to d do
+	r := Random(S);
+	Exclude(~S, r);
+	m := m*P.r;
+    end for;
+    return m;
+end function;
+
+procedure test_solution(:
+    q := 2, nvars := 20, nrels := nvars,
+    deg_range := [0 .. 3], len_range := [5 .. 10], beta := 0
+)
+    ss, sc := GetSeed();
+
+    K<w> := GF(q);
+    deg_range := [deg_range[1] .. Min(deg_range[#deg_range], nvars)];
+
+    Fq := Factorization(q);
+    printf "q: %o^%o, v: %o, r: %o, d: %o, l: %o, seed: %o, %o\n",
+	Fq[1, 1], Fq[1, 2], nvars, nrels, deg_range, len_range, ss, sc;
+    IndentPush();
+    ZEIT := Cputime();
+
+    function rand()
+        repeat
+            x := Random(K);
+        until x ne 0;
+        return x;
+    end function;
+
+    n := nvars;
+    P := PolynomialRing(K, n, "grevlex");
+    AssignNames(~P, ["x" cat IntegerToString(i): i in [1 .. n]]);
+
+    if beta gt 0 then
+        M := &join {@ MonomialsOfDegree(P, d): d in deg_range @};
+        L := [
+            &+[rand()*Random(M): j in [1 .. Round(beta*#M)]]:
+                i in [1 .. nrels]
+        ];
+    else
+	L := [
+	    &+[rand_mon(P, Random(deg_range)): j in len_range]:
+		i in [1 .. nrels]
+	];
+    end if;
+
+    p := [Random(K): i in [1 .. n]];
+    L := [L[i] - Evaluate(L[i], p): i in [1 .. #L]];
+
+//if q eq 37 and nvars eq 10 then gon(); end if;
+
+//"L:", L;
+//"p:", p;
+
+    fpol := q le 4;
+    if fpol then
+	F := [P.i^q - P.i: i in [1 .. n]];
+	L cat:= F;
+    end if;
+
+    I := ideal<P | L>;
+    B := GroebnerBasis(I);
+// B;
+
+    //B := Basis(EasyIdeal(I));
+    assert forall{f: f in B | Evaluate(f, p) eq 0};
+    assert not fpol or IsZeroDimensional(I);
+
+    if fpol then
+	I := ChangeOrder(I, "lex");
+	Groebner(I: Al := "Walk");
+
+	B := GroebnerBasis(I);
+	assert forall{f: f in B | Evaluate(f, p) eq 0};
+
+	E := [Exponents(LeadingMonomial(f)): f in B];
+	b := #B;
+	C := #[v: v in [1 .. nvars] | exists{i: i in [1 .. b] | E[i][v] gt 1}];
+	VB := q^C;
+
+	if VB ge DIM_BOUND then
+	    printf "Variety bound: %o\n", VB;
+	else
+	    d := Dimension(Generic(I)/I);
+	    if d le VAR_BOUND then
+		printf "Variety size: %o\n", d;
+		V := VarietySequence(I);
+		assert p in V;
+	    else
+		printf "Variety size: %o (skip full test)\n", d;
+	    end if;
+	end if;
+    end if;
+
+    "Time:", Cputime(ZEIT);
+    IndentPop();
+end procedure;
+
+///
+///
+
+/*
+gon();
+
+v := 23;
+SetSeed(1, 1029102);
+test_solution(:
+    nvars := v, nrels := v + 3,
+    deg_range := [0 .. 3], len_range := [2 .. 5]
+);
+error "done";
+*/
+
+//error "STOP"; clear;
+
+"*** GF(2) tests ***";
+
+SMALL := 10;
+
+for v := 1 to SMALL do
+    test_solution(: nvars := v, deg_range := [0 .. 4], len_range := [2 .. 5]);
+    test_solution(: nvars := v, deg_range := [0 .. 2], len_range := [5 .. 10]);
+end for;
+
+for v := SMALL + 1 to 32 do
+    test_solution(:
+	nvars := v, nrels := v + 3,
+	deg_range := [0 .. 3], len_range := [2 .. 5]
+    );
+end for;
+
+for v := 32 to 100 do
+    test_solution(:
+	nvars := v, nrels := v + v div 2,
+	deg_range := [0 .. 2], len_range := [2 .. 3]
+    );
+end for;
+
+"*** GF(2^k) tests ***";
+
+range := [
+    <2, 14>,
+    <3, 12>,
+    <11, 12>,
+    <12, 11>,
+    <32, 10>,
+    <80, 10>,
+    <10^10, 5>
+];
+
+//gon();
+for d in [2 .. 67] do
+    q := 2^d;
+    for i := 1 to #range do
+	t := range[i];
+	if d le t[1] then
+	    break;
+	end if;
+    end for;
+    nv := t[2];
+    for v in [nv] do
+        test_solution(:
+            q := q, nvars := v, nrels := v + v div 2,
+            deg_range := [0 .. 2],
+            beta := 0.5 // len_range := [v - 1 .. v]
+        );
+    end for;
+end for;
+
+"*** Other tests ***";
+
+for q in [3 .. 100] cat [2^8, 257] do
+    if #Factorization(q) gt 1 then
+	continue;
+    end if;
+    for v in [1, 3, 5, 7] do
+	test_solution(:
+	    q := q, nvars := v, nrels := v + v div 2,
+	    deg_range := [0 .. 2], len_range := [2 .. 3]
+	);
+    end for;
+end for;
+
+/*
+gon();
+SetSeed(1, 1242601);
+test_solution();
+*/

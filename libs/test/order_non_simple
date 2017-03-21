@@ -1,0 +1,263 @@
+SetDebugOnError(true);
+
+procedure check(O)
+Oa := AbsoluteOrder(O);
+o := CoefficientRing(O);
+
+Ao := NumberField(o);
+AO := NumberField(O);
+
+Fo := FieldOfFractions(o);
+FO := FieldOfFractions(O);
+
+Vo := RSpace(o, Degree(O));
+VA := RSpace(Integers(), AbsoluteDegree(O));
+
+x := Random(O, 20);
+assert Evaluate(MinimalPolynomial(x, o), x) eq 0;
+assert Evaluate(MinimalPolynomial(x, Integers()), x) eq 0;
+assert Evaluate(MinimalPolynomial(x, Ao), x) eq 0;
+assert Evaluate(MinimalPolynomial(x, Rationals()), x) eq 0;
+assert Evaluate(MinimalPolynomial(x, Fo), x) eq 0;
+assert Evaluate(MinimalPolynomial(x, O), x) eq 0;
+assert Evaluate(MinimalPolynomial(x, FO), x) eq 0;
+assert Evaluate(MinimalPolynomial(x, AO), x) eq 0;
+
+assert Evaluate(CharacteristicPolynomial(x, o), x) eq 0;
+assert Evaluate(CharacteristicPolynomial(x, Integers()), x) eq 0;
+assert Evaluate(CharacteristicPolynomial(x, Ao), x) eq 0;
+assert Evaluate(CharacteristicPolynomial(x, Rationals()), x) eq 0;
+assert Evaluate(CharacteristicPolynomial(x, Fo), x) eq 0;
+assert Evaluate(CharacteristicPolynomial(x, O), x) eq 0;
+assert Evaluate(CharacteristicPolynomial(x, FO), x) eq 0;
+assert Evaluate(CharacteristicPolynomial(x, AO), x) eq 0;
+
+y := Random(O, 20);
+v1 := Vo!Eltseq(y);
+v2 := VA!&cat[Eltseq(u) : u in Eltseq(y)];
+v := RSpace(O, 1)![y];
+assert O!Eltseq(ChangeRing(v1, Ao)*RepresentationMatrix(x, Ao)) eq y*x;
+s := Eltseq(ChangeRing(v2, Rationals())*RepresentationMatrix(x, Rationals()));
+s := [Fo!s[i .. i+Degree(o)-1] : i in [1 .. AbsoluteDegree(O) by Degree(o)]];
+assert O!s eq y*x;
+assert O!Eltseq(ChangeRing(v1, Fo)*RepresentationMatrix(x, Fo)) eq y*x;
+assert O!Eltseq(v*RepresentationMatrix(x, O))[1] eq y*x;
+assert O!Eltseq(ChangeRing(v, FO)*RepresentationMatrix(x, FO))[1] eq y*x;
+assert O!Eltseq(ChangeRing(v, AO)*RepresentationMatrix(x, AO))[1] eq y*x;
+
+assert RepresentationMatrix(x, Fo) eq RepresentationMatrix(x);
+assert RepresentationMatrix(x, Rationals()) eq AbsoluteRepresentationMatrix(x);
+
+assert Norm(x, o) eq Norm(x);
+assert Norm(x, Integers()) eq AbsoluteNorm(x);
+assert Norm(x, Ao) eq Ao!Norm(x);
+assert Norm(x, Rationals()) eq AbsoluteNorm(x);
+assert Norm(x, Fo) eq Fo!Norm(x);
+assert Norm(x, O) eq x;
+assert Norm(x, FO) eq FO!x;
+assert Norm(x, AO) eq AO!x;
+
+assert Trace(x, o) eq Trace(x);
+assert Trace(x, Integers()) eq AbsoluteTrace(x);
+assert Trace(x, Ao) eq Ao!Trace(x);
+assert Trace(x, Rationals()) eq AbsoluteTrace(x);
+assert Trace(x, Fo) eq Fo!Trace(x);
+assert Trace(x, O) eq x;
+assert Trace(x, FO) eq FO!x;
+assert Trace(x, AO) eq AO!x;
+
+Vo := KSpace(Fo, Degree(O));
+VA := KSpace(Fo, AbsoluteDegree(O));
+
+x := Random(FO, 20);
+assert Evaluate(MinimalPolynomial(x, o), x) eq 0;
+assert Evaluate(MinimalPolynomial(x, Fo), x) eq 0;
+assert Evaluate(MinimalPolynomial(x, Ao), x) eq 0;
+assert Evaluate(MinimalPolynomial(x, Integers()), x) eq 0;
+assert Evaluate(MinimalPolynomial(x, Rationals()), x) eq 0;
+assert Evaluate(MinimalPolynomial(x, O), x) eq 0;
+assert Evaluate(MinimalPolynomial(x, FO), x) eq 0;
+assert Evaluate(MinimalPolynomial(x, AO), x) eq 0;
+
+assert Evaluate(CharacteristicPolynomial(x, o), x) eq 0;
+assert Evaluate(CharacteristicPolynomial(x, Ao), x) eq 0;
+assert Evaluate(CharacteristicPolynomial(x, O), x) eq 0;
+assert Evaluate(CharacteristicPolynomial(x, Integers()), x) eq 0;
+assert Evaluate(CharacteristicPolynomial(x, Rationals()), x) eq 0;
+assert Evaluate(CharacteristicPolynomial(x, Fo), x) eq 0;
+assert Evaluate(CharacteristicPolynomial(x, FO), x) eq 0;
+assert Evaluate(CharacteristicPolynomial(x, AO), x) eq 0;
+
+y := Random(FO, 20);
+v1 := Vo!Eltseq(y);
+v2 := VA!&cat[Eltseq(u) : u in Eltseq(y)];
+v := RSpace(FO, 1)![y];
+if IsIntegral(x) and &and[B[1] eq 1*BaseRing(O) : B in PseudoBasis(Module(O))] then
+x;
+    assert FO!Eltseq(v1*ChangeRing(RepresentationMatrix(x, o), Fo)) eq y*x;
+end if;
+assert FO!Eltseq(v1*(RepresentationMatrix(x, Fo))) eq y*x;
+assert FO!Eltseq(ChangeRing(v1, Ao)*(RepresentationMatrix(x, Ao))) eq y*x;
+if IsIntegral(x) and &and[B[1] eq 1*BaseRing(O) : B in PseudoBasis(Module(O))] then
+    assert FO![Fo![s[1], s[2]], Fo![s[3], s[4]]] eq y*x where s is 
+    Eltseq(v2*ChangeRing(RepresentationMatrix(x, Integers()), Fo));
+end if;
+s := Eltseq(ChangeRing(v2, Rationals())*(RepresentationMatrix(x, Rationals())));
+s := [Fo!s[i .. i+Degree(o)-1] : i in [1 .. AbsoluteDegree(O) by Degree(o)]];
+assert FO!s eq y*x;
+if IsIntegral(x) and &and[B[1] eq 1*BaseRing(O) : B in PseudoBasis(Module(O))] then
+    assert FO!Eltseq(v*ChangeRing(RepresentationMatrix(x, O), FO))[1] eq y*x;
+end if;
+assert FO!Eltseq(ChangeRing(v, FO)*(RepresentationMatrix(x, FO)))[1] eq y*x;
+assert FO!Eltseq(ChangeRing(v, AO)*(RepresentationMatrix(x, AO)))[1] eq
+ y*x;
+
+assert RepresentationMatrix(x, Fo) eq RepresentationMatrix(x);
+assert RepresentationMatrix(x, Rationals()) eq AbsoluteRepresentationMatrix(x);
+
+if IsIntegral(x) then
+x;
+    assert Norm(x, o) eq Norm(x);
+end if;
+assert Norm(x, Ao) eq Ao!Norm(x);
+assert Norm(x, Fo) eq Fo!Norm(x);
+if IsIntegral(x) then
+    assert Norm(x, Integers()) eq AbsoluteNorm(x);
+end if;
+assert Norm(x, Rationals()) eq AbsoluteNorm(x);
+if IsIntegral(x) then
+    assert Norm(x, O) eq x;
+end if;
+assert Norm(x, FO) eq FO!x;
+assert Norm(x, AO) eq AO!x;
+
+if IsIntegral(x) then
+    assert Trace(x, o) eq Trace(x);
+    assert Trace(x, Integers()) eq AbsoluteTrace(x);
+end if;
+assert Trace(x, Ao) eq Ao!Trace(x);
+assert Trace(x, Rationals()) eq AbsoluteTrace(x);
+assert Trace(x, Fo) eq Fo!Trace(x);
+if IsIntegral(x) then
+    assert Trace(x, O) eq x;
+end if;
+assert Trace(x, FO) eq FO!x;
+assert Trace(x, AO) eq AO!x;
+
+Vo := KSpace(Ao, Degree(O));
+VA := KSpace(Ao, AbsoluteDegree(O));
+
+x := Random(AO, 20);
+assert Evaluate(MinimalPolynomial(x), x) eq 0;
+assert Evaluate(MinimalPolynomial(x, o), x) eq 0;
+assert Evaluate(MinimalPolynomial(x, Integers()), x) eq 0;
+assert Evaluate(MinimalPolynomial(x, Ao), x) eq 0;
+assert Evaluate(MinimalPolynomial(x, Rationals()), x) eq 0;
+assert Evaluate(MinimalPolynomial(x, Fo), x) eq 0;
+assert Evaluate(MinimalPolynomial(x, O), x) eq 0;
+assert Evaluate(MinimalPolynomial(x, FO), x) eq 0;
+assert Evaluate(MinimalPolynomial(x, AO), x) eq 0;
+
+assert Evaluate(CharacteristicPolynomial(x), x) eq 0;
+assert Evaluate(CharacteristicPolynomial(x, o), x) eq 0;
+assert Evaluate(CharacteristicPolynomial(x, Integers()), x) eq 0;
+assert Evaluate(CharacteristicPolynomial(x, Ao), x) eq 0;
+assert Evaluate(CharacteristicPolynomial(x, Rationals()), x) eq 0;
+assert Evaluate(CharacteristicPolynomial(x, Fo), x) eq 0;
+assert Evaluate(CharacteristicPolynomial(x, O), x) eq 0;
+assert Evaluate(CharacteristicPolynomial(x, FO), x) eq 0;
+assert Evaluate(CharacteristicPolynomial(x, AO), x) eq 0;
+
+y := Random(AO, 20);
+v1 := Vo!Eltseq(y);
+v2 := VA!&cat[Eltseq(u) : u in Eltseq(y)];
+v := RSpace(AO, 1)![y];
+if IsIntegral(x) then
+x;
+    rx := RepresentationMatrix(x);
+    if CanChangeRing(rx, o) then
+	assert AO!Eltseq(v1*ChangeRing(rx, Ao)) eq y*x;
+	s := Eltseq(v2*ChangeRing(RepresentationMatrix(x, Integers()), Ao));
+	s := [Ao!s[i .. i+Degree(o)-1] : i in [1 .. AbsoluteDegree(O) by Degree(o)]];
+	assert AO!s eq y*x;
+    end if;
+end if;
+assert AO!Eltseq(ChangeRing(v1, Ao)*(RepresentationMatrix(x, Ao))) eq y*x;
+s := Eltseq(ChangeRing(v2, Rationals())*(RepresentationMatrix(x, Rationals())));
+s := [Ao!s[i .. i+Degree(o)-1] : i in [1 .. AbsoluteDegree(O) by Degree(o)]];
+assert AO!s eq y*x;
+assert AO!Eltseq(ChangeRing(v1, Fo)*(RepresentationMatrix(x, Fo))) eq y*x;
+if IsIntegral(x) then
+    if CanChangeRing(rx, o) then
+	assert AO!Eltseq(v*ChangeRing(RepresentationMatrix(x, O), AO))[1] eq y*x;
+    end if;
+end if;
+assert AO!Eltseq(ChangeRing(v, FO)*RepresentationMatrix(x, FO))[1] eq y*x;
+assert AO!Eltseq(ChangeRing(v, AO)*RepresentationMatrix(x, AO))[1] eq y*x;
+
+assert RepresentationMatrix(x, Ao) eq RepresentationMatrix(x);
+assert RepresentationMatrix(x, Rationals()) eq AbsoluteRepresentationMatrix(x);
+
+if IsIntegral(x) then
+    assert Norm(x, o) eq Norm(x);
+    assert Norm(x, Integers()) eq AbsoluteNorm(x);
+end if;
+assert Norm(x, Ao) eq Ao!Norm(x);
+assert Norm(x, Rationals()) eq AbsoluteNorm(x);
+assert Norm(x, Fo) eq Fo!Norm(x);
+if IsIntegral(x) then
+    assert Norm(x, O) eq x;
+end if;
+assert Norm(x, FO) eq FO!x;
+assert Norm(x, AO) eq AO!x;
+
+if IsIntegral(x) then
+    assert Trace(x, o) eq Trace(x);
+    assert Trace(x, Integers()) eq AbsoluteTrace(x);
+end if;
+assert Trace(x, Ao) eq Ao!Trace(x);
+assert Trace(x, Rationals()) eq AbsoluteTrace(x);
+assert Trace(x, Fo) eq Fo!Trace(x);
+if IsIntegral(x) then
+    assert Trace(x, O) eq x;
+end if;
+assert Trace(x, FO) eq FO!x;
+assert Trace(x, AO) eq AO!x;
+end procedure;
+
+
+P<x> := PolynomialRing(Rationals());
+o := MaximalOrder(x^2-2);
+N := ext<NumberField(o) | x^2 - 3, x^2 + 5 : Abs>;
+O := MaximalOrder(N);
+check(O);
+
+N := ext<NumberField(o) | x^2 - 3, x^2 + 5 >;
+N := RelativeField(CoefficientField(CoefficientField(N)), N);
+O := MaximalOrder(N);
+check(O);
+
+N := ext<NumberField(o) | x^3 + 1*x^2/2 + 1*x/7 - 1/11>;
+O := MaximalOrder(N);
+check(O);
+
+N := ext<NumberField(o) | 74*x^3 + 83*x^2 - x + 20>;
+O := MaximalOrder(N);
+check(O);
+
+P<x> := PolynomialRing(IntegerRing());
+E := EquationOrder(x^2 + 5);
+M := MaximalOrder(E);
+I := ideal<M | M!4, M![0, 8]>;
+assert IsPower(I^3, 3);
+assert Root(I^3, 3) eq I;
+assert Sqrt(I^2) eq I;
+assert IsSquare(I^2);
+assert IsSquare(I);
+assert not IsPower(I, 3);
+assert Sqrt(I)^2 eq I;
+r, r2 := IsPower(I, 4);
+assert r;
+assert r2^4 eq I;
+assert not IsPower(I, 5);
+

@@ -1,0 +1,35 @@
+freeze;
+
+/////////////////////////////////////////////////////////////////////////
+// simplex.m
+/////////////////////////////////////////////////////////////////////////
+// $Revision: 46563 $
+// $Date: 2014-04-01 20:29:36 +1100 (Tue, 01 Apr 2014) $
+// $LastChangedBy: kasprzyk $
+/////////////////////////////////////////////////////////////////////////
+// Author: Alexander M Kasprzyk
+/////////////////////////////////////////////////////////////////////////
+// Calculates the Minkowski decompositions for a simplex.
+/////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////
+// Main function
+/////////////////////////////////////////////////////////////////////////
+
+// Returns the Minkowski decomposition of a simplex P.
+function simplex_decomposition(P)
+    // The only possibility is for P = mQ for a simplex Q
+    verts:=Vertices(P);
+    orig:=verts[1];
+    m:=GCD(&cat[PowerSequence(Integers()) | Eltseq(v - orig) : v in verts]);
+    if m eq 1 then
+        return [[P]];
+    else
+        Q:=(P - orig) / m;
+        factors:=[[Q : i in [1..m]]];
+        if not IsZero(orig) then
+            Append(~factors[1],Polytope([orig]));
+        end if;
+        return factors;
+    end if;
+end function;

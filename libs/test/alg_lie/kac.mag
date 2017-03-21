@@ -1,0 +1,222 @@
+
+function Ad(x, p, y) 
+//(x::AlgLieKMAffElt, p::RngIntElt, y::AlgLieKMAffElt) -> AlgLieKMAffElt, RngIntElt
+/*Compute ad_x^p (y) (left action). Returns ad_x^p(y) as first return value, and the nilpotency degree
+of ad_x on y (i.e., the smallest k such that ad_x^k(y) = 0) as second return value. If ad_x^p(y) != 0
+then -1 is returned as second value.*/
+	if (p eq 0) then return y, 0; end if;
+
+	assert IsIntegral(p) and (p ge 1);
+	nd := -1;
+	k := 0; xy := y;
+	repeat
+		k +:= 1;
+		xy := x*xy;
+		isz := IsZero(xy);
+		if (isz) then nd := k; end if;
+	until (k eq p) or (isz);
+	
+	return xy, nd;
+end function;
+function Nildegree(x, p, y) 
+//(x::AlgLieKMAffElt, p::RngIntElt, y::AlgLieKMAffElt) -> RngIntElt
+/* Compute the nilpotency degree of x on y; at most p. */
+	_, nd := Ad(x, p, y);
+	return nd;
+end function;
+
+function rndKM(L)
+//(L::AlgLieKMAff) -> AlgLieKMAffElt
+/* A sort-of random element of L */
+	F := BaseRing(L);
+	Lf := FiniteLieAlgebra(L);
+	LR := LaurentSeriesRing(L);
+	dim := Dimension(Lf);
+	t := L`t;
+	
+	if IsFinite(F) then
+		rndF := func< | Random(F)>;
+	else
+		rndF := func< | F!Random([-5,-2,-1,-1,1,1,2,5])/Random([-2,-1,-1,1,1,2])>;
+	end if;
+	
+	rnd_Lf := function()
+		x := Zero(Lf);
+		for i in [1..2] do x[Random([1..dim])] := rndF(); end for;
+		return x;
+	end function;
+	rnd_LR := function()
+		return &+[ LR | rndF()*t^(Random([-5..5])) : i in [1..3] ];
+	end function;
+	
+	return &+[ elt<L | <[<rnd_LR(), rnd_Lf()>], rndF(), rndF()> > : i in [1..4] ];
+end function;
+
+function TestStandardGenerators(L)
+//(L::AlgLieKMAff) -> BoolElt
+/* Test the KacMoody relations on L. */
+
+/* It is a bit worrying that we have to transpose the Cartan matrix in order for it
+   to work in the non-simply laced case :s */
+	es, fs, hs := StandardGenerators(L);
+
+	assert Universe(es) eq L;
+	assert Universe(fs) eq L;
+	assert Universe(hs) eq L;
+	
+	C := L`CartanMatrix;
+	
+	l := #es; 
+	assert l eq #fs and l eq #hs;
+	assert Ncols(C) eq l;
+
+	//[h_i, h_j] = 0
+	b := forall{<i,j> : i,j in [1..l] | IsZero(hs[i]*hs[j])};
+	if not b then printf "FAIL\n"; return false; end if;
+	
+	//[e_i, f_i] = h_i
+	b := forall{i : i in [1..l] | hs[i] eq es[i]*fs[i]};
+	if not b then printf "FAIL\n"; return false; end if;
+	
+	//[e_i, f_j] = 0 (i != j)
+	b := forall{<i,j> : i,j in [1..l] | (i eq j) or IsZero(es[i]*fs[j])};
+	if not b then printf "FAIL\n"; return false; end if;
+	
+	//[h_i, e_j] = a_ji e_j
+	b := forall{<i,j> : i,j in [1..l] | C[j][i]*es[j] eq hs[i]*es[j]};
+	if not b then printf "FAIL\n"; return false; end if;
+	
+	//[h_i, f_j] = -a_ji f_j
+	b := forall{<i,j> : i,j in [1..l] | -C[j][i]*fs[j] eq hs[i]*fs[j]};
+	if not b then printf "FAIL\n"; return false; end if;
+	
+	//(ad e_i)^{1-a_ij} e_j = 0 (i != j)
+	nds := [[ (i eq j) select 1 else Nildegree(es[i], 1-C[j][i], es[j]) : j in [1..l] ] : i in [1..l] ];
+	b := forall{<i,j> : i,j in [1..l] | nds[i][j] ne -1};
+	if not b then printf "FAIL\n"; return false; end if;
+	if exists(pr){<i,j> : i,j in [1..l] | (i ne j) and nds[i][j] lt 1-C[j][i]} then
+		i := pr[1]; j := pr[2];
+		printf "WARN: ad_{es[%o]}^%o (es[%o]) = 0, but 1-C[i][j] = %o\n", i, nds[i][j], j, 1-C[j][i];
+	end if;
+	
+	
+	//(ad f_i)^{1-a_ij} f_j = 0 (i != j)
+	nds := [[ (i eq j) select 1 else Nildegree(fs[i], 1-C[j][i], fs[j]) : j in [1..l] ] : i in [1..l] ];
+	b := forall{<i,j> : i,j in [1..l] | nds[i][j] ne -1};
+	if not b then printf "FAIL\n"; return false; end if;
+	if exists(pr){<i,j> : i,j in [1..l] | (i ne j) and nds[i][j] lt 1-C[j][i]} then
+		i := pr[1]; j := pr[2];
+		printf "WARN: ad_{fs[%o]}^%o (fs[%o]) = 0, but 1-C[i][j] = %o\n", i, nds[i][j], j, 1-C[j][i];
+	end if;	
+
+	return true;
+end function;
+
+
+function KMTestHash(L : N := 100) 
+	elts := []; cntdup := 0;
+	for i in [1..N] do
+		if (#elts gt 0) and (Random([1..Floor(N/10)]) eq 1) then
+			x := Random(elts);
+			Append(~elts, elt<L | EltTup(x)>);
+			cntdup +:= 1;
+		else
+			Append(~elts, rndKM(L));
+		end if;
+	end for;
+	
+	assert #elts eq N;
+	
+	myset := [];
+	for e in elts do
+		if Position(myset, e) gt 0 then continue; end if;
+		Append(~myset, e);
+	end for;
+
+	assert #myset le N-cntdup;
+	
+	theset := SequenceToSet(elts);
+	assert #myset eq #theset;
+
+	while #theset gt 0 do
+		x := Representative(theset);
+		p := Position(myset, x);
+		assert p ne 0;
+		Remove(~myset, p);
+		Exclude(~theset, x);
+	end while;
+
+	return true;
+end function;
+
+/* 
+ * Generalized Cartan Matrices 
+ */
+CA := CartanMatrix("A2");
+cl,v := KacMoodyClass(CA);;
+assert cl eq "a";
+assert forall{ x : x in Eltseq(v) | x  gt 0 };
+assert forall{ x : x in Eltseq(CA*v) | x gt 0 };
+
+CE := CartanMatrix("E~8");
+cl,v := KacMoodyClass(CE);;
+assert cl eq "b";
+assert forall{ x : x in Eltseq(v) | x  gt 0 };
+assert forall{ x : x in Eltseq(CE*v) | x eq 0 };
+
+C := CartanMatrix("A~2");
+C[1][2] := -5; 
+cl,v := KacMoodyClass(C);;
+assert cl eq "c";
+assert forall{ x : x in Eltseq(v) | x  gt 0 };
+assert forall{ x : x in Eltseq(C*v) | x lt 0 };
+
+/* 
+ * Construction
+ */
+C := CartanMatrix("F~4");
+L<t> := AffineLieAlgebra(C, Rationals());
+assert CartanMatrix(L) eq C;
+assert CartanName(L) eq "F~4";
+assert Dimension(L) eq Infinity();
+
+/*
+ * Arithmetic
+ */ 
+L<t> := AffineLieAlgebra("A~3", Rationals());
+p0,n0 := StandardBasis(FiniteLieAlgebra(L));
+x := elt<L | <[<t^-1-1+t^2,2*p0[1]+3*n0[2]>], 1/3, 0> >;
+assert 3*x eq x+x+x;
+assert x*x eq L!0;
+
+/* 
+ * Standard Generators 
+ */
+L<t> := AffineLieAlgebra("G~2", Rationals());
+e,f,h := StandardGenerators(L);
+assert TestStandardGenerators(L);
+
+eF, fF, hF := StandardBasis(FiniteLieAlgebra(L));
+
+FL<e1,e2,e0,f1,f2,f0> := FreeLieAlgebra(Rationals(), 6);
+phi := hom<FL -> L | e cat f>;
+assert phi(e1) eq e[1];
+assert phi(e0) eq t*L!(fF[6]);
+assert phi(e1)*phi(f1) eq phi(e1*f1);
+assert phi(e2*e1) eq phi(e2)*phi(e1);
+
+/*
+ * Jacobi
+ */
+for i in [1..10] do
+	x := rndKM(L); y := rndKM(L); z := rndKM(L);
+	assert IsZero(x*(y*z) + y*(z*x) + z*(x*y));
+end for;
+
+/* 
+ * Hashing, sets, etc.
+ */
+L<t> := AffineLieAlgebra("A~2D~4", GF(17));
+assert KMTestHash(L);
+
+

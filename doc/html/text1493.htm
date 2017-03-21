@@ -1,0 +1,563 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Points on the Jacobian</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1494.htm">[Next]</A><A  HREF = "text1492.htm">[Prev]</A> <A  HREF = "text1494.htm">[Right]</A> <A  HREF = "text1492.htm">[Left]</A> <A  HREF = "text1483.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16900">Points on the Jacobian</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+Points on Jac(C) are represented as divisors on C.
+They can be specified simply by giving points on C,
+or divisors on C, 
+or in the Mumford representation, which is the way 
+Magma returns them (and which it uses to store and manipulate them).
+Points can be added and subtracted.
+<P>
+<P>
+<P>
+<I>Representation of points on Jac(C):</I>
+Let C be a hyperelliptic curve of genus g.
+A triple &lt; a(x), b(x), d &gt; specifies the 
+divisor D of degree d on C defined by 
+A(x, z) = 0,   y = B(x, z)
+where 
+A(x, z) is the degree d homogenisation of a(x), and 
+B(x, z) is the degree (g + 1) homogenisation of b(x).
+Note that the equation y = B(x, z) make sense projectively
+because y has weight g + 1
+(as always for hyperelliptic curves in Magma).
+<P>
+The <I>point on Jac(C) corresponding to</I> 
+&lt; (a(x), b(x), d) &gt; is then D minus a multiple
+of the divisor at infinity on C.
+So, when there is a single point P<sub>&infin;</sub> at infinity, 
+we have D - d P<sub>&infin;</sub>.
+Otherwise, there is a Q-rational divisor 
+P<sub> + &infin;</sub> + P<sub> - &infin;</sub> consisting of the two points at infinity;
+in this case d is required to be even and 
+we have D - (d/2) (P<sub> + &infin;</sub> + P<sub> - &infin;</sub>).
+<P>
+All points on Jac(C) can be expressed in this way, except
+when g is odd and there are no rational points at infinity
+(in which case the extra points can not be created in Magma,
+and arithmetic on points is not implemented).
+There is a uniquely determined "reduced" triple 
+representing each point, which Magma uses to represent
+any point it encounters.
+<P>
+See the examples in the following section ("Creation of Points").
+<P>
+<P>
+<P>
+<I>Technical details:</I>
+In order to make sense, a triple &lt; (a(x), b(x), d) &gt; 
+is required to satisfy:
+<P>
+<P>
+<P>
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>a(x) is monic of degree at most g;
+<DT>(b)</DT><DD>b(x) has degree at most g + 1, and 
+    a(x) divides  b(x)<sup>2</sup> + h(x)b(x) - f(x), where h(x) 
+    and f(x) are the defining polynomials of C;
+<DT>(c)</DT><DD>d is a positive integer with deg(a(x)) &le;d &le;g + 1,
+    such that the degree of b(x)<sup>2</sup> + h(x)b(x) - f(x) is less than 
+    or equal to 2g + 2 - d + deg(a(x)).
+<P>
+<P>
+<P>
+<P>
+</DL>
+For uniqueness of representation, in the case of one point at infinity,
+(the odd degree case, in particular), we require that d = deg(a(x)).
+<P>
+A triple &lt; (a(x), b(x), d) &gt; is reduced to a canonical
+representative as follows:
+<P>
+<P>
+<P>
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>If d = deg(a(x)), we reduce b mod a, so 
+   deg(b(x)) &lt; deg(a(x)).
+<DT>(b)</DT><DD>If a = 1, we assume that deg(B(1, z)) = d.
+<DT>(c)</DT><DD>A unique representative for b(x) is found such that 
+   the coefficient of x<sup>k</sup> in b is zero for deg(a(x)) &le;k 
+   &le;deg(a(x)) + g + 1 - d.
+<P>
+<P>
+<P>
+<P>
+</DL>
+For certain models of C, not all rational points can be represented
+in the above form (with the restrictions on d) or the
+representation is not unique.
+The bad cases are g odd and (i) 0 or (ii) 2 rational points at infinity.
+<P>
+In case (i) we would have to allow divisors with deg(a(x)) = g + 1, which
+give linear pencils of equivalent divisors, and
+in case (ii) a Jacobian point with d = g + 1 has precisely two canonical
+representatives.
+<P>
+In case (i), there is no obvious canonical representative for these 
+additional Jacobian points and currently Magma does not deal with them.
+Consequently, arithmetic is not implemented in this case.
+<P>
+However, in case (ii), the two representatives correspond to the two
+distinguished elements of a linear pencil of divisors which include contributions
+from one or the other point at infinity. By arbitrarily selecting one of
+these two infinite points as the default, a unique representative can be chosen.
+This is now performed internally by Magma, the default point being chosen at
+the time of creation of the Jacobian. Arithmetic is also implemented.
+Note that in this case, extra
+work is generally required in point addition to keep track of points at
+infinity and final reduction to the unique representation. If very fast
+addition is crucial when C is of this type, it is generally wise to use an
+isomorphic model with exactly one point at infinity, if possible, 
+by moving a rational Weierstrass point to infinity.
+<P>
+<P>
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1493.htm#16901">Creation of Points</A>
+<LI> <A  HREF = "text1493.htm#16912">Random Points</A>
+<LI> <A  HREF = "text1493.htm#16914">Booleans and Predicates for Points</A>
+<LI> <A  HREF = "text1493.htm#16918">Access Operations</A>
+<LI> <A  HREF = "text1493.htm#16921">Arithmetic of Points</A>
+<LI> <A  HREF = "text1493.htm#16929">Order of Points on the Jacobian</A>
+<LI> <A  HREF = "text1493.htm#16934">Frobenius</A>
+<LI> <A  HREF = "text1493.htm#16936">Weil Pairing</A>
+</UL>
+<H4><A NAME = "16901">Creation of Points</A></H4>
+
+
+
+<H5><A NAME = "16902">J ! 0 : JacHyp, RngIntElt  -&gt; JacHypPt</A></H5>
+<H5>Id(J) : JacHyp -&gt; JacHypPt</H5>
+<H5>Identity(J) : JacHyp -&gt; JacHypPt</H5>
+<BLOCKQUOTE>
+The identity element on the Jacobian J.
+</BLOCKQUOTE>
+<H5><A NAME = "16903">J ! [a, b] : JacHyp, [ RngUPolElt ] -&gt; JacHypPt</A></H5>
+<H5>elt&lt; J | a, b &gt; : JacHyp, RngUPolElt, RngUPolElt -&gt; JacHypPt</H5>
+<H5>elt&lt; J | [a, b] &gt; : JacHyp, [ RngUPolElt ] -&gt; JacHypPt</H5>
+<H5>elt&lt; J | a, b, d &gt; : JacHyp, RngUPolElt, RngUPolElt, RngIntElt -&gt; JacHypPt</H5>
+<H5>elt&lt; J | [a, b], d &gt; : JacHyp, [ RngUPolElt ], RngIntElt -&gt; JacHypPt</H5>
+<BLOCKQUOTE>
+The point on the Jacobian J defined by the polynomials a and b 
+and the positive integer d; if not specified then d is taken to be 
+deg(a).
+</BLOCKQUOTE>
+<H5><A NAME = "16904">P - Q : PtHyp, PtHyp -&gt; JacHypPt</A></H5>
+<H5>J ! [P, Q] : JacHyp, [PtHyp] -&gt; JacHypPt</H5>
+<H5>elt&lt; J | P, Q &gt; : JacHyp, PtHyp, PtHyp  -&gt; JacHypPt</H5>
+<BLOCKQUOTE>
+For points P and Q on a hyperelliptic curve, this constructs the
+image of the divisor class [P - Q] as a point on its Jacobian J.
+</BLOCKQUOTE>
+<H5><A NAME = "16905">J ! [S, T] : JacHyp, [SeqEnum] -&gt; JacHypPt</A></H5>
+<H5>elt&lt; J | S, T &gt; : JacHyp, [PtHyp], [PtHyp]  -&gt; JacHypPt</H5>
+<BLOCKQUOTE>
+Given two sequences S = [P<sub>i</sub>] and T = [Q<sub>i</sub>] of points on the 
+hyperelliptic curve with Jacobian J, each of length n, this returns 
+the image of the divisor class &sum;<sub>i</sub> [P<sub>i</sub>] - &sum;<sub>i</sub> [Q<sub>i</sub>] as a 
+point on the Jacobian J.
+</BLOCKQUOTE>
+<H5><A NAME = "16906">JacobianPoint(J, D) : JacHyp, DivCrvElt -&gt; JacHypPt</A></H5>
+<BLOCKQUOTE>
+The point on the Jacobian J (of a hyperelliptic curve C)
+associated to the divisor D on C. If D does not have degree 0,
+then a suitable multiple of the divisor at infinity is subtracted.
+When the divisor at infinity on C has even degree, 
+D is required to have even degree.
+<P>
+The function works for any divisor such that the corresponding
+point is definable in Magma.
+It is not implemented for characteristic 2.
+</BLOCKQUOTE>
+<H5><A NAME = "16907">J ! P : JacHyp, JacHypPt -&gt; JacHypPt</A></H5>
+<BLOCKQUOTE>
+Given a point P on a Jacobian J', construct the image of P on J, 
+where J is a base extension of J'.
+</BLOCKQUOTE>
+<H5><A NAME = "16908">Points(J, a, d) : JacHyp, RngUPolElt, RngIntElt -&gt; SetIndx</A></H5>
+<H5>RationalPoints(J, a, d) : JacHyp, RngUPolElt, RngIntElt -&gt; SetIndx</H5>
+<BLOCKQUOTE>
+Find all points on the Jacobian J with first component a and degree d.
+Only implemented for genus 2 curves of the form y<sup>2</sup> = f(x).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16909">Example <TT>CrvHyp_point_creation_jacobian (H131E18)</TT></A></H3>
+<P>
+Points on y<sup>2</sup> = x<sup>6</sup> - 3x - 1 and their images on the Jacobian.
+<P>
+<P>
+<P>
+<PRE>
+&gt; _&lt;x&gt; := PolynomialRing(Rationals());
+&gt; C := HyperellipticCurve(x^6-3*x-1);
+&gt; C;
+Hyperelliptic Curve defined by y^2 = x^6 - 3*x - 1 over Rational Field
+&gt; J := Jacobian(C);
+&gt; J;
+Jacobian of Hyperelliptic Curve defined by y^2 = x^6 - 3*x - 1 over Rational Field
+</PRE>
+Find some points on C and map them to J 
+(using the first point to define the map C -&gt; J):
+<P>
+<P>
+<PRE>
+&gt; ptsC := Points(C : Bound := 100);  
+&gt; ptsC;
+{@ (1 : -1 : 0), (1 : 1 : 0), (-1 : -1 : 3), (-1 : 1 : 3) @}
+&gt; ptsJ := [ ptsC[i] - ptsC[1] : i in [2,3,4] ];
+&gt; ptsJ;
+[ (1, x^3, 2), (x + 1/3, x^3, 2), (x + 1/3, x^3 + 2/27, 2) ]
+</PRE>
+We recreate the first of these, giving it in Magma's notation
+(which is read as "the divisor of degree 2 on C determined by 
+z<sup>2</sup> = y - x<sup>3</sup> = 0").
+<P>
+<P>
+<PRE>
+&gt; pt1 := elt&lt; J | [1,x^3], 2 &gt;;
+&gt; pt1 eq ptsJ[1]; 
+true
+</PRE>
+The degree of the divisor must be specified here,
+otherwise it is assumed to be deg(a(x)) = 0:
+<P>
+<P>
+<PRE>
+&gt; pt1 := J! [1,x^3];
+&gt; pt1; pt1 eq J!0;
+(1, 0, 0)
+true
+</PRE>
+<HR>
+<H3><A NAME = "16910">Example <TT>CrvHyp_point_creation_jacobian2 (H131E19)</TT></A></H3>
+We define the nontrivial 2-torsion point on the Jacobian of C: y<sup>2</sup> = (x<sup>2</sup> + 1)(x<sup>6</sup> + 7).
+<P>
+<P>
+The divisor (y=0, x<sup>2</sup> + 1=0) should define the only
+nontrivial 2-torsion point in J(Q).
+<P>
+<P>
+<PRE>
+&gt; _&lt;x&gt; := PolynomialRing(Rationals());
+&gt; C := HyperellipticCurve( (x^2+1)*(x^6+7) );
+&gt; J := Jacobian(C);
+</PRE>
+Define the point corresponding to the divisor given by x<sup>2</sup> + 1=0, y=0 on C. 
+We can use the simpler syntax, 
+not specifying that the degree of the divisor is 2, 
+because this equals the degree of a(x)=x<sup>2</sup> + 1.
+<P>
+<P>
+<PRE>
+&gt; Ptors := J![x^2+1, 0];
+&gt; Ptors;
+(x^2 + 1, 0, 2)
+</PRE>
+The alternative syntax would be as follows.
+<P>
+<P>
+<PRE>
+&gt; Ptors1 := elt&lt; J | [x^2+1, 0], 2 &gt;;
+&gt; Ptors eq Ptors1;  // Are they the same?
+true
+</PRE>
+Check that Ptors has order 2:
+<P>
+<P>
+<PRE>
+&gt; 2*Ptors;
+(1, 0, 0)
+&gt; $1 eq J!0;  // Is the previous result really the trivial point on J?
+true
+&gt; Order(Ptors);  // Just to be absolutely sure ...
+2
+</PRE>
+The other factor x<sup>6</sup> + 7 will give the same point on J:
+<P>
+<P>
+<PRE>
+&gt; Ptors2 := J![x^6+7,0];
+(x^2 + 1, 0, 2)
+</PRE>
+Note that Magma returned the unique reduced triple representing this point,
+which means we can easily check whether or not it is the same point as <TT>Ptors</TT>.
+<P>
+For alternative ways to obtain 2-torsion points, see the section on torsion. 
+<HR>
+<H3><A NAME = "16911">Example <TT>CrvHyp_point_creation_jacobian3 (H131E20)</TT></A></H3>
+A Jacobian with a point not coming from the curve.
+<P>
+Any curve containing
+the point (Sqrt(2), Sqrt(2)) has a Q-rational divisor 
+ D := (Sqrt(2), Sqrt(2)) + ( - Sqrt(2), - Sqrt(2)). 
+This will give a nontrivial point in J(Q).
+For instance, take y<sup>2</sup> = x<sup>6</sup> - 6.
+<P>
+<P>
+<P>
+<PRE>
+&gt; _&lt;x&gt; := PolynomialRing(Rationals());
+&gt; C := HyperellipticCurve(x^6-6);
+&gt; J := Jacobian(C);
+</PRE>
+The divisor D has degree 2 and 
+is given by x<sup>2</sup> - 2 = y - x = 0.
+<P>
+<P>
+<PRE>
+&gt; pt := J![x^2-2, x];
+&gt; pt;  // What is pt? 
+(x^2 - 2, x, 2)
+&gt; Parent(pt);  // Where does pt live? 
+Jacobian of Hyperelliptic Curve defined by y^2 = x^6 - 6 over Rational Field
+&gt; pt eq J!0;  // Is pt equal to 0 on J?
+false
+&gt; Order(pt);
+0
+</PRE>
+This means that P has infinite order in J(Q).
+<P>
+Alternatively we can construct the same point by first constructing the divisor, 
+giving it as an ideal in the homogeneous coordinate ring in which C lives. 
+(Note that Y has weight 3).
+<P>
+<P>
+<PRE>
+&gt; P&lt;X,Y,Z&gt; := CoordinateRing(Ambient(C));
+&gt; D := Divisor(C, ideal&lt;P | X^2-2*Z^2, Y-X*Z^2&gt; );
+&gt; pt1 := J!D;
+&gt; pt eq pt1;
+true
+</PRE>
+<HR>
+<H4><A NAME = "16912">Random Points</A></H4>
+
+
+
+<H5><A NAME = "16913">Random(J) : JacHyp -&gt; JacHypPt</A></H5>
+<BLOCKQUOTE>
+A random point on a Jacobian J of a hyperelliptic curve
+defined over a finite field. 
+</BLOCKQUOTE>
+<H4><A NAME = "16914">Booleans and Predicates for Points</A></H4>
+
+<P>
+<P>
+<P>
+For each of the following functions, P and Q are points
+on the Jacobian of a hyperelliptic curve.
+
+
+<H5><A NAME = "16915">P eq Q : JacHypPt, JacHypPt -&gt;  BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the points P and Q on the same Jacobian
+are equal.
+</BLOCKQUOTE>
+<H5><A NAME = "16916">P ne Q : JacHypPt, JacHypPt -&gt;  BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>false</TT> if and only if the two points P and Q on 
+the same Jacobian are equal.
+</BLOCKQUOTE>
+<H5><A NAME = "16917">IsZero(P) : JacHypPt -&gt; BoolElt</A></H5>
+<H5>IsIdentity(P) : JacHypPt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if P is the zero element of the Jacobian. 
+</BLOCKQUOTE>
+<H4><A NAME = "16918">Access Operations</A></H4>
+
+
+
+<H5><A NAME = "16919">P[i] : JacHypPt, RngIntElt -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+Given an integer 1 &le;i &le;2, this returns the i-th defining 
+polynomial for the Jacobian point P. For i = 3, this returns
+the degree d of the associated reduced divisor. 
+</BLOCKQUOTE>
+<H5><A NAME = "16920">Eltseq(P) : PtHyp -&gt; SeqEnum, RngIntElt</A></H5>
+<H5>ElementToSequence(P) : PtHyp -&gt; SeqEnum, RngIntElt</H5>
+<BLOCKQUOTE>
+Given a point P on the Jacobian J of a hyperelliptic curve,
+the function returns firstly, a sequence containing the two 
+defining polynomials for the divisor associated to P and 
+secondly, the degree of the divisor.
+</BLOCKQUOTE>
+<H4><A NAME = "16921">Arithmetic of Points</A></H4>
+
+<P>
+<P>
+For each of the following functions, P and Q are points
+on the Jacobian of a hyperelliptic curve.
+
+
+<H5><A NAME = "16922">- P : JacHypPt -&gt; JacHypPt</A></H5>
+<BLOCKQUOTE>
+The additive inverse of the point P on the Jacobian.
+</BLOCKQUOTE>
+<H5><A NAME = "16923">P + Q : JacHypPt, JacHypPt -&gt; JacHypPt</A></H5>
+<BLOCKQUOTE>
+The sum of the points P and Q on the same Jacobian.
+</BLOCKQUOTE>
+<H5><A NAME = "16924">P +:= Q : JacHypPt, JacHypPt -&gt;</A></H5>
+<BLOCKQUOTE>
+Given two points P and Q on the same Jacobian, set P
+equal to their sum.
+</BLOCKQUOTE>
+<H5><A NAME = "16925">P - Q : JacHypPt, JacHypPt -&gt; JacHypPt</A></H5>
+<BLOCKQUOTE>
+The difference of the points P and Q on the same Jacobian.
+</BLOCKQUOTE>
+<H5><A NAME = "16926">P -:= Q : JacHypPt, JacHypPt -&gt;</A></H5>
+<BLOCKQUOTE>
+Given two points P and Q on the same Jacobian, set P
+equal to the difference P - Q. 
+</BLOCKQUOTE>
+<H5><A NAME = "16927">n * P : RngIntElt, JacHypPt -&gt; JacHypPt</A></H5>
+<H5>P * n : JacHypPt, RngIntElt -&gt; JacHypPt</H5>
+<BLOCKQUOTE>
+The n-th multiple of P in the group of rational points on 
+the Jacobian.
+</BLOCKQUOTE>
+<H5><A NAME = "16928">P *:= n : JacHypPt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Set P equal to the n-th multiple of itself. 
+</BLOCKQUOTE>
+<H4><A NAME = "16929">Order of Points on the Jacobian</A></H4>
+
+
+
+<H5><A NAME = "16930">Order(P) : JacHypPt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the order of the point P on the Jacobian J of a 
+hyperelliptic curve defined over a finite field or the rationals,
+or 0 if P has infinite order. 
+This first computes #J when J is defined over
+  a finite field.
+</BLOCKQUOTE>
+<H5><A NAME = "16931">Order(P, l, u) : JacHypPt, RngIntElt, RngIntElt -&gt; RngIntElt</A></H5>
+
+<PRE>    Alg: MonStg                         Default: "Shanks"</PRE>
+
+<PRE>    UseInversion: BoolElt               Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Returns the order of the point P where u and l 
+  are bounds for the order of P or for the order 
+  of J the parent of P.
+This does not compute #J.
+<P>
+If the parameter <TT>Alg</TT> is set to <TT>"Shanks"</TT> then the generic 
+  Shanks algorithm is used, otherwise, when <TT>Alg</TT> is <TT>"PollardRho"</TT>,
+  a Pollard-Rho variant is used (see <A  HREF = "text1482.htm#bib_gaudry_har">[GH00]</A>).
+<P>
+If <TT>UseInversion</TT> is <TT>true</TT> the search space is halved 
+  by using point negation.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "16932">Order(P, l, u, n, m) : JacHypPt, RngIntElt, RngIntElt ,RngIntElt, RngIntElt -&gt; RngIntElt</A></H5>
+
+<PRE>    Alg: MonStg                         Default: "Shanks"</PRE>
+
+<PRE>    UseInversion: BoolElt               Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Returns the order of the point P where u and l 
+  are bounds for the order of P or for the order 
+  of J the parent of P and where 
+    n and m are
+        such that the group order is n mod m.
+This does not compute #J.
+<P>
+The two parameters <TT>Alg</TT>  and <TT>UseInversion</TT>
+  have the same use as in the previous function.
+<P>
+<P>
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "16933">HasOrder(P, n) : JacHypPt, RngIntElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a point P on the Jacobian J of a hyperelliptic curve 
+and a positive integer n, this returns <TT>true</TT> if the order of the point 
+is n.
+</BLOCKQUOTE>
+<H4><A NAME = "16934">Frobenius</A></H4>
+
+
+
+<H5><A NAME = "16935">Frobenius(P, k) : JacHypPt, FldFin -&gt; JacHypPt</A></H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a point P that lies on the Jacobian J of a hyperelliptic curve
+that is defined over the finite field k=F<sub>q</sub>, determine the image of P 
+under the Frobenius map x -&gt; x<sup>q</sup>. If <TT>Check</TT> is <TT>true</TT>, 
+Magma verifies that the Jacobian of P is defined over k. 
+</BLOCKQUOTE>
+<H4><A NAME = "16936">Weil Pairing</A></H4>
+
+
+
+<H5><A NAME = "16937">WeilPairing(P, Q, m) : JacHypPt, JacHypPt, RngIntElt -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+Computes the Weil pairing of P and Q, where P and Q are
+m-torsion points on the 2-dimensional Jacobian J defined over
+a finite field.  
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16938">Example <TT>CrvHyp_Jac_WeilPairing (H131E21)</TT></A></H3>
+<P>
+The following illustrates the use of the Weil Pairing in the
+MOV-reduction of the discrete logarithm problem on a Jacobian.  
+<P>
+<P>
+<P>
+<PRE>
+&gt; PP&lt;x&gt;:=PolynomialRing(GF(2));                                                
+&gt; h := PP!1;
+&gt; f := x^5 + x^4 + x^3 + 1;
+&gt; J := Jacobian(HyperellipticCurve(f,h));  // a supersingular curve
+&gt; Jext := BaseExtend(J, 41);
+&gt; Factorization(#Jext);
+[ &lt;7, 1&gt;, &lt;3887047, 1&gt;, &lt;177722253954175633, 1&gt; ]
+&gt; m := 177722253954175633;                 // some big subgroup order
+&gt; cofact := 3887047*7;
+&gt; P := cofact*Random(Jext);
+&gt; Q := 876213876263897634*P;               // Q in &lt;P&gt;
+</PRE>
+<P>
+Say we want to recompute the logarithm of Q in base P.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Jext2 := BaseExtend(Jext, 6);            // go to an ext of deg 6
+&gt; NJ := #Jext2;
+&gt;
+&gt; R := Random(Jext2);
+&gt; R *:= NJ div m^Valuation(NJ, m);
+&gt;
+&gt; eP := WeilPairing(Jext2!P, R, m);
+&gt; eQ := WeilPairing(Jext2!Q, R, m);
+&gt; assert eP^876213876263897634 eq eQ; 
+</PRE>
+<P>
+So the discrete log problem on the Jacobian has been reduced to
+a discrete log problem in a finite field.
+<HR>
+<PRE></PRE> <A  HREF = "text1494.htm">[Next]</A><A  HREF = "text1492.htm">[Prev]</A> <A  HREF = "text1494.htm">[Right]</A> <A  HREF = "text1492.htm">[Left]</A> <A  HREF = "text1483.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

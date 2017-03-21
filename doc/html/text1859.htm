@@ -1,0 +1,630 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Introduction</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1862.htm">[Next]</A><A  HREF = "text1858.htm">[Prev]</A> [_____] [____] <A  HREF = "text1858.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "20689">Introduction</A></H3>
+
+<P>
+<P>
+<P>
+Low density parity check (LDPC) codes are among the best performing 
+codes in practice, being
+capable of correcting errors close to the Shannon limit.
+Magma provides facilities for the construction, decoding, 
+simulation and analysis of LDPC codes.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1859.htm#20690">Constructing LDPC Codes</A>
+<LI> <A  HREF = "text1859.htm#20697">Access Functions</A>
+<LI> <A  HREF = "text1859.htm#20707">LDPC Decoding and Simulation</A>
+<LI> <A  HREF = "text1859.htm#20713">Density Evolution</A>
+</UL>
+<H4><A NAME = "20690">Constructing LDPC Codes</A></H4>
+
+<P>
+<P>
+<P>
+LDPC codes come in two main varieties, <I>regular</I>
+and <I>irregular</I>, defined by the row and column weights of
+the sparse parity check matrix.
+If all columns in the parity check matrix have some constant weight
+a, and all rows have some constant weight b, then
+the LDPC code is said to be (a, b)-regular.
+When either the columns or the rows have a distribution of weights,
+the LDPC code is said to be irregular.
+<P>
+Currently, there do not exist many techniques for 
+the explicit construction of LDPC codes. More commonly, these
+codes are selected at random from an ensemble, and their
+properties determined through simulation.
+
+
+<H5><A NAME = "20691">LDPCCode(H) : MtrxSprs -&gt; Code</A></H5>
+<BLOCKQUOTE>
+Given a sparse binary matrix H, return the LDPC code which
+has H as its parity check matrix.
+</BLOCKQUOTE>
+<H5><A NAME = "20692">GallagerCode(n, a, b) : RngIntElt, RngIntElt, RngIntElt -&gt; Code</A></H5>
+<BLOCKQUOTE>
+Return a random (a, b)-regular LDPC code of length n, using
+Gallager's original method of construction.
+The row weight a must dividethe length n.
+</BLOCKQUOTE>
+<H5><A NAME = "20693">RegularLDPCEnsemble(n, a, b) : RngIntElt, RngIntElt, RngIntElt -&gt; Code</A></H5>
+<BLOCKQUOTE>
+Return a random code from the ensemble of (a, b)-regular binary LDPC codes.
+</BLOCKQUOTE>
+<H5><A NAME = "20694">IrregularLDPCEnsemble(n, Sc, Sv) : RngIntElt, SeqEnum, SeqEnum -&gt; Code</A></H5>
+<BLOCKQUOTE>
+Given (unnormalized) distributions for the variable and check weights,
+return length n irregular LDPC codes whose degree distributions
+match the given distribution. 
+The arguments Sv and Sc are sequences of real numbers, where the 
+i-th entry indicates what percentage of the variable (resp. check) 
+nodes should have weight i.
+<P>
+Note that the distributions will not be
+matched perfectly unless everything is in complete balance.
+</BLOCKQUOTE>
+<H5><A NAME = "20695">MargulisCode(p) : RngIntElt -&gt; Code</A></H5>
+<BLOCKQUOTE>
+Return the (3,6)-regular binary LDPC code of length 2(p<sup>3</sup> - p)
+using the group-based construction of Margulis.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20696">Example <TT>CodeLDPC_IsLDPC (H160E1)</TT></A></H3>
+Most LDPC constructions are generated pseudo-randomly
+from an ensemble, so the same function will return
+a different code each time. To be able to re-use an LDPC code, 
+the sparse parity check matrix must be saved.
+<P>
+<P>
+<PRE>
+&gt; C1 := RegularLDPCEnsemble(10, 2, 4);
+&gt; C2 := RegularLDPCEnsemble(10, 2, 4);
+&gt; C1 eq C2;                           
+false
+&gt; LDPCMatrix(C1):Magma;
+SparseMatrix(GF(2), 5, 10, [
+    4, 2,1, 3,1, 4,1, 6,1,
+    4, 1,1, 7,1, 9,1, 10,1,
+    4, 1,1, 2,1, 3,1, 7,1,
+    4, 5,1, 6,1, 8,1, 9,1,
+    4, 4,1, 5,1, 8,1, 10,1
+])
+&gt; H := LDPCMatrix(C1);
+&gt; C3 := LDPCCode(H);
+&gt; C3 eq C1;
+true
+</PRE>
+<HR>
+<H4><A NAME = "20697">Access Functions</A></H4>
+
+<P>
+<P>
+<P>
+Since a code can have many different parity check matrices,
+the matrix which defines a code as being LDPC must be assigned
+specifically.
+Any parity check matrix can be assigned for this purpose, and
+once a code is assigned an LDPC matrix it is considered by Magma
+to be an LDPC code (regardless of the density or other properties of
+the matrix).
+The matrix must be of sparse type (<TT>MtrxSprs</TT>).
+
+
+<H5><A NAME = "20698">IsLDPC(C) : Code -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return true if C is an LDPC code (which is true if it has been assigned 
+an LDPC matrix).
+</BLOCKQUOTE>
+<H5><A NAME = "20699">AssignLDPCMatrix(~C, H) : Code, MtrxSprs -&gt;</A></H5>
+<BLOCKQUOTE>
+Given a sparse matrix H which is a parity check matrix of the code C,
+assign H as the LDPC matrix of C.
+</BLOCKQUOTE>
+<H5><A NAME = "20700">LDPCMatrix(C) : Code -&gt; MtrxSprs</A></H5>
+<BLOCKQUOTE>
+Given an LDPC code C, return the sparse matrix which has been assigned
+as its low density parity check matrix.
+</BLOCKQUOTE>
+<H5><A NAME = "20701">LDPCDensity(C) : Code -&gt; FldReElt</A></H5>
+<BLOCKQUOTE>
+Given an LDPC code C, return the density of the 
+sparse matrix which has been assigned
+as its low density parity check matrix.
+</BLOCKQUOTE>
+<H5><A NAME = "20702">IsRegularLDPC(C) : Code -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if C is an LDPC code and has regular column and row 
+weights. If true, the row and column weights are also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "20703">TannerGraph(C) : Code -&gt; Grph</A></H5>
+<BLOCKQUOTE>
+For an LDPC code C, return its Tanner graph. If there are n
+variables and m checks, then the graph has n + m nodes,
+the first n of which are the variable nodes.
+</BLOCKQUOTE>
+<H5><A NAME = "20704">LDPCGirth(C) : Code -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+For an LDPC code C, return the girth of its Tanner graph.
+</BLOCKQUOTE>
+<H5><A NAME = "20705">LDPCEnsembleRate(v, c) : RngIntElt, RngIntElt -&gt; FldReElt</A></H5>
+<H5>LDPCEnsembleRate(Sv, Sc) : [FldReElt], [FldReElt] -&gt; FldReElt</H5>
+<BLOCKQUOTE>
+Return the theoretical rate of LDPC codes from the
+ensemble described by the given inputs.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20706">Example <TT>CodeLDPC_IsLDPC (H160E2)</TT></A></H3>
+In Magma, whether or not a code is considered LDPC is 
+based solely on whether or not an LDPC matrix has been assigned.
+This example shows that any code can be made to be considered LDPC,
+although a random parity check matrix without low density will
+perform very badly using LDPC decoding.
+<P>
+<P>
+<PRE>
+&gt; C := RandomLinearCode(GF(2),100,50);
+&gt; IsLDPC(C);
+false
+&gt; H := SparseMatrix(ParityCheckMatrix(C));
+&gt; H;
+Sparse matrix with 50 rows and 100 columns over GF(2)
+&gt; AssignLDPCMatrix(~C, H);
+&gt; IsLDPC(C);
+true
+&gt; LDPCDensity(C);
+0.253400000000000014122036873232
+</PRE>
+The density of the parity check matrices of LDPC codes is much lower 
+than that of randomly generated codes.
+<P>
+<P>
+<PRE>
+&gt; C1 := RegularLDPCEnsemble(100,3,6);  
+&gt; C1:Minimal;
+[100, 50] Linear Code over GF(2)
+&gt; LDPCDensity(C1);
+0.0599999999999999977795539507497
+</PRE>
+<HR>
+<H4><A NAME = "20707">LDPC Decoding and Simulation</A></H4>
+
+<P>
+<P>
+<P>
+The impressive performance of LDPC codes lies in their iterative decoding
+algorithm. Magma provides facilities to decode using LDPC codes,
+as well as simulating  transmission over a binary symmetric
+or white Gaussian noise channels.
+<P>
+The binary symmetric channel transmits binary values
+and is defined by p &lt; 0.5.
+Each individual bit independently sustains a "bit-flip" error with
+probability p. 
+<P>
+The Gaussian channel is analog, transmitting real-values, and
+is defined by a standard deviation &sigma;. 
+Binary values are mapped to -1 and 1 before being transmitted.
+Each value independently sustains an errors which are normally
+distributed about 0 with standard deviation &sigma;.
+
+
+<H5><A NAME = "20708">LDPCDecode(C, v) : Code, ModTupRngElt -&gt; ModTupRngElt</A></H5>
+
+<PRE>    Channel: MonStgElt                  Default: "BinarySymmetric"</PRE>
+
+<PRE>    p: RngReSubElt                      Default: 0.1</PRE>
+
+<PRE>    StdDev: RngReSubElt                 Default: 0.25</PRE>
+
+<PRE>    Iterations: RngIntElt               Default: Dimension(C)</PRE>
+<BLOCKQUOTE>
+For an LDPC code C and a received vector v, decode v
+to a codeword of C using the LDPC iterative decoding algorithm.
+<P>
+The nature of the channel from which v is received is
+described by the variable argument <TT>Channel</TT>, which can either be
+the <TT>BinarySymmetric</TT> channel or the <TT>Gaussian</TT> channel.
+Errors on the binary symmetric channel is described by the 
+argument <TT>p</TT>, while on the Gaussian channel they are 
+described by <TT>StdDev</TT>.
+<P>
+The vector v must be over a ring corresponding to the channel
+which is selected.
+For the binary symmetric channel v must be a binary vector over 
+F<sub>2</sub>, while for the Gaussian channel it must be real-valued.
+<P>
+Since the decoding algorithm is iterative and does not necessarily terminate
+on its own, a maximum number of iterations needs to be specified 
+using the argument <TT>Iterations</TT>.
+The default value is much larger than would normally be used in practice,
+giving maximum error-correcting performance (at possibly some cost
+to efficiency).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20709">Example <TT>CodeLDPC_DecodeLDPC-BSC (H160E3)</TT></A></H3>
+Errors in the binary symmetric channel are just bit 
+flips.
+<P>
+<P>
+<PRE>
+&gt; n := 500;
+&gt; C := RegularLDPCEnsemble(n, 4, 8);
+&gt; e := 5;
+&gt; Errs := ;
+&gt; repeat Include(~Errs, Random(1,n)); until #Errs eq e;
+&gt; v := Random(C);
+&gt; ev := AmbientSpace(C)![ (i in Errs) select 1 else 0 : i in [1..n]];
+&gt; rec_vec := v + ev;
+&gt; time res := LDPCDecode(C, rec_vec : Channel:="BinarySymmetric", p:=0.2);
+Time: 0.000
+&gt; res eq v;
+true
+</PRE>
+<HR>
+<H3><A NAME = "20710">Example <TT>CodeLDPC_DecodeLDPC-BSC (H160E4)</TT></A></H3>
+For the Gaussian channel binary vectors are considered to
+be transmitted as sequences of the values 1 and -1.
+Errors are normally distributed with a standard deviation
+defined by the channel.
+<P>
+To simulate a Gaussian channel requires obtaining
+normally distributed errors. This can be done (discretely) by
+generating a multiset of possible errors.
+<P>
+<P>
+<PRE>
+&gt; sigma := 0.5;
+&gt; MaxE := 3.0;
+&gt; N := 100;
+&gt; V := [ MaxE*(i/N) : i in [-N div 2..N div 2]];
+&gt; E := [ 0.5*(1+Erf(x/(sigma*Sqrt(2)))) : x in V ];
+&gt; Dist := {* V[i]^^Round(1000*(E[i]-E[i-1])) : i in [2..#V]*};
+</PRE>
+A codeword of an LDPC code needs to be mapped
+into the real domain.
+<P>
+<P>
+<PRE>
+&gt; n := 500;
+&gt; C := RegularLDPCEnsemble(n, 4, 8);
+&gt; v := Random(C);
+&gt; R := RealField();
+&gt; RS := RSpace(R, n);
+&gt; vR := RS ! [ IsOne(v[i]) select 1 else -1 : i in [1..n]];
+</PRE>
+Normally distributed errors are then introduced, and the
+received vector decoded.
+<P>
+<P>
+<PRE>
+&gt; for i in [1..n] do
+&gt;    vR[i] +:= Random(Dist);
+&gt; end for;
+&gt; time res := LDPCDecode(C, vR : Channel:="Gaussian", StdDev:=sigma);
+Time: 0.000
+&gt; res eq v;
+true
+</PRE>
+<HR>
+<H5><A NAME = "20711">LDPCSimulate(C, N) : Code, RngIntElt -&gt; FldReElt, FldReElt</A></H5>
+
+<PRE>    Channel: MonStgElt                  Default: "BinarySymmetric"</PRE>
+
+<PRE>    p: RngReSubElt                      Default: 0.1</PRE>
+
+<PRE>    StdDev: RngReSubElt                 Default: 0.25</PRE>
+
+<PRE>    Iterations: RngIntElt               Default: Dimension(C)</PRE>
+<BLOCKQUOTE>
+For an LDPC code C, simulate N transmissions across
+the given channel and return the accumulated bit error rate
+and word error rate.
+<P>
+The variable arguments are as described for the function 
+<TT>LDPCDecode</TT>. The channel which is described controls not
+only the way the decoding algorithm functions, but also the nature
+of the errors introduced during the simulation.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20712">Example <TT>CodeLDPC_DecodeEnsemble (H160E5)</TT></A></H3>
+The more noise that is introduced into the channel the
+error rate increases. Note that the bit error rate (the first return value)
+is always lower than the word error rate (the second return value).
+<P>
+<P>
+<PRE>
+&gt; C := RegularLDPCEnsemble(200, 3, 6);
+&gt; LDPCSimulate(C, 10000 : Channel := "Gaussian", StdDev := 0.7);
+0.00118249999999999995739519143001 0.00619999999999999978211873141731
+&gt; LDPCSimulate(C, 10000 : Channel := "Gaussian", StdDev := 0.75);
+0.00749499999999999992617016886243 0.0410000000000000017208456881690
+&gt; LDPCSimulate(C, 10000 : Channel := "Gaussian", StdDev := 0.8); 
+0.0337220000000000019735324485737 0.159700000000000008615330671091
+&gt; LDPCSimulate(C, 10000 : Channel := "Gaussian", StdDev := 0.85);
+0.0856174999999999991606713933834 0.370800000000000018474111129763
+&gt; LDPCSimulate(C, 10000 : Channel := "Gaussian", StdDev := 0.9); 
+0.162790999999999991265653420669 0.640499999999999958255614274094
+&gt; LDPCSimulate(C, 10000 : Channel := "Gaussian", StdDev := 0.95);
+0.237657499999999993756105709508 0.840099999999999957900342906214
+&gt; LDPCSimulate(C, 10000 : Channel := "Gaussian", StdDev := 1.0); 
+0.296526500000000026169288958044 0.944799999999999973177011725056
+</PRE>
+<HR>
+<H4><A NAME = "20713">Density Evolution</A></H4>
+
+<P>
+<P>
+<P>
+The asymptotic performance of ensembles of LDPC codes
+can be determined using <I>density evolution</I>.
+An ensemble of LDPC codes (either regular or irregular) is defined
+by a pair of degree distributions, corresponding
+to the degrees at the variable and check nodes of the Tanner graph.
+<P>
+Over a specific channel, the critical parameter which defines the
+asymptotic performance of a given ensemble is its <I>threshold</I>,
+which is a value of the channel parameter 
+(i.e., the probability of error p for the binary symmetric
+channel, and the standard deviation &sigma; for the Gaussian channel).
+When the channel parameter is less than the threshold, asymptotically
+a code from the ensemble will decode with an error probability
+tending to zero. However, at any channel parameter above the threshold
+there will be a non-vanishing finite error probability.
+<P>
+Determining the threshold of an ensemble over the binary symmetric
+channel is relatively trivial, however over the real-valued
+Gaussian channel it can involve extensive computations.
+The speed depends heavily on the granularity
+of the discretization which is used, though this also affects 
+the accuracy of the result.
+<P>
+The default settings of the Magma implementation use a 
+reasonably coarse discretization, emphasizing speed
+over accuracy. These (still quite accurate) approximate
+results can then be used to help reduce the workload of
+calculations over finer discretizations if more accuracy is required.
+
+
+<H5><A NAME = "20714">LDPCBinarySymmetricThreshold(v, c) : RngIntElt, RngIntElt -&gt; FldReElt</A></H5>
+<H5>LDPCBinarySymmetricThreshold(Sv, Sc) : [FldReElt], [FldReElt] -&gt; FldReElt</H5>
+
+<PRE>    Precision: RngReSubElt              Default: 0.00005</PRE>
+<BLOCKQUOTE>
+Determines the threshold of the described ensemble of
+LDPC codes over the binary symmetric channel, which is
+the critical value of the channel parameter above which there is
+a non-vanishing error probability (asymptotically).
+The ensemble can either be defined by two integers for
+(v, c)-regular LDPC codes, or by two density distributions
+Sv and Sc, which are sequences of non-negative real numbers.
+The density distributions do not ned to be normalized, though the
+first entry (corresponding to weight 1 nodes in the Tanner graph)
+should always be zero.
+<P>
+The computation proceeds by
+establishing lower and upper bounds on the threshold, then
+narrowing this range by repeatedly performing density evolution
+on the midpoint.
+The argument <TT>Precision</TT> controls the precision to
+which the threshold is desired.
+</BLOCKQUOTE>
+<H5><A NAME = "20715">DensityEvolutionBinarySymmetric(v, c, p) : RngIntElt, RngIntElt, FldReElt -&gt; BoolElt</A></H5>
+<H5>DensityEvolutionBinarySymmetric(Sv, Sc, p) : [FldReElt], [FldReElt], FldReElt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Perform density evolution on the binary symmetric channel using 
+channel parameter p and determine the asymptotic behaviour
+for the given LDPC ensemble.
+The return value is boolean, where <TT>true</TT> indicates that
+p is below the threshold and the ensemble
+has error probability asymptotically tending to zero.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20716">Example <TT>CodeLDPC_DE-BSC (H160E6)</TT></A></H3>
+Density evolution on the binary symmetric channel
+is not computationally intensive.
+<P>
+<P>
+<PRE>
+&gt; time LDPCBinarySymmetricThreshold(3, 6);
+0.0394140625000000000000000000000
+Time: 0.010
+&gt; time LDPCBinarySymmetricThreshold(4, 8);
+0.0473925781250000000000000000001
+Time: 0.110
+&gt; time LDPCBinarySymmetricThreshold(4, 10);
+0.0368359375000000000000000000000
+Time: 0.090
+</PRE>
+<HR>
+<H5><A NAME = "20717">LDPCGaussianThreshold(v, c) : RngIntElt, RngIntElt -&gt; FldReElt</A></H5>
+<H5>LDPCGaussianThreshold(Sv, Sc) : [FldReElt], [FldReElt] -&gt; FldReElt</H5>
+
+<PRE>    Lower: RngReSubElt                  Default: 0</PRE>
+
+<PRE>    Upper: RngReSubElt                  Default: &infin;</PRE>
+
+<PRE>    Points: RngIntElt                   Default: 500</PRE>
+
+<PRE>    MaxLLR: RngReSubElt                 Default: 25</PRE>
+
+<PRE>    MaxIterations: RngIntElt            Default: &infin;</PRE>
+
+<PRE>    QuickCheck: BoolElt                 Default: <TT>true</TT></PRE>
+
+<PRE>    Precision: RngReSubElt              Default: 0.00005</PRE>
+<BLOCKQUOTE>
+Determines the threshold of the described ensemble of 
+LDPC codes over the Gaussian channel, which is
+the critical value of the standard deviation above which there is 
+a non-vanishing error probability (asymptotically).
+The ensemble can either be defined by two integers for 
+(v, c)-regular LDPC codes, or by two density distributions
+Sv and Sc, which are sequences of non-negative real numbers.
+The density distributions do not ned to be normalized, though the
+first entry (corresponding to weight 1 nodes in the Tanner graph)
+should always be zero.
+<P>
+The computation proceeds by
+establishing lower and upper bounds on the threshold, then
+narrowing this range by repeatedly performing density evolution 
+on the midpoint.
+If the threshold is approximately known then manually setting tight
+<TT>Lower</TT> and <TT>Upper</TT> bounds can reduce the length
+of the calculation.
+<P>
+The speed with which these evolutions are computed depends on how
+fine the discretization is, controlled by the 
+variable argument <TT>Points</TT>.
+If the threshold is needed to high levels of accuracy then
+an initial computation with fewer points is recommended
+to get a reduced searched range.
+The specific meaning of eachvariable argument is described below.
+<P>
+<TT>Lower</TT> and <TT>Upper</TT> are real-valued bounds on the threshold,
+which (if tight) can help to reduce the search range and 
+speed up the threshold determination.
+The validity of an input bound is verified before the search begins,
+and an error is returned if it is incorrect.
+<P>
+<TT>Points</TT> and <TT>MaxLLR</TT> define the discretized basis
+of log likelihood ratios
+on which density evolution is performed, and have 
+integer and real values resp.
+Specifically, the probability mass function is defined on the
+range [ -<TT>MaxLLR</TT>, ..., <TT>MaxLLR</TT>] on 2 * Points + 1 discretized points.
+<P>
+<TT>MaxIterations</TT> allows the user to set a finite limit
+of iterations that a density evolution should perform in determining
+the asymptotic behaviour at each channel parameter.
+Although this may help reduce the time of a computation, it should
+be kept in mind that the result may not be valid.
+<P>
+<TT>QuickCheck</TT> defines the method by which the asymptotic behaviour 
+at each channel parameter is identified.
+If set to <TT>false</TT>, then the probability density must evolve
+all the way to within an infinitesimal value of unity.
+When set to <TT>true</TT>, if the rate of change of the 
+probability density is seen to be successively increasing then
+the asymptotic behaviour is assumed to go to unity.
+Empirically this method seems to give accurate results and 
+so the default behaviour is <TT>true</TT>, however it has
+no theoretical justification.
+<P>
+<TT>Precision</TT> is a real-valued parameter
+defining the precision to which the threshold should be
+determined.
+<P>
+Setting the verbose mode <TT>Code</TT> prints out the bounds on the threshold as
+subsequent density evolutions narrow the search range.
+</BLOCKQUOTE>
+<H5><A NAME = "20718">DensityEvolutionGaussian(v, c, &sigma;) : RngIntElt, RngIntElt, FldReElt -&gt; BoolElt</A></H5>
+<H5>DensityEvolutionGaussian(Sv, Sc, &sigma;) : [FldReElt], [FldReElt], FldReElt -&gt; BoolElt</H5>
+
+<PRE>    Points: RngIntElt                   Default: 500</PRE>
+
+<PRE>    MaxLLR: RngReSubElt                 Default: 25</PRE>
+
+<PRE>    MaxIterations: RngIntElt            Default: &infin;</PRE>
+
+<PRE>    QuickCheck: BoolElt                 Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Perform density evolution on the Gaussian channel using standard
+deviation &sigma; and determine the asymptotic behaviour
+for the given LDPC ensemble.
+The return value is boolean, where <TT>true</TT> indicates that
+&sigma; is below the threshold and the ensemble
+has error probability asymptotically tending to zero.
+<P>
+See the description of <TT>LDPCGaussianThreshold</TT> for a 
+description of the variable arguments.
+</BLOCKQUOTE>
+<H5><A NAME = "20719">GoodLDPCEnsemble(i) : RngIntElt -&gt; FldReElt, [FldReElt], [FldReElt]</A></H5>
+<BLOCKQUOTE>
+Access a small database of density distributions
+defining good irregular LDPC ensembles.
+Returned is the published threshold of the ensemble over the Gaussian channel,
+along with the variable and check degree distributions.
+The input i is a non-negative integer, which indexes
+the database (in no particular order).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20720">Example <TT>CodeLDPC_DEGaussian (H160E7)</TT></A></H3>
+Since performing density evolution on a large number
+of discrete points is time consuming, it is normally better
+to first get an estimate with an easier computation.
+<P>
+In this example a published value of the threshold of an 
+ensemble (obtained using a different implementation) can
+be compared to the outputs from different levels of discretization.
+<P>
+<P>
+<PRE>
+&gt; thresh, Sv, Sc := GoodLDPCEnsemble(5);
+&gt; R4 := RealField(4);
+&gt; [R4| x : x in Sv];
+[ 0.0000, 0.3001, 0.2839, 0.0000, 0.0000, 0.0000, 0.0000, 0.4159 ]
+&gt; [R4| x : x in Sc];
+[ 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.2292, 0.7708 ]
+&gt; thresh;
+0.949700000000000000000000000000
+&gt; time approx1 := LDPCGaussianThreshold(Sv, Sc:
+&gt;         Points := 500, Precision := 0.001);
+Time: 19.400
+&gt; approx1;
+0.960976562499999964472863211995
+&gt; time approx2 := LDPCGaussianThreshold(Sv, Sc:
+&gt;       Points := 3000,
+&gt;       Lower := approx1-0.02, Upper := approx1+0.02);
+Time: 873.560
+&gt; approx2;
+0.951210937499999964472863211995
+</PRE>
+This estimate can now be used to narrow the search range of
+accurate density evolution.
+For the very long calculation the verbose mode is used to keep track
+of the progress of the calculation.
+<P>
+<P>
+<PRE>
+&gt; SetVerbose("Code", true);
+&gt; time approx3 := LDPCGaussianThreshold(Sv, Sc:
+&gt;        Points := 5000,
+&gt;        Lower := approx2-0.005, Upper := approx2+0.0005);
+Determining the mapping matrix...
+                        ...mapping matrix obtained  19.10s
+Threshold Determination for LDPC code ensemble:
+c:  (6):0.229190 (7):0.770810
+v:  (2):0.300130 (3):0.283950 (8):0.415920
+will be found to precision 0.000050
+Max LLR is 25.000000 distributed across 5000 points
+Asymptotic behaviour determination is: fast
+Beginning search with lb = 0.946211, ub = 0.951711
+New Bounds: lb = 0.948961, ub = 0.951711  114.41s
+New Bounds: lb = 0.950336, ub = 0.951711  367.19s
+New Bounds: lb = 0.950336, ub = 0.951023  553.95s
+New Bounds: lb = 0.950336, ub = 0.950680  814.35s
+New Bounds: lb = 0.950508, ub = 0.950680  1261.46s
+New Bounds: lb = 0.950508, ub = 0.950594  1557.46s
+New Bounds: lb = 0.950508, ub = 0.950551  1891.52s
+Time: 2136.150
+</PRE>
+The thresholds given in the database are published values
+taken from other implementations, and so are not  
+guaranteed to match up exactly with the values 
+obtained using Magma.
+<PRE></PRE> <A  HREF = "text1862.htm">[Next]</A><A  HREF = "text1858.htm">[Prev]</A> [_____] [____] <A  HREF = "text1858.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

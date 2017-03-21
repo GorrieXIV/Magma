@@ -1,0 +1,71 @@
+"Source: Text/Geometry/GrpPSL2.text";
+"Line: 1440";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/GrpPSL2.text, line: 1440
+// Example: H136E9 ()
+print "Example: H136E9";
+ei := GetEchoInput();
+SetEchoInput(true);
+G := Gamma0(24);
+FS := FareySymbol(G);
+C := Cusps(FS);
+Domain := FundamentalDomain(G);
+red := [1,0,0];
+procedure draw_fundamental_domain(Group,file)
+    cosets := CosetRepresentatives(Group);
+    H<i,r> := UpperHalfPlaneWithCusps();
+    tri := [H|Infinity(),0,r];
+    red := [1,0,0];  
+    yellow := [1,1,0];
+    cyan := [0,1,1];
+    cols := &cat[[red,yellow,cyan] : i in [1..(Ceiling(#cosets/3))]];
+    trans := [g*tri : g in cosets];
+    Outlines := [false : g in cosets];
+    DisplayPolygons(trans,file:
+        Colours := cols, Outline := Outlines, Show := true);
+end procedure;
+// use the procedure to draw a domain for Gamma_0(19):
+G := Gamma0(11);
+H<i,rho> := UpperHalfPlaneWithCusps();
+tri := [H|Infinity(),i,rho];
+tri1 := [H|0,i,rho];
+C11 := CosetRepresentatives(G);
+Colours := [[0.6,0.2,0.9] : i in [1..#C11]] cat [[1,1,0] : i in [1..#C11]];
+triangles := [g*tri : g in C11] cat [g*tri1 : g in C11];
+tri2 := [H|Infinity(),2*i + 1,i,rho];
+G := CongruenceSubgroup(4,2);
+H<i,r> := UpperHalfPlaneWithCusps();
+generators := Generators(G);
+M := generators cat [g^(-1) : g in generators] cat [G!1];
+tri1 := [H|Infinity(),r-1,0,r,r+1];
+tri2 := [H|Infinity(),i-1,0,i+1];
+tri3 := FundamentalDomain(G);
+X := [1..#M];
+L := [G!m : m in Set([Matrix(M[i]*M[j]*M[k]) : i in X, j in X, k in X])];
+H<i,r> := UpperHalfPlaneWithCusps();
+cosets := CosetRepresentatives(Gamma0(19));
+polygons := [g*tri : g in cosets, tri in [[H|i,r],[H|i,2*r,3*r-1]]];
+outlines := [true : i in cosets] cat [false : i in cosets];
+cyan := [0,1,1];
+frac := func<a | a[1]/a[2]>;
+
+function FareyValue(m)
+  mat := Matrix(m);
+  Denominators := [mat[2,1],mat[2,2],mat[2,1]+mat[2,2]];
+  values := [Abs(v) : v in Denominators];
+  return &+ContinuedFraction(frac(Sort(values)));
+end function;
+procedure drawDomain(cosets)
+   H<i,r> := UpperHalfPlaneWithCusps();
+   tri := [H|Infinity(),0,r];
+   cols := [[0.5,0.2*FareyValue(c),1-0.2*FareyValue(c)] : c  in cosets];
+   trans := [g*tri : g in cosets];
+   DisplayPolygons(trans,"/tmp/pic.ps":
+       Outline := false, Colours := cols, Show := true);
+end procedure;
+// Now we can use the above functions and procedure, for example
+// take the cosets as follows:
+C := CosetRepresentatives(Gamma0(41));     
+// Then draw the picture:
+SetEchoInput(ei);

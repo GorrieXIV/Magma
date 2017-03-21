@@ -1,0 +1,158 @@
+"Source: Text/Basics/SMat.text";
+"Line: 1530";
+"Date: Tue Jun  7 22:27:15 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Basics/SMat.text, line: 1530
+// Example: H27E3 ()
+print "Example: H27E3";
+ei := GetEchoInput();
+SetEchoInput(true);
+function Sieve(K, qlimit, climit, ratio)
+    p := #K;
+    Z := Integers();
+    H := Iroot(p, 2) + 1;
+    J := H^2 - p;
+
+    // Get factor basis of all primes <= qlimit.
+    fb_primes := [p: p in [2 .. qlimit] | IsPrime(p)];
+
+    printf "Factor base has %o primes, climit is %o\n", #fb_primes, climit;
+
+    // Ensure that the primitive element of K is prime (as an integer).
+    a := rep{x: x in [2..qlimit] | IsPrime(x) and IsPrimitive(K!x)};
+    SetPrimitiveElement(K,K!a);
+    
+    // Initialize extended factor base FB to fb_primes (starting with a).
+    FB := {@ Z!a @};
+    for x in fb_primes do
+        Include(~FB, x);
+    end for;
+
+    // Initialize A to 0 by 0 sparse matrix over Z.
+    A := SparseMatrix();
+
+    // Get logs of all factor basis primes.
+    log2 := Log(2.0);
+    logqs := [Log(q)/log2: q in fb_primes];
+
+    for c1 in [1 .. climit] do
+
+        // Stop if ratio of relations to unknowns is high enough.
+        if Nrows(A)/#FB ge ratio then break; end if;
+
+        if c1 mod 50 eq 0 then
+            printf "c1: %o, #rows: %o, #cols: %o, ratio: %o\n",
+                c1, Nrows(A), #FB, RealField(8)!Nrows(A)/#FB;
+        end if;
+
+        // Initialize sieve.
+        sieve := [z: i in [1 .. climit]] where z := Log(1.0);
+        den := H + c1;                  // denominator of relation
+        num := -(J + c1*H);             // numerator
+
+        for i := 1 to #fb_primes do
+            // For each prime q in factor base...
+            q := fb_primes[i];
+            logq := logqs[i];
+
+            qpow := q;
+            while qpow le qlimit do
+                // For all powers qpow of q up to qlimit...
+
+                if den mod qpow eq 0 then break; end if;
+                c2 := num * Modinv(den, qpow) mod qpow;
+                if c2 eq 0 then c2 := qpow; end if;
+
+                nextqpow := qpow*q;
+                // Ensure c2 >= c1 to remove redundant relations.
+                while c2 lt c1 do 
+                    c2 +:= qpow;        
+                end while;
+
+                while c2 le #sieve do
+                    // Add logq into sieve for c2.
+                    sieve[c2] +:= logq;
+
+                    // Test higher powers of q if nextqpow is too large.
+                    if nextqpow gt qlimit then 
+                        prod := (J + (c1 + c2)*H + c1*c2) mod p;
+                        nextp := nextqpow;
+                        while prod mod nextp eq 0 do
+                            sieve[c2] +:= logq;
+                            nextp *:= q;
+                        end while;
+                    end if;
+                    c2 +:= qpow;
+                end while;
+                qpow := nextqpow;
+            end while;
+        end for;
+
+        // Check sieve for full factorizations.
+        rel := den * (H + 1);   // the relation 
+        relinc := H + c1;       // add to relation to get next relation
+        count := 0;
+        for c2 in [1 .. #sieve] do
+            n := rel mod p;
+            if Abs(sieve[c2] - Ilog2(n)) lt 1 then
+                fact, r := TrialDivision(n, qlimit);
+                if r eq [] and (#fact eq 0 or fact[#fact][1] lt qlimit) then 
+                    // Include each H + c_i in extended factor basis.
+                    Include(~FB, H + c1);
+                    Include(~FB, H + c2);
+
+                    // Include relation (H + c1)*(H + c2) = fact.
+                    row := Nrows(A) + 1;
+                    for t in fact do
+                        SetEntry(~A, row, Index(FB, t[1]), t[2]);
+                    end for;
+                    if c1 eq c2 then
+                        SetEntry(~A, row, Index(FB, H + c1), -2);
+                    else
+                        SetEntry(~A, row, Index(FB, H + c1), -1);
+                        SetEntry(~A, row, Index(FB, H + c2), -1);
+                    end if;
+                end if;
+            end if;
+            rel +:= relinc;
+        end for;        
+    end for;
+
+    // Check matrix by multiplying out relations in field.
+    assert {&*[(K!FB[j])^A[k, j]: j in Support(A, k)]: k in [1..Nrows(A)]}
+            eq {1};
+
+    return A, FB;
+end function;
+K := GF(103);
+A, F := Sieve(K, 35, 27, 1.1);
+A;
+A[1]; A[2]; A[30];
+F;
+Factorization(#K-1);
+v := ModularSolution(A, #K - 1);
+v;
+a := PrimitiveElement(K);
+a;
+assert $1 eq 5;
+Z := IntegerRing();
+[a^Z!x: x in Eltseq(v)];                   
+F;
+K := GF(100000000000000000763);
+Factorization(#K - 1);
+time A, F := Sieve(K, 2200, 800, 1.1);
+A;
+time v := ModularSolution(A, #K - 1);
+a := PrimitiveElement(K);
+a;
+assert $1 eq 2;
+v[1], v[2];
+a^71610399209536789314;
+assert $1 eq 3;
+P := [a^x: x in Eltseq(v)];
+[P[i]: i in [1 .. 30]];
+[F[i]: i in [1 .. 30]];
+[i: i in [1..#F] | P[i] ne F[i]];
+[v[i]: i in [1..#F] | P[i] ne F[i]];
+[P[i]: i in [1..#F] | P[i] ne F[i]];
+SetEchoInput(ei);

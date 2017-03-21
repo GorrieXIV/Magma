@@ -1,0 +1,96 @@
+rndBR := function(BR)
+	if Characteristic(BR) cmpeq Integers() then
+		return Random([-5,-3,-2,-1,-1,-1,-1,-1,-1,-1,0,1,1,1,1,1,1,1,1,3,4,5]);
+	elif Characteristic(BR) gt 0 then
+		return Random(BR);
+	else
+		return Random([-5..5])/Random([1,2,3]);
+	end if;
+end function;
+
+rndTrm := function(F)
+	assert Type(F) eq AlgFPLie;
+	
+	n := Rank(F);
+
+	x := F.(Random([1..n]));
+	i := Random([1..3]);
+	if i eq 1 then
+		return x;
+	elif i eq 2 then 
+		return (x, $$(F));
+	else
+		return ($$(F), x);
+	end if;
+end function;
+
+rndF := function(F : NTrms := [0,1,1,2,2,2,3,4])
+	ntrms := Random(NTrms);
+	BR := BaseRing(F);
+	return &+[ F | rndBR(BR)*rndTrm(F) : k in [1..ntrms] ];
+end function;
+
+rndF_NZ := function(F)
+	repeat
+		x := rndF(F);
+	until not IsZero(x);
+	return x; 
+end function;
+
+
+for F in [* Rationals(), GF(7) *] do
+	printf "F = %o\n", F;
+
+	L<x,y> := FreeLieAlgebra(F, 2);
+
+	/* Silly tests */
+	assert 1 notin L;
+	assert x in L;
+	assert x*y eq -y*x;
+	assert x*y eq (x,y);
+
+	a,b := IsLeaf(x);
+	assert a;
+	assert b eq 1;
+
+	m := 3*y;
+	a,b := IsLeaf(m);
+	assert a;
+	assert b eq 2;
+	assert LeadingCoefficient(m) eq 3;
+	assert m eq LeadingCoefficient(m)*(L.b);
+
+	m := 4*x*(x,y);
+	a,b,c := IsLeaf(m);
+	assert not a;
+	assert m eq LeadingCoefficient(m)*(b*c);
+
+
+	/* Construct a quotient; test quo */
+	R := [ x*(x*y)-2*x, y*(y*x)-2*y ];
+	K, phi := quo<L | R>;
+	assert Dimension(K) eq 3;
+	assert SemisimpleType(K) in {"A1", "A1 "};
+	imgs := [ b @@ phi :b in Basis(K) ];
+	assert forall{1 : b,c in imgs | phi(b)*phi(c) eq phi(b*c) };
+
+	/* Test some more quo */
+	R := [ x*(x*y), y*(y*(y*x)) ];
+	K, phi := quo<L | R>;
+	assert Dimension(K) eq 4;
+	imgs := [ b @@ phi :b in Basis(K) ];
+	assert forall{1 : b,c in imgs | phi(b)*phi(c) eq phi(b*c) };
+	//check consistency (0)
+	assert forall{r : r in R | IsZero(phi(r)) };
+	//check consistency (1)
+	rndK := func< | K![ Random([-5..5])/Random([1,2,3])  :i in [1..Dimension(K)] ]>;
+	eltsK := [ rndK() : i in [1..20] ];
+	assert forall{ e : e in eltsK | phi(e @@ phi) eq e};
+	//check consistency (2a)
+	eltsL := [ rndF_NZ(L) : k in [1..20] ];
+	assert forall{e : e in eltsL | phi(phi(e) @@ phi) eq phi(e) };
+	//check consistency (2b)
+	assert forall{<e,f> : e,f in eltsL | phi(e*f) eq phi(e)*phi(f) };
+	//check consistency (2c)
+	assert forall{<e,f> : e,f in eltsL | phi((phi(e) @@ phi)*f) eq phi(e)*phi(f) };
+end for;

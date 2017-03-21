@@ -1,0 +1,306 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Affine Patches and Projective  Closure</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1335.htm">[Next]</A><A  HREF = "text1333.htm">[Prev]</A> <A  HREF = "text1335.htm">[Right]</A> <A  HREF = "text1333.htm">[Left]</A> <A  HREF = "text1321.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "14564">Affine Patches and Projective  Closure</A></H3>
+
+<P>
+<P>
+<P>
+In Magma, any affine ambient space A has a unique projective closure.
+This may be assigned different variable names just like any projective space.
+The projective closure intrinsics applied to affine schemes in A will
+return projective schemes in the projective closure of A.
+Conversely, a projective space has a number of standard affine patches.
+These will be the ambient spaces of the standard affine patches of a
+projective scheme.
+In this way, the closures of any two schemes lying in the same space will
+also lie in the same space. The same goes for standard affine patches.
+These relationships between affine and projective objects are very tightly
+fixed: asking for the projective closure of an affine scheme will always
+return the identical object, for instance.
+<P>
+There are also nonstandard affine patches for weighted projective spaces
+for indices where the standard affine patch is undefined. These are
+necessarily more complicated than the standard affine patches, which are
+plain affine ambients, and as such, cannot be integrated into the lower level
+scheme machinery in the way that the standard patches are. However, they
+can be a very useful user tool for local computations. 
+
+
+<H5><A NAME = "14565">ProjectiveClosure(X) : Sch -&gt; Sch</A></H5>
+<BLOCKQUOTE>
+The projective closure of the scheme X.
+If the projective closure has already been computed, this scheme will
+be returned.
+If X is an affine space for which no projective closure has been
+computed, the projective closure will be a projective space with this
+space as its first standard patch.
+Otherwise, the result will lie in the projective closure of the ambient
+space of X.
+If X has been computed as an affine patch the projective closure will be
+the scheme it is an affine patch of even if this is not mathematically correct
+(see Example <A  HREF = "text1334.htm#14573">H118E24</A>).
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14566"></A><A NAME = "aff_pat">AffinePatch</A>(X,i) : Sch,RngIntElt -&gt; Sch</H5>
+<BLOCKQUOTE>
+The ith affine patch of the scheme X.
+The number of affine patches is dependent on the type of projective ambient
+space in which X lies, but for instance, the standard projective space
+of dimension n has n + 1 affine patches. In that case, i can be any
+integer in the range 1, ..., n + 1.
+The order for affine patches is the natural one once you decide that
+the first patch is that with final coordinate entry nonzero 
+(in the projective closure).
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14567">AffinePatch(X,p) : Sch,Pt -&gt; Sch,Pt</A></H5>
+<BLOCKQUOTE>
+A standard affine patch of the scheme X containing the point p.
+The second return value is the point corresponding to p in that patch.
+</BLOCKQUOTE>
+<H5><A NAME = "14568">IsStandardAffinePatch(A) : Aff -&gt; BoolElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Return whether the affine space 
+A is a standard affine patch of its projective closure 
+and if so which patch it is. For A to be a non--standard patch means that
+its projective closure must have been set using <TT>MakePCMap</TT>. Returns
+<TT>false</TT> if A does not have a projective closure to be a patch of.
+</BLOCKQUOTE>
+<H5><A NAME = "14569">NumberOfAffinePatches(X) : Sch -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return the number of standard affine patches of the scheme X (O if X
+is an affine scheme).
+</BLOCKQUOTE>
+<H5><A NAME = "14570">HasAffinePatch(X, i) : Sch, RngIntElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return whether the ith patch of the scheme X can be created.
+</BLOCKQUOTE>
+<H5><A NAME = "14571">WeightedAffinePatch(P, i) : Prj, RngIntElt -&gt; Sch, MapIsoSch</A></H5>
+<BLOCKQUOTE>
+Computes and returns an "affine patch" A of a weighted projective ambient P
+for any index i along with the projective closure map &phi; from A to P. Here,
+weighted projective space means a projective space with a single grading where
+all weights are positive integers. If the number of coordinate variables is n,
+the index i can be any number between 1 and n and it indexes patches in
+the usual manner. If the corresponding weight is 1 (i.e. the (n + 1 - i)th entry
+of the unique grading array is 1), then the standard affine patch is returned along
+with its usual projective closure map. Here, A is an (n - 1)-dimensional
+affine ambient and &phi; is an everywhere defined inclusion map on A.
+<P>
+When the (n + 1 - i)th weight is &gt; 1, A is an affine scheme, but it will generally have
+defining equations and its affine ambient space will have more than n - 1 variables,
+except in the case that the weight divides all other weights. The projective closure
+map &phi; here will have multiple sets of alternative defining polynomials but
+the combined domain of definition of these will never cover all of A (except in
+the special case of weight division again). That is, &phi; will have a non-empty
+base scheme, which in fact will always contain the origin of A. This is unavoidable,
+using magma scheme maps. To define the map everywhere requires something like
+the radical maps of the Toric Geometry package. However, we do compute a sufficient
+number of alternative sets of defining equations so that the base scheme only
+contains points where it is impossible to define &phi; by scheme maps. The inverse
+equations for the map P |-&gt; A is defined on the full theoretical
+domain of definition - that is, at all points in the Zariski-open subset A. Note
+also that, althought the dimension of the affine ambient of the constructed
+A is often much
+greater than n - 1, it is the minimal dimension for affine ambients into which the
+abstract scheme-theoretic patch may be embedded. This can be seen from the fact
+that the tangent space at the origin of A is always the full ambient.
+<P>
+Because A is not a plain affine ambient at weight &gt; 1 indices and &phi; is not
+everywhere defined on A, it cannot be
+used by the lower-level scheme machinery in the way that standard affine patches are.
+In particular, it is not stored, it cannot be obtained from the usual
+<TT>AffinePatch</TT> intrinsic and <TT>HasAffinePatch</TT> will still return <TT>false</TT>
+for that index. It can be a very useful object for local computations that should be
+considered as existing at a higher user level and not fitting into the basic scheme
+machinery in the way that the existing standard affine patches do. We have only
+defined these weighted patches on the ambients. For subschemes of weighted projective
+ambients, the corresponding patches can be constructed by the user by pulling across
+defining equations via &phi; or its inverse. This can be very slow for high weight
+spaces, unlike for standard patches, and there are simplifications in various cases,
+which is why we have left it to the user rather than adding an inefficient general
+function.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14572">Example <TT>Scheme_projective-closure (H118E23)</TT></A></H3>
+This example shows that taking patches and closures several times
+really does return identical schemes.
+<P>
+<P>
+<PRE>
+&gt; A1&lt;u,v&gt; := AffineSpace(GF(5),2);
+&gt; X := Scheme(A1,u^2 - v^5);
+&gt; PX&lt;U,V,W&gt; := ProjectiveClosure(X);
+&gt; PX;
+Scheme over GF(5) defined by
+U^2*W^3 + 4*V^5
+&gt; AffinePatch(PX,1) eq X;
+true
+&gt; X2&lt;u2,w2&gt; := AffinePatch(PX,2);
+&gt; X2;
+Scheme over GF(5) defined by
+u2^2*w2^3 + 4
+&gt; ProjectiveClosure(X2) eq ProjectiveClosure(X);
+true
+</PRE>
+<HR>
+<H3><A NAME = "14573">Example <TT>Scheme_projective-closure-incorrect (H118E24)</TT></A></H3>
+Even if those schemes are not mathematically correct.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P2&lt;X,Y,Z&gt; := ProjectiveSpace(Rationals(),2);
+&gt; L := Curve(P2,Z);
+&gt; Laff := AffinePatch(L,1);
+&gt; Dimension(Laff);
+-1
+&gt; Laff;
+Scheme over Rational Field defined by
+1
+&gt; ProjectiveClosure(Laff) eq L;
+true
+&gt; ProjectiveClosure(EmptyScheme(Ambient(Laff)));
+Scheme over Rational Field defined by
+1
+</PRE>
+<HR>
+<H3><A NAME = "14574">Example <TT>Scheme_weighted-patches (H118E25)</TT></A></H3>
+The first example is the first affine patch of the 3-dimensional
+weighted projective space (P)(2, 3, 4, 5). We see that the
+affine patch is embedded in an 8-dimensional affine ambient and
+the projective closure map &phi; is not defined at the origin.
+Although the patches in this case seems like complicated affine schemes,
+it is still better to work with them than globally embedding P
+into 418-dimensional ordinary projective space via the usual embedding.
+<P>
+<P>
+<PRE>
+&gt; P := ProjectiveSpace(Rationals(),[2,3,4,5]);
+&gt; A,phi := WeightedAffinePatch(P,1);
+&gt; A;
+Scheme over Rational Field defined by
+$.4^2 - $.2*$.6,
+$.1^2*$.4 - $.3*$.6,
+$.2*$.3 - $.1*$.5,
+$.1^2*$.2 - $.3*$.4,
+-$.2*$.5 + $.1*$.8,
+$.1*$.2*$.4 - $.5*$.6,
+$.1*$.3^2 - $.2*$.7,
+$.1^3*$.3 - $.4*$.7,
+$.1*$.2^2 - $.4*$.5,
+$.1^5 - $.6*$.7,
+-$.5^2 + $.3*$.8,
+$.2^2*$.4 - $.6*$.8,
+$.3^3 - $.5*$.7,
+$.2^3 - $.4*$.8,
+-$.3^2*$.5 + $.7*$.8
+&gt; phi;
+Mapping from: Sch: A to Prj: P
+with equations : 
+$.6
+$.1*$.6
+$.4*$.6
+$.6^2
+and inverse
+$.1*$.2/$.4
+$.1*$.3^2/$.4^2
+$.2^2*$.3/$.4^2
+$.1^3*$.3/$.4^2
+$.2*$.3^3/$.4^3
+$.1^5/$.4^2
+$.2^5/$.4^3
+$.3^5/$.4^4
+and alternative equations :
+$.1*$.7
+$.7^2
+$.3*$.7^2
+$.7^3
+
+$.2
+$.5
+$.8
+$.8
+&gt; bs := ReducedSubscheme(BaseScheme(phi));
+&gt; Dimension(bs); Degree(bs);
+0
+1
+&gt; Support(bs);
+{ (0, 0, 0, 0, 0, 0, 0, 0) }
+</PRE>
+The second example shows why it's a good idea to avoid working with
+an unnecessary weighted projective space. We take the 2-dimensional
+weighted projective plane (P)(1, 2, 2) which is easily seen to be
+isomorphic to the ordinary weighted projective plane under
+[x:y:z] |-&gt; [x<sup>2</sup>:y:z]. However, an everywhere defined set of
+inverse equations cannot be written down via magma scheme maps
+(we'd need radical maps) and that shows up in the projective closure
+map &phi; from the first affine patch being undefinable along a
+coordinate axis, even though this patch is just the affine plane,
+corresponding to the first standard affine patch of the ordinary
+projective plane.
+<P>
+<P>
+<PRE>
+&gt; P := ProjectiveSpace(Rationals(),[1,2,2]);
+&gt; A,phi := WeightedAffinePatch(P,1);
+&gt; A;
+Affine Space of dimension 2 over Rational Field
+Variables: $.1, $.2
+&gt; phi;
+Mapping from: Aff: A to Prj: P
+with equations : 
+$.2
+$.1*$.2
+$.2
+and inverse
+$.2/$.3
+$.1^2/$.3
+&gt; GroebnerBasis(BaseScheme(phi));
+[
+    $.2
+]
+</PRE>
+<HR>
+<H5><A NAME = "14575">HyperplaneAtInfinity(X) : Sch -&gt; Sch</A></H5>
+<BLOCKQUOTE>
+The hyperplane complement of the scheme X in its projective closure.
+</BLOCKQUOTE>
+<H5><A NAME = "14576">ProjectiveClosureMap(A) : Aff -&gt; MapSch</A></H5>
+<H5>PCMap(A) : Aff -&gt; MapSch</H5>
+<BLOCKQUOTE>
+The map from the affine space A to its projective closure.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "14577">AffineDecomposition(P) : Prj -&gt; [MapSch],Pt</A></H5>
+<BLOCKQUOTE>
+Projective spaces have a standard disjoint decomposition into affine
+pieces---not the same thing as the affine patches---of the form
+<P>
+P<sup>n</sup> = A<sup>n</sup> &cup;A<sup>n - 1</sup> &cup; ... &cup;A<sup>1</sup> &cup;p
+<P>
+where A<sup>n</sup> is the first affine patch, A<sup>n - 1</sup> is the first
+affine patch on the hyperplane at infinity and so on.
+Finally, p is the point (1:0: ... :0).
+This intrinsic returns 
+a sequence of maps from affine spaces to the projective space 
+P whose images are these affine pieces of a decomposition.
+The point p is returned as a second value.
+</BLOCKQUOTE>
+<H5><A NAME = "14578">CentredAffinePatch(S, p) : Sch, Pt -&gt; Sch, MapSch</A></H5>
+<BLOCKQUOTE>
+An affine patch of S centred at the point p and the embedding into S,
+achieved by translation of a standard affine patch.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text1335.htm">[Next]</A><A  HREF = "text1333.htm">[Prev]</A> <A  HREF = "text1335.htm">[Right]</A> <A  HREF = "text1333.htm">[Left]</A> <A  HREF = "text1321.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

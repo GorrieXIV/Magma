@@ -1,0 +1,243 @@
+/*
+  Test file for ComplexRootData.m
+  
+  $Id : $
+*/
+ttt := Cputime();
+SetVerbose("User1",false);
+
+// Suppress all printed output
+// SetOutputFile("/dev/null");
+
+primitiveOrder := 
+ [0,0,0,24,72,48,144,
+  96,192,288,576,48,96,144,288,
+  600,1200,1800,3600,360,720,240,
+  120,336,648,1296,2160,           // rank 3
+  1152,7680,14400,46080,155520,    // rank 4
+  51840,                           // K5
+  39191040,51840,                  // K6, E6
+  2903040,                         // E7
+  696729600];                      // E8
+
+imprimOrder := func< m,p,n | m^n*Factorial(n) div p >;
+
+pairing := func< u, v | (u*Transpose(Matrix(v)))[1] >;
+
+fldaut := function(F)
+  if Type(F) eq FldRat then
+    fn := IdentityHomomorphism(F);
+  else
+    flag, fn := HasComplexConjugate(F);
+    if not flag then
+      fn := IdentityHomomorphism(F);
+    end if;
+  end if;
+  return fn;
+end function;  
+
+ip := function(u,J,v)
+  sigma := fldaut(BaseRing(J));
+  return (u*J*Transpose(Matrix(Nrows(v),Ncols(v), [sigma(e) : e in Eltseq(v)])))[1];
+end function;
+
+action := function( M,g,sigma )
+// g*M*sigma(g)^t, where sigma is a field automorphism
+   n := Nrows(g);
+  gbar := Transpose(Matrix(n,n, [sigma(e) : e in Eltseq(g) ]));
+  return g*M*gbar;
+end function;
+
+
+eCartan := function(R,j,J,W,seq)
+// (R,j) is a root datum
+// J is the invariant form
+// seq is a list of root indices
+  n := Nrows(J);
+  F := BaseRing(J);
+  M := Zero(MatrixAlgebra(F,#seq));
+  for ii in [1..#seq] do
+    for kk in [1..#seq] do
+      i := seq[ii];
+      k := seq[kk];
+      a := R[k];
+      b := j(a);
+      M[ii,kk] := pairing(R[i],b)*ip(a,J,a)/pairing(a,b);
+    end for;
+  end for;
+  H := sub<W | [PseudoReflection(R[i],j(R[i])) : i in seq]>;
+  return M,H;
+end function;
+
+
+// Simple tests - primitive groups
+order_test := procedure(n)
+  W1 := ShephardTodd(n);
+  W2 := ShephardTodd(n:NumFld);
+  n,#W1,primitiveOrder[n];
+  assert #W1 eq #W2;
+  assert #W1 eq primitiveOrder[n];
+end procedure;
+
+rootdatum_size_test := procedure(n)
+  A,B,J1,gen,ord := ComplexRootMatrices(n);
+  R,S,rho,W,J2 := ComplexRootDatum(n);
+  deg := BasicDegrees(W);
+  n, #R, #R/ord,&+deg - Dimension(W), #W;
+  assert J1 eq J2;
+  assert #R eq #S;
+  assert #W eq &*deg;
+end procedure;
+
+semilinear_test := procedure(n)
+  A,B,J1,gen,ord := ComplexRootMatrices(n);
+  R,S,rho,W,J2 := ComplexRootDatum(n);
+  print n, #R;
+  for a in R do
+    assert rho(gen*a) eq gen^-1*rho(a);
+  end for;
+end procedure;
+
+hermitian_test := procedure(n)
+  R,S,rho,W,J := ComplexRootDatum(n);
+  C := ComplexCartanMatrix(n);
+  M,H := eCartan(R,rho,J,W,[1..Ncols(C)]);
+  print n, M eq HermitianCartanMatrix(n);
+end procedure;
+
+rootclosure_test := procedure(n)
+  R,S,rho,W,J := ComplexRootDatum(n);
+  assert forall{ <a,g> : a in R, g in Generators(W) | a*g in R };
+  assert forall{ <a,g> : a in S, g in Generators(W) | a*Transpose(g^-1) in S };
+end procedure;
+
+
+test1 := procedure(n)
+  R,S,rho,W,J := ComplexRootDatum(n);
+  C := ComplexCartanMatrix(n);
+  print n,"Cartan Matrix",C;
+  F := BaseRing(W);
+  fn := fldaut(F);
+  assert forall{g : g in Generators(W) | action(J,g,fn) eq J };   
+end procedure;
+
+
+CheckCartan := function(n)
+  R,S,rho,W,J := ComplexRootDatum(n);
+  C := ComplexCartanMatrix(n);
+  m := Nrows(C);
+  seq := [1..m];
+  F := BaseRing(J);
+  M := Zero(MatrixAlgebra(F,#seq));
+  for ii in [1..#seq] do
+    for kk in [1..#seq] do
+      i := seq[ii];
+      k := seq[kk];
+      a := R[k];
+      b := rho(a);
+      M[ii,kk] := pairing(R[i],b)*ip(a,J,a)/pairing(a,b);
+    end for;
+  end for;
+
+  flag := forall{ <i,j> : i in [j+1..m], j in [1..m] | (M[i,j] eq 0) eq (M[j,i] eq 0)};
+  flag and:= forall{ i : i in [1..m] | (C[i,i] ne 0) and IsRootOfUnity(1-C[i,i]) };
+  T := M + Transpose(M);
+  q := false;
+  for I in InfinitePlaces(F) do // check all places
+    q or:= forall{ <i,j> : i in [j+1..m], j in [1..m] | Real(Evaluate(T[i,j],I)) le 0  };
+  end for;
+  return flag and q;
+end function;
+
+
+action := function( M,g,sigma )
+// g*M*sigma(g)^t, where sigma is a field automorphism
+  n := Nrows(g);
+  gbar := Transpose(Matrix(n,n, [sigma(e) : e in Eltseq(g) ]));
+  return g*M*gbar;
+end function;
+
+testInvariance := function(n)
+  R,S,rho,W,J := ComplexRootDatum(n);
+  F := BaseRing(W);
+  sigma := fldaut(F);
+  return forall{ g : g in Generators(W) | action(J,g,sigma) eq J };
+end function;
+
+
+testImprimInvariance := function(m,p,n)
+  R,S,rho,W,J := ComplexRootDatum(m,p,n);
+  F := BaseRing(W);
+  sigma := fldaut(F);
+  return m,p,n,forall{ g : g in Generators(W) | action(J,g,sigma) eq J };
+end function;
+
+
+primitive_tests := procedure()
+  print "Group orders";
+  for n := 4 to 37 do
+    order_test(n);
+  end for;
+
+  print "Root system sizes and order check";
+  print "n #roots #lines #ref #W";
+  for n := 4 to 37 do
+    rootdatum_size_test(n);
+  end for;
+
+  print "Semilinear test";  
+  for n := 4 to 37 do
+    semilinear_test(n);
+  end for;
+  
+  print "Hermitian test";  
+  for n := 4 to 37 do
+    hermitian_test(n);
+  end for;
+
+  print "Root closure";  
+  for n := 4 to 37 do
+    n; rootclosure_test(n);
+  end for;
+
+  print "Invariance";  
+  for n := 4 to 37 do
+    n; testInvariance(n);
+  end for;
+
+end procedure;
+
+
+// Simple tests - imprimitive groups
+imprim_order_test := procedure(m,p,n)
+  W := ShephardTodd(m,p,n);
+  m,p,n,#W,imprimOrder(m,p,n);
+  assert #W eq imprimOrder(m,p,n);
+end procedure;
+
+imprimitive_tests := procedure();
+  testvals := [<p*e,p,n> : n in [2..5], p in [1..5], e in [1..4] | e*p*n gt 1];
+  for tpl in testvals do
+    imprim_order_test(tpl[1],tpl[2],tpl[3]);
+  end for;
+  print "Invariance";  
+  for tpl in testvals do
+    testImprimInvariance(tpl[1],tpl[2],tpl[3]);
+  end for;
+end procedure;
+
+run_all_tests := procedure()
+  primitive_tests();
+  imprimitive_tests();
+  print "test1";
+  for n := 4 to 37 do n; test1(n); end for;
+end procedure;
+
+run_all_tests();
+
+if HasOutputFile() then
+  UnsetOutputFile();
+end if;
+
+Cputime(ttt);
+

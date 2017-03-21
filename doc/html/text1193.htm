@@ -1,0 +1,188 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Introduction</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1194.htm">[Next]</A><A  HREF = "text1192.htm">[Prev]</A> <A  HREF = "text1194.htm">[Right]</A> [____] <A  HREF = "text1192.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "13291">Introduction</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+This chapter gives functionality for direct sums of <I>highest weight 
+representations</I> (or modules).
+This is an important class of representations of (almost) semisimple Lie
+algebras (Chapter <A  HREF = "text1130.htm#12659">LIE ALGEBRAS</A>) and connected reductive algebraic groups
+(Chapter <A  HREF = "text1175.htm#13090">GROUPS OF LIE TYPE</A>). 
+This class includes all finite dimensional representations if the base field is
+the complex field.
+<P>
+The representations we are considering are in bijection with sets of dominant
+weights with multiplicities.  
+Such sets are called <I>decomposition multisets</I>.
+Many interesting computations in representation theory can be done
+combinatorially with weight multisets, without the need to construct
+the module itself.  
+Examples of the things we can compute include:
+module dimension,  the multiset of all the weights, and
+decomposition multisets for symmetric powers, alternating powers, and tensor
+products.
+We can also restrict a decomposition multiset to a subgroup or induce it to a
+supergroup. 
+<P>
+The code for such combinatorial computations is based on the LiE software 
+package <A  HREF = "text1191.htm#bib_leeuwen-cohen-lisser">[vLCL92]</A>.
+The algorithms for computing the actual representations are from
+<A  HREF = "text1191.htm#bib_wdg-lie-hwrep">[dG01]</A> in the Lie algebra case, and from <A  HREF = "text1191.htm#bib_CohenMurrayTaylor">[CMT04]</A>
+in the group case.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1193.htm#13292">Highest Weight Modules</A>
+<LI> <A  HREF = "text1193.htm#13293">Toral Elements</A>
+<LI> <A  HREF = "text1193.htm#13294">Other Highest Weight  Representations</A>
+</UL>
+<H4><A NAME = "13292">Highest Weight Modules</A></H4>
+
+<P>
+<P>
+<P>
+This introduction is inspired by the LiE manual 
+<A  HREF = "text1191.htm#bib_leeuwen-cohen-lisser">[vLCL92]</A>. 
+<P>
+First consider connected reductive Lie groups over the complex field. 
+If G is a connected reductive complex Lie group, then it is a homomorphic 
+image G=&xi;(G'), where &xi; is a Lie-group
+homomorphism with finite kernel and G' is the direct product of a simply
+connected group and a torus.
+Recall that a simply connected group is a direct product of <I>simple</I>
+simply connected groups.
+In particular, such groups are determined by their Cartan name and the
+dimension of the torus.
+For example, we denote the direct product of the group of type 
+A<sub>4</sub> C<sub>3</sub> B<sub>2</sub> with a two dimensional torus by  A<sub>4</sub> C<sub>3</sub> B<sub>2</sub> T<sub>2</sub>.
+Most of the code ported from LiE works only for groups of this form.
+Similar terminology is used for the root datum corresponding to a group.
+<P>
+<P>
+Connected reductive complex Lie groups have a very pleasing representation
+theory: 
+<DL COMPACT class='compact'>
+<DT>-- </DT><DD>Every module decomposes as a direct sum of irreducible
+representations. 
+<DT>-- </DT><DD>The (finite dimensional) irreducible representations correspond to
+dominant weights.
+<P>
+<P>
+</DL>
+It follows that representations correspond to finite sets of dominant weights 
+with multiplicity. 
+These multisets are called <I>decomposition multisets</I>.
+We can use this classification to do useful computations about representations,
+without having to explicitly construct them.
+<P>
+<P>
+Multisets of weights can be used for other purposes as well:
+The multiset of all weights occurring in a module M is called the
+<I>character multiset</I>.
+Since the Weyl group permutes the weights
+occurring in the character of M, it suffices to
+consider only the dominant weights with their multiplicities.
+This is called the <I>dominant character multiset</I>.
+In the LiE system,  multisets of weights are represented by polynomials: for
+example, the decomposition multiset is called a decomposition character.
+<P>
+When using the functions in this section, it is important to keep track of 
+which kind of multiset you are using.  
+For example, if you input a decomposition multiset to a function that expects a
+dominant character multiset, the output is meaningless.  
+<P>
+<P>
+We often abbreviate decomposition multiset to <I>decomposition</I>, and similarly for character multisets. 
+Write R<sub>D</sub> for the root datum of the group of the
+decomposition D. 
+Denote the irreducible module for the group with root datum R with highest
+weight v by V<sup>R</sup><sub>v</sub>, or to V<sub>v</sub> if R is clear from the context. 
+<P>
+It is often useful to define consider <I>virtual</I> multisets, 
+which allow weights to have negative multiplicities.
+We call a virtual multiset <I>proper</I> if its weights all have nonnegative 
+multiplicities. 
+A decomposition corresponds to an actual module if and only if it is proper.
+
+
+<H4><A NAME = "13293">Toral Elements</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+Many functions use a special syntax for finite-order elements of the 
+torus of a Lie group G (we are rarely interested in infinite-order
+elements). Recall that a weight is in fact a mapping from the torus T to
+C<sup>star</sup>, and thus a weight &lambda; can be evaluated at an element t &isin;T.
+The resulting element is written t<sup>&lambda;</sup>. A set of fundamental weights
+&omega;<sub>1</sub>, ..., &omega;<sub>r</sub> has the property that any element t &isin;T is
+uniquely determined by the values t<sup>&omega;<sub>1</sub></sup>, ..., t<sup>&omega;<sub>r</sub></sup>.
+Therefore, we may represent t as a vector (a<sub>1</sub>, ..., a<sub>r</sub>, n), with the
+property that t<sup>&omega;<sub>i</sub></sup> = e<sup>2 &pi; i a<sub>i</sub> / n</sup> = &zeta;<sub>n</sub><sup>a<sub>i</sub></sup>, where
+&zeta;<sub>n</sub> = e<sup>2 &pi; i / n</sup> is the canonical n-th root of unity. 
+An example of a function which uses this syntax for toral elements 
+is <A  HREF = "text1196.htm#spectrumRvt">Spectrum</A>. 
+This function also provides a means to convert toral elements into a more 
+natural form: see Example <A  HREF = "text1196.htm#13367">H110E10</A>.
+
+
+<H4><A NAME = "13294">Other Highest Weight  Representations</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+Magma can also construct highest weight representations for:
+<DL COMPACT class='compact'>
+<DT>-- </DT><DD>(Almost) reductive Lie algebras (Chapter <A  HREF = "text1130.htm#12659">LIE ALGEBRAS</A>); and
+<DT>-- </DT><DD>Split groups of Lie type (Chapter <A  HREF = "text1175.htm#13090">GROUPS OF LIE TYPE</A>).
+<P>
+</DL>
+If the base field ha positive characteristic, highest weight representations are
+indecomposable, but not necessarily irreducible. 
+In some cases there are irreducible representations which are not highest
+weight representations. 
+<P>
+For groups of Lie type, we consider projective representations (i.e.,
+homomorphisms to a projective general linear group).
+Suppose G is a split group of Lie type defined over 
+the field k and r is the least common multiple of the nonzero abelian-group
+invariants of the coisogeny group of G (see Section <A  HREF = "text1090.htm#12122">Isogeny of Split Reduced Root  Data</A>).
+Let K be an extension of k containing at least one rth root of each element of k (i.e., K contains a Kummer extension).  
+Then highest weight representations are projective representations defined over K, and are constructed using polynomial functions and rth roots.
+<P>
+If k already contains all rth roots, then no extension is needed and the 
+representation will be linear rather than projective.  This happens when r=1,
+i.e., the coisogeny group is torsion free.
+This includes direct products of a simply connected group and a torus.
+The general linear group also has this property.
+It also happens when k is the complex field or field of algebraic numbers,
+when k is the real field and r is odd, and when k is finite and
+|k| - 1 is coprime to r.
+<P>
+The functions give a warning when the representation is not linear, but this can be avoided using the optional parameter <TT>NoWarning</TT>.
+Note that an appropriate extension K can be constructed for all fields other 
+than rational function fields, fields of Laurent series, and local fields.  
+In these cases, as well as for nonfields, the representations can only be 
+computed when r=1.
+
+
+<PRE></PRE> <A  HREF = "text1194.htm">[Next]</A><A  HREF = "text1192.htm">[Prev]</A> <A  HREF = "text1194.htm">[Right]</A> [____] <A  HREF = "text1192.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

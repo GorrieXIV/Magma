@@ -1,0 +1,50 @@
+Puvw<u,v,w>:=ProjectiveSpace(Rationals(),2);
+Pxyz<x,y,z>:=ProjectiveSpace(Rationals(),2);
+D:=Curve(Puvw,u^4+v^4-w^4);
+C:=Curve(Pxyz,x^4-y^4+y^2*z^2);
+phiAmb:=map<Puvw->Pxyz|[y*z,z^2,x^2]>;
+phi:=Restriction(phiAmb,D,C);
+
+KC:=FunctionField(C);
+KD:=FunctionField(D);
+
+Omega:=BasisOfHolomorphicDifferentials(KC)[1];
+
+//a holomorphic differential pulls back to holomorphic
+
+assert IsEffective(Divisor(Pullback(phi,Omega))); 
+
+//check definition of ramification divisor
+
+assert RamificationDivisor(phi) eq
+   Divisor(Pullback(phi,Omega))-Pullback(phi,Divisor(Omega));
+
+//Riemann-Hurwitz:
+
+assert 2*Genus(D)-2 eq MyDegree(phi)*(2*Genus(C)-2)+Degree(RamificationDivisor(phi));
+
+f:=KC.1;
+
+assert Pushforward(phi,Pullback(phi,f)) eq f^MyDegree(phi);
+
+g:=KD.1;
+
+assert Divisor(Pushforward(phi,g)) eq Pushforward(phi,Divisor(g));
+
+/* pushforward/pullback curve tests added by mch */
+P<x,y,z> := ProjectiveSpace(Rationals(), 2);
+D := Curve(P,z*x^3*y^4-(x^4+z^4)^2);
+C := Curve(P,y);
+FFD := FunctionField(D);
+FFC := FunctionField(C);
+phi := map<D->C | [x^4+z^4,0,x*y^2*z]>;
+Pullback(phi, FFC!(x/z));
+assert $1 eq FFD!((x^4+z^4)/(x*z*y^2));
+Dram := RamificationDivisor(phi);
+assert Degree(Dram) eq 10;
+Dinf := Pullback(phi,Divisor(C![1,0,0]));
+boo,Y := IsPrincipal(Dram-5*Dinf);
+assert boo;                             
+Pushforward(phi,Y);
+assert $1 eq -FFC!((x/z)^9 + (x/z)); // really should check that they agree
+                                     // up to a constant factor

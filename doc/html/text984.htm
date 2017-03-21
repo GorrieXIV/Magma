@@ -1,0 +1,257 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Creation of Quaternion Algebras</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text985.htm">[Next]</A><A  HREF = "text983.htm">[Prev]</A> <A  HREF = "text985.htm">[Right]</A> <A  HREF = "text983.htm">[Left]</A> <A  HREF = "text982.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "11126">Creation of Quaternion Algebras</A></H3>
+
+<P>
+<P>
+A general constructor for a quaternion algebra over any field K 
+creates a model in terms of two generators x and y and three 
+relations 
+ x<sup>2</sup> = a,   y<sup>2</sup> = b,   yx = - xy 
+with a, b &isin;K<sup> * </sup> if K has characteristic different from 2, and
+ x<sup>2</sup> + x = a,   y<sup>2</sup> = b,   yx = (x + 1)y 
+if K has characteristic 2.  The printing names 
+i, j, and k are assigned to the generators x, y, and xy 
+by default, unless the user assigns alternatives (see the function 
+<TT>AssignNames</TT> below, or the example which follows).
+<P>
+Special constructors are provided for quaternion algebras over Q, 
+which return an algebra with a more general set of three defining 
+quadratic relations.  In general, the third generator 
+need not be the product of the first two.  This allows the creation 
+of a quaternion algebra A such that the default generators 
+{1, i, j, k} form a basis for a maximal order. 
+
+
+<H5><A NAME = "11127">QuaternionAlgebra&lt; K | a, b &gt; : Rng, RngElt, RngElt -&gt; AlgQuat</A></H5>
+<BLOCKQUOTE>
+For a, b &isin;K<sup> * </sup>, this function creates the quaternion algebra 
+A over the field K on generators i and j with relations 
+i<sup>2</sup> = a, j<sup>2</sup> = b, and 
+ji = - ij or ji=(i + 1)j, as (char)(K) != 2 or 
+(char)(K)=2,
+respectively.  A third generator is set to k = ij. 
+The field K may be of any Magma field type; for inexact fields,
+such as local fields, one should expect unstable results 
+since one cannot test deterministically for element equality.
+</BLOCKQUOTE>
+<H5><A NAME = "11128">AssignNames(~A, S) : AlgQuat, [MonStgElt] -&gt;</A></H5>
+<BLOCKQUOTE>
+Given a quaternion algebra A and sequence S of strings of length 3, 
+this function assigns the strings to the generators of A, i.e. the 
+basis elements not equal to 1.  This function is called by the bracket 
+operators <TT>&lt; &gt;</TT> at the time of creation of a quaternion algebra.
+<P>
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11129">Example <TT>AlgQuat_Quaternion_Constructor (H91E1)</TT></A></H3>
+A general quaternion algebra can be created as follows.  Note that 
+the brackets <TT>&lt; &gt;</TT> can be used to give any convenient names to 
+the generators of the ring.
+<P>
+<P>
+<PRE>
+&gt; A&lt;x,y,z&gt; := QuaternionAlgebra&lt; RationalField() | -1, -7 &gt;; 
+&gt; x^2;
+-1
+&gt; y^2;
+-7
+&gt; x*y;
+z
+</PRE>
+In the case of this constructor the algebra generators are of trace 
+zero and are pairwise anticommuting.  This contrasts with some of the
+special constructors for quaternion algebras over the rationals described
+below.
+<HR>
+<H3><A NAME = "11130">Example <TT>AlgQuat_Quaternion_Constructor_char2 (H91E2)</TT></A></H3>
+Similarly, we have the following for characteristic 2.
+<P>
+<P>
+<PRE>
+&gt; A&lt;i,j&gt; := QuaternionAlgebra&lt; GF(2) | 1, 1 &gt;;
+&gt; i^2;
+1 + i
+&gt; j^2;
+1
+</PRE>
+<HR>
+<H5><A NAME = "11131">QuaternionAlgebra(N) : RngIntElt -&gt; AlgQuat</A></H5>
+
+<PRE>    Al: MonStgElt                       Default: "TraceValues"</PRE>
+
+<PRE>    Optimized: BoolElt                  Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a positive squarefree integer N, this function returns a rational 
+quaternion algebra of discriminant N.  
+If the optional parameter <TT>Al</TT> is set to
+<TT>"Random"</TT>, or N is the product of an even number of primes
+(i.e. the algebra is indefinite), then a faster, probabilistic algorithm is used.  
+If <TT>Al</TT> is set to <TT>"TraceValues"</TT> and 
+N is a product of an odd number of primes, then an algebra basis is computed which
+also gives a basis for a maximal order (of discriminant N). 
+If <TT>Optimized</TT> is <TT>true</TT> then an optimized representation of the algebra
+is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "11132">QuaternionAlgebra(N) : RngUPolElt -&gt; AlgQuat</A></H5>
+<BLOCKQUOTE>
+Given a squarefree polynomial N &isin;F<sub>q</sub>[x] for some odd q, this 
+function returns a quaternion algebra over F<sub>q</sub>(x) of discriminant N.
+</BLOCKQUOTE>
+<H5><A NAME = "11133">QuaternionAlgebra(I) : RngOrdIdl -&gt; AlgQuat</A></H5>
+
+<PRE>    Optimized: BoolElt                  Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given an ideal I of a number field F with an even number of
+prime ideal factors, the function returns the quaternion algebra A 
+over F which is ramified exactly at the primes dividing I.
+The ideal I is not required to be squarefree, so A will be ramified
+at the radical of I.  If <TT>Optimized</TT> is <TT>true</TT> then an 
+optimized representation of the algebra is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "11134">QuaternionAlgebra(I, S) : RngOrdIdl, [PlcNumElt] -&gt; AlgQuat</A></H5>
+
+<PRE>    Optimized: BoolElt                  Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given an ideal I and a subset S of real places of a number
+field F such that the number of prime ideal divisors of I 
+has the same parity as S, the function returns the quaternion 
+algebra which is ramified exactly at the primes dividing I and at 
+the real places specified by the set S.  If <TT>Optimized</TT> 
+is <TT>true</TT> then an optimized representation of the algebra is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "11135">QuaternionAlgebra(S) : [PlcNumElt] -&gt; AlgQuat</A></H5>
+
+<PRE>    Optimized: BoolElt                  Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given an even set S of noncomplex places of a number field F, 
+this function returns the quaternion algebra which is ramified 
+exactly at S.  If <TT>Optimized</TT> is <TT>true</TT> then an optimized 
+representation of the algebra is returned.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11136">Example <TT>AlgQuat_Quaternion_Constructor_Over_NumberField (H91E3)</TT></A></H3>
+We illustrate the above constructors in the case of
+a general number field.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x&gt; := PolynomialRing(Rationals());
+&gt; F&lt;b&gt; := NumberField(x^3-3*x-1);
+&gt; Foo := InfinitePlaces(F);
+&gt; Z_F := MaximalOrder(F);
+&gt; I := ideal&lt;Z_F | 6&gt;;
+&gt; A := QuaternionAlgebra(I);
+&gt; FactoredDiscriminant(A);
+[
+    Prime Ideal of Z_F
+    Two element generators:
+        [3, 0, 0]
+        [2, 1, 0],
+    Principal Prime Ideal of Z_F
+    Generator:
+        [2, 0, 0]
+]
+[]
+&gt; A := QuaternionAlgebra(ideal&lt;Z_F | 1&gt;, Foo[1..2]);
+&gt; FactoredDiscriminant(A);
+[]
+[ 1st place at infinity, 2nd place at infinity ]
+</PRE>
+<HR>
+<H5><A NAME = "11137">QuaternionAlgebra(D1, D2, T) : RngIntElt, RngIntElt, RngIntElt -&gt; AlgQuat</A></H5>
+<BLOCKQUOTE>
+This intrinsic creates the rational quaternion algebra Q&lt; i, j &gt;, 
+where Z[i] and Z[j] are quadratic suborders of discriminant D<sub>1</sub> 
+and D<sub>2</sub>, respectively, and Z[ij - ji] is a quadratic suborder 
+of discriminant D<sub>3</sub> = D<sub>1</sub> D<sub>2</sub> - T<sup>2</sup>.  The values D<sub>1</sub> D<sub>2</sub> and 
+T must have the same parity and D<sub>1</sub>, D<sub>2</sub> and D<sub>3</sub> must each 
+be the discriminant of some quadratic order, i.e. nonsquare 
+integers congruent to 0 or 1 modulo 4.  
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11138">Example <TT>AlgQuat_Quaternion_Constructor_over_Rationals (H91E4)</TT></A></H3>
+The above constructor is quite powerful for constructing quaternion 
+algebras with given ramification.  For any  i and j, a commutator 
+element such as ij - ji has trace zero, so in the above constructor, 
+the minimal polynomial of this element is x<sup>2</sup> + n, where 
+n = (D<sub>1</sub> D<sub>2</sub> - T<sup>2</sup>)/4.  
+<P>
+In the following example 
+we construct such a ring, and demonstrate some of the relations 
+satisfied in this algebra.  Note that the minimal polynomial is an
+element of the commutative polynomial ring over the base field 
+of the algebra.
+<P>
+In particular, we note that the algebra is not in standard form.
+<P>
+<P>
+<PRE>
+&gt; A&lt;i,j,k&gt; := QuaternionAlgebra(-7,-47,1);
+&gt; PQ&lt;x&gt; := PolynomialRing(RationalField());
+&gt; MinimalPolynomial(i);      
+x^2 - x + 2
+&gt; MinimalPolynomial(j);
+x^2 - x + 12
+&gt; MinimalPolynomial(k);
+x^2 - x + 24
+&gt; i*j;
+k
+&gt; i*j eq -j*i;
+false
+</PRE>
+From their minimal polynomials, we see that the algebra generators 
+i, j, and k generate commutative subfields of discriminants 
+-7, -47, and -95.  The value 82 = (D<sub>1</sub> D<sub>2</sub> - T<sup>2</sup>)/4, however, 
+is a more important invariant of the ring.  We give a preview of 
+the later material by demonstrating the functionality for computing 
+the determinant and ramified primes of an algebra over Q. 
+<P>
+<P>
+<PRE>
+&gt; MinimalPolynomial(i*j-j*i);
+x^2 + 82
+&gt; Discriminant(A);
+41
+&gt; RamifiedPrimes(A);
+[ 41 ]
+</PRE>
+A ramified prime must be inert or ramified in every subfield and
+must divide the norm of any commutator element xy - yx. 
+<P>
+<P>
+<PRE>
+&gt; x := i;
+&gt; y := j;
+&gt; Norm(x*y-y*x);
+82
+&gt; Factorization(82);
+[ &lt;2, 1&gt;, &lt;41, 1&gt; ]
+&gt; x := i-k;
+&gt; y := i+j+k;    
+&gt; Norm(x*y-y*x);                
+1640
+&gt; Factorization(1640);
+[ &lt;2, 3&gt;, &lt;5, 1&gt;, &lt;41, 1&gt; ]
+&gt; KroneckerSymbol(-7,2), KroneckerSymbol(-47,2), KroneckerSymbol(-95,2);
+1 1 1
+&gt; KroneckerSymbol(-7,41), KroneckerSymbol(-47,41), KroneckerSymbol(-95,41);
+-1 -1 -1
+</PRE>
+The fact that the latter Kronecker symbols are -1, indicating that 
+41 is inert in the quadratic fields of discriminants -7, -47, 
+and -95, proves that 41 is a ramified prime, and 2 is not.   
+<HR>
+<PRE></PRE> <A  HREF = "text985.htm">[Next]</A><A  HREF = "text983.htm">[Prev]</A> <A  HREF = "text985.htm">[Right]</A> <A  HREF = "text983.htm">[Left]</A> <A  HREF = "text982.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

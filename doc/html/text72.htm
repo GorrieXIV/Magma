@@ -1,0 +1,128 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Profiler Basics</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text73.htm">[Next]</A><A  HREF = "text71.htm">[Prev]</A> <A  HREF = "text73.htm">[Right]</A> <A  HREF = "text71.htm">[Left]</A> <A  HREF = "text70.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "565">Profiler Basics</A></H3>
+
+<P>
+<P>
+<P>
+The Magma profiler records timing information for each function, procedure,
+map, and intrinsic call made by your program.  When the profiler is switched
+on, upon the entry and exit to each such call the current system clock time
+is recorded.  This information is then stored in a call graph, which can be
+viewed in various ways.
+
+
+<H5><A NAME = "566">SetProfile(b): BoolElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Turns profiling on (if b is <TT>true</TT>) or off (if b is <TT>false</TT>).  Profiling
+information is stored cumulatively, which means that in the middle of a
+profiling run, the profiler can be switched off during sections for which
+profiling information is not wanted.  At startup, the profiler is off.  Turning
+the profiler on will slow down the execution of your program slightly.
+</BLOCKQUOTE>
+<H5><A NAME = "567">ProfileReset(): -&gt;</A></H5>
+<BLOCKQUOTE>
+Clear out all information currently recorded by the profiler.  It is generally
+a good idea to do this after the call graph has been obtained, so that future
+profiling runs in the same Magma session begin with a clean slate.
+</BLOCKQUOTE>
+<H5><A NAME = "568">ProfileGraph(): -&gt; GrphDir</A></H5>
+<BLOCKQUOTE>
+Get the call graph based upon the information recorded up to this point by the
+profiler.  This function will return an error if the profiler has not yet been
+turned on.
+<P>
+The call graph is a directed graph, with the nodes representing the functions
+that were called during the program's execution.  There is an edge in the call
+graph from a function x to a function y if y was called during the
+execution of x.  Thus, recursive calls will result in cycles in the call
+graph.
+<P>
+Each node in the graph has an associated label, which is a record with the
+following fields:
+<P>
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD><TT>Name</TT>: the name of the function
+<DT>(ii)</DT><DD><TT>Time</TT>: the total time spent in the function
+<DT>(iii)</DT><DD><TT>Count</TT>: the number of times the function was called
+<P>
+<P>
+<P>
+</DL>
+Each edge &lt; x, y &gt; in the graph also has an associated label,
+which is a record with the following fields:
+<P>
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD><TT>Time</TT>: the total time spent in function y when it was
+called from function x
+<P>
+<DT>(ii)</DT><DD><TT>Count</TT>: the total number of times function y was called
+by function x</DL>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "569">Example <TT>Prof_basic-profiling (H6E1)</TT></A></H3>
+We illustrate the basic use of the profiler in the following example.  The code
+we test is a simple implementation of the Fibonacci sequence; this can be
+replaced by any Magma code that needs to be profiled.
+<P>
+<P>
+<P>
+<PRE>
+&gt; function fibonacci(n)
+&gt;     if n eq 1 or n eq 2 then
+&gt;       return 1;
+&gt;     else
+&gt;       return fibonacci(n - 1) + fibonacci(n - 2);
+&gt;     end if;
+&gt; end function;
+&gt; 
+&gt; SetProfile(true);
+&gt; time assert fibonacci(27) eq Fibonacci(27);
+Time: 10.940
+&gt; SetProfile(false);
+&gt; G := ProfileGraph();
+&gt; G;
+Digraph
+Vertex  Neighbours
+
+1       2 3 6 7 ;
+2       2 3 4 5 ;
+3       ;
+4       ;
+5       ;
+6       ;
+7       ;
+
+&gt; V := Vertices(G);
+&gt; Label(V!1);
+rec&lt;recformat&lt;Name: Strings(), Time: RealField(), Count: IntegerRing()&gt; | 
+    Name := &lt;main&gt;,
+    Time := 10.93999999999999950262,
+    Count := 1
+    &gt;
+&gt; Label(V!2);
+rec&lt;recformat&lt;Name: Strings(), Time: RealField(), Count: IntegerRing()&gt; | 
+    Name := fibonacci,
+    Time := 10.93999999999999950262,
+    Count := 392835
+    &gt;
+&gt; E := Edges(G);
+&gt; Label(E![1,2]);
+rec&lt;recformat&lt;Time: RealField(), Count: IntegerRing()&gt; | 
+    Time := 10.93999999999999950262,
+    Count := 1
+    &gt;
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text73.htm">[Next]</A><A  HREF = "text71.htm">[Prev]</A> <A  HREF = "text73.htm">[Right]</A> <A  HREF = "text71.htm">[Left]</A> <A  HREF = "text70.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

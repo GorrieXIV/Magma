@@ -1,0 +1,2 @@
+174,1
+S,Collect,"Attemps to perform the inverse operation of branch, namely to reconstruct a R-module from its restriction to a smaller group. We compute decomp(filter_dom(dom_char(p,h)*InvResMat, g), g). See also page 69 of the LiE manual. Note that for this form you must supply the matrix used in branch. This is *different* from the way it is done in LiE",0,3,0,0,0,0,0,0,0,-1,,0,0,450,,0,0,489,,450,-38,-38,-38,-38,-38

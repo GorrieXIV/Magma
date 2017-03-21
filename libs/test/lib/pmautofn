@@ -1,0 +1,47 @@
+inform("Characters.", 2);
+
+inform("Character Table.", 3);
+
+w(bChTb(c41), "ch tab: c41.");
+w(bChTb(d16), "ch tab: d16.");
+w(bChTb(sub<im24 | im24b>), "ch tab: im24.");
+
+inform("Character Degrees.", 3);
+
+w(cXDegs(SylowSubgroup(s16, 3)), "chrdgs: s16.");
+w(cXDegs(SylowSubgroup(l302, 2)), "chrdgs: l302.");
+
+inform("Subgroups and Permutation Characters.", 3);
+permcharmat := function(G)
+    nc := #ConjugacyClasses(G);
+    subs := Subgroups(G);
+    M := Hom(RSpace(Integers(), #subs), RSpace(Integers(), nc));
+    return M !
+        &cat[ Eltseq(PermutationCharacter(G, s`subgroup)) : s in subs ];
+end function;
+
+pcm := permcharmat( Alt(4) );
+relations := func< G | Kernel( permcharmat(G) ) >;
+rel := relations( Alt(4) );
+G := Sym(6);
+U := sub< G | (1,2)(3,4), (1,3)(2,4), (1,4)(2,3) >;
+V := sub< G | (1,2)(3,4), (1,2)(5,6), (3,4)(5,6) >;
+assert not IsConjugate(G, U, V);
+p1 := PermutationCharacter(G, U);
+p2 := PermutationCharacter(G, V);
+assert p1 eq p2;
+assert Induction(PrincipalCharacter(U), G) eq PermutationCharacter(G, U);
+count := 0;
+for n := 1 to 12 do
+ for k := 1 to NumberOfTransitiveGroups(n) do
+  G := TransitiveGroup(n, k);
+  U := Stabilizer(G, 1);
+  chi := PermutationCharacter(G, U);
+  S := Subgroups(G : OrderEqual := Order(G) div n);
+  if exists{ i :  i in [1..#S] | PermutationCharacter(G, V) eq chi
+        and IsEmpty(Fix(V)) where V := S[i]`subgroup } then
+   count +:= 1;
+  end if;
+ end for;
+end for;
+assert count eq 10;

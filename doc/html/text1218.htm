@@ -1,0 +1,172 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Computation of Varieties</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1219.htm">[Next]</A><A  HREF = "text1217.htm">[Prev]</A> <A  HREF = "text1219.htm">[Right]</A> <A  HREF = "text1217.htm">[Left]</A> <A  HREF = "text1214.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "13583">Computation of Varieties</A></H3>
+
+<P>
+<P>
+The slightly non-standard term variety in this section refers to the (finite)
+solution set of the system of polynomials that make up a zero-dimensional ideal.
+It can also be thought of as the set of points of a zero-dimensional affine scheme
+over a specified field extension of the polynomial ring base field.
+For more general functionality for
+schemes of arbitrary dimension, see the chapters on Algebraic and
+Arithmetic Geometry. The functions here also work for higher-dimensional
+ideals if the base field is finite, when the solution set is again finite
+(over the base or a finite extension of the base).
+<P>
+The functions compute solutions over the base field of the polynomial
+ring or over an extension field L. Magma's algebraically closed 
+fields (see Chapter <A  HREF = "text421.htm#4382">ALGEBRAICALLY CLOSED FIELDS</A>) may be used to get all solutions
+if so desired when an explicit splitting field is not known for the 
+system. L should be an exact field over which Magma has a root-finding
+algorithm for univariate polynomials or a real or complex field.
+<P>
+For the corresponding functions with argument a zero-dimensional scheme
+which may not be affine, see the Section <A  HREF = "text1328.htm#14493">Rational Points and Point Sets</A> in the Schemes
+chapter.
+
+
+<H5><A NAME = "13584">Variety(I) : RngMPol -&gt; [ ModTupFldElt ]</A></H5>
+<H5>Variety(I, L) : RngMPol, Rng -&gt; [ ModTupFldElt ]</H5>
+
+<PRE>    Al: MonStgElt                       Default: em "Default"</PRE>
+<BLOCKQUOTE>
+Given a zero-dimensional ideal I of a polynomial ring P, return the variety
+of I over its coefficient field K as a sequence of tuples.
+Each tuple is of length n, where n is the rank of P,
+and corresponds to an assignment of the n variables of P (in order) such
+that all polynomials in I vanish with this assignment.
+<P>
+If K is not a finite field then the ideal must be the full polynomial
+ring or be zero-dimensional so that the variety is known to be finite.
+If a superfield L of K is also given, the variety is computed over
+L instead, so the entries of the tuples lie in L.
+<P>
+<P>
+<P>
+<P>
+<TT>Al := "Wiedemann"</TT>:
+This parameter selects the Wiedemann algorithm and is
+applicable to computing the variety of a generic zero-dimensional ideal I
+over K, where K is a moderately sized finite
+field.  The <I>degree</I> D of I is the dimension of the quotient
+algebra R/I, and as D grows large (particularly above 10000),
+computing the variety of I becomes very difficult since it involves
+computing a minimal polynomial of degree D.  The Wiedemann algorithm
+is effective when it is impractical to store a fully dense D x D
+matrix in memory.
+See <TT>http://magma.maths.usyd.edu.au/users/allan/densef4/#CC</TT> for a
+very large example.
+<P>
+<P>
+<P>
+<P>
+<TT>Al := "KellerGehrig"</TT>:
+This parameter selects the Keller-Gehrig algorithm, which
+is similar to the Wiedemann algorithm in that
+it finds the minimal polynomial of a matrix to compute a
+variety of a zero-dimensional ideal, but it uses the Keller-Gehrig
+algorithm to compute this minimal polynomial by mapping
+the problem to several matrix multiplications.
+This method typically takes more memory than the Wiedemann algorithm
+but may be faster for dimensions in the thousands, particularly when
+a GPU is available.
+<P>
+<P>
+<P>
+<P>
+<TT>Al := "ExhaustiveSearch"</TT>:
+This parameter selects the Exhaustive Search algorithm
+for solving quadratic multivariate polynomial systems over GF(2).
+For a system with n variables, the algorithm simply
+enumerates all 2<sup>n</sup> possible assignments of the variables and
+determines the set of all such assignments which simultaneously
+satisfy all the polynomial equations.
+Despite the obvious exponential complexity of this brute force
+approach, the algorithm is highly optimised: for a quadratic input
+system, the algorithm covers 10<sup>10</sup> possible solutions in
+1.47 seconds on a typical 3.2GHz Intel Xeon processor and an
+arbitrary quadratic system with 40 variables is solved in
+162 seconds.
+The algorithm is preferable to other algorithms for certain types of
+input system.  For example, in the case of an arbitrary generic dense
+quadratic system with no structure (such as a random system), the
+exhaustive search algorithm is typically faster than both the Gr&ouml;bner
+basis and SAT algorithms by a factor of more than 100.  This is because
+all algorithms have exponential complexity for this type of input,
+but the associated constant is much better for the exhaustive search.
+</BLOCKQUOTE>
+<H5><A NAME = "13585">VarietySequence(I) : RngMPol -&gt; [ [ RngElt ] ]</A></H5>
+<H5>VarietySequence(I, L) : RngMPol, Rng -&gt; [ [ RngElt ] ]</H5>
+<BLOCKQUOTE>
+Given a zero-dimensional ideal I of a polynomial ring P whose order is of
+lexicographic type, return the variety of I over its coefficient field
+K as a sequence of sequences of elements of K.
+Each inner sequence is of length n, where n is the rank of P,
+and corresponds to an assignment of the n variables of P (in order) such
+that all polynomials in I vanish with this assignment.
+The parameters and other conditions are the same as for <TT>Variety</TT>
+above.
+</BLOCKQUOTE>
+<H5><A NAME = "13586">VarietySizeOverAlgebraicClosure(I) : RngMPol -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a zero-dimensional ideal I of a polynomial ring P over a field
+K, return the size of the variety of I over the algebraic closure
+K' of K.  The size is determined by finding the (prime) radical
+decomposition of I and placing each component of the decomposition
+into normal position so the size of the variety of the component
+over K' can be read off.  Note that this function will usually be
+much faster than actually computing the variety of I over a suitable
+extension field of K.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13587">Example <TT>Ideal_Variety (H112E3)</TT></A></H3>
+We construct an ideal I of the polynomial ring GF(27)[x, y], and
+then find the variety V = V(I).  We then check that I vanishes on V.
+<P>
+<P>
+<PRE>
+&gt; K&lt;w&gt; := GF(27);
+&gt; P&lt;x, y&gt; := PolynomialRing(K, 2);
+&gt; I := ideal&lt;P | x^8 + y + 2, y^6 + x*y^5 + x^2&gt;;
+&gt; Groebner(I);
+&gt; I;
+Ideal of Polynomial ring of rank 2 over GF(3^3)
+Order: Lexicographical
+Variables: x, y
+Inhomogeneous, Dimension 0
+Groebner basis:
+[
+    x + 2*y^47 + 2*y^45 + y^44 + 2*y^43 + y^41 + 2*y^39 + 2*y^38 + 2*y^37 + 
+        2*y^36 + y^35 + 2*y^34 + 2*y^33 + y^32 + 2*y^31 + y^30 + y^28 + y^27 + 
+        y^26 + y^25 + 2*y^23 + y^22 + y^21 + 2*y^19 + 2*y^18 + 2*y^16 + y^15 + 
+        y^13 + y^12 + 2*y^10 + y^9 + y^8 + y^7 + 2*y^6 + y^4 + y^3 + y^2 + y + 
+        2,
+    y^48 + y^41 + 2*y^40 + y^37 + 2*y^36 + 2*y^33 + y^32 + 2*y^29 + y^28 + 
+        2*y^25 + y^24 + y^2 + y + 1
+]
+&gt; V := Variety(I);
+&gt; V;
+[ &lt;w^14, w^12&gt;, &lt;w^16, w^10&gt;, &lt;w^22, w^4&gt; ]
+&gt; // Check that the original polynomials vanish:
+&gt; [
+&gt;    &lt;x^8 + y + 2, y^6 + x*y^5 + x^2&gt; where x is v[1] where y is v[2]: v in V
+&gt; ];
+[ &lt;0, 0&gt;, &lt;0, 0&gt;, &lt;0, 0&gt; ]
+&gt; // Note that the variety of I would be larger over an extension field of K:
+&gt; VarietySizeOverAlgebraicClosure(I);
+48
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1219.htm">[Next]</A><A  HREF = "text1217.htm">[Prev]</A> <A  HREF = "text1219.htm">[Right]</A> <A  HREF = "text1217.htm">[Left]</A> <A  HREF = "text1214.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

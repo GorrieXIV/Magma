@@ -1,0 +1,514 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Minimal Degree Functions and Plane Models</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1355.htm">[Next]</A><A  HREF = "text1368.htm">[Prev]</A> <A  HREF = "text1355.htm">[Right]</A> <A  HREF = "text1368.htm">[Left]</A> <A  HREF = "text1356.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "15287">Minimal Degree Functions and Plane Models</A></H3>
+
+<P>
+<P>
+This section contains functionality to compute smallest degree covering maps from a curve
+to the projective line (P)<sup>1</sup>, which are equivalent to smallest degree functions on the 
+curve. We refer to such maps as <I>gonal</I> maps (the degree of such a map is usually
+referred to as the <I>gonality</I> of the curve). There are intrinsics for all general type
+(genus &ge;2) curves of genus less than seven and for all trigonal (gonality 3) curves.
+The trigonal cases use the Lie algebra method to construct degree 3 maps following the
+algorithm in <A  HREF = "text1355.htm#bib_schicho_sevilla_11">[SS]</A>. The 4-gonal cases for genus 5 and 6 curves use
+the algorithms
+in <A  HREF = "text1355.htm#bib_mike_harr_gen56_11">[Har13]</A>. Hyperelliptic cases (gonality 2) are dealt with directly
+using the canonical map and parametrisation of rational curves.
+<P>
+Gonal maps may not exist over the base field and the intrinsics here will return
+a gonal map over a finite extension in such cases. In some cases, the degree of
+a minimal extension over which a gonal map may be constructed is determined exactly.
+In others, this may involve difficult arithmetic problems (e.g., finding a point
+of minimal degree on a plane sextic over (Q)) and the extension used may not
+be of minimal degree. This is discussed further in the descriptions of the
+intrinsics. The intrinsics are designed for input curves defined over number fields
+or finite fields.
+<P>
+There are also some intrinsics to compute minimal degree plane models of curves of
+genus 5 and 6. In the genus 6 case, these birational models may be defined over
+a small extension field of the base field (an exact minimal degree extension is
+found here). In the genus 5 case, the intrinsic computes models over the base
+field given a rational point or divisor of degree 2 in the generic case that
+may be input by the user. The functionality here is incomplete and doesn't currently
+cover every type of genus 5 or 6 curve or lower genus curves. We plan to extend this
+in later releases.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1369.htm#15288">General Functions and Clifford Index One</A>
+<LI> <A  HREF = "text1369.htm#15292">Small Genus Functions</A>
+<LI> <A  HREF = "text1369.htm#15299">Small Genus Plane Models</A>
+</UL>
+<H4><A NAME = "15288">General Functions and Clifford Index One</A></H4>
+
+<P>
+<P>
+The algorithm of Schicho and Sevilla used for trigonal curves actually covers
+the slightly more general case of Clifford index one. An algebraic curve
+has Clifford index one iff it is trigonal or it is of genus 6 and isomorphic
+to a non-singular plane quintic. In the latter case, the curve has gonality 4.
+Classical theory (e.g. Petri's theorem) tells us that a curve of genus greater
+than one has Clifford index 1 precisely when its canonical image is not defined
+by quadrics alone. For genus &gt; 3, a minimal basis for the ideal defining
+the canonical image will then consist of quadrics and cubics. A non-hyperelliptic
+genus 3 curve is always trigonal and it's canonical image is defined by a 
+smooth quartic in the projective plane.
+<P>
+This gives a simple computational test for Clifford index 1. There is an
+intrinsic described below that may be called directly by the user for
+Clifford index 1 canonical curves that returns a gonal map to (P)<sup>1</sup> in the
+trigonal case or gives a birational map to a smooth plane quintic.
+
+
+<H5><A NAME = "15289">GenusAndCanonicalMap(C) : Crv -&gt; RngIntElt, BoolElt, MapSch</A></H5>
+<BLOCKQUOTE>
+Convenience function for the user. Returns the genus g of the curve C, a Boolean
+value which is <TT>true</TT> iff g &le;1 or C is hyperelliptic, and
+the canonical map from C to its canonical image if g &gt; 1.
+</BLOCKQUOTE>
+<H5><A NAME = "15290">CliffordIndexOne(C) : Crv -&gt; MapSch</A></H5>
+<H5>CliffordIndexOne(C,X) : Crv,Sch -&gt; MapSch</H5>
+<BLOCKQUOTE>
+The curve C should be a (non-singular) canonical model of a curve of Clifford index 1
+(this condition may be tested as described in the introduction). Computes
+and returns a degree 3 map to the projective line (P)<sup>1</sup> or a birational
+map onto a smooth plane quintic, depending on whether C is trigonal or not.
+In the trigonal case, the map may be defined over a quadratic extension of
+the base field for curves of even genus. This will occur only if no such map exists
+over the base field.
+In the plane quintic case, the map is always defined over the base field.
+The trigonal case requires that the characteristic of the base field is not 2.
+<P>
+The algorithm used is that of Schicho and Sevilla that applies the Lie algebra
+method to explicitly compute the fibration map to (P)<sup>1</sup> of the rational
+scroll surface X that is defined by the quadrics in the defining ideal of
+the canonical curve C. The second version of the intrinsic also takes X
+as an argument in case the user has already computed it.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15291">Example <TT>Crv_gon-gen-ex (H120E42)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; P5&lt;x,y,z,s,t,u&gt; := ProjectiveSpace(Rationals(),5);
+&gt; C := Curve(P5,[
+&gt; -y*z+x*s-y*s+z*t-4*s*t+t^2+2*s*u-3*t*u+2*u^2,
+&gt; -z^2+s^2+x*t+2*z*t-2*t^2-4*s*u-2*t*u+4*u^2,
+&gt; -z*s-s^2+z*t+t^2+x*u-2*s*u-7*t*u+6*u^2,
+&gt; -z*s+s^2+y*t+2*s*t-t^2-2*s*u+t*u,
+&gt; -s^2+s*t+y*u-s*u-t*u+u^2,
+&gt; -s*t+t^2+z*u-s*u-3*t*u+2*u^2,
+&gt; x^3-3*x^2*y+7*x*y^2+3*y^3+x*y*z-y*z^2+9*z^3+3*y^2*s-3*y*z*s-7*z^2*s-7*y*s^2+
+&gt; 17*z*s^2-86*s^3-4*z*s*t-16*s^2*t-185*z*t^2+807*s*t^2-406*t^3+17*s^2*u-
+&gt; 666*s*t*u+1391*t^2*u+228*s*u^2-1378*t*u^2+393*u^3,
+&gt; x^2*z-2*x*y*z+5*y^2*z+y*z^2+3*z^3+8*y^2*s+y*z*s-7*z^2*s+3*y*s^2+17*z*s^2-
+&gt; 47*s^3+6*z^2*t+9*z*s*t+s^2*t+32*z*t^2+11*s*t^2-103*t^3-51*s^2*u-171*s*t*u+
+&gt; 433*t^2*u+89*s*u^2-577*t*u^2+246*u^3,
+&gt; x*z^2-y*z^2-z^3+4*y*z*s+z^2*s+8*y*s^2-3*z*s^2-5*s^3+7*z^2*t-3*z*s*t+17*s^2*t+
+&gt; 8*z*t^2-2*s*t^2+62*t^3-41*s^2*u-34*s*t*u-28*t^2*u+14*s*u^2-127*t*u^2+92*u^3
+&gt; ]);
+&gt; // C a genus 6 canonical curve of gonality 3
+&gt; mp3 := CliffordIndexOne(C);
+&gt; mp3;
+Mapping from: Crv: C to Curve over Rational Field defined by
+0
+with equations : 
+x - 2*z + 10*s - 7*t + 10*u
+-2/5*x - 24/5*s + 26/5*t - 44/5*u
+</PRE>
+We can check that <TT>mp3</TT> gives a degree 3 map by seeing that the
+degree 10 linear pencil of divisors generated by D<sub>1</sub> and D<sub>2</sub>, the hyperplane
+sections of C given by the two defining equations of the map, has a 
+common degree 7 factor.
+<P>
+<P>
+<PRE>
+&gt; defs := DefiningPolynomials(mp3);
+&gt; D1 := Scheme(C,defs[1]);
+&gt; D2 := Scheme(C,defs[2]);
+&gt; D12 := Scheme(C,defs);
+&gt; Degree(D1); Degree(D2);
+10
+10
+&gt; Dimension(D12); Degree(D12);
+0
+7
+</PRE>
+<HR>
+<H4><A NAME = "15292">Small Genus Functions</A></H4>
+
+<P>
+<P>
+This section contains intrinsics to compute gonal maps for curves with genus
+greater than one and less than seven.
+
+
+<H5><A NAME = "15293">Genus2GonalMap(C) : Crv -&gt; MapSch</A></H5>
+<BLOCKQUOTE>
+Returns a degree 2 map from genus 2 curve C to the projective line. The map
+is defined over a quadratic extension of the base field k iff no such map
+exists over k. The map is just the canonical map followed by an inverse
+parametrisation of its image.
+</BLOCKQUOTE>
+<H5><A NAME = "15294">Genus3GonalMap(C) : Crv -&gt; RngIntElt, MapSch</A></H5>
+
+<PRE>    IsCanonical: BoolElt                Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+For a genus 3 curve C, returns the gonality (2 or 3) and a gonal map to (P)<sup>1</sup>.
+C is trigonal precisely when it is non-hyperelliptic, when its canonical image
+is a plane quartic Q. Gonal maps are given by the canonical map onto Q followed by
+projection from a point on Q. Constructing one requires finding a point on Q.
+If Q is defined over the rationals, a point search up to a small height is applied,
+and if Q is defined over a finite field a point enumeration is applied to try to
+find a point over the base field. If this fails to locate a point or if the base field
+is a number field, a point of Q over an extension of degree &le;4 of the base field
+is used. Thus the map returned may be over an extension of the base field and this
+extension may not be of minimal degree.
+<P>
+If the input C is already a canonical model, parameter <TT>IsCanonical</TT> may be
+set to <TT>true</TT>. This will simplify the internal processing. <B>NB</B> The defining equations
+of C must be a minimal basis for its defining ideal.
+</BLOCKQUOTE>
+<H5><A NAME = "15295">Genus4GonalMap(C) : Crv -&gt; RngIntElt, MapSch</A></H5>
+
+<PRE>    IsCanonical: BoolElt                Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+For a genus 4 curve C, returns the gonality (2 or 3) and a gonal map to (P)<sup>1</sup>.
+C is trigonal precisely when it is non-hyperelliptic. In the trigonal case,
+a gonal map is computed using the <TT>CliffordIndexOne</TT> intrinsic. This involves
+computing a fibration map for a quadric surface in (P)<sup>3</sup> containing the canonical
+image of C, which may be defined over a biquadratic extension of the base field
+in bad cases. So the map returned may be defined over an extension of degree 4,
+whereas the map on C should always be defined over an extension of degree at most
+2. We will try to fix this in later releases.
+<P>
+If the input C is already a canonical model, parameter <TT>IsCanonical</TT> may be
+set to <TT>true</TT>. This will simplify the internal processing. <B>NB</B> The defining equations
+of C must be a minimal basis for its defining ideal.
+</BLOCKQUOTE>
+<H5><A NAME = "15296">Genus5GonalMap(C) : Crv -&gt; RngIntElt, MapSch, Crv, UserProgram</A></H5>
+
+<PRE>    DataOnly: BoolElt                   Default: <TT>false</TT></PRE>
+
+<PRE>    IsCanonical: BoolElt                Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+For a genus 5 curve C, returns the gonality (2, 3 or 4) and a gonal map to (P)<sup>1</sup>.
+In the gonality 4 case, it also returns some extra data that gives the parametrisation
+of the set of degree 4 linear pencils (g<sup>1</sup><sub>4</sub>s) which give the gonal maps.
+<P>
+The hyperelliptic case (gonality 2) is handled as usual by parametrising the canonical
+image which gives a gonal map that may be defined over a quadratic extension of
+the base field.
+<P>
+The trigonal case is easy to deal with here since the rational scroll X that contains
+the canonical image of C is of codimension 2 in its ambient. We directly compute the
+fibration map of X from the minimal free polynomial resolution of the canonical
+coordinate ring of C. This gives a gonal map on C that is always defined over
+the base field.
+<P>
+In the general (4-gonal case), there are infinitely many equivalence classes of
+gonal maps which are parametrised by a plane quintic curve F. This
+along with a function f which takes a point in F(K) as an argument are returned
+as third and fourth return values. f evaluated at p&isin;F(K) will return the
+corresponding gonal map on C which is defined over K or a quadratic extension
+of it. The actual gonal map returned as the second return value is given by
+searching for a point on F over a small extension of the base field. We use
+a point search as for <TT>Genus3GonalMap</TT> if the base field is the rationals
+or a finite field. Otherwise or if this fails, we find a point over an extension
+field by decomposing a random hyperplane section of F. We try to use singular
+points on F, if they exist, which correspond to g<sup>1</sup><sub>4</sub>s whose associated
+rational scroll is defined by a rank 3 rather than a rank 4 quadric.
+<P>
+If the parameter <TT>DataOnly</TT> is set to <TT>true</TT> (the default is <TT>false</TT>), then
+only the gonality is returned when it is less than 4, and only the gonality,
+F and f are computed and returned in the 4-gonal case.
+<P>
+If the input C is already a canonical model, parameter <TT>IsCanonical</TT> may be
+set to <TT>true</TT>. This will simplify the internal processing. <B>NB</B> The defining equations
+of C must be a minimal basis for its defining ideal. 
+</BLOCKQUOTE>
+<H5><A NAME = "15297">Genus6GonalMap(C) : Crv -&gt; RngIntElt, RngIntElt, MapSch, MapSch</A></H5>
+
+<PRE>    DataOnly: BoolElt                   Default: <TT>false</TT></PRE>
+
+<PRE>    IsCanonical: BoolElt                Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+For a genus 6 curve C, returns the gonality (2, 3 or 4), a second type identifier and a 
+gonal map to (P)<sup>1</sup>. The second type number is irrelevant in the gonality 2 and 3
+cases, when it is always 1. It is 1,2 or 3 in the 4-gonal case.
+<P>
+For 4-gonal curves of secondary type 2, C is a double cover of a genus 1 curve
+E through which all gonal maps factor. In this case, the map giving this double
+covering is returned as a fourth return value. Secondary type 3 curves are isomorphic
+to (smooth) plane quintics and an isomorphism to such a quintic is returned as the
+fourth return value. These maps are defined over the base field.
+<P>
+The hyperelliptic case (gonality 2) is handled as for <TT>Genus5GonalMap</TT>.
+<P>
+The trigonal case requires the characteristic of the base field to not be 2.
+It uses the <TT>CliffordIndexOne</TT> intrinsic and constructs a gonal map
+that is defined over a quadratic extension of the base field k if no such map
+exists over k.
+<P>
+There are 3 distinct subcases of the 4-gonal case, which are distinguished by
+the second return number.
+<P>
+Type 2 curves are double covers of a genus 1 curve
+E and there are infinitely many 4-gonal maps which are given by composing
+this double cover with a degree 2 map of E to (P)<sup>1</sup>. E is constructed
+as a projective normal curve of degree 5 in (P)<sup>4</sup>. The gonal map returned
+is found by looking for k-rational points on E by general point search methods
+and, if this fails, taking a point on E defined over a finite extension of
+k lying in a random hyperplane section of E.
+<P>
+Type 3 curves are (birationally)
+isomorphic to a plane quintic C<sub>5</sub>. The infinitely many 4-gonal maps are given by
+projection from a point on C<sub>5</sub>. The gonal map returned is constructed by finding
+a k-rational point on C<sub>5</sub> or one over a finite extension as for type 2.
+<P>
+Type 1 (general type) curves have only finitely many gonal maps up to equivalence
+(5 at most, in fact). The algorithm explicitly finds algebraic data defining these
+map classes. It chooses one defined over k if possible. Otherwise, we take
+one over a minimal degree extension of k. The gonal map returned is thus
+defined over a minimal degree extension of k for such maps.
+<P>
+If the parameter <TT>DataOnly</TT> is set to <TT>true</TT> (the default is <TT>false</TT>), then
+only the gonality (and secondary type 1) is returned when it is less than 4, and
+only the gonality, secondary type t and fourth return value when t=2 or 3
+are computed and returned in the 4-gonal case.
+<P>
+If the input C is already a canonical model, parameter <TT>IsCanonical</TT> may be
+set to <TT>true</TT>. This will simplify the internal processing. <B>NB</B> The defining equations
+of C must be a minimal basis for its defining ideal.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15298">Example <TT>Crv_gon-sm-gen-ex (H120E43)</TT></A></H3>
+We give some examples with 4-gonal curves of genus 5 and 6.
+Firstly, we take a random canonical curve of genus 5 given
+by the intersection of 3 quadrics in (P)<sup>4</sup>.
+<P>
+<P>
+<PRE>
+&gt; P4&lt;x,y,z,t,u&gt; := ProjectiveSpace(Rationals(),4);
+&gt; C := Curve(P4,[
+&gt; -x^2-x*y-y*z+z^2-x*t-y*t-z*t+t^2-x*u+y*u-t*u,
+&gt; -x*y+y^2+y*z+x*t+y*t-z*t+z*u+t*u+u^2,
+&gt; -x^2-x*y-y*z+z^2+x*t-y*t+t^2-x*u+y*u+z*u+t*u+u^2]);
+&gt; g,mp4,F,f := Genus5GonalMap(C);
+&gt; g;
+4
+&gt; mp4;
+Mapping from: Crv: C to Curve over Rational Field defined by
+0
+with equations : 
+z + u
+t
+&gt; F;
+Curve over Rational Field defined by
+7*u^5+6*u^4*v-50*u^3*v^2+40*u^2*v^3+3*u*v^4+2*v^5+48*u^4*w-22*u^3*v*w-
+ 50*u^2*v^2*w+30*u*v^3*w+10*v^4*w+134*u^3*w^2-24*u^2*v*w^2-36*u*v^2*w^2+
+ 8*v^3*w^2+187*u^2*w^3+6*u*v*w^3-19*v^2*w^3+129*u*w^4+6*v*w^4+35*w^5
+</PRE>
+Next, we look at a genus 6 curve that is a degree 2 cover of a genus 1 curve.
+<P>
+<P>
+<PRE>
+&gt; P3&lt;x,y,z,t&gt; := ProjectiveSpace(Rationals(),3);
+&gt; C := Curve(P3,[ x^2*y^2-x^2*t^2-z^2*t^2+2*t^4,
+&gt;    y^4-x*z^2*t-2*y^2*t^2+2*x*t^3+t^4,
+&gt;    x^3-y^2*t+t^3 ]);
+&gt; Genus(C);
+6
+&gt; g,t,mp4,mpE := Genus6GonalMap(C);
+&gt; g; t;
+4
+2
+&gt; mp4;
+Mapping from: Crv: C to Curve over Rational Field defined by
+0
+with equations : 
+x
+t
+&gt; mpE;
+Mapping from: Crv: C to Curve over Rational Field defined by
+$.1^2 + $.2*$.3 - $.4*$.5,
+$.1*$.2 + $.3^2 - $.5^2,
+$.2^2 - $.1*$.3,
+$.2*$.4 - $.1*$.5,
+$.3*$.4 - $.2*$.5
+with equations : 
+x^2
+x*t
+t^2
+x*y
+y*t
+</PRE>
+<HR>
+<H4><A NAME = "15299">Small Genus Plane Models</A></H4>
+
+<P>
+<P>
+This section contains intrinsics to compute minimal degree birational plane models
+for curves of genus 5 or 6.
+
+
+<H5><A NAME = "15300">Genus6PlaneCurveModel(C) : Crv -&gt; BoolElt, MapSch</A></H5>
+
+<PRE>    IsCanonical: BoolElt                Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+For a genus 6 curve C of gonality 4 which isn't the double cover of a
+genus 1 curve (i.e. subtype 2 for <TT>Genus6GonalMap</TT>), returns a birational map
+to a plane curve of minimal degree (5 or 6). This map may be defined over a 
+finite extension of the base field k, but it will always be a minimal degree
+extension for the existence of minimal degree plane models. The first return
+value is a boolean, which is <TT>true</TT> only if C is of gonality 4 and not of
+subtype 2. If so, the second return value is the map to the curve.
+<P>
+When C is birationally isomorphic to a plane quintic C<sub>5</sub>, (subtype 3 for
+<TT>Genus6GonalMap</TT>), C<sub>5</sub> is a minimal degree plane model and it and the
+birational map to it are defined over k. This is a Clifford index 1 case,
+and the computation is performed via the <TT>CliffordIndexOne</TT> intrinsic.
+<P>
+In the general case, (subtype 1 for <TT>Genus6GonalMap</TT>), the smallest
+degree plane models are of degree 6, there are only finitely many birational
+maps from C to degree 6 plane curves up to linear equivalence and these are in
+1-1 correspondence with the finitely many equivalence classes of gonal maps.
+The birational maps to plane models are computed by a slight variant of
+the same algorithm used to compute the gonal maps (see <A  HREF = "text1355.htm#bib_mike_harr_gen56_11">[Har13]</A>).
+The return value is over the base field k, if possible, and otherwise over a
+smallest degree (at most 5) possible field extension.
+<P>
+If the input C is already a canonical model, parameter <TT>IsCanonical</TT> may be
+set to <TT>true</TT>. This will simplify the internal processing. <B>NB</B> The defining equations
+of C must be a minimal basis for its defining ideal.
+</BLOCKQUOTE>
+<H5><A NAME = "15301">Genus5PlaneCurveModel(C) : Crv -&gt; BoolElt, MapSch</A></H5>
+<H5>Genus5PlaneCurveModel(C,P) : Crv, Pt -&gt; BoolElt, MapSch</H5>
+<H5>Genus5PlaneCurveModel(C,Z) : Crv, Sch -&gt; BoolElt, MapSch</H5>
+
+<PRE>    IsCanonical: BoolElt                Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+For a genus 5 curve C, tries to compute a birational map over the base field k
+to a plane curve of minimal degree (5 or 6) for plane curve models over bar(k).
+The first return value is a boolean which is <TT>true</TT> if the construction succeeds
+and, if so, the second return value is the birational map to the plane curve.
+<P>
+If C is hyperelliptic, the return value is always <TT>false</TT>. Gonality 3 curves
+are always birational over k to a plane curve of degree 5 with a single
+singular point and the computation always succeeds. The map to (P)<sup>2</sup>
+on a canonical model C<sub>c</sub> of C lying in (P)<sup>4</sup> is given by projection from
+a line lying in the rational scroll surface X that contains C<sub>c</sub>.
+<P>
+If C is 4-gonal and isn't a double cover of a genus 1 curve, the minimal degree
+plane model is of degree 6 and there are infinitely many of these (up to linear
+equivalence) that are given by projection from a secant line or tangent line
+of the canonical model C<sub>c</sub>.
+<P>
+To find a birational map to such a model over k, we need a secant
+or tangent line defined over k, which will correspond to a k-rational
+point on C<sub>c</sub> or a k-rational reduced divisor of degree 2 (i.e. 2 distinct
+points that are k-rational or conjugate over a quadratic extension of k).
+<P>
+The second and third versions of the function have a second argument that should
+be a k-rational <I>non-singular</I> point on C or a reduced subscheme of
+C of dimension 0 and degree 2, whose points (over bar(k)) lie in the 
+non-singular locus of C. These are used to define the k-rational tangent line
+or secant line on the canonical model and the intrinsic will always succeed and
+return the map to a degree 6 model if they are provided by the user.
+<P>
+In the version with only the curve C as input, the intrinsic attempts to find
+a (non-singular) k-rational point on C using <TT>PointSearch</TT> if the 
+base field is the rationals or using point enumeration if the base field is
+a finite field. If this search fails, or k is a field of a different type, 
+the intrinsic will fail and return <TT>false</TT>.
+<P>
+If the input C is already a canonical model, parameter <TT>IsCanonical</TT> may be
+set to <TT>true</TT>. This will simplify the internal processing. <B>NB</B> The defining equations
+of C must be a minimal basis for its defining ideal.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15302">Example <TT>Crv_gon-pln_mod-ex (H120E44)</TT></A></H3>
+We use the intrinsic for genus 6 curves to get a degree 6 plane model
+for the modular curve X<sub>0</sub>(58), starting from its canonical model.
+<P>
+<P>
+<PRE>
+&gt; X := X0NQuotient(58,[]);
+&gt; X;
+Curve over Rational Field defined by
+x[1]^2-x[1]*x[3]+x[2]*x[4]+x[2]*x[5]-x[1]*x[6]+x[4]*x[6]+x[5]*x[6],
+x[1]^2-x[1]*x[2]-x[2]^2-x[1]*x[3]-x[1]*x[4]+x[3]*x[4]+x[2]*x[5]+x[3]*x[5],
+-x[1]^2+x[1]*x[2]+x[2]^2+x[4]^2+x[4]*x[5]-x[2]*x[6],
+-x[1]^2-x[1]*x[2]+x[2]^2+x[2]*x[3]-x[1]*x[4]+x[2]*x[4]+x[3]*x[4]+x[4]^2-x[5]*x[6],
+x[2]^2-x[1]*x[3]+x[2]*x[3]+x[3]^2-x[1]*x[4]+x[3]*x[4]+x[2]*x[6]+x[3]*x[6],
+x[1]*x[2]-x[2]*x[3]-x[1]*x[4]+x[3]*x[4]+x[2]*x[5]+x[3]*x[5]+x[4]*x[5]-x[1]*x[6]+
+x[2]*x[6]+x[3]*x[6]+x[4]*x[6]
+&gt; boo,mp := Genus6PlaneCurveModel(X : IsCanonical := true);
+&gt; boo;
+true
+&gt; C&lt;x,y,z&gt; := Codomain(mp); //the plane model
+&gt; C;
+Curve over Rational Field defined by
+x^6-3*x^5*y+x^4*y^2+3*x^3*y^3-7/4*x^2*y^4-1/4*x*y^5-1/4*y^6+3/2*x^5*z-x^4*y*z-
+9/2*x^3*y^2*z+7/2*x^2*y^3*z+5/8*x*y^4*z+3/4*y^5*z+5/4*x^4*z^2+1/4*x^3*y*z^2-
+3*x^2*y^2*z^2+3/4*x*y^3*z^2-3/4*y^4*z^2+5/8*x^3*z^3+5/4*x^2*y*z^3-7/4*x*y^2*z^3+
+1/4*y^3*z^3+1/8*x^2*z^4+5/8*x*y*z^4-1/8*y^2*z^4+1/8*y*z^5
+&gt; mp;
+Mapping from: Crv: X to Crv: C
+with equations : 
+x[1] - x[3]
+x[2] + x[6]
+x[5] + x[6]
+</PRE>
+Do the same for genus 5 4-gonal modular curve X<sub>0</sub>(42).
+<P>
+<P>
+<PRE>
+&gt; P4&lt;x,y,z,t,u&gt; := ProjectiveSpace(Rationals(),4);
+&gt; X42 := Curve(P4,[x*z+z^2+x*t-x*u,
+&gt;   y^2-2*y*z+z^2-x*t-2*y*t+z*t-2*y*u+z*u+t*u,
+&gt;   x^2+x*t+y*t+y*u ]);
+&gt; // use pointsearch to pick rational point on X42
+&gt; boo,mp := Genus5PlaneCurveModel(X42 : IsCanonical := true);
+&gt; boo;
+true
+&gt; C&lt;x,y,z&gt; := Codomain(mp);
+&gt; C;
+x^6+3*x^5*y+9/2*x^4*y^2+2*x^3*y^3+2*x^2*y^4+11/8*x^5*z+31/8*x^4*y*z+23/4*x^3*y^2*z
++1/2*x^2*y^3*z+3*x*y^4*z+85/128*x^4*z^2+29/16*x^3*y*z^2+41/16*x^2*y^2*z^2-
+9/4*x*y^3*z^2+9/8*y^4*z^2+9/64*x^3*z^3+17/32*x^2*y*z^3+15/16*x*y^2*z^3-
+9/8*y^3*z^3+1/128*x^2*z^4+3/32*x*y*z^4+9/32*y^2*z^4
+&gt; mp;
+Mapping from: Crv: X42 to Crv: C
+with equations : 
+x + 1/2*t - 1/2*u
+y - 1/4*t + 1/4*u
+z - t + u
+&gt; // use nicer chosen point for nicer map
+&gt; boo,mp := Genus5PlaneCurveModel(X42,X42![0,0,0,0,1] : IsCanonical := true);
+&gt; C&lt;x,y,z&gt; := Codomain(mp);
+&gt; C;
+x^5*y-2*x^4*y^2+x^3*y^3-x^2*y^4+2*x*y^5-y^6-x^5*z+3*x^4*y*z-6*x^3*y^2*z-
+11*x^2*y^3*z-12*x*y^4*z-2*x^4*z^2+9*x^3*y*z^2+20*x^2*y^2*z^2+16*x*y^3*z^2+
+2*y^4*z^2-4*x^3*z^3-7*x^2*y*z^3-4*x*y^2*z^3-x^2*z^4-2*x*y*z^4-y^2*z^4
+&gt; mp;
+Mapping from: Crv: X42 to Crv: C
+with equations : 
+x
+y
+z + t
+</PRE>
+<PRE></PRE> <A  HREF = "text1355.htm">[Next]</A><A  HREF = "text1368.htm">[Prev]</A> <A  HREF = "text1355.htm">[Right]</A> <A  HREF = "text1368.htm">[Left]</A> <A  HREF = "text1356.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,698 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Constructions for Z4 Codes</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1877.htm">[Next]</A><A  HREF = "text1875.htm">[Prev]</A> <A  HREF = "text1877.htm">[Right]</A> <A  HREF = "text1875.htm">[Left]</A> <A  HREF = "text1874.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "20839">Constructions for Z<sub>4</sub> Codes</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1876.htm#20840">The Gray Map</A>
+<LI> <A  HREF = "text1876.htm#20845">Families of Codes over Z<sub>4</sub></A>
+<LI> <A  HREF = "text1876.htm#20866">Derived Binary Codes</A>
+<LI> <A  HREF = "text1876.htm#20871">New Codes from Old</A>
+</UL>
+<H4><A NAME = "20840">The Gray Map</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+For an element x&isin;Z<sub>4</sub>, the <I>Gray map</I> &phi;: Z<sub>4</sub> -&gt; Z<sub>2</sub><sup>2</sup>
+is defined by:
+0 |-&gt; 00,   1 |-&gt; 01,   2 |-&gt; 11,   3 |-&gt; 10.
+This map is extended to a map from Z<sub>4</sub><sup>n</sup> onto Z<sub>2</sub><sup>2n</sup> in the
+obvious way (by concatenating the images of each component). The resulting
+map is a weight- and distance-preserving map from Z<sub>4</sub><sup>n</sup> (with Lee weight
+metric) to Z<sub>2</sub><sup>2n</sup> (with Hamming weight metric).
+See <A  HREF = "text1873.htm#bib_Wan_Z4">[Wan97, Chapter 3]</A> for more information (but note that that
+author uses a different ordering of the components of the image of a vector).
+
+
+<H5><A NAME = "20841">GrayMap(C) : Code -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Given a Z<sub>4</sub>-linear code C, this function returns the Gray map for C.
+This is the map &phi; from C to GF(2)<sup>2n</sup>, as defined above.
+</BLOCKQUOTE>
+<H5><A NAME = "20842">GrayMapImage(C) : Code -&gt; [ ModTupRngElt ]</A></H5>
+<BLOCKQUOTE>
+Given a Z<sub>4</sub>-linear code C, this function returns the image of C
+under the Gray map as a sequence of vectors in GF(2)<sup>2n</sup>.  As the
+resulting image may not be a GF(2)-linear code, a sequence of vectors 
+is returned rather than a code.
+</BLOCKQUOTE>
+<H5><A NAME = "20843">HasLinearGrayMapImage(C) : Code -&gt; BoolElt, Code</A></H5>
+<BLOCKQUOTE>
+Given a Z<sub>4</sub>-linear code C, this function returns true if and only
+if the image of C under the Gray map is a GF(2)-linear code.  If
+so, the function also returns the image B as a GF(2)-linear code,
+together with the bijection &phi;: C -&gt; B.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20844">Example <TT>CodeZ4_GrayMap (H162E1)</TT></A></H3>
+Let &phi;(O<sub>8</sub>) be the image of the octacode O<sub>8</sub> under the Gray map.
+This image is not a GF(2)-linear code, but it is the non-linear 
+(8, 256, 6) Nordstrom-Robinson code <A  HREF = "text1873.htm#bib_Wan_Z4">[Wan97, Ex.3.4]</A>.  The 
+statements below demonstrate that the Hamming weight distribution of 
+the GF(2) image is identical to the Lee weight distribution of 
+the linear Z<sub>4</sub> code.
+<P>
+<P>
+<PRE>
+&gt; Z4 := IntegerRing(4);
+&gt; O8 := LinearCode&lt;Z4, 8 |
+&gt;     [1,0,0,0,3,1,2,1],
+&gt;     [0,1,0,0,1,2,3,1],
+&gt;     [0,0,1,0,3,3,3,2],
+&gt;     [0,0,0,1,2,3,1,1]&gt;;
+&gt; HasLinearGrayMapImage(O8);
+false
+&gt; NR := GrayMapImage(O8);
+&gt; #NR;
+256
+&gt; LeeWeightDistribution(O8);
+[ &lt;0, 1&gt;, &lt;6, 112&gt;, &lt;8, 30&gt;, &lt;10, 112&gt;, &lt;16, 1&gt; ]
+&gt; {* Weight(v): v in NR *};
+{* 0, 16, 6^^112, 8^^30, 10^^112 *}
+</PRE>
+After defining the code K<sub>8</sub>, the images of some codewords under 
+the Gray map are found.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Z4 := IntegerRing(4);
+&gt; K8 := LinearCode&lt; Z4, 8 |
+&gt;     [1,1,1,1,1,1,1,1],
+&gt;     [0,2,0,0,0,0,0,2],
+&gt;     [0,0,2,0,0,0,0,2],
+&gt;     [0,0,0,2,0,0,0,2],
+&gt;     [0,0,0,0,2,0,0,2],
+&gt;     [0,0,0,0,0,2,0,2],
+&gt;     [0,0,0,0,0,0,2,2]&gt;;
+&gt; f := GrayMap(K8);
+&gt; K8.1;
+(1 1 1 1 1 1 1 1)
+&gt; f(K8.1);
+(0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1)
+&gt; K8.2;
+(0 2 0 0 0 0 0 2)
+&gt; f(K8.2);
+(0 0 1 1 0 0 0 0 0 0 0 0 0 0 1 1)
+</PRE>
+The image of K<sub>8</sub> under the Gray map is a linear code over GF(2).
+<P>
+<P>
+<PRE>
+&gt; l, B, g := HasLinearGrayMapImage(K8);
+&gt; l;
+true
+&gt; B;
+[16, 8, 4] Linear Code over GF(2)
+Generator matrix:
+[1 0 0 1 0 1 0 1 0 1 0 1 0 1 1 0]
+[0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1]
+[0 0 1 1 0 0 0 0 0 0 0 0 0 0 1 1]
+[0 0 0 0 1 1 0 0 0 0 0 0 0 0 1 1]
+[0 0 0 0 0 0 1 1 0 0 0 0 0 0 1 1]
+[0 0 0 0 0 0 0 0 1 1 0 0 0 0 1 1]
+[0 0 0 0 0 0 0 0 0 0 1 1 0 0 1 1]
+[0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1]
+&gt; g(K8.1) in B;
+true
+</PRE>
+<HR>
+<H4><A NAME = "20845">Families of Codes over Z<sub>4</sub></A></H4>
+
+<P>
+<P>
+<P>
+<P>
+This section presents some standard constructions for Z<sub>4</sub>-linear codes.
+Further constructions will become available in the near future.
+
+
+<H5><A NAME = "20846">KerdockCode(m): RngIntElt -&gt; Code</A></H5>
+<BLOCKQUOTE>
+Given an integer m&ge;2, return the quaternary Kerdock code K(m) of
+length 2<sup>m</sup> - 1 defined by a default primitive polynomial h&isin;Z<sub>4</sub>[x] of
+degree m.
+</BLOCKQUOTE>
+<H5><A NAME = "20847">PreparataCode(m): RngIntElt -&gt; Code</A></H5>
+<BLOCKQUOTE>
+Given an integer m&ge;2, return the quaternary Preparata code P(m)
+of length 2<sup>m</sup> - 1 defined by a default primitive polynomial
+h&isin;Z<sub>4</sub>[x] of degree m.
+</BLOCKQUOTE>
+<H5><A NAME = "20848">ReedMullerCodeZ4(r, m) : RngIntElt, RngIntElt -&gt; Code</A></H5>
+<BLOCKQUOTE>
+Given an integer m &ge;2 and an integer r such that 0 &le;r &le;m 
+this function returns the r-th order Reed-Muller code over Z<sub>4</sub> of 
+length 2<sup>m</sup>.
+</BLOCKQUOTE>
+<H5><A NAME = "20849">GoethalsCode(m) : RngIntElt -&gt; Code</A></H5>
+<BLOCKQUOTE>
+Given a positive integer m, where m must be an odd and greater than 
+or equal to 3, return the Goethals code of length 2<sup>m</sup>.
+</BLOCKQUOTE>
+<H5><A NAME = "20850">DelsarteGoethalsCode(m, delta) : RngIntElt, RngIntElt -&gt; Code</A></H5>
+<BLOCKQUOTE>
+Return the Delsarte-Goethals Code of length 2<sup>m</sup>.
+</BLOCKQUOTE>
+<H5><A NAME = "20851">GoethalsDelsarteCode(m, delta) : RngIntElt, RngIntElt -&gt; Code</A></H5>
+<BLOCKQUOTE>
+Return the Goethals-Delsarte code of length 2<sup>m</sup>
+</BLOCKQUOTE>
+<H5><A NAME = "20852">QRCodeZ4(p) : RngIntElt -&gt; Code</A></H5>
+<BLOCKQUOTE>
+Given a prime number p such that 2 is a quadratic residue
+modulo p, return the quadratic residue code of length p over 
+Z<sub>4</sub>.
+</BLOCKQUOTE>
+<H5><A NAME = "20853">GolayCodeZ4(e) : BoolElt -&gt; Code</A></H5>
+<BLOCKQUOTE>
+Return the Golay Code over Z<sub>4</sub>. If e is <TT>true</TT> then return the extended
+Golay Code
+</BLOCKQUOTE>
+<H5><A NAME = "20854">SimplexAlphaCodeZ4(k) : RngIntElt -&gt; Code</A></H5>
+<BLOCKQUOTE>
+Return the simplex alpha code over Z<sub>4</sub> of degree k.
+</BLOCKQUOTE>
+<H5><A NAME = "20855">SimplexBetaCodeZ4(k) : RngIntElt -&gt; Code</A></H5>
+<BLOCKQUOTE>
+Return the simplex beta code over Z<sub>4</sub> of degree k.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20856">Example <TT>CodeZ4_Kerdock (H162E2)</TT></A></H3>
+The minimum Lee weights of some default Kerdock and Preparata codes are found.
+<P>
+<P>
+<PRE>
+&gt; PreparataCode(3);
+(8, 256, 4) Linear Code over IntegerRing(4)
+Generator matrix:
+[1 0 0 0 3 1 2 1]
+[0 1 0 0 2 1 1 3]
+[0 0 1 0 1 1 3 2]
+[0 0 0 1 3 2 3 3]
+&gt; MinimumLeeWeight($1);
+6
+&gt; KerdockCode(4);
+[16, 5, 8] Linear Code over IntegerRing(4)
+Generator matrix:
+[1 0 0 0 0 1 1 3 0 3 3 0 2 1 2 3]
+[0 1 0 0 0 2 3 3 3 2 1 3 0 0 1 1]
+[0 0 1 0 0 3 1 0 3 0 3 1 1 3 2 2]
+[0 0 0 1 0 2 1 3 0 1 2 3 1 3 3 0]
+[0 0 0 0 1 1 3 0 3 3 0 2 1 2 1 3]
+&gt; MinimumLeeWeight($1);
+12
+&gt; KerdockCode(5);
+(32, 4096, 16) Linear Code over IntegerRing(4)
+Generator matrix:
+[1 0 0 0 0 0 3 3 3 2 0 3 2 2 0 3 0 1 0 1 3 1 1 0 3 1 2 3 2 2 3 3]
+[0 1 0 0 0 0 3 2 2 1 2 3 1 0 2 3 3 1 1 1 0 0 2 1 3 0 3 1 1 0 1 2]
+[0 0 1 0 0 0 1 0 3 0 1 3 1 3 0 3 3 2 1 0 2 3 3 2 2 2 2 0 3 3 1 3]
+[0 0 0 1 0 0 1 2 1 1 0 2 1 3 3 1 3 2 2 0 1 1 2 3 3 1 0 3 2 1 0 0]
+[0 0 0 0 1 0 0 1 2 1 1 0 2 1 3 3 1 3 2 2 0 1 1 2 3 3 1 0 3 2 1 0]
+[0 0 0 0 0 1 1 1 2 0 1 2 2 0 1 0 3 0 3 1 3 3 0 1 3 2 1 2 2 1 3 1]
+&gt; MinimumLeeWeight($1);
+28
+</PRE>
+<HR>
+<H5><A NAME = "20857">HadamardCodeZ4(&delta;, m) : RngIntElt, RngIntElt -&gt; CodeLinRng, Mtrx</A></H5>
+<BLOCKQUOTE>
+Given an integer m&ge;1 and an integer &delta; such that
+1&le;&delta; &le;&lfloor;(m + 1)/2 &rfloor;, return a Hadamard
+code over Z<sub>4</sub> of length 2<sup>m - 1</sup> and type 2<sup>&gamma;</sup> 4<sup>&delta;</sup>, where &gamma;=m + 1 - 2&delta;.
+Moreover, return a generator matrix with &gamma; + &delta; rows constructed in a
+recursive way from the <TT>Plotkin</TT> and <TT>BQPlotkin</TT> constructions defined in Section <A  HREF = "text1876.htm#20871">New Codes from Old</A>.
+<P>
+A Hadamard code over Z<sub>4</sub> of length 2<sup>m - 1</sup> is a code over Z<sub>4</sub> such that,
+after the Gray map, give a binary (not necessarily linear) code with the same
+parameters as the binary Hadamard code of length 2<sup>m</sup>.
+</BLOCKQUOTE>
+<H5><A NAME = "20858">ExtendedPerfectCodeZ4(&delta;, m) : RngIntElt, RngIntElt -&gt; CodeLinRng, Mtrx</A></H5>
+<BLOCKQUOTE>
+Given an integer m&ge;2 and an integer &delta; such that
+1&le;&delta; &le;&lfloor;(m + 1)/2 &rfloor;, return an extended
+perfect code over Z<sub>4</sub> of length 2<sup>m - 1</sup>, such that its dual code is of type
+2<sup>&gamma;</sup> 4<sup>&delta;</sup>, where &gamma;=m + 1 - 2&delta;.
+Moreover, return a generator matrix  constructed in a
+recursive way from the <TT>Plotkin</TT> and <TT>BQPlotkin</TT> constructions defined in Section <A  HREF = "text1876.htm#20871">New Codes from Old</A>.
+<P>
+An extended perfect code over Z<sub>4</sub> of length 2<sup>m - 1</sup> is a code over Z<sub>4</sub> such that, after the Gray map, give a binary
+(not necessarily linear) code with the same parameters as the binary extended
+perfect code of length 2<sup>m</sup>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20859">Example <TT>CodeZ4_spain-Z4-1 (H162E3)</TT></A></H3>
+Some codes over Z<sub>4</sub> whose images under the Gray map are binary codes having the 
+same parameters as some well-known families of binary linear codes are explored.
+<P>
+<P>
+First, a Hadamard code C over Z<sub>4</sub> of length 8 and type 2<sup>1</sup>4<sup>2</sup> is defined. 
+The matrix Gc is the quaternary matrix used to generate C and obtained by a 
+recursive method from <TT>Plotkin</TT> and <TT>BQPlotkin</TT> constructions.
+<P>
+<P>
+<P>
+<PRE>
+&gt; C, Gc := HadamardCodeZ4(2,4);
+&gt; C;
+((8, 4^2 2^1)) Linear Code over IntegerRing(4)
+Generator matrix:
+[1 0 3 2 1 0 3 2]
+[0 1 2 3 0 1 2 3]
+[0 0 0 0 2 2 2 2]
+&gt; Gc;
+[1 1 1 1 1 1 1 1]
+[0 1 2 3 0 1 2 3]
+[0 0 0 0 2 2 2 2]
+&gt; HasLinearGrayMapImage(C);
+true [16, 5, 8] Linear Code over GF(2)
+Generator matrix:
+[1 0 0 0 0 1 1 1 0 1 1 1 1 0 0 0]
+[0 1 0 0 1 0 1 1 0 1 0 0 1 0 1 1]
+[0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1]
+[0 0 0 1 1 1 1 0 0 0 0 1 1 1 1 0]
+[0 0 0 0 0 0 0 0 1 1 1 1 1 1 1 1]
+Mapping from: CodeLinRng: C to [16, 5, 8] Linear Code over GF(2) given by a rule
+</PRE>
+<P>
+Then, an extended perfect code D over Z<sub>4</sub> of length 8 is defined, such that 
+its dual code is of type 2<sup>1</sup>4<sup>2</sup>. The matrix Gd is the quaternary matrix which 
+is used to generate D and obtained in a recursive way from <TT>Plotkin</TT> and 
+<TT>BQPlotkin</TT> constructions. Note that the code D is the Kronecker dual code of C.
+<P>
+<P>
+<P>
+<PRE>
+&gt; D, Gd := ExtendedPerfectCodeZ4(2,4);	
+&gt; D;
+((8, 4^5 2^1)) Linear Code over IntegerRing(4)
+Generator matrix:
+[1 0 0 1 0 0 1 3]
+[0 1 0 1 0 0 2 2]
+[0 0 1 1 0 0 1 1]
+[0 0 0 2 0 0 0 2]
+[0 0 0 0 1 0 3 2]
+[0 0 0 0 0 1 2 3]
+&gt; Gd;
+[1 1 1 1 1 1 1 1]
+[0 1 2 3 0 1 2 3]
+[0 0 1 1 0 0 1 1]
+[0 0 0 2 0 0 0 2]
+[0 0 0 0 1 1 1 1]
+[0 0 0 0 0 1 2 3]
+
+&gt; DualKroneckerZ4(C) eq D;
+true
+</PRE>
+<HR>
+<H5><A NAME = "20860">ReedMullerCodeZ4(r, m) : RngIntElt, RngIntElt -&gt; CodeLinRng</A></H5>
+<H5>ReedMullerCodeQRMZ4(r, m) : RngIntElt, RngIntElt -&gt; CodeLinRng</H5>
+<BLOCKQUOTE>
+Given an integer m&ge;2 and an integer r such that 0&le;r&le;m, 
+the r-th order Reed-Muller code over Z<sub>4</sub> of length 2<sup>m</sup> is returned.
+<P>
+The binary image under the modulo 2 map is the binary linear r-th
+order Reed-Muller code of length 2<sup>m</sup>. For r=1 and r=m - 2, the function
+returns the quaternary linear Kerdock and Preparata code, respectively.
+</BLOCKQUOTE>
+<H5><A NAME = "20861">ReedMullerCodesLRMZ4(r, m) : RngIntElt, RngIntElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given an integer m&ge;1 and an integer r such that 0&le;r&le;m, 
+a set of r-th order Reed-Muller codes over Z<sub>4</sub> of length 2<sup>m - 1</sup>
+is returned.
+<P>
+The binary image under the Gray map of any of these codes is a binary
+(not necessarily linear) code with the same parameters as the binary linear r-th
+order Reed-Muller code of length 2<sup>m</sup>. Note that for these codes neither the usual inclusion nor
+duality properties of the binary linear Reed-Muller family are satisfied.
+</BLOCKQUOTE>
+<H5><A NAME = "20862">ReedMullerCodeRMZ4(s, r, m) : RngIntElt, RngIntElt, RngIntElt -&gt; CodeLinRng, Mtrx</A></H5>
+<BLOCKQUOTE>
+Given an integer m&ge;1, an integer r such that 0&le;r
+ &le;m, and an integer s such that 0&le;s &le;&lfloor;(m - 1)/2 &rfloor;,
+ return a r-th order Reed-Muller code over Z<sub>4</sub> of length 2<sup>m - 1</sup>, denoted by RM<sub>s</sub>(r, m), as well as the generator matrix used in the recursive construction.
+<P>
+The binary image under the Gray map is a binary
+(not necessarily linear) code with the same parameters as the binary linear r-th
+order Reed-Muller code of length 2<sup>m</sup>. Note that the inclusion and duality properties are also satisfied, that is,
+the code RM<sub>s</sub>(r - 1, m) is a subcode of RM<sub>s</sub>(r, m), r&gt;0, and the code RM<sub>s</sub>(r, m) is the Kronecker dual code of RM<sub>s</sub>(m - r - 1, m), r&lt;m.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20863">Example <TT>CodeZ4_spain-Z4-2 (H162E4)</TT></A></H3>
+Taking the Reed-Muller codes RM<sub>1</sub>(1, 4) and RM<sub>1</sub>(2, 4), it can be seen that the 
+former is a subcode of the latter. Note that RM<sub>1</sub>(1, 4) and RM<sub>1</sub>(2, 4) are the 
+same as the ones given in Example <A  HREF = "text1876.htm#20859">H162E3</A> by <TT>HadamardCodeZ4(2,4)</TT> and  
+<TT>ExtendedPerfectCodeZ4(2,4)</TT>, respectively.
+<P>
+<P>
+<P>
+<PRE>
+&gt; C1,G1 := ReedMullerCodeRMZ4(1,1,4);
+&gt; C2,G2 := ReedMullerCodeRMZ4(1,2,4);
+&gt; C1;
+((8, 4^2 2^1)) Linear Code over IntegerRing(4)
+Generator matrix:
+[1 0 3 2 1 0 3 2]
+[0 1 2 3 0 1 2 3]
+[0 0 0 0 2 2 2 2]
+&gt; C2;
+((8, 4^5 2^1)) Linear Code over IntegerRing(4)
+Generator matrix:
+[1 0 0 1 0 0 1 3]
+[0 1 0 1 0 0 2 2]
+[0 0 1 1 0 0 1 1]
+[0 0 0 2 0 0 0 2]
+[0 0 0 0 1 0 3 2]
+[0 0 0 0 0 1 2 3]
+&gt; C1 subset C2;
+true
+&gt; DualKroneckerZ4(C2) eq C1;
+true
+</PRE>
+<HR>
+<H5><A NAME = "20864">ReedMullerCodesRMZ4(s, m) : RngIntElt, RngIntElt -&gt; Tup</A></H5>
+<BLOCKQUOTE>
+Let m be an integer m&ge;1, and s an integer such that 
+0&le;s &le;&lfloor;(m - 1)/2 &rfloor;. This function returns 
+a sequence containing the family of Reed-Muller codes over 
+Z<sub>4</sub> of length 2<sup>m - 1</sup>, that is, the codes RM<sub>s</sub>(r, m), 
+for all 0&le;r&le;m.
+<P>
+The binary image of these codes under the Gray map gives a 
+family of binary (not necessarily linear) codes with the same 
+parameters as the binary linear Reed-Muller family of codes of length 2<sup>m</sup>.
+Note that RM<sub>s</sub>(0, m) &sub;RM<sub>s</sub>(1, m) &sub; ... &sub;RM<sub>s</sub>(m, m)
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20865">Example <TT>CodeZ4_spain-Z4-3 (H162E5)</TT></A></H3>
+The family of Reed-Muller codes over Z<sub>4</sub> of length 2<sup>2</sup> given by s=0
+is constructed.
+<P>
+<P>
+<P>
+<PRE>
+&gt; F := ReedMullerCodesRMZ4(0,3);
+&gt; F;
+[((4, 4^0 2^1)) Cyclic Linear Code over IntegerRing(4)
+Generator matrix:
+[2 2 2 2],
+((4, 4^1 2^2)) Cyclic Linear Code over IntegerRing(4)
+Generator matrix:
+[1 1 1 1]
+[0 2 0 2]
+[0 0 2 2],
+((4, 4^3 2^1)) Cyclic Linear Code over IntegerRing(4)
+Generator matrix:
+[1 0 0 1]
+[0 1 0 1]
+[0 0 1 1]
+[0 0 0 2],
+((4, 4^4 2^0)) Cyclic Linear Code over IntegerRing(4)
+Generator matrix:
+[1 0 0 0]
+[0 1 0 0]
+[0 0 1 0]
+[0 0 0 1]]
+
+&gt; F[1] subset F[2] and F[2] subset F[3] and F[3] subset F[4];
+true
+</PRE>
+<HR>
+<H4><A NAME = "20866">Derived Binary Codes</A></H4>
+
+<P>
+<P>
+As well as the binary image of a quaternary code under the Gray map
+(see section <A  HREF = "text1876.htm#20840">The Gray Map</A>), there are also two other
+associated canonical binary codes. They are known the <I>residue</I> 
+and <I>torsion</I> codes, the former being a subcode of the latter.
+<P>
+From any binary code-subcode pair C<sub>1</sub> &sub;C<sub>2</sub>, a quaternary 
+code C can be constructed such that the residue and torsion codes 
+of C will be C<sub>1</sub> and C<sub>2</sub> respectively. Note that this quaternary 
+code is not unique.
+
+
+<H5><A NAME = "20867">BinaryResidueCode(C) : Code -&gt; Code</A></H5>
+<BLOCKQUOTE>
+Given a quaternary code C, return the binary code formed by taking 
+each codeword in C modulo 2. This is known as the <I>binary
+residue code</I> of C.
+</BLOCKQUOTE>
+<H5><A NAME = "20868">BinaryTorsionCode(C) : Code -&gt; Code</A></H5>
+<BLOCKQUOTE>
+Given a quaternary code C, return the binary code formed by the support 
+of each codeword in C which is zero modulo 2. This is known as the 
+<I>binary torsion code</I> of C.
+</BLOCKQUOTE>
+<H5><A NAME = "20869">Z4CodeFromBinaryChain(C1, C2) : Code, Code -&gt; Code</A></H5>
+<BLOCKQUOTE>
+Given binary code C<sub>1</sub> and C<sub>2</sub> such that C<sub>1</sub> &sub;C<sub>2</sub>, return 
+a quaternary code such that its binary residue code is C<sub>1</sub> and its 
+binary torsion code is C<sub>2</sub>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20870">Example <TT>CodeZ4_derived-binary (H162E6)</TT></A></H3>
+This example shows that the derived binary codes of the Z<sub>4</sub> Golay 
+code, are in fact equal to the binary Golay code. 
+<P>
+<P>
+<PRE>
+&gt; C := GolayCodeZ4(false);
+&gt; C;
+(23, 4^12 2^0)) Cyclic Code over IntegerRing(4)
+Generator matrix:
+[1 0 0 0 0 0 0 0 0 0 0 0 3 1 0 0 2 3 3 3 0 3 2]
+[0 1 0 0 0 0 0 0 0 0 0 0 2 1 1 0 0 0 1 1 3 2 3]
+[0 0 1 0 0 0 0 0 0 0 0 0 3 3 1 1 2 3 3 0 1 2 0]
+[0 0 0 1 0 0 0 0 0 0 0 0 0 3 3 1 1 2 3 3 0 1 2]
+[0 0 0 0 1 0 0 0 0 0 0 0 2 2 3 3 1 3 0 1 3 2 1]
+[0 0 0 0 0 1 0 0 0 0 0 0 1 1 2 3 1 2 0 1 1 0 0]
+[0 0 0 0 0 0 1 0 0 0 0 0 0 1 1 2 3 1 2 0 1 1 0]
+[0 0 0 0 0 0 0 1 0 0 0 0 0 0 1 1 2 3 1 2 0 1 1]
+[0 0 0 0 0 0 0 0 1 0 0 0 1 3 0 1 3 3 0 2 2 1 3]
+[0 0 0 0 0 0 0 0 0 1 0 0 3 2 3 0 3 2 2 3 2 1 3]
+[0 0 0 0 0 0 0 0 0 0 1 0 3 0 2 3 2 2 1 1 3 1 3]
+[0 0 0 0 0 0 0 0 0 0 0 1 3 0 0 2 1 1 1 0 1 2 3]
+&gt;
+&gt; CRes := BinaryResidueCode(C);
+&gt; CTor := BinaryTorsionCode(C);
+&gt; CRes eq CTor;
+true
+&gt; CRes:Minimal;
+[23, 12, 7] Linear Code over GF(2)
+&gt; AreEq, _ := IsEquivalent( CRes, GolayCode(GF(2), false) );
+&gt; AreEq;
+true
+</PRE>
+Note that the canonical code over Z<sub>4</sub> corresponding to the derived 
+binary codes CRes and CTor is different to the initial Z<sub>4</sub> code C. 
+<P>
+<P>
+<PRE>
+&gt; C1 := Z4CodeFromBinaryChain(CRes, CTor);
+&gt; C1:Minimal;
+(23, 16777216) Linear Code over IntegerRing(4)
+&gt; C eq C1;
+false
+</PRE>
+<HR>
+<H4><A NAME = "20871">New Codes from Old</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+The functions described in this section produce a new code over Z<sub>4</sub> 
+by modifying in some way the codewords of some given codes over Z<sub>4</sub>.
+
+
+<H5><A NAME = "20872">PlotkinSum(A, B) : Mtrx, Mtrx -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given matrices A and B both over the same ring and with the same number of columns, return
+the P<sub>AB</sub> matrix over the same ring of A and B, where
+<P>
+	P<sub>AB</sub> =
+	(
+	matrix(
+	A &amp; A cr
+	0 &amp; B
+	)
+	).
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "20873">PlotkinSum(C, D) : Code, Code -&gt; Code</A></H5>
+<BLOCKQUOTE>
+Given codes C and D both over the same ring and of the same length,
+construct the Plotkin sum of C and D. The Plotkin sum consists of
+all vectors of the form (u | u + v), where u &isin;C and v&isin;D.
+<P>
+Note that the Plotkin sum is computed using generator matrices for C
+and D and the <TT>PlotkinSum</TT> function for matrices. Thus, this
+function returns the code over Z<sub>4</sub> generated by the matrix P<sub>AB</sub>
+defined above, where A and B are the generator matrices for C and D,
+respectively.
+</BLOCKQUOTE>
+<H5><A NAME = "20874">QuaternaryPlotkinSum(A, B) : Mtrx, Mtrx -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given two matrices A and B over Z<sub>4</sub>, both with the same number 
+of columns, return the QP<sub>AB</sub> matrix over Z<sub>4</sub>, where
+<P>
+	QP<sub>AB</sub> =
+	(
+	matrix(
+	A &amp; A &amp; A &amp; A cr
+	0 &amp; B &amp; 2B &amp; 3B
+	)
+	).
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "20875">QuaternaryPlotkinSum(C, D) : Code, Code -&gt; Code</A></H5>
+<BLOCKQUOTE>
+Given two codes C and D over Z<sub>4</sub>, both of the same length, construct
+the Quaternary Plotkin sum of C and D.  The Quaternary Plotkin sum
+is a code over Z<sub>4</sub> that consists of all vectors of the form (u, u +
+v, u + 2v, u + 3v), where u &isin;C and v &isin;D.
+<P>
+Note that the Quaternary Plotkin sum is computed using generator matrices
+of C and D and the <TT>QuaternaryPlotkinSum</TT> function for matrices,
+that is, this function returns the code over Z<sub>4</sub> generated by the matrix
+QP<sub>AB</sub> defined above, where A and B are generators matrices of C
+and D, respectively.
+</BLOCKQUOTE>
+<H5><A NAME = "20876">BQPlotkinSum(A, B, C) : Mtrx, Mtrx, Mtrx -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given three matrices A, B, and C over Z<sub>4</sub>, all with the same 
+number of columns, return the BQP<sub>ABC</sub> matrix over Z<sub>4</sub>, where 
+	BQP<sub>ABC</sub> =
+	(
+	matrix(
+	A &amp; A &amp; A &amp; A cr
+	0 &amp; B' &amp; 2B' &amp; 3B'cr
+	0 &amp; 0 &amp; hat(B) &amp; hat(B)cr
+	0 &amp; 0 &amp; 0 &amp; C cr
+	)
+	),
+<P>
+B' is obtained from B replacing the twos with ones in the rows of 
+order two, and hat(B) is obtained from B removing the rows of 
+order two.
+</BLOCKQUOTE>
+<H5><A NAME = "20877">BQPlotkinSum(D, E, F) : Code, Code, Code -&gt; Code</A></H5>
+<BLOCKQUOTE>
+Given three codes D, E and F over Z<sub>4</sub>, all of the same length,
+construct the BQ Plotkin sum of D, E and F. Let Ge be a generator
+matrix for E of type 2<sup>&gamma;</sup> 4<sup>&delta;</sup>. The code E' over
+Z<sub>4</sub> is obtained from E by replacing the twos with ones in the &gamma;
+rows of order two of Ge, and the code hat(E) over Z<sub>4</sub> is obtained
+from E removing the &gamma; rows of order two of Ge. 
+<P>
+The BQ Plotkin
+sum is a code over Z<sub>4</sub> that consists of all vectors of the form 
+(u, u + v', u + 2v' + hat(v), u + 3v' + hat(v) + z), where u &isin;Gd,
+v' &isin;Ge' hat(v) &isin;hat(Ge), and z &isin;Gf, where Gd, Ge',
+hat(Ge) and Gf are generator matrices for D, E', hat(E)
+and F, respectively.
+<P>
+Note that the BQPlotkin sum is computed using generator matrices of D,
+E and F and the <TT>BQPlotkinSum</TT> function for matrices.  However,
+this function does not necessarily return the same code over Z<sub>4</sub>
+as that generated by the matrix QP<sub>ABC</sub> defined above, where A, 
+B and C are generators matrices of D, E and F, respectively, 
+as shown in Example <A  HREF = "text1876.htm#20881">H162E7</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "20878">DoublePlotkinSum(A, B, C, D) : Mtrx, Mtrx, Mtrx, Mtrx -&gt; Mtrx</A></H5>
+<BLOCKQUOTE>
+Given four matrices A, B, C, and D over Z<sub>4</sub>, all with the 
+same number of columns, return the DP<sub>ABC</sub> matrix over Z<sub>4</sub>, where 
+	DP<sub>ABCD</sub> =
+	(
+	matrix(
+	A &amp; A &amp; A &amp; A cr
+	0 &amp; B &amp; 2B &amp; 3B cr
+	0 &amp; 0 &amp; C &amp; C cr
+	0 &amp; 0 &amp; 0 &amp; D cr
+	)
+	).
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "20879">DoublePlotkinSum(E, F, G, H) : Code, Code, Code, Code -&gt; Code</A></H5>
+<BLOCKQUOTE>
+Given four codes E, F, G and H over Z<sub>4</sub>, all of the same
+length, construct the Double Plotkin sum of E, F, G and H. The
+Double Plotkin sum is a code over Z<sub>4</sub> that consists of all vectors
+of the form (u, u + v, u + 2v + z, u + 3v + z + t), where u &isin;E,
+v &isin;F, z &isin;G and t &isin;H.
+<P>
+Note that the Double Plotkin sum is computed using generator matrices
+of E, F, G and H and the <TT>DoublePlotkinSum</TT> function for
+matrices, that is, this function returns the code over Z<sub>4</sub> generated
+by the matrix DP<sub>ABCD</sub> defined above, where A, B, C and D
+are generator matrices for E, F, G and H, respectively.
+</BLOCKQUOTE>
+<H5><A NAME = "20880">DualKroneckerZ4(C) : CodeLinRng -&gt; CodeLinRng</A></H5>
+<BLOCKQUOTE>
+Given a code C over Z<sub>4</sub> of length 2<sup>m</sup>, return its Kronecker 
+dual code.  The Kronecker dual code of C is C<sub> tensor </sub><sup>perp</sup> = 
+{x &isin;Z<sub>4</sub><sup>2<sup>m</sup></sup> : x .K<sub>2<sup>m</sup></sub> .y<sup>t</sup>=0, forall y &isin;C }, 
+where K<sub>2<sup>m</sup></sub>= tensor <sub>j=1</sub><sup>m</sup> K<sub>2</sub>, K<sub>2</sub>=(matrix( 1 &amp; 0cr 0 &amp; 3cr ) ) 
+and tensor denotes the Kronecker product of matrices. Equivalently, 
+K<sub>2<sup>m</sup></sub> is a quaternary matrix of length 2<sup>m</sup> with the vector 
+(1, 3, 3, 1, 3, 1, 1, 3, ... ) in the main diagonal and zeros elsewhere.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20881">Example <TT>CodeZ4_spain-Z4-4 (H162E7)</TT></A></H3>
+The purpose of this example is to show that the codes over Z<sub>4</sub> constructed 
+from the <TT>BQPlotkinSum</TT> function for matrices are not necessarily the 
+same as the ones constructed from the <TT>BQPlotkinSum</TT> function for codes.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Z4:=IntegerRing(4);
+&gt; Ga:=Matrix(Z4,1,2,[1,1]);
+&gt; Gb:=Matrix(Z4,2,2,[1,2,0,2]);
+&gt; Gc:=Matrix(Z4,1,2,[2,2]);
+&gt; Ca:=LinearCode(Ga);
+&gt; Cb:=LinearCode(Gb);
+&gt; Cc:=LinearCode(Gc);
+&gt; C:=LinearCode(BQPlotkinSum(Ga,Gb,Gc));
+&gt; D:=BQPlotkinSum(Ca,Cb,Cc);
+&gt; C eq D;
+false
+</PRE>
+<HR>
+<H3><A NAME = "20882">Example <TT>CodeZ4_spain-Z4-4a (H162E8)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; Ga := GeneratorMatrix(ReedMullerCodeRMZ4(1,2,3));
+&gt; Gb := GeneratorMatrix(ReedMullerCodeRMZ4(1,1,3));
+&gt; Gc := GeneratorMatrix(ReedMullerCodeRMZ4(1,0,3));
+&gt; C := ReedMullerCodeRMZ4(1,2,4);
+&gt; Cp := LinearCode(PlotkinSum(Ga, Gb));
+&gt; C eq Cp;
+true
+&gt; D := ReedMullerCodeRMZ4(2,2,5);
+&gt; Dp := LinearCode(BQPlotkinSum(Ga, Gb, Gc));
+&gt; D eq Dp;
+true
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1877.htm">[Next]</A><A  HREF = "text1875.htm">[Prev]</A> <A  HREF = "text1877.htm">[Right]</A> <A  HREF = "text1875.htm">[Left]</A> <A  HREF = "text1874.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

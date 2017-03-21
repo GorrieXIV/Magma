@@ -1,0 +1,613 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Homomorphisms</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text586.htm">[Next]</A><A  HREF = "text583.htm">[Prev]</A> [_____] <A  HREF = "text583.htm">[Left]</A> <A  HREF = "text575.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "6180">Homomorphisms</A></H3>
+
+<P>
+<P>
+Throughout this part of the chapter, when discussing the set of all 
+R-homomorphisms from the R-module M into the R-module N, 
+it will be assumed that R is a <B>commutative</B> ring.
+We further assume that M and N are free R-modules
+and that bases for these modules are present. The module Hom<sub>R</sub>(M, N) will
+be identified with the module of m x n matrices over R. Thus, an
+element of Hom<sub>R</sub>(M, N) is represented as a matrix relative to the bases
+of the generic modules corresponding to M and N.
+For this reason, we will refer to these modules as <I>matrix modules</I>.
+<P>
+We remind the reader that submodules of Hom<sub>R</sub>(M, N) are always
+presented in embedded form.
+If the user wishes to have submodules presented
+in reduced form then he/she should use the natural isomorphism between
+R<sup>(m x n)</sup> and R<sup>(mn)</sup>.
+<P>
+<P>
+It should be noted that essentially operation defined for tuple modules,
+their elements and submodules applies to matrix modules. Thus, all of the 
+operations discussed earlier in this chapter apply to matrix modules.
+<P>
+The modules M and N may themselves be matrix modules.  In this case,
+the resulting matrix module has either a right or left action and an element
+belonging to it transforms a (homomorphism) element of M into a 
+(homomorphism) element of N.
+<P>
+The function <TT>Reduce</TT> may be used to construct for a matrix module H
+the matrix module H' equivalent to H whose elements are with respect
+to the actual bases of the domain and codomain of elements of H (not
+the generic bases of the domain and codomain).
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text584.htm#6181">Hom<sub>R</sub>(M, N) for R-modules</A>
+<LI> <A  HREF = "text584.htm#6185">Hom<sub>R</sub>(M, N) for Matrix Modules</A>
+<LI> <A  HREF = "text584.htm#6189">Modules Hom<sub>R</sub>(M, N) with Given  Basis</A>
+<LI> <A  HREF = "text584.htm#6192">The Endomorphsim Ring</A>
+<LI> <A  HREF = "text584.htm#6195">The Reduced Form of a Matrix Module</A>
+<LI> <A  HREF = "text584.htm#6199">Construction of a Matrix</A>
+<LI> <A  HREF = "text584.htm#6202">Element Operations</A>
+</UL>
+<H4><A NAME = "6181">Hom<sub>R</sub>(M, N) for R-modules</A></H4>
+
+
+
+<H5><A NAME = "6182">Hom(M, N) : ModTupRng, ModTupRng -&gt; ModMatRng</A></H5>
+<BLOCKQUOTE>
+If M is the tuple module R<sup>(m)</sup> and N is the tuple module 
+R<sup>(n)</sup>, create the module Hom<sub>R</sub>(M, N) as the (R, R)-bimodule
+R<sup>(m x n)</sup>, represented as the set of all m x n matrices 
+over R. The module is created with the standard basis, 
+{E<sub>ij</sub>  |  i = 1 ..., m, j = 1 ..., n}, where E<sub>ij</sub> 
+is the matrix having a 1 in the (i, j)-th position and zeros 
+elsewhere.
+</BLOCKQUOTE>
+<H5><A NAME = "6183">RMatrixSpace(R, m, n) : Rng, RngIntElt, RngIntElt -&gt; ModMatRng</A></H5>
+<BLOCKQUOTE>
+Given a ring R and positive integers m and n, construct 
+H = Hom(M, N), where M = R<sup>(m)</sup> and N = R<sup>(n)</sup>, as the free 
+(R, R)-bimodule R<sup>(m x n)</sup>, consisting of all m x n 
+matrices over R. The module is created with the standard basis, 
+{E<sub>ij</sub>  |  i = 1 ..., m, j = 1 ..., m}. Note that
+the modules M and N are created by this function and may be
+accessed as <TT>Domain(H)</TT> and <TT>Codomain(H)</TT>, respectively.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6184">Example <TT>ModRng_Create (H58E5)</TT></A></H3>
+We construct the vector spaces V and W of dimensions 3 and 
+4, respectively, over the field of two elements and then define M to be 
+the module of homomorphisms from V into W.
+<P>
+<P>
+<PRE>
+&gt; F2 := GaloisField(2);
+&gt; V  := VectorSpace(F2, 3);
+&gt; W  := VectorSpace(F2, 4);
+&gt; M  := Hom(V, W);
+&gt; M;
+Full KMatrixSpace of 3 by 4 matrices over GF(2)
+</PRE>
+<HR>
+<H4><A NAME = "6185">Hom<sub>R</sub>(M, N) for Matrix Modules</A></H4>
+
+
+
+<H5><A NAME = "6186">Hom(M, N, "right") : ModMatRng, ModMatRng, MonStgElt -&gt; ModMatRng</A></H5>
+<BLOCKQUOTE>
+Suppose M is a matrix module over the coefficient ring R
+whose elements are a by b matrices and have domain D and codomain C.
+Suppose also that N is a matrix module over the coefficient ring R
+whose elements are a by c matrices and have domain D and codomain C'.
+Then the homomorphism module H = Hom(M, N) with right multiplication
+action exists and consists of all b by c matrices over R which
+multiply an element of M on the right to yield an element of N.
+This function constructs H explicitly.  The domain of elements of
+H is then M and the codomain of elements of H is N and the
+elements are b by c matrices over R which multiply an element
+of M on the right to yield an element of N.  Note that if M and
+N are proper submodules of their respective generic modules, then
+H may be a proper submodule of its generic module, and the correct
+basis of H will be explicitly constructed.
+</BLOCKQUOTE>
+<H5><A NAME = "6187">Hom(M, N, "left") : ModMatRng, ModMatRng, MonStgElt -&gt; ModMatRng</A></H5>
+<BLOCKQUOTE>
+Suppose M is a matrix module over the coefficient ring R
+whose elements are a by c matrices and have domain D and codomain C.
+Suppose also that N is a matrix module over the coefficient ring R
+whose elements are b by c and have domain D' and codomain C.
+Then the homomorphism module H = Hom(M, N) with left multiplication
+action exists and consists of all b by a matrices over R which
+multiply an element of M on the left to yield an element of N.
+This function constructs H explicitly.  The domain of elements of
+H is then M and the codomain of elements of H is N and the
+elements are b by a matrices over R which multiply an element
+of M on the right to yield an element of N.  Note that if M and
+N are proper submodules of their respective generic modules, then
+H may be a proper submodule of its generic module, and the correct
+basis of H will be explicitly constructed.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6188">Example <TT>ModRng_CreateHom (H58E6)</TT></A></H3>
+We construct two homomorphism modules H<sub>1</sub> and H<sub>2</sub> over Q and then
+the homomorphism module H = Hom(H<sub>1</sub>, H<sub>2</sub>) with right matrix action.
+<P>
+<P>
+<PRE>
+&gt; Q := RationalField();
+&gt; H1 := sub&lt;RMatrixSpace(Q, 2, 3) | [1,2,3, 4,5,6], [0,0,1, 1,3,3]&gt;;
+&gt; H2 := sub&lt;RMatrixSpace(Q, 2, 4) | [6,5,7,1, 15,14,16,4], [0,0,0,0, 1,2,3,4]&gt;;
+&gt; H := Hom(H1, H2, "right");
+&gt; H: Maximal;
+KMatrixSpace of 3 by 4 matrices and dimension 1 over Rational Field
+Echelonized basis:
+
+
+[   1    2    3    4]
+[-1/2   -1 -3/2   -2]
+[   0    0    0    0]
+
+
+&gt; H1.1 * H.1;
+[  0   0   0   0]
+[3/2   3 9/2   6]
+&gt; H1.1 * H.1 in H2;
+true
+&gt; Image(H.1): Maximal;      
+KMatrixSpace of 2 by 4 matrices and dimension 1 over Rational Field
+Echelonized basis:
+
+
+[0 0 0 0]
+[1 2 3 4]
+
+
+&gt; Kernel(H.1): Maximal;     
+KMatrixSpace of 2 by 3 matrices and dimension 1 over Rational Field
+Echelonized basis:
+
+
+[ 1  2  6]
+[ 7 14 15]
+
+
+&gt; H1 := sub&lt;RMatrixSpace(Q,2,3) | [1,2,3, 4,5,6]&gt;;
+&gt; H2 := sub&lt;RMatrixSpace(Q,3,3) | [1,2,3, 5,7,9, 4,5,6]&gt;;
+&gt; H := Hom(H1, H2, "left");
+&gt; H: Maximal;
+KMatrixSpace of 3 by 2 matrices and dimension 1 over Rational Field
+Echelonized basis:
+
+
+[1 0]
+[1 1]
+[0 1]
+&gt; Image(H.1);
+KMatrixSpace of 3 by 3 matrices and dimension 1 over Rational Field
+&gt; Kernel(H.1);
+KMatrixSpace of 2 by 3 matrices and dimension 0 over Rational Field
+</PRE>
+<HR>
+<H4><A NAME = "6189">Modules Hom<sub>R</sub>(M, N) with Given  Basis</A></H4>
+
+<P>
+
+
+<H5><A NAME = "6190">RMatrixSpaceWithBasis(Q) : [ ModMatRngElt ] -&gt; ModMatRng</A></H5>
+<BLOCKQUOTE>
+Given a sequence Q of k independent matrices each lying in
+a matrix space H = Hom(M, N), where M = R<sup>(m)</sup> and N = R<sup>(n)</sup>,
+construct the subspace of H of dimension k whose basis is Q.
+The basis is echelonized internally but all functions which depend
+on the basis of the matrix space (e.g. <TT>Coordinates</TT>)
+will use the given basis Q.
+</BLOCKQUOTE>
+<H5><A NAME = "6191">KMatrixSpaceWithBasis(Q) : [ ModMatRngElt ] -&gt; ModMatRng</A></H5>
+<BLOCKQUOTE>
+Given a sequence Q of k independent matrices each lying in
+a matrix space H = Hom(M, N), where M = K<sup>(m)</sup> and N = K<sup>(n)</sup>,
+with K a field,
+construct the subspace of H of dimension k whose basis is Q.
+The basis is echelonized internally but all functions which depend
+on the basis of the matrix space (e.g. <TT>Coordinates</TT>)
+will use the given basis Q.
+</BLOCKQUOTE>
+<H4><A NAME = "6192">The Endomorphsim Ring</A></H4>
+
+
+
+<H5><A NAME = "6193">EndomorphismAlgebra(M) : ModTupRng -&gt; AlgMat</A></H5>
+<BLOCKQUOTE>
+If M is the free R-module R<sup>(m)</sup>, create the matrix algebra
+Mat<sub>m</sub>(R). The algebra is created with the standard basis, 
+{E<sub>ij</sub>  |  i = 1 ..., m, j = 1 ..., m}, where E<sub>ij</sub> 
+is the matrix having a 1 in the (i, j)-th position and zeros elsewhere.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6194">Example <TT>ModRng_CreateHom (H58E7)</TT></A></H3>
+We construct the endomorphism ring of the 4-dimensional vector space 
+over the rational field.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Q  := RationalField();
+&gt; R4 := RModule(Q, 4);
+&gt; M  := EndomorphismAlgebra(R4);
+&gt; M;
+Full Matrix Algebra of degree 4 over Rational Field
+</PRE>
+<HR>
+<H4><A NAME = "6195">The Reduced Form of a Matrix Module</A></H4>
+
+
+
+<H5><A NAME = "6196">Reduce(H) : ModMatRng -&gt; ModMatRng, Map</A></H5>
+<BLOCKQUOTE>
+Suppose H is a matrix module whose elements have domain A and codomain
+B.
+Suppose first that A and B are tuple modules (R-spaces, R-modules,
+or RG-modules) and that
+A has degree a and dimension d while B has degree b and dimension e.
+(For the reduced cases (R-modules or RG-modules), a equals d and
+b equals e).
+The elements of H have the natural representation with respect
+to the standard embedded basis of the generic modules of A and B.
+Thus H has degree a by b.
+So one can multiply a 1 by a vector of A directly by an element
+h of H (in the natural matrix way) to get a 1 by b vector of B.
+Now suppose A and B are in the embedded form (R-space) and h is in 
+H.  Then
+h is an a by b matrix but there is a corresponding d by e matrix h'
+which gives the same transformation of h from A to B but is
+<I>with respect to the bases of A and B</I>.  We call h' the
+<I>reduced</I> form of h.  Also, there is the <I>reduced
+module</I> H' corresponding to H.  This function constructs the reduced
+module H' corresponding to H, together with the epimorphism f from
+H onto H'.  Note that if A and B are in reduced form, then
+H' is the same as H.
+<P>
+Suppose secondly that A and B are matrix modules themselves.  Suppose
+A = Hom(D<sub>1</sub>, C<sub>1</sub>), B = Hom(D<sub>1</sub>, C<sub>2</sub>), and H = Hom(A, B) with
+the right multiplication action.
+Suppose also that A has degree r by s and dimension d while
+B has degree r by t, and dimension e.
+Then H would have degree s by t so an element h of H would be
+s by t and would multiply a r by s element of A on the right
+to yield an r by t element of B.  Then the reduced matrix h'
+corresponding to a matrix h of H would be a d by e matrix corresponding
+to the bases of A and B.  This function similarly constructs the reduced
+module H' corresponding to H, together with the epimorphism f from
+H onto H'.  Note also that in this case the domain and codomains of
+H' are the generic R-spaces (tuple modules) corresponding to A
+(of dimension d) and B (of dimension e).
+Similarly, for the left multiplication action there is the corresponding
+reduced module constructed in the obvious way.
+<P>
+Note also that the kernel of the epimorphism f is the submodule of H which
+consists of all matrices which transform all elements of A to the zero
+element of B.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6197">Example <TT>ModRng_Reduce (H58E8)</TT></A></H3>
+We demonstrate the function <TT>Reduce</TT> for a homomorphism module
+from one vector space to another.
+<P>
+<P>
+<PRE>
+&gt; V1 := sub&lt;VectorSpace(GF(3), 3) | [1,0,1], [0,1,2]&gt;;
+&gt; V2 := sub&lt;VectorSpace(GF(3), 4) | [1,1,0,2], [0,0,1,2]&gt;;
+&gt; H := Hom(V1, V2);
+&gt; H;
+KMatrixSpace of 3 by 4 matrices and dimension 8 over GF(3)
+&gt; R, f := Reduce(H);
+&gt; R;
+Full KMatrixSpace of 2 by 2 matrices over GF(3)
+&gt; H.1;
+[1 0 0 0]
+[0 1 0 2]
+[0 1 0 2]
+&gt; f(H.1);
+[1 0]
+[0 0]
+&gt; V1.1;
+(1 0 1)
+&gt; V1.1 * H.1;
+(1 1 0 2)
+&gt; Coordinates(V2, V1.1 * H.1);
+[ 1, 0 ]
+&gt; Coordinates(V2, V1.2 * H.1);
+[ 0, 0 ]
+&gt; Kernel(f): Maximal;
+KMatrixSpace of 3 by 4 matrices and dimension 4 over GF(3)
+Echelonized basis:
+
+
+[1 0 0 0]
+[2 0 0 0]
+[2 0 0 0]
+
+
+[0 1 0 0]
+[0 2 0 0]
+[0 2 0 0]
+
+
+[0 0 1 0]
+[0 0 2 0]
+[0 0 2 0]
+
+
+[0 0 0 1]
+[0 0 0 2]
+[0 0 0 2]
+&gt; R.1@@f;
+[1 0 0 0]
+[0 1 0 2]
+[0 1 0 2]
+</PRE>
+<HR>
+<H3><A NAME = "6198">Example <TT>ModRng_ReduceHom (H58E9)</TT></A></H3>
+We demonstrate the function <TT>Reduce</TT> for a homomorphism module
+from one homomorphism module to another.  Note that the reduced module
+has the same dimension as the original module but larger degrees!
+<P>
+<P>
+<PRE>
+&gt; V1 := VectorSpace(GF(3), 2);
+&gt; V2 := VectorSpace(GF(3), 3);
+&gt; V3 := VectorSpace(GF(3), 4);
+&gt; H1 := Hom(V1, V2);
+&gt; H2 := Hom(V1, V3);
+&gt; H := Hom(H1, H2, "right");
+&gt; H1;
+Full KMatrixSpace of 2 by 3 matrices over GF(3)
+&gt; H2;
+Full KMatrixSpace of 2 by 4 matrices over GF(3)
+&gt; H;
+Full KMatrixSpace of 3 by 4 matrices over GF(3)
+&gt; R,f := Reduce(H);
+&gt; R;
+KMatrixSpace of 6 by 8 matrices and dimension 12 over GF(3)
+&gt; X := H.1;
+&gt; X;
+[1 0 0 0]
+[0 0 0 0]
+[0 0 0 0]
+&gt; f(X);
+[1 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0]
+[0 0 0 0 1 0 0 0]
+[0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0]
+&gt; Domain(X);
+Full KMatrixSpace of 2 by 3 matrices over GF(3)
+&gt; Domain(f(X));
+Full Vector space of degree 6 over GF(3)
+&gt; Image(X): Maximal;
+KMatrixSpace of 2 by 4 matrices and dimension 2 over GF(3)
+Echelonized basis:
+
+
+[1 0 0 0]
+[0 0 0 0]
+
+
+[0 0 0 0]
+[1 0 0 0]
+
+
+&gt; Image(f(X));      
+Vector space of degree 8, dimension 2 over GF(3)
+Echelonized basis:
+(1 0 0 0 0 0 0 0)
+(0 0 0 0 1 0 0 0)
+&gt; Kernel(X): Maximal;
+KMatrixSpace of 2 by 3 matrices and dimension 4 over GF(3)
+Echelonized basis:
+
+
+[0 1 0]
+[0 0 0]
+
+
+[0 0 1]
+[0 0 0]
+
+
+[0 0 0]
+[0 1 0]
+
+
+[0 0 0]
+[0 0 1]
+
+
+&gt; Kernel(f(X)): Maximal;
+Vector space of degree 6, dimension 4 over GF(3)
+Echelonized basis:
+(0 1 0 0 0 0)
+(0 0 1 0 0 0)
+(0 0 0 0 1 0)
+(0 0 0 0 0 1)
+</PRE>
+<HR>
+<H4><A NAME = "6199">Construction of a Matrix</A></H4>
+
+
+
+<H5><A NAME = "6200">M ! Q : ModMatRng, [RngElt] -&gt; ModMatRngElt</A></H5>
+<BLOCKQUOTE>
+Given the matrix bimodule M over the ring R, and the sequence 
+Q = [a<sub>11</sub>, ..., a<sub>1n</sub>, a<sub>21</sub>, ..., a<sub>2n</sub>, ..., a<sub>m1</sub>, ..., a<sub>mn</sub>]
+whose terms are elements of the ring R, construct the m x n matrix
+<P>
+<PRE>
+   [ a_11  a_12 ... a_1n ]
+   [ a_21  a_22 ... a_2n ]
+   [       ...           ]
+   [       ...           ]
+   [ a_m1  a_m2 ... a_mn ]
+</PRE>as an element of M. In the context of the <TT>sub</TT> or <TT>quo</TT>
+constructors the coercion clause <TT>M !</TT> may be omitted.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6201">Example <TT>ModRng_Matrix (H58E10)</TT></A></H3>
+We create the 4 x 4 Hilbert matrix h4 as an element of
+the endomorphism ring of the 4-dimensional vector space over the rational
+field.
+<P>
+<P>
+<PRE>
+&gt; Q  := RationalField();
+&gt; R4 := RModule(Q, 4);
+&gt; M  := EndomorphismAlgebra(R4);
+&gt; h4 := M ! [ 1/i : i in [1 .. 16 ] ];
+&gt; h4;
+[   1  1/2  1/3  1/4]
+[ 1/5  1/6  1/7  1/8]
+[ 1/9 1/10 1/11 1/12]
+[1/13 1/14 1/15 1/16]
+</PRE>
+<HR>
+<H4><A NAME = "6202">Element Operations</A></H4>
+
+<P>
+<P>
+All operations that apply to elements of tuple modules also apply to elements
+of matrix modules. Here, we confine our discussion to those
+operations which are special to matrix modules.
+<P>
+Throughout this section, M is a submodule of R<sup>(m)</sup>, N is a submodule 
+of R<sup>(n)</sup> and a is a homomorphism belonging to Hom<sub>R</sub>(M, N), where 
+R is a Euclidean Domain.
+<P>
+See also the chapter on general matrices for many other functions
+applicable to matrices (e.g., <TT>EchelonForm)</TT>.
+
+
+<H5><A NAME = "6203">u * a : ModTupRngElt, ModMatRngElt -&gt; ModTupRngElt</A></H5>
+<H5>a(u) : ModTupRngElt, ModMatRngElt -&gt; ModTupRngElt</H5>
+<BLOCKQUOTE>
+Given an element u belonging to the module M, return the image of u under
+the homomorphism a as an element of the module N.
+</BLOCKQUOTE>
+<H5><A NAME = "6204">a * b : ModMatRngElt, ModMatRngElt -&gt; ModMatRngElt</A></H5>
+<BLOCKQUOTE>
+Given a homomorphism a belonging to a submodule of Hom(M, N), and a 
+homomorphism b belonging to a submodule of Hom(N, P), return the 
+composition of the homomorphisms a and b as an element of Hom(M, P). 
+Note that if Hom(M, P) does not already exist, it will be created.
+</BLOCKQUOTE>
+<H5><A NAME = "6205">a ^ -1 : ModMatRngElt, RngIntElt -&gt; ModMatRngElt</A></H5>
+<BLOCKQUOTE>
+Given a homomorphism a belonging to a submodule of Hom(M, N)
+with M and N having the same dimension, return the inverse
+of a as an element of Hom(N, M).
+</BLOCKQUOTE>
+<H5><A NAME = "6206">Codomain(S) : ModMatRng -&gt; ModTupRng</A></H5>
+<BLOCKQUOTE>
+Given a submodule S of the module Hom(M, N), return the module N.
+</BLOCKQUOTE>
+<H5><A NAME = "6207">Codomain(a) : ModMatRngElt -&gt; ModTupRng</A></H5>
+<BLOCKQUOTE>
+The codomain N of the homomorphism a belonging to Hom(M, N).
+</BLOCKQUOTE>
+<H5><A NAME = "6208">Cokernel(a) : ModMatRngElt -&gt; ModTupRng</A></H5>
+<BLOCKQUOTE>
+The cokernel for the homomorphism a belonging to the module Hom(M, N).
+</BLOCKQUOTE>
+<H5><A NAME = "6209">Domain(S) : ModMatRng -&gt; ModTupRng</A></H5>
+<BLOCKQUOTE>
+The domain M of the submodule S belonging to the module Hom(M, N).
+</BLOCKQUOTE>
+<H5><A NAME = "6210">Domain(a) : ModMatRngElt -&gt; ModTupRng</A></H5>
+<BLOCKQUOTE>
+The domain M of the homomorphism a belonging to the module Hom(M, N).
+</BLOCKQUOTE>
+<H5><A NAME = "6211">Image(a) : ModMatRngElt -&gt; ModTupRng</A></H5>
+<BLOCKQUOTE>
+The image of the homomorphism a belonging to the module H =Hom(M, N), 
+returned as a submodule of N.
+Note that if the domain and codomain
+of a are matrix modules themselves, the image will be with respect to
+the appropriate action (right or left).
+</BLOCKQUOTE>
+<H5><A NAME = "6212">Kernel(a) : ModMatRngElt -&gt; ModTupRng</A></H5>
+<H5>NullSpace(a) : ModMatRngElt -&gt; ModTupRng</H5>
+<BLOCKQUOTE>
+The kernel of the homomorphism a belonging to the module Hom(M, N), 
+returned as a submodule of M.
+Note that if the domain and codomain
+of a are matrix modules themselves, the kernel will be with respect to
+the appropriate action (right or left).
+</BLOCKQUOTE>
+<H5><A NAME = "6213">Morphism(M, N) : ModTupRng, ModTupRng -&gt; ModMatRngElt</A></H5>
+<BLOCKQUOTE>
+Assuming the R-module M was created as a submodule of the module N, 
+return the matrix defining the inclusion homomorphism 
+&phi; : M -&gt; N as an element of
+Hom<sub>R</sub>(M, N). Thus &phi; gives the correspondence between elements of 
+M (represented with respect to the standard basis of M) and elements 
+for N.
+</BLOCKQUOTE>
+<H5><A NAME = "6214">Rank(a) : ModMatRngElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The dimension of the image of the homomorphism a, i.e. the rank of a.
+</BLOCKQUOTE>
+<H5><A NAME = "6215">IsBijective(a) : ModMatRngElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the homomorphism a belonging to the module Hom(M, N) is a
+bijective mapping.
+</BLOCKQUOTE>
+<H5><A NAME = "6216">IsInjective(a) : ModMatRngElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the homomorphism a belonging to the module Hom(M, N) is an
+injective mapping.
+</BLOCKQUOTE>
+<H5><A NAME = "6217">IsSurjective(a) : ModMatRngElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the homomorphism a belonging to the module Hom<sub>R</sub>(M, N) is 
+a surjective mapping.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6218">Example <TT>ModRng_Operations (H58E11)</TT></A></H3>
+ We illustrate some of these operations in the context of the module 
+Hom<sub>R</sub>(M, N), where M and N are, respectively, the 4-dimensional and 
+3-dimensional vector spaces over GF(8).
+<P>
+<P>
+<P>
+<PRE>
+&gt; K&lt;w&gt; := GaloisField(8);
+&gt; V3 := VectorSpace(K, 3);
+&gt; V4 := VectorSpace(K, 4);
+&gt; M := Hom(V4, V3);
+&gt; A := M ! [1, w, w^5, 0,  w^3, w^4, w, 1,  w^6, w^3, 1, w^4 ];
+&gt; A;
+[  1   w w^5]
+[  0 w^3 w^4]
+[  w   1 w^6]
+[w^3   1 w^4]
+&gt; Rank(A);
+3
+&gt; Image(A);
+Full Vector space of degree 3 over GF(2^3)
+&gt; Kernel(A);
+Vector space of degree 4, dimension 1 over GF(2^3)
+Echelonized basis:
+(  1 w^5   1   1)
+&gt; Cokernel(A);
+Vector space of degree 3, dimension 0 over GF(2^3)
+</PRE>
+<PRE></PRE> <A  HREF = "text586.htm">[Next]</A><A  HREF = "text583.htm">[Prev]</A> [_____] <A  HREF = "text583.htm">[Left]</A> <A  HREF = "text575.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

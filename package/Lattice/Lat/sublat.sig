@@ -1,0 +1,38 @@
+174,1
+T,LatLat,LatLatElt,0
+A,LatLat,8,G,Primes,Constituents,Lattices,Index,Children,Parents,Complete
+T,LatLatElt,-,0
+A,LatLatElt,3,Parent,Number,Endo
+S,Print,internal,0,1,0,0,1,0,0,0,0,LatLat,,-38,-38,-38,-38,-38,-38
+S,Print,internal,0,1,0,0,1,0,0,0,0,LatLatElt,,-38,-38,-38,-38,-38,-38
+S,Parent,internal,0,1,0,0,0,0,0,0,0,LatLatElt,,LatLat,-38,-38,-38,-38,-38
+S,IsCoercible,internal,0,2,0,0,0,0,0,0,0,-1,,0,0,LatLat,,36,LatLatElt,-38,-38,-38,-38
+S,#,internal,0,1,0,0,0,0,0,0,0,LatLat,,148,-38,-38,-38,-38,-38
+S,Primes,The primes used for constructing the lattice V of sublattices,0,1,0,0,0,0,0,0,0,LatLat,,82,-38,-38,-38,-38,-38
+S,Constituents,The constituents used for constructing the lattice V of sublattices,0,1,0,0,0,0,0,0,0,LatLat,,82,-38,-38,-38,-38,-38
+S,NumberOfLevels,The number of different levels (layers) stored in the lattice V,0,1,0,0,0,0,0,0,0,LatLat,,148,-38,-38,-38,-38,-38
+S,Levels,A sequence where the i-th entry contains the sublattices stored for the (i-1)-th level (layer),0,1,0,0,0,0,0,0,0,LatLat,,82,-38,-38,-38,-38,-38
+S,Level,The sublattices stored in the i-th layer,0,2,0,0,0,0,0,0,0,148,,0,0,LatLat,,82,-38,-38,-38,-38,-38
+S,MaximalSublattices,The maximal sublattices of the element x in a lattice of sublattices,0,1,0,0,0,0,0,0,0,LatLatElt,,82,82,-38,-38,-38,-38
+S,MinimalSuperlattices,The minimal superlattices of the element x in a lattice of sublattices,0,1,0,0,0,0,0,0,0,LatLatElt,,82,82,-38,-38,-38,-38
+S,Morphism,The morphism (basis matrix) of the element x in a lattice of sublattices,0,1,0,0,0,0,0,0,0,LatLatElt,,-34,-38,-38,-38,-38,-38
+S,BasisMatrix,The morphism (basis matrix) of the element x in a lattice of sublattices,0,1,0,0,0,0,0,0,0,LatLatElt,,-34,-38,-38,-38,-38,-38
+S,Lattice,The lattice corresponding to the element x in a lattice of sublattices,0,1,0,0,0,0,0,0,0,LatLatElt,,164,-38,-38,-38,-38,-38
+S,+,internal,0,2,0,0,0,0,0,0,0,LatLatElt,,0,0,LatLatElt,,LatLatElt,-38,-38,-38,-38,-38
+S,meet,internal,0,2,0,0,0,0,0,0,0,LatLatElt,,0,0,LatLatElt,,LatLatElt,-38,-38,-38,-38,-38
+S,eq,internal,0,2,0,0,0,0,0,0,0,LatLatElt,,0,0,LatLatElt,,LatLatElt,-38,-38,-38,-38,-38
+S,!,internal,0,2,0,0,0,0,0,0,0,LatLatElt,,0,0,319,,148,-38,-38,-38,-38,-38
+S,Sublattices,"The G-invariant sublattices of some G-lattice L which are not contained in p*L for any p in Q and whose index in L is a product of elements of Q. G must be a subgroup of GL(n,Z) or generators of some Z-order in M(n,Z). If L is not provided then the standard lattice Z^n is chosen. The second return value indicates whether the enumeration is complete or not",0,2,0,0,0,0,0,0,0,-52,,0,0,178,,82,36,-38,-38,-38,-38
+S,Sublattices,"The G-invariant sublattices of some G-lattice L which are not contained in p*L for any p in Q and whose index in L is a product of elements of Q. G must be a subgroup of GL(n,Z) or generators of some Z-order in M(n,Z). If L is not provided then the standard lattice Z^n is chosen. The second return value indicates whether the enumeration is complete or not",0,2,0,0,0,0,0,0,0,148,,0,0,178,,82,36,-38,-38,-38,-38
+S,Sublattices,"The G-invariant sublattices of some G-lattice L which are not contained in p*L for any p in Q and whose index in L is a product of elements of Q. G must be a subgroup of GL(n,Z) or generators of some Z-order in M(n,Z). If L is not provided then the standard lattice Z^n is chosen. The second return value indicates whether the enumeration is complete or not",0,1,0,0,0,0,0,0,0,178,,82,36,-38,-38,-38,-38
+S,Sublattices,"The G-invariant sublattices of some G-lattice L which are not contained in p*L for any p in Q and whose index in L is a product of elements of Q. G must be a subgroup of GL(n,Z) or generators of some Z-order in M(n,Z). If L is not provided then the standard lattice Z^n is chosen. The second return value indicates whether the enumeration is complete or not",0,2,0,0,0,0,0,0,0,-52,,0,0,164,,82,36,-38,-38,-38,-38
+S,Sublattices,"The G-invariant sublattices of some G-lattice L which are not contained in p*L for any p in Q and whose index in L is a product of elements of Q. G must be a subgroup of GL(n,Z) or generators of some Z-order in M(n,Z). If L is not provided then the standard lattice Z^n is chosen. The second return value indicates whether the enumeration is complete or not",0,2,0,0,0,0,0,0,0,148,,0,0,164,,82,36,-38,-38,-38,-38
+S,Sublattices,"The G-invariant sublattices of some G-lattice L which are not contained in p*L for any p in Q and whose index in L is a product of elements of Q. G must be a subgroup of GL(n,Z) or generators of some Z-order in M(n,Z). If L is not provided then the standard lattice Z^n is chosen. The second return value indicates whether the enumeration is complete or not",0,1,0,0,0,0,0,0,0,164,,82,36,-38,-38,-38,-38
+S,Sublattices,"The G-invariant sublattices of some G-lattice L which are not contained in p*L for any p in Q and whose index in L is a product of elements of Q. G must be a subgroup of GL(n,Z) or generators of some Z-order in M(n,Z). If L is not provided then the standard lattice Z^n is chosen. The second return value indicates whether the enumeration is complete or not",1,0,1,82,0,-34,2,0,0,0,0,0,0,0,-52,,0,0,82,,82,36,-38,-38,-38,-38
+S,Sublattices,"The G-invariant sublattices of some G-lattice L which are not contained in p*L for any p in Q and whose index in L is a product of elements of Q. G must be a subgroup of GL(n,Z) or generators of some Z-order in M(n,Z). If L is not provided then the standard lattice Z^n is chosen. The second return value indicates whether the enumeration is complete or not",1,0,1,82,0,-34,2,0,0,0,0,0,0,0,148,,0,0,82,,82,36,-38,-38,-38,-38
+S,SublatticeLattice,"The G-invariant sublattices of the standard lattice L=Z^n which are not contained in p*L for any p in Q and whose index in L is a product of elements of Q. G must be a subgroup of GL(n,Z) or generators of some Z-order in M(n,Z). The second return value indicates whether the enumeration is complete or not",1,0,1,82,0,-34,2,0,0,0,0,0,0,0,-52,,0,0,82,,LatLat,36,-38,-38,-38,-38
+S,SublatticeLattice,"The G-invariant sublattices of the standard lattice L=Z^n which are not contained in p*L for any p in Q and whose index in L is a product of elements of Q. G must be a subgroup of GL(n,Z) or generators of some Z-order in M(n,Z). The second return value indicates whether the enumeration is complete or not",1,0,1,82,0,-34,2,0,0,0,0,0,0,0,148,,0,0,82,,LatLat,36,-38,-38,-38,-38
+S,SublatticeLattice,"The G-invariant sublattices of the standard lattice L=Z^n which are not contained in p*L for any p in Q and whose index in L is a product of elements of Q. G must be a subgroup of GL(n,Z) or generators of some Z-order in M(n,Z). The second return value indicates whether the enumeration is complete or not",0,2,0,0,0,0,0,0,0,-52,,0,0,178,,LatLat,36,-38,-38,-38,-38
+S,SublatticeLattice,"The G-invariant sublattices of the standard lattice L=Z^n which are not contained in p*L for any p in Q and whose index in L is a product of elements of Q. G must be a subgroup of GL(n,Z) or generators of some Z-order in M(n,Z). The second return value indicates whether the enumeration is complete or not",0,2,0,0,0,0,0,0,0,148,,0,0,178,,LatLat,36,-38,-38,-38,-38
+S,SublatticeLattice,"The G-invariant sublattices of the standard lattice L=Z^n which are not contained in p*L for any p in Q and whose index in L is a product of elements of Q. G must be a subgroup of GL(n,Z) or generators of some Z-order in M(n,Z). The second return value indicates whether the enumeration is complete or not",0,1,0,0,0,0,0,0,0,178,,LatLat,36,-38,-38,-38,-38
+S,SublatticeClasses,Returns the isomorphism classes of ZG-lattices. Currently it assumes that End(G) is a field!,0,1,0,0,0,0,0,0,0,178,,82,-38,-38,-38,-38,-38

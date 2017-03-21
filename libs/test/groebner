@@ -1,0 +1,395 @@
+/*
+Groebner Basis Test
+AKS 24/11/95.
+*/
+
+
+SetAssertions(true);
+VERB := true;
+VERB := false;
+
+//gon();
+
+function create_ideal(P, k, l, d, rand)
+    n := Rank(P);
+    return ideal<P |
+	[
+	    &+[rand() * &*[P.i^Random(0, d): i in [1..n]]: i in [1..l]]:
+	    i in [1..k]
+	]
+    >;
+end function;
+
+procedure ideal_test(K, n, k, l, d, rand)
+    if VERB then
+	"\n******************\n";
+    end if;
+
+    "*** Groebner test:", K, n, k, l, d;
+
+    //SetVerbose("GroebnerWalk", true);
+    //SetVerbose("Groebner", true);
+
+    P := PolynomialRing(K, n, "grevlex");
+    AssignNames(~P, [CodeToString(i + 96): i in [1 .. n]]);
+
+    I := create_ideal(P, k, l, d, rand);
+    J := create_ideal(P, k, l, d, rand);
+
+    if VERB then
+	"I:", I;
+	"J:", J;
+    end if;
+
+    Groebner(I);
+    Groebner(J);
+
+    _ := IsZeroDimensional(I);
+    _ := IsZeroDimensional(J);
+
+    if VERB then
+	"Groebner I:", I;
+	"Groebner J:", J;
+
+	"IsZeroDimensional(I):", IsZeroDimensional(I);
+	"IsZeroDimensional(J):", IsZeroDimensional(J);
+    end if;
+
+    S := I + J;
+    M := I meet J;
+    if VERB then
+	"M:", M;
+    end if;
+    T := I * J;
+    if VERB then
+	"T:", T;
+    end if;
+    C := ColonIdeal(I, J);
+    if VERB then
+	"C:", C;
+    end if;
+
+    assert I subset S;
+    assert J subset S;
+    assert M subset I;
+    assert M subset J;
+    assert T subset M;
+    if VERB then
+	"T eq M:", T eq M;
+    end if;
+
+    assert IsProper(I) eq (1 notin I);
+    assert IsZero(I) eq (#GroebnerBasis(I) eq 0);
+
+    F := &+Basis(I);
+    G := &+Basis(J);
+    H := &+Basis(M);
+
+    assert F in I;
+    assert G in J;
+    assert H in M;
+    assert IsInRadical(F, I);
+    assert IsInRadical(G, J);
+    assert IsInRadical(H, M);
+
+    assert NormalForm(F, I) eq 0;
+    assert NormalForm(G, J) eq 0;
+    assert NormalForm(F, J) in S;
+
+    NF := NormalForm([F, G, F*G + 1], J);
+
+    assert NF[1] eq NormalForm(F, J);
+    assert NF[2] eq 0;
+    assert NF[3] eq NormalForm(P!1, J);
+
+    if F ne 0 and G ne 0 then
+	assert SPolynomial(F, G) in S;
+    end if;
+
+    C := Coordinates(I, F);
+    assert &+[P | C[i]*BasisElement(I, i): i in [1..#C]] eq F;
+end procedure;
+
+rand := func<K| func<|Random(K)>>;
+ideal_testr := proc<K, n, k, l, d | ideal_test(K, n, k, l, d, rand(K))>;
+
+ideal_test(RationalField(), 2, 2, 3, 2, func<|Random(-10, 10)>);
+
+ideal_testr(GF(2), 10, 3, 3, 1);
+ideal_testr(GF(2), 6, 2, 5, 1);
+ideal_testr(GF(2), 3, 2, 5, 1);
+ideal_testr(GF(3), 5, 2, 3, 1);
+
+for q in
+    [2^i: i in [2 .. 67] cat [100, 200]] cat
+    [4, 5, 7, 9, 13, 16, 23, 3^5] cat
+    [2965819, 11863279, NextPrime(2^32),
+     NextPrime(10^10), NextPrime(10^100)]
+do
+    //GetSeed();
+    ideal_testr(GF(q), 3, 2, 3, 3);
+end for;
+
+ideal_testr(GF(2^1000), 3, 3, 3, 2);
+
+SetEchoInput(true);
+
+K := GF(35098201);
+P<x,y> := PolynomialRing(K, 2);
+B := [y + 1 + x^5 + x^10, 1 + x^34];
+I := ideal<P | B>;
+E := EliminationIdeal(I, 1);
+B := Basis(E);
+G := GroebnerBasis(I);
+assert G[2] eq B[1];
+
+B := [y + 1 + x^5 + x^10, 1 + x^34];
+I := ideal<P | B>;
+Groebner(I: Al := "Direct");
+assert Basis(I) eq G;
+
+
+P<x,y,z>:=PolynomialRing(Rationals(),3);
+assert MinimalAlgebraGenerators([x + y + 1, (x+y + z)^2, z^2, x*z, y*z, z^6])
+    eq [x+y+1, (x+y + z)^2, x*z, y*z];
+assert MinimalAlgebraGenerators([x+y+1, (x+y)*z, z + 1]) eq [x+y+1, z + 1];
+
+
+/*
+GB over Z test.
+*/
+
+P<x1,x2,x3,x4> := PolynomialRing(IntegerRing(), 4);
+f1 := 7*x1*x2^3*x3;
+f2 := x1*x2*x3^3;
+g1 := 64*x1^2 - 62*x1*x2 + 57*x1*x3 + 61*x1*x4 - 100*x2^2 + 5*x2*x3 +
+50*x2*x4 - 23*x3^2 - 81*x3*x4 + 59*x4^2;
+g2 := 70*x1^2 + 63*x1*x2 - 21*x1*x3 + 84*x1*x4 + 51*x2^2 - 20*x2*x3 +
+38*x2*x4 - 29*x3^2 - 11*x3*x4 + 8*x4^2;
+I := Ideal([g1, g2]);
+Groebner(I);
+h := f1*g1+f2*g2;
+assert h in I;
+
+
+// ER, Feb 2013
+
+P<a60,a61,a62,a63,a64,a65,a66,a40,a41,a42,a43,a44,a30,a31,a32,a33,a20,a21,
+a22,a10,a11>
+:=PolynomialAlgebra(Integers(),
+[6,6,6,6,6,6,6, 4,4,4,4,4, 3,3,3,3, 2,2,2, 1,1],"grevlexw",
+[6,6,6,6,6,6,6, 4,4,4,4,4, 3,3,3,3, 2,2,2, 1,1]);
+
+a6:=Polynomial([a60,a61,a62,a63,a64,a65,a66]);
+a4:=Polynomial([a40,a41,a42,a43,a44]);
+a3:=Polynomial([a30,a31,a32,a33]);
+a2:=Polynomial([a20,a21,a22]);
+a1:=Polynomial([a10,a11]);
+
+c4:=-48*a4+16*a2^2+a1^4-24*a1*a3+8*a2*a1^2;
+c6:=864*a6+216*a3^2+48*a2^2*a1^2+12*a2*a1^4-288*a4*a2-72*a4*a1^2-36*a1^3*a3+64*a2^3
++a1^6-144*a1*a3*a2;
+
+eqIV:=[Coefficient(c4,i):i in [2..4]]
+   cat [Coefficient(c6,i):i in [3..6]];
+idl:=Ideal(eqIV cat [a10,a11,a30,a31,a32,a33]);
+assert 16*a44*a21*a22 + 16*a43*a22^2 - 16*a21*a22^3 in idl;
+GB := GroebnerBasis(idl);
+assert #GB eq 78;
+assert [LeadingTerm(f): f in Basis(idl)] eq
+    [ 32*a64^2*a20*a22^3, 32*a64^2*a21*a22^3, 32*a64*a65*a21*a22^3, 
+    32*a65^2*a21*a22^3, 32*a64^2*a22^4, 32*a64*a65*a22^4, 32*a65^2*a22^4, 
+    16*a64*a42*a21^3, 16*a65*a42*a21^3, 16*a66*a42*a21^3, 
+    16*a64*a43*a20*a21*a22, 16*a65*a43*a20*a21*a22, 16*a66*a43*a20*a21*a22, 
+    16*a64*a43*a20*a22^2, 16*a65*a43*a20*a22^2, 16*a66*a43*a20*a22^2, 
+    16*a64*a42*a22^3, 16*a65*a42*a22^3, 16*a64*a43*a22^3, 16*a65*a43*a22^3, 
+    16*a64*a44*a22^3, 16*a65*a44*a22^3, 32*a65*a21^2*a22^3, 16*a42^2*a21^3, 
+    16*a42*a43*a20*a21*a22, 16*a43^2*a20*a21*a22, 96*a64*a20*a21^2*a22, 
+    16*a42*a43*a20*a22^2, 16*a43^2*a20*a22^2, 16*a43^2*a21*a22^2, 
+    96*a64*a20*a21*a22^2, 96*a65*a20*a21*a22^2, 96*a64*a21^2*a22^2, 
+    16*a42^2*a22^3, 16*a42*a43*a22^3, 16*a43^2*a22^3, 16*a42*a44*a22^3, 
+    16*a43*a44*a22^3, 16*a44^2*a22^3, 32*a65*a20*a22^3, 96*a66*a20*a22^3, 
+    32*a64*a21^3, 32*a65*a21^3, 32*a66*a21^3, 96*a65*a21^2*a22, 
+    96*a66*a21^2*a22, 96*a66*a21*a22^2, 96*a64*a22^3, 96*a65*a22^3, 
+    288*a63*a21^2, 288*a64*a21^2, 288*a65*a21^2, 288*a66*a21^2, 288*a63*a21*a22,
+    288*a64*a21*a22, 288*a65*a21*a22, 288*a66*a21*a22, 288*a63*a22^2, 
+    288*a64*a22^2, 288*a65*a22^2, 288*a66*a22^2, 16*a44*a20*a22^2, 16*a43*a21^2,
+    16*a44*a21^2, 16*a44*a21*a22, 864*a63, 864*a64, 864*a65, 864*a66, 48*a42, 
+    48*a43, 48*a44, a30, a31, a32, a33, a10, a11 ];
+
+// May 2015 (GB over ANF)
+
+SetEchoInput(false);
+
+"GB over ANF";
+
+procedure test_gb_anf(M1, M2)
+
+    "test_gb_anf:";
+    IndentPush();
+    Factorization(M1);
+    Factorization(M2);
+    IndentPop();
+
+    Z := IntegerRing();
+    P<x> := PolynomialRing(Z);
+    K<w> := NumberField(x^2 + 1);
+    P<x,y,z,s,t> := PolynomialRing(K, 5, "grevlex");
+    f := w*x + M1*z + M2*1;
+    g := y+z+1;
+
+    B := [f+g, f+2*g, g];
+    GB := GroebnerBasis(B);
+    assert GB eq [x - w*M1*z - w*M2, y + z + 1];
+
+    B := [f*g, g];
+    GB := GroebnerBasis(B);
+    assert GB eq [g];
+
+    B := [f*g, f];
+    GB := GroebnerBasis(B);
+    assert GB eq [Normalize(f)];
+
+    B := [f^2, x*g];
+    GB := GroebnerBasis(B);
+    assert GB eq 
+    [
+	y*z^2 + z^3 + 2*M2/M1*y*z + (M1 + 2*M2)/M1*z^2 + M2^2/M1^2*y +
+	    (2*M1*M2 + M2^2)/M1^2*z + M2^2/M1^2,
+	x^2 - 2*w*M1*x*z - M1^2*z^2 - 2*w*M2*x - 2*M1*M2*z - M2^2, x*y +
+	x*z + x
+    ];
+
+    B := [f^2, M2*x*y*g + M1];
+    assert GroebnerBasis(B) eq 
+    [
+	y^2*z^2 + y*z^3 + 2*M2/M1*y^2*z + (M1 + 2*M2)/M1*y*z^2 + M2^2/M1^2*y^2 + 
+	    (2*M1*M2 + M2^2)/M1^2*y*z + 1/(M1*M2)*x + M2^2/M1^2*y + -2*w/M2*z + 
+	    -2*w/M1,
+	x*y^2 + x*y*z + x*y + M1/M2,
+	x^2 + -2*w*M1*x*z + -M1^2*z^2 + -2*w*M2*x + -2*M1*M2*z + -M2^2
+    ];
+
+    B := [M1*x^2*y + M2, w*M2*x*y + M1*z + 1];
+    assert GroebnerBasis(B) eq 
+    [
+	x*y + -w*M1/M2*z + -w/M2,
+	x*z + 1/M1*x + -w*M2^2/M1^2,
+	z^2 + -M2^3/M1^3*y + 2/M1*z + 1/M1^2
+    ];
+
+    B := [M1*M2*x^2*y + M2+w, (w+1)*M2*x*y^3 + M1*z + 1, M1*M2*x^3*y + z + w];
+    assert GroebnerBasis(B) eq 
+    [
+	z^4 + (3*w*M1 + 1)/M1*z^3 + (-3*M1 + 3*w)/M1*z^2 + ((w + 1)*M2^5 +
+	    (5*w - 5)*M2^4 + (-10*w - 10)*M2^3 + (-10*w + 10)*M2^2 + (5*w +
+	    5)*M2 + (w - 1))/(M1^3*M2)*y + (-w*M1 - 3)/M1*z + -w/M1,
+	y*z^2 + 2*w*y*z + -1*y + (M2^3 + 3*w*M2^2 - 3*M2 - w)/(M1*M2),
+	y^2 + 1/2*(w - 1)*M1^2/(M2^2 + 2*w*M2 - 1)*z^2 + (1/2*(-w - 1)*M1^2 +
+	    1/2*(w - 1)*M1)/(M2^2 + 2*w*M2 - 1)*z + 1/2*(-w - 1)*M1/(M2^2 +
+	    2*w*M2 - 1),
+	x + -1/(M2 + w)*z + -w/(M2 + w)
+
+    ];
+
+    B := [M1*M2*x^3*y^4 + M2*x*y+w, (w+1)*M2*x*y^3 + M2*y + M1*z + 1, M1*M2*x^3*
+    y^2 + z + w];
+    assert GroebnerBasis(B) eq 
+    [
+	y*z^3 + (2*w*M1^2 + 1/2*(5*w + 5)*M1*M2^2 + M1 - 3*M2^3)/M1^2*y*z^2 + 
+	    1/2*(3*w + 3)*M2*z^3 + (-w*M1*M2^2 + 1/2*(3*w + 3)*M2^4 + M2^2)/M1^2*x*y
+	    + -4*M2^2/M1^3*y^2 + (-2*w*M1^2*M2 + 1/2*(w + 1)*M1*M2^3 + 2*M1*M2 + 
+	    3*M2^4)/M1^2*x*z + (-M1^3 + 1/2*(5*w - 5)*M1^2*M2^2 + 2*w*M1^2 - 
+	    3*w*M1*M2^3 + 1/2*(5*w + 5)*M1*M2^2 - 3*M2^3)/M1^3*y*z + (1/2*(3*w - 
+	    3)*M1*M2 + (3*w + 3)*M2)/M1*z^2 + ((-3*w - 1)*M1^2*M2 + 1/2*(w + 
+	    1)*M1*M2^3 + 2*M1*M2 + 3*M2^4)/M1^3*x + (-M1^2 + 1/2*(5*w - 5)*M1*M2^2 +
+	    (-8*w - 5)*M2^3)/M1^3*y + ((4*w - 3)*M1*M2 + (-w - 1)*M2^2 + 1/2*(3*w + 
+	    3)*M2)/M1^2*z + (-M1^2*M2 + (w - 1)*M1*M2^3 + (w - 1)*M1*M2^2 + 1/2*(3*w
+	    - 3)*M1*M2 - 3*w*M2^4 + (-2*w - 2)*M2^2)/M1^3,
+	z^4 + (1/2*(-9*w - 9)*M1^2*M2^3 + 7*M1*M2^4 + (w - 1)*M2^5)/M1^4*y*z^2 + 
+	    (2*w*M1^2 + 1/2*(-5*w - 5)*M1*M2^2 + 2*M1 + M2^3)/M1^2*z^3 + 
+	    (3*w*M1^2*M2^3 + 2*M1^2*M2 + 1/2*(-5*w - 5)*M1*M2^5 + (-w - 1)*M1*M2^4 -
+	    3*M1*M2^3 + M2^6 + (-w + 1)*M2^4)/M1^4*x*y + (8*M1*M2^3 + (2*w - 
+	    2)*M2^4)/M1^5*y^2 + (4*w*M1^3*M2^2 + 1/2*(-w - 1)*M1^2*M2^4 + (-w - 
+	    1)*M1^2*M2^3 - 4*M1^2*M2^2 - 5*M1*M2^5 + (-w + 1)*M1*M2^3 + (-w + 
+	    1)*M2^6)/M1^4*x*z + (1/2*(-9*w + 9)*M1^3*M2^3 + (-w - 1)*M1^3*M2 + 
+	    7*w*M1^2*M2^4 + 1/2*(-9*w - 9)*M1^2*M2^3 - 4*M1^2*M2^2 + (-w - 
+	    1)*M1*M2^5 + 7*M1*M2^4 + (w - 1)*M2^5)/M1^5*y*z + (-M1^3 + 1/2*(-5*w + 
+	    5)*M1^2*M2^2 + (3*w - 1)*M1^2 + w*M1*M2^3 + (-5*w - 5)*M1*M2^2 + M1 + 
+	    2*M2^3)/M1^3*z^2 + ((6*w + 2)*M1^3*M2^2 + 1/2*(-w - 1)*M1^2*M2^4 + (-w -
+	    3)*M1^2*M2^3 - 4*M1^2*M2^2 - 5*M1*M2^5 + (-w + 1)*M1*M2^3 + (-w + 
+	    1)*M2^6)/M1^5*x + ((-w + 1)*M1^3*M2 + 1/2*(-9*w + 9)*M1^2*M2^3 - 
+	    4*w*M1^2*M2^2 + (16*w + 9)*M1*M2^4 + (-w - 5)*M2^5)/M1^5*y + ((-w - 
+	    1)*M1^3 + (-6*w + 5)*M1^2*M2^2 + (w - 1)*M1^2 + (4*w + 2)*M1*M2^3 + 
+	    1/2*(-5*w - 5)*M1*M2^2 + M2^3)/M1^4*z + (M1^3*M2^2 - w*M1^3 + (-2*w + 
+	    2)*M1^2*M2^4 + (-2*w + 2)*M1^2*M2^3 + 1/2*(-5*w + 5)*M1^2*M2^2 + 
+	    6*w*M1*M2^5 + 2*w*M1*M2^4 + (5*w + 4)*M1*M2^3 + (-w - 1)*M2^6 - 
+	    2*M2^4)/M1^5,
+	x*y^2 + 1/2*(-w - 1)*M1/M2*y*z^2 + 1/2*(w + 1)*M1*x*z + (1/2*(-w + 1)*M1 + 
+	    1/2*(-w - 1))/M2*y*z + 1/2*(w + 1)*x + 1/2*(-w + 1)/M2*y + 1/2*(-w + 1),
+	y^3 + (1/4*(3*w - 3)*M1^3 + 1/2*w*M1^2*M2^2 - 1/2*w*M1^2*M2 + 1/4*(-3*w - 
+	    3)*M1^2 + 1/4*(-w - 1)*M1*M2^3 + 1/2*M1*M2)/M2*y*z^2 + (1/4*(w - 1)*M1^4
+	    + 1/4*w*M1^3*M2^2 + 1/4*(-w - 1)*M1^3)/M2^2*z^3 + (1/2*(w + 1)*M1^2 + 
+	    1/4*w*M1*M2^4)/M2*x*y + (1/2*(-w + 1)*M1^3 + 1/2*w*M1^2*M2 + 1/2*(w + 
+	    1)*M1^2 + 1/4*(w + 1)*M1*M2^3 - 1/2*M1*M2)*x*z + (1/4*(-3*w - 3)*M1^3 - 
+	    1/2*M1^2*M2^2 + 1/2*M1^2*M2 - 1/2*w*M1^2 + 1/4*(-w + 1)*M1*M2^3 + 
+	    1/2*w*M1*M2^2 + 1/4*(-3*w - 3)*M1 + 1/4*(-w - 1)*M2^3 + 1/2*M2)/M2*y*z +
+	    (1/4*(-w - 1)*M1^4 - 1/4*M1^3*M2^2 + 1/4*(-w - 1)*M1^3 + 1/2*w*M1^2*M2^2
+	    + 1/2*(-w - 1)*M1^2)/M2^2*z^2 + (1/2*(-2*w + 1)*M1^2 + 1/2*w*M1*M2 + 
+	    1/2*(w + 1)*M1 + 1/4*(w + 1)*M2^3 - 1/2*M2)*x + (1/4*(-3*w - 1)*M1^2 + 
+	    1/4*(-w - 1)*M1*M2^2 + 1/2*(-2*w + 3)*M1*M2 + 1/4*(-3*w + 3)*M1 + 
+	    1/4*(-5*w + 1)*M2^3 + 1/2*(3*w + 2)*M2)/M2*y + (-1/2*w*M1^3 + 1/4*(-w - 
+	    1)*M1^2*M2^2 + 1/4*(-3*w + 1)*M1^2 + 1/4*w*M1*M2^2 + 1/4*(-w - 
+	    1)*M1)/M2^2*z + (1/2*(-w - 1)*M1^2*M2^2 + 1/4*(-w + 1)*M1^2 - 
+	    1/4*M1*M2^4 + 1/4*(-3*w + 2)*M1*M2^2 + 1/4*(-w + 1)*M1 + 1/4*(-w + 
+	    1)*M2^5)/M2^2,
+	x*y*z + (1/2*(-w - 1)*M1 + M2)/M1*y*z^2 + 1/2*(-w - 1)*M1/M2*z^3 + (1/2*(-w 
+	    - 1)*M2^2 + 1)/M1*x*y + (1/2*(-w - 1)*M1*M2 - M2^2)/M1*x*z + (1/2*(-w + 
+	    1)*M1^2 + w*M1*M2 + 1/2*(-w - 1)*M1 + M2)/M1^2*y*z + (1/2*(-w + 1)*M1 - 
+	    w - 1)/M2*z^2 + (1/2*(-w - 1)*M1*M2 - M2^2)/M1^2*x + (1/2*(-w + 1)*M1 + 
+	    (2*w + 1)*M2)/M1^2*y + ((-w + 1)*M1 + 1/2*(-w - 1))/(M1*M2)*z + (1/2*(-w
+	    + 1)*M1 + w*M2^3)/(M1^2*M2),
+	y^2*z + -M2*x*y + w*y^2 + -w,
+	x*z^2 + (1/2*(3*w + 3)*M1*M2 - 2*M2^2)/M1^2*y*z^2 + (w + 1)*z^3 + (w + 
+	    1)*M2^3/M1^2*x*y + -2*M2/M1^3*y^2 + (1/2*(w + 1)*M1*M2^2 + 2*M1 + 
+	    2*M2^3)/M1^2*x*z + (1/2*(3*w - 3)*M1^2*M2 - 2*w*M1*M2^2 + 1/2*(3*w + 
+	    3)*M1*M2 - 2*M2^2)/M1^3*y*z + ((w - 1)*M1 + (2*w + 2))/M1*z^2 + (1/2*(w 
+	    + 1)*M1*M2^2 + M1 + 2*M2^3)/M1^3*x + (1/2*(3*w - 3)*M1*M2 + (-5*w - 
+	    3)*M2^2)/M1^3*y + ((2*w - 2)*M1 + (-w - 1)*M2 + (w + 1))/M1^2*z + 
+	    (1/2*(w - 1)*M1*M2^2 + (w - 1)*M1 - 2*w*M2^3 + (-w - 1)*M2)/M1^3,
+	x^2 + (w*M1 + 1/2*(w + 1)*M2^2 - 1)/(M1*M2)*x*y + 1/2*(w + 1)*x*z + (1/2*(-w
+	    + 1)*M1^2 + w*M1*M2 + 1/2*(w + 1)*M1 - M2)/(M1^2*M2)*y*z + (1/2*(-w + 
+	    1)*M1 + 1/2*(w + 1))/M2^2*z^2 + (-w*M1*M2 + 1/2*(w + 1)*M1 + M2)/M1^2*x 
+	    + (1/2*(w + 1)*M1^2 - M1*M2 + 1/2*(w - 1)*M1 + (-2*w - 
+	    1)*M2)/(M1^2*M2)*y + (1/2*(w + 1)*M1^2 + 1/2*(w + 1))/(M1*M2^2)*z + 
+	    (1/2*(w + 1)*M1^2 + 1/2*(w - 1)*M1 - w*M2^3)/(M1^2*M2^2)
+    ];
+end procedure;
+
+time test_gb_anf(11863249*11863213, 11863253*11863213);
+
+p := 11863279;
+M1 := p;
+p := PreviousPrime(p);
+M2 := p;
+for i := 1 to 10 do
+    p := PreviousPrime(p);
+    M1 *:= p;
+    if Random(0, 1) eq 1 then
+	M2 *:= p;
+    end if;
+end for;
+time test_gb_anf(M1, M2);
+
+h := 11863279;
+l := h div 2;
+M1 := h;
+M2 := 1;
+for i := 1 to 30 do
+    p := PreviousPrime(Random(l, h));
+    M1 *:= p;
+    if Random(0, 1) eq 1 then
+	M2 *:= p;
+    end if;
+end for;
+time test_gb_anf(M1, M2);

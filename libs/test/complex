@@ -1,0 +1,90 @@
+//problems with the trig tests : MPC 0.6 is used for trig functions BUT
+//PARI is used for the inverses : this may be why applying inverses does not
+//get us back where we started!!
+
+//So, test sin, cos and tan then test the hyperbolics in terms of sin, cos and tan
+//How to test the inverses? Don't really care - they are old code, hopefully 
+//once we have the MPC versions they might get us back where we started, if not
+//we can deal with it then!
+
+
+R := ComplexField(400);
+//R := ComplexField(50);
+
+assert elt<R | 4, 3> eq 4+3*R.1;
+assert R!CyclotomicField(2).1 eq -1;
+assert R!QuadraticField(2).1 eq Sqrt(2);
+
+time for i in [1 .. 100] do
+
+    r := R!Root(Random([1 .. Precision(R)]), Random([1 .. 10]));
+    r +:= R!Root(Random([1 .. Precision(R)]), Random([1 .. 10]))*R.1;
+    s := R!Root(Random([1 .. Precision(R)]), Random([1 .. 10]));
+    s +:= R!Root(Random([1 .. Precision(R)]), Random([1 .. 10]))*R.1;
+
+    assert r + s eq s + r;
+    assert r*s eq s*r;
+    assert Abs((r/s)*s - r) lt 10^Floor(-Precision(R)*3/4);
+    assert Abs((r/s)*(s/r) - 1) lt 10^Floor(-Precision(R)*3/4);
+
+    assert r - s eq -(s - r);
+
+    assert Abs(r^5 - r*r*r*r*r) lt 10^Floor(-Precision(R)*4/5);
+    r;
+    r^-3; (r^-1)^3;
+    r^-3 - (r^-1)^3;
+    r^-3 - (r^3)^-1;
+    assert Abs(r^-1*r - 1) lt 10^Floor(-Precision(R)*4/5);
+    assert Abs(r^-3 - (r^-1)^3) lt 10^Floor(-Precision(R)*4/5);
+    assert Abs(r^-3 - (r^3)^-1) lt 10^Floor(-Precision(R)*4/5);
+
+    while Abs((r)^s - Exp(Log(r)*s)) gt 10^Floor(-Precision(R)*1/9) do
+	r /:= 10;
+    end while;
+    j := 0;
+    while Abs((s*10^-j)^r - Exp(Log(s*10^-j)*r)) gt 10^Floor(-Precision(R)*1/9) do
+	j +:= 1;
+    end while;
+
+    assert Abs(Sin(r + s) - (Sin(r)*Cos(s) + Cos(r)*Sin(s))) lt 10^Floor(-Precision(R)*1/5);
+    assert Abs(Cos(r + s) - (Cos(r)*Cos(s) - Sin(r)*Sin(s))) lt 10^Floor(-Precision(R)*1/5);
+    assert Abs(Tan(r + s) - (Tan(r) + Tan(s))/(1 - Tan(r)*Tan(s))) lt 10^Floor(-Precision(R)*3/4);
+
+    assert Abs(Sin(r)^2 - 1 + Cos(r)^2) lt 10^Floor(-Precision(R)*1/8);
+    assert Abs(Sin(2*r) - 2*Sin(r)*Cos(r)) lt 10^Floor(-Precision(R)*1/8);
+    assert Abs(Cos(2*r) - (Cos(r)^2 - Sin(r)^2)) lt 10^Floor(-Precision(R)*1/8);
+
+    assert Cosec(r) eq 1/Sin(r);
+    assert Sec(r) eq 1/Cos(r);
+    assert Abs(Cot(r) - 1/Tan(r)) lt 10^Floor(-Precision(R)*3/4);
+
+    assert Abs(Sin(Arcsin(Sin(r))) - Sin(r)) lt 10^Floor(-Precision(R)*11/20);
+    assert Abs(Cos(Arccos(Cos(r))) - Cos(r)) lt 10^Floor(-Precision(R)*11/20);
+    assert Abs(Tan(r) - Sin(r)/Cos(r)) lt 10^Floor(-Precision(R)*11/20);
+    assert Abs(Tan(Arctan(Tan(r))) - Tan(r)) lt 10^Floor(-Precision(R)*11/20);
+    assert Abs(Sec(Arcsec(Sec(r))) - Sec(r)) lt 10^Floor(-Precision(R)*11/20);
+    assert Abs(Cosec(Arccosec(Cosec(r))) - Cosec(r)) lt 10^Floor(-Precision(R)*11/20);
+    if Cot(r) ne -R.1 then
+    assert Abs(Cot(Arccot(Cot(r))) - Cot(r)) lt 10^Floor(-Precision(R)*11/20);
+    end if;
+
+    assert Abs(Sinh(R.1*s)/R.1 - Sin(s)) lt 10^Floor(-Precision(R)*1/10);
+    assert Abs(Cosh(R.1*s) - Cos(s)) lt 10^Floor(-Precision(R)*1/10);
+    assert Abs(Tanh(R.1*s)/R.1 - Tan(s)) lt 10^Floor(-Precision(R)*1/10);
+    assert Abs(Tanh(s) - Sinh(s)/Cosh(s)) lt 10^Floor(-Precision(R)*1/10);
+    assert Cosech(s) eq 1/Sinh(s);
+    assert Sech(s) eq 1/Cosh(s);
+    assert Coth(s) eq 1/Tanh(s);
+
+    assert Abs(Sinh(Argsinh(Sinh(s))) - Sinh(s)) lt 10^Floor(-Precision(R)*9/16);
+    assert Abs(Cosh(Argcosh(Cosh(s))) - Cosh(s)) lt 10^Floor(-Precision(R)*1/2);
+    assert Abs(Tanh(Argtanh(Tanh(s))) - Tanh(s)) lt 10^Floor(-Precision(R)*1/2);
+    assert Abs(Sech(Argsech(Sech(s))) - Sech(s)) lt 10^Floor(-Precision(R)*1/2);
+    assert Abs(Cosech(Argcosech(Cosech(s))) - Cosech(s)) lt 10^Floor(-Precision(R)*1/2);
+    assert Abs(Coth(Argcoth(Coth(s))) - Coth(s)) lt 10^Floor(-Precision(R)*1/2);
+
+    assert Abs(Exp(Log(r)) - r) lt 10^Floor(-Precision(R)*1/10);
+    assert Abs(Exp(Log(Exp(r))) - Exp(r)) lt 10^Floor(-Precision(R)*1/10);
+    assert Abs(PolarToComplex(Modulus(r), Arg(r)) - r) lt 10^Floor(-Precision(R)*3/4);
+
+end for;

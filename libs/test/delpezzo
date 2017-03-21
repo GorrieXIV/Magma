@@ -1,0 +1,137 @@
+
+// This tests the Del Pezzo constructors
+// (which use algebraic geometry stuff including LinSys, ShfCoh, Image)
+// AJW, SRD, March 2011
+
+/////////////////////////////////////////////////////////
+// IsDelPezzo
+
+k := Rationals();
+P3<x,y,z,t> := ProjectiveSpace(k,3);
+
+Y := Scheme(P3, &+[ i*P3.i^3 : i in [1..4] ]);
+bool,X,f := IsDelPezzo(Y);
+assert bool;
+
+Y := Scheme(P3, &+[ i*P3.i^4 : i in [1..4] ]);
+bool,X,f := IsDelPezzo(Y);
+assert not bool;
+
+Y := ProjectiveSpace(k,2);
+bool,X,f := IsDelPezzo(Y);
+assert bool;
+
+Y := Scheme(P3, x*y-z*t);
+bool,X,f := IsDelPezzo(Y);
+assert bool;
+
+/////////////////////////////////////////////////////////
+// DelPezzoSurface
+
+k := Rationals();
+P2<u,v,w> := ProjectiveSpace(k,2);
+
+Z := Cluster(P2,P2![0,0,1]);
+X := DelPezzoSurface(Z);
+assert Degree(X) eq 8;
+
+Z := Cluster(P2,{P2![1,0,0],P2![0,1,0]});
+X := DelPezzoSurface(Z);
+assert Degree(X) eq 7;
+
+Z := Cluster(P2,{P2![0,0,1],P2![0,1,0],P2![1,0,0]});
+X := DelPezzoSurface(Z);
+assert Degree(X) eq 6;
+
+Z := Cluster(P2,{P2![1,1,1],P2![0,0,1],P2![0,1,0],P2![1,0,0]});
+X := DelPezzoSurface(Z);
+assert Degree(X) eq 5;
+
+Z := Cluster(P2,{P2![1,2,3],P2![1,1,1],P2![0,0,1],P2![0,1,0],P2![1,0,0]});
+X := DelPezzoSurface(Z);
+assert Degree(X) eq 4;
+
+Z := Cluster(P2,{P2![2,3,5],P2![1,2,3],P2![1,1,1],P2![0,0,1],P2![0,1,0],P2![1,0,0]});
+X := DelPezzoSurface(Z);
+assert Degree(X) eq 3;
+
+pts := {@ P2![2,3,5],P2![1,2,3],P2![1,1,1],P2![0,0,1],P2![0,1,0],P2![1,0,0],P2![1,3,11] @};
+X := DelPezzoSurface(pts);
+assert Degree(X) eq 2;
+
+pts := {@ P2![2,3,5],P2![1,2,3],P2![1,1,1],P2![0,0,1],P2![0,1,0],P2![1,0,0],P2![1,3,11],P2![11,7,2] @};
+X := DelPezzoSurface(pts);
+assert Degree(X) eq 1;
+
+/////////////////////////////////////////////////////////
+// DelPezzoSurface with blownup points over extensions
+
+k := Rationals();
+P2<u,v,w> := ProjectiveSpace(k,2);
+_<x> := PolynomialRing(k);
+K := NumberField(x^2-2);
+L := NumberField(x^2-5);
+pts := [* P2(K)![K.1,0,1], P2(L)![0,L.1,1], [1,1,1], [1,-1,1], [-1,1,1], [-1,-1,1] *];
+
+X := DelPezzoSurface(P2, pts[1..2]);
+assert Degree(X) eq 5;
+
+X := DelPezzoSurface(P2, pts[1..3]);
+assert Degree(X) eq 4;
+
+X := DelPezzoSurface(P2, pts[1..4]);
+assert Degree(X) eq 3;
+
+/* degree 1 and 2 not implemented until LinearSystem works
+X := DelPezzoSurface(P2, pts[1..5]);
+assert Degree(X) eq 2;
+
+X := DelPezzoSurface(P2, pts[1..6]);
+assert Degree(X) eq 1;
+*/
+
+/////////////////////////////////////////////////////////
+// Points not in general position
+
+k := Rationals();
+P2<u,v,w> := ProjectiveSpace(k,2);
+
+procedure check_bad_delpezzo(pts : P2:=0)
+    try 
+        if P2 cmpeq 0 then
+            X := DelPezzoSurface(pts);
+        else 
+            X := DelPezzoSurface(P2, pts);
+        end if;
+        assert false;
+    catch E
+        // newlines get introduced sometimes
+        assert forall{s : s in {"not","general","position"} | s in E`Object};
+    end try;
+end procedure;
+
+// not colinear
+pts := {P2![0,2,1],P2![0,1,5],P2![0,0,1]}; 
+check_bad_delpezzo(pts);
+
+// 6 pts on a conic + 3 colinear
+pts := {P2|[0,5,5],[0,-5,5],[5,0,5],[-5,0,5],[4,3,1],[-4,-3,1]}; 
+check_bad_delpezzo(pts);
+
+// 6 pts on a conic (over extension)
+_<x> := PolynomialRing(k);
+_<q> := NumberField(x^2-2);
+pts := [*[0,1,1],[0,-1,1],[1,0,1],[-1,0,1],[q,q,2]*]; 
+check_bad_delpezzo(pts : P2:=P2);
+
+/////////////////////////////////////////////////////////
+// EckardtPoints
+
+P3<x,y,z,t> := ProjectiveSpace(Rationals(),3);
+
+_,F := IsDelPezzo(Scheme(P3,x^3+y^3+z^3+t^3)); //Fermat cubic
+assert Degree(EckardtPoints(F)) eq 18;
+
+_,C := IsDelPezzo(Scheme(P3,x^3+y^3+z^3+t^3-(x+y+z+t)^3)); //Clebsch cubic
+assert Degree(EckardtPoints(C)) eq 10;
+

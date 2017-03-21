@@ -1,0 +1,207 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Extended Examples</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1454.htm">[Next]</A><A  HREF = "text1464.htm">[Prev]</A> <A  HREF = "text1454.htm">[Right]</A> <A  HREF = "text1464.htm">[Left]</A> <A  HREF = "text1455.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16647">Extended Examples</A></H3>
+
+
+
+<HR>
+<H3><A NAME = "16648">Example <TT>CrvEllFldFun_ellfunfld1 (H129E4)</TT></A></H3>
+In this example we construct an elliptic curve by using a pencil of
+cubic curves passing through 8 given points. The 8 points are defined
+over GF(1831<sup>8</sup>) and form a Galois orbit over GF(1831).
+<P>
+<P>
+<PRE>
+&gt; p := 1831;
+&gt; F := GF(p);
+&gt; Fe&lt;u&gt; := ext&lt;F | 8&gt;;
+&gt; K&lt;t&gt; := FunctionField(F);
+&gt; P2&lt;X,Y,Z&gt; := ProjectivePlane(K);
+&gt; // define the 8 points:
+&gt; points := [ [ u^(p^i), (u^3+u+1)^(p^i) ] : i in [0..7] ];
+&gt; M := [ [ p[1]^i*p[2]^j : i in [0..3-j], j in [0..3] ] : p in points ];
+&gt; // find the coefficients of 2 cubics that pass through the points:
+&gt; B := Basis(Kernel(Transpose(Matrix(M))));
+&gt; R&lt;x,y&gt; := PolynomialRing(F, 2);
+&gt; mono_aff := [ x^i*y^j : i in [0..3-j], j in [0..3] ];
+&gt; // f1 and f2 are the cubics:
+&gt; f1 := &amp;+[ (F!B[1][i])*mono_aff[i] : i in [1..10] ];
+&gt; f2 := &amp;+[ (F!B[2][i])*mono_aff[i] : i in [1..10] ];
+&gt; // Find the 9th intersection point, which we use as zero, to put
+&gt; // it to a nice Weierstrass model :
+&gt; P9 := Points(Scheme(Spec(R), [f1, f2]))[1];
+&gt; F1 := Homogenization(Evaluate(f1, [X, Y]), Z);
+&gt; F2 := Homogenization(Evaluate(f2, [X, Y]), Z);
+&gt; C := Curve(P2, F1 + t*F2);
+&gt; E := MinimalDegreeModel(EllipticCurve(C, C![P9[1], P9[2]]));
+</PRE>
+We could transfer the 8 points to this Weierstrass model, and use
+them to determine the Mordell--Weil group. Instead, we will see what
+Magma is able to compute just from the Weierstrass model.
+<P>
+<P>
+<PRE>
+&gt; KodairaSymbols(E);
+[ &lt;I1, 1&gt;, &lt;I1, 7&gt;, &lt;II, 1&gt;, &lt;I1, 2&gt; ]
+</PRE>
+All fibres are irreducible. According to the theory of rational
+elliptic surfaces, the geometric Mordell--Weil lattice should then be
+isomorphic to the root lattice E<sub>8</sub>. We can check this. We also
+compute the Mordell--Weil lattice over the ground field.
+<P>
+<P>
+<PRE>
+&gt; Lgeom := GeometricMordellWeilLattice(E);
+&gt; IsIsomorphic(Lgeom, Lattice("E", 8));
+true
+[-1  0 -2  1  1 -1  0 -1]
+[ 0  0  0  1  0  0 -1  1]
+[ 2  0  2 -2 -1  1  1  0]
+[-2  0 -1  0  1  0  0 -1]
+[ 1  0  0  1 -1 -1 -1  1]
+[-1  0  0  0  1  0  1 -1]
+[ 2 -1  2 -3 -1  1  1  1]
+[ 1 -1  1 -1  0  0  0  0]
+&gt; L, f := MordellWeilLattice(E);
+&gt; L;
+Standard Lattice of rank 1 and degree 1
+Inner Product Matrix:
+[8]
+&gt; f(L.1);
+((1057*t^8 + 384*t^7 + 351*t^6 + 728*t^5 + 872*t^4 + 948*t^3 + 1473*t^2 + 257*t
+    + 1333)/(t^6 + 100*t^5 + 1565*t^4 + 1145*t^3 + 927*t^2 + 1302*t + 1197) :
+    (1202*t^12 + 1506*t^11 + 1718*t^10 + 1365*t^9 + 656*t^8 + 325*t^7
+    + 1173*t^6    + 902*t^5 + 1555*t^4 + 978*t^3 + 616*t^2 + 779*t +
+    964)/(t^9 + 150*t^8 + 1520*t^7 + 747*t^6 + 1065*t^5 + 340*t^4 +
+    1618*t^3 + 1669*t^2 + 1150*t + 1768) : 1)
+</PRE>
+That the rank equals 1 is not surprising; this point corresponds to
+the F<sub>1831</sub>-rational degree 8 divisor consisting of the sum of the
+8 points we started with.
+<P>
+To determine the L-function of E one would normally have to count
+points over various extension fields of F<sub>1831</sub>, in this case up to
+F<sub>1831<sup>4</sup></sub>. This would be costly using current techniques. But since
+Magma is able to determine the geometric Mordell--Weil lattice,
+it can compute the L-function by simply considering the Galois action
+on points. Magma automatically uses this when asked for the
+L-function:
+<P>
+<P>
+<PRE>
+&gt; LFunction(E);
+-126330075128099803866555841*T^8 + 1
+</PRE>
+<HR>
+<H3><A NAME = "16649">Example <TT>CrvEllFldFun_Reductionmodp (H129E5)</TT></A></H3>
+<P>
+In this example we determine the C(t)-rank
+of an elliptic curve, following <A  HREF = "text1454.htm#bib_Kloosterman">[Klo07]</A>.
+<P>
+<P>
+<PRE>
+&gt; K&lt;t&gt; := FunctionField(Rationals());
+&gt; E := EllipticCurve([-(2*t-1)^3*(4*t-1)^2, t*(2*t-1)^3*(4*t-1)^3]);
+</PRE>
+To determine where the surface has bad reduction we determine the
+primes at which singular fibres collapse.
+<P>
+<P>
+<PRE>
+&gt; &amp;*BadPlaces(E);
+(t^5 - 99/32*t^4 + 337/128*t^3 - 251/256*t^2 + 3/16*t - 1/64)/t
+&gt; Discriminant(Numerator($1));
+-87887055375/4503599627370496
+&gt; Factorisation(Numerator($1));
+[ &lt;3, 15&gt;, &lt;5, 3&gt;, &lt;7, 2&gt; ]
+&gt; Factorisation(Denominator($2));
+[ &lt;2, 52&gt; ]
+</PRE>
+So 11 and 13 are the smallest primes of good reduction. We remark that in
+<A  HREF = "text1454.htm#bib_Kloosterman">[Klo07]</A> the primes 17 and 19 were used.
+<P>
+<P>
+<PRE>
+&gt; K11&lt;t11&gt; := FunctionField(GF(11));
+&gt; E11 := ChangeRing(E,K11);  // Reduce E mod 11
+&gt; LFunction(E11);
+161051*T^5 - 7986*T^4 - 363*T^3 - 33*T^2 - 6*T + 1
+&gt; AnalyticInformation(E11);
+&lt;0, 1, 1&gt;
+&gt; AnalyticInformation(E11, 2);
+&lt;1, 1, 35/2&gt;
+</PRE>
+So modulo 11 the rank is 0, but over F<sub>11<sup>2</sup></sub>(t) the rank equals the
+geometric rank of 1, and the
+height of a generator is congruent to (35 /2) modulo Q<sup>2</sup>.
+From this it can be concluded that the geometric rank in
+characteristic 0 is at most 1. As the L-function has odd degree 5
+for any p of good reduction, it will always have a zero at 1/p
+or -1/p and consequently the geometric rank modulo p will always
+be at least 1. To determine what the geometric rank is in
+characteristic zero, one can combine information at 2 different primes.
+<P>
+<P>
+<PRE>
+&gt; K13&lt;t13&gt; := FunctionField(GF(13));
+&gt; E13 := ChangeRing(E, K13);  // Redude E mod 13
+&gt; AnalyticInformation(E13);
+&lt;0, 1, 1&gt;
+&gt; AnalyticInformation(E13,2);
+&lt;1, 1, 121/2&gt;
+</PRE>
+So over F<sub>13<sup>2</sup></sub>(t) the rank equals the geometric rank of 1. The
+height of a generator is congruent to (121 /2) modulo
+Q<sup>2</sup>. As the quotient of the heights of generators in
+characteristics 11 and 13 is not a square in Q, there cannot exist
+a Mordell--Weil group in characteristic zero that both modulo 11 and 13
+reduces to a finite index subgroup of the Mordell--Weil group modulo
+p. Hence one can conclude that the geometric Mordell--Weil rank in
+characteristic zero is zero.
+<HR>
+<H3><A NAME = "16650">Example <TT>CrvEllFldFun_LFunctionbyhand (H129E6)</TT></A></H3>
+<P>
+In this example we calculate part of the L-function of an
+elliptic curve for which it is not feasible to compute
+the L-function completely.
+The simplest way to compute an L-function is to call <TT>LFunction</TT>, which counts points on the surface over certain
+constant field extensions.
+However, if the required extension fields are too big then
+<TT>LFunction</TT> will not terminate.
+One can determine the required extension degrees as follows.
+<P>
+<P>
+<PRE>
+&gt; K&lt;t&gt; := FunctionField(GF(5));
+&gt; E := EllipticCurve([t^9+t^2, t^14+t^4+t^3]);
+&gt; h2 := BettiNumber(E, 2);
+&gt; N := FrobeniusActionOnTrivialLattice(E);
+&gt; [h2, h2 - NumberOfRows(N)];
+[ 34, 21 ]
+</PRE>
+So the H<sup>2</sup> has dimension 34, of which a 13-dimensional piece is
+generated by the trivial lattice and a 21-dimensional piece is
+unknown. To determine the L-function one would have to at least
+count points over F_(5<sup>10</sup>). As this is not feasible we will instead
+count points over extension degrees up to 5 and print the first few
+coefficients of the L-function.
+<P>
+<P>
+<PRE>
+&gt; nop := NumbersOfPointsOnSurface(E, 5);
+&gt; traces := [ nop[i] - 1 - 25^i - 5^i*Trace(N^i) : i in [1..5] ];
+&gt; CharacteristicPolynomialFromTraces(traces);
+5750*T^5 + 875*T^4 - 40*T^3 - 40*T^2 + 1
+</PRE>
+<PRE></PRE> <A  HREF = "text1454.htm">[Next]</A><A  HREF = "text1464.htm">[Prev]</A> <A  HREF = "text1454.htm">[Right]</A> <A  HREF = "text1464.htm">[Left]</A> <A  HREF = "text1455.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

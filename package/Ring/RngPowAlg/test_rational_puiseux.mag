@@ -1,0 +1,72 @@
+// Example: (Rational) Puiseux Parametrizations
+// ============================================
+import "power_series.m": ScalePolynomial2, PlOrd;
+// SetVerbose("AlgSeries", 1);
+ord := 50;
+
+Q := Rationals();
+S<x,y> := PolynomialRing(Q, 2, "glex");
+P<z> := PolynomialRing(S);
+
+// Function to test whether a parametrization is sane
+function TestParam(prm)
+	ser := prm[2]; S := Domain(ser); r := Rank(S); F := BaseRing(S);
+	
+	// try to expand
+	good, approx := Expand(ser, ord);
+	if not good then
+		error "series not expandable!";
+	end if;
+	
+	// check if defining polynomial vanishes on it
+	defpol := DefiningPolynomial(ser);
+	_, e := Explode(ExponentLattice(ser));
+	o := PlOrd(Evaluate(ScalePolynomial2(defpol,e),approx));
+	if not ((o eq -1) or (o ge ord)) then
+		error "defining polynomial and series do not match!";
+	end if;
+	
+	// check if numbers N and E are correct
+	Gamma, e := Explode(ExponentLattice(ser));
+	N := Index(Gamma, e*StandardLattice(r)); E := Degree(F, Q);
+	if not (N eq prm[3] and E eq prm[4]) then
+		error "wrong <N,E>-value computed!";
+	end if;
+	
+	return true;
+end function;
+
+
+// Example with a number of considerably different parameterizations
+// -----------------------------------------------------------------
+p0 := (1-x*y)*z^4+(4*x^3*y^3+3*x^5*y^6-4*x*y+2*x^2*y^2)*z^3+
+(-9*x^6*y^7+4*x^2*y^2-9*x^7*y^8-5*x^5*y^5-12*x^4*y^4)*z^2+
+(9*x^9*y^10+13*x^6*y^6+2*x^7*y^7-7*x^9*y^8+8*x^5*y^5+
+18*x^8*y^9+9*x^7*y^8)*z+x^7*y^7-4*x^8*y^8-3*x^8*y^9-9*x^9*y^10
+-9*x^10*y^11-3*x^11*y^12+7*x^10*y^9+7*x^11*y^10;
+_, prms := RationalPuiseux(p0 : Duval := true);
+for prm in prms do TestParam(prm); end for;
+
+
+// Example where rational and classical parametrizations differ
+// ------------------------------------------------------------
+p1 := z^6 + 3*x*y^2*z^4 + x*y*z^3 + 3*x^2*y^4*z^2 + x^3*y^6;
+_, prms := RationalPuiseux(p1);
+for prm in prms do TestParam(prm); end for;
+_, prms := RationalPuiseux(p1 : Duval := true);
+for prm in prms do TestParam(prm); end for;
+
+
+// Examples with nested extensions of exponent lattice
+// ---------------------------------------------------
+p2 := z^6 + 3*x^2*y^3*z^4 + x^4*y^5*z^3 + 3*x^4*y^6*z^2 + x^6*y^9;
+_, prms := RationalPuiseux(p2);
+for prm in prms do TestParam(prm); end for;
+_, prms := RationalPuiseux(p2 : Duval := true);
+for prm in prms do TestParam(prm); end for;
+
+p3 := z^6 + 3*y*z^4 + x^2*y^3*z^3 + 3*y^2*z^2 + y^3;
+_, prms := RationalPuiseux(p3);
+for prm in prms do TestParam(prm); end for;
+_, prms := RationalPuiseux(p3 : Duval := true);
+for prm in prms do TestParam(prm); end for;

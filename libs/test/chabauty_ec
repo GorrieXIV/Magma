@@ -1,0 +1,60 @@
+
+// Test elliptic curve Chabauty
+
+
+// ex-bug fixed in June 2012
+
+K<a>:=QuadraticField(14);
+_<t>:=PolynomialRing(K);
+qp:=(t^2 + 1/7*(-10*a - 50)*t + 1/7*(10*a + 39))*(t^2 + 1/7*(10*a + 28)*t + 1/7*(-10*a - 39));
+H<t,y,z>:=HyperellipticCurve(qp);
+P1 := ProjectiveSpace(Rationals(),1);
+w:=map< H->P1 | [t,z] >;
+P:=RationalPoints(H:Bound:=100);
+assert #P eq 4;
+
+Em<X,Y,Z>, m1 := EllipticCurve(H,P[1]);
+E<X,Y,Z>, mi  := MinimalModel(Em);
+PE:=[p @m1 @mi : p in P];
+
+T, mT := TorsionSubgroup(E);
+assert #T eq 2;
+bounds, gens := MordellWeilShaInformation(E); 
+assert bounds eq [1,1] and #gens eq 1;
+GtoEK := map< AbelianGroup([2,0]) -> E |
+              x :-> s[1]*(T.1@mT) + s[2]*gens[1] 
+                    where s is Eltseq(x) >;
+
+m := Inverse(mi) * Inverse(m1) * w;
+time
+V, R := Chabauty( GtoEK, m : IndexBound:= 2);
+V, R;
+assert #V eq 4;
+
+// V should include the cosets of the points in PE, because
+assert {p@m : p in PE} eq {P1(K) | [1,0], [1,1]};
+
+// this is allowed to fail, if different coset reps were chosen
+assert {v @GtoEK : v in V} join {-v @GtoEK : v in V} 
+    eq {p : p in PE} join {-p : p in PE};
+
+
+////////////////////////////////////////////////////////////////////
+// bug fixed October 2014
+
+P<x> := PolynomialRing(Rationals());
+K<w> := NumberField(x^5 - 2);
+E := EllipticCurve([-5*w, -75/2*w^2, -625/4*w^3, -34375/16*w^4, 0]);
+gens := [E| [-125/4*w^2, 0],
+            [1/4*(800*w^4 + 1000*w^3 + 1175*w^2 + 1200*w + 1600),
+             1/2*(-17250*w^4 - 19125*w^3 - 22500*w^2 - 26000*w - 29000)],
+            [1/4*(400*w^4 + 400*w^3 + 375*w^2 + 400*w + 600),
+             1/2*(-4000*w^4 - 4625*w^3 - 5000*w^2 - 5250*w - 6000)]];
+A := AbelianGroup([2, 0, 0]);
+MW := map<A -> E | a :-> &+[e[i]*gens[i] : i in [1..#e]]
+                                  where e := Eltseq(a)>;
+P1 := ProjectiveSpace(Rationals(), 1);
+pi := map<E -> P1 | [F.2, 2*F.1]> where F := FunctionField(E);
+V, R := Chabauty(MW, pi);
+assert #V eq 6;
+

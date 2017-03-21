@@ -1,0 +1,14 @@
+{
+    RngDiff.m
+    DiffOpForRngDiff.m 
+    ForOtherTypes.m
+    ExteriorPower.m
+    PadeHermite.m 
+    gcdsandlcms.m
+    completion.m
+    singularities.m
+    newtonPolygon.m
+    localfactorisation.m
+    locallclm.m
+    ricatti.m
+}

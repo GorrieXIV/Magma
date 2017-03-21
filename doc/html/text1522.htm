@@ -1,0 +1,986 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Arithmetic with L-series</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1523.htm">[Next]</A><A  HREF = "text1521.htm">[Prev]</A> <A  HREF = "text1523.htm">[Right]</A> <A  HREF = "text1521.htm">[Left]</A> <A  HREF = "text1513.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "17246">Arithmetic with L-series</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+With the exception of some modular forms, all the built-in 
+L-series have weakly multiplicative coefficients, so that
+L(s)=&sum;a<sub>n</sub>/n<sup>s</sup> with a<sub>mn</sub>=a<sub>m</sub>a<sub>n</sub> for m, n coprime.
+For two such L-series, Magma allows the user to construct their 
+product and, provided that it makes sense, their quotient.
+<P>
+There are also various methods to construct a new L-function
+from old L-functions, namely tensor products and symmetrizations.
+The notion of Hodge structure is also useful to have.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1522.htm#17249">Hodge Structure</A>
+<LI> <A  HREF = "text1522.htm#17263">Tensor Products</A>
+<LI> <A  HREF = "text1522.htm#17270">Symmetric Powers</A>
+</UL>
+<H5><A NAME = "17247">L1 * L2 : LSer, LSer -&gt; LSer</A></H5>
+
+<PRE>    Poles: SeqEnum                      Default: []</PRE>
+
+<PRE>    Residues: SeqEnum                   Default: []</PRE>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Let L<sub>1</sub>(s) and L<sub>2</sub>(s) be two L-series of the same weight
+whose coefficients are weakly multiplicative, that is, they 
+satisfy a<sub>mn</sub>=a<sub>m</sub>a<sub>n</sub> for m, n coprime.  This function constructs 
+their product L(s)=L<sub>1</sub>(s)L<sub>2</sub>(s). 
+<P>
+If one of the L-series has zeros that cancel the poles of the
+other L-series, the user should specify the list of poles for 
+L<sub>1</sub><sup> * </sup>(s)L<sub>2</sub><sup> * </sup>(s) using the <TT>Poles</TT> parameter and the 
+corresponding residues using the <TT>Residues</TT> parameter.
+See Section <A  HREF = "text1517.htm#17210">Terminology</A> for the terminology and Section <A  HREF = "text1517.htm#17211">Constructing a General L-Series</A>
+for the format of the poles and residues parameters.
+<P>
+The number of digits of precision to which the values L(s) are 
+to be computed may be specified using the <TT>Precision</TT> parameter. 
+If it is omitted, the precision is taken to be that of the default 
+real field. 
+</BLOCKQUOTE>
+<H5><A NAME = "17248">L1 / L2 : LSer, LSer -&gt; LSer</A></H5>
+
+<PRE>    Poles: SeqEnum                      Default: []</PRE>
+
+<PRE>    Residues: SeqEnum                   Default: []</PRE>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+<BLOCKQUOTE>
+Let L<sub>1</sub>(s) and L<sub>2</sub>(s) be two L-series whose coefficients a<sub>mn</sub>
+are weakly multiplicative, that is, they satisfy a<sub>mn</sub>=a<sub>m</sub>a<sub>n</sub> for 
+m, n coprime.  This function constructs 
+their quotient L(s)=L<sub>1</sub>(s)/L<sub>2</sub>(s).
+<P>
+This function assumes (but does not check!) that this quotient exists and 
+is a genuine L-function with finitely many poles.
+<P>
+If L<sub>2</sub>(s) happens to have zeros that give poles in the quotient, 
+the user must specify the list of poles of L<sub>1</sub><sup> * </sup>(s)/L<sub>2</sub><sup> * </sup>(s) using
+the <TT>Poles</TT> parameter and the corresponding residues using the 
+<TT>Residues</TT> parameter.
+See Section <A  HREF = "text1517.htm#17210">Terminology</A> for the terminology and Section <A  HREF = "text1517.htm#17211">Constructing a General L-Series</A>
+for the format of <TT>Poles</TT> and <TT>Residues</TT>.
+<P>
+The number of digits of precision to which the values L(s) are 
+to be computed may be specified using the <TT>Precision</TT> parameter. 
+If it is omitted, the precision is taken to be minimum of that of the inputs.
+</BLOCKQUOTE>
+<H4><A NAME = "17249">Hodge Structure</A></H4>
+
+<P>
+<P>
+<P>
+Magma can compute with Hodge structures of an L-series.
+In the sense of Deligne <A  HREF = "text1512.htm#bib_deligne-rootnumber">[Del79, Table 5.3]</A>,
+this is printed as a series of
+&lt; p, q &gt; pairs and &lt; p, p, &epsilon; &gt; triples,
+where the former have p&lt;q and correspond to H<sup>p, q</sup> and H<sup>q, p</sup>,
+and with the latter F_&infin;=( - 1)<sup>p + &epsilon;</sup>
+is the action of complex conjugation on H<sup>p, p</sup>.
+<P>
+Hodge structures of the same weight (possibly negative) can be added
+or subtracted (though virtual Hodge structures are not currently allowed).
+They can also be tensored and inverted (the latter negates all p, q)
+via the multiplication and division operators.
+
+
+<H5><A NAME = "17250">HasHodgeStructure(L) : LSer -&gt; BoolElt, HodgeStruc</A></H5>
+<H5>HodgeStructure(L) : LSer -&gt; HodgeStruc</H5>
+<BLOCKQUOTE>
+Given an L-series, determine if it has a Hodge structure.
+The <TT>HodgeStructure</TT> intrinsic can also be applied to various
+other objects.
+</BLOCKQUOTE>
+<H5><A NAME = "17251">TateTwist(HS, k) : HodgeStruc, RngIntElt -&gt; HodgeStruc</A></H5>
+<BLOCKQUOTE>
+Given a Hodge structure and an integer, take the Tate twist of the structure.
+This subtracts k from all the p and q, decreasing the weight by 2k.
+This corresponds to translating the L-function in the complex plane.
+</BLOCKQUOTE>
+<H5><A NAME = "17252">Translate(L, z) : LSer, RngIntElt -&gt; LSer</A></H5>
+<H5>Translate(L, z) : LSer, FldRatElt -&gt; LSer</H5>
+<BLOCKQUOTE>
+Given an L-series, translate it by the given integer (or rational).
+</BLOCKQUOTE>
+<H5><A NAME = "17253">GammaFactors(HS) : HodgeStruc -&gt; SeqEnum</A></H5>
+<H5>GammaShifts(HS) : HodgeStruc -&gt; SeqEnum</H5>
+<H5>Degree(HS) : HodgeStruc -&gt; RngIntElt</H5>
+<H5>Weight(HS) : HodgeStruc -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The &gamma;-factors (or shifts), degree, and (motivic) weight
+of a Hodge structure.
+</BLOCKQUOTE>
+<H5><A NAME = "17254">EffectiveHodgeStructure(HS) : HodgeStruc -&gt; HodgeStruc, RngIntElt</A></H5>
+<BLOCKQUOTE>
+The Hodge structure obtained by shifting so that all p, q&ge;0 with
+at least one of them equal to zero. Also returns the shift amount.
+</BLOCKQUOTE>
+<H5><A NAME = "17255">RootNumber(HS) : HodgeStruc -&gt; FldCycElt</A></H5>
+<BLOCKQUOTE>
+The root number at &infin; of a Hodge structure,
+which is a 4th root of unity.
+<P>
+Note that this is the reciprocal of that given by Deligne
+in <A  HREF = "text1512.htm#bib_deligne-rootnumber">[Del79, Table 5.3]</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "17256">TensorProduct(H1, H2) : HodgeStruc, HodgeStruc -&gt; HodgeStruc</A></H5>
+<BLOCKQUOTE>
+This is the standard operation on Hodge structures, also accesible
+via the '*' operator.
+</BLOCKQUOTE>
+<H5><A NAME = "17257">SymmetricPower(HS, m) : HodgeStruc, RngIntElt -&gt; HodgeStruc</A></H5>
+<BLOCKQUOTE>
+The mth symmetric power of a Hodge structure.
+</BLOCKQUOTE>
+<H5><A NAME = "17258">Determinant(HS) : HodgeStruc, -&gt; HodgeStruc</A></H5>
+<BLOCKQUOTE>
+The determinant of a Hodge structure.
+</BLOCKQUOTE>
+<H5><A NAME = "17259">AlternatingSquare(HS) : HodgeStruc -&gt; HodgeStruc</A></H5>
+<BLOCKQUOTE>
+The alternating square of Hodge structure.
+The general symmetrization intrinsic for Hodge structures
+has not been implemented at this time, but these last examples
+are probably the more interesting cases.
+</BLOCKQUOTE>
+<H5><A NAME = "17260">CriticalPoints(HS) : HodgeStruc -&gt; SeqEnum</A></H5>
+<H5>CriticalPoints(L) : LSer -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Given a Hodge structure or an L-series with a Hodge structure,
+return its critical points. In the case that the list is infinite,
+it will be truncated at height 100.
+</BLOCKQUOTE>
+<H5><A NAME = "17261">ImaginaryTwist(HS) : HodgeStruc -&gt; HodgeStruc</A></H5>
+<BLOCKQUOTE>
+Take the tensor product with the nontrivial weight 0 Hodge structure.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17262">Example <TT>Lseries_lseries-hodge-struc (H133E24)</TT></A></H3>
+Some examples of Hodge structures and operations.
+<P>
+<P>
+<PRE>
+&gt; LE := LSeries(EllipticCurve("11a"));
+&gt; HE := HodgeStructure(LE); HE;
+Hodge structure of weight 1 given by &lt;0,1&gt;
+&gt; Lf := LSeries(Newforms(CuspForms(9,4))[1][1]);
+&gt; Hf := HodgeStructure(Lf); Hf;
+Hodge structure of weight 3 given by &lt;0,3&gt;
+&gt; PR := Translate(LE,1)*Lf;
+&gt; HodgeStructure(PR);
+Hodge structure of weight 3 given by &lt;0,3&gt; &lt;1,2&gt;
+&gt; TateTwist(HE,-1)+Hf; // direct sum
+Hodge structure of weight 3 given by &lt;0,3&gt; &lt;1,2&gt;
+&gt; TP := TensorProduct(LE,Lf);
+&gt; HodgeStructure(TP);
+Hodge structure of weight 4 given by &lt;0,4&gt; &lt;1,3&gt;
+&gt; HE*Hf; // tensor product
+Hodge structure of weight 4 given by &lt;0,4&gt; &lt;1,3&gt;
+&gt; RootNumber(HodgeStructure([[0,0,1]])); // imag quad field
+-zeta_4
+&gt; RootNumber(HE); // elliptic curve
+-1
+&gt; RootNumber(Hf); // wt 4 modform
+1
+&gt; assert SymmetricPower(HE,2) eq HodgeStructure(SymmetricPower(LE,2));
+&gt; CriticalPoints(SymmetricPower(Hf,2));
+[1, 3, 4, 6]
+&gt;   CriticalPoints(ImaginaryTwist(SymmetricPower(Hf,2)));
+[ 2, 5 ]
+</PRE>
+<HR>
+<H4><A NAME = "17263">Tensor Products</A></H4>
+
+<P>
+<P>
+The above discussion with Hodge structure folds nicely
+into the <TT>TensorProduct</TT> machinery.
+
+
+<H5><A NAME = "17264">TensorProduct(L1, L2, ExcFactors) : LSer, LSer, [&lt;&gt;] -&gt; LSer</A></H5>
+<H5>TensorProduct(L1, L2, ExcFactors, K) : LSer, LSer, [&lt;&gt;], FldNum -&gt; LSer</H5>
+<H5>TensorProduct(L1, L2) : LSer, LSer, -&gt; LSer</H5>
+<H5>TensorProduct(L1, L2, K) : LSer, LSer, FldNum -&gt; LSer</H5>
+
+<PRE>    BadPrimes: SeqEnum                  Default: []</PRE>
+
+<PRE>    Precision: RngIntElt                Default: </PRE>
+
+<PRE>    Sign: FldComElt                     Default: </PRE>
+<BLOCKQUOTE>
+Let L<sub>1</sub> and L<sub>2</sub> be L-functions such that L<sub>1</sub>(s)=L(V<sub>1</sub>, s) and 
+L<sub>2</sub>(s)=L(V<sub>2</sub>, s) are associated to systems of l-adic representations
+V<sub>1</sub> and V<sub>2</sub> (&agrave; la Serre). This function computes their tensor product
+L(s)=L(V<sub>1</sub> tensor V<sub>2</sub>, s). This can be used, for example, to twist
+an L-function by characters or higher-dimensional Artin representations
+(see Examples <A  HREF = "text1523.htm#17295">H133E43</A>, <A  HREF = "text1523.htm#17297">H133E44</A>).
+<P>
+Note that, in particular, both L<sub>1</sub>(s) and L<sub>2</sub>(s) must have integer
+conductor, weakly multiplicative coefficients and an underlying
+Hodge structure (which is computed from the &gamma;-shifts).
+The argument <TT>ExcFactors</TT> (or the vararg <TT>BadPrimes</TT>) is a list of
+tuples of  the form &lt; p, v &gt; or &lt; p, v, F<sub>p</sub>(x) &gt;
+that give,  for each of the primes p where V<sub>1</sub> and V<sub>2</sub> both have bad
+reduction,  the valuation v of the conductor of V<sub>1</sub> tensor V<sub>2</sub> at p and
+the  inverse local factor at p.  If the data is not provided for such a 
+prime p, Magma will attempt to compute the local factors by assuming 
+that the inertia invariants behave well at p, 
+<P>
+  (V<sub>1</sub> tensor V<sub>2</sub>)<sup>I<sub>p</sub></sup> = V<sub>1</sub><sup>I<sub>p</sub></sup> tensor V<sub>2</sub><sup>I<sub>p</sub></sup>.
+<P>
+It will also compute the conductor exponents by predicting the tame and
+wild degrees from the degrees of the local factors, but this does not
+work if both V<sub>1</sub> and V<sub>2</sub> are wildly ramified at p.
+<P>
+The sign in the functional equation of L(V<sub>1</sub> tensor V<sub>2</sub>, s) cannot be 
+determined from the signs of the factors, so it will be calculated
+numerically from the functional equation. If the sign is known, the user
+may specify it by means of the <TT>Sign</TT> parameter.
+<P>
+The number of digits of precision to which the values L(s) are 
+to be computed may be specified using the <TT>Precision</TT> parameter. 
+If it is omitted, the precision is taken to be the minimal precision
+among the tensor parts.
+<P>
+Some tensor products can induce poles, particularly when tensoring
+an L-series with itself. Also in some cases, the tensor product
+will be taken over (Q) unless the user specifies otherwise.
+<P>
+<P>
+However, if L<sub>1</sub> and L<sub>2</sub> have Euler products over the same field K,
+this field can be given as an additional argument, and the tensor
+product will be taken with respect to that field.
+Namely, we take two L-functions with Euler products over a field K:
+L<sub>1</sub>(M, s)=&prod;<sub>p</sub>&prod;<sub>i=1</sub><sup>m</sup>
+bigl(1 - &alpha;<sub>i</sub>(p)/N p<sup>s</sup>bigr)<sup> - 1</sup> (and) 
+L<sub>2</sub>(N, s)=&prod;<sub>p</sub>&prod;<sub>j=1</sub><sup>n</sup> bigl(1 - &beta;<sub>j</sub>(p)/N p<sup>s</sup>bigr)<sup> - 1</sup>,
+where M and N are of degrees m and n respectively,
+and we ignore bad Euler factors in the above.
+Their tensor product is an L-function of degree mn given by
+L(A tensor B, s)=&prod;<sub>p</sub>&prod;<sub>i=1</sub><sup>m</sup>&prod;<sub>j=1</sub><sup>n</sup>
+bigl(1 - &alpha;<sub>i</sub>(p)&beta;<sub>j</sub>(p)/N p<sup>s</sup>bigr)<sup> - 1</sup>.
+It is not clear in general how to compute bad Euler factors,
+and even the gamma factors can be tricky. Internally, the functionality
+tries to compute a "Hodge structure" corresponding to the gamma factors
+of each object, with the "Hodge structure" for the tensor product then
+following via combinatorics, before passing back to the gamma factors.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17265">Example <TT>Lseries_ec-tensorprod (H133E25)</TT></A></H3>
+<P>
+A tensor product of two elliptic curves over (Q).
+<P>
+<P>
+<PRE>
+&gt; E1 := EllipticCurve("11a");
+&gt; E2 := EllipticCurve("17a");
+&gt; L1 := LSeries(E1);
+&gt; L2 := LSeries(E2);
+&gt; L := TensorProduct(L1, L2, []);
+&gt; LSeriesData(L); // level is 11^2 * 17^2
+&lt;3, [ -1, 0, 0, 1 ], 34969, function(p, d [ Precision ]) ... end function, 0,
+   [], []&gt;
+&gt; CFENew(L);
+0.000000000000000000000000000000
+</PRE>
+<HR>
+<H3><A NAME = "17266">Example <TT>Lseries_level1-modform (H133E26)</TT></A></H3>
+A tensor product of two modular forms of level 1.
+<P>
+<P>
+<PRE>
+&gt; f1 := ModularForms(1,12).2;
+&gt; f2 := ModularForms(1,26).2;
+&gt; L1 := LSeries(f1);
+&gt; L2 := LSeries(f2);
+&gt; L := TensorProduct(L1, L2, []);
+WARNING: Modular form is not known to be a newform
+WARNING: Modular form is not known to be a newform
+&gt; LSeriesData(L); // weight is (12-1)+(26-1)+1 -- motivic weight is 11+25
+&lt;37, [ -11, -10, 0, 1 ], 1, function(p, d [ Precision ]) ... end function, 0,
+   [], []&gt;
+&gt; CFENew(L);
+0.000000000000000000000000000000
+&gt; Pi(RealField(30))^2 * Evaluate(L,24) / Evaluate(L,25);
+9.87142857142857142857142857142
+&gt; 691/70.; // Ramanujan congruence
+9.87142857142857142857142857142
+</PRE>
+<HR>
+<H3><A NAME = "17267">Example <TT>Lseries_siegel-modular-form (H133E27)</TT></A></H3>
+<P>
+An example related to Siegel modular forms (see <A  HREF = "text1512.htm#bib_geemen-straten">[vGvS93, S8.7]</A>).
+<P>
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve("32a"); // congruent number curve
+&gt; chi := DirichletGroup(32).1; // character of conductor 4 lifted
+&gt; MF := ModularForms(chi, 3); // weight 3 modular forms on Gamma1(32,chi)
+&gt; NF := Newforms(MF);
+&gt; NF[1][1]; // q-expansion of the desired form
+q + a*q^3 + 2*q^5 - 2*a*q^7 - 7*q^9 - a*q^11 + O(q^12)
+&gt; Parent(Coefficient(NF[1][1], 3)); // defined over Q(i)
+Number Field with defining polynomial x^2 + 16 over the Rational Field
+&gt; f1, f2 := Explode(ComplexEmbeddings(NF[1][1])[1]);
+&gt; L1 := LSeries(E);
+&gt; L2 := LSeries(f1); // first complex embedding
+&gt; L := TensorProduct(L1, L2, [ &lt;2, 9&gt; ]); // conductor 2^9 (guessed)
+WARNING: Modular form is not known to be a newform
+&gt; time CFENew(L);
+3.15544362088404722164691426113E-30
+Time: 1.900
+</PRE>
+<HR>
+<H3><A NAME = "17268">Example <TT>Lseries_tensprod-overK (H133E28)</TT></A></H3>
+An example of a tensor product over a field larger than the rationals.
+<P>
+<P>
+<P>
+<PRE>
+&gt; K&lt;s&gt; := QuadraticField(-3);
+&gt; I := Factorization(3 * IntegerRing(K))[1][1];
+&gt; H := HeckeCharacterGroup(I^2);
+&gt; G := Grossencharacter(H.0, [[1, 0]]); // canonical character
+&gt; E := EllipticCurve([1, (3+s)/2, 0, (1+s)/2, 0]);
+&gt; Norm(Conductor(E));
+73
+&gt; LG := LSeries(G);
+&gt; LE := LSeries(E);
+&gt; TP := TensorProduct(LE, LG, [&lt;I, 5&gt;], K); // ensure 3-part correct
+&gt; LSetPrecision(TP, 9); // there is another factor of 3 from K
+&gt; LCfRequired(TP); // approx for old CheckFunctionalEquation
+1642
+&gt; CFENew(TP);
+0.000000000
+</PRE>
+<HR>
+<H3><A NAME = "17269">Example <TT>Lseries_consani-scholten (H133E29)</TT></A></H3>
+Another example of a tensor product over a field larger than the rationals.
+This comes from work of Consani and Scholten <A  HREF = "text1512.htm#bib_consani-scholten">[CS01]</A>,
+and the motivic realisation was later proven by Dieufelait, Pacetti,
+and Sch&uuml;tt <A  HREF = "text1512.htm#bib_DPS2012">[DPS12]</A>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; K := NumberField(x^2 - 5) where x is PolynomialRing(Rationals()).1;
+&gt; SetStoreModularForms(K, true); // to save computation time
+&gt; f5 := Factorization(5*Integers(K))[1][1];
+&gt; H := HilbertCuspForms(K,2*3*f5,[2,4]);
+&gt; N := NewformDecomposition(NewSubspace(H)); // 4-dimensional
+&gt; f11 := Factorization(11*Integers(K))[1][1]; // get right form
+&gt; f := [f : f in N | HeckeEigenvalue(Eigenform(f),f11) eq -2*K.1-58][1];
+&gt; Lf := LSeries(Eigenform(f));
+&gt; psi := HeckeCharacterGroup(f5,[1,2]).1;
+&gt; Lpsi := LSeries(psi);
+&gt; R := PolynomialRing(Integers());
+&gt; TP := TensorProduct(Lf,Lpsi,[&lt;f5,3,R!1&gt;],K); // 5^4 in all, 1 from K
+</PRE>
+<P>
+The above constructs the L-series of a specific Hilbert modular form
+of weight [2, 4] of level 6&#8730;5 over (Q)(&#8730;5),
+and then twists it by a nontrivial Hecke character. This corresponds to
+twisting the Fourier coefficients by a Dirichlet character of this field,
+which yields a Hilbert modular form at level 6(&#8730;5)<sup>2</sup>.
+We construct this latter form below.
+<P>
+We then compare the L-series data (to ensure that Magma correctly worked
+with the Hodge structure over the real quadratic field in the tensor product),
+and Euler factors up to 100 (a weak check).
+The use of <TT>CFENew</TT> or <TT>CheckFunctionalEquation</TT> to (say) 6 digits
+takes a few minutes, so we omit it here.
+<P>
+<P>
+<P>
+<PRE>
+&gt; H := HilbertCuspForms(K, 2*3*f5^2, [2,4]);
+&gt; time N := NewformDecomposition(NewSubspace(H));
+Time: 1.410
+&gt; g := [g : g in N | Dimension(g) eq 1 and
+&gt;                  HeckeEigenvalue(Eigenform(g),f11) eq -2*K.1-58][1];
+&gt; Lg := LSeries(Eigenform(g));
+&gt; assert forall{ i : i in [1..3] |
+&gt;                LSeriesData(TP)[i] eq LSeriesData(Lg)[i] };
+&gt; // weak check of Euler factors
+&gt; assert forall{ p : p in PrimesUpTo(100) |
+&gt;                EulerFactor(TP, p : Degree:=1, Integral) eq
+&gt;                EulerFactor(Lg, p : Degree:=1, Integral) };
+&gt; // weak check of Euler over K
+&gt; assert forall{ p : p in PrimesUpTo(100, K) |
+&gt;                Round(Coefficient(EulerFactor(TP, p), 1)) eq
+&gt;                Round(Coefficient(EulerFactor(Lg, p), 1)) };
+</PRE>
+<HR>
+<H4><A NAME = "17270">Symmetric Powers</A></H4>
+
+<P>
+<P>
+Symmetric power L-functions form a natural analogue to tensor products.
+Here we essentially tensor an L-function with itself repeatedly,
+but remove redundant factors.
+<P>
+In the case of GL(1), the kth symmetric power is simply the L-function
+associated to the kth power of the underlying character, though we must
+be careful to ensure primitivity (this disregards the bad primes).
+Explicitly, we have
+L((Sym)<sup>k</sup>&psi;, s)=&prod;<sub>p</sub> (1 - &psi;(p)<sup>k</sup>/N p<sup>s</sup>)<sup> - 1</sup>,
+(again ignoring bad primes)
+and so the eigenvalues are just the kth powers of the original.
+It is relatively easy to compute the bad Euler factors,
+given those for L(&psi;, s).
+<P>
+In the case of GL(2), the kth symmetric power is an L-function of
+degree (k + 1) over the field of definition, given by
+L((Sym)<sup>k</sup> A, s)=
+&prod;<sub>p</sub>&prod;<sub>i=0</sub><sup>k</sup>
+(1 - &alpha;<sub>1</sub>(p)<sup>k - i</sup>&alpha;<sub>2</sub>(p)<sup>i</sup>/N p<sup>s</sup>)<sup> - 1</sup>,
+where &alpha;<sub>1</sub>(p) and &alpha;<sub>2</sub>(p) are the eigenvalues at the prime p.
+In the case of elliptic curves, one can use the fact that
+&alpha;<sub>1</sub>(p)&alpha;<sub>2</sub>(p)=p to rewrite these via symmetric functions.
+<P>
+A similar definition can be made for higher degree L-functions,
+yielding that the kth symmetric power of an L-function of degree d
+will have degree (k + d - 1choose d - 1).
+<P>
+If the object itself has a natural powering operation (as with, say,
+Hecke characters), Magma will simply take the primitivization therein.
+The bad Euler factors have been explicitly calculated for elliptic curves
+over the rationals in <A  HREF = "text1512.htm#bib_martin-watkins">[MW06]</A> and <A  HREF = "text1512.htm#bib_dummigan-martin-watkins">[DMW09]</A>.
+In other cases, the user will likely have to provide them.
+Furthermore, the full ability to take symmetric powers over fields
+other than the rationals is not yet fully implemented.
+<P>
+More general symmetrizations are also possible, with the determinant
+and the alternating square perhaps being the most useful.
+
+
+<H5><A NAME = "17271">Determinant(L) : LSer -&gt; LSer</A></H5>
+
+<PRE>    Translate: BoolElt                  Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+This computes the determinant L-series, returned as a translate of
+an L-function of a Dirichlet character.
+</BLOCKQUOTE>
+<H5><A NAME = "17272">SymmetricPower(L, m) : LSer, RngIntElt -&gt; LSer</A></H5>
+
+<PRE>    BadPrimes: SeqEnum                  Default: []</PRE>
+<BLOCKQUOTE>
+Return the L-series corresponding to the mth symmetric power of L.
+The <TT>BadPrimes</TT> vararg consists of &lt; p, f, E &gt; triples,
+where p is a prime, f the conductor exponent, and E a polynomial
+that gives the Euler factor at that prime.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17273">Example <TT>Lseries_lseries-sympow (H133E30)</TT></A></H3>
+Some basic code, showing the special cases where Magma will just take
+the power of the underlying object.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := FullDirichletGroup(3*5*7);
+&gt; chi := G.1*G.2*G.3;
+&gt; L := LSeries(chi);
+&gt; LS3 := SymmetricPower(L, 3);
+&gt; Lc3 := LSeries(chi^3);
+&gt; Evaluate(LS3, 1);
+0.843964498053507794372984784472 + 0.199232992137116783033645803753*i
+&gt; Evaluate(Lc3, 1);
+0.843964498053507794372984784472 + 0.199232992137116783033645803753*i
+</PRE>
+<HR>
+<H3><A NAME = "17274">Example <TT>Lseries_sympow-gross (H133E31)</TT></A></H3>
+In this example we take symmetric powers of the L-function of a 
+Grossencharacter.
+<P>
+<P>
+<P>
+<PRE>
+&gt; K := QuadraticField(-23);
+&gt; I := Factorization(23 * IntegerRing(K))[1][1];
+&gt; G := HeckeCharacterGroup(I);
+&gt; psi := G.1^14;
+&gt; L := LSeries(psi);
+&gt; LS5 := SymmetricPower(L, 5);
+&gt; Lp5 := LSeries(psi^5);
+&gt; Evaluate(LS5, 1);
+0.870801884824381647583631149814 + 0.622589291563954831229726530813*i
+&gt; Evaluate(Lp5, 1);
+0.870801884824381647583631149814 + 0.622589291563954831229726530813*i
+&gt; GR := Grossencharacter(psi, [[1,0]]);
+&gt; L := LSeries(GR);
+&gt; LS4 := SymmetricPower(L, 4);
+&gt; Lp4 := LSeries(GR^4);
+&gt; Evaluate(LS4, 3);
+4.48608491213433366278327243071 + 0.424809367967343270765667919450*i
+&gt; Evaluate(Lp4, 3);
+4.48608491213433366278327243071 + 0.424809367967343270765667919450*i
+</PRE>
+<HR>
+<H3><A NAME = "17275">Example <TT>Lseries_sympow-ec (H133E32)</TT></A></H3>
+An example with symmetric powers of elliptic curves.
+In the case of the symmetric square of 389A, the <TT>ModularDegree</TT>
+code will do the same calculation, but more efficiently.
+<P>
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve("389a");
+&gt; L := LSeries(E);
+&gt; L2 := SymmetricPower(L, 2);
+&gt; LSeriesData(L2);
+&lt;3, [ 0, 1, 0 ], 151321, function(p, d) ... end function, 1, [], []&gt;
+&gt; LSetPrecision(L2, 9);
+&gt; Evaluate(L2, 2);
+3.17231145
+&gt; ($1 * Conductor(E)) / (2 * Pi(RealField()) * FundamentalVolume(E));
+40.0000000
+&gt; ModularDegree(E);
+40
+</PRE>
+<HR>
+<H3><A NAME = "17276">Example <TT>Lseries_sympow-ec2 (H133E33)</TT></A></H3>
+This is an example where a higher symmetric power
+has a vanishing central value. It comes from work
+of Buhler,  Schoen, and Top <A  HREF = "text1512.htm#bib_buhler-schoen-top">[BST97]</A>,
+who also compute that the observed analytic rank
+of the symmetric cube of 2379b is 4.
+<P>
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve("73a"); // conductor 73
+&gt; L := LSeries(E);           // note this is &lt; 389 (!)
+&gt; L3 := SymmetricPower(L, 3);
+&gt; LSeriesData(L3); // Magma knows the Sign is +1
+&lt;4, [ 0, -1, 1, 0 ], 389017, function(p, d) ... end function, 1, [], []&gt;
+&gt; LSetPrecision(L3, 9);
+&gt; CentralValue(L3); // analytic rank 2
+-1.14998623E-16
+</PRE>
+<HR>
+<H5><A NAME = "17277">Symmetrization(L, p) : LSer, SeqEnum -&gt; LSer</A></H5>
+
+<PRE>    BadPrimes: SeqEnum                  Default: []</PRE>
+
+<PRE>    PoleOrder: RngIntElt                Default: 0</PRE>
+
+<PRE>    Induction: BoolElt                  Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+The <TT>Symmetrization</TT> intrinsic is the general workhorse.
+It takes an L-function and a partition (weakly decreasing sequence
+of nonnegative integers) as inputs. The <TT>BadPrimes</TT> vararg is as
+with other cases, while <TT>PoleOrder</TT> specifies that an appropriate
+translate of the Riemann &zeta;-function will be a factor of the result
+(Magma knows about this is some cases). Finally, the <TT>Induction</TT> vararg
+controls how GL(1) objects over fields larger than <B>Q</B> are handled.
+<P>
+Magma will reduce the symmetrization, so that, for example,
+the {6, 4}-symmetrization of a degree 2 L-function will just
+be the translate by 4 of its symmetric square.
+However, the practical symmetrizations that can be computed are
+still rather limited. Thus, for reasons of efficiency, Magma contains
+hardcoded formulas for small degree examples. For degree 2 these include
+all symmetric powers. For degree 3 it includes the symmetric cube,
+the alternating square ({1, 1}-symmetrization),
+and {2, 1}-symmetrization, not to mention the determinant
+(which is always available).
+For degree 4 Magma has the symmetric and alternating squares,
+and for degree 5 the alternating square is available.
+Furthermore, for objects such as Artin representations,
+<TT>Symmetrization</TT> can be applied to the object itself,
+and the resulting L-function is (highly) imprimitive,
+easing computations.
+</BLOCKQUOTE>
+<H5><A NAME = "17278">IsOrthogonal(L) : LSer -&gt; BoolElt</A></H5>
+<H5>IsSymplectic(L) : LSer -&gt; BoolElt</H5>
+
+<PRE>    AssumeTrue: BoolElt                 Default: <TT>false</TT></PRE>
+
+<PRE>    AssumeFalse: BoolElt                Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given an L-function return whether it is orthogonal
+(respectively symplectic).
+Firstly this means it is self-dual, that is it has real coefficients
+(a check is done for the first few values).
+If the motivic weight is odd, then it is symplectic but not orthogonal.
+If the degree is odd, then it is orthogonal but not symplectic.
+If both the degree and motivic weight are even, then currently the user must
+specify <TT>AssumeTrue</TT> or <TT>AssumeFalse</TT> for a result to be given.
+</BLOCKQUOTE>
+<H5><A NAME = "17279">OrthogonalSymmetrization(L, p) : LSer, SeqEnum -&gt; LSer</A></H5>
+<H5>SymplecticSymmetrization(L, p) : LSer, SeqEnum -&gt; LSer</H5>
+
+<PRE>    BadPrimes: SeqEnum                  Default: []</PRE>
+
+<PRE>    PoleOrder: RngIntElt                Default: 0</PRE>
+<BLOCKQUOTE>
+Given an orthogonal L-function and a suitable partition p,
+return the orthogonal symmetrization.
+Referring to Section <A  HREF = "text1042.htm#11804">Symmetrization</A>,
+the symmetrization of L can factor into smaller parts.
+In particular, one can throw out "old" factors, and concentrate
+on those that are truly new. In general, one should have that the
+degree exceeds twice the number of parts in the partition (see the
+"modification rules" in the above reference), as these form a basis
+for the representation space (up to twisting).
+<P>
+In degree 2, the relevant partitions are of the form (m),
+and all the orthogonal symmetrizations themselves have degree 2.
+In degree 3, again the relevant partitions are singletons,
+and the orthogonal mth power has degree 2m + 1. Magma allows one to
+consider m&le;4 via hand-coded formulas.
+In degree 4 the practical partitions are (2) and (2, 2),
+these leading to degree 9 and 10 L-functions respectively.
+<P>
+Similarly one can compute the symplectic symmetrization
+of a symplectic L-function.
+The only (interesting) available case is for degree 4 L-functions,
+when the (1, 1) partition gives a L-function of degree 5.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17280">Example <TT>Lseries_general-symm (H133E34)</TT></A></H3>
+Here we consider some general symmetrizations.
+We first take a modular form of level 25 and weight 4,
+so a degree 2 L-function of motivic weight 3,
+and take various symmetrizations of it.
+<P>
+<P>
+<P>
+<PRE>
+&gt; x := PolynomialRing(Integers()).1;
+&gt; Lf := LSeries(Newforms(ModularForms(25,4))[1][1]);
+&gt; S2 := Symmetrization(Lf,[2] : BadPrimes:=[&lt;5,2,1+125*x&gt;]);
+&gt; CFENew(S2);
+0.000000000000000000000000000000
+&gt; S31 := Symmetrization(Lf,[3,1] : BadPrimes:=[&lt;5,2,1+5^7*x&gt;]);
+&gt; CFENew(S31);
+0.000000000000000000000000000000
+&gt; LSetPrecision(Lf,10);
+&gt; S3 := Symmetrization(Lf,[3] : BadPrimes:=[&lt;5,4,1&gt;]);
+&gt; CFENew(S3);
+0.0000000000
+&gt; S4 := Symmetrization(Lf,[4] : BadPrimes:=[&lt;5,4,1-125^2*x&gt;]);
+&gt; CFENew(S4);
+5.820766091E-11
+</PRE>
+<P>
+<P>
+Another (unitary) example in degree 2 is from a weight 2 newform
+with complex character. Here we take a "semistable" example, as
+for such L-functions it is relatively easy to compute the
+bad prime info.
+<P>
+<P>
+<P>
+<PRE>
+&gt; f := Newforms(CuspForms(FullDirichletGroup(13).1^2,2))[1][1];
+&gt; L := LSeries(f : Embedding:=func&lt;x|Conjugates(x)[1]&gt;);
+&gt; BP := [&lt;13,2,Polynomial([1,-(-Coefficient(EulerFactor(L,13),1))^2])&gt;];
+&gt; S2 := Symmetrization(L,[2] : BadPrimes:=BP);
+&gt; CFENew(S2); // deg 3, conductor 169
+0.000000000000000000000000000000
+&gt; LSetPrecision(L,15);
+&gt; BP := [&lt;13,3,Polynomial([1,-(-Coefficient(EulerFactor(L,13),1))^3])&gt;];
+&gt; S3 := Symmetrization(L,[3] : BadPrimes:=BP);
+&gt; CFENew(S3); // deg 4, conductor 13^3
+8.88178419700125E-16
+&gt; LSetPrecision(L,5);
+&gt; BP := [&lt;13,4,Polynomial([1,-(-Coefficient(EulerFactor(L,13),1))^4])&gt;];
+&gt; S4 := Symmetrization(L,[4] : BadPrimes:=BP);
+&gt; CFENew(S4); // deg 5, conductor 13^4
+0.00000
+</PRE>
+<HR>
+<H3><A NAME = "17281">Example <TT>Lseries_orthog-symm (H133E35)</TT></A></H3>
+We next take a degree 3 L-function of (motivic) weight 2,
+and compute its symmetric cube. Note that this is a degree 10
+L-function, but when the input is orthogonal this original L-function
+(translated appropriately) appears as a factor.
+<P>
+<P>
+<P>
+<PRE>
+&gt; H := HypergeometricData([1,1,1],[2,2,2]);
+&gt; L := LSeries(H,2 : BadPrimes:=[&lt;2,8,1&gt;],SaveEuler:=10000);
+&gt; LSetPrecision(L,5);
+&gt; assert IsOrthogonal(L); // degree 3 weight 2
+&gt; S3 := Symmetrization(L,[3] : BadPrimes:=[&lt;2,26,1&gt;]);
+&gt; [Degree(x[1]) : x in Factorization(S3)];
+[ 8, 3 ]
+&gt; CFENew(S3); // 2^18 for deg 7 factor
+0.045944
+</PRE>
+<P>
+It would be more efficient to compute the above information using
+<TT>OrthogonalSymmetrization</TT>. Note that the <TT>BadPrimes</TT>
+vararg in the first form referred to the whole L-functions, while
+when using this second form we center on the degree 7 constituent.
+<P>
+<P>
+<P>
+<PRE>
+&gt; O3 := OrthogonalSymmetrization(L,[3] : BadPrimes:=[&lt;2,18,1&gt;]);
+&gt; Degree(O3);
+7
+&gt; CFENew(O3); // L-coeffs already computed, thanks to SaveEuler
+0.00000
+</PRE>
+<P>
+The {2, 1}-symmetrization of a degree 3 L-function has degree 8,
+and when the input is orthogonal there is a degree 3 constituent
+corresponding to the L-function.
+<P>
+<P>
+<P>
+<PRE>
+&gt; LSetPrecision(L,20);
+&gt; S21 := Symmetrization(L,[2,1] : BadPrimes:=[&lt;2,20,1&gt;]); // deg 8
+&gt; CFENew(S21);
+0.00000000000000000000
+&gt; LT := Translate(L,2);
+&gt; CFENew(S21/LT);
+0.00000000000000000000
+</PRE>
+<P>
+The degree 5 constituent is the
+orthogonal symmetric square twisted by the determinant.
+<P>
+<P>
+<P>
+<PRE>
+&gt; D := Determinant(L); D;
+Translation by 3 of L-series of Kronecker character -4
+&gt; O2 := OrthogonalSymmetrization(L,[2] : BadPrimes:=[&lt;2,10,1&gt;]);
+&gt; CFENew(O2);
+0.00000000000000000000
+&gt; TP := TensorProduct(O2,D : BadPrimes:=[&lt;2,12,1&gt;]);
+&gt; Q := Translate(S21/LT,2);
+&gt; P := PrimesUpTo(100);
+&gt; assert &amp;and[EulerFactor(TP,p) eq EulerFactor(Q,p) : p in P];
+</PRE>
+<P>
+Be careful here! It turns out that <TT>CFENew</TT> works
+to 12 digits for the quotient of S<sub>21</sub> with the <TT>Determinant</TT>,
+but in fact there is no such factorization at the
+level of L-functions (the issue is likely that the lowest height
+zero on the critical line for the <TT>Determinant</TT> is rather large,
+and thus the poles in the L-quotient do not contribute much).
+<P>
+<P>
+<P>
+<PRE>
+&gt; CFENew(S21/LT/D);       // the product of these
+2.5742151368679484303E-6
+&gt; CFENew(LT/D);           // last two is ~10^(-12)
+6.3865388810908029459E-5
+</PRE>
+<P>
+A superior way to detect constituents is through
+taking a Selberg inner product; here this would just
+be looking at the average c<sub>p</sub> value when twisting by
+the appropriate Dirichlet character.
+<P>
+The {1, 1}-symmetrization (or alternating square) of a degree 3 L-function
+is actually a translate of the original L-function tensored with its
+determinant.
+<P>
+<P>
+<P>
+<PRE>
+&gt; S := Symmetrization(L,[1,1] : BadPrimes:=[&lt;2,8,1&gt;]);
+&gt; DL := TensorProduct(D,L : BadPrimes:=[&lt;2,8,1&gt;]);
+&gt; T := Translate(DL,-2);
+&gt; assert &amp;and[EulerFactor(T,p)  eq EulerFactor(S,p) : p in P];
+</PRE>
+<HR>
+<H3><A NAME = "17282">Example <TT>Lseries_symplectic-symm (H133E36)</TT></A></H3>
+We consider a degree 4 symplectic L-function.
+Note that when the base L-function has degree 4, one needs to compute
+the quadratic term of the Euler factor to be able to compute the
+symmetrizations, and depending on the type of L-function, this can be
+quite time-consuming.
+Our first example is identified by the internal Magma machinery as coming
+from an elliptic curve over a quadratic field, which allows faster
+computations of the coefficients.
+We take its alternating square, which yields a degree 6 L-function that has
+a translated Riemann &zeta;-function as a factor.
+<P>
+<P>
+<P>
+<PRE>
+&gt; x := PolynomialRing(Integers()).1;
+&gt; H := HypergeometricData([4,4],[1,1,2,2]);
+&gt; L := LSeries(H,2 : Precision:=10);
+&gt; assert IsSymplectic(L); // degree 4 weight 1
+&gt; L`parent;
+Elliptic Curve defined by y^2 + x*y + $.1*y = x^3 + $.1*x^2 over Number Field
+   with defining polynomial x^2 - 1/512 over the Rational Field
+&gt; S := Symmetrization(L,[1,1] : BadPrimes:=[&lt;2,16,1-2*x&gt;]);
+&gt; Degree(S);
+6
+&gt; CFENew(S);
+0.0000000000
+&gt; Factorization(S)[2];
+&lt;Translation by 1 of L-series of Riemann zeta function, 1&gt;
+</PRE>
+<P>
+Alternatively, we can compute this via the symplectic symmetrization,
+when we don't have to specify the bad prime information corresponding
+to the &zeta;-function.
+<P>
+<P>
+<P>
+<PRE>
+&gt; S := SymplecticSymmetrization(L,[1,1] : BadPrimes:=[&lt;2,16,1&gt;]);
+&gt; Degree(S);
+5
+&gt; CFENew(S);
+0.0000000000
+</PRE>
+<P>
+Another example comes from hypergeometric motives, where here the
+conductor is sufficiently small so that the slowdown from computing
+quadratic coefficients is not too problematic.
+<P>
+<P>
+<P>
+<PRE>
+&gt; H := HypergeometricData([4,2,2,2,2],[1,1,1,1,1,1]);
+&gt; L := LSeries(H,1 : Precision:=10); // t=1 degeneration
+&gt; Conductor(L); // degree 4, conductor 2^8, motivic wt 5
+256
+&gt; S := SymplecticSymmetrization(L,[1,1] : BadPrimes:=[&lt;2,8,1&gt;]);
+&gt; time CFENew(S);
+0.0000000000
+Time: 2.300
+</PRE>
+<P>
+An additional source of such L-functions could be Gr&ouml;ssencharacters,
+though these are inductions from GL(1).
+<P>
+<P>
+<P>
+<PRE>
+&gt; K&lt;zeta5&gt; := CyclotomicField(5);
+&gt; p5 := Factorization(5*Integers(K))[1][1];
+&gt; psi := HeckeCharacterGroup(p5^2).0;
+&gt; GR := Grossencharacter(psi,[[3,0],[1,2]]);
+&gt; L := LSeries(GR : Precision:=15);
+&gt; S := SymplecticSymmetrization(L,[1,1] : BadPrimes:=[&lt;5,6,1&gt;]);
+&gt; CFENew(S); // S is imprimitive
+0.000000000000000
+&gt; Q := S/Translate(LSeries(KroneckerCharacter(5)),3);
+&gt; CFENew(Q);
+0.000000000000000
+</PRE>
+<HR>
+<H3><A NAME = "17283">Example <TT>Lseries_more-orthog (H133E37)</TT></A></H3>
+<P>
+Here are some examples involving the higher orthogonal symmetrizations.
+Again we note that computing the quadratic term of the underlying
+L-function can sometimes be quite time-consuming.
+<P>
+<P>
+<P>
+<PRE>
+&gt; _&lt;x&gt; := PolynomialRing(Integers());
+&gt; H := HypergeometricData([2,2,2],[1,1,1]);
+&gt; L := LSeries(H,2 : BadPrimes:=[&lt;2,9,1&gt;],Precision:=5);
+&gt; BP := [&lt;2,18,1-16*x&gt;];
+&gt; O4 := OrthogonalSymmetrization(L,[4] : BadPrimes:=BP);
+&gt; CFENew(O4); // OSym^4(deg3) // deg 9
+0.00000
+&gt; H := HypergeometricData([2,2,2,2,2],[1,1,1,4]);
+&gt; L := LSeries(H,1); // degree 4, weight 4, cond 2^7
+&gt; BP := [&lt;2,15,1-16*x&gt;];
+&gt; O2 := OrthogonalSymmetrization(L,[2] : BadPrimes:=BP);
+&gt; LSetPrecision(O2,5); // only 450 terms required, but slow!
+&gt; time CFENew(O2); // OSym^2(deg4) // deg 9
+0.00000
+Time: 21.420
+</PRE>
+<P>
+With this latter selection of L, one can verify
+(using about 1000 terms to get 3 digits, taking 5 minutes)
+that the orthogonal symmetrization L<sup>[2, 2]</sup> has conductor 2<sup>21</sup> and
+trivial Euler factor at 2. This is fully in line with a computation from
+(wild) Swan slopes.
+<HR>
+<H3><A NAME = "17284">Example <TT>Lseries_final-symm-examples (H133E38)</TT></A></H3>
+<P>
+We are able to give a computed example of an L<sup>[2, 2]</sup>
+orthogonal symmetrization of a degree 4 L-function.
+It turns out to be imprimitive (in fact, with a factor of &zeta;,
+but factors even further it seems), though L itself is primitive.
+<P>
+<P>
+<P>
+<PRE>
+&gt; _&lt;x&gt; := PolynomialRing(Integers());
+&gt; H := HypergeometricData([2,2,2,2,2],[1,1,1,1,1]);
+&gt; L := LSeries(H,1 : SaveEuler:=10^4); // degree 4, weight 4, cond 2^8
+&gt; LSetPrecision(L,5);
+&gt; BP := [&lt;2,12,(1-2^8*x)^2*(1+2^8*x)^2&gt;]; // Swan conductor 16-10 or 6
+&gt; O22 := OrthogonalSymmetrization(L,[2,2] : BadPrimes:=BP,PoleOrder:=1);
+&gt; time CFENew(O22); // OSym^[2,2](deg4) // deg 10
+1.5259E-5
+Time: 6.910
+&gt; BP := [&lt;2,12,(1+2^8*x^2)*(1+2^4*x)&gt;]; // Swan conductor 15-9 or 6
+&gt; O2 := OrthogonalSymmetrization(L,[2] : BadPrimes:=BP);
+&gt; time CFENew(O2); // OSym^2(deg4) // deg 9
+0.00000
+Time: 0.220
+</PRE>
+<P>
+It is difficult to give an example of a <I>primitive</I> L-function
+of degree 5 and nonzero weight for which the {1, 1}-symmetrization
+is computable reasonably fast; one example here is the t=1 hypergeometric
+motive from [4, 4, 4] and [1, 2, 2, 2, 2, 2], whose L^({1, 1}) has
+conductor 2<sup>24</sup> and trivial Euler factor.
+<P>
+Having no better example, we rely on the 4th symmetric power of an
+elliptic curve L-function, which is primitive though not wholly generic.
+Indeed, the resulting {1, 1}-symmetrization is itself imprimitive.
+Importantly, the coefficients can be computed fast.
+<P>
+<P>
+<P>
+<PRE>
+&gt; _&lt;x&gt; := PolynomialRing(Integers());
+&gt; E := EllipticCurve("128a");
+&gt; L := LSeries(E);
+&gt; S4 := SymmetricPower(L,4 : Precision:=5);
+&gt; Degree(S4), Conductor(S4); // 2^10, slopes 5/3,5/3,5/3,0,0
+5 1024
+&gt; BP :=[&lt;2,24,1+16*x&gt;]; // Swan conductor (5/3)*9
+&gt; S11 := Symmetrization(S4,[1,1] : BadPrimes:=BP);
+&gt; time CFENew(S11); // Sym^[1,1](deg5) // deg 10
+0.00000
+Time: 1.910
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1523.htm">[Next]</A><A  HREF = "text1521.htm">[Prev]</A> <A  HREF = "text1523.htm">[Right]</A> <A  HREF = "text1521.htm">[Left]</A> <A  HREF = "text1513.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

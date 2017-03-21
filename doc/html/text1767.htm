@@ -1,0 +1,235 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Resolutions, Parallelisms and Parallel Classes</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1768.htm">[Next]</A><A  HREF = "text1766.htm">[Prev]</A> <A  HREF = "text1768.htm">[Right]</A> <A  HREF = "text1766.htm">[Left]</A> <A  HREF = "text1758.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "19584">Resolutions, Parallelisms and Parallel Classes</A></H3>
+
+<P>
+<P>
+<P>
+Let D be an incidence structure with v points.
+A <I>resolution</I>
+  of D is a partition of the blocks of D
+  into classes C<sub>i</sub> such that each class is a 1-design
+  with v points and index &lambda;.
+The positive integer &lambda; is called the <I>index</I>
+  of the resolution.
+A resolution with &lambda; = 1 is called a 
+  <I>parallelism</I>.
+In this case the classes C<sub>i</sub> are called 
+  <I>parallel classes</I>.
+<P>
+All the functions which deal  with resolutions  apply to general incidence 
+  structures.
+The functions <TT>HasParallelism</TT>, <TT>AllParallelisms</TT>, <TT>HasParallelClass</TT>,
+  <TT>IsParallelClass</TT> and <TT>AllParallelClasses</TT> 
+  require that the incidence structure be uniform.
+The function <TT>IsParallelism</TT> however applies to a general 
+  incidence structure.
+
+
+<H5><A NAME = "19585">HasResolution(D) : Inc -&gt; BoolElt, { SetEnum }, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the incidence structure D has a resolution.
+If <TT>true</TT>, one resolution is returned as the second value of the function 
+and the  index of the resolution is returned as the third value.
+</BLOCKQUOTE>
+<H5><A NAME = "19586">HasResolution(D, &lambda;) : Inc, RngIntElt -&gt; BoolElt, { SetEnum }</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the incidence structure D has a resolution
+  with index  &lambda;.
+If <TT>true</TT>, one such resolution is returned as the second value of 
+the function.
+</BLOCKQUOTE>
+<H5><A NAME = "19587">AllResolutions(D) : Inc  -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Returns all resolutions of the incidence structure D.
+</BLOCKQUOTE>
+<H5><A NAME = "19588">AllResolutions(D, &lambda;) : Inc, RngIntElt  -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Returns all resolutions of the incidence structure D having index &lambda;.
+When the problem is to find all parallelisms (&lambda; = 1) in 
+  a uniform design D, it is best to use the function
+  <TT>AllParallelisms</TT> described below.
+</BLOCKQUOTE>
+<H5><A NAME = "19589">IsResolution(D, P) : Inc, SetEnum[SetEnum] -&gt; BoolElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the set P of blocks (or sets) is a resolution
+  of the incidence structure D.
+If <TT>true</TT>, also returns the index of the resolution as the second value 
+  of the function.
+</BLOCKQUOTE>
+<H5><A NAME = "19590">HasParallelism(D: parameters) : Inc, RngIntElt -&gt; BoolElt, { SetEnum }</A></H5>
+
+<PRE>    Al: MonStg                          Default: "Backtrack"</PRE>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the uniform incidence structure D has a parallelism.
+If <TT>true</TT>, a parallelism is returned as the second value of the function.
+The parameter <TT>Al</TT> allows the user to specify the algorithm used.
+<P>
+<P>
+<TT>Al := "Backtrack"</TT>: A backtrack search is employed. 
+This is in general very efficient when the design D is
+  parallelizable, irrespective of the number of blocks.  
+In particular, it compares very favourably with the 
+  algorithm <TT>Clique</TT>, described below.  
+The later algorithm is recommended when the design appears 
+  to have no parallelism.
+Backtrack is the default.
+<P>
+<P>
+<TT>Al := "Clique"</TT>: This algorithm proceeds in two stages.  
+Assume that D has v points and b blocks of size k. 
+Define the graph G<sub>1</sub> of D to be the graph whose vertices 
+  are the blocks of D and
+  where two blocks are adjacent if and only if they are disjoint. 
+The first stage of the Clique algorithm involves constructing the graph
+  G<sub>1</sub> and finding all cliques of size v/k in G<sub>1</sub>.  
+Any such clique is a parallel class of D.  
+The second stage involved building a graph G<sub>2</sub> of D where 
+  the vertices are the parallel classes of D and two
+  parallel classes are adjacent if and only if they are disjoint.  
+The second stage of the Clique algorithm involves searching for cliques of
+  size b/(v/k) in G<sub>2</sub>.  
+If such a clique exists then it yields a parallelism of D.
+  (This algorithm was communicated by Vladimir Tonchev).
+<P>
+The clique algorithm is recommended when the design is suspected of
+  having no parallelism.  
+As an example, in the case of a non--parallelizable
+  design with 272 blocks, Clique took around 0.1 second to complete as
+  compared to 2 seconds for the backtrack algorithm. 
+For a non--parallelizable design having 6642 blocks, 
+  Clique took around four hours to complete as compared 
+  to Backtrack which did not complete in 15 hours.  
+Apart from performing very poorly when D has a parallelism,
+  Clique may require a considerable amount of memory.  
+It is recommended that Backtrack be tried first, 
+  and if it does not complete in a
+  reasonable amount of time, then Clique should be used.
+</BLOCKQUOTE>
+<H5><A NAME = "19591">AllParallelisms(D) : Inc  -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Returns all parallelisms of the uniform incidence structure D.
+This function is to be preferred to the function <TT>AllResolutions(D, 1)</TT>
+  when D is uniform.
+This is the case since the implementation of <TT>AllParallelClasses</TT>
+  implies finding cliques in graphs (see the algorithm Clique
+  described in the function <TT>HasParallelism</TT>), while 
+  <TT>AllResolutions</TT> performs a full backtrack search.
+</BLOCKQUOTE>
+<H5><A NAME = "19592">IsParallelism(D, P) : Inc, SetEnum[SetEnum] -&gt; BoolElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if  the set P of blocks (or sets) is a parallelism
+  of the incidence structure D.
+</BLOCKQUOTE>
+<H5><A NAME = "19593">HasParallelClass(D) : Inc -&gt; BoolElt, { IncBlk }</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the uniform incidence structure D has a parallel 
+  class.
+</BLOCKQUOTE>
+<H5><A NAME = "19594">IsParallelClass(D, B, C) : Inc, IncBlk, IncBlk -&gt; BoolElt, { IncBlk }</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the uniform incidence structure D has a parallel 
+  class containing the blocks B  and C.
+If such a parallel class does exist, one is returned as the second
+  value of the function.
+</BLOCKQUOTE>
+<H5><A NAME = "19595">AllParallelClasses(D) : Inc -&gt;  SeqEnum</A></H5>
+<BLOCKQUOTE>
+Returns all  parallel classes of the uniform incidence structure D. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19596">Example <TT>Design_resol-parallel (H153E8)</TT></A></H3>
+Some of the above functions are illustrated here.
+<P>
+<P>
+<PRE>
+&gt; D := IncidenceStructure&lt; 6 | {1,2,3}, {4,5,6}, {1,3,4}, {2,5,6}&gt;;
+&gt; bool, R, lambda := HasResolution(D);
+&gt; bool;
+true
+&gt; R;
+{
+  { 
+    {1, 2, 3},
+    {4, 5, 6},
+    {1, 3, 4},
+    {2, 5, 6}
+  }
+}
+&gt; lambda;
+2
+&gt; HasResolution(D,2);
+true {
+  { 
+    {1, 2, 3},
+    {4, 5, 6},
+    {1, 3, 4},
+    {2, 5, 6}
+  }
+}
+&gt; AllResolutions(D);
+[
+  {
+    { 
+      {1, 2, 3},
+      {4, 5, 6},
+      {1, 3, 4},
+      {2, 5, 6}
+    }
+  },
+  {
+    { 
+      {1, 2, 3},
+      {4, 5, 6}
+    },
+    { 
+      {1, 3, 4},
+      {2, 5, 6}
+    }
+  }
+]
+&gt; HasParallelism(D);
+true {
+  { 
+    {1, 2, 3},
+    {4, 5, 6}
+  },
+  { 
+    {1, 3, 4},
+    {2, 5, 6}
+  }
+}
+&gt; V := PointSet(D);
+&gt; S := { PowerSet(PowerSet(V)) | 
+&gt;        { {1, 2, 3}, {4, 5, 6} }, { {1, 3, 4}, {2, 5, 6} } };
+&gt; IsParallelism(D, S);
+true
+&gt; B := BlockSet(D);
+&gt; S := { { B.1, B.2 }, {B.3, B.4 }};
+&gt; IsParallelism(D, S);
+true
+&gt; AllParallelClasses(D);
+{
+  { 
+    {1, 2, 3},
+    {4, 5, 6}
+  },
+  { 
+    {1, 3, 4},
+    {2, 5, 6}
+  }
+}
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1768.htm">[Next]</A><A  HREF = "text1766.htm">[Prev]</A> <A  HREF = "text1768.htm">[Right]</A> <A  HREF = "text1766.htm">[Left]</A> <A  HREF = "text1758.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

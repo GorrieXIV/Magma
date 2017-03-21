@@ -1,0 +1,25 @@
+d := 7;
+F := GF(7,4);
+wantdim := Floor(d/3);
+
+/* Construct Sylow subgrp */
+sd1, sd2 := GetSeed();
+printf "SetSeed(%o, %o)\n", sd1, sd2;
+p := Characteristic(F);
+ClSy := ClassicalSylow(GL(d, F), p);
+G := sub<GL(d,F) | [ Random(ClSy) : i in [1..10] ]>;
+
+/* Construct subspc */
+Vfull := VectorSpace(F, d);
+U := sub<Vfull | >;
+while Dimension(U) lt wantdim do
+	U := sub<Vfull | U, Random(Vfull)>;
+end while;
+
+/* Stabiliser... */
+time H, C, x, slp := UnipotentStabiliser(G, U);
+
+/* Check return values */
+assert forall{h : h in Generators(H) | U*h eq U };
+assert U*x eq C;
+assert Evaluate(slp, G) eq x;

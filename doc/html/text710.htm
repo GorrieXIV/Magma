@@ -1,0 +1,164 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Homomorphisms</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text711.htm">[Next]</A><A  HREF = "text709.htm">[Prev]</A> <A  HREF = "text711.htm">[Right]</A> <A  HREF = "text709.htm">[Left]</A> <A  HREF = "text706.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "8019">Homomorphisms</A></H3>
+
+<P>
+<P>
+Arbitrary homomorphisms can be defined between pc-groups by using
+the <TT>hom&lt;&gt;</TT> constructor.  For pc-groups, this constructor has
+features not generally available for user-defined homomorphisms.
+In addition to defining the map by giving images for the pc-generators,
+a homomorphism can be defined by giving images for any generating
+set of the domain.  Magma will verify that the specified images
+define a homomorphism and will compute the kernel and inverse images
+for the defined map.  Note that the value returned for an inverse
+image of an element is simply one element from the preimage, not
+the complete coset.
+
+
+<H5><A NAME = "8020">hom&lt; G -&gt; H | L &gt; : GrpPC, GrpPC, List -&gt; Map</A></H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Construct a homomorphism &phi;:G -&gt; H defined by the images
+specified by the list L.
+<P>
+<P>
+The list L must be one of the following:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>a list, set, or sequence of 2-tuples &lt;g<sub>i</sub>, h<sub>i</sub>&gt; (order not important);
+<DT>(b)</DT><DD>a list, set, or sequence of arrow pairs g<sub>i</sub> - &gt; h<sub>i</sub> (order not important);
+<DT>(c)</DT><DD>a list or sequence of images h<sub>1</sub>, ..., h<sub>n</sub> (order is important).
+<P>
+<P>
+<P>
+</DL>
+The elements g<sub>i</sub> and h<sub>i</sub> must be elements of G and H, respectively,
+in each case.  For the cases (a) and (b), the elements g<sub>i</sub> must generate
+G and the homomorphism will satisfy &phi;(g<sub>i</sub>) = h<sub>i</sub>.  For case (c),
+n must be the number of pc-generators of G and the g<sub>i</sub> are implicitly
+defined to be the pc-generators.  However, if G is a p-group which has p-Quotient
+definitions set (see <A  HREF = "text813.htm#HaspQuotientDefinitions">HaspQuotientDefinitions</A>), then n can be the number of
+generators of G (the result of <TT>Ngens(G)</TT>) and the g<sub>i</sub> are implicitly defined
+to be the first n pc-generators.
+<P>
+The parameter <TT>Check</TT> can be set to <TT>false</TT> in order to turn off
+the check that the map defined is a homomorphism.  This should only
+be done when one is certain that the map is a homomorphism, since
+later results will most likely be incorrect if it is not.
+</BLOCKQUOTE>
+<H5><A NAME = "8021">IsHomomorphism(G, H, L) : GrpPC, GrpPC, SeqEnum -&gt; BoolElt, Map</A></H5>
+<H5>IsHomomorphism(G, H, L) : GrpPC, GrpPC, SetEnum[Tup] -&gt; BoolElt, Map</H5>
+<BLOCKQUOTE>
+This is a conditional form of the <TT>hom</TT>-constructor.  The argument
+L must be a set or sequence of pairs (as in case (a) of the 
+<TT>hom</TT>-constructor), or a sequence of images in H for the 
+pc-generators of G (as in case (c) of the <TT>hom</TT>-constructor).  
+If the specified images define a homomorphism, the value true and 
+the resulting map are returned.  Otherwise, <TT>false</TT> is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "8022">IdentityHomomorphism(G) : GrpPC -&gt; Map</A></H5>
+<BLOCKQUOTE>
+The identity map from G to G.
+</BLOCKQUOTE>
+<H5><A NAME = "8023">Kernel(f) : Map -&gt; GrpPC</A></H5>
+<BLOCKQUOTE>
+Given a homomorphism f from one pc-group to another, return the
+kernel of f.  This will be a pc-group which is a subgroup of the
+domain of f.
+</BLOCKQUOTE>
+<H5><A NAME = "8024">Homomorphisms(G, H) : GrpPC, GrpPC -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given finite <I>abelian</I> groups G and H, return a sequence containing
+all elements of (Hom)(G, H).  The elements
+are returned as actual (Magma map type) homomorphisms.
+Note that this function simply uses <TT>Hom</TT>, transferring each
+element of the returned group to the actual Magma map type homomorphism.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8025">Example <TT>GrpPC_pc_hom (H68E5)</TT></A></H3>
+Let G be a pc-representation of the symmetric group S<sub>4</sub>, and N be
+O<sub>2</sub>(G).
+<P>
+<P>
+<PRE>
+&gt; G := PCGroup(Sym(4));
+&gt; G;
+GrpPC : G of order 24 = 2^3 * 3
+PC-Relations:
+    G.1^2 = Id(G),
+    G.2^3 = Id(G),
+    G.3^2 = Id(G),
+    G.4^2 = Id(G),
+    G.2^G.1 = G.2^2,
+    G.3^G.1 = G.3 * G.4,
+    G.3^G.2 = G.4,
+    G.4^G.2 = G.3 * G.4
+&gt; N := pCore(G,2);
+&gt; Order(N);
+4
+</PRE>
+Let us define H to be a complement of N in G.
+<P>
+<P>
+<PRE>
+&gt; H := sub&lt;G|G.1*G.4,G.2*G.4&gt;;
+&gt; Order(H);
+6
+&gt; H meet N;
+GrpPC of order 1
+PC-Relations:
+</PRE>
+We now wish to define the projection homomorphism from G to H.
+This will map each element of N to the identity and each element
+of H to itself.  We can define the map directly using these
+properties.
+<P>
+<P>
+<PRE>
+&gt; pairs := [];
+&gt; for n in Generators(N) do
+&gt;   pairs cat:= [&lt;G!n,Id(H)&gt;];
+&gt; end for;
+&gt; for h in Generators(H) do
+&gt;   pairs cat:= [&lt;G!h, h&gt;];
+&gt; end for;
+&gt; proj := hom&lt;G -&gt; H|pairs&gt;;
+&gt; proj;
+Mapping from: GrpPC: G to GrpPC: H
+&gt; proj(G.1);
+H.1
+&gt; proj(N);
+GrpPC of order 1
+PC-Relations:
+</PRE>
+We can also compute inverse images and can verify that
+N is the kernel of the map.
+Note that the preimage of a single element is just
+one element from the preimage, not the complete coset.
+Of course, one can use the kernel to compute the full
+coset if desired.
+<P>
+<P>
+<PRE>
+&gt; y := (H.1)@@proj;
+&gt; y;
+G.1
+&gt; Kernel(proj) eq N;
+true
+&gt; {y*k: k in Kernel(proj)};
+{ G.1 * G.3 * G.4, G.1 * G.4, G.1, G.1 * G.3 }
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text711.htm">[Next]</A><A  HREF = "text709.htm">[Prev]</A> <A  HREF = "text711.htm">[Right]</A> <A  HREF = "text709.htm">[Left]</A> <A  HREF = "text706.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

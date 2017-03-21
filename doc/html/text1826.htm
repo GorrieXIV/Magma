@@ -1,0 +1,255 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Construction of Networks</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1827.htm">[Next]</A><A  HREF = "text1825.htm">[Prev]</A> <A  HREF = "text1827.htm">[Right]</A> <A  HREF = "text1825.htm">[Left]</A> <A  HREF = "text1824.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "20273">Construction of Networks</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+Networks are constructed in a similar way to multidigraphs
+  (Subsection <A  HREF = "text1811.htm#20042">Construction of a General Multidigraph</A>).
+In this implementation the order n of a network
+  is bounded by 134217722.
+See Section <A  HREF = "text1784.htm#19679">Bounds on the Graph Order</A> 
+  for more details on this.
+<P>
+Let N be the network to be constructed.
+In all cases, whenever 
+  an edge [u, v], u != v, is to be added to N, 
+  its capacity will be set
+  to 1 (0 if a loop)
+  unless either its capacity is explicitly given at construction
+  time, 
+  or it is the edge of a network, in which case the capacity of the edge
+  remains as it was in the original network.
+<P>
+As an example, if D is a digraph, then the edges of the network N
+  constructed as <TT>N := Network&lt; Order(D) | D &gt;</TT>;
+  will be all the edges of D whose capacity is set as 1
+  (or 0 if they are loops).
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1826.htm#20276">Magma Output: Printing of a Network</A>
+</UL>
+<H5><A NAME = "20274">Network&lt;n | edges &gt; : RngIntElt, List -&gt; GrphNet, GrphVertSet, GrphEdgeSet</A></H5>
+<H5>Network&lt;S | edges &gt; : SetEnum, List -&gt; GrphNet, GrphVertSet, GrphEdgeSet</H5>
+<H5>Network&lt;S | edges &gt; : SetIndx, List -&gt; GrphNet, GrphVertSet, GrphEdgeSet</H5>
+<BLOCKQUOTE>
+Construct the network N with vertex-set
+V = {@ v<sub>1</sub>, v<sub>2</sub>, ..., v<sub>n</sub> @}
+(where v<sub>i</sub> = i for each i if the first form of the constructor is used,
+or the ith element of the enumerated or indexed set S otherwise),
+and edge-set
+E = { e<sub>1</sub>, e<sub>2</sub>, ..., e<sub>q</sub> }.
+This function returns three values: The network N, 
+  the vertex-set V of N; and the edge-set E of N.
+<P>
+The elements of E are specified by the list edges, where the items of
+edges may be objects of the following types:
+<P>
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>A pair [v<sub>i</sub>, v<sub>j</sub>] of vertices in V.  The directed edge 
+  [v<sub>i</sub>, v<sub>j</sub>]
+from v<sub>i</sub> to v<sub>j</sub> with capacity 1 (or 0 if it is a loop) will be added 
+to the edge-set for N.
+<P>
+<DT>(b)</DT><DD>A tuple of the form &lt; v<sub>i</sub>, N<sub>i</sub> &gt; where N<sub>i</sub>
+will be interpreted as a set of out-neighbours for the vertex v<sub>i</sub>.
+The elements of the sets N<sub>i</sub> must be elements of V.
+If N<sub>i</sub> = { u<sub>1</sub>, u<sub>2</sub>, ..., u<sub>r</sub> },
+the edges [v<sub>i</sub>, u<sub>1</sub>], ..., [v<sub>i</sub>, u<sub>r</sub>] will be added to N,
+all with capacity 1 (or 0 if they are loops).
+<P>
+<DT>(c)</DT><DD>A tuple of the form &lt; [v<sub>i</sub>, v<sub>j</sub>], c &gt;
+  where v<sub>i</sub>, v<sub>j</sub> are vertices in V and c the 
+  non-negative capacity of the  directed edge [v<sub>i</sub>, v<sub>j</sub>]
+  added to N.
+<P>
+<DT>(d)</DT><DD>A sequence [ N<sub>1</sub>, N<sub>2</sub>, ..., N<sub>n</sub> ] of n sets, where N<sub>i</sub>
+will be interpreted as a set of out-neighbours for the vertex v<sub>i</sub>.
+All the edges [v<sub>i</sub>, u<sub>i</sub>], u<sub>i</sub> &isin;N<sub>i</sub>, are added to N 
+  with capacity 1 (or 0 if they are loops).
+<P>
+<P>
+<P>
+</DL>
+In addition to these four basic ways of specifying the edges
+  list, the items in edges may also be:
+<P>
+<DL COMPACT class='compact'>
+<DT>(e)</DT><DD>An edge e of a graph (or di/multi/multidigraph) or network of order n.
+If e is an edge of a network H, then it will be added to N with the
+  capacity it has in H. If e is not a network edge, then 
+  it will be added to N with capacity 1, or 0 if it is a loop.
+<P>
+<DT>(f)</DT><DD>An edge-set E of a graph (or di/multi/multidigraph) or network of order n.
+  Every edge e in E will be added to N according to the rule
+  set out for a single edge.
+<P>
+<DT>(g)</DT><DD>A graph (or di/multi/multidigraph)
+  or network H of order n.
+  Every edge e  in H's edge-set is added to N according to the rule
+  set out for a single edge.
+<P>
+<DT>(h)</DT><DD>A n x n (0, 1)-matrix A.
+  The matrix A will be interpreted as the adjacency matrix 
+  for a digraph H on n vertices and the edges of H  will be 
+  included among the edges of N with capacity 1 (0 if loops).
+<P>
+<DT>(i)</DT><DD>A set of 
+<P>
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>Pairs of the form [v<sub>i</sub>, v<sub>j</sub>] of vertices in V.
+<DT>(ii)</DT><DD>Tuples of the form &lt; v<sub>i</sub>, N<sub>i</sub> &gt; where N<sub>i</sub>
+will be interpreted as a set of out-neighbours for the vertex v<sub>i</sub>.
+<DT>(iii)</DT><DD>A tuple of the form &lt; [ v<sub>i</sub>, v<sub>j</sub>], c &gt;
+  where v<sub>i</sub>, v<sub>j</sub> are vertices in V and c a
+  non-negative capacity.
+<DT>(iv)</DT><DD>Edges of a graph (or di/multi/multidigraph) 
+or network of order n.
+<DT>(v)</DT><DD>Graphs (or di/multi/multidigraphs) or networks of order n.
+<P>
+</DL>
+<DT>(j)</DT><DD>A sequence of 
+<P>
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>Tuples of the form &lt; v<sub>i</sub>, N<sub>i</sub> &gt; where N<sub>i</sub>
+will be interpreted as a set of out-neighbours for the vertex v<sub>i</sub>.
+<DT>(ii)</DT><DD>A tuple of the form &lt; [v<sub>i</sub>, v<sub>j</sub>], c &gt;
+  where v<sub>i</sub>, v<sub>j</sub> are vertices in V and c a
+  non-negative capacity.</DL>
+</DL>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20275">Example <TT>Network_GrphNet_Constr (H157E1)</TT></A></H3>
+We construct a network from a digraph, and observe that the edges that 
+<P>
+ are not loops have a capacity of 1:
+<P>
+<P>
+<PRE>
+&gt; SetSeed(1, 0);
+&gt; n := 5;
+&gt; d := 0.2;
+&gt; D := RandomDigraph(n, d : SparseRep := true); 
+&gt; N := Network&lt; n | D &gt;;
+&gt; D;
+Digraph
+Vertex  Neighbours
+
+1       2 1 ;
+2       3 2 ;
+3       ;
+4       5 ;
+5       2 ;
+
+&gt; N;
+Network
+Vertex  Neighbours
+
+1       1 [ 0 ] 2 [ 1 ] ;
+2       2 [ 0 ] 3 [ 1 ] ;
+3       ;
+4       5 [ 1 ] ;
+5       2 [ 1 ] ;
+</PRE>
+<HR>
+<H4><A NAME = "20276">Magma Output: Printing of a Network</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+Magma displays a network N in the form of a list of vertices,
+each accompanied by a list of its outgoing capacitated edges
+(each followed by the capacity of the edge in brackets).
+Thus, in the previous example <A  HREF = "text1826.htm#20275">H157E1</A>, 
+  it can be verified that all edges
+  have capacity 1 (since the network was constructed from a digraph)
+  except those edges that are loops.
+<P>
+If the network has multiple edges from u to v, then 
+  <I>each</I> edge from u to v, or rather its end-point v,
+  is printed followed by the capacity of that edge.
+Also, the end-points in the adjacency list are not ordered and
+appear in the order in which they were created.
+The next example illustrates these two points.
+
+
+<HR>
+<H3><A NAME = "20277">Example <TT>Network_GrphNet_Constr2 (H157E2)</TT></A></H3>
+We construct a network from a set of tuples
+<P>
+&lt;[vertex, vertex], capacity&gt; and we exhibit a multiple edge.
+<P>
+<P>
+<PRE>
+&gt; n := 5;
+&gt; C := 5;
+&gt; M := 3;
+&gt; T := [];
+&gt; for i in [1..12] do
+&gt;     u := Random(1, n);
+&gt;     v := Random(1, n);
+&gt;     m := Random(1, M);
+&gt;     for j in [1..m] do
+&gt;        c := Random(0, C);
+&gt;        if u eq v then 
+&gt;            Append(~T, &lt; [u, u], 0 &gt;);
+&gt;        else
+&gt;            Append(~T, &lt; [u, v], c &gt;);
+&gt;        end if;
+&gt;     end for;
+&gt; end for;
+&gt; T;
+[
+  &lt;[ 5, 4 ], 1&gt;, &lt;[ 5, 4 ], 3&gt;, &lt;[ 5, 4 ], 2&gt;, &lt;[ 5, 4 ], 1&gt;,
+  &lt;[ 5, 4 ], 5&gt;, &lt;[ 1, 3 ], 2&gt;, &lt;[ 1, 3 ], 2&gt;, &lt;[ 5, 5 ], 0&gt;,
+  &lt;[ 5, 5 ], 0&gt;, &lt;[ 2, 1 ], 2&gt;, &lt;[ 4, 2 ], 2&gt;, &lt;[ 4, 2 ], 5&gt;,
+  &lt;[ 4, 2 ], 1&gt;, &lt;[ 4, 1 ], 3&gt;, &lt;[ 4, 1 ], 4&gt;, &lt;[ 4, 1 ], 3&gt;,
+  &lt;[ 2, 3 ], 1&gt;, &lt;[ 2, 3 ], 3&gt;, &lt;[ 4, 3 ], 5&gt;, &lt;[ 4, 3 ], 3&gt;,
+  &lt;[ 4, 3 ], 4&gt;, &lt;[ 2, 2 ], 0&gt;, &lt;[ 2, 2 ], 0&gt;, &lt;[ 5, 4 ], 0&gt;,
+  &lt;[ 4, 4 ], 0&gt;
+]
+&gt; N := Network&lt; n | T &gt;;
+&gt; N;
+Network
+Vertex  Neighbours
+
+1       3 [ 2 ] 3 [ 2 ] ;
+2       2 [ 0 ] 2 [ 0 ] 3 [ 3 ] 3 [ 1 ] 1 [ 2 ] ;
+3       ;
+4       4 [ 0 ] 3 [ 4 ] 3 [ 3 ] 3 [ 5 ] 1 [ 3 ] 1 [ 4 ] 1 [ 3 ] 2
+        [ 1 ] 2 [ 5 ] 2 [ 2 ] ;
+5       4 [ 0 ] 5 [ 0 ] 5 [ 0 ] 4 [ 5 ] 4 [ 1 ] 4 [ 2 ] 4 [ 3 ] 4
+        [ 1 ] ;
+
+&gt; Edges(N);
+{@ &lt; [1, 3], 6 &gt;, &lt; [1, 3], 7 &gt;, &lt; [2, 1], 10 &gt;, &lt; [2, 2], 22 &gt;, 
+&lt; [2, 2], 23 &gt;, &lt; [2, 3], 17 &gt;, &lt; [2, 3], 18 &gt;, &lt; [4, 1], 14 &gt;, 
+&lt; [4, 1], 15 &gt;, &lt; [4, 1], 16 &gt;, &lt; [4, 2], 11 &gt;, &lt; [4, 2], 12 &gt;, 
+&lt; [4, 2], 13 &gt;, &lt; [4, 3], 19 &gt;, &lt; [4, 3], 20 &gt;, &lt; [4, 3], 21 &gt;,  
+&lt; [4, 4], 25 &gt;, &lt; [5, 4], 1 &gt;, &lt; [5, 4], 2 &gt;, &lt; [5, 4], 3 &gt;, 
+&lt; [5, 4], 4 &gt;, &lt; [5, 4], 5 &gt;, &lt; [5, 4], 24 &gt;, &lt; [5, 5], 8 &gt;, 
+&lt; [5, 5], 9 &gt; @}
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1827.htm">[Next]</A><A  HREF = "text1825.htm">[Prev]</A> <A  HREF = "text1827.htm">[Right]</A> <A  HREF = "text1825.htm">[Left]</A> <A  HREF = "text1824.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

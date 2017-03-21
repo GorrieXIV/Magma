@@ -1,0 +1,54 @@
+"Source: Text/RepThy/Chtr.text";
+"Line: 1959";
+"Date: Wed Jun  8 14:03:59 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/RepThy/Chtr.text, line: 1959
+// Example: H97E11 ()
+print "Example: H97E11";
+ei := GetEchoInput();
+SetEchoInput(true);
+X := CharacterTable("Ly");
+#X;
+Z := Integers();
+int_cl := {i : i in [1..#X] |
+    CanChangeUniverse([x[i]: x in X], Z)};
+R := Universe(X);
+d := ClassesData(R);
+test := function(x)                            
+   if Indicator(x) eq -1 then return false; end if;
+   c := [i : i in int_cl | x[i] in {1,-1}];
+   return #c gt 0 and GCD([d[i,1]: i in c]) eq 1;
+end function;
+schur_1 := {i : i in [1..#X] | test(X[i]) };  
+#schur_1;
+assert $1 eq 28;
+rat := {i:i in schur_1|DegreeOfCharacterField(X[i]) eq 1};
+#rat;
+assert $1 eq 20;
+unknown := {1..#X} diff schur_1;
+#unknown;
+assert $1 eq 25;
+new_1 := {i : i in unknown | exists{j : j,k in rat | j le k
+and ip eq 1 or (Indicator(X[i]) ne 0 and IsOdd(ip))
+where ip := Z!InnerProduct(X[i], X[j]*X[k]) } };
+schur_1 := schur_1 join new_1;    
+unknown := {1..#X} diff schur_1;
+unknown;
+assert $1 eq {37};
+Degree(X[37]), Indicator(X[37]);
+DegreeOfCharacterField(X[37]);
+PrimeDivisors(GroupOrder(R) div 36887520);
+d[17,1];
+X[37,17];
+for p in [2,3,5,7] do
+   bl := Block(X, 37, p);
+   p, forall{i:i in bl|X[i,17] eq Conjugate(X[i,17],p)};
+end for;
+GroupFactoredOrder(R);
+d[27,1];
+X[37,27];
+for p in [2,11] do
+   bl := Block(X, 37, p);
+   p, forall{i:i in bl|X[i,27] eq Conjugate(X[i,27],p)};
+end for;
+SetEchoInput(ei);

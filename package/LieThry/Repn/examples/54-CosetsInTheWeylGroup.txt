@@ -1,0 +1,41 @@
+/*
+  * Cosets in the Weyl group
+  *
+  * Equivalent to 5.4 of the LiE manual
+  */
+ rho := func<g | [ (i le Rank(g)) select 1 else 0 : i in [1..Dimension(g)] ] >;
+char_v := func<g, v | [ (i in v) select 0 else rho(g)[i] : i in [1..Dimension(g)] ] >;
+g := RootDatum("D4" : Isogeny := "SC");
+W := CoxeterGroup(g);
+
+Wword := function(W, w)
+    wt, wrd := DominantWeight(W, w : Basis := "Weight");
+     return Eltseq(wrd);
+end function;
+ToWeylWord := func<W, w | (#w eq 0) select W!1 else &*[W.i : i in w]>;
+LReduce := function(W, l, w)
+    GrpFp, h := CoxeterGroup(GrpFPCox, W);
+    Wl := ReflectionSubgroup(W, l);
+    te := TransversalElt(W, Wl, ToWeylWord(W, w));
+    return Eltseq(h(te));
+end function;
+
+/* Right cosets */
+right_cosets := func<W, r | { Wword(W,x) : x in WeightOrbit(W, char_v(W,r))} >;
+right_cosets(g, [1,3,4]);
+#right_cosets(g, [1,3,4]);
+
+ /* Left cosets */
+left_cosets := func<W, r | { Reverse(Wword(W,x)) : x in WeightOrbit(W, char_v(W,r))} >;
+left_cosets(g, [1,3,4]);
+#left_cosets(g, [1,3,4]);
+
+/* Double cosets */
+double_cosets := function(W,l,r)
+    t := { Wword(W,x) : x in WeightOrbit(W, char_v(W,r)) };
+    t := { w : w in t | LReduce(W, l, w) eq w  };
+    return t;
+end function;
+double_cosets(W, [1,3,4], [1,3,4]);
+ #double_cosets(W, [1,3,4], [1,3,4]);
+ 

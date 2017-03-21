@@ -1,0 +1,456 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Standard Construction for  Networks</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1828.htm">[Next]</A><A  HREF = "text1826.htm">[Prev]</A> <A  HREF = "text1828.htm">[Right]</A> <A  HREF = "text1826.htm">[Left]</A> <A  HREF = "text1824.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "20278">Standard Construction for  Networks</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1827.htm#20279">Subgraphs</A>
+<LI> <A  HREF = "text1827.htm#20282">Incremental Construction: Adding Edges</A>
+<LI> <A  HREF = "text1827.htm#20290">Union of Networks</A>
+</UL>
+<H4><A NAME = "20279">Subgraphs</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+The construction of  a sub-network is 
+  very similar to the construction of a sub-multidigraph
+  (see Subsection <A  HREF = "text1814.htm#20113">Subgraphs</A>).
+Additional flexibility is available for setting edge capacities 
+in the subgraph.
+<P>
+There are two constraints when building a subgraph
+  (see the introduction to Section <A  HREF = "text1816.htm#20164">Elementary Invariants and  Predicates for Multigraphs</A>).
+Let N be a network, and H a subgraph of N.
+Then, given any vertices u, v of H,
+  the edge multiplicity from u to v is no greater 
+  in H than it is in N,
+  and the total capacity 
+  from u to v in H is no greater than the 
+  total capacity from u to v in N.
+Failure to satisfy these constraints will result in a run-time error
+  when constructing a sub-network.
+<P>
+Assume that we intend to add an edge from u to v in H. Assume
+ also that  the total capacity from u to v in N is C<sub>N</sub>,
+  that the total capacity from u to v in H is C<sub>H</sub> before 
+  adding the edge from u to v in H,
+  and that the total capacity from u to v in H is C<sub>H</sub>' 
+  after  adding the edge from u to v in H.
+In order to satisfy the "capacity constraint" 
+  it is enough that C<sub>H</sub>' &le;C<sub>N</sub>, i.e. that
+  C<sub>H</sub> + c &le;C<sub>N</sub> where c is the capacity of the edge 
+  one wants to add in H.
+<P>
+There are two methods for adding an edge from u to v.
+Firstly, adding the edge [u, v] to H without specifying its
+  capacity in H assumes that the edge [u, v] will be added
+  with capacity C<sub>N</sub>.
+This implies that C<sub>H</sub> is zero, since we require that
+     C<sub>H</sub> + C<sub>G</sub> &le;C<sub>N</sub>. 
+Secondly, adding the edge [u, v] to H when specifying its capacity 
+  as c assumes that the edge [u, v] will be added
+  with capacity c such that C<sub>H</sub> + c &le;C<sub>N</sub>.
+<P>
+Note that the support set, vertex labels and edge labels and weights,
+  if applicable, 
+  are transferred from the network to the sub-network.
+
+
+<H5><A NAME = "20280">sub&lt; N | list &gt; : GrphNet, List -&gt; GrphNet, GrphVertSet, GrphEdgeSet</A></H5>
+<BLOCKQUOTE>
+Construct the network H as a subgraph (sub-network) of N.
+The function returns three values: The network H, 
+  the vertex-set V of H; and the edge-set E of H.
+If N has a support set and/or if N has vertex/edge labels,
+  and/or  edge weights
+  then <I>all</I> these attributes are transferred to the subgraph H.
+Edge capacities are also transferred to H unless
+  they are specifically set as explained below.
+<P>
+The elements of V and of E are specified by the list list
+  whose items can be objects  of the following types:
+<P>
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>A vertex of N.
+  The resulting subgraph will be the subgraph induced on the subset 
+   of <TT>VertexSet(N)</TT> defined by the vertices  in list.
+<P>
+<DT>(b)</DT><DD>An edge of N.
+  The resulting subgraph will be the subgraph with vertex-set 
+    <TT>VertexSet(N)</TT>
+    whose edge-set consists of the edges in list
+    subject to the multiplicity and capacity constraints being satisfied.
+<P>
+<DT>(c)</DT><DD>A pair of [v<sub>i</sub>, v<sub>j</sub>] of vertices of N.
+  The resulting subgraph will be the subgraph with vertex-set 
+    <TT>VertexSet(N)</TT>
+    whose edge-set consists of the edges [v<sub>i</sub>, v<sub>j</sub>] in list
+    whose capacity is assumed to be the total capacity 
+    from v<sub>i</sub> to v<sub>j</sub> in N.
+    The multiplicity and capacity constraints must be satisfied.
+<P>
+<P>
+<DT>(d)</DT><DD>A tuple of the form &lt; [v<sub>i</sub>, v<sub>j</sub>], c &gt; where
+    v<sub>i</sub>, v<sub>j</sub> are vertices of N and c the 
+    non-negative capacity of the edge [v<sub>i</sub>, v<sub>j</sub>]
+    to be added to H.
+  The resulting subgraph will be the subgraph with vertex-set 
+    <TT>VertexSet(N)</TT>
+    whose edge-set consists of the edges as they are given in list,
+    subject to the multiplicity and capacity constraints being satisfied.
+<P>
+<DT>(e)</DT><DD>A set of 
+<P>
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>Vertices of N.
+<DT>(ii)</DT><DD>Edges of N.
+<DT>(iii)</DT><DD>Pairs of vertices of N.
+<DT>(iv)</DT><DD>Tuples of the form &lt; [v<sub>i</sub>, v<sub>j</sub>], c &gt;  where
+    v<sub>i</sub>, v<sub>j</sub> are vertices of N and c the 
+    non-negative capacity of the edge [v<sub>i</sub>, v<sub>j</sub>]
+    to be added to H.</DL>
+</DL>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20281">Example <TT>Network_ConstrSubNetwork (H157E3)</TT></A></H3>
+We start by constructing a network with some multiple edges.
+&gt; %%&gt; //no-test [To remove seeing this all the time; May 16]
+<P>
+<P>
+<PRE>
+&gt; N := Network&lt; 4 |
+&gt; &lt; [1, 2], 2 &gt;, &lt; [1, 2], 3 &gt;, &lt; [1, 4], 5 &gt;,
+&gt; &lt; [2, 3], 1 &gt;, &lt; [2, 3], 3 &gt;, &lt; [3, 4], 1 &gt;, &lt; [3, 4], 6 &gt; &gt;;
+&gt; N;
+Network
+Vertex  Neighbours
+
+1       4 [ 5 ] 2 [ 3 ] 2 [ 2 ] ;
+2       3 [ 3 ] 3 [ 1 ] ;
+3       4 [ 6 ] 4 [ 1 ] ;
+4       ;
+
+&gt; V := VertexSet(N);
+&gt; E := EdgeSet(N);
+</PRE>
+We construct a subgraph H of N induced by some of N's vertices
+  and we obtain 
+  the mapping from the vertices of N to the vertices of H and vice-versa.
+<P>
+<P>
+<PRE>
+&gt; H := sub&lt; N | V!1, V!3, V!4 &gt;;
+&gt; assert IsSubgraph(N, H);
+&gt; H;
+Network
+Vertex  Neighbours
+
+1       3 [ 5 ] ;
+2       3 [ 1 ] 3 [ 6 ] ;
+3       ;
+
+&gt; V!VertexSet(H)!1, VertexSet(H)!V!1;
+1 1
+&gt; V!VertexSet(H)!2, VertexSet(H)!V!3;
+3 2
+&gt; V!VertexSet(H)!3, VertexSet(H)!V!4;
+4 3
+</PRE>
+The next statements illustrate the "capacity constraint": That is, 
+   given any pair [u, v] of vertices of H, H a subgraph of N,
+   the total capacity from u to v in H can not be greater than 
+   the total capacity from u to v in N.
+The subgraph constructor will fail whenever this rule cannot be
+  satisfied.
+We give a few examples below.
+<P>
+<P>
+<PRE>
+&gt; Edges(N);
+{@ &lt; [1, 2], 1 &gt;, &lt; [1, 2], 2 &gt;, &lt; [1, 4], 3 &gt;, &lt; [2, 3], 4 &gt;, &lt; [2, 3], 5 &gt;,
+&lt; [3, 4], 6 &gt;, &lt; [3, 4], 7 &gt; @}
+&gt; E.1, E.2;
+&lt; [1, 2], 1 &gt; &lt; [1, 2], 2 &gt;
+&gt; Capacity(E.1);
+2
+&gt; Capacity(E.2);
+3
+&gt; Capacity(V!1, V!2);
+5
+&gt; 
+&gt; H := sub&lt; N | E.1, E.1 &gt;;
+&gt; H;
+Network
+Vertex  Neighbours
+
+1       2 [ 2 ] 2 [ 2 ] ;
+2       ;
+3       ;
+4       ;
+
+</PRE>
+Adding twice the edge E.1 to H is a valid operation since
+  the resulting total capacity from 1 to 2 in H is 4 while 
+  it is 5 in N.
+<P>
+<P>
+<PRE>
+&gt; &gt; H := sub&lt; N | E.2, E.2 &gt;;
+
+&gt;&gt; H := sub&lt; N | E.2, E.2 &gt;;
+           ^
+Runtime error in sub&lt; ... &gt;: RHS argument 2 - Edge multiplicity and capacity 
+not compatible with subgraph constructor
+&gt; 
+</PRE>
+Adding twice the edge E.2 (which has capacity 3) to H would have 
+  resulted in the total capacity from 1 to 2 in H to be 6, 
+  while it is 5 in N.
+<P>
+<P>
+<PRE>
+&gt; H := sub&lt; N | E!&lt; [1, 2], 1 &gt;, E!&lt; [1, 2], 1 &gt; &gt;;
+&gt; H;
+Network
+Vertex  Neighbours
+
+1       2 [ 2 ] 2 [ 2 ] ;
+2       ;
+3       ;
+4       ;
+
+</PRE>
+This succeeded since the total capacity from 1 to 2 in H is now 4.
+<P>
+<P>
+<PRE>
+
+&gt; &gt; H := sub&lt; N | E!&lt; [1, 2], 2 &gt;, E!&lt; [1, 2], 2 &gt; &gt;;
+
+&gt;&gt; H := sub&lt; N | E!&lt; [1, 2], 2 &gt;, E!&lt; [1, 2], 2 &gt; &gt;;
+           ^
+Runtime error in sub&lt; ... &gt;: RHS argument 2 - Edge multiplicity and capacity 
+not compatible with subgraph constructor
+&gt; 
+</PRE>
+Again, this operation failed as it would have  resulted 
+   in the total capacity  from 1 to 2 in H to be 6.
+<P>
+<P>
+<PRE>
+&gt; H := sub&lt; N | &lt; [ V!1, V!2 ], 2 &gt;, &lt; [ V!1, V!2 ], 2 &gt; &gt;;
+&gt; H;
+Network
+Vertex  Neighbours
+
+1       2 [ 2 ] 2 [ 2 ] ;
+2       ;
+3       ;
+4       ;
+
+</PRE>
+This operation is valid since  
+   the total capacity from 1 to 2 in H is now 4.
+<P>
+<P>
+<PRE>
+&gt; &gt; H := sub&lt; N | &lt; [ V!1, V!2 ], 2 &gt;, &lt; [ V!1, V!2 ], 4 &gt; &gt;;
+
+&gt;&gt; H := sub&lt; N | &lt; [ V!1, V!2 ], 2 &gt;, &lt; [ V!1, V!2 ], 4 &gt; &gt;;
+           ^
+Runtime error in sub&lt; ... &gt;: RHS argument 2 - Tuple must be &lt;[vertex, 
+vertex], capacity&gt; with total edge multiplicity and capacity compatible with 
+subgraph constructor
+&gt; 
+</PRE>
+This operation cannot succeed as 
+   the total capacity from 1 to 2 in H would be 6.
+<P>
+<P>
+<PRE>
+&gt; H := sub&lt; N | [ V!1, V!2 ] &gt;;
+&gt; H;
+Network
+Vertex  Neighbours
+
+1       2 [ 5 ] ;
+2       ;
+3       ;
+4       ;
+
+</PRE>
+Adding the edge [1, 2] without specifying its capacity
+  implies that an edge from 1 to 2 is added with capacity 5 to H, 
+  which is  the total capacity from  1 to 2 in N.
+<P>
+<P>
+<PRE>
+&gt; &gt; H := sub&lt; N | [ V!1, V!2 ], [ V!1, V!2 ] &gt;;
+
+&gt;&gt; H := sub&lt; N | [ V!1, V!2 ], [ V!1, V!2 ] &gt;;
+           ^
+Runtime error in sub&lt; ... &gt;: RHS argument 2 - Sequence must be 
+[vertex, vertex] with vertices of the LHS and must be unique
+&gt;
+</PRE>
+Adding twice the edge [1, 2] without specifying its capacity
+  would have resulted in the total
+  capacity from 1 to 2 in H to be 10.
+This operation cannot succeed.
+Finally, let us illustrate the edge multiplicity constraint.
+<P>
+<P>
+<PRE>
+&gt; &gt; H := sub&lt; N | E.4, E.4, E.4 &gt;;
+
+&gt;&gt; H := sub&lt; N | E.4, E.4, E.4 &gt;;
+           ^
+Runtime error in sub&lt; ... &gt;: RHS argument 3 - Edge multiplicity and capacity 
+not compatible with subgraph constructor
+&gt;
+</PRE>
+Although the above statement satisfies the capacity constraint 
+<P>
+<P>
+<PRE>
+&gt; Capacity(E.4);
+1
+&gt; Capacity(V!InitialVertex(E.4), V!TerminalVertex(E.4));
+4
+</PRE>
+  it  cannot succeed since the edge multiplicity constraint
+  is violated.
+<P>
+<P>
+<PRE>
+&gt; EdgeMultiplicity(V!InitialVertex(E.4), V!TerminalVertex(E.4));
+2
+</PRE>
+<HR>
+<H4><A NAME = "20282">Incremental Construction: Adding Edges</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+Almost all the functions to add or remove either vertices or edges  
+  that are available for multidigraphs also apply to networks;
+  they are not listed here,
+  see Section <A  HREF = "text1814.htm#20116">Incremental Construction of Multigraphs</A> for details.
+<P>
+The only exception is the function 
+  <A  HREF = "text1814.htm#MultiGraph:AddEdgeLabel">AddEdge</A> which differs for multidigraphs and networks.
+It is replaced by the functions 
+  <A  HREF = "text1827.htm#MultiGraph:AddEdgeCap">AddEdge</A>and 
+  <A  HREF = "text1827.htm#MultiGraph:AddEdgeCapLabel">AddEdge</A>which are specialised functions for adding 
+  capacitated edges to networks.
+There are a few more such specialised functions which
+  are listed below, they all concern adding edges to a network.
+<P>
+Note that whenever an edge is added to a network 
+  using the general multidigraph functions,
+  which do not allow specifying an edge capacity,
+  the edge to be added is <I>always 
+  taken to have capacity 1 (or 0 if a loop)</I>.
+
+
+<H5><A NAME = "20283">N + &lt; [ u, v ], c &gt; : GrphNet, &lt; [ GrphVert, GrphVert ], RngIntElt &gt; -&gt; GrphNet, GrphEdge</A></H5>
+<BLOCKQUOTE>
+Given two vertices u and v of a network N, 
+  and c a non-negative integer,
+  adds an edge from u to v with capacity c.
+The support and  edge capacities are retained.
+This function returns two values: The modified network, and the edge
+  newly created (added).
+This feature is especially useful when adding parallel edges.
+</BLOCKQUOTE>
+<H5><A NAME = "20284">N + { &lt; [ u, v ], c &gt; } : GrphNet, { &lt; [ GrphVert, GrphVert ], RngIntElt &gt; } -&gt; GrphNet</A></H5>
+<H5>N + [ &lt; [ u, v ], c &gt; ] : GrphNet, [ &lt; [ GrphVert, GrphVert ], RngIntElt &gt; ] -&gt; GrphNet</H5>
+<BLOCKQUOTE>
+Given tuples of the form &lt; [ u, v ], c &gt;, u and v vertices of
+   the network N and c a non-negative integer,
+  adds the edges from u to v with capacity c.
+Tuples   can be contained in a set or a sequence; the latter is 
+  useful when dealing with duplicates.
+The support and  edge capacities are retained.
+</BLOCKQUOTE>
+<H5><A NAME = "20285">N +:= &lt; [ u, v ], c &gt; : GrphNet, &lt; [ GrphVert, GrphVert ], RngIntElt &gt; -&gt;</A></H5>
+<H5>N +:= { &lt; [ u, v ], c &gt; } : GrphNet, { &lt; [ GrphVert, GrphVert ], RngIntElt &gt; } -&gt;</H5>
+<H5>N +:= [ &lt; [ u, v ], c &gt; ] : GrphNet, [ &lt; [ GrphVert, GrphVert ], RngIntElt &gt; ] -&gt;</H5>
+<BLOCKQUOTE>
+The procedural versions of the previous three functions. 
+Tuples can be contained in a set or a sequence; the latter is 
+  useful when dealing with duplicates.
+</BLOCKQUOTE>
+<H5><A NAME = "20286"></A><A NAME = "MultiGraph:AddEdgeCap">AddEdge</A>(N, u, v, c) : GrphNet, GrphVert, GrphVert, RngIntElt -&gt; GrphNet, GrphEdge</H5>
+<BLOCKQUOTE>
+Given two vertices u and v of the network N, and c a non-negative integer,
+  adds an edge from u to v with capacity c.
+The support and  edge capacities are retained.
+This function returns the modified network and the newly created  edge.
+This feature is especially useful when adding parallel edges.
+</BLOCKQUOTE>
+<H5><A NAME = "20287"></A><A NAME = "MultiGraph:AddEdgeCapLabel">AddEdge</A>(N, u, v, c, l) : GrphNet,GrphVert, GrphVert, RngIntElt, . -&gt; GrphNet, GrphEdge</H5>
+<BLOCKQUOTE>
+Given two vertices u and v of the network N, c a non-negative integer,
+  and a label l,
+  adds an edge from u to v with capacity c and label l.
+The support and  edge capacities are retained.
+This function returns the modified network and the newly created edge.
+This feature is especially useful when adding parallel edges.
+</BLOCKQUOTE>
+<H5><A NAME = "20288">AddEdges(N, S) : GrphNet, { &lt; [  GrphVert, GrphVert ], RngIntElt &gt; } -&gt; GrphNet</A></H5>
+<H5>AddEdges(N, S) : GrphNet, [ &lt; [  GrphVert, GrphVert ], RngIntElt &gt; ] -&gt; GrphNet</H5>
+<BLOCKQUOTE>
+Given a network N and a set or a sequence S of tuples, this function
+includes the edges specified in S.
+The tuples must be of the form &lt; [ u, v ], c &gt;, where u and v vertices of
+N and c a non-negative integer.
+The support and existing vertex and edge  decorations are retained.
+</BLOCKQUOTE>
+<H5><A NAME = "20289">AddEdge(~N, u, v, c) : GrphNet, GrphVert, GrphVert, RngIntElt -&gt;</A></H5>
+<H5>AddEdge(~N, u, v, c, l) : GrphNet, GrphVert, GrphVert, RngIntElt, . -&gt;</H5>
+<H5>AddEdges(~N, S) : GrphNet, { &lt; [  GrphVert, GrphVert ], RngIntElt &gt; } -&gt;</H5>
+<H5>AddEdges(~N, S) : GrphNet, [ &lt; [  GrphVert, GrphVert ], RngIntElt &gt; ] -&gt;</H5>
+<BLOCKQUOTE>
+Procedural versions of previous functions adding edges to a network.
+Tuples can be contained in a set or a sequence; the latter is 
+  useful when dealing with duplicates.
+</BLOCKQUOTE>
+<H4><A NAME = "20290">Union of Networks</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+It is possible to construct a new network from the union of two 
+networks.
+For more details, we refer the reader 
+  to Subsection <A  HREF = "text1814.htm#20147">Unions of Multigraphs</A>.
+
+
+<PRE></PRE> <A  HREF = "text1828.htm">[Next]</A><A  HREF = "text1826.htm">[Prev]</A> <A  HREF = "text1828.htm">[Right]</A> <A  HREF = "text1826.htm">[Left]</A> <A  HREF = "text1824.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

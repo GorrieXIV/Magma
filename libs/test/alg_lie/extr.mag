@@ -1,0 +1,146 @@
+/*
+ * First case: 4 generators 
+ */
+"4 generator case; over Q";
+clear;
+F := Rationals();
+L := ExtremalLieAlgebra(F, 4);
+assert #FreefValues(L) eq 12;
+M := Instance(L);
+assert Dimension(M) eq 28;
+/* Construct some rational instance; check */
+"  rational instance";
+M, phi := Instance(L, [F | i/2 : i in [1..12]]);
+assert Dimension(M) eq 28;
+assert BaseRing(M) cmpeq F;
+assert IsSimple(M);
+assert SemisimpleType(M) eq "D4";
+/* Construct some instance over finite field */
+"  finite field instance";
+vals, pairs := FreefValues(L);
+inst := [Random(GF(101)) : k in [1..#vals]];
+M, phi := Instance(L, inst);
+assert Dimension(M) eq 28;
+/* Check that the instance behaves as dictated by inst */
+for k in [1..#pairs] do
+	i := pairs[k][1]; j := pairs[k][2];
+	assert M.i*(M.i*M.j) eq inst[k]*M.i;
+end for;
+/* Check the map to the free Lie algebra */
+"  check homomorphism to free Lie algebra";
+fla := Codomain(phi);
+assert Type(fla) eq AlgFPLie;
+assert Rank(fla) eq Ngens(L);
+assert BaseRing(fla) eq Universe(inst);
+for k in [1..5] do
+	sd1, sd2 := GetSeed();
+	printf "    SetSeed(%o, %o)... ", sd1, sd2;
+	x := Random(M); y := Random(M);
+	assert ((phi(x)*phi(y)) @@ phi) eq x*y;
+	printf "OK\n";
+end for;
+
+
+/*
+ * Second case: 6 generators 
+ */
+"6 generator case, 93-dim; over Q";
+clear;
+/* Setup */
+Gamma := Graph<6 | {{1,i} : i in [2..6]}>;
+F := Rationals();
+L := ExtremalLieAlgebra(F, Gamma);
+assert CoefficientRing(L) cmpeq F;
+/* Compute X; check free values */
+"  Compute X; check free values";
+vals,pairs := FreefValues(L);
+assert #vals eq 5;
+assert pairs eq [<i,1> : i in [2..6]];
+CR := CoefficientRing(L);
+assert Type(CR) eq RngMPol and Rank(CR) eq #vals;
+assert Dimension(L) eq 93;
+/* Check consistency of fValue & of coefficient ring*/
+"  Check consistency of fValue & of coefficient ring";
+assert forall{k : k in [1..#pairs] | vals[k] eq CR.k};
+assert forall{k : k in [1..#pairs] | fValue(L, pairs[k][1], pairs[k][2]) eq vals[k]};
+/* Verify some instance */
+"  Verify instance over GF(17)";
+inst := [GF(17)|5,4,3,2,1];
+M, phi := Instance(L, inst);
+assert Dimension(M) eq 93;
+/* Check that the instance behaves as dictated by inst */
+for k in [1..#pairs] do
+	i := pairs[k][1]; j := pairs[k][2];
+	assert M.i*(M.i*M.j) eq inst[k]*M.i;
+end for;
+
+
+/* 
+ * Third case: 5 generators 
+ */
+"5 generator case, 86-dim; over GF(17)";
+clear;
+Gamma := Graph<5 | {1,2},{1,5},{2,3},{2,4},{2,5},{3,5},{4,5}>;
+F := GF(17);
+L := ExtremalLieAlgebra(F, Gamma);
+assert CoefficientRing(L) cmpeq F;
+MultiplicationTable(~L : HowMuch := "Top", FullJacobi := false);
+/* Check the two basis notations */
+"  Check bases";
+B1, B2 := Basis(L);
+assert #B1 eq #B2;
+FLA := Universe(B1);
+gens := [FLA.i : i in [1..5]]; comp := func<x,y | (x,y)>;
+assert forall{i : i in [1..#B1] | B2[i](gens, comp) eq B1[i]};
+assert #FreefValues(L) eq 13;
+/* Verify some instance */
+"  Check instance over GF(17^4)";
+vals, pairs := FreefValues(L);
+inst := [Random(GF(17,4)) : k in [1..#vals]];
+M, phi := Instance(L, inst);
+assert Dimension(M) eq 86;
+/* Check that the instance behaves as dictated by inst */
+for k in [1..#pairs] do
+	i := pairs[k][1]; j := pairs[k][2];
+	assert M.i*(M.i*M.j) eq inst[k]*M.i;
+end for;
+/* Check the map to the free Lie algebra */
+"  Elementary checks on free Lie algebra";
+fla := Codomain(phi);
+assert Type(fla) eq AlgFPLie;
+assert Rank(fla) eq 5;
+assert BaseRing(fla) eq Universe(inst);
+
+
+/* 
+ * Fourth case: easy case, hard work 
+ */
+"3 generator case over Q";
+clear;
+F := Rationals();
+L := ExtremalLieAlgebra(F, 3);
+g := func< | [ Random(GF(5)) : i in [1..4] ]>;
+/* EstimateDimensions (using fixed seed) */
+"  EstimateDimensions...";
+sd1, sd2 := GetSeed();
+SetSeed(1);
+_, ED2 := DimensionsEstimate(L, g : NumSamples := 100, Check := true);
+assert &+[ Multiplicity(ED2, n) : n in MultisetToSet(ED2) ] eq 100;
+assert 3 in ED2;
+assert 8 in ED2;
+/* Find instances; verify their structure*/
+"  FindInstancesForDims...";
+SetSeed(sd1, sd2);
+assarr := InstancesForDimensions(L, g, {3,8} : Check := false);
+tr := assarr[3];
+assert ExtendedType(tr[1]) eq SeqEnum[FldFinElt] and #tr[1] eq 4;
+M := tr[2];
+assert Dimension(M) eq 8;
+assert (Type(tr[3]) eq Map) and (Domain(tr[3]) eq M) and (Type(Codomain(tr[3])) eq AlgFPLie);
+N := M/SolvableRadical(M);
+assert SemisimpleType(N) eq "A1";
+M := assarr[8][2];
+assert Dimension(M) eq 8;
+assert IsSimple(M);
+assert SemisimpleType(M) eq "A2";
+

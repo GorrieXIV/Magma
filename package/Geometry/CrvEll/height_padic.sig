@@ -1,0 +1,6 @@
+174,1
+V,pAdicHeight,2
+S,EisensteinTwo,"Compute the p-adic E2 function of an elliptic curve over Q. Requires p to be good, ordinary, and > 4. The default precision is 20",1,0,1,334,0,262,2,0,0,0,0,0,0,0,148,,0,0,334,,401,-38,-38,-38,-38,-38
+S,pAdicHeight,"Computes the p-adic height of a point on an elliptic curve over Q to the given absolute precision. The prime must be good, ordinary, and at least 5. The default precision is 20",1,0,1,372,0,262,2,0,0,0,0,0,0,0,148,,0,0,372,,401,-38,-38,-38,-38,-38
+S,pAdicHeightPairingMatrix,"Computes the p-adic height matrix of the given points on an elliptic curve over Q to the given absolute precision The prime must be good, ordinary, and at least 5. The default precision is 20, and the precision is for the points involved, so some might be lost in the determinant step",1,0,1,82,1,372,0,262,2,0,0,0,0,0,0,0,148,,0,0,82,,401,-38,-38,-38,-38,-38
+S,pAdicRegulator,"Computes the p-adic height matrix of the given points on an elliptic curve over Q to the given absolute precision The prime must be good, ordinary, and at least 5. The default precision is 20, and the precision is for the points involved, so some might be lost in the determinant step",1,0,1,82,1,372,0,262,2,0,0,0,0,0,0,0,148,,0,0,82,,401,-38,-38,-38,-38,-38

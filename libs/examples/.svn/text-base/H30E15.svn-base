@@ -1,0 +1,50 @@
+"Source: Text/Lat/Lat.text";
+"Line: 3839";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Lat/Lat.text, line: 3839
+// Example: H30E15 ()
+print "Example: H30E15";
+ei := GetEchoInput();
+SetEchoInput(true);
+G := MatrixGroup< 8, Integers() |
+  [ -673,  -291,  -225,  -316,   250,   -32,    70,  -100,
+     252,   274,   349,   272,  -156,   -94,  -296,   218,
+    2532,  1159,   609,  5164, -1450,  -181,   188,   742,
+    -551,   163,   629, -1763,   285,  -162,  -873,   219,
+   -2701,  -492,   411, -3182,  1062,  -397, -1195,   151,
+   -5018, -1112,  1044,-12958,  2898,  -153, -2870,  -454,
+    2581,    90, -1490,  8197, -1553,   261,  2556,  -149,
+   -3495, -2776, -3218, -2776,  1773,   652,  2459, -1910],
+  [ 2615,  1314,  1633,   400,  -950, -1000, -2480,  1049,
+     161,   159,   347,  -657,     2,  -385,  -889,   230,
+   -2445, -1062, -1147,   269,   744,  1075,  2441,  -795,
+    1591,   925,  1454, -1851,  -350, -1525, -3498,   982,
+   10655,  5587,  7476, -1751, -3514, -5575,-13389,  4873,
+    6271,  3253,  4653, -6126, -1390, -5274,-11904,  3219,
+   -3058, -1749, -2860,  5627,   392,  3730,  8322, -2009,
+    4875,  1851,  1170,  5989, -2239,   625,  1031,   692] >;
+Order(G);
+assert $1 eq 60;
+M := MatrixRing(Integers(), 8);
+e := [ &+[ M!g * MatrixUnit(M, i, i) * M!(g^-1) : g in G ] : i in [1..4] ];
+E := sub<M | e>;
+Dimension(E);
+assert $1 eq 4;
+L := Lattice(64, &cat[ Eltseq(b) : b in Basis(E) ]);
+LL := sub<L | [ Round( Norm(L.4)/Norm(L.i) ) * L.i : i in [1..4] ]>;
+Minimum(LL);
+assert $1 eq 910870284600;
+SV := ShortVectors(LL, 100*Minimum(LL));
+#SV;
+assert $1 eq 46;
+Sing := [ X : v in SV | Determinant(X) eq 0 where X is M!Eltseq(v[1]) ];
+#Sing;
+assert $1 eq 3;
+ker := LLL( KernelMatrix(Sing[1]) );
+ker;
+H := MatrixGroup<4, Integers() | [Solution(ker, ker*g) : g in Generators(G)]>;
+H;
+#H;
+assert $1 eq 60;
+SetEchoInput(ei);

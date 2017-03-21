@@ -1,0 +1,92 @@
+
+VERB := false;
+
+for q in
+    [q: q in [2 .. 16] | #Factorization(q) eq 1] cat
+	[1073741789, 2^50, 3^30] do
+    K<w> := GF(q);
+    for n in [2 .. 4] do
+	P := PolynomialRing(K, n);
+	AssignNames(~P, [CodeToString(96 + i): i in [1 .. n]]);
+	for c := 1 to 3 do
+	    f := &+[Random(K)*&*[P.j^Random(1,3): j in [1..n]]: i in [1..5]];
+	    g := &+[Random(K)*&*[P.j^Random(1,3): j in [1..n]]: i in [1..5]];
+
+	    gcd := GCD(f*g, f*(g+1));
+	    if gcd ne Normalize(f) then
+		print "ERROR";
+		print "q:", q;
+		print "n:", n;
+		print "P:", P: Magma;
+		print "f:", f;
+		print "g:", g;
+		print "gcd:", gcd;
+		error "";
+	    end if;
+	    gcd := GCD(f, f+1);
+	    if gcd ne 1 then
+		print "ERROR f,f+1";
+		print "q:", q;
+		print "n:", n;
+		print "f:", f;
+		print "gcd:", gcd;
+		error "";
+	    end if;
+	end for;
+    end for;
+end for;
+
+procedure gcd_test(F, G, H)
+    if VERB then
+	print "";
+	print "gcd_test:";
+	print "F:", F;
+	print "G:", G;
+	print "H:", H;
+    end if;
+
+    assert GCD(F*G, F*H) eq F;
+    assert GCD(G*F, G*H) eq G;
+end procedure;
+
+
+P<x, y, z> := PolynomialRing(Integers(), 3);
+
+for i in [1 .. 10 by 2] do
+    gcd_test((i*x+y-z)^i, (5*x-z)^i, (x*y-y)^i);
+    gcd_test((x*y*z-1)^i, 100*x+1, 200*y+2);
+end for;
+
+f := (x+y+z)^5+1;
+g := (x-y-z)^4+z;
+h := (x*y+1)^3-1;
+
+gcd_test(f, g, h);
+
+a := &*[(y^i+z^j)*x^k + 1: i,j in [1..2], k in [1..3]];
+b := Derivative(a, 1);
+time c := GCD(a, b);
+assert c eq 1;
+
+Z := IntegerRing();
+F<x> := FunctionField(Z);
+FF<y> := FunctionField(F);
+P<z> := PolynomialRing(FF);
+f := z + (y + 1/x)/(y - 1/x);
+g := z - (y + 1/x)/(y - 1/x);
+assert GCD(f, g) eq 1;
+assert GCD(f*g, f*(g+1)) eq f;
+
+for R in <GF(2), GF(11863279), Z> do
+    "Large GCD:", R: Minimal;
+    time for n in [1 .. 10] do
+	P := PolynomialRing(R, n);
+	s := &+[P.i: i in [1 .. n]];
+	printf "n: %o\n", n; time
+	for e in [1 .. 5] do
+	    f := (s + 1)^e;
+	    c := GCD(f*(s + 2), f*(s + 3));
+	    assert c eq f;
+	end for;
+    end for;
+end for;

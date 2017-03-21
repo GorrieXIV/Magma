@@ -1,0 +1,222 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Operations on Elements</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text794.htm">[Next]</A><A  HREF = "text792.htm">[Prev]</A> <A  HREF = "text794.htm">[Right]</A> <A  HREF = "text792.htm">[Left]</A> <A  HREF = "text786.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "8977">Operations on Elements</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text793.htm#8978">Order of an Element</A>
+<LI> <A  HREF = "text793.htm#8984">Discrete Logarithm</A>
+<LI> <A  HREF = "text793.htm#8987">Equality and Comparison</A>
+</UL>
+<H4><A NAME = "8978">Order of an Element</A></H4>
+
+
+
+<P>
+<P>
+It is possible to determine the order of an element of a generic
+group with first calculating the structure of the group. 
+The order function involves the use of one of several algorithms:
+<DL COMPACT class='compact'>
+<DT>--</DT><DD>an improved baby-step giant-step algorithm, due
+  to  J. Buchmann, M.J. Jacobson, E. Teske <A  HREF = "text785.htm#bib_teske_bsgs">[BJT97]</A>,
+<DT>--</DT><DD>the Pollard--Rho method based algorithm, described above
+   <A  HREF = "text785.htm#bib_teske_prho">[Tes98a]</A>.
+<P>
+<P>
+<P>
+</DL>
+When computing the order of an element whose lower and upper bounds 
+are known, or where lower and upper bounds for the group order are 
+known, the following two algorithms have been shown to be significantly 
+faster than the two algorithms mentioned above.
+<DL COMPACT class='compact'>
+<DT>--</DT><DD>the standard baby-step giant-step Shanks algorithm,
+<DT>--</DT><DD>another variant of the Pollard--Rho method which is due
+  to P. Gaudry and R. Harley <A  HREF = "text785.htm#bib_gaudry_har">[GH00]</A>.
+<P>
+<P>
+<P>
+</DL>
+To avoid confusion we will distinguish the algorithms due to 
+  Teske <I>et al</I> and name them the <TT>T</TT> baby-step giant-step
+  algorithm and the <TT>T</TT> Pollard--Rho  algorithm respectively.
+The Pollard--Rho algorithm has smaller space requirements
+  than the baby-step giant-step algorithm, so it is recommended
+  for use in very large groups.
+<P>
+<P>
+<P>
+In all cases, if the group order is known beforehand, the element
+ order is computed using this knowledge.  This is a trivial operation.
+<H5><A NAME = "8979">Order(x) : GrpAbElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Order of the element x belonging to an fp-abelian group. If the 
+element has infinite order, the value zero is returned.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8980">Example <TT>GrpAb_DiscreteLog (H74E10)</TT></A></H3>
+We compute the orders of some elements in the group 
+Z<sub>2</sub> x Z<sub>3</sub> x Z<sub>4</sub> x Z<sub>5</sub> x Z.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G&lt;[x]&gt; := AbelianGroup([2,3,4,5,0]);
+&gt; Order( x[1] + 2*x[2] + 3*x[4]);
+30
+&gt; Order( x[1] + x[5] );
+0
+</PRE>
+<HR>
+<H5><A NAME = "8981">Order(g: parameters) : GrpAbGenElt -&gt; RngIntElt</A></H5>
+
+<PRE>    ComputeGroupOrder: Bool             Default: <TT>true</TT></PRE>
+
+<PRE>    BSGSLowerBound: RngIntElt           Default: 0</PRE>
+
+<PRE>    BSGSStepWidth: RngIntElt            Default: 0</PRE>
+<BLOCKQUOTE>
+Assume that g is an element of the generic abelian group A.
+This functions returns the order of the element g. 
+Note that if <TT>UseRepresentation</TT> is set to true for A,
+  then this is a trivial operation.
+<P>
+If the parameter <TT>ComputeGroupOrder</TT> is true, the order of A
+  is computed first (unless it is already known).
+The order of g is then computed using this knowledge; this 
+  last computation is trivial.
+<P>
+If <TT>ComputeGroupOrder</TT> is false, the order of g is 
+  computed using the <TT>T</TT> baby-step
+  giant-step algorithm.
+<P>
+ <TT>BSGSLowerBound</TT> and <TT>BSGSStepWidth</TT> are 
+  parameters which can be passed
+  to the baby-step giant-step algorithm.
+<P>
+ <TT>BSGSLowerBound</TT> sets a lowerbound on the order of the element g,
+  and <TT>BSGSStepWidth</TT> sets the step-width in the algorithm.
+</BLOCKQUOTE>
+<H5><A NAME = "8982">Order(g, l, u: parameters) : GrpAbGenElt, RngIntElt, RngIntElt -&gt; RngIntElt</A></H5>
+
+<PRE>    Alg: MonStg                         Default: "Shanks"</PRE>
+
+<PRE>    UseInversion: BoolElt               Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Assume that g is an element of the generic abelian group A
+such that the order of g or the order of A is bounded by u 
+and l.  This function returns the order of the element g. 
+<P>
+If the parameter <TT>Alg</TT> is set to <TT>"Shanks"</TT> then the generic 
+Shanks algorithm is used, and when <TT>Alg</TT> is set to <TT>"PollardRho"</TT>,
+the Gaudry--Harley Pollard--Rho variant is used.  Setting 
+<TT>UseInversion</TT> halves the search space. To be effective element 
+inversion must be fast.
+</BLOCKQUOTE>
+<H5><A NAME = "8983">Order(g, l, u, n, m: parameters) : GrpAbGenElt, RngIntElt, RngIntElt ,RngIntElt, RngIntElt -&gt; RngIntElt</A></H5>
+
+<PRE>    Alg: MonStg                         Default: "Shanks"</PRE>
+
+<PRE>    UseInversion: BoolElt               Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Assume that g is an element of the generic abelian group A such that 
+the order of g or the order of A is bounded by u and l.  Assume 
+also that <TT>Order(g)</TT> &equiv; n <TT>(mod m)</TT> or that 
+#A &equiv; <TT>(mod m)</TT> This function returns the order of the 
+element g. The two parameters <TT>Alg</TT>  and <TT>UseInversion</TT>
+have the same meaning as for the previous <TT>Order</TT> function.
+</BLOCKQUOTE>
+<H4><A NAME = "8984">Discrete Logarithm</A></H4>
+
+
+
+<H5><A NAME = "8985">Log(g, d: parameters) : GrpAbGenElt, GrpAbGenElt -&gt; RngIntElt</A></H5>
+
+<PRE>    ComputeGroupOrder: Bool             Default: <TT>true</TT></PRE>
+
+<PRE>    AlInPohligHellmanLoop: MonStg       Default: "BSGS"</PRE>
+
+<PRE>    BSGSStepWidth: RngIntElt            Default: 0</PRE>
+
+<PRE>    PollardRhoRParam: RngInt            Default: 20</PRE>
+
+<PRE>    PollardRhoTParam: RngInt            Default: 8</PRE>
+
+<PRE>    PollardRhoVParam: RngInt            Default: 3</PRE>
+<BLOCKQUOTE>
+Assume that g and d are elements of the generic abelian group A.
+This function returns the discrete logarithm of d to the base g.
+If <TT>ComputeGroupOrder</TT> is true, then the group order is computed
+first (if not already known) and from this the order of the base  g
+is computed.  The discrete logarithm problem is then solved using a
+Pohlig--Hellman loop calling either the <TT>T</TT> baby-step giant-step
+algorithm (<TT>AlInPohligHellmanLoop := "BSGS"</TT>) or the <TT>T</TT>
+Pollard--Rho algorithm (<TT>AlInPohligHellmanLoop := "PollardRho"</TT>).
+<P>
+The parameter <TT>BSGSStepWidth</TT> has the same meaning as for the Order
+function. Parameters <TT>PollardRhoRParam</TT>, <TT>PollardRhoTParam</TT>, 
+and <TT>PollardRhoVParam</TT> have the same meaning as they do for the 
+determination of structure (function AbelianGroup).
+If <TT>ComputeGroupOrder</TT> is false then the discrete logarithm 
+problem is solved using the <TT>T</TT>  baby-step giant-step  algorithm.
+Here again the parameter <TT>BSGSStepWidth</TT> applies.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8986">Example <TT>GrpAb_DiscreteLog (H74E11)</TT></A></H3>
+It is assumed that the structure of the groups QF has already been 
+computed.  We illustrate the computation of the discrete logarithm 
+relative to a given base.
+<P>
+<P>
+<P>
+<PRE>
+&gt; n := 38716;
+&gt; Ip := Reduction(PrimeForm(Q,11));
+&gt; g := GA_qf!Ip;
+&gt; d := n * g;
+&gt; 
+&gt; l1 := Log(g, d : BSGSStepWidth := Floor((-Dk)^(1/4)/2));
+&gt; l2 := Log(g, d : AlInPohligHellmanLoop := "PollardRho");
+&gt; l3 := Log(g, d : ComputeGroupOrder := false);
+&gt; l4 := Log(g, d: ComputeGroupOrder := false, 
+&gt;                 BSGSStepWidth := Floor((-Dk)^(1/4)/2));
+&gt; assert l1 eq l2 and l2 eq l3 and l3 eq l4;
+&gt; assert IsDivisibleBy(n - l1, Order(g));
+</PRE>
+<HR>
+<H4><A NAME = "8987">Equality and Comparison</A></H4>
+
+
+
+<H5><A NAME = "8988">u eq v : GrpAbElt, GrpAbElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the elements u and v are identical (as elements of the
+appropriate free abelian group), <TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "8989">u ne v : GrpAbElt, GrpAbElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the elements u and v are not identical (as elements of 
+the appropriate free abelian group), <TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "8990">IsIdentity(u) : GrpAbElt -&gt; BoolElt</A></H5>
+<H5>IsId(u) : GrpAbElt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the element u, belonging to the abelian group A, 
+is the identity element (zero), <TT>false</TT> otherwise. 
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text794.htm">[Next]</A><A  HREF = "text792.htm">[Prev]</A> <A  HREF = "text794.htm">[Right]</A> <A  HREF = "text792.htm">[Left]</A> <A  HREF = "text786.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

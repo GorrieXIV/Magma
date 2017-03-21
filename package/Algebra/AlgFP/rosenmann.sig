@@ -1,0 +1,4 @@
+174,1
+S,CosetGraphIntersect,"Input: a finitely generated free group F and two finitely generated subgroups H1 and H2; Output: a coset graph CG for the intersection of H1 and H2. This graph is the component of the graph CG1xCG2 which includes the vertex (1,1) (where CG1, CG2 are the coset graphs of H1, H2 respectively). The vertex labels of CG are minimal with respect to the Shortlex ordering with regard to the generators of F",0,3,0,0,0,0,0,0,0,121,,0,0,121,,0,0,121,,-1,-38,-38,-38,-38,-38
+S,FGIntersect,Input: a finitely generated free group F and two finitely generated subgroups H1 and H2; Output: the subgroup of F which is the intersection of H1 and H2,0,3,0,0,0,0,0,0,0,121,,0,0,121,,0,0,121,,121,-38,-38,-38,-38,-38
+S,MultiRank,Input: a finitely generated free group F and two finitely generated subgroups H1 and H2; Output: the expression computed for the generalized Hanna Neumann conjecture,0,3,0,0,0,0,0,0,0,121,,0,0,121,,0,0,121,,-1,-38,-38,-38,-38,-38

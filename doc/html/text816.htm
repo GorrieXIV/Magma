@@ -1,0 +1,802 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Coset Spaces and Tables</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text817.htm">[Next]</A><A  HREF = "text815.htm">[Prev]</A> <A  HREF = "text817.htm">[Right]</A> <A  HREF = "text815.htm">[Left]</A> <A  HREF = "text808.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "9358">Coset Spaces and Tables</A></H3>
+
+<P>
+<P>
+Let G = &lt; X | R &gt; be a finitely presented group. Suppose 
+that H is a subgroup of G having finite index m. Let V = { 
+c<sub>1</sub> (=H), c<sub>2</sub>, ..., c<sub>m</sub> } denote the set of distinct 
+right cosets of H in G. This set admits a natural G-action
+       f : V x G -&gt; V
+where f : &lt; c<sub>i</sub>, x &gt;  = c<sub>k</sub>  iff  c<sub>i</sub> * x = c<sub>k</sub>,
+for c<sub>i</sub> &isin;V and x &isin;G. The set V together with this action
+is a G-set called a <I>right coset space</I> for H in G. The action
+may also be represented using a coset table T.
+<P>
+If certain of the products c<sub>i</sub> * x are unknown, the corresponding images 
+under f are undefined. In this case, T is not closed, and V is 
+called an <I>incomplete coset space</I> for H in G.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text816.htm#9359">Coset Tables</A>
+<LI> <A  HREF = "text816.htm#9364">Coset Spaces: Construction</A>
+<LI> <A  HREF = "text816.htm#9367">Coset Spaces: Elementary Operations</A>
+<LI> <A  HREF = "text816.htm#9375">Accessing Information</A>
+<LI> <A  HREF = "text816.htm#9391">Double Coset Spaces: Construction</A>
+<LI> <A  HREF = "text816.htm#9395">Coset Spaces: Selection of Cosets</A>
+<LI> <A  HREF = "text816.htm#9398">Coset Spaces: Induced  Homomorphism</A>
+</UL>
+<H4><A NAME = "9359">Coset Tables</A></H4>
+
+<P>
+<P>
+A coset table is represented in Magma as a mapping. Given a finitely-presented
+group G and a subgroup H, the corresponding (right) coset table is a mapping 
+f:{1, ..., r} x G -&gt; {0, ..., r}, where r is the index
+of H in G. f(i, x) is the coset to which coset i is mapped under the action
+of x&isin;G. The value 0 is only included in the codomain if the coset table 
+is not closed, and it denotes that the coset is not known.
+
+
+<H5><A NAME = "9360">CosetTable(G, H: parameters) : GrpFP, GrpFP -&gt; Map</A></H5>
+<BLOCKQUOTE>
+The (right) coset table for G over subgroup H, constructed by means 
+of the Todd-Coxeter procedure. If the coset table does
+not close then the codomain will include the value 0.
+<P>
+<P>
+Experienced users can control the Todd-Coxeter procedure invoked by this
+function with a wide range of parameters. This function accepts the same
+parameters as the function <A  HREF = "text826.htm#GrpFP_2:CosetEnumerationProcess">CosetEnumerationProcess</A> described
+in Chapter <A  HREF = "text823.htm#9460">FINITELY PRESENTED GROUPS: ADVANCED</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "9361"></A><A NAME = "GrpFP_1:CosetTableToRepresentation">CosetTableToRepresentation</A>(G, T): GrpFP, Map -&gt; Map, GrpPerm, Grp</H5>
+<BLOCKQUOTE>
+Given a coset table T for a subgroup H of G, construct the 
+permutation representation of G given by its action on the cosets of H,
+using the columns of T. The function returns:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>The homomorphism f: G -&gt; P;
+<DT>(b)</DT><DD>The permutation group image P;
+<DT>(c)</DT><DD>The kernel K of the action (a subgroup of G).</DL>
+</BLOCKQUOTE>
+<H5><A NAME = "9362">CosetTableToPermutationGroup(G, T) : GrpFP, Map -&gt; GrpPerm</A></H5>
+<BLOCKQUOTE>
+Given a coset table T for a subgroup H of G, construct the 
+permutation group image of G given by its action on the cosets of H,
+using the columns of T. This is the second return value of 
+<A  HREF = "text816.htm#GrpFP_1:CosetTableToRepresentation">CosetTableToRepresentation</A><TT>(G, T)</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9363">Example <TT>GrpFP_1_CosetTable1 (H75E67)</TT></A></H3>
+Consider the infinite dihedral group.
+<P>
+<P>
+<PRE>
+&gt; G&lt;a,b&gt; := DihedralGroup(GrpFP, 0);
+&gt; G;
+Finitely presented group G on 2 generators
+Relations
+    b^2 = Id(G)
+    (a * b)^2 = Id(G)
+</PRE>
+We define a subgroup S of G and compute the coset table map for S in G.
+<P>
+<P>
+<PRE>
+&gt; S := sub&lt;G|a*b, a^10&gt;;
+&gt; ct := CosetTable(G, S);
+&gt; ct;
+Mapping from: Cartesian Product&lt;{ 1 .. 10 }, GrpFP: G&gt;
+        to { 1 .. 10 }
+     $1  $2 -$1
+ 1.   2   2   3
+ 2.   4   1   1
+ 3.   1   4   5
+ 4.   6   3   2
+ 5.   3   6   7
+ 6.   8   5   4
+ 7.   5   8   9
+ 8.  10   7   6
+ 9.   7  10  10
+10.   9   9   8
+</PRE>
+When printing the coset table, the action of the generators and of the
+non-trivial inverses of generators on the enumerated transversal is shown
+in table form.
+<P>
+<P>
+<P>
+<P>
+Using the coset table, we now construct the permutation representation of G
+on the cosets of S in G. We assign the representation (a homomorphism),
+the image (a permutation group of degree [G:S] = 10) and the kernel of the
+permutation representation (a subgroup of G).
+<P>
+<P>
+<PRE>
+&gt; fP, P, K := CosetTableToRepresentation(G, ct);
+&gt; fP;
+Homomorphism of GrpFP: G into GrpPerm: P, Degree 10,
+Order 2^2 * 5 induced by
+    a |--&gt; (1, 2, 4, 6, 8, 10, 9, 7, 5, 3)
+    b |--&gt; (1, 2)(3, 4)(5, 6)(7, 8)(9, 10)
+</PRE>
+Note that the images of a and b correspond to the first two columns of
+the printed coset table above.
+<P>
+<P>
+<PRE>
+&gt; P;
+Permutation group P acting on a set of cardinality 10
+Order = 20 = 2^2 * 5
+    (1, 2, 4, 6, 8, 10, 9, 7, 5, 3)
+    (1, 2)(3, 4)(5, 6)(7, 8)(9, 10)
+&gt; K;
+Finitely presented group K
+Index in group G is 20 = 2^2 * 5
+Subgroup of group G defined by coset table
+</PRE>
+Now, we define a subgroup of infinite index in G and compute a coset table
+for it.
+<P>
+<P>
+<PRE>
+&gt; H := sub&lt;G|b&gt;;
+&gt; ct := CosetTable(G, H);
+</PRE>
+Of course, the coset table cannot be complete; note that 0 is in its codomain,
+indicating unknown images of cosets.
+<P>
+<P>
+<PRE>
+&gt; ct;
+Mapping from: Cartesian Product&lt;{ 1 .. 1333331 }, GrpFP: G&gt;
+        to { 0 .. 1333331 }
+</PRE>
+<HR>
+<H4><A NAME = "9364">Coset Spaces: Construction</A></H4>
+
+<P>
+<P>
+The indexed (right) coset space V of the subgroup H of the group G is 
+a G-set consisting of the set of integers { 1, ..., m}, where i 
+represents the right coset c<sub>i</sub> of H in G. The action of G on 
+this G-set is that induced by the natural G-action 
+f : V x G -&gt; V
+where
+f : &lt; c<sub>i</sub>, x &gt;  = c<sub>k</sub>  iff  c<sub>i</sub> * x = c<sub>k</sub>,
+for c<sub>i</sub> &isin;V and x &isin;G.
+If certain of the products c<sub>i</sub> * x are unknown, the corresponding images 
+under f are undefined, and V is called an <I>incomplete coset space</I> 
+for H in G.
+
+
+<H5><A NAME = "9365">CosetSpace(G, H: parameters) : GrpFP, GrpFP: -&gt; GrpFPCos</A></H5>
+<BLOCKQUOTE>
+This function attempts to construct a coset space for the subgroup H 
+in the group G by means of the Todd-Coxeter procedure. If the enumeration 
+fails to complete, the function returns an incomplete coset space.  The coset
+space is returned as an indexed right coset space. For a sample application
+of this function see Example <A  HREF = "text816.htm#9388">H75E69</A>.
+<P>
+<P>
+Experienced users can control the Todd-Coxeter procedure invoked by this
+function with a wide range of parameters. This function accepts the same
+parameters as the function <A  HREF = "text826.htm#GrpFP_2:CosetEnumerationProcess">CosetEnumerationProcess</A> described
+in Chapter <A  HREF = "text823.htm#9460">FINITELY PRESENTED GROUPS: ADVANCED</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "9366">RightCosetSpace(G, H: parameters) : GrpFP, GrpFP -&gt; GrpFPCos</A></H5>
+<H5>LeftCosetSpace(G, H: parameters) : GrpFP, GrpFP -&gt; GrpFPCos</H5>
+<BLOCKQUOTE>
+The explicit right coset space of the subgroup H of the group G 
+is a G-set containing the set of right cosets of H in G. The 
+elements of this G-set are the pairs &lt; H, x &gt;, where x 
+runs through a transversal for H in G. Similarly, the explicit left 
+coset space of H is a G-set containing the set of left cosets of 
+H in G, represented as the pairs &lt; x, H &gt;. These 
+functions use the Todd-Coxeter procedure to construct the explicit 
+right (left) coset space of the subgroup H of the group G.
+For a sample application see Example <A  HREF = "text816.htm#9388">H75E69</A>.
+<P>
+<P>
+Experienced users can control the Todd-Coxeter procedure invoked by these
+functions with a wide range of parameters. Both functions accept the same
+parameters as the function <A  HREF = "text826.htm#GrpFP_2:CosetEnumerationProcess">CosetEnumerationProcess</A> described
+in Chapter <A  HREF = "text823.htm#9460">FINITELY PRESENTED GROUPS: ADVANCED</A>. 
+</BLOCKQUOTE>
+<H4><A NAME = "9367">Coset Spaces: Elementary Operations</A></H4>
+
+
+
+<H5><A NAME = "9368">H * g : GrpFP, GrpFPElt -&gt; GrpFPCosElt</A></H5>
+<BLOCKQUOTE>
+Right coset of the subgroup H of the group G, where g is an
+element of G (as an element of the right coset of H).
+</BLOCKQUOTE>
+<H5><A NAME = "9369">C * g : GrpFPCosElt, GrpFPElt -&gt; GrpFPCosElt</A></H5>
+<BLOCKQUOTE>
+Coset to which the right coset C of the group G is mapped by the 
+(right) action of g, where g is an element of G.
+</BLOCKQUOTE>
+<H5><A NAME = "9370">C * D : GrpFPCosElt, GrpFPCosElt -&gt; GrpFPCosElt</A></H5>
+<BLOCKQUOTE>
+Given two right cosets of the same normal subgroup H of the
+group G, return the right coset that is the product of C and D.
+</BLOCKQUOTE>
+<H5><A NAME = "9371">g in C : GrpFPElt, GrpFPCosElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if element g of group G lies in the coset C.
+</BLOCKQUOTE>
+<H5><A NAME = "9372">g notin C : GrpFPElt, GrpFPCosElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if element g of group G does not lie in the coset C.
+</BLOCKQUOTE>
+<H5><A NAME = "9373">C1 eq C2 : GrpFPCosElt, GrpFPCosElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the coset C1 is equal to the coset C2.
+</BLOCKQUOTE>
+<H5><A NAME = "9374">C1 ne C2 : GrpFPCosElt, GrpFPCosElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the coset C1 is not equal to the coset C2.
+</BLOCKQUOTE>
+<H4><A NAME = "9375">Accessing Information</A></H4>
+
+
+
+<H5><A NAME = "9376"># V : GrpFPCos -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The cardinality of the coset space V.
+</BLOCKQUOTE>
+<H5><A NAME = "9377">Action(V) : GrpFPCos -&gt; Map</A></H5>
+<BLOCKQUOTE>
+The mapping V x G -&gt; V giving the action of G on the 
+coset space V. This mapping is a coset table.
+</BLOCKQUOTE>
+<H5><A NAME = "9378">&lt;i, w&gt; @ T : GrpFPCosElt, GrpFPElt, Map -&gt; GrpFPElt</A></H5>
+<H5>T(i, w) : Map, GrpFPCosElt, GrpFPElt -&gt; GrpFPElt</H5>
+<BLOCKQUOTE>
+The image of coset i as defined in the coset table T, under the action 
+of word w.
+<P>
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "9379">ExplicitCoset(V, i) : GrpFPCos, RngIntElt -&gt; GrpFPCosElt</A></H5>
+<BLOCKQUOTE>
+The element of the explicit coset space that corresponds to indexed 
+coset i.
+</BLOCKQUOTE>
+<H5><A NAME = "9380">IndexedCoset(V, w) : GrpFPCos, GrpFPElt -&gt; GrpFPCosElt</A></H5>
+<BLOCKQUOTE>
+The element of the indexed coset space V to which the element w of 
+G corresponds.
+</BLOCKQUOTE>
+<H5><A NAME = "9381">IndexedCoset(V, C) : GrpFPCos, GrpFPCosElt -&gt; GrpFPCosElt</A></H5>
+<BLOCKQUOTE>
+The element of the indexed coset space V to which the 
+explicit coset C of G corresponds.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "9382">Group(V) : GrpFPCos -&gt; GrpFP</A></H5>
+<BLOCKQUOTE>
+The group G for which V is a coset space. 
+</BLOCKQUOTE>
+<H5><A NAME = "9383">Subgroup(V) : GrpFPCos -&gt; GrpFP</A></H5>
+<BLOCKQUOTE>
+The subgroup H of G such that V is a coset space for G over H.
+</BLOCKQUOTE>
+<H5><A NAME = "9384">IsComplete(V) : GrpFPCos -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the coset space V is complete.
+</BLOCKQUOTE>
+<H5><A NAME = "9385">ExcludedConjugates(V) : GrpFPCos -&gt; { GrpFPElt }</A></H5>
+<H5>ExcludedConjugates(T) : Map -&gt; { GrpFPElt }</H5>
+<BLOCKQUOTE>
+Given a partial or complete coset space V for the group G over the
+subgroup H, or a coset table T corresponding to this coset space,
+this function returns the set of words 
+E ={g<sub>i</sub><sup> - 1</sup>h<sub>j</sub>g<sub>i</sub> | g<sub>i</sub> a generator of G, h<sub>j</sub> a generator of
+H, and, modulo V, g<sub>i</sub><sup> - 1</sup>h<sub>j</sub>g<sub>i</sub> does not lie in H}.  If E
+is empty, then H is a normal subgroup of G, while if E is
+non-empty, the addition of the elements of E to the generators of H
+will usually be a larger subgroup of the normal closure of H. This 
+function may be used with incomplete coset spaces for G over H; 
+it may then happen that some of the elements of E actually lie in H 
+but there is insufficient information for this to be detected.
+This function is normally used in conjunction with the Todd-Coxeter
+algorithm when seeking some subgroup having index sufficiently small
+so that the Todd-Coxeter procedure completes. The conjugates are
+returned as a set of words.
+</BLOCKQUOTE>
+<H5><A NAME = "9386">Transversal(G, H) : GrpFP, GrpFP -&gt; {@ GrpFPElt  @}, Map</A></H5>
+<H5><A NAME = "GrpFP_1:RightTransversal">RightTransversal</A>(G, H) : GrpFP, GrpFP -&gt; {@ GrpFPElt  @}, Map</H5>
+<BLOCKQUOTE>
+Given a finitely presented group G and a subgroup H of G, this function
+returns
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>A set of elements T of G forming a right transversal for G
+over H; and
+<DT>(b)</DT><DD>The corresponding transversal mapping &phi;: G -&gt; T.
+If T = [t<sub>1</sub>, ..., t<sub>r</sub>] and g &isin;G, &phi; is defined by
+&phi;(g) = t<sub>i</sub>, where g&isin;H * t<sub>i</sub>.
+<P>
+<P>
+</DL>
+These functions may require the computation of a coset table. Experienced users
+can control the behaviour of a possibly invoked coset enumeration with a set of
+global parameters. These global parameters can be changed using the function
+<A  HREF = "text814.htm#GrpFP_1:SetGlobalTCParameters">SetGlobalTCParameters</A>. For a detailed description of the
+available parameters and their meanings, we refer to Chapter <A  HREF = "text823.htm#9460">FINITELY PRESENTED GROUPS: ADVANCED</A>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9387">Example <TT>GrpFP_1_CosetTable2 (H75E68)</TT></A></H3>
+Consider the infinite dihedral group.
+<P>
+<P>
+<PRE>
+&gt; G&lt;a,b&gt; := DihedralGroup(GrpFP, 0);
+</PRE>
+We define a subgroup H of index 10 in G ... <PRE>
+&gt; H := sub&lt; G | a*b, a^10 &gt;;
+&gt; Index(G, H);
+10
+</PRE> ... and construct a right transversal for H in G and the associate
+transversal map.
+<P>
+<P>
+<PRE>
+&gt; RT, transmap := Transversal(G, H);
+&gt; RT;
+{@ Id(G), a, a^-1, a^2, a^-2, a^3, a^-3, a^4, a^-4, a^5 @}
+&gt; transmap;
+Mapping from: GrpFP: G to SetIndx: RT
+</PRE>
+From this a left transversal is easily obtained:
+<P>
+<P>
+<PRE>
+&gt; LT := {@ x^-1 : x in RT @};
+&gt; LT;
+{@ Id(G), a^-1, a, a^-2, a^2, a^-3, a^3, a^-4, a^4, a^-5 @}
+</PRE>
+We construct the coset table and check whether the enumeration of the cosets
+is compatible to the enumeration of the right transversal RT.
+<P>
+<P>
+<PRE>
+&gt; ct := CosetTable(G, H);
+&gt; forall(culprit){ i : i in [1..Index(G, H)]
+&gt;                    | ct(1, RT[i]) eq i};
+true
+</PRE>
+It is. Thus, we can very easily define a function
+RT x G -&gt; RT, describing the action of G on the set of
+right cosets of H in G.
+<P>
+<P>
+<PRE>
+&gt; action := func&lt; r, g | RT[ct(Index(RT, r), g)] &gt;;
+</PRE>
+Note that the definition of the function <TT>action</TT> relies on the fact that 
+the computed right transversal and its enumeration match the ones internally
+used for the coset table ct.
+<P>
+<P>
+<PRE>
+&gt; action(Id(G), b); 
+a
+</PRE>
+I.e. H * b = H * a.
+<P>
+<P>
+<PRE>
+&gt; action(a^-4, a*b);
+a^4
+</PRE>
+I.e. Ha<sup> - 4</sup> * (ab) = Ha<sup>4</sup>.
+<HR>
+<H3><A NAME = "9388">Example <TT>GrpFP_1_CosetSpace (H75E69)</TT></A></H3>
+<P>
+Consider the group G =&lt; a, b | a<sup>8</sup>, b<sup>7</sup>, (ab)<sup>2</sup>, (a<sup> - 1</sup>b)<sup>3</sup> &gt; and the
+subgroup H of G, generated by a<sup>2</sup> and a<sup> - 1</sup>b.
+<P>
+<P>
+<PRE>
+&gt; F&lt;x, y&gt; := FreeGroup(2);
+&gt; G&lt;a, b&gt; := quo&lt; F | x^8, y^7, (x*y)^2, (x^-1*y)^3 &gt;;
+&gt; H := sub&lt; G | a^2,a^-1*b &gt;;
+</PRE>
+We construct an indexed right coset space V and an explicit right coset
+space Vr for H in G.
+<P>
+<P>
+<PRE>
+&gt; V := CosetSpace(G, H);
+&gt; Vr := RightCosetSpace(G, H);
+</PRE>
+The coset H always has index 1.
+<P>
+<P>
+<PRE>
+&gt; trivial_coset := ExplicitCoset(Vr, 1);
+&gt; trivial_coset;
+&lt;GrpFP: H, Id(G)&gt;
+&gt; IndexedCoset(V, trivial_coset);
+1
+</PRE>
+We now pick a coset ... <PRE>
+&gt; coset := ExplicitCoset(Vr, 42); 
+&gt; coset;
+&lt;GrpFP: H, a^-1 * b^-1 * a^3 * b^-1&gt;
+</PRE> ... multiply from the right with b ... <PRE>
+&gt; coset * b;
+&lt;GrpFP: H, a^-1 * b^-1 * a^3&gt;
+</PRE> ... and check where this gets us in the indexed coset space V.
+<P>
+<P>
+<PRE>
+&gt; IndexedCoset(V, coset * b);
+23
+</PRE>
+<HR>
+<H3><A NAME = "9389">Example <TT>GrpFP_1_DerSub (H75E70)</TT></A></H3>
+We present a function which computes the derived subgroup 
+G' for the finitely presented group G.  It assumes that the 
+Todd-Coxeter procedure can enumerate the coset space of G' in G.
+<P>
+<P>
+<PRE>
+&gt; function DerSub(G)
+&gt;
+&gt; /* Initially define S to contain the commutator of each pair of distinct
+&gt;  generators of G */
+&gt;
+&gt;     S := { (x,y) : x, y in Generators(G) | (x,y) ne Id(G) };
+&gt;
+&gt; /* successively extend S until it is closed under conjugation by the
+&gt;   generators of G */
+&gt;
+&gt;         repeat
+&gt;             V := CosetSpace(G, sub&lt;G | S&gt;);
+&gt;             E := ExcludedConjugates(V);
+&gt;             S := S join E;
+&gt;         until # E eq 0;
+&gt;     return sub&lt;G | S&gt;;
+&gt; end function; 
+</PRE>
+<HR>
+<H3><A NAME = "9390">Example <TT>GrpFP_1_ExcludedConjugates (H75E71)</TT></A></H3>
+Given a subgroup H of the finitely presented group G,
+for which the Todd-Coxeter procedure does not complete, add excluded
+conjugates one at a time to the generators of G until a subgroup K is
+reached such that either K is normal in G, or K has sufficiently small
+index for the Todd-Coxeter method to complete.  The set hgens contains a set
+of generating words for H.
+<P>
+<P>
+<PRE>
+&gt; function NormClosure(G, hgens)
+&gt; xgens := hgens;
+&gt; kgens := hgens;
+&gt; indx := 0;
+&gt; while # xgens ne 0 do
+&gt;       Include(~kgens, Representative(xgens));
+&gt;       V := CosetSpace(G, sub&lt;G | kgens&gt;);
+&gt;       if IsComplete(V) then break; end if;
+&gt;       xgens := ExcludedConjugates(V);
+&gt; end while;
+&gt; if IsComplete(V) then
+&gt;           print "The subgroup generated by", kgens, "has index", #V;
+&gt;           return kgens;
+&gt; else
+&gt;           print "The construction was unsuccessful";
+&gt;           return { };
+&gt; end if;
+&gt; end function;
+</PRE>
+<HR>
+<H4><A NAME = "9391">Double Coset Spaces: Construction</A></H4>
+
+
+
+<H5><A NAME = "9392">DoubleCoset(G, H, g, K ) : GrpFP, GrpFP, GrpFPElt, GrpFP -&gt; GrpFPDcosElt</A></H5>
+<BLOCKQUOTE>
+The double coset H * g * K of the subgroups H and K
+of the group G, where g is an element of G.
+</BLOCKQUOTE>
+<H5><A NAME = "9393"></A><A NAME = "GrpFP_1:DoubleCosets">DoubleCosets</A>(G, H, K) : GrpFP, GrpFP, GrpFP -&gt; { GrpFPDcosElt }</H5>
+<BLOCKQUOTE>
+Set of double cosets H * g * K of the group G.
+<P>
+<P>
+This function may require the computation of a coset table. Experienced users
+can control the behaviour of a possibly invoked coset enumeration with a set of
+global parameters. These global parameters can be changed using the function
+<A  HREF = "text814.htm#GrpFP_1:SetGlobalTCParameters">SetGlobalTCParameters</A>. For a detailed description of the
+available parameters and their meanings, we refer to Chapter <A  HREF = "text823.htm#9460">FINITELY PRESENTED GROUPS: ADVANCED</A>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9394">Example <TT>GrpFP_1_DoubleCosets (H75E72)</TT></A></H3>
+Consider again the infinite dihedral group G ... <PRE>
+&gt; G&lt;a,b&gt; := DihedralGroup(GrpFP, 0);
+</PRE> ... and the subgroup H of index 10 in G.
+<P>
+<P>
+<PRE>
+&gt; H := sub&lt; G | a*b, a^10 &gt;;
+</PRE>
+The set of H-H double cosets in G can be obtained with the statement
+<P>
+<P>
+<PRE>
+&gt; DoubleCosets(G, H, H);
+{ &lt;GrpFP: H, Id(G), GrpFP: H&gt;, &lt;GrpFP: H, a^5, GrpFP: H&gt;,
+  &lt;GrpFP: H, a^4, GrpFP: H&gt;, &lt;GrpFP: H, a^2, GrpFP: H&gt;,
+  &lt;GrpFP: H, a, GrpFP: H&gt;, &lt;GrpFP: H, a^3, GrpFP: H&gt; }
+</PRE>
+<HR>
+<H4><A NAME = "9395">Coset Spaces: Selection of Cosets</A></H4>
+
+
+
+<H5><A NAME = "9396"></A><A NAME = "GrpFP_1:CosetsSatisfying">CosetsSatisfying</A>(T, S: parameters) : Map, { GrpFPElt }: -&gt; { GrpFPCosElt }</H5>
+<H5><A NAME = "GrpFP_1:CosetSatisfying">CosetSatisfying</A>(T, S: parameters) : Map, { GrpFPElt }: -&gt; { GrpFPCosElt }</H5>
+<H5>CosetsSatisfying(V, S: parameters) : GrpFPCos, { GrpFPElt }: -&gt; { GrpFPCosElt }</H5>
+<H5>CosetSatisfying(V, S: parameters) : GrpFPCos, { GrpFPElt }: -&gt; { GrpFPCosElt }</H5>
+<BLOCKQUOTE>
+Given a fp-group G, and a partial or complete coset space V or
+coset table T for G 
+over the subgroup H generated by the set of words S, these functions
+return representatives for the cosets of V which satisfy the conditions 
+defined in the parameters. In the description of the parameters below,
+the symbol l will denote a Boolean value, while the
+symbol n will denote a positive integer in the range [1, #V].
+<P>
+<P>
+The functions are not identical. <TT>CosetsSatisfying</TT> returns a set of coset
+representatives for V as defined in the parameters. <TT>CosetSatisfying</TT>
+is the same as <TT>CosetsSatisfying</TT> with the <TT>Limit</TT> parameter equal
+to 1; thus it returns a set containing a single coset representative, or an
+empty set if  no cosets satisfy the conditions.
+<P>
+<P>
+<PRE>
+     First: RngIntElt                    Default: 1
+</PRE>
+Start looking for coset representatives satisfying the designated
+conditions beginning with coset i of V.
+<P>
+<P>
+<PRE>
+     Last: RngIntElt                     Default: #V
+</PRE>
+Stop looking for coset representatives after examining
+coset j of V.
+<P>
+<P>
+<PRE>
+     Limit: RngIntElt                    Default: &infin;
+</PRE>
+Terminate the search for coset representatives as soon as l have
+been found which satisfy the designated conditions. This parameter
+is not available for <TT>CosetSatisfying</TT>, since <TT>Limit</TT> is set
+to 1 for this function.
+<P>
+<P>
+<PRE>
+     Normalizing: BoolElt                Default: <TT>false</TT>
+</PRE>
+If <TT>true</TT>, select coset representatives x such that, modulo V,
+the word x<sup> - 1</sup>h<sub>1</sub>x, ..., x<sub>1</sub>h<sub>s</sub>x is contained in H.
+<P>
+<P>
+<PRE>
+     Order: RngIntElt                    Default: 0
+</PRE>
+Select coset representatives x such that, modulo V, the word
+x<sup>n</sup> is contained in H.
+<P>
+<P>
+<PRE>
+     Print: RngIntElt                    Default: 0
+</PRE>
+If t &gt; 0, print the coset representatives found to satisfy the
+designated conditions.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9397">Example <TT>GrpFP_1_CosetSatisfying (H75E73)</TT></A></H3>
+Consider the braid group G on 4 strings with Artin generators a, b 
+and c and the subgroup H of G generated by a and b.
+<P>
+<P>
+<PRE>
+&gt; G&lt;a,b,c&gt; := BraidGroup(GrpFP, 4);
+&gt; H := sub&lt; G | a,b &gt;;
+</PRE>
+We construct an -- obviously incomplete -- explicit right coset space for
+H in G.
+<P>
+<P>
+<PRE>
+&gt; V := RightCosetSpace(G, H);
+</PRE>
+Using the function <A  HREF = "text816.htm#GrpFP_1:CosetSatisfying">CosetSatisfying</A>, we compute an element
+of G, not contained in H, which normalises H.
+<P>
+<P>
+<PRE>
+&gt; cs := CosetSatisfying(V, Generators(Subgroup(V))
+&gt; : Normalizing := true, First := 2);
+&gt; cs;
+{
+    &lt;GrpFP: H, c * b * a^2 * b * c&gt;
+}
+&gt; rep := c * b * a^2 * b * c;
+</PRE>
+The conjugates of a and b by this element had better be in H ... <PRE>
+&gt; rep^-1 * a * rep in H;
+true
+&gt; rep^-1 * b * rep in H;
+true
+</PRE> ... OK.
+<HR>
+<H4><A NAME = "9398">Coset Spaces: Induced  Homomorphism</A></H4>
+
+
+
+<H5><A NAME = "9399">CosetAction(G, H) : Grp, Grp -&gt; Hom(Grp), GrpPerm, Grp</A></H5>
+<BLOCKQUOTE>
+Given a subgroup H of the group G, this function constructs the
+permutation representation &phi; of G given by the action of G
+on the cosets of H. It returns:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>The homomorphism &phi;;
+<DT>(b)</DT><DD>The image group &phi;(G).
+<DT>(c)</DT><DD>(if possible) the kernel of &phi;.
+<P>
+<P>
+<P>
+<P>
+</DL>
+The permutation representation is obtained by using the Todd-Coxeter
+procedure to construct the coset table for H in G. Note that G
+may be an infinite group: it is only necessary that the index of H
+in G be finite. 
+</BLOCKQUOTE>
+<H5><A NAME = "9400">CosetAction(V) : GrpFPCos -&gt; Hom(Grp), GrpPerm</A></H5>
+<BLOCKQUOTE>
+Construct the permutation representation L of G given by the action 
+of G on the coset space V.
+It returns the permutation representation &phi; (as a map) and its image.
+</BLOCKQUOTE>
+<H5><A NAME = "9401">CosetImage(G, H) : Grp, Grp -&gt; GrpPerm</A></H5>
+<BLOCKQUOTE>
+Construct the image of G given by its action on the (right) coset 
+space of H in G.
+</BLOCKQUOTE>
+<H5><A NAME = "9402">CosetImage(V) : GrpFPCos -&gt; GrpPerm</A></H5>
+<BLOCKQUOTE>
+Construct the image of G as defined by its action on the coset 
+space V.
+</BLOCKQUOTE>
+<H5><A NAME = "9403"></A><A NAME = "GrpFP_1:CosetKernel">CosetKernel</A>(G, H) : GrpFP, GrpFP -&gt; GrpFP</H5>
+<BLOCKQUOTE>
+The kernel of G in its action on the (right) coset space of H in G. 
+(Only available when the index of H in G is very small).
+<P>
+<P>
+This function may require the computation of a coset table. Experienced users
+can control the behaviour of a possibly invoked coset enumeration with a set of
+global parameters. These global parameters can be changed using the function
+<A  HREF = "text814.htm#GrpFP_1:SetGlobalTCParameters">SetGlobalTCParameters</A>. For a detailed description of the
+available parameters and their meanings, we refer to Chapter <A  HREF = "text823.htm#9460">FINITELY PRESENTED GROUPS: ADVANCED</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "9404">CosetKernel(V) : GrpFPCos -&gt; GrpFP</A></H5>
+<BLOCKQUOTE>
+The kernel of G in its action on the (right) coset space V.
+(Only available when the index of the subgroup H of G defining
+the coset space is very small).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9405">Example <TT>GrpFP_1_Co1 (H75E74)</TT></A></H3>
+The first Conway group has a representation as the image of
+the group
+<PRE>
+G = &lt;a, b, c, d, e, f, g, h | a^2, b^2, c^2, d^2, e^2, f^2, g^2, h^2,
+(ab)^3, (ac)^2, (ad)^2, (ae)^4, (af)^2, (ag)^2, (ah)^3,
+(bc)^5, (bd)^2, (be)^2, (bf)^2, (bg)^4, (bh)^4,
+(cd)^3, (ce)^3, (cf)^4, (cg)^2, (ch)^2,
+(de)^2, (df)^3, (dg)^2, (dh)^2,
+(ef)^6, (eg)^2, (eh)^2,
+(fg)^4, (fh)^6,
+(gh)^2,
+a(cf)^2 = (adfh)^3 = b(ef)^3 = (baefg)^3 = 1,
+(cef)^7 = d(bh)^2 = d(aeh)^3 = e(bg)^2 = 1&gt;
+</PRE>under the homomorphism defined by the action of G on the cosets of the
+subgroup H = &lt;a, b, c, d, e, f, g, (adefcefgh)<sup>39</sup> &gt;. 
+The permutation
+group can be constructed as follows:
+<P>
+<P>
+<PRE>
+&gt; F&lt;s, t, u, v, w, x, y, z&gt; := FreeGroup(8);
+&gt; G&lt;a, b, c, d, e, f, g, h&gt; := quo&lt;F | s^2, t^2, u^2, v^2, w^2, x^2, y^2, z^2,
+&gt; (s*t)^3, (s*u)^2, (s*v)^2, (s*w)^4, (s*x)^2, (s*y)^2, (s*z)^3,
+&gt; (t*u)^5, (t*v)^2, (t*w)^2, (t*x)^2, (t*y)^4, (t*z)^4,
+&gt; (u*v)^3, (u*w)^3, (u*x)^4, (u*y)^2, (u*z)^2,
+&gt; (v*w)^2, (v*x)^3, (v*y)^2, (v*z)^2,
+&gt; (w*x)^6, (w*y)^2, (w*z)^2,
+&gt; (x*y)^4, (x*z)^6,
+&gt; (y*z)^2,
+&gt; s*(u*x)^2 = (s*v*x*z)^3 = t*(w*x)^3 = (t*s*w*x*y)^3 = 1,
+&gt; (u*w*x)^7 = v*(t*z)^2 = v*(s*w*z)^3 = w*(t*y)^2 = 1&gt;;
+&gt; H := sub&lt; G | a, b, c, d, e, f, g, (a*d*e*f*c*e*f*g*h)^39 &gt;;
+&gt; V := CosetSpace(G, H: FillFactor := 100000);
+&gt; Co1 := CosetImage(V);
+&gt; Degree(Co1);
+     98280
+</PRE>
+<HR>
+<H3><A NAME = "9406">Example <TT>GrpFP_1_G23 (H75E75)</TT></A></H3>
+The group G<sub>2</sub>(3) is a homomorph of the fp-group G defined below.
+We construct a permutation representation G1 for G<sub>2</sub>(3) on 351 points, 
+and then compute the subgroup generated by the images of the first four
+generators of G in G1. (The functions applied to permutation groups are
+described in Chapter <A  HREF = "text629.htm#6871">PERMUTATION GROUPS</A>.)
+<P>
+<P>
+<P>
+<PRE>
+&gt; F&lt;a,b,c,d,y,x,w&gt; := FreeGroup(7);
+&gt; z := y*c*a^2*b;
+&gt; u := x*d;
+&gt; t := w*c*a*d*b^2*c;
+&gt; G&lt;a,b,c,d,y,x,w&gt;, g :=
+&gt;            quo&lt; F | a^4, b^4, c^2, d^2, (a,b), (a*c)^2, (b*c)^2,
+&gt;                        (c*d)^2, d*a*d*b^-1, y^3, (a^-1*b)^y*d*a^-1*b^-1,
+&gt;                        (c*d*a^-1*b)^y*b^-1*a*d*c, a*d*y*d*a^-1*y, x^3,
+&gt;                        a^x*b^-1, b^x*a*b, c^x*c, (x*d)^2, (u*z)^6, w^3,
+&gt;                        (w,y), (a*b)^w*b^-1*a*d*c, (c*d*a^-1*b)^w*d*c*b^2,
+&gt;                        (b^2*c*d)^w*a^-1*b^-1, (c*a^2*b*w)^2,
+&gt;                       (a^-1*b)^w*d*a^-1*b^-1, (t*u)^3 &gt;;
+&gt; z1 := g(z);
+&gt; u1 := g(u);
+&gt; t1 := g(t);
+
+&gt; H := sub&lt; G | z1*a^2*b^2, u1*c, t1*a^2*b^2 &gt;;
+&gt; f, G1, K := CosetAction(G, H);
+&gt; Degree(G1);
+351
+
+&gt; print Order(G1), FactoredOrder(G1);
+4245696 [ &lt;2, 6&gt;, &lt;3, 6&gt;, &lt;7, 1&gt;, &lt;13, 1&gt; ]
+
+&gt; CompositionFactors(G1);
+    G
+    |  G(2, 3)
+    1
+
+&gt; S := sub&lt; G1 | f(a), f(b), f(c), f(d) &gt;;
+&gt; BSGS(S);
+&gt; S;
+Permutation group S of degree 351
+Order = 64 = 2^6
+</PRE>
+Thus the images of a, b, c and d in G1 generate the Sylow 2-subgroup
+<HR>
+<PRE></PRE> <A  HREF = "text817.htm">[Next]</A><A  HREF = "text815.htm">[Prev]</A> <A  HREF = "text817.htm">[Right]</A> <A  HREF = "text815.htm">[Left]</A> <A  HREF = "text808.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

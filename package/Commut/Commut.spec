@@ -1,0 +1,52 @@
+RngMPol
+{
+    IdealOps.m
+    RingMaps.m
+    access.m
+    cohomology_package.m
+    decomp.m
+    equidimensional.m
+    ideal.m
+    misc.m
+    multi_hilb.m
+    names.m
+    noether.m
+    normal.m
+    poly.m
+    quotrem.m
+    radical.m
+    regular.m
+    dual2.m
+    homogeneous.m
+    sheaf.m
+    loc_free_extra.m
+}
+RngMPolRes
+{
+    AffineAlgebraOps.m
+    AffineAlgebraMaps.m
+    basis.m
+    rees.m
+}
+RngInvar
+{
+    ag.m
+    binforms.m
+    fld.m
+    king.m
+    misc.m
+    prim.m
+    proj.m
+    relations.m
+    sec.m
+    sec_non_mod.m
+}
+Loc
+{
+    multiplicity.m
+}
+Solve
+{
+    sat.m
+    solve.m
+}

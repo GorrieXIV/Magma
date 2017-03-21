@@ -1,0 +1,3 @@
+174,1
+S,HessePolynomials,"The Hesse polynomials DD,cc4,cc6. These polynomials give the invariants for certain families of genus one curves",1,2,1,82,0,-45,3,0,0,0,0,0,0,0,82,,0,0,148,,0,0,148,,-45,-45,-45,267,267,-38
+S,RubinSilverbergPolynomials,"Polynomials alpha(t) and beta(t) that determine a family of elliptic curves with fixed $n$-torsion. Let n = 2,3,4 or 5 and let E : y^2 = x^3 + A x + B be an elliptic curve over Q with j-invariant 1728J. Then every non-singular member of the family EE(t) : y^2 = x^3 + A alpha(t) x + B beta(t) has n-torsion isomorphic to that of E (as a Galois module equipped with the Weil pairing). If n = 3,4,5 with A and B nonzero, then all such n-congruent curves arise in this way",0,2,0,0,0,0,0,0,0,-45,,0,0,148,,-45,-45,-38,-38,-38,-38

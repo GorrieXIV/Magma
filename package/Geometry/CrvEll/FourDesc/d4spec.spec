@@ -1,0 +1,13 @@
+{
+    d4.m
+    hints.m
+    utils.m
+    quartics.m
+    quartmin.m
+    quartred.m
+    local_quartic.m
+    stoll_reduce.m
+    reduce.m
+    minimise.m
+    find_point.m
+}

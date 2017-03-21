@@ -1,0 +1,493 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Isolated Points on Schemes</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1341.htm">[Next]</A><A  HREF = "text1339.htm">[Prev]</A> <A  HREF = "text1341.htm">[Right]</A> <A  HREF = "text1339.htm">[Left]</A> <A  HREF = "text1321.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "14834">Isolated Points on Schemes</A></H3>
+
+<P>
+<P>
+<P>
+There is now experimental code to try to find isolated points of
+schemes in (A)(Q)<sup>n</sup> that are defined by n or more equations.
+There is no restriction that the scheme itself must be of dimension 0,
+and in many applications, there is an uninteresting (or degenerate)
+variety of positive dimension, with the isolated points being the ones
+of interest.
+<P>
+The first technique to do this is to find points locally modulo
+some prime, at which the Jacobian matrix is of maximal rank.
+A separate procedure then lifts such points via a Newton method,
+and tries to identify them (via LLL) in a number field.
+If the degree is known (or suspected), this information can be
+passed to the lifting function, and otherwise it will try a generic
+method that applies LLL for degrees 3.2<sup>n</sup> and 4.2<sup>n</sup>
+as n increases, expecting to catch other solutions via a factorization
+into a smaller field (for instance, a degree 6 solution will show up in
+degree 8 as the expected minimal polynomial multiplied by a more-or-less
+random quadratic one).
+<P>
+The running time of such a process is often dominating by the
+searching for local points, and so various methods can be used
+to pre-condition the system. Firstly, variables which appear
+as a linear monomial in one of the equations can be (iteratively)
+eliminated. Already it is not clear what the best order is, so the
+user can specify it. In given examples, it is not untypical for later
+steps to take 10 times as long due to a different choice of eliminations,
+so some experimenting with this parameter can be useful.
+Secondly, resultants can be used to try to eliminate
+more variables, perhaps concentrating on those which appear to a small
+degree in the equations. By default, if a variable appears to degree 2
+or less in all the equations, a resultant step will be applied. The
+resulting equations can be quite complicated (taking many megabytes to
+represent them), but it is still often faster to loop over p<sup>V - 1</sup>
+possible local points compared to p<sup>V</sup>. The resultants can introduce
+extraneous solutions, which are checked when undoing the modifications
+to the system of equations.
+An error can occur if the variable elimination reduces the number of
+equations below the dimension.
+<P>
+Another concern for running time is in the order of the above operations.
+For instance, computing the resultants can be time-consuming in some examples,
+and perhaps doing so modulo p for the primes of interest might be a superior
+method in some cases. A second example is that recognising points over
+the number fields in question might be faster with a reduced system and
+then undoing the resultants and linear eliminations in the number field,
+though the lifting might be slower in that case. The algorithm as implemented
+tries to handle the general case well.
+<P>
+Note that the scheme given to the IsolatedPoints routines might also
+have components of positive dimension, but the techniques here will
+only work to find the points that do not lie on them.
+
+
+<H5><A NAME = "14835">LinearElimination(S) : Sch -&gt; Map</A></H5>
+
+<PRE>    EliminationOrder: SeqEnum           Default: [ ]</PRE>
+<BLOCKQUOTE>
+Given a scheme, iteratively eliminate variables that appear strictly
+linearly (that is, as a monomial times a constant) in some equation.
+The <TT>EliminationOrder</TT> vararg allows an ordering to be specified.
+The results can vary drastically when the order is changed.
+The returned value is a map from the resulting scheme to the input scheme,
+with an inverse.
+</BLOCKQUOTE>
+<H5><A NAME = "14836">IsolatedPointsFinder(S,P) : Sch, SeqEnum -&gt; List</A></H5>
+
+<PRE>    LinearElimination: SeqEnum          Default: [ ]</PRE>
+
+<PRE>    ResultantElimination: SeqEnum       Default: [ ]</PRE>
+
+<PRE>    FactorizationInResultant: BoolElt   Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a affine n-dimensional scheme defined over the rationals
+by at least n equations, and a sequence of primes, try to find
+liftable points of the scheme modulo the primes.
+The variables given in the <TT>LinearElimination</TT> vararg will
+be eliminated in that order. If this is non-empty, an automatic procedure
+will be applied. Similarly with <TT>ResultantElimination</TT>.
+Finally, by default, computed resultants have <TT>SquarefreeFactorization</TT>
+applied to them (and repeated factors removed), and this can be turned off.
+</BLOCKQUOTE>
+<H5><A NAME = "14837">IsolatedPointsLifter(S,P) : Sch, SeqEnum -&gt; BoolElt, Pt</A></H5>
+
+<PRE>    LiftingBound: RngIntElt             Default: 10</PRE>
+
+<PRE>    DegreeBound: RngIntElt              Default: 32</PRE>
+
+<PRE>    OptimizeFieldRep: BoolElt           Default: <TT>false</TT></PRE>
+
+<PRE>    DegreeList: SeqEnum                 Default: [ ]</PRE>
+<BLOCKQUOTE>
+Given a affine n-dimensional scheme defined over the rationals
+by at least n equations,
+and a sequence of finite field elements giving a point (on the scheme) whose
+Jacobian matrix is of maximal rank,
+attempt to lift the point via a Newton method and
+recognise it over a number field. The function returns <TT>false</TT> if a point
+was not found, and else returns both <TT>true</TT> and the point that was found.
+<P>
+The <TT>LiftingBound</TT> vararg determines how many lifting steps to use,
+with the default being 10, so that approximately precision p^(2<sup>10</sup>)
+is obtained. The <TT>DegreeBound</TT> is a limit on how high of a degree of
+field extension to check for solutions. The method used only checks
+for some of the degrees via LLL, as usually smaller degrees will show
+up in factors. The <TT>DegreeList</TT> vararg can also be used for this,
+perhaps when the degree of the solution in question is known.
+The practical limit is likely around 50 in the degree.
+Finally, there is the <TT>OptimizeFieldRep</TT> boolean vararg, which
+determines whether the number field obtained will have its
+optimised representation computed.
+</BLOCKQUOTE>
+<H5><A NAME = "14838">IsolatedPointsLiftToMinimalPolynomials(S,P) : Sch, SeqEnum -&gt; BoolElt, SeqEnum</A></H5>
+
+<PRE>    LiftingBound: RngIntElt             Default: 10</PRE>
+
+<PRE>    DegreeBound: RngIntElt              Default: 32</PRE>
+
+<PRE>    DegreeList: SeqEnum                 Default: [ ]</PRE>
+<BLOCKQUOTE>
+This works as with <TT>IsolatedPointsLifter</TT>, but instead of trying to
+find a common field containing all the coordinates, simply returns a minimal
+polynomial for each one.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14839">Example <TT>Scheme_ec-large-int-pts (H118E65)</TT></A></H3>
+This example follows an idea of Elkies to construct "large" integral
+points on elliptic curves.
+Let X, Y, A, B be polynomials in t, and let Q(t) be quadratic.
+The idea is that Q(t)Y(t)<sup>2</sup>=X(t)<sup>3</sup> + A(t)X(t) + B(t)
+will have infinitely many specialisations with Q(t) square
+(via solving a Pell equation), and thus yield, perhaps after scaling
+to clear denominators, integral points on the resulting curves.
+If the degree of A, B is small enough compared to that of X,
+the resulting specialisation will be quite notable.
+However, one must avoid the cases where the resulting
+discriminant 4A(t)<sup>3</sup> - 27B(t)<sup>2</sup> is zero, as these points
+do not yield an elliptic curve. It turns out that such points
+contribute a positive-dimensional component to the solution space,
+and we simply want to ignore such solutions in general.
+<P>
+The first case of interest is when the degrees of (X, Y, A, B)
+are (4, 5, 0, 1), solved by Elkies in 1988.
+One way of parametrising this, taking into account possible
+rational changes of the t-variable to simplify the system, is:
+X(t)=t<sup>4</sup> + t<sup>3</sup> + x<sub>2</sub>t<sup>2</sup> + x<sub>1</sub>t + x<sub>0</sub>, Q(t)=t<sup>2</sup> + q<sub>1</sub>t + q_, 0
+Y(t)=t<sup>5</sup> + y<sub>3</sub>t<sup>3</sup> + y<sub>2</sub>t<sup>2</sup> + y<sub>1</sub>t + y<sub>0</sub>, A(t)=a<sub>0</sub>, B(t)=b<sub>1</sub>t + b<sub>0</sub>.
+Then we get 12 equations from requiring that the 0th to 11th
+degree coefficients of X<sup>3</sup> + AX + B - QY<sup>2</sup> all vanish.
+It turns out that the desired solution is rational in this case,
+so that (almost) any prime will suffice.
+The solution can then be lifted -- as a final step (particular to this
+problem), one would have to scale the resulting point so as to ensure
+that Q(t) represents squares.
+<P>
+<P>
+<P>
+<PRE>
+&gt; K := Rationals();
+&gt; R&lt;a0,b0,b1,q0,q1,x0,x1,x2,y0,y1,y2,y3&gt; := PolynomialRing(K,12);
+&gt; _&lt;t&gt; := PolynomialRing(R);
+&gt; X := t^4+t^3+x2*t^2+x1*t+x0; Y := t^5+y3*t^3+y2*t^2+y1*t+y0;
+&gt; Q := t^2+q1*t+q0; A := a0; B := b1*t+b0;
+&gt; L := X^3+A*X+B-Q*Y^2;
+&gt; COEFF:=[Coefficient(L,i) : i in [0..11]];
+&gt; S := Scheme(AffineSpace(R),COEFF);
+</PRE>
+<P>
+For this example, we simply call <TT>IsolatedPointsFinder</TT> directly.
+Alternatively, we could first use <TT>LinearElimination</TT> if desired.
+<P>
+<P>
+<P>
+<PRE>
+&gt; PTS:=IsolatedPointsFinder(S,[13]); PTS; // 13 is a random choice
+[* [ 11, 1, 7, 6, 3, 1, 6, 11, 0, 3, 4, 2 ] *]
+&gt; b, sol := IsolatedPointsLifter(S,PTS[1]); sol;
+(216513/4096, -3720087/131072, 531441/8192,
+ 11/4, 3, 311/64, 61/8, 9/2, 715/64, 165/16, 77/16, 55/8)
+&gt; _&lt;u&gt;:=PolynomialRing(Rationals());
+&gt; X := Polynomial([Evaluate(c,Eltseq(sol)) : c in Coefficients(X)]);
+&gt; Y := Polynomial([Evaluate(c,Eltseq(sol)) : c in Coefficients(Y)]);
+&gt; Q := Polynomial([Evaluate(c,Eltseq(sol)) : c in Coefficients(Q)]);
+&gt; A := Evaluate(A,Eltseq(sol));
+&gt; B := Polynomial([Evaluate(c,Eltseq(sol)) : c in Coefficients(B)]);
+&gt; assert X^3+A*X+B-Q*Y^2 eq 0;
+&gt; Q; // note that Q does not represent any squares, but 2*Q(1/2)=9
+u^2 + 3*u + 11/4
+&gt; B; // also need to clear 2^17 from denominators
+531441/8192*u - 3720087/131072
+&gt; POLYS := [2^7*X, 2^9*Y, 2^3*Q, 2^14*A, 2^21*B]; // 2^21 in each term
+&gt; [Evaluate(f,u/2) : f in POLYS];
+[
+    8*u^4 + 16*u^3 + 144*u^2 + 488*u + 622,
+    16*u^5 + 440*u^3 + 616*u^2 + 2640*u + 5720,
+    2*u^2 + 12*u + 22,
+    866052,
+    68024448*u - 59521392
+]
+</PRE>
+<P>
+As noted by Elkies, one can clean up the final form of the solution
+if desired, via rational transformations of the u-variable.
+Since Q(1)=2 + 12 + 22=36, the theory of the Pell equation tells us
+that there are infinitely many integers u such that Q(u) is integral,
+and these all give integral points on a suitable elliptic curve.
+<P>
+There are only four choices of (X, Y, A, B) degrees that give
+the "largest" possible integral points via this method. The second case,
+of degrees (6, 8, 1, 1) has a solution over a quartic number field,
+and the third case, of degrees (8, 11, 1, 2) has a nonic solution.
+Both of these were found by the methods of this section,
+the former taking only a couple of minutes.
+<HR>
+<H3><A NAME = "14840">Example <TT>Scheme_halls-conjecture (H118E66)</TT></A></H3>
+Another application of the isolated points routine is to compute Belyi maps,
+one instance of which is in finding solutions to a polynomial version
+of Hall's conjecture, concerning how small the degree of X(t)<sup>3</sup> - Y(t)<sup>2</sup>
+can be (if the difference is nonzero). The result is that the degree must
+be at least 1 + (deg)(X)/2, and there are (up to equivalence) finitely
+many polynomials of that degree, the count of which can be described in
+terms of some combinatorics, or in terms of simultaneously conjugacy classes
+of cycle products of given types in a symmetric group.
+<P>
+In this example, we compute the solution for the case where X has degree 12.
+It turns out that there are 6 solutions in this case, lying over a
+sextic number field (we of course ignore "solutions" with X(t)<sup>3</sup>=Y(t)<sup>2</sup>,
+though similar to the previous example, they contribute a positive-dimensional
+component of the solution set).
+The finding of a suitable local point is not particularly easy,
+so we just note that
+X(t) &equiv; t<sup>12</sup> + 14t<sup>10</sup> + 14t<sup>9</sup> + 9t<sup>8</sup> + 6t<sup>7</sup> + 4t<sup>6</sup> + 7t<sup>5</sup> + 6t<sup>4</sup> + 15t<sup>3</sup> + 7t<sup>2</sup> + 3t + 10
+gives a solution modulo 17, with Y(t) being (of course) the approximate
+square root of X(t)<sup>3</sup>.
+We shall lift this in a way that keeps the t<sup>11</sup> as zero and the t<sup>9</sup>
+and t<sup>10</sup> coefficients as equal (these are from preliminary
+transformations of the t-parameter that can be applied to the system).
+<P>
+As noted above, it might be easier to remove the y-variables "by hand",
+and then undo the linear eliminations in the resulting sextic number field.
+We chose here to work directly. A theorem of Beckmann says that the
+number field we obtain can only be ramified at primes less than 36.
+<P>
+<P>
+<P>
+<P>
+<PRE>
+&gt; SetVerbose("IsolatedPoints",1);
+&gt; XVARS := ["x"*IntegerToString(n) : n in [0..9]];
+&gt; YVARS := ["y"*IntegerToString(n) : n in [0..17]];
+&gt; P := PolynomialRing(Rationals(),28);
+&gt; AssignNames(~P,XVARS cat YVARS);
+&gt; _&lt;t&gt; := PolynomialRing(P);
+&gt; Y := &amp;+[P.(i+11)*t^i : i in [0..17]]+t^18;
+&gt; X := &amp;+[P.(i+1)*t^i : i in [0..9]]+(P.10)*t^10+t^12;
+&gt; Xpt := [GF(17)|10,3,7,15,6,7,4,6,9,14];
+&gt; pt := Xpt cat [0 : i in [11..28]];
+&gt; FF := GF(17); _&lt;u&gt; := PolynomialRing(FF);
+&gt; Xv := Polynomial([FF!Evaluate(c,pt) : c in Coefficients(X)]);
+&gt; Xv3 := Xv^3; Yv := u^18;
+&gt; for d:=17 to 0 by -1 do // ApproximateSquareRoot
+&gt;     Yv:=Yv+Coefficient(Xv3,d+18)/2*u^d; Xv3:=Xv^3-Yv^2; end for;
+&gt; Yv^2-Xv^3; // must be degree 7 or less
+8*u^7 + 11*u^5 + 10*u^4 + 3*u^3 + 3*u^2 + 11*u + 4
+&gt; pt := Xpt cat [Coefficient(Yv,d) : d in [0..17]];
+&gt; SYS := [Coefficient(X^3-Y^2,d) : d in [8..35]]; // 28 vars
+&gt; S := Scheme(AffineSpace(P),SYS);
+&gt; b, sol := IsolatedPointsLifter(S,pt : LiftingBound:=12, DegreeBound:=10);
+&gt; K := OptimisedRepresentation(Parent(sol[1]) : PartialFactorisation); K;
+Number Field with defining polynomial
+  y^6 - y^5 - 60*y^4 - 267*y^3 - 514*y^2 -  480*y - 180 over the Rationals
+&gt; Factorization(Discriminant(Integers(K)));
+[ &lt;2, 2&gt;, &lt;5, 1&gt;, &lt;13, 1&gt;, &lt;29, 5&gt; ]
+</PRE>
+An alternative of completing the computation is to first use
+<TT>LinearElimination</TT> before applying <TT>IsolatedPointsLifter</TT>.
+In any event, the computation of the local point (which we simply
+assumed to be given) would be the dominant part of the running time.
+<P>
+<P>
+<PRE>
+&gt; mp := LinearElimination(S); // a few seconds to evaluate scheme maps
+&gt; rmp := // reduced map
+&gt;  map&lt;ChangeRing(Domain(mp),GF(17))-&gt;ChangeRing(Codomain(mp),GF(17))
+&gt;     | DefiningEquations(mp),DefiningEquations(Inverse(mp)) : Check:=false&gt;;
+&gt; PT := Inverse(rmp)(Codomain(rmp)!(pt));
+</PRE>
+<P>
+The <TT>IsolatedPointLifter</TT> can now be called on
+<TT>Domain(mp)</TT> and <TT>Eltseq(PT)</TT> (with varargs if desired),
+and then the result can be mapped back to the original
+scheme <TT>S</TT> via <TT>mp</TT>. It is a bit hairy to do this directly,
+as scheme maps do not naturally deal with finite field inputs in all cases.
+Due to the way that <TT>IsolatedPointsLifter</TT> uses to choose which
+coordinate to try to recognise first, it could also be slower in the end.
+<HR>
+<H3><A NAME = "14841">Example <TT>Scheme_random-linear-scheme (H118E67)</TT></A></H3>
+Here is an example where finding the common field is quite difficult,
+but finding minimal polynomials for all the coordinates is rather easy.
+First, a somewhat generic random scheme in (P)<sup>3</sup> is chosen, such
+that each variable appears no more than linearly. This has degree less
+than 4!, and in the example chosen, it has degree 22.
+Then two local points are found modulo 5. These are then passed to the
+lifting function, which returns the desired solution.
+<P>
+<P>
+<PRE>
+&gt; P&lt;w,x,y,z&gt; := AffineSpace(Rationals(),4);
+&gt; f1 := w*x*y - 6*w*x - 7*w*y*z + w*y - 6*w*z - 3*x*y + y + 6*z;
+&gt; f2 := 10*w*x*y*z - 4*w*y*z + 2*w*y - 9*w - x*y*z - 10*x*z + y*z - 7*y;
+&gt; f3 := 10*w*x*y*z - 6*w*x*y + 8*w*x*z - 4*w*y*z - 6*w*z - x*z + 9*x + 8*y;
+&gt; f4 := 6*w*x*y*z + 3*w*x*z + 19*w*y*z - 7*w*z + 8*x*y*z - 2*x*z + 6;
+&gt; S := Scheme(P,[f1,f2,f3,f4]);
+&gt; SetVerbose("IsolatedPoints",1);
+&gt; PTS := IsolatedPointsFinder(S,[5]);
+&gt; Degree(S);
+22
+&gt; b,POLYS := IsolatedPointsLiftToMinimalPolynomials
+&gt;                    (S,PTS[1] : DegreeBound:=22,LiftingBound:=10);  
+&gt; POLYS[1];
+18124035687220989600*x^22 + 62977055844929678832*x^21 +
+ 65273363651442356128*x^20 + 81271204075826455992*x^19 +
+ 130701369600138969680*x^18 - 285376384061267841622*x^17 -
+ 802166956118815471654*x^16 + 253325444790327996845*x^15 -
+ 1266591733002155213172*x^14 + 25113861844403230090*x^13 +
+ 506530967406804631482*x^12 - 1323179973699695447463*x^11 +
+ 1605685921502538803112*x^10 - 1318315736155520576802*x^9 +
+ 949649129582958459958*x^8 - 527441332544171338490*x^7 +
+ 254463684049866607512*x^6 - 100039189198577581440*x^5 +
+ 26014411295686475856*x^4 - 3177984195514332576*x^3 -
+ 1852946687180290752*x^2 + 971825485320437760*x - 88506566917263360
+</PRE>
+All of the four polynomials in <TT>POLYS</TT> look approximately like this,
+and all should determine the same field, but it is difficult to find suitable
+isomorphisms between them, let alone find an <TT>OptimisedRepresentation</TT>.
+<P>
+In fact, the Gr&ouml;bner basis machinery is superior for this purpose.
+Writing one of the coordinates in terms of the other (so as to get the
+field generators in terms of each other) would necessitate quite high
+precision in the p-adic lifting to recognise the coefficients,
+likely 5^(2<sup>14</sup>) or more (this takes about 5 minutes).
+The Gr&ouml;bner basis method, which recognises one coordinate and then
+back-substitutes into the resulting equations, solving them algebraically,
+takes only about 15 seconds.
+<P>
+<P>
+<PRE>
+&gt; time V := Variety(Ideal(S),AlgebraicClosure()); // about 15s
+&gt; MinimalPolynomial(V[22][4]); // deg 22, all coeffs about 25 digits
+y^22 - 70869414518205839537/14232439756116709952*y^21 - 
+    6067542586100223488373/56929759024466839808*y^20 + [...]
+    [...] + 166661449939161/1779054969514588744
+&gt; MinimalPolynomial(V[22][3]); // deg 22, all coeffs about 25 digits
+y^22 - 428567519465749893/68067993818308256*y^21 - 
+    22959295396880059615/1089087901092932096*y^20 + [...]
+    [...] + 2469165405490441431/68067993818308256
+&gt; V[22][4]; // given simply as r22, all 22 conjugates are found
+r22
+&gt; V[22][3]; // third coordinate in terms of the fourth
+[output takes about 200 lines, involving 750-digit coordinates]
+</PRE>
+Another way to achieve the result is to plug the known coordinate into
+the system, and use Gr&ouml;bner bases (or resultants, if possible) to solve it.
+<P>
+<P>
+<PRE>
+&gt; K := NumberField(POLYS[1]); // first coordinate
+&gt; _&lt;xx,yy,zz&gt; := PolynomialRing(K,3);
+&gt; E := [Evaluate(e,[K.1,xx,yy,zz]) : e in DefiningEquations(S)];
+&gt; Variety(Ideal(E)); // about 2 seconds
+[again a rather bulky output]
+</PRE>
+Both of these uses of Gr&ouml;bner bases are somewhat specific
+to the simplicity of the case here,
+and in more difficult cases would likely be rather onerous.
+This example does exemplify that for a generic variety the Gr&ouml;bner basis
+methods should be superior. The lifting methods are largely for cases where
+the problem has special structure.
+<HR>
+<H3><A NAME = "14842">Example <TT>Scheme_mathieu-monodromy (H118E68)</TT></A></H3>
+Here is an example from N. D. Elkies of a polynomial f(x)&isin;K(x)
+for which f(x) - t appears to have Galois group M<sub>23</sub> over K(t)
+(this is sometimes called the monodromy group of f).
+This involves trying to find f=P<sub>3</sub>P<sub>2</sub><sup>2</sup>P<sub>4</sub><sup>4</sup>=P<sub>7</sub>P<sub>8</sub><sup>2</sup> - c
+for some polynomials P<sub>d</sub> of degree d, for some constant c.
+Upon suitable reductions, one gets a system of 8 variables and equations.
+With a few additional considerations, the search space can be reduced a bit
+further. As noted by M. Zieve, the equation should have 4 solutions, and thus
+likely be in a quartic field K that is an extension of (Q)(Sqrt( - 23)).
+This is indeed the case.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Q := Rationals();
+&gt; R&lt;a2,c,b1,b2,c1,c2,c3,c4,d1,d2,d3,d4,d5,d6,d7,
+&gt;   e1,e2,e3,e4,e5,e6,e7,e8&gt; := PolynomialRing(Q,(3-1)+2+4+7+8);
+&gt; _&lt;t&gt; := PolynomialRing(R);
+&gt; P3 := t^3 + a2*t + a2/(26/-27); // normalisation
+&gt; P2 := t^2 + b1*t + b2;
+&gt; P4 := t^4 + c1*t^3 + c2*t^2 + c3*t + c4;
+&gt; P7 := t^7 + d1*t^6 + d2*t^5 + d3*t^4 + d4*t^3 + d5*t^2 + d6*t + d7;
+&gt; P8 := t^8 + e1*t^7 + e2*t^6 + e3*t^5 + e4*t^4 +
+&gt;             e5*t^3 + e6*t^2 + e7*t + e8;
+&gt; Q := P3 * P2^2 * P4^4 - P7 * P8^2 - c;
+&gt; S := Scheme(AffineSpace(R),Coefficients(Q));
+&gt; SetVerbose("IsolatedPoints",1);
+&gt; v:=[GF(101) | 26, 1,  -26,21,  -19,-27,-22,8, // known point
+&gt;              -14,12,26,-3,-37,-43,-22,  44,-11,-13,-21,45,-45,32,46];
+&gt; b, pt := IsolatedPointsLifter
+&gt;           (S,v : DegreeList:=[4], LiftingBound:=15, OptimizeFieldRep);
+&gt; K := Parent(pt[1]);
+&gt; DefiningPolynomial(K);
+y^4 - 2*y^3 - 10*y^2 + 11*y + 36
+&gt; Factorization(Discriminant(Integers(K)));
+[ &lt;3, 1&gt;, &lt;23, 3&gt; ]
+</PRE>
+<P>
+The above code lifts the given point to precision 101^(2<sup>11</sup>), and
+recognises it in the field K. Next we can compute the polynomial f(x)
+in question, and see that reductions (modulo 269, say) of f(x) - i do
+indeed correspond to cycle structures of M<sub>23</sub>.
+However, to prove that this really is the Galois group
+(over the function field)
+seems to require a more difficult monodromy calculation.
+<P>
+A more theoretical (topological) construction
+was given by P. M&uuml;ller in 1995,
+but did not explicitly produce f.
+It is also still an open question whether there is a polynomial
+over the <I>rationals</I> with Galois group M<sub>23</sub>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; X := P3 * P2^2 * P4^4;
+&gt; f := Polynomial([Evaluate(e,Eltseq(pt)) : e in Coefficients(X)]);
+&gt; p := 269;
+&gt; P := Factorization(p * Integers(K))[1][1]; assert Norm(P) eq p;
+&gt; _, mp := ResidueClassField(P);
+&gt; fp := Polynomial([mp(c) : c in Coefficients(f)]);
+&gt; D := [[Degree(u[1]) : u in Factorization(fp-i)] : i in [1..p]];
+&gt; Sort(SetToSequence(Set([Sort(d) : d in D | &amp;+d eq 23])));
+[
+    [ 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2 ],
+    [ 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3 ],
+    [ 1, 1, 1, 2, 2, 4, 4, 4, 4 ],
+    [ 1, 1, 1, 5, 5, 5, 5 ],
+    [ 1, 1, 7, 7, 7 ],
+    [ 1, 2, 2, 3, 3, 6, 6 ],
+    [ 1, 2, 4, 8, 8 ],
+    [ 1, 11, 11 ],
+    [ 2, 7, 14 ],
+    [ 3, 5, 15 ],
+    [ 23 ]
+]
+&gt; load m23; // G is M23
+&gt; C := [g : g in ConjugacyClasses(G) | Order(g[3]) ne 1];
+&gt; S := Set([CycleStructure(c[3]) : c in C]);
+&gt; Sort([Sort(&amp;cat[[s[1] : i in [1..s[2]]] : s in T]) : T in S]);
+[
+    [ 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2 ],
+    [ 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3 ],
+    [ 1, 1, 1, 2, 2, 4, 4, 4, 4 ],
+    [ 1, 1, 1, 5, 5, 5, 5 ],
+    [ 1, 1, 7, 7, 7 ],
+    [ 1, 2, 2, 3, 3, 6, 6 ],
+    [ 1, 2, 4, 8, 8 ],
+    [ 1, 11, 11 ],
+    [ 2, 7, 14 ],
+    [ 3, 5, 15 ],
+    [ 23 ]
+]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1341.htm">[Next]</A><A  HREF = "text1339.htm">[Prev]</A> <A  HREF = "text1341.htm">[Right]</A> <A  HREF = "text1339.htm">[Left]</A> <A  HREF = "text1321.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

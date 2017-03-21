@@ -1,0 +1,86 @@
+"Source: Text/Geometry/CrvEllFldFin.text";
+"Line: 1023";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/CrvEllFldFin.text, line: 1023
+// Example: H127E7 ()
+print "Example: H127E7";
+ei := GetEchoInput();
+SetEchoInput(true);
+Zs<s> := PolynomialRing(Integers());
+ps := 36*s^4 + 36*s^3 + 24*s^2 + 6*s + 1;
+ns := 36*s^4 + 36*s^3 + 18*s^2 + 6*s + 1;
+z := 513235038556;  // arbitrary initial value
+repeat
+  z := z+1;
+  p := Evaluate(ps, z);
+  n := Evaluate(ns, z);
+until IsProbablePrime(p) and IsProbablePrime(n);
+p;
+assert $1 eq 2497857711095780713403056606399151275099020724723;
+n;
+assert $1 eq 2497857711095780713403055025937917618634473494829;
+Fp := FiniteField(p);
+b := Fp!0;
+repeat
+  repeat b := b + 1; until IsSquare(b + 1);
+  y := SquareRoot(b + 1);
+  E := EllipticCurve([Fp!0, b]);
+  G := E![1, y];
+until IsZero(n*G);
+E;
+#E eq n;  // just to verify
+assert $1;
+t := p + 1 - n;
+t;
+assert $1 eq 1580461233656464547229895;
+k := 12; // security multiplier
+(p^k - 1) mod n; // check on p, n and k
+assert $1 eq 0;
+Fpk := GF(p, k);
+N := Resultant(s^k - 1, s^2 - t*s + p);  // number of points over big field
+Cofac := N div n^2;
+P := E(Fpk)!G;
+Q := Cofac*Random(E(Fpk));  // Q has order n now
+WeilPairing(P, 2*P, n) eq 1;
+assert $1;
+WeilPairing(P, Q, n) eq (-1)^n*TatePairing(P, Q, n)/TatePairing(Q, P, n);
+assert $1;
+ReducedTatePairing(P, 2*Q, n) eq ReducedTatePairing(P, Q, n)^2;
+assert $1;
+TatePairing(P, 2*Q, n) eq TatePairing(P, Q, n)^2;
+assert not $1;
+TrQ := &+[ E(Fpk) ! [Frobenius(Q[1], Fp, i), Frobenius(Q[2], Fp, i)]  :
+                     i in [0..k-1]];
+Q := k*Q - TrQ;
+T := t - 1;
+L := (T^k - 1) div n;
+c := &+[ T^(k - 1 - i)*p^i : i in [0..k-1] ] mod n;
+ReducedAteTPairing(Q, P, n, p)^c eq ReducedTatePairing(Q, P, n)^L;
+assert $1;
+Frobenius(AteqPairing(Q, P, n, p)^k, Fp, k - 1) eq ReducedTatePairing(Q, P, n);
+assert $1;
+F2m := GF(2, 163);
+q := #F2m;
+E := EllipticCurve([F2m!0, 0, 1, 1, 1]);
+#E;
+assert $1 eq 11692013098647223345629483497433542615764159168513;
+IsPrime($1);
+assert $1;
+n := #E;
+t := TraceOfFrobenius(E);
+P := Random(E);
+k := 4;
+F2m4 := ExtensionField<F2m, X | X^4 + X + 1>;
+N := Resultant(s^k - 1, s^2 - t*s + q);  // number of points over big field
+Cofac := N div n^2;
+P := E(F2m4) ! P;
+Q := Cofac*Random(E(F2m4));  // Q has order n now
+TrQ := &+[ E(F2m4) ! [Frobenius(Q[1], F2m, i), Frobenius(Q[2], F2m, i)]  :
+                      i in [0..k-1]];
+Q := k*Q - TrQ;
+d := GCD(k, q^k - 1);
+Frobenius(EtaqPairing(P, Q, n, q)^(k div d), F2m, k - 1) eq
+                                      ReducedTatePairing(P, Q, n);
+assert $1;
+SetEchoInput(ei);

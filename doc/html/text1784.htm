@@ -1,0 +1,694 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Construction of Graphs and Digraphs</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1785.htm">[Next]</A><A  HREF = "text1783.htm">[Prev]</A> <A  HREF = "text1785.htm">[Right]</A> <A  HREF = "text1783.htm">[Left]</A> <A  HREF = "text1782.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "19678">Construction of Graphs and Digraphs</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+Any enumerated or indexed set S may be given as the vertex-set of 
+  a graph. 
+The graph constructor will take a copy V of S, convert 
+  V into an indexed set if necessary, and flag its type as <TT>GrphVertSet</TT>.
+A graph may be specifically created as a sparse graph.
+If no indication is given then the graph is <I>always</I> created 
+  with the dense representation, that is, as an adjacency matrix.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1784.htm#19679">Bounds on the Graph Order</A>
+<LI> <A  HREF = "text1784.htm#19682">Construction of a General Graph</A>
+<LI> <A  HREF = "text1784.htm#19687">Construction of a General Digraph</A>
+<LI> <A  HREF = "text1784.htm#19691">Operations on the Support</A>
+<LI> <A  HREF = "text1784.htm#19697">Construction of a Standard Graph</A>
+<LI> <A  HREF = "text1784.htm#19708">Construction of a Standard  Digraph</A>
+</UL>
+<H4><A NAME = "19679">Bounds on the Graph Order</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+Memory allocation for any elementary object (that is, accessed via
+  a single pointer) cannot exceed 2<sup>32</sup> bytes.
+For this reason there is a bound on the graph order.
+This bound is dependent upon the (internal) graph representation 
+  chosen at creation: the dense representation (as a packed
+  adjacency matrix), or the sparse representation (as an 
+  adjacency list).
+The former is quadratic in the number of vertices of the graph,
+  the latter is linear in the number of the edges.
+Thus a large graph with a low edge density will require less 
+  memory space than the  same graph with a dense representation.
+<P>
+The bounds on the graph order n are as follows:
+<P>
+- for the dense representation, n &le;65535,
+<P>
+- for the sparse representation, n &le;134217722.
+<P>
+These bounds are maximal, that is, they assume 
+  --- for the sparse representation --- that the number of 
+  edges is zero.
+To help users determine the likely size of the
+  graph they want to construct, we provide the following function.
+
+
+<H5><A NAME = "19680">GraphSizeInBytes(n, m : parameters): RngIntElt, RngIntElt -&gt; RngIntElt</A></H5>
+
+<PRE>    IsDigraph: Bool                     Default: <TT>false</TT></PRE>
+
+<PRE>    SparseRep: Bool                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Computes the memory requirement in bytes of a graph 
+  of order n and size m.
+By default it is assumed that the graph is undirected and has a dense 
+  representation.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19681">Example <TT>Graph_Grph_Size (H155E1)</TT></A></H3>
+<P>
+One may verify that the dense representation cannot be used for
+  a value of n (graph order) larger than 65535.
+<P>
+<P>
+<PRE>
+&gt; n := 65536;
+&gt; m := 0;
+&gt; assert GraphSizeInBytes(n, m) gt 2^32;
+</PRE>
+It is possible to construct such a graph with a 
+  sparse representation:
+<P>
+<P>
+<PRE>
+&gt; GraphSizeInBytes(n, m : SparseRep := true);
+2097580
+</PRE>
+However, assuming that the graph of order n = 65535 has 
+  a size of m = 33538101 we see that such a graph 
+  cannot be constructed as its total memory requirement is again larger than
+  2<sup>32</sup>:
+<P>
+<P>
+<PRE>
+&gt; m := 33538101;
+&gt; assert GraphSizeInBytes(n, m : SparseRep := true) gt 2^32;
+</PRE>
+<HR>
+<H4><A NAME = "19682">Construction of a General Graph</A></H4>
+
+
+
+<H5><A NAME = "19683">Graph&lt; n | edges : parameters&gt; : RngIntElt, List -&gt; GrphUnd, GrphVertSet, GrphEdgeSet</A></H5>
+<H5>Graph&lt; S | edges : parameters &gt; : SetEnum, List -&gt; GrphUnd, GrphVertSet, GrphEdgeSet</H5>
+<H5>Graph&lt; S | edges : parameters&gt; : SetIndx, List -&gt; GrphUnd, GrphVertSet, GrphEdgeSet</H5>
+
+<PRE>    SparseRep: Bool                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Construct the graph G with vertex-set
+V = {@ v<sub>1</sub>, v<sub>2</sub>, ..., v<sub>n</sub> @}
+(where v<sub>i</sub> = i for each i if the first form of the constructor is used,
+or the ith element of the enumerated or indexed set S otherwise),
+and edge-set
+E = { e<sub>1</sub>, e<sub>2</sub>, ..., e<sub>q</sub> }.
+This function returns three values: The graph G, 
+  the vertex-set V of G; and the edge-set E of G.
+If SparseRep is <TT>true</TT> then the resulting graph will have a sparse 
+  representation.
+<P>
+The elements of E are specified by the list <TT>edges</TT>, where the items of
+<TT>edges</TT> may be objects of the following types:
+<P>
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>A pair { v<sub>i</sub>, v<sub>j</sub> } of vertices in V.  
+  The edge from v<sub>i</sub> to v<sub>j</sub> will be added to the edge-set for G.
+<P>
+<DT>(b)</DT><DD>A tuple of the form &lt; v<sub>i</sub>, N<sub>i</sub> &gt; where N<sub>i</sub>
+will be interpreted as a set of neighbours for the vertex v<sub>i</sub>.
+The elements of the sets N<sub>i</sub> must be elements of V.
+If N<sub>i</sub> = { u<sub>1</sub>, u<sub>2</sub>, ..., u<sub>r</sub> },
+the edges { v<sub>i</sub>, u<sub>1</sub> }, ..., { v<sub>i</sub>, u<sub>r</sub> } will be added to G.
+<P>
+<DT>(c)</DT><DD>A sequence [ N<sub>1</sub>, N<sub>2</sub>, ..., N<sub>n</sub> ] of n sets, where N<sub>i</sub>
+will be interpreted as a set of neighbours for the vertex v<sub>i</sub>.
+The edges { v<sub>i</sub>, u<sub>i</sub> }, 1 &le;i &le;n, u<sub>i</sub> &isin;N<sub>i</sub>, 
+  are added to G.
+<P>
+<P>
+<P>
+</DL>
+In addition to these three basic ways of specifying the edges
+  list, the items in edges may also be:
+<P>
+<DL COMPACT class='compact'>
+<DT>(d)</DT><DD>An edge e of a graph or digraph or  multigraph or
+   multidigraph or network of order n.
+If e is an edge from u to v in a directed graph H, 
+  then the undirected edge { u, v } will be added to G.
+<P>
+<DT>(e)</DT><DD>An edge-set E of a graph or digraph or  multigraph or
+  multidigraph or network of order n.
+  Every edge e in E will be added to G.
+<P>
+<DT>(f)</DT><DD>A graph or a digraph or a multigraph or a multidigraph
+  or a network H of order n.
+  Every edge e  in H's edge-set is added to G.
+<P>
+<DT>(g)</DT><DD>A n x n symmetric (0, 1)-matrix A.
+  The matrix A will be interpreted as the adjacency matrix 
+  for a graph H on n vertices and the edges of H will be 
+  added  will be added to G.
+<P>
+<DT>(h)</DT><DD>A set of 
+<P>
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>Pairs of the form { v<sub>i</sub>, v<sub>j</sub> } of vertices in V.
+<DT>(ii)</DT><DD>Tuples of the form &lt; v<sub>i</sub>, N<sub>i</sub> &gt; where N<sub>i</sub>
+will be interpreted as a set of neighbours for the vertex v<sub>i</sub>.
+<DT>(iii)</DT><DD>Edges of a graph or digraph or  multigraph or
+   multidigraph or network of order n.
+<DT>(iv)</DT><DD>Graphs or digraphs or multigraphs or 
+   multidigraphs or networks of order n.
+<P>
+</DL>
+<DT>(j)</DT><DD>A sequence of 
+<P>
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>Tuples of the form &lt; v<sub>i</sub>, N<sub>i</sub> &gt; where N<sub>i</sub>
+will be interpreted as a set of neighbours for the vertex v<sub>i</sub>.</DL>
+</DL>
+</BLOCKQUOTE>
+<H5><A NAME = "19684">IncidenceGraph(A) : ModMatRngElt -&gt; GrphUnd</A></H5>
+<BLOCKQUOTE>
+Let A be a n x m (0, 1) matrix having exactly two
+1s in each column. 
+Then a graph G of order n and size m  having A as its
+incidence matrix will be constructed. The rows of A will correspond
+to the vertices of G while the columns will correspond to the edges.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19685">Example <TT>Graph_Constructors (H155E2)</TT></A></H3>
+The Petersen graph will be constructed in various different ways
+to illustrate the use of the constructor. Firstly, it will be
+constructed by listing the edges:
+<P>
+<P>
+<PRE>
+&gt; P := Graph&lt; 10 | { 1, 2 }, { 1, 5 }, { 1, 6 }, { 2, 3 }, { 2, 7 },
+&gt;            { 3, 4 }, { 3, 8 }, { 4, 5 }, { 4, 9 }, { 5, 10 },
+&gt;            { 6, 8 }, { 6, 9 }, { 7, 9 }, { 7, 10 }, { 8, 10 } &gt;;
+</PRE>
+We next construct the Petersen graph by listing the neighbours of each vertex:
+<P>
+<P>
+<PRE>
+&gt; P := Graph&lt; 10 | [ { 2, 5, 6 }, { 1, 3, 7 }, { 2, 4, 8 }, { 3, 5, 9 },
+&gt;               { 1, 4, 10 }, { 1, 8, 9 }, { 2, 9, 10 }, { 3, 6, 10 },
+&gt;               { 4, 6, 7 }, { 5, 7, 8 } ] &gt;;
+</PRE>
+We repeat the above construction but now the graph is created as 
+  a sparse graph:
+<P>
+<P>
+<PRE>
+&gt; PS := Graph&lt; 10 | [ { 2, 5, 6 }, { 1, 3, 7 }, { 2, 4, 8 }, { 3, 5, 9 },
+&gt;               { 1, 4, 10 }, { 1, 8, 9 }, { 2, 9, 10 }, { 3, 6, 10 },
+&gt;               { 4, 6, 7 }, { 5, 7, 8 } ] : SparseRep := true &gt;;
+&gt; assert PS eq P;
+</PRE>
+Here is yet another way of constructing the sparse graph, from 
+  the dense graph:
+<P>
+<P>
+<PRE>
+&gt; PS := Graph&lt; 10 | P : SparseRep := true &gt;;
+&gt; assert PS eq P;
+</PRE>
+We finally construct the graph in terms of an adjacency matrix:
+<P>
+<P>
+<PRE>
+&gt; M := MatrixRing( Integers(), 10 );
+&gt; P := Graph&lt; 10 | M![ 0,1,0,0,1,1,0,0,0,0,
+&gt;                   1,0,1,0,0,0,1,0,0,0,
+&gt;                   0,1,0,1,0,0,0,1,0,0,
+&gt;                   0,0,1,0,1,0,0,0,1,0,
+&gt;                   1,0,0,1,0,0,0,0,0,1,
+&gt;                   1,0,0,0,0,0,0,1,1,0,
+&gt;                   0,1,0,0,0,0,0,0,1,1,
+&gt;                   0,0,1,0,0,1,0,0,0,1,
+&gt;                   0,0,0,1,0,1,1,0,0,0,
+&gt;                   0,0,0,0,1,0,1,1,0,0] &gt;;
+&gt; P;
+
+        Graph
+    Vertex  Neighbours
+
+
+       1     2 5 6 ;
+       2     1 3 7 ;
+       3     2 4 8 ;
+       4     3 5 9 ;
+       5     1 4 10 ;
+       6     1 8 9 ;
+       7     2 9 10 ;
+       8     3 6 10 ;
+       9     4 6 7 ;
+      10     5 7 8 ;
+</PRE>
+<HR>
+<H3><A NAME = "19686">Example <TT>Graph_TutteCage (H155E3)</TT></A></H3>
+A more sophisticated example is the construction of Tutte's 8-cage 
+using the technique described in P. Lorimer <A  HREF = "text1781.htm#bib_lorimer">[Lor89]</A>.
+The graph is constructed so that it
+has G = P GammaL(2, 9) in its representation of degree 30 as its 
+automorphism group.
+The vertices of the graph correspond to the points on which G acts.
+The neighbours of vertex 1 are the points lying in 
+the unique orbit N<sub>1</sub> of length 3 of the stabilizer of 1.
+The edges for vertex i are precisely the points N<sub>1</sub><sup>g</sup> where
+g is an element of G such that 1<sup>g</sup> = i.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := PermutationGroup&lt; 30 |
+&gt;     (1, 2)(3, 4)(5, 7)(6, 8)(9, 13)(10, 12)(11, 15)(14, 19) (16, 23)
+&gt;         (17, 22)(18, 21)(20, 27)(24, 29)(25, 28)(26, 30),
+&gt;     (1, 24, 28, 8)(2, 9, 17, 22)(3, 29, 19, 15)(4, 5, 21, 25)
+&gt;         (6, 18, 7, 16)(10, 13, 30, 11)(12, 14)(20, 23)(26, 27) &gt;;
+&gt; N1 := rep{ o : o in Orbits(Stabilizer(G, 1)) | #o eq 3 };
+&gt; tutte := Graph&lt; 30 | &lt;1, N1&gt;^G &gt;;
+</PRE>
+<HR>
+<H4><A NAME = "19687">Construction of a General Digraph</A></H4>
+
+
+
+<H5><A NAME = "19688">Digraph&lt; n | edges : parameters&gt; : RngIntElt, List -&gt; GrphDir</A></H5>
+<H5>Digraph&lt; S | edges : parameters&gt; : SetEnum, List -&gt; GrphDir</H5>
+<H5>Digraph&lt; S | edges : parameters&gt; : SetIndx, List -&gt; GrphDir</H5>
+
+<PRE>    SparseRep: Bool                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Construct the digraph G with vertex-set
+V = {@ v<sub>1</sub>, v<sub>2</sub>, ..., v<sub>n</sub> @}
+(where v<sub>i</sub> = i for each i if the first form of the constructor is used,
+or the ith element of the enumerated or indexed set S otherwise),
+and edge-set
+E = { e<sub>1</sub>, e<sub>2</sub>, ..., e<sub>q</sub> }.
+This function returns three values: The graph G, 
+  the vertex-set V of G; and the edge-set E of G.
+If SparseRep is <TT>true</TT> then the resulting graph will have a sparse 
+  representation.
+<P>
+The elements of E are specified by the list <TT>edges</TT>, where the items of
+<TT>edges</TT> may be objects of the following types:
+<P>
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>A pair [ v<sub>i</sub>, v<sub>j</sub> ] of vertices in V.  
+  The directed 
+  edge from v<sub>i</sub> to v<sub>j</sub> will be added to the edge-set for G.
+<P>
+<DT>(b)</DT><DD>A tuple of the form &lt; v<sub>i</sub>, N<sub>i</sub> &gt; where N<sub>i</sub>
+will be interpreted as a set of out-neighbours for the vertex v<sub>i</sub>.
+The elements of the sets N<sub>i</sub> must be elements of V.
+If N<sub>i</sub> = { u<sub>1</sub>, u<sub>2</sub>, ..., u<sub>r</sub> },
+the directed edges [ v<sub>i</sub>, u<sub>1</sub> ], ..., [ v<sub>i</sub>, u<sub>r</sub> ] will be added to G.
+<P>
+<DT>(c)</DT><DD>A sequence [ N<sub>1</sub>, N<sub>2</sub>, ..., N<sub>n</sub> ] of n sets, where N<sub>i</sub>
+will be interpreted as a set of neighbours for the vertex v<sub>i</sub>.
+The directed edges [ v<sub>i</sub>, u<sub>i</sub> ], 1 &le;i &le;n, u<sub>i</sub> &isin;N<sub>i</sub>, 
+  are added to G.
+<P>
+<P>
+<P>
+</DL>
+In addition to these three basic ways of specifying the edges
+  list, the items in edges may also be:
+<P>
+<DL COMPACT class='compact'>
+<DT>(d)</DT><DD>An edge e of a graph or digraph or  multigraph or
+   multidigraph or network of order n.
+If e is an edge { u, v } in an undirected graph then both
+  directed edges [ u, v ] and [ v, u ] are added to G.
+<P>
+<DT>(e)</DT><DD>An edge-set E of a graph or digraph or  multigraph or
+  multidigraph or network of order n.
+  Every edge e in E will be added to G according to the rule
+  set out for a single edge.
+<P>
+<DT>(f)</DT><DD>A graph or a digraph or a multigraph or a multidigraph
+  or a network H of order n.
+  Every edge e  in H's edge-set is added to G according to the rule
+  set out for a single edge.
+<P>
+<DT>(g)</DT><DD>A n x n (0, 1)-matrix A.
+  The matrix A will be interpreted as the adjacency matrix 
+  for a digraph H on n vertices and the edges of H will be 
+  added  will be added to G.
+<P>
+<DT>(h)</DT><DD>A set of 
+<P>
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>Pairs of the form [ v<sub>i</sub>, v<sub>j</sub> ] of vertices in V.
+<DT>(ii)</DT><DD>Tuples of the form &lt; v<sub>i</sub>, N<sub>i</sub> &gt; where N<sub>i</sub>
+will be interpreted as a set of out-neighbours for the vertex v<sub>i</sub>.
+<DT>(iii)</DT><DD>Edges of a graph or digraph or  multigraph or
+   multidigraph or network of order n.
+<DT>(iv)</DT><DD>Graphs or digraphs or multigraphs or 
+   multidigraphs or networks of order n.
+<P>
+</DL>
+<DT>(j)</DT><DD>A sequence of 
+<P>
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>Tuples of the form &lt; v<sub>i</sub>, N<sub>i</sub> &gt; where N<sub>i</sub>
+will be interpreted as a set of out-neighbours for the vertex v<sub>i</sub>.</DL>
+</DL>
+</BLOCKQUOTE>
+<H5><A NAME = "19689">IncidenceDigraph(A) : ModMatRngElt -&gt; GrphDir</A></H5>
+<BLOCKQUOTE>
+Let A be a n x m matrix such that each column contains
+at most one entry equal to +1 and at most one entry equal to -1 (all
+others being zero). 
+Then a digraph G of order n and size m having A as its
+incidence matrix will be constructed. The rows of A will correspond
+to the vertices of G while the columns will correspond to the edges.
+If column k of A contains +1 in row i and -1 in row j, the
+directed edge v<sub>i</sub>v<sub>j</sub> will be included in G.  If only row i has a
+non-zero entry (either 1 or -1), then the loop v<sub>i</sub>v<sub>i</sub> will be
+included in G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19690">Example <TT>Graph_Constructors (H155E4)</TT></A></H3>
+The digraph D with vertices { v<sub>1</sub>, v<sub>2</sub>, v<sub>3</sub>, v<sub>4</sub>, v<sub>5</sub> }
+and edges (v<sub>1</sub>, v<sub>2</sub>), (v<sub>1</sub>, v<sub>3</sub>), (v<sub>1</sub>, v<sub>4</sub>), (v<sub>3</sub>, v<sub>2</sub>), and (v<sub>4</sub>, v<sub>3</sub>)
+will be constructed, firstly by listing its edges and secondly by giving
+its adjacency matrix.
+<P>
+<P>
+<PRE>
+&gt; D1 := Digraph&lt; 5 | [1, 2], [1, 3], [1, 4],
+&gt;                   [3, 2], [4, 3] &gt;;
+&gt; D1;
+Digraph
+Vertex  Neighbours
+
+1       2 3 4 ;
+2       ;
+3       2 ;
+4       3 ;
+5       ;
+</PRE>
+The same digraph with a sparse representation:
+<P>
+<P>
+<PRE>
+&gt; D1 := Digraph&lt; 5 | [1, 2], [1, 3], [1, 4],
+&gt;                   [3, 2], [4, 3] : SparseRep := true&gt;;
+</PRE>
+We next construct the digraph by giving its adjacency matrix:
+<P>
+<P>
+<PRE>
+&gt; M := MatrixRing(Integers(), 5);
+&gt; D2 := Digraph&lt; 5 | 
+&gt;           M![ 0,1,1,1,0, 
+&gt;               0,0,0,0,0, 
+&gt;               0,1,0,0,0, 
+&gt;               0,0,1,0,0,
+&gt;               0,0,0,0,0 ] &gt;; 
+&gt; IsIsomorphic(D1, D2);
+true
+</PRE>
+<HR>
+<H4><A NAME = "19691">Operations on the Support</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+Let S be the set over which the graph G is defined. 
+The set S is referred to as the <I>support</I> of G.
+
+
+<H5><A NAME = "19692">Support(G) : Grph -&gt; SetIndx</A></H5>
+<H5>Support(V) : GrphVertSet -&gt; SetIndx</H5>
+<BLOCKQUOTE>
+The indexed set used in the construction of G (or the graph for which V
+is the vertex-set), or the standard set {@ 1, ..., n @}
+if it was not given.
+</BLOCKQUOTE>
+<H5><A NAME = "19693">ChangeSupport(G, S) : Grph, SetIndx -&gt; Grph, GrphVertSet, GrphEdgeSet</A></H5>
+<BLOCKQUOTE>
+If G is a graph having n vertices and S is an indexed set
+of cardinality n,  return a new graph H equal to G but whose 
+   support is S.
+That is, H is structurally equal to G and its vertex and edge
+  decorations are the <I>same</I> as those for G.
+</BLOCKQUOTE>
+<H5><A NAME = "19694">ChangeSupport(~G, S) : Grph, SetIndx -&gt;</A></H5>
+<BLOCKQUOTE>
+The procedural version of the above function.
+</BLOCKQUOTE>
+<H5><A NAME = "19695">StandardGraph(G) : Grph -&gt; Grph</A></H5>
+<BLOCKQUOTE>
+The graph H equal to G but defined on the standard support.
+That is, H is structurally equal to G and its vertex and edge
+  decorations are the same as those for G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19696">Example <TT>Graph_Constructors (H155E5)</TT></A></H3>
+The Odd Graph, O<sub>n</sub>, has as vertices all n-subsets of a 2n - 1 set with
+two vertices adjacent if and only if they are disjoint. We construct O<sub>3</sub> 
+and then form its standard graph. 
+<P>
+<P>
+<PRE>
+&gt; V := Subsets({1..5}, 2);                                   
+&gt; O3 := Graph&lt; V | { {u,v} : u,v in V | IsDisjoint(u, v) } &gt;;
+&gt; O3;
+Graph
+Vertex  Neighbours
+
+
+{ 1, 5 }        { 2, 4 } { 2, 3 } { 3, 4 } ;
+{ 2, 5 }        { 1, 3 } { 1, 4 } { 3, 4 } ;
+{ 1, 3 }        { 2, 5 } { 2, 4 } { 4, 5 } ;
+{ 1, 4 }        { 2, 5 } { 3, 5 } { 2, 3 } ;
+{ 2, 4 }        { 1, 5 } { 1, 3 } { 3, 5 } ;
+{ 3, 5 }        { 1, 4 } { 2, 4 } { 1, 2 } ;
+{ 2, 3 }        { 1, 5 } { 1, 4 } { 4, 5 } ;
+{ 1, 2 }        { 3, 5 } { 3, 4 } { 4, 5 } ;
+{ 3, 4 }        { 1, 5 } { 2, 5 } { 1, 2 } ;
+{ 4, 5 }        { 1, 3 } { 2, 3 } { 1, 2 } ;
+
+
+&gt; Support(O3);
+{@
+    { 1, 5 },
+    { 2, 5 },
+    { 1, 3 },
+    { 1, 4 },
+    { 2, 4 },
+    { 3, 5 },
+    { 2, 3 },
+    { 1, 2 },
+    { 3, 4 },
+    { 4, 5 }
+@}
+&gt; SO3 := StandardGraph(O3);                                  
+&gt; SO3;
+Graph
+Vertex  Neighbours
+
+
+1       5 7 9 ;
+2       3 4 9 ;
+3       2 5 10 ;
+4       2 6 7 ;
+5       1 3 6 ;
+6       4 5 8 ;
+7       1 4 10 ;
+8       6 9 10 ;
+9       1 2 8 ;
+10      3 7 8 ;
+&gt; Support(SO3);            
+{@ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 @}
+</PRE>
+<HR>
+<H4><A NAME = "19697">Construction of a Standard Graph</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+Some of the construction functions listed below can also 
+  be used to create a graph with a sparse representation.
+Are concerned only those functions creating relatively sparse graphs.
+
+
+<H5><A NAME = "19698">BipartiteGraph(m, n) : RngIntElt, RngIntElt -&gt; GrphUnd</A></H5>
+<BLOCKQUOTE>
+The complete bipartite graph, K<sub>m, n</sub>, with partite sets of
+cardinality m and n.
+</BLOCKQUOTE>
+<H5><A NAME = "19699">CompleteGraph(n) : RngIntElt -&gt; GrphUnd</A></H5>
+<BLOCKQUOTE>
+The complete graph K<sub>n</sub> on n vertices.
+</BLOCKQUOTE>
+<H5><A NAME = "19700">KCubeGraph(n : parameters) : RngIntElt -&gt; GrphUnd</A></H5>
+
+<PRE>    SparseRep: Bool                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The graph of the n-dimensional cube, Q<sub>n</sub>.
+The graph can be created as a sparse graph if so requested.
+</BLOCKQUOTE>
+<H5><A NAME = "19701">MultipartiteGraph(Q) : [RngIntElt] -&gt; GrphUnd</A></H5>
+<BLOCKQUOTE>
+Given a sequence Q of positive integers m<sub>1</sub>, ..., m<sub>r</sub>,
+construct the complete multipartite graph K<sub>m<sub>1</sub>, ..., m<sub>r</sub></sub>.
+</BLOCKQUOTE>
+<H5><A NAME = "19702">EmptyGraph(n : parameters) : RngIntElt -&gt; GrphUnd</A></H5>
+
+<PRE>    SparseRep: Bool                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The graph on n vertices with no edges.
+It can be created as a sparse graph if so requested.
+</BLOCKQUOTE>
+<H5><A NAME = "19703">NullGraph( : parameters) : -&gt; GrphUnd</A></H5>
+
+<PRE>    SparseRep: Bool                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The graph with no vertices and no edges.
+It can be created as a sparse graph if so requested.
+</BLOCKQUOTE>
+<H5><A NAME = "19704">PathGraph(n : parameters) : RngIntElt -&gt; GrphUnd</A></H5>
+
+<PRE>    SparseRep: Bool                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The path graph on n vertices, i.e. the graph on vertices
+v<sub>1</sub>, ..., v<sub>n</sub>, with v<sub>i</sub> and v<sub>j</sub> (1 &le;i &lt; j &le;n)
+adjacent if and only if j = i + 1.
+The graph can be created as a sparse graph if so requested.
+</BLOCKQUOTE>
+<H5><A NAME = "19705">PolygonGraph(n : parameters) : RngIntElt -&gt; GrphUnd</A></H5>
+
+<PRE>    SparseRep: Bool                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given an integer n &ge;3, define the polygon graph on n vertices,
+i.e. the graph on vertices v<sub>1</sub>, ..., v<sub>n</sub>, with v<sub>i</sub> and v<sub>j</sub>
+(1 &le;i &lt; j &le;n) adjacent if and only if j = i + 1, or i = 1
+and j = n.
+The graph can be created as a sparse graph if so requested.
+</BLOCKQUOTE>
+<H5><A NAME = "19706">RandomGraph(n, r : parameters) : RngIntElt, FldReElt -&gt; GrphUnd</A></H5>
+
+<PRE>    SparseRep: Bool                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+A random graph on n vertices such that the probability that an
+arbitrary pair of vertices is adjacent is given by the real number
+r, where r lies in the interval [0, 1].
+The graph can be created as a sparse graph if so requested.
+</BLOCKQUOTE>
+<H5><A NAME = "19707">RandomTree(n : parameters) : RngIntElt -&gt; GrphUnd</A></H5>
+
+<PRE>    SparseRep: Bool                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+A random tree on n vertices.
+It can be created as a sparse graph if so requested.
+</BLOCKQUOTE>
+<H4><A NAME = "19708">Construction of a Standard  Digraph</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+As for standard graphs (Subsection <A  HREF = "text1784.htm#19697">Construction of a Standard Graph</A>)
+  some of the construction functions listed below can
+  be used to create digraphs with a sparse representation.
+
+
+<H5><A NAME = "19709">CompleteDigraph(n) : RngIntElt -&gt; GrphDir</A></H5>
+<BLOCKQUOTE>
+The complete symmetric digraph on n vertices.
+</BLOCKQUOTE>
+<H5><A NAME = "19710">EmptyDigraph(n : parameters) : RngIntElt -&gt; GrphDir</A></H5>
+
+<PRE>    SparseRep: Bool                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The null digraph on n vertices.
+It can be created as sparse if so requested.
+</BLOCKQUOTE>
+<H5><A NAME = "19711">RandomDigraph(n, r : parameters) : RngIntElt, FldReElt -&gt; GrphDir</A></H5>
+
+<PRE>    SparseRep: Bool                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+A random digraph on n vertices such that the probability that there
+exists an edge directed from vertex u to vertex v, where u and
+v arbitrary vertices, is given by the real number r, where r lies
+in the interval [0, 1].
+The digraph can be created as sparse if so requested.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19712">Example <TT>Graph_Constructors (H155E6)</TT></A></H3>
+The complete symmetric digraph on 5 vertices is created as follows:
+<P>
+<P>
+<PRE>
+&gt; kd5 := CompleteDigraph(5);
+&gt; kd5;
+Digraph
+Vertex  Neighbours
+
+
+1       2 3 4 5 ;
+2       1 3 4 5 ;
+3       1 2 4 5 ;
+4       1 2 3 5 ;
+5       1 2 3 4 ;
+</PRE>
+We next construct a random digraph on 5 vertices such that the probability
+that there is an edge directed from an arbitrary vertex to any other
+arbitrary vertex is 0.75.
+<P>
+<P>
+<PRE>
+&gt; rd5 := RandomDigraph(5, 0.75);
+&gt; rd5;
+Digraph
+Vertex  Neighbours
+
+
+1       2 5 ;
+2       2 3 4 5 ;
+3       2 3 4 5 ;
+4       1 2 3 5 ;
+5       2 3 4 ;
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1785.htm">[Next]</A><A  HREF = "text1783.htm">[Prev]</A> <A  HREF = "text1785.htm">[Right]</A> <A  HREF = "text1783.htm">[Left]</A> <A  HREF = "text1782.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

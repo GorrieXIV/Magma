@@ -1,0 +1,53 @@
+/* test rewriting for non-natural irreducible repns of SL */
+
+// SetSeed (1);
+
+import "../recognition/standard.m": SLChosenElements;
+
+SetEchoInput (true);
+
+NmrElts := 10;
+power := 2;
+fct := SymmetricPower;
+fct := ExteriorPower;
+
+for d in [2..10] do
+// for q in [2,3,4,5,7,8,9,11,13,16,17,19,23,25, 64, 81, 128, 243] do
+for q in [2,3,4,5,7,8,9,11,13,16,17,19,23,25] do  
+
+G := SL(d, q);
+
+Q := SLChosenElements(G);
+MA := MatrixAlgebra (GF (q), d);
+QQ := [fct(MA!Q[i], power) : i in [1..#Q]];
+n := Nrows(QQ[1]);
+if n lt 2 then continue; end if;
+QQ := [GL(n, q) ! x : x in QQ];
+A := Random(GL(n, q));
+
+/* conjugating everything by a random matrix to make the exterior
+   square look random
+*/
+_, a1 := int_SLWordInGen(G, Q[1]);
+_, a2 := int_SLWordInGen(G, Q[2]);
+_, a3 := int_SLWordInGen(G, Q[3]);
+_, a4 := int_SLWordInGen(G, Q[4]);
+Q := [Evaluate(a1, QQ)^A, Evaluate(a2, QQ)^A, 
+      Evaluate(a3, QQ)^A, Evaluate(a4, QQ)^A];
+
+E := sub<GL(n, q)|Q>;
+if IsIrreducible (E) eq false then continue; end if;
+P := RandomProcess(E);
+
+for i in [1..NmrElts] do 
+d, q, i; 
+
+A := Random(P);
+flag, word := int_SLAltRepWordInGen(E, Q, A, d, q);
+assert flag;
+assert Evaluate (word, Q) eq A;
+
+end for; 
+end for; 
+end for; 
+

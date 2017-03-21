@@ -1,0 +1,48 @@
+"Source: Text/Lat/LatNF.text";
+"Line: 1205";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Lat/LatNF.text, line: 1205
+// Example: H31E8 ()
+print "Example: H31E8";
+ei := GetEchoInput();
+SetEchoInput(true);
+K<u> := QuadraticField(5);
+e := (1+u)/2;
+M := Matrix(4,[2,-1,0,1-e, -1,2,-1,e-1, 0,-1,2,-e, 1-e,e-1,-e,2]);
+Determinant(M);
+assert $1 eq 1;
+L := NumberFieldLattice(K,4 : Gram:=M);
+Dual(L) eq L; // self-dual, since unimodular
+assert $1;
+Norm(L); // L is even
+AutomorphismGroup(L);
+assert #$1 eq 14400;
+#Sphere(L,2);
+assert $1 eq 120;
+H := Matrix(K,4, [     20,   -20*u+8,   u-6,       0,
+                  -20*u+8, -16*u+104, 6*u-8, (1-u)/2,
+                      u-6,     6*u-8,     4,       0,
+                        0,   (1-u)/2,     0,       4]);
+LL := NumberFieldLattice(K,4 : Gram:=H); // det(H) is e^4
+assert IsIsometric(L,LL);
+D := DirectSum([LL,LL,LL]);
+DIAG := [D.1+D.5+D.9, D.2+D.6+D.10];
+ORTHO := [D.3-D.7, D.3-D.11, D.4-D.8, D.4-D.12];
+assert &and[InnerProduct(a,b) eq 0 : a in DIAG, b in ORTHO];
+SUB := (2*D) + sub<D | DIAG cat ORTHO>;
+I6 := IdentityMatrix(K,6);
+T := DiagonalJoin(I6/e,I6); // make determinant be 1
+N := T*InnerProductScaling(SUB,1/2);
+Determinant(N);
+assert $1 eq 1;
+Dual(N) eq N; // again self-dual
+assert $1;
+Norm(N); // and even
+time #AutomorphismGroup(N);
+assert $1 eq 72576000;
+#Sphere(N,2); // rootless
+assert $1 eq 0;
+time #Sphere(N,4 : Negatives:=false);
+assert $1 eq 18900;
+SetEchoInput(ei);

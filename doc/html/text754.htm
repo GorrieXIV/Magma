@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Database of Finite Symplectic Matrix Groups</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text755.htm">[Next]</A><A  HREF = "text753.htm">[Prev]</A> <A  HREF = "text755.htm">[Right]</A> <A  HREF = "text753.htm">[Left]</A> <A  HREF = "text742.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "8677">Database of Finite Symplectic Matrix Groups</A></H3>
+
+<P>
+<P>
+Magma includes a database of the maximal finite irreducible subgroups 
+of Sp<sub>2n</sub>(Q) for 1&le;i &le;11 up to conjugacy in GL<sub>2n</sub>(Q).
+This collection is due to Markus Kirschmer <A  HREF = "text741.htm#bib_kirschmer-symplectic">[Kir09]</A>.
+This section defines the interface to that database.
+<P>
+To avoid non-integral entries, the stored matrix groups do not fix 
+the standard skewsymmetric form but some other nondegenerate 
+skewsymmetric form. The example below illustrates how to construct a 
+conjugate matrix group which fixes the standard skewsymmetric form.
+<P>
+A particular entry of the database can be specified in one of two ways.
+Firstly, a number in the range 1 to the size of the database can be
+given.  Alternatively, the desired dimension can be provided, together
+with a number in the range 1 to the number of entries of that dimension.
+<P>
+Each entry can be accessed either as a matrix group or as a lattice with a pair of forms.
+If accessed as a matrix group, the order and base are set on return.
+
+
+<H5><A NAME = "8678">SymplecticMatrixGroupDatabase() : -&gt; DB</A></H5>
+<BLOCKQUOTE>
+This function returns a database object which contains information about the
+database.
+</BLOCKQUOTE>
+<H5><A NAME = "8679">LargestDimension(D) : DB -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the largest dimension of any entry stored in the database.
+It is an error to refer to larger dimensions in the database.
+</BLOCKQUOTE>
+<H5><A NAME = "8680"># D : DB -&gt; RngIntElt</A></H5>
+<H5>NumberOfGroups(D) : DB -&gt; RngIntElt</H5>
+<H5>NumberOfLattices(D) : DB -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Returns the number of entries stored in the database.
+</BLOCKQUOTE>
+<H5><A NAME = "8681">NumberOfGroups(D, d) : DB, RngIntElt -&gt; RngIntElt</A></H5>
+<H5>NumberOfLattices(D, d) : DB, RngIntElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Returns the number of entries stored in the database of dimension d.
+</BLOCKQUOTE>
+<H5><A NAME = "8682">Group(D, i): DB, RngIntElt -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Returns the i-th entry from the database D as a matrix group. 
+</BLOCKQUOTE>
+<H5><A NAME = "8683">Lattice(D, i): DB, RngIntElt -&gt; Lat, SeqEnum</A></H5>
+<BLOCKQUOTE>
+Returns a lattice L and a sequence S of two integral forms such that
+the automorphism group of L with respect to S equals <TT>Group(DB, i)</TT>.
+The first form in S is the gram matrix of L and the second form is
+skewsymmetric. The sequence S is normalized as described in the
+appendix of <A  HREF = "text741.htm#bib_kirschmer-symplectic">[Kir09]</A> to simplify the recognition of the
+matrix group.
+</BLOCKQUOTE>
+<H5><A NAME = "8684">Construction(D, i): DB, RngIntElt -&gt; MonStgElt</A></H5>
+<BLOCKQUOTE>
+Returns a string which describes the construction of the
+i-th entry of the database D.
+</BLOCKQUOTE>
+<H5><A NAME = "8685">Group(D, d, i): DB, RngIntElt, RngIntElt -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Returns the i-th entry of dimension d in the database D as a
+matrix group. 
+</BLOCKQUOTE>
+<H5><A NAME = "8686">Lattice(D, d, i): DB, RngIntElt, RngIntElt -&gt; Lat, SeqEnum</A></H5>
+<BLOCKQUOTE>
+Returns a lattice L and a sequence S of forms corresponding to the
+i-th entry of dimension d in the database D.
+</BLOCKQUOTE>
+<H5><A NAME = "8687">Construction(D, d, i): DB, RngIntElt, RngIntElt -&gt; MonStgElt</A></H5>
+<BLOCKQUOTE>
+Returns a string which describes the construction of the
+i-th entry of dimension d in the database D.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8688">Example <TT>GrpData_Symplectic (H71E18)</TT></A></H3>
+We illustrate accessing the symplectic matrix group database
+with a group of dimension 16.
+<P>
+<P>
+<PRE>
+&gt; DB := SymplecticMatrixGroupDatabase();
+&gt; NumberOfGroups(DB, 16);
+91
+&gt; G := Group(DB, 16, 1);
+&gt; G : Minimal;
+MatrixGroup(16, Integer Ring) of order 2^21 * 3^4 * 5^2
+</PRE>
+The group G does not fix the standard skewsymmetic form. But it can be
+conjugated to do so.
+<P>
+<P>
+<PRE>
+&gt; _, S := Lattice(DB, 16, 1);
+&gt; T := TransformForm(Matrix(Rationals(), S[2]), "symplectic");
+&gt; H := ChangeRing(G, Rationals())^(GL(16,Rationals()) ! T);
+&gt; J := SymplecticForm(16, Rationals());
+&gt; forall{h: h in Generators(H) | h * J * Transpose(h) eq J};
+true
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text755.htm">[Next]</A><A  HREF = "text753.htm">[Prev]</A> <A  HREF = "text755.htm">[Right]</A> <A  HREF = "text753.htm">[Left]</A> <A  HREF = "text742.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

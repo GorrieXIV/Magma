@@ -1,0 +1,45 @@
+"Source: Text/Basics/RngInt.text";
+"Line: 4288";
+"Date: Tue Jun  7 22:27:15 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Basics/RngInt.text, line: 4288
+// Example: H18E15 ()
+print "Example: H18E15";
+ei := GetEchoInput();
+SetEchoInput(true);
+n := RandomPrime(90)*RandomPrime(90);
+n;
+d := 4;
+approx_m := Iroot( Iroot( n, d+1 ) * Iroot( n, d ) , 2 );
+leading_coeff := n div approx_m^d;
+leading_coeff;
+m := Iroot( n div leading_coeff, d );
+P<X,Y> := PolynomialRing( Integers(), 2 );
+F<X,Y> := BaseMPolynomial(n,m,d);
+F;
+skew, als := OptimalSkewness( F );
+alpha := MurphyAlphaApproximation( F, 2000 );
+rating := als + alpha;
+rating;
+
+best_rating := rating;
+best_m := m;
+for i in [1..100] do
+  leading_coeff := leading_coeff + 1;
+  m := Iroot( n div leading_coeff, d );
+  F<X,Y> := BaseMPolynomial(n,m,d);
+  skew, als := OptimalSkewness( F );
+  alpha := MurphyAlphaApproximation( F, 2000 );
+  rating := als + alpha;
+  if rating lt best_rating then
+    best_rating := rating;
+    best_m := m;
+  end if;
+end for;
+best_rating;
+best_m;
+F<X,Y> := BaseMPolynomial(n,best_m,d);
+F;
+OptimalSkewness( F );
+MurphyAlphaApproximation( F, 2000 );
+SetEchoInput(ei);

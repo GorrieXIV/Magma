@@ -1,0 +1,1334 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Desingularisation by Blow Up</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1384.htm">[Next]</A><A  HREF = "text1382.htm">[Prev]</A> <A  HREF = "text1384.htm">[Right]</A> <A  HREF = "text1382.htm">[Left]</A> <A  HREF = "text1379.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "15435">Desingularisation by Blow Up</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1383.htm#15436">Introduction</A>
+<LI> <A  HREF = "text1383.htm#15440">Accessor Functions</A>
+<LI> <A  HREF = "text1383.htm#15446">Multiplicities, Intersections and  Restricted Linear Systems</A>
+<LI> <A  HREF = "text1383.htm#15451">Canonical Divisor Functionality</A>
+<LI> <A  HREF = "text1383.htm#15455">Extended Examples</A>
+</UL>
+<H4><A NAME = "15436">Introduction</A></H4>
+
+<P>
+<P>
+<P>
+In addition to the older functionality for formal desingularisation of
+hypersurfaces in P<sup>3</sup> in characteristic zero described in the next section,
+there is now (Magma V2.21) a more general desingularisation routine available
+that desingularises by blowing up. It has the current restriction that
+it only applies to surfaces with point singularities (the singular
+subscheme is of dimension zero) but this should only be a provisional
+restriction that is lifted in later releases.
+<P>
+The advantages are firstly
+that it applies to surfaces in any ambient of any characteristic with the
+mild proviso that all of the singular points have to lie in definable affine
+patches. In particular, it applies to surfaces in affine, projective or product
+projective space of any dimension. Secondly, it provides a much more
+detailed desciption than formal desingularisation. Global information
+is available for each irreducible divisor lying over each singular point
+rather than just generic information. This allows the computation of
+the intersection pairing between these blow-up divisors as well as 
+computation of intersection pairings between the blow-up divisors and
+strict transforms (pull-backs to the desingularisation with blow-up
+divisor components removed) of divisors on the singular surface model.
+This is in addition to the functionality for computing the multiplicity
+of blow-up divisors in the pull-backs of divisors. The latter should be
+available for formal desingularisation also but is not fully implemented
+currently. There is much useful information regarding the canonical
+divisor on the desingularisation but this is currently only available
+for hypersurfaces - another restriction that should only be provisional.
+Finally, it has the advantage that it is often much faster than formal
+desingularisation in the ordinary hypersurface case where both apply.
+In the main resolution intrinsic <A  HREF = "text1383.htm#resolve_singular_surface">ResolveSingularSurface</A>, it is
+now used as the default method, even in the hypersurface case, as long
+as the surface only has point singulariries. We will illustrate the
+speed and rich range of functionality in three extended examples at the
+end of this section.
+<P>
+Let k be the base field of the surface S. In resolving by blow-up, there
+is a choice to make. When blowing up a zero-dimensional reduced subscheme, we
+can choose to blow up the whole thing in one operation; split into irreducible components,
+which represent a conjugate set of points in S(bar(k)), and blow these up
+separately; or keep base-changing to fields over which all points are rational and
+blow up only rational points. We have chosen the second method. Splitting into
+irreducible components has some overhead cost, but we cannot identify the
+different irreducible blow-up components at the end without it. We also do not
+base-change in order to only blow up rational points, because it is probably best to
+stick to working over the original ground field k. Groebner basis computations
+in Magma are very highly-tuned over the rational numbers, for example, but may
+not work quite so efficiently over number fields. On the other hand, blowing
+up an irreducible zero-dimensional subscheme rather than the points
+over an extension field can lead to an increase in the number of variables
+for the ambients that our blow-up patches lie in. However, we usually
+have to blow up singular curves at some stage in the resolution process and
+it is hard to avoid a potential increase in the number of variables in these
+operations, anyway. In addition, when we avoid field extensions, the final
+`irreducible' blow-up components over a singular point will often not all be
+geometrically irreducible (never in the case of blowing up a `non-rational
+singular point'), but some will split into a set of conjugate irreducible
+components over bar(k). This, however, should not cause many problems.
+For example, multiplicities of
+conjugate blow-up divisors in rational divisors or differentials are all the
+same, so they always enter into decompositions of rational divisors as 
+sums  of our blow-up components with multiplicity. If the user really needs
+to inspect the blow-up divisors in detail, rather than just using the top-level
+intrinsics, there are functions to return affine patches of them and they can be
+used to check for geometric irreducibility or not. All of the package intrinsics
+only require irreducible over k blow-up components for their implementation.
+
+
+<H5><A NAME = "15437"></A><A NAME = "resolve_singular_surface">ResolveSingularSurface</A>(S) : Srfc -&gt; List, RngIntElt</H5>
+
+<PRE>    AdjComp: BoolElt                    Default: <TT>false</TT></PRE>
+
+<PRE>    UseFormalDesing: BoolElt            Default: <TT>false</TT></PRE>
+
+<PRE>    SetVerbose("Resolve", n):           Maximum: 1</PRE>
+<BLOCKQUOTE>
+The main intrinsic to compute a desingularisation of surface S and return a data
+list containing information about it. The desingularisation
+is either formal or of blow-up type. The second return value is a code value for the
+type: 1 for formal and 2 for blow-up desingularisation. The type of desingularisation
+is determined as follows. If the characteristic of the base field k is not 0, or S
+does not lie in ordinary projective space of dimension 3, P<sup>3</sup>, only blow-up
+desingularisation is possible. However, this currently requires S to have only
+point singularities (its singular subscheme must be empty or of dimension 0). If
+only blow-up type is possible and S has curves in its singular locus, a runtime error
+will result. When the ambient of S is P<sup>3</sup>, k is of characteristic 0 and the
+singularities are of dimension 0, either method could be used but blow-up is taken
+as the default. To force formal desingularisation in the case of a choice, the
+parameter <TT>UseFormalDesing</TT> can be set to <TT>true</TT> (the default is <TT>false</TT>).
+If the user only wishes to perform adjoint computations (see <TT>HomAdjoints</TT>),
+determine the arithmetic, geometric or pluri-genera of the desingularisation,
+or perform most other computations that only depend on the canonical divisor
+class of the desingularisation, some time may be saved by setting parameter
+<TT>AdjComp</TT> to <TT>true</TT>. This means that the resolution is not fully carried
+out, but the only singularities in the desingularisation process that are not fully
+resolved are of `canonical type': none of the resolution curves above them
+occur in the support of some canonical divisor and they do not impose conditions
+on the sections of the canonical sheaf. For blow-up resolution, it is only simple
+singularities on the base singular scheme S that are ignored when <TT>AdjComp</TT>
+is true (we do not check for ignorable singularities arising at later stages) and
+it probably saves little time using this option in general, as simple singularities
+should resolve quite quickly under blow-up. However, it can save more time with
+formal desingularisation.
+<P>
+In neither case is the resolution guaranteed to be a <I>minimal</I> one. That is,
+there may exist (-1)-curves in the irreducible components lying above singularities.
+<P>
+<P>
+<P>
+The elements of the list returned are of type <TT>DesingData</TT> for blow-up
+resolution and tuples containing a sequence of four algebraic power series and
+a multiplicity for formal desingularisation. In the formal case, there is a
+tuple for each exceptional divisor (lying over a singular point or curve on S)
+of the desingularisation and the power series define the map from the
+completion of the local ring of the generic point of that divisor to S. This
+is all described more fully in the next section on surfaces in P<sup>3</sup>.
+For blow-up desingularisation, there is a <TT>DesingData</TT> object for each
+irreducible component p of the singular subscheme of S (these correspond to
+a conjugate set of singular points in S(bar(k)) - we will usually
+just refer to each one as a singular point from now on, whether it is a
+k-rational singular point or a set of conjugates). Each object contains
+a set of affine patches arising in the blow-up process along with birational
+blow-down maps to a chosen affine patch of S containing p; a set of
+irreducible curves for each patch which give the intersection of the blow-up
+divisors with that patch; and information to determine which irreducible
+curves for different patches are parts of the same complete irreducible blow-up
+divisor over p. They also cache other useful information about the resolution
+over p that has been determined by post-resolution intrinsic calls.
+<P>
+Once a formal or blow-up resolution
+has been computed, it is stored in an attribute of S for use in other intrinsic
+calls or to be returned by subsequent calls to this intrinsic. Resolution data
+for both formal and blow-up decomposition will be stored if resolutions of both
+types are constructed at different times. If a blow-up data list is computed and
+stored for Adjoint computation only and a subsequent call to <A  HREF = "text1383.htm#resolve_singular_surface">ResolveSingularSurface</A>
+or equivalent is made with <TT>AdjComp</TT> <TT>false</TT>, the stored resolution data is
+upgraded to full resolution data by computing blow-up resolutions over the simple
+singularities only: the entire resolution process is not repeated.
+</BLOCKQUOTE>
+<H5><A NAME = "15438">DesingulariseSurfaceByBlowUp(S) : Srfc -&gt; List</A></H5>
+
+<PRE>    AdjComp: BoolElt                    Default: <TT>false</TT></PRE>
+
+<PRE>    SetVerbose("Resolve", n):           Maximum: 1</PRE>
+<BLOCKQUOTE>
+This is just a version of the above that always uses blow-up desingularisation.
+The conditions on S are the same and the returned resolution list is again cached.
+</BLOCKQUOTE>
+<H5><A NAME = "15439">ResolveSingByBlowUp(X,Y) : Sch, Sch -&gt; DesingData</A></H5>
+
+<PRE>    SetVerbose("Resolve", n):           Maximum: 1</PRE>
+<BLOCKQUOTE>
+This is another variant that we have exported. In this case, X must be an affine
+surface and Y an irreducible, reduced subscheme of dimension zero, which is
+a single singular `point' (i.e. a conjugate set of points over bar(k)) on X.
+Note that the conditions on Y are not checked here. It performs the blow-up resolution
+of just Y and returns the desingularisation data object for it. We have
+exported this so the user can have a look at the desingularisation of individual
+singularities in case the overall desingularisation process is a little slow. If the
+original surface is a projective one, it should be applied to an affine patch that
+contains the singularity.
+</BLOCKQUOTE>
+<H4><A NAME = "15440">Accessor Functions</A></H4>
+
+<P>
+<P>
+<P>
+Functions to obtain some basic information about the blow-up resolution
+over a singular point. These are not needed for the main magma functionality
+related to desingularisation but they are provided for times when the user may
+wish to examine the local structure of the resolution in more detail.
+
+
+<H5><A NAME = "15441">NumberOfBlowUpDivisors(dsd) : DesingData -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The number of irreducible divisors (curves) lying over the surface singular point
+p for which dsd is the desingularisation data object.
+</BLOCKQUOTE>
+<H5><A NAME = "15442">SingularPoint(dsd) : DesingData -&gt; Sch</A></H5>
+<BLOCKQUOTE>
+The singular point on a surface S for which dsd is the blow-up desingularisation object.
+Note that the `point' is not necessarily a point of S(k), where k is the base field of S.
+It is a reduced, irreducible (zero-dimensional) component of the singular locus of S and so
+is a scheme-theoretic point representing a conjugate set of singular points of S(bar(k)).
+For this reason it is returned as a subscheme of S rather than as a point type.
+</BLOCKQUOTE>
+<H5><A NAME = "15443">BlowUpDivisor(S, dsd, i) : Srfc, DesingData, RngIntElt -&gt; Crv, Sch, MapSch</A></H5>
+<BLOCKQUOTE>
+Given dsd, the desingularisation data object for the blow-up resolution of point singularity
+p on surface S, returns an affine curve C giving one patch of the i-th irreducible
+divisor lying over p, the surface blow-up affine patch Sa in which it lies, and the
+blow-down map of Sa to S.
+</BLOCKQUOTE>
+<H5><A NAME = "15444">BlowUpDivisorAllPatches(dsd, i) : DesingData, RngIntElt -&gt; List, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Let dsd be the desingularisation data object for the blow-up resolution of point singularity
+p on surface S. This intrinsic returns the most detailed information about the i-th
+irreducible divisor lying over p. It gives a full set of affine patches in the blow-up
+resolution of p that cover the complete divisor. As it involves a rather complicated set-up,
+this intrinsic is best avoided unless the user really knows what they are doing. The
+description and comments below should be read with care.
+<P>
+The first actual return value is a list
+of 4-tuples, one for each patch. The entries of the tuples are
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>An affine curve C giving the irreducible divisor on the patch.
+<DT>(ii)</DT><DD>The affine surface Sa which is the blow-up patch in which C lies.
+<DT>(iii)</DT><DD>The birational blow-down map of Sa to an affine patch of S in which
+p lies.
+<DT>(iv)</DT><DD>The index of Sa in the full list of blow-up patches in dsd.
+<P>
+<P>
+<P>
+<P>
+</DL>
+The patch index of the affine patch of S (containing p), which is the Codomain of
+all of the maps which are third entries of a tuple, is the second return value. If
+S is itself affine, this second return value is just 0.
+<P>
+We choose to gives maps to the base patch here, rather than to S as in the last intrinsic,
+because it makes it slightly more efficient to compose one with the inverse of another to
+get the rational map from one curve patch to another. However, it should be noted that
+the rational maps between patches given directly as the blow-down composed with the
+blow-up do not generally restrict to maximally-defined maps on the affine curves and
+may have the entire affine curve in their base-scheme in some cases.
+<P>
+Also, we note that <I>not all</I> blow-up patches of the surface are non-singular. So as
+not to do redundant work and to avoid multiple copies of blow-up divisors, we
+only blow up one copy of isolated singular points, which will generally occur in multiple
+blow-up affine patches (these affine patches all intersect abstractly
+in Zariski open subsets) that arise in the resolution process. However, over the
+(abstractly intersecting) affine surface patches containing
+the complete irreducible blow-up divisor, each point on the divisor will occur on
+<I>at least one</I> patch at a point where the surface is non-singular. It is
+on these patches (relative to the particular point) that the local description of the divisor
+at the point is the correct one.
+<P>
+The package intrinsics dealing with blow-up divisors are coded to get around these problems,
+so it is recommended that these be used for required operations if possible.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15445">Example <TT>AlgSrf_srfc_blow_up_desing_basics (H122E10)</TT></A></H3>
+We illustrate these basic accessors with an easy example. S is a degree 5 degenerate
+(weak) Del Pezzo surface in P<sup>5</sup> with a simple A<sub>1</sub> and a simple A<sub>2</sub> singularity.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P5&lt;a,b,c,d,e,f&gt; := ProjectiveSpace(Rationals(),5);
+&gt; S := Surface(P5,[b^2-a*d, b*c-a*f, c^2-b*e, c*d-b*f, d*e-c*f]);
+&gt; HasOnlySimpleSingularities(S : ReturnList := true); 
+true
+[* &lt;(0 : 0 : 0 : 0 : 1 : 0), "A", 2&gt;, &lt;(1 : 0 : 0 : 0 : 0 : 0), "A", 1&gt; *]
+&gt; dsds := ResolveSingularSurface(S);
+&gt; #dsds; //one for each singular point
+2
+&gt; [NumberOfBlowUpDivisors(dsd) : dsd in dsds];
+[2,1]
+&gt; // First dsd corresponds to the A2.
+&gt; dsd := dsds[1];
+&gt; SingularPoint(dsd);
+Scheme over Rational Field defined by
+a, b, c, d, f
+&gt; Da,Sa,prj := BlowUpDivisor(S, dsd, 1);
+&gt; Da; Ambient(Da);
+Curve over Rational Field defined by
+$.1
+Affine Space of dimension 2 over Rational Field
+Variables: $.1, $.2
+&gt; Sa; // blow-up surface patch is just A^2!
+Scheme over Rational Field defined by
+0
+&gt; prj; //typical blow-up map!
+Mapping from: Sch: Sa to Srfc: X5
+with equations : 
+$.1^2*$.2
+$.1^2*$.2^2
+$.1*$.2
+$.1^2*$.2^3
+1
+$.1*$.2^2
+&gt; // get patch cover of the full blow-up divisor D, which is just P^1
+&gt; lst := BlowUpDivisorAllPatches(dsd, 1);
+&gt; #lst; //2 patch cover
+2
+&gt; D1 := lst[1][1]; D2 := lst[2][1];
+&gt; mp12 := Restriction(Expand(lst[1][3] * Inverse(lst[2][3])),D1,D2);
+&gt; A1&lt;x,y&gt; := Ambient(D1); A2&lt;x,y&gt; := Ambient(D2);
+&gt; // D1 and D2 are both the line x=0 in an affine plane. The rational map
+&gt; // between them equates to the usual y -&gt; 1/y
+&gt; D1; D2; mp12;
+Curve over Rational Field defined by
+x
+Curve over Rational Field defined by
+x
+Mapping from: CrvPln: D1 to CrvPln: D2
+with equations : 
+$.1*$.2^2
+1/$.2
+</PRE>
+<HR>
+<H4><A NAME = "15446">Multiplicities, Intersections and  Restricted Linear Systems</A></H4>
+
+<P>
+<P>
+<P>
+This subsection deals with blow-up desingularisation intrinsics that don't depend on the
+ambient, unlike those in the next subsection that involve the canonical divisor and
+are currently only available for surfaces in P<sup>3</sup>. All intrinsics use a 
+<TT>DesingData</TT> desingularisation data object of blow-up type cached in singular
+surface S. If the resolution process hasn't already been carried out, it is
+performed at the start (and the result cached).
+
+
+<H5><A NAME = "15447">IntersectionMatrix(dsd) : DesingData -&gt; Mtrx</A></H5>
+
+<PRE>    get<sub>s</sub>elf<sub>i</sub>nts: BoolElt Default: <TT>true</TT></PRE>
+
+<PRE>    SetVerbose("MultsAndInts", n):      Maximum: 1</PRE>
+<BLOCKQUOTE>
+Returns the intersection matrix for the irreducible (blow-up) divisors
+that lie above the surface singular point p whose resolution is represented by
+data object dsd. This is a symmetric matrix where the (i, j)-th entry is the
+intersection number D<sub>i</sub>.D<sub>j</sub>, where the D<sub>i</sub> are the irreducible divisors.
+The most work involved in this is computing the self-intersections,
+which can be rather slow. The intersections between different divisors are
+generally computed very quickly. Parameter get<sub>s</sub>elf<sub>i</sub>nts can be set to
+<TT>false</TT> to only compute the non-self intersections. In that case, the matrix
+is returned containing 0s for the diagonal entries. This should cause no
+confusion as all genuine self-intersections are negative numbers. The result
+is cached in dsd for future use. If the result has been cached without
+self-intersections and the intrinsic is called again with get<sub>s</sub>elf<sub>i</sub>nts
+set to <TT>true</TT>, only the diagonal entries are computed.
+</BLOCKQUOTE>
+<H5><A NAME = "15448">Multiplicities(S,D) : Srfc, DivSchElt -&gt; SeqEnum</A></H5>
+<H5>Multiplicities(S,D) : Srfc, Sch -&gt; SeqEnum</H5>
+<H5>Multiplicities(S,dsd,D) : Srfc, DesingData, Sch -&gt; SeqEnum</H5>
+
+<PRE>    SetVerbose("MultsAndInts", n):      Maximum: 1</PRE>
+<BLOCKQUOTE>
+These intrinsics give the multiplicities of the irreducible blow-up divisors
+above singular points in the pullback of a divisor on S to the desingularisation. Note
+that the usual requirement of S to be normal here for divisor computations to be
+correct is not needed because we are effectively working on the desingularisation.
+<P>
+The first two intrinsics take the singular surface S as a first argument and the
+divisor D as second. In the second intrinsic - for effective divisors - the divisor
+is passed in as a subscheme of S. The return value is a sequence of sequences:
+one sequence for the divisors above each of the singular points, which correspond 1-1
+with the <TT>DesingData</TT> objects in the resolution list of S and are taken in the
+order of that list.
+<P>
+The third intrinsic returns a single sequence containing only the multiplicities above
+a particular singular point of S, which is represented by the <TT>DesingData</TT>
+object dsd passed in as second argument. The third argument is an effective divisor
+D given as a subscheme.
+</BLOCKQUOTE>
+<H5><A NAME = "15449">MultiplicitiesAndIntersections(S,D) : Srfc, DivSchElt -&gt; SeqEnum, SeqEnum</A></H5>
+<H5>MultiplicitiesAndIntersections(S,D) : Srfc, Sch -&gt; SeqEnum, SeqEnum</H5>
+<H5>MultiplicitiesAndIntersections(S,dsd,D) : Srfc, DesingData, Sch -&gt; SeqEnum, SeqEnum</H5>
+
+<PRE>    SetVerbose("MultsAndInts", n):      Maximum: 1</PRE>
+<BLOCKQUOTE>
+The intrinsics are the exact analogues of the <TT>Multiplicities</TT> ones except that
+they also compute and return the intersection of the <I>strict transform</I> of divisor D
+with the irreducible blow-up divisors. The strict transform of D is the pullback of
+D to the desingularisation with all blow-up divisor components removed. The return
+values are in the same format as for <TT>Multiplicities</TT> except that there are now two
+sequences of sequences or two sequences returned. The first contains the multiplicities
+and the second contains the intersections with the strict transform.
+<P>
+This can often be much slower than <TT>Intersections</TT>. Most of the work usually goes
+into the computation of the strict transform on the blow-up surface patches, where
+removing blow-up divisor components can be a heavy task.
+</BLOCKQUOTE>
+<H5><A NAME = "15450">LinearSystemDivisorRestriction(S,B,ms) : Srfc, SeqEnum[RngMPolElt], SeqEnum[SeqEnum]				-&gt; SeqEnum</A></H5>
+
+<PRE>    CheckB: BoolElt                     Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+The surface S is a surface with only point singularities and B is a sequence of polynomials on the ambient
+of S which are homogeneous of the same multi-degree with respect to all gradings of S and
+can be thought of as sections (not necessarily linearly-independent) of a linear system on S
+given by the vector space V of appropriately-graded polynomials generated by B.
+<P>
+The sequence ms should be a sequence of sequences of integers giving some multiplicities for the
+irreducible blow-up divisors. This should be in the same format (in terms of grouping and order
+of divisors) as the return value of <TT>Multiplicities</TT> above.
+<P>
+The intrinsic computes the sublinear system of V consisting of sections whose pull-back to
+the blow-up desingularisation vanish on each blow-up divisor to at least the multiplicity
+given in ms. Note that negative and zero multiplicities have no effect. The return value
+is a basis of sections of this sublinear system, which will be linearly-independent modulo
+the defining ideal of S.
+<P>
+The implementation initially checks B for linear-independence modulo the ideal of S and, if
+necessary, replaces it with a linearly-independent subsequence that generates the same V. To
+save a little time, the user can set parameter <TT>CheckB</TT> to <TT>false</TT> when it is known that
+B gives linearly-independent sections and then this initial check is skipped.
+<P>
+<P>
+<P>
+One intended use of this intrinsic is to compute Riemann-Roch spaces of strict transforms
+of divisors on S. The second and third long examples at the end of this section give illustrations
+of this. We briefly indicate how it works generally, with D a divisor on S and tilde(D), its
+strict transform.
+<P>
+Assume that the Riemann-Roch space of D has been computed, using the sheaf or divisor functionality
+for example, on S. Let it be given by a basis of polynomials B<sub>1</sub> and denominator d (all polynomials
+having the same grading). Then the divisor of vanishing of d on S will be D + R for some effective
+divisor R and B<sub>1</sub> is the basis of polynomials (of the same grading) whose divisor of zeros contains
+R. When we pull-back to the desingularisation of S, the divisor of d pulls back to tilde(D) +
+tilde(R) + &sum;<sub>i</sub> a<sub>i</sub> D<sub>i</sub> where D<sub>i</sub> runs over the irreducible blow-up divisors and a<sub>i</sub> is the
+multiplicity of D<sub>i</sub> in the pull back of the divisor of d. It is easy to see that the Riemann-Roch
+space of tilde(D) is the space of rational functions on S with basis f/d where f runs
+through a basis of the sublinear system of the one generated by B<sub>1</sub> that consists of sections
+that vanish on each D<sub>i</sub> to multiplicity at least a<sub>i</sub>, i.e. the multiplicity of d.
+<P>
+<B>Warning:</B> It is important to remember that if D<sub>1</sub> lies in the rational equivalence class of
+D on S, its strict transform will not generally be rationally equivalent to tilde(D)
+on the desingularisation because the two will differ by a non-principal divisor supported on blow-up
+divisors. So, it is important to make sure that the call to get the
+Riemann-Roch space on S is applied to the correct divisor. This will be seen in the third example
+below, blowing down lines on a degenerate Del Pezzo surface. There, a hyperplane divisor has
+to be added to the sum of the divisors of two lines. The hyperplane divisor has to avoid the
+singular points for the strict transform of the resulting divisor to be in the class that we
+want on the desingularised Del Pezzo.
+</BLOCKQUOTE>
+<H4><A NAME = "15451">Canonical Divisor Functionality</A></H4>
+
+<P>
+<P>
+<P>
+This subsection deals with blow-up resolution intrinsics that involves canonical
+divisors on the desingularisation. These are currently only available for surfaces
+in ordinary projective space P<sup>3</sup>. Along with the intrinsics listed here,
+there are also important intrinsics for birational invariants (<A  HREF = "text1384.htm#as:hyp-gg">GeometricGenusOfDesingularization</A>,
+<A  HREF = "text1384.htm#as:hyp-ag">ArithmeticGenusOfDesingularization</A> and <A  HREF = "text1384.htm#as:hyp-pg">PlurigenusOfDesingularization</A>) and for adjoint maps (<A  HREF = "text1384.htm#as:hom_adj">HomAdjoints</A>),
+which include pluri-canonical and pluri-anticanonical maps, that are available for
+resolutions of singularities of blow-up <I>or</I> formal type and are described in subsection
+<A  HREF = "text1384.htm#15471">Adjoint Systems and Birational Invariants</A> of the next section on hypersurfaces.
+
+
+<H5><A NAME = "15452">DifferentialMultiplicities(dsd) : DesingData -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+This is the fundamental intrinsic to get information about divisor multiplicities of
+irreducible blow-up divisors of a blow-up desingularisation in the divisors of
+canonical differential forms (sections of the canonical sheaf: differentials of type (2,0)).
+Let F be the homogeneous polynomial of degree d in 4 variables defining the singular
+surface S in P<sup>3</sup>.
+<P>
+Let &omega; be the `natural' pseudo-differential form which is given by 
+dx^ dy/(&part;f/
+&part;z) = dy^ dz/(&part;f/&part;x) = dz^ dx/(&part;f/&part;y) on a standard
+affine patch of S with affine coordinates x, y, z where f is the defining polynomial
+of S on the patch: the dehomogenisation of F at the variable which is set to 1.
+With an appropriate choice of signs between the standard patches, &#8723; this form
+multiplied by a homogeneous polynomial G of degree d - 4 gives a genuine global differential
+form on S, &omega;<sub>G</sub>. That is, the &#8723;&omega; form on the standard patches multiplied
+by the dehomogenisation of G on those patches gives a set of patch forms that agree on
+the patch intersections. On each patch, &omega; gives a form that has no zeros or poles
+outside of the singular points.
+<P>
+The intrinsic returns the sequence of multiplicities of the irreducible blow-up divisors
+which lie above the singular point p in the divisor of the pull-back of &omega;.
+Here p is the singular point represented by desingularisation object dsd.
+<P>
+The pull-back of genuine differential form &omega;<sub>G</sub> has divisor equal to the
+(pull-back of the) effective divisor of G added to the divisor supported on all blow-up
+components (over all singular points) with multiplicities given by the return values
+of this intrinsic for the various dsds.
+<P>
+Note that all of these multiplicities are &le;0 and that they all equal 0 over a
+singular point p if and only if p is a simple singularity. This is why simple singularities
+can be ignored for most canonical divisor questions.
+<P>
+Examples of the use of <TT>DifferentialMultiplicities</TT> are given in the first two long examples
+at the end of the section. It is also used by many of the other package intrinsics relating to
+the canonical divisor.
+</BLOCKQUOTE>
+<H5><A NAME = "15453">FirstChernClassOfDesingularization(S) : Srfc -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the self-intersection of the canonical divisor, K.K or K<sup>2</sup>, on the blow-up
+desingularisation of surface S. Again, S must be an ordinary projective surface
+in P<sup>3</sup> with only point singularities. If the desingularisation (by blow-up) of
+S hasn't already been cached, it is computed and cached at the start.
+<P>
+Note that this is not a birational invariant of desingularisations. It depends on
+the desingularisation that magma computes. It gives a measure of how non-minimal
+the desingularisation is.
+</BLOCKQUOTE>
+<H5><A NAME = "15454">CanonicalIntersection(S,D) : Srfc, DivSchElt -&gt; RngIntElt</A></H5>
+<H5>CanonicalIntersection(S,D) : Srfc, Sch -&gt; RngIntElt</H5>
+<H5>CanonicalIntersection(dsd,i) : DesingData, RngIntElt -&gt; RngIntElt</H5>
+
+<PRE>    SetVerbose("MultsAndInts", n):      Maximum: 1</PRE>
+<BLOCKQUOTE>
+The first two intrinsics return the intersection number tilde(D).K of the strict transform
+tilde(D) of divisor D with the canonical divisor on the blow-up desingularisation of surface S.
+Recall that the strict transform of a divisor is the pull-back of the divisor to the blow-up
+with all blow-up divisor components removed (equivalently, the Zariski closure in the
+desingularisation of the divisor with the singular points of S removed). This uses
+<TT>MultiplicitiesAndIntersections</TT> for the divisor, which can be quite slow in some cases.
+The second intrinsic is for an effective divisor which is given as a subscheme of S.
+<P>
+The third intrinsic return the intersection number with the canonical divisor of the
+i-th irreducible blow-up divisor over the surface singular point p that is represented by
+desingularisation data object dsd. This uses the intersection matrix of the
+blow-up divisors over p.
+<P>
+<P>
+<P>
+One use of these intrinsics (see the examples) is to compute self-intersections of strict
+transforms of divisors. This can be useful when trying to identify (-1)-curves, for example.
+The adjunction formula gives 2p<sub>a</sub>(D) - 2 = D.D + D.K, where p<sub>a</sub>(D) is the arithmetic genus
+of D. When D is given by an irreducible curve on S (so its strict transform is
+an irreducible curve on the desingularisation), the arithmetic genus is the geometric genus
+with adjustments added at its singular points. In particular, if D is non-singular, it is
+just the geometric genus. In many cases, it can be seen directly that the points of the
+strict transform curve that lie over singular points of S are non-singular on the curve.
+For example, this is always true if D is actually non-singular at the singular points of
+S (e.g. if D is a line or conic in S). Further, if D is singular at a point
+p which is singular on S, the strict transform will definitely be non-singular above this as
+long as the singularity on D is one that is resolved by a single blow-up (e.g. an ordinary
+singular point of D). In more general cases, the user may have to examine the affine
+blow-up patches over surface singular points using the accessor functions given in the earlier
+section. Singular points of D on S that are not singular points of S can be examined
+directly on S. The geometric genus of curve D can be computed using magma's usual
+functionality for curves.
+</BLOCKQUOTE>
+<H4><A NAME = "15455">Extended Examples</A></H4>
+
+
+
+<HR>
+<H3><A NAME = "15456">Example <TT>AlgSrf_srfc_blow_up_desing_1 (H122E11)</TT></A></H3>
+The first example for blow-up desingularisation is a singular
+degree 9 hypersurface model S of an elliptic fibration X of general type
+(Kodaira dimension 1) which was sent in by a user. This has rather
+nasty singularities that are unsuitable for formal desingularisation,
+which rapidly grinds to a halt in trying to process them. However,
+the blow-up method can resolve all singularities in a few seconds.
+There are 2 conjugate A<sub>3</sub> singularities over Q(i), 2 pairs of
+conjugate A<sub>1</sub> singularities over Q(surd 2), and 2 non-simple
+singularities over Q. One of the non-simple singularities has
+11 non-singular rational curves lying over it in the resolution -
+10 (-2)-curves and a (-4)-curve - and the other has 38 (!) -
+33 (-2)-curves, 4 (-3)-curves and a (-4)-curve. The geometric
+genus of X is 3 and the (rational) canonical map maps X
+onto a non-singular conic in P<sup>2</sup>. This gives the elliptic
+fibration map of X.
+<P>
+We show how we can quickly compute all this with the surface intrinsics,
+along with the intersection matrices of the curves (which give the intersection
+graphs) over each conjugate set of singular points.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z,t&gt; := ProjectiveSpace(Rationals(),3);
+&gt; S := Surface(P,
+&gt; z^2*t^7-x^8*t-8*x^7*t*y-4*x^6*t^2*y-24*x^6*t*y^2-24*x^5*t^2*y^2-
+&gt; 4*x^6*y^3-32*x^5*t*y^3-52*x^4*t^2*y^3-24*x^5*y^4-32*x^4*t*y^4-
+&gt; 48*x^3*t^2*y^4-52*x^4*y^5-64*x^3*t*y^5-16*x^2*t^2*y^5-48*x^3*y^6-
+&gt; 96*x^2*t*y^6-16*x^2*y^7-64*x*t*y^7-16*t*y^8);
+&gt; dsds,typ := ResolveSingularSurface(S);
+&gt; typ;  // resolution of blow-up type
+2
+&gt; #dsds; // 5 conjugacy classes of singular points
+5
+&gt; IntersectionMatrix(dsds[1]); // 2 conjugate A3 singularities
+[-4  0  2]
+[ 0 -4  2]
+[ 2  2 -4]
+&gt; IntersectionMatrix(dsds[2]); // 2 conjugate A1 singularities
+[-4]
+&gt; IntersectionMatrix(dsds[3]); // 2 more conjugate A1 singularities
+[-4]
+&gt; IntersectionMatrix(dsds[4]); // 11-component singular point
+[-2  0  0  0  0  0  0  1  0  0  0]
+[ 0 -2  0  0  0  0  0  1  0  0  0]
+[ 0  0 -2  0  0  0  0  0  1  0  0]
+[ 0  0  0 -2  0  0  0  0  1  0  0]
+[ 0  0  0  0 -2  0  0  0  0  0  1]
+[ 0  0  0  0  0 -2  0  0  0  1  0]
+[ 0  0  0  0  0  0 -2  0  0  1  0]
+[ 1  1  0  0  0  0  0 -2  0  0  1]
+[ 0  0  1  1  0  0  0  0 -2  0  1]
+[ 0  0  0  0  0  1  1  0  0 -2  1]
+[ 0  0  0  0  1  0  0  1  1  1 -4]
+</PRE>
+Computing the self-intersections for the 38 components over the final
+singularity takes about five minutes, so we don't include it here.
+The computation of the intersections between different components is still
+very fast, though.
+<P>
+<P>
+<P>
+<PRE>
+&gt;  // 38-component singular point
+&gt; IntersectionMatrix(dsds[5] : get_self_ints := false);
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0]
+[0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 1 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 1]
+[1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 1 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 1]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 0 0 0 0 0 0 0 0 0 0 0 1 0]
+&gt; GeometricGenusOfDesingularization(S);
+3
+</PRE>
+A sequence of degree 5 polynomials defining (rationally) the canonical map 
+is returned by <TT>HomAdjoints(1,0,S)</TT>. For simplicity, we will then just
+write down an equivalent map to P<sup>1</sup>, which is obvious from
+inspection, factoring out the common t<sup>3</sup> and combining with the standard
+birational projection of the image (ac=b<sup>2</sup> in P<sup>2</sup>(a, b, c)) to P<sup>1</sup>.
+We then check that this is an elliptic fibration map by looking at a
+particular fibre, which is an irreducible genus one curve.
+<P>
+<P>
+<PRE>
+&gt; HomAdjoints(1,0,S);
+[
+    x^2*t^3,
+    x*y*t^3,
+    y^2*t^3
+]
+&gt; P1&lt;u,v&gt; := Curve(ProjectiveSpace(Rationals(),1));
+&gt; fib_map := map&lt;S-&gt;P1|[x,y]&gt;;
+&gt; bs := ReducedSubscheme(BaseScheme(fib_map));
+&gt; bs;
+Scheme over Rational Field defined by
+z*t,
+x,
+y
+&gt; // bs is just the two rational singular points
+&gt; f1 := Complement((P1![1,1])@@fib_map,bs);
+&gt; GroebnerBasis(f1);
+[
+    y^9 + 337/144*y^8*t + y^7*t^2 - 1/144*z^2*t^7,
+    x - y
+]
+&gt; IsIrreducible(f1); IsReduced(f1);
+true
+true
+&gt; Genus(Curve(f1));
+1
+</PRE>
+We can go further here and find out exactly the structure of bad fibres
+of the minimal model of X and how they relate to the graphs of exceptional
+divisors over the singular points. Firstly, we check that our desingularisation
+is not minimal by computing its first Chern class. This is the self-intersection
+number K<sup>2</sup> where K is a canonical divisor on the desingularisation. It turns
+out to be -27. As K<sup>2</sup> for the minimal model is 0, the desingularisation is
+the minimal model blown up 27 times. Normally, the intrinsic
+<TT>FirstChernClassOfDesingularization</TT> would be called here. As that uses
+full intersection matrices for the exceptional blow-up divisors and we have
+avoided computing the fifth one fully to save time, we cheat by manually
+inserting the diagonal entries of the fifth matrix and then perform the
+computation undertaken by the intrinsic directly.
+<P>
+<P>
+<P>
+<PRE>
+&gt; imats := [*IntersectionMatrix(dsds[i]) : i in [1..4]*];
+&gt; imat5 := IntersectionMatrix(dsds[5] : get_self_ints := false);
+&gt; imat5 := imat5 + DiagonalMatrix([-2 : i in [1..33]] cat [-3,-3,-3,-4,-3]);
+&gt; Append(~imats,imat5);
+&gt; dms := [DifferentialMultiplicities(dsd) : dsd in dsds];
+&gt; i2 := &amp;+[(m*imats[i]*Transpose(m))[1,1] where m is Matrix(Vector(dms[i])) :
+&gt;              i in [1..5]];
+&gt; d := Degree(S); // d=9
+&gt; K2 := d*(d-4)^2+i2;
+&gt; K2;
+-27
+</PRE>
+Theory tells us that the irreducible curves of the desingularisation that
+are components of the blowing up of the minimal model are precisely those
+that all holomorphic differentials vanish on. A basis B for these differentials
+is given by the degree 5 polynomials returned by the earlier HomAdjoints
+call multiplied by what we have referred to as the `natural differential' 
+&omega; for the hypersurface (which only gives a proper (2,0)-differential
+when multiplied by a degree d - 4 homogeneous polynomial). As &omega; is
+regular and non-vanishing away from the singularities, this means that
+the irreducible curves that do not lie over a singular point on S at which all
+differentials vanish correspond to irreducible curves on S where all polynomials
+in B vanish: those on which t vanishes or on which both x and y vanish.
+The ones over the singular points can be computed similarly, using the fact
+that <TT>DifferentialMultiplicities</TT> gives the order of the poles of &omega;
+at the blow-up components and the orders of vanishing of the polynomials in the
+adjoint sequence can be computed using <TT>Multiplicities</TT>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Dt := Scheme(P,t); Dx := Scheme(P,x); Dy := Scheme(P,y);
+&gt; divs1 := IrreducibleComponents(ReducedSubscheme(S meet Dt));
+&gt; divs1;
+[
+    Scheme over Rational Field defined by
+    x + 2*y,
+    t,
+    Scheme over Rational Field defined by
+    x + y,
+    t,
+    Scheme over Rational Field defined by
+    x,
+    t,
+    Scheme over Rational Field defined by
+    y,
+    t
+]
+&gt; divs2 := IrreducibleComponents(ReducedSubscheme(S meet Dx meet Dy)); 
+&gt; [Dimension(D) : D in divs2];
+[ 0 , 0 ]
+&gt; // divs2 gives no curve components - it's just the two singular points!
+&gt; // Now get the relevant components over the singular points. We could
+&gt; // ignore the simple singularities by general theory, but may as well
+&gt; // do the computation for them (which excludes them)
+&gt; mults_t := [*Vector(Multiplicities(S,dsd,S meet Dt)) : dsd in dsds*];
+&gt; mults_x := [*Vector(Multiplicities(S,dsd,S meet Dx)) : dsd in dsds*];
+&gt; mults_y := [*Vector(Multiplicities(S,dsd,S meet Dy)) : dsd in dsds*];
+&gt; m_t3x2w := [Eltseq(3*mults_t[i]+2*mults_x[i]+Vector(dms[i])) : 
+&gt;                i in [1..5]];
+&gt; m_t3xyw := [Eltseq(3*mults_t[i]+mults_x[i]+mults_y[i]+
+&gt;                Vector(dms[i])) : i in [1..5]];
+&gt; m_t3y2w := [Eltseq(3*mults_t[i]+2*mults_y[i]+Vector(dms[i])) :
+&gt;                i in [1..5]];
+&gt; m_min := [[Min([m[i][j] : m in [m_t3x2w,m_t3xyw,m_t3y2w]]) : 
+&gt;              j in [1..#(m_t3x2w[i])]] : i in [1..5]];
+&gt; m_min;
+[
+    [ 0, 0, 0 ],
+    [ 0 ],
+    [ 0 ],
+    [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+    [ 5, 5, 7, 8, 5, 3, 3, 4, 5, 3, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 0, 0, 1,
+    4, 4, 4, 6, 2, 2, 3, 2, 0, 0, 0, 0, 0 ]
+]
+&gt; [i : i in [1..38] | m_min[5][i] gt 0];
+[ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 19, 20, 21, 22, 25, 26, 27, 28, 29, 30, 31, 32,
+33 ]
+</PRE>
+Thus, the four lines in <TT>divs1</TT> and 23 blow-up divisors over the fifth
+singular point whose indices lie in the sequence given above are the components
+that need to be contracted to give the minimal model for X. This tallies with
+the earlier K<sup>2</sup> computation (and renders it redundant!).
+<P>
+Further analysis shows the following.
+<P>
+The irreducible divisors above the 2 Q-rational singular points map to 
+one of the four points 0, - 1, - 2, &infin; on P<sup>1</sup> under fib<sub>m</sub>ap
+except for the curve of self-intersection -3 over singularity 4 and the
+curve of self-intersection -4 over singularity 5, both of which map onto
+P<sup>1</sup>. This is computed using <TT>BlowUpDivisors</TT> to get affine patches
+of the divisors along with the maps down to S.
+<P>
+The four lines are all (-1)-curves. What this means is that their strict
+transforms on the desingularisation all have self-intersection -1. This
+is computed by showing that they have intersection number -1 with the
+canonical divisor via calls to <TT>CanonicalIntersection</TT>, which in
+turn uses <TT>MultiplicitiesAndIntersections</TT>.
+The latter (the intersection part) is a bit slow for the first 3 
+divisors, although all took less than 2 minutes processor time on our machines.
+The final one is very slow, taking about an hour.
+<P>
+There are four chains of curves, each starting from one of these (-1)-curves, continuing
+down through (-2)-curves above the fifth singularity p and stopping at the four
+(-3)-curves over p. The blow-down from the desingularisation to the minimal model
+contracts these four chains, leaving only (-2)-curves and the (-4)-curve over p.
+We also find another
+8 irreducible curves in S over the four points of P<sup>1</sup> mentioned above and these
+8 curves are also (-2)-curves and join the remaining (non-blown-down) components
+over p to those over the fourth singularity. All of these (-2)-curves together -
+the 8 new ones and those over p and the fourth singularity, excluding the
+two (-4)-curves which map onto P<sup>1</sup> - form four disjoint simple loops containing
+eight curves each. These are the fibres of the minimal model over the four points
+of P<sup>1</sup> and are all of type I<sub>8</sub> in the usual Neron/Kodaira notation. The
+curves over the six simple singular points along with an additional (-2)-curve
+(strict transform of a curve in S) for each singularity form the remaining bad fibres
+on the minimal model which give two fibres of type I<sub>4</sub> and four of type I<sub>2</sub>.
+<P>
+We can deduce from all the information gained that the divisor H + K on the
+desingularisation (H is the hyperplane divisor and K the canonical) is base-point
+free and its associated map into projective space contracts precisely the curves
+on which all differentials vanish, so factors through the minimal model. It should
+give an isomorphic embedding of the minimal model into ordinary projective space.
+However, it maps into projective space of dimension 30, which is rather large.
+<P>
+We briefly illustrate a couple of these final points.
+<P>
+<P>
+<PRE>
+&gt; C,_,mp := BlowUpDivisor(S,dsds[4],11);
+&gt; mp := Restriction(mp,C,S : Check := false);
+&gt; fmpC := Expand(mp*fib_map);
+&gt; // manually remove common factors from defining equations to
+&gt; // get the fibre map from C to P^1
+&gt; fmpC := map&lt;C-&gt;P1|[e div g : e in DefiningPolynomials(fmpC)]&gt; where
+&gt;   g is GCD(DefiningPolynomials(fmpC));
+&gt; C; fmpC;
+Curve over Rational Field defined by
+1/4*$.2^2 - 1/4*$.3^2 + $.2,
+$.2,
+$.3
+Mapping from: Crv: C to Crv: P1
+with equations :
+1 
+$.1
+&gt; Image(fmpC); // It's onto!
+Curve over Rational Field defined by
+0
+&gt; C,_,mp := BlowUpDivisor(S,dsds[5],34);
+&gt; mp := Restriction(mp,C,S : Check := false);
+&gt; fmpC := Expand(mp*fib_map);
+&gt; fmpC := map&lt;C-&gt;P1|[e div g : e in DefiningPolynomials(fmpC)]&gt; where
+&gt;   g is GCD(DefiningPolynomials(fmpC));
+&gt; C; fmpC;
+Curve over Rational Field defined by
+$.2,
+$.3
+Mapping from: Crv: C to Crv: P1
+with equations : 
+1
+$.1*$.2 + 4*$.2 - 1/2
+&gt; Image(fmpC); // C maps to [-2:1]
+Scheme over Rational Field defined by
+1/2*u + v
+&gt; // |H+K| divisor map is the (1,1)-adjoint map : HomAdjoints gives
+&gt; // defining polynomials
+&gt; HKeqns := HomAdjoints(1,1,S);
+&gt; #HKeqns; // It's into P^30
+31
+</PRE>
+<HR>
+<H3><A NAME = "15457">Example <TT>AlgSrf_srfc_blow_up_desing_2 (H122E12)</TT></A></H3>
+This example deals with K3 surfaces S that are double covers of the plane 
+ramified over smooth sextics. If the plane sextic f<sub>6</sub> has a tritangent line,
+then the pull back of that line to S splits into two rational (-2)-curves
+Z<sub>1</sub> and Z<sub>2</sub>. General theory (see <A  HREF = "text1378.htm#bib_StD73">[SD74]</A>, Section 7) says that
+if B is the divisor class of the pullback of lines in the plane (the
+general member of which is a smooth genus 2 curve: a double cover of
+the plane line ramified over the six points where the line meets the
+ramification sextic) then the divisor map for the divisor class 2B + Z<sub>1</sub>
+gives a birational embedding of S into P<sup>6</sup> which is an isomorphism to
+its image X outside of contracting Z<sub>1</sub> to an A<sub>1</sub> singularity. X is the
+intersection of a singular cone over a Veronese surface in P<sup>5</sup> with
+three cubics. Furthermore, the Veronese cone is generated by the quadrics
+in the ideal of X. The image of Z<sub>1</sub> is the vertex of the cone.
+<P>
+We will use the desingularisation machinery to analyse a singular model
+of such an S in P<sup>3</sup>, construct the divisor map on this model and
+check that the image has the predicted form. Note, generally that if the
+smooth sextic has equation f<sub>6</sub>(a, b, d)=0 in P<sup>2</sup>(a, b, d) then a birational
+model for the double cover in P<sup>3</sup>(a, b, c, d) is given by the degree 6
+homogeneous equation F=f<sub>6</sub>(a, b, d) - c<sup>2</sup>d<sup>4</sup>=0 and this hypersurface is
+only singular at the point with homogeneous coordinates [0:0:1:0]
+so blow-up desingularisation may be applied. In the more general case
+of a sextic with simple curve singularities (which also leads to a K3
+surface), there will be further singular points on the hypersurface model,
+but still only singular points (not curves) as long as coordinates are
+chosen so that none of the singularities of f<sub>6</sub> are at infinity
+(i.e. on the line d=0).
+<P>
+Our example has
+<P>
+<P>
+<P>
+<P>
+f<sub>6</sub> = a<sup>6</sup> + 2a<sup>5</sup>b - 2a<sup>4</sup>b<sup>2</sup> + 2a<sup>2</sup>b<sup>4</sup> + b<sup>6</sup> + a<sup>4</sup>d<sup>2</sup> + 2a<sup>3</sup>bd<sup>2</sup> +
+     a<sup>2</sup>b<sup>2</sup>d<sup>2</sup> - ab<sup>3</sup>d<sup>2</sup> - 2b<sup>4</sup>d<sup>2</sup> - a<sup>2</sup>bd<sup>3</sup> - 2ab<sup>2</sup>d<sup>3</sup> + 2a<sup>2</sup>d<sup>4</sup> +
+     b<sup>2</sup>d<sup>4</sup> - ad<sup>5</sup> 
+<P>
+<P>
+<P>
+<P>
+which is easily checked to be nonsingular and to have a=0 as a tritangent
+line. We will take the pullback of the line b=0 as an irreducible divisor
+of class B.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P&lt;a,b,c,d&gt; := ProjectiveSpace(Rationals(),3);
+&gt; S := Surface(P, a^6+2*a^5*b-2*a^4*b^2+2*a^2*b^4+b^6+a^4*d^2+2*a^3*b*d^2+
+&gt;   a^2*b^2*d^2-a*b^3*d^2-2*b^4*d^2-a^2*b*d^3-2*a*b^2*d^3+2*a^2*d^4+b^2*d^4-
+&gt;   c^2*d^4-a*d^5);
+&gt; dsds := ResolveSingularSurface(S);
+&gt; #dsds; // only one singular point at [0,0,1,0]
+1
+&gt; dsd := dsds[1];
+&gt; IntersectionMatrix(dsd);
+[-10   0   5]
+[  0  -2   1]
+[  5   1  -4]
+</PRE>
+The first irreducible blow-up divisor D actually splits into 5 disjoint
+(-2)-curves over a finite extension of Q. We can see this by examining
+the equations for it on a chosen affine patch. To check that the components
+don't intersect on another patch, we could use <TT>BlowUpDivisorAllPatches</TT>,
+but it suffices to show that the intersection number K.D=0
+(implying that K.D<sub>i</sub>=0 for each component : they are all conjugate
+and so have the same intersection number with the Q-rational class K),
+and that each component is a rational curve. Then, if any component were
+singular on another patch or the components intersected, D.D would be
+greater than -10. The other two classes are a further genus 0
+nonsingular curve (also disjoint from D by the intersection matrix)
+and a non-singular genus 2 curve.
+<P>
+<P>
+<PRE>
+&gt; C1 := BlowUpDivisor(S,dsd,1); C1;
+Curve over Rational Field defined by
+$.2^5 - $.2^4 + 3*$.2^3 - 3*$.2^2 + $.2 + 1,
+$.1
+&gt; CanonicalIntersection(dsd,1);
+0
+&gt; C2 := BlowUpDivisor(S,dsd,2); C2;
+Curve over Rational Field defined by
+$.1,
+$.2 + 1
+&gt; C3 := BlowUpDivisor(S,dsd,3); C3;
+$.1^6*$.3^2 + 2*$.1^4*$.3^2 - 2*$.1^2*$.3^2 + 2*$.1*$.3^2 + $.3^2 - 1,
+$.2
+&gt; Genus(Curve(C3));
+2
+</PRE>
+<P>
+As in the last example, we can get the geometric genus of the blow-up,
+a basis for holomorphic differentials and also the set of irreducible
+divisors on which all these differentials vanish. Comparing with the
+K<sup>2</sup> intersection number verifies that the minimal K<sup>2</sup> = 0 and that
+the desingularisation is a minimal model blown up twelve times. We
+also confirm that S is (birationally) a K3 surface by checking
+that the second plurigenus and the arithmetic genus are 1. These
+invariant values, along with p<sub>g</sub>=1, only occur for blow-ups of
+K3 surfaces.
+<P>
+<P>
+<PRE>
+&gt; GeometricGenusOfDesingularization(S);
+1
+&gt; PlurigenusOfDesingularization(S,2);
+1
+&gt; ArithmeticGenusOfDesingularization(S);
+1
+&gt; diffs := HomAdjoints(1,0,S); diffs;
+[
+    d^2
+]
+&gt; // Only one holomorphic differential up to a scalar. 
+&gt; // Curves on which it vanishes are those in S on which
+&gt; // d vanishes and blowup divisors on which $d^2$ vanishes
+&gt; // to a higher order than the differential multiplicity.
+&gt; // This turns out to be the first 2 blow-up divisors.
+&gt; Dd := S meet Scheme(P,d);
+&gt; divs1 := IrreducibleComponents(ReducedSubscheme(Dd));
+&gt; divs1;
+[
+    Scheme over Rational Field defined by
+    a^5 + a^4*b - 3*a^3*b^2 + 3*a^2*b^3 - a*b^4 + b^5,
+    d,
+    Scheme over Rational Field defined by
+    a + b,
+    d
+]
+&gt; // The first divisor above splits into 5 disjoint lines
+&gt; // again over an extension of Q. We check that all 6
+&gt; // geometrically irreducible lines in divs1 have strict
+&gt; // transforms on the blow-up that are (-1)-curves by
+&gt; // computing that K.D=-1 for all of them
+&gt; CanonicalIntersection(S,divs1[1]);
+-5
+&gt; CanonicalIntersection(S,divs1[2]);
+-1
+&gt; DifferentialMultiplicities(dsd);
+[ -3, -3, -6 ]
+&gt; [2*m : m in Multiplicities(S,dsd,Dd)];
+[ 4, 4, 6 ]
+&gt; FirstChernClassOfDesingularization(S);
+-12
+</PRE>
+<P>
+The strict transform of each of the five conjugate lines in <TT>divs1</TT>
+meets one of the five conjugate lines of the first irreducible
+blow-up divisor once transversally. The line over Q in <TT>divs1</TT>
+meets blow-up divisor 2 once transversally. This is checked by
+computing intersection numbers. This shows that the blow-up process
+to go from the minimal K3 surface to our desingularisation is to
+blow up 6 points (one over Q and 5 conjugate ones over Q)
+and then to further blow up a point on each of the (-1)-curves arising.
+<P>
+<P>
+<PRE>
+&gt; _,ints := MultiplicitiesAndIntersections(S,dsd,divs1[1]);
+&gt; ints;
+[ 5, 0, 0 ]
+&gt; _,ints := MultiplicitiesAndIntersections(S,dsd,divs1[2]);
+&gt; ints;
+[ 0, 1, 0]
+</PRE>
+<P>
+We now construct the 2B + Z1 divisor map. The method is to
+first get a basis for the Riemann-Roch space of the divisor using
+the normal call to the divisor/sheaf intrinsic. However, as explained
+in the description of the <TT>LinearSystemDivisorRestriction</TT>
+intrinsic, we then have to impose extra conditions at the blow-up
+divisors. If the denominator of the R-R space vanishes to given
+multiplicities at these divisors, we have to take the subspace
+of numerators that also vanish to at least these multiplicities.
+As it is slightly more convenient to get the R-R space as
+a separate basis of numerators and denominators using the sheaf
+intrinsic, we use that here.
+<P>
+<P>
+<PRE>
+&gt; // First get B and Z1
+&gt; // Z1 is one of the components of the pullback of a=0 to S
+&gt; cmps := IrreducibleComponents(S meet Scheme(P,a));
+&gt; cmps;
+[
+    Scheme over Rational Field defined by
+    b^3 - b*d^2 + c*d^2,
+    a,
+    Scheme over Rational Field defined by
+    b^3 - b*d^2 - c*d^2,
+    a
+]
+&gt; Z1 := cmps[1];
+&gt; // B is the pullback of b=0 to S
+&gt; B := S meet Scheme(P,b);
+&gt; GroebnerBasis(B);
+[
+    a^6 + a^4*d^2 + 2*a^2*d^4 - c^2*d^4 - a*d^5,
+    b
+]
+&gt; rr,den := RiemannRochBasis(S,
+&gt;  EquidimensionalPart((Ideal(B)^2*Ideal(Z1))+Ideal(S)));
+&gt; rr;
+[
+    a^3,
+    a^2*b,
+    a^2*c,
+    a^2*d,
+    a*b^2,
+    a*b*c,
+    a*b*d,
+    a*c^2,
+    a*c*d,
+    a*d^2,
+    b^3 - b*d^2 - c*d^2
+]
+&gt; den;
+a*b^2
+&gt; // Do the linear system restriction at blow-up divisors
+&gt; mults := Multiplicities(S,dsd,S meet Scheme(P,den)); mults;
+[3,3,6]
+&gt; div_map_eqns := LinearSystemDivisorRestriction(S,rr,[mults]:
+&gt;      CheckB := false);
+&gt; div_map_eqns;
+[
+    a^3,
+    a^2*b,
+    a^2*d,
+    a*b^2,
+    a*b*d,
+    a*d^2,
+    b^3 - b*d^2 - c*d^2
+]
+</PRE>
+<P>
+We finally check that the image is of the expected type.
+<P>
+<P>
+<PRE>
+&gt; P6&lt;x,y,z,s,t,u,v&gt; := ProjectiveSpace(Rationals(),6);
+&gt; div_map := map&lt;S-&gt;P6|div_map_eqns&gt;;
+&gt; X := Image(div_map);
+&gt; Xeqns := MinimalBasis(Ideal(X));
+&gt; Xeqns;
+[
+    t^2 - s*u,
+    z*t - y*u,
+    z*s - y*t,
+    z^2 - x*u,
+    y*z - x*t,
+    y^2 - x*s,
+    x^2*z + 2*x^2*t - 2*x*y*t + 2*y*s*t + x*z*u + 2*x*t*u +
+    y*t*u - s*t*u - y*u^2 + 2*z*u^2 - 2*s*u^2 - u^3 + 
+        2*s*t*v - 2*t*u*v - z*v^2,
+    x^2*y + 2*x^2*s - 2*x*y*s + 2*y*s^2 + x*y*u + 2*x*s*u +
+     y*s*u - s^2*u - y*t*u - 2*s*t*u + 2*y*u^2 - t*u^2 + 
+        2*s^2*v - 2*s*u*v - y*v^2,
+    x^3 - 6*x^2*s + 4*x*y*s + 2*x*s^2 - 4*y*s^2 + x^2*u - 
+     3*x*s*u - 3*y*s*u + 2*s^2*u - x*t*u + 4*s*t*u + 
+       2*x*u^2 - 4*y*u^2 - z*u^2 + 2*t*u^2 + 2*y*s*v -
+        4*s^2*v - 2*y*u*v + 4*s*u*v - x*v^2 + 2*y*v^2
+]
+</PRE>
+<P>
+As expected, there are 3 cubics. Also, the quadrics do not
+contain v so define a singular cone over the scheme they
+define in the P<sup>5</sup> hyperplane v=0. Can see by inspection that
+this is a Veronese surface. However, we can check this mechanically
+by the characterisation that it is a non-singular, irreducible,
+non-degenerate (not lying in a hyperplane) surface of degree 4
+with K<sup>2</sup>=9. We verify the K<sup>2</sup> condition with the general
+machinery for surfaces with at most simple singularities. We also check
+directly that X has only an A<sub>1</sub> singularity at the cone
+vertex, [0:0:0:0:0:0:1].
+<P>
+<P>
+<PRE>
+&gt; P5 := ProjectiveSpace(Rationals(),5);
+&gt; hm := hom&lt;CoordinateRing(P6)-&gt;CoordinateRing(P5)|
+&gt;   [P5.i : i in [1..6]] cat [0]&gt;;
+&gt; Xquad := Surface(P5,[hm(Xeqns[i]) : i in [1..6]]);
+&gt; // The surface constructor has checked irreducibility
+&gt; // and dimension!
+&gt; IsNonsingular(Xquad);
+true
+&gt; Degree(Xquad);
+4
+&gt; ChernNumber(Xquad,1); // K^2 = 9
+9
+&gt; // Check non-degeneracy : no linear form vanishes on Xquad
+&gt; Saturate(~Xquad);
+&gt; Min([TotalDegree(f) : f in Basis(Ideal(Xquad))]);
+2 1
+&gt; HasOnlySimpleSingularities(X : ReturnList := true);
+true [* &lt;(0 : 0 : 0 : 0 : 0 : 0 : 1), "A", 1&gt; *]
+</PRE>
+<HR>
+<H3><A NAME = "15458">Example <TT>AlgSrf_srfc_blow_up_desing_3 (H122E13)</TT></A></H3>
+<P>
+This example deals with blowing down lines that pass through singular points
+on a degenerate Del Pezzo surface. On non-singular Del Pezzos, a disjoint collection
+of lines {L<sub>i</sub>} can be blown down by applying the divisor map of the divisor
+class H + &sum;<sub>i</sub> L<sub>i</sub>, where H is a hyperplane divisor. The divisor map can be
+obtained from either the sheaf <TT>DivisorMap</TT> intrinsic or from the Riemann-Roch
+basis computed using the divisor machinery.
+<P>
+In the singular case, the Riemann-Roch space computation in general produces a
+space of functions that is too large and which doesn't give the anti-canonical embedding
+of the blow-down. As in the last example, we can get the correct Riemann-Roch space
+for the blow-down map using linear system divisor restriction.
+<P>
+Our example is a degree 4 Del Pezzo S in P<sup>4</sup> with an A<sub>1</sub> and an A<sub>2</sub> singularity.
+We have two lines L<sub>1</sub> and L<sub>2</sub> that we want to blow down which intersect at the A<sub>2</sub> singularity
+but whose strict transforms are (-1)-curves that do not intersect on the desingularised
+Del Pezzo. The Riemann-Roch space for H + L<sub>1</sub> + L<sub>2</sub> is of dimension one too large, but gives
+the correct anticanonical map into P<sup>6</sup> after restriction.
+<P>
+Since we want the strict transform of our divisor on S to be a full divisor of the Cartier
+hyperplane divisor class added to the strict transforms of the two lines,
+we have to be careful to take a hyperplane on S that doesn't
+pass through the singular points. Otherwise, divisor restriction leads to a Riemann-Roch
+space that is too small: the subspace of the required space of functions that vanish to some
+positive multiplicity on the (-2)-curves above the singular points.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P4&lt;x,y,z,t,u&gt; := ProjectiveSpace(Rationals(),4);
+&gt; S := Surface(P4,[z^2+x*t-y*t-z*u, x*z-y*z+x*u]);
+&gt; HasOnlySimpleSingularities(S : ReturnList := true);
+true
+[* &lt;(0 : 0 : 0 : 1 : 0), "A", 2&gt;, &lt;(1 : 1 : 0 : 0 : 0), "A", 1&gt; *]
+&gt; dsds := ResolveSingularSurface(S);
+&gt; L1 := Scheme(P4,[x,y,z]);
+&gt; L2 := Scheme(P4,[x-y,z,u]);
+&gt; MultiplicitiesAndIntersections(S,L1);
+[
+    [ 0 ],
+    [ 1, 1 ]
+]
+[
+    [ 0 ],
+    [ 1, 0 ]
+]
+&gt; MultiplicitiesAndIntersections(S,L2);
+[
+    [ 1 ],
+    [ 1, 1 ]
+]
+[
+    [ 1 ],
+    [ 0, 1 ]
+]
+</PRE>
+We see from this that for the two (-2)-curves over the A<sub>2</sub> singularity,
+the strict transform of L<sub>1</sub> passes through one (transversally) and 
+that of L<sub>2</sub> passes through the other. The strict transform of L<sub>2</sub>
+passes through the A<sub>1</sub> singularity and meets the (-2)-curve above it,
+whereas that of L<sub>1</sub> doesn't. In particular, the strict transforms of
+the two lines don't meet.
+<P>
+We first show that if we take a very bad hyperplane divisor (x=0) that passes
+through both of the singularities, divisor restriction gives a Riemann-Roch
+space that is much too small.
+<P>
+<P>
+<P>
+<PRE>
+&gt; D := Divisor(S,L1)+Divisor(S,L2)+Divisor(S,Scheme(S,x));
+&gt; rr := RiemannRochBasis(D);
+&gt; #rr; // too large by one
+8
+&gt; // transform to numerators and denominators
+&gt; rr_fns := [ProjectiveRationalFunction(e) : e in rr];
+&gt; den := LCM([Denominator(f): f in rr_fns]);
+&gt; den;
+y*z - x*u
+&gt; B := [R!(den*f) : f in rr_fns] where R is CoordinateRing(P4);
+&gt; ms := Multiplicities(S,Scheme(S,den)); ms;
+[
+    [ 1 ],
+    [ 3, 2 ]
+]
+&gt; B1 := LinearSystemDivisorRestriction(S,B,ms);
+&gt; #B1; // too small by 5!
+2
+</PRE>
+We now get the correct result for blow-down to a non-degenerate degree 6 Del Pezzo
+using a hyperplane divisor that avoids the singular points (x + t=0).
+<P>
+<P>
+<P>
+<PRE>
+&gt; D := Divisor(S,L1)+Divisor(S,L2)+Divisor(S,Scheme(S,x+t));
+&gt; rr := RiemannRochBasis(D);
+&gt; #rr; // too large by one again
+8
+&gt; // transform to numerators and denominators
+&gt; rr_fns := [ProjectiveRationalFunction(e) : e in rr];
+&gt; den := LCM([Denominator(f): f in rr_fns]);
+&gt; den;
+y*z + z*t - x*u
+&gt; B := [R!(den*f) : f in rr_fns] where R is CoordinateRing(P4);
+&gt; ms := Multiplicities(S,Scheme(S,den)); ms;
+[
+    [ 1 ],
+    [ 1, 1 ]
+]
+&gt; B1 := LinearSystemDivisorRestriction(S,B,ms);
+&gt; #B1; // correct!
+7
+</PRE>
+B1 gives the blow-down map to the anti-canonical image in P<sup>6</sup>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P6&lt;a,b,c,d,e,f,g&gt; := ProjectiveSpace(Rationals(),6);
+&gt; bdmp := map&lt;S-&gt;P6|B1&gt;;
+&gt; X := Image(bdmp);
+&gt; MinimalBasis(Ideal(X));
+[
+    e*f - d*g,
+    d*f - f^2 - a*g,
+    c*f - b*g,
+    d*e - c*g - f*g,
+    a*e + a*g - b*g,
+    d^2 - f^2 - b*g,
+    c*d - b*e,
+    a*d + a*f - b*f,
+    a*c - b*d + b*f
+]
+&gt; Degree(X);
+6
+&gt; ChernNumber(X,1); //K^2 for X
+6
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1384.htm">[Next]</A><A  HREF = "text1382.htm">[Prev]</A> <A  HREF = "text1384.htm">[Right]</A> <A  HREF = "text1382.htm">[Left]</A> <A  HREF = "text1379.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

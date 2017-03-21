@@ -1,0 +1,2 @@
+174,1
+A,TorPol,6,fp_ng,fp_are_vertices,fp_supporting_cones,fp_decomposition,fp_nonvanishing_form,fp_dimension

@@ -1,0 +1,212 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Transcendental Functions</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text515.htm">[Next]</A><A  HREF = "text513.htm">[Prev]</A> <A  HREF = "text515.htm">[Right]</A> <A  HREF = "text513.htm">[Left]</A> <A  HREF = "text509.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "5586">Transcendental Functions</A></H3>
+
+<P>
+<P>
+In each of the functions below, the precision of the result will be
+approximately equal to the precision of the argument if that is finite;
+otherwise it will be approximately equal to the default precision of
+the parent of the argument.  An error will result if the coefficient
+ring of the series is not a field.  If the first argument has a
+non-zero constant term, an error will result unless the coefficient
+ring of the parent is a real or complex domain (so that the
+transcendental function can be evaluated in the constant term).
+<P>
+See also the chapter on real and complex fields for elliptic
+and modular functions which are also defined for formal series.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text514.htm#5587">Exponential and Logarithmic Functions</A>
+<LI> <A  HREF = "text514.htm#5591">Trigonometric Functions and their Inverses</A>
+<LI> <A  HREF = "text514.htm#5599">Hyperbolic Functions and their Inverses</A>
+</UL>
+<H4><A NAME = "5587">Exponential and Logarithmic Functions</A></H4>
+
+
+
+<H5><A NAME = "5588">Exp(f) : RngSerElt -&gt; RngSerElt</A></H5>
+<BLOCKQUOTE>
+Given a series f defined over a field, return the exponential of f. 
+</BLOCKQUOTE>
+<H5><A NAME = "5589">Log(f) : RngSerElt -&gt; RngSerElt</A></H5>
+<BLOCKQUOTE>
+Given a series f defined over a field of characteristic zero,
+return the logarithm of f. The valuation of f must be zero.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5590">Example <TT>RngSer_Bernoulli (H49E3)</TT></A></H3>
+In this example we show how one can compute the Bernoulli
+number B<sub>n</sub> for given n using generating functions.
+The function <TT>BernoulliNumber</TT> now actually uses this method (since
+V2.4).  Using this method, the Bernoulli number B<sub>10000</sub> has
+been computed, taking about 14 hours on a 250MHz Sun Ultrasparc
+(the computation depends on the new asymptotically fast
+methods for series division).
+<P>
+<P>
+The exponential generating function for the Bernoulli numbers is:
+ E(x) = (x /(e<sup>x</sup> - 1)). 
+This means that the n-th Bernoulli number B<sub>n</sub> is
+n! times the coefficient of x<sup>n</sup> in E(x).
+The Bernoulli numbers B<sub>0</sub>, ..., B<sub>n</sub> for any n can thus be
+calculated by computing the above power series and scaling the coefficients.
+<P>
+<P>
+<P>
+In this example we will compute B<sub>500</sub>.
+We first set the final coefficient index n we desire
+to be 500.  We then create the denominator D = e<sup>x</sup> - 1 of the exponential
+generating function to precision n + 2 (we need n + 2 since we
+lose precision when we divide by the denominator and the valuation changes).
+For each series we create, we print the sum of it and (O)(x<sup>20</sup>), which
+will only print the terms up to x<sup>19</sup>.
+<P>
+<P>
+<PRE>
+&gt; n := 500;
+&gt; S&lt;x&gt; := LaurentSeriesRing(RationalField(), n + 2);
+&gt; time D := Exp(x) - 1;
+Time: 0.040
+&gt; D + O(x^20);
+x + 1/2*x^2 + 1/6*x^3 + 1/24*x^4 + 1/120*x^5 + 1/720*x^6 + 1/5040*x^7 + 
+    1/40320*x^8 + 1/362880*x^9 + 1/3628800*x^10 + 1/39916800*x^11 + 
+    1/479001600*x^12 + 1/6227020800*x^13 + 1/87178291200*x^14 + 
+    1/1307674368000*x^15 + 1/20922789888000*x^16 + 1/355687428096000*x^17 + 
+    1/6402373705728000*x^18 + 1/121645100408832000*x^19 + O(x^20)
+</PRE>
+We then form the quotient E=x/D which gives the exponential generating
+function.
+<P>
+<P>
+<PRE>
+&gt; time E := x / D;
+Time: 5.330
+&gt; E + O(x^20);
+1 - 1/2*x + 1/12*x^2 - 1/720*x^4 + 1/30240*x^6 - 1/1209600*x^8 + 
+    1/47900160*x^10 - 691/1307674368000*x^12 + 1/74724249600*x^14 - 
+    3617/10670622842880000*x^16 + 43867/5109094217170944000*x^18 + O(x^20)
+</PRE>
+We finally compute the Laplace transform of E (which multiplies the
+coefficient of x<sup>i</sup> by i!) to yield the generating function of
+the Bernoulli numbers up to the x<sup>n</sup> term.  Thus the coefficient of x<sup>n</sup>
+here is B<sub>n</sub>.
+<P>
+<P>
+<PRE>
+&gt; time B := Laplace(E);
+Time: 0.289
+&gt; B + O(x^20);
+1 - 1/2*x + 1/6*x^2 - 1/30*x^4 + 1/42*x^6 - 1/30*x^8 + 5/66*x^10 - 
+    691/2730*x^12 + 7/6*x^14 - 3617/510*x^16 + 43867/798*x^18 + O(x^20)
+&gt; Coefficient(B, n);
+-16596380640568557229852123088077134206658664302806671892352650993155331641220\
+960084014956088135770921465025323942809207851857992860213463783252745409096420\
+932509953165466735675485979034817619983727209844291081908145597829674980159889\
+976244240633746601120703300698329029710482600069717866917229113749797632930033\
+559794717838407415772796504419464932337498642714226081743688706971990010734262\
+0768812383228675592757482195884044&#8802;3034528296023051638858467185173202483888\
+794342720837413737644410765563213220043477396887812891242952336301344808165757\
+942109887803692579439427973561487863524556256869403384306433922049078300720480\
+361757680714198044230522015775475287075315668886299978958150756677417180004362\
+981454396613646612327019784141740499835461/8365830
+&gt; n;
+500
+</PRE>
+<HR>
+<H4><A NAME = "5591">Trigonometric Functions and their Inverses</A></H4>
+
+
+
+<H5><A NAME = "5592">Sin(f) : RngSerElt -&gt; RngSerElt</A></H5>
+<BLOCKQUOTE>
+Given a series f defined over a field of characteristic zero,
+return the sine of f. The valuation of f must be zero.
+</BLOCKQUOTE>
+<H5><A NAME = "5593">Cos(f) : RngSerElt -&gt; RngSerElt</A></H5>
+<BLOCKQUOTE>
+Given a series f defined over a field of characteristic zero,
+return the cosine of f. The valuation of f must be zero.
+</BLOCKQUOTE>
+<H5><A NAME = "5594">Sincos(f) : RngSerElt -&gt; RngSerElt</A></H5>
+<BLOCKQUOTE>
+Given a series f defined over a field of characteristic zero,
+return both the sine and cosine of f. The valuation of f must be zero.
+</BLOCKQUOTE>
+<H5><A NAME = "5595">Tan(f) : RngSerElt -&gt; RngSerElt</A></H5>
+<BLOCKQUOTE>
+Return the tangent of the series f defined over a field. 
+</BLOCKQUOTE>
+<H5><A NAME = "5596">Arcsin(f) : RngSerElt -&gt; RngSerElt</A></H5>
+<BLOCKQUOTE>
+Given a series f defined over a field of characteristic zero, 
+return the inverse sine of f.
+</BLOCKQUOTE>
+<H5><A NAME = "5597">Arccos(f) : RngSerElt -&gt; RngSerElt</A></H5>
+<BLOCKQUOTE>
+Given a series f defined over the real or complex field, return the
+inverse cosine of f.
+</BLOCKQUOTE>
+<H5><A NAME = "5598">Arctan(f) : RngSerElt -&gt; RngSerElt</A></H5>
+<BLOCKQUOTE>
+Given a series f defined over a field of characteristic zero, 
+return the inverse tangent of f.
+<P>
+<P>
+<P>
+<P>
+</BLOCKQUOTE>
+<H4><A NAME = "5599">Hyperbolic Functions and their Inverses</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+
+
+<H5><A NAME = "5600">Sinh(f) : RngSerElt -&gt; RngSerElt</A></H5>
+<BLOCKQUOTE>
+Given a series f defined over a field, return the hyperbolic 
+sine of f.
+</BLOCKQUOTE>
+<H5><A NAME = "5601">Cosh(f) : RngSerElt -&gt; RngSerElt</A></H5>
+<BLOCKQUOTE>
+Given a series f defined over a field, return the hyperbolic 
+cosine of f.
+</BLOCKQUOTE>
+<H5><A NAME = "5602">Tanh(f) : RngSerElt -&gt; RngSerElt</A></H5>
+<BLOCKQUOTE>
+Given a series f defined over a field, return the hyperbolic 
+tangent of f.
+</BLOCKQUOTE>
+<H5><A NAME = "5603">Argsinh(f) : RngSerElt -&gt; RngSerElt</A></H5>
+<BLOCKQUOTE>
+Given a series f defined over a field of characteristic zero, return 
+the inverse hyperbolic sine of f.
+</BLOCKQUOTE>
+<H5><A NAME = "5604">Argcosh(f) : RngSerElt -&gt; RngSerElt</A></H5>
+<BLOCKQUOTE>
+Given a series f defined over the real or complex field, return the
+inverse hyperbolic cosine of f.
+</BLOCKQUOTE>
+<H5><A NAME = "5605">Argtanh(f) : RngSerElt -&gt; RngSerElt</A></H5>
+<BLOCKQUOTE>
+Given a series f defined over a field of characteristic zero, return 
+the inverse hyperbolic tangent of f.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text515.htm">[Next]</A><A  HREF = "text513.htm">[Prev]</A> <A  HREF = "text515.htm">[Right]</A> <A  HREF = "text513.htm">[Left]</A> <A  HREF = "text509.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

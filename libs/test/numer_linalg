@@ -1,0 +1,537 @@
+
+////////////////////////////////////////////////////////////////////////
+
+function MyNorm(M) E:=Eltseq(M); if #E eq 0 then return 0; end if;
+ return Sqrt(&+([Abs(x)^2 : x in Eltseq(M)])); end function;
+
+function my_rand(F,sz) r:=Random(-sz*10^30,sz*10^30)/10^30;
+ if Type(F) eq FldRe then return F!r; end if;
+ s:=Random(-sz*10^30,sz*10^30)/10^30; return F![r,s]; end function;
+
+DBG:=false;
+
+procedure check_mat(M,rk) R:=BaseRing(M); nr:=Nrows(M); nc:=Ncols(M);
+ function E(x) assert x le 10^(-25); return x; end function;
+ procedure H(x,y) if DBG then x,y; end if; end procedure;
+ assert rk eq NumericalRank(M); assert Nrows(NumericalKernel(M)) eq nr-rk;
+ w1:=&+[my_rand(R,5)*M[u] : u in [1..nr]];
+ w2:=&+[my_rand(R,5)*M[u] : u in [1..nr]];
+ w3:=&+[my_rand(R,5)*M[u] : u in [1..nr]]; w:=Matrix([w1,w2,w3]);
+ PI:=NumericalPseudoinverse(M); COND:=MyNorm(M)*MyNorm(PI); H("COND",COND);
+ v,K:=NumericalSolution(M,w); nm:=MyNorm(w);
+ if nm ne 0 then H("v*M-w",E(MyNorm(v*M-w)/MyNorm(w)));
+ else assert MyNorm(v) eq 0; end if;
+ if Nrows(K) ne 0 and MyNorm(M) ne 0
+  then H("KM",E(MyNorm(K*M)/MyNorm(M))); end if;
+ b,v,K:=NumericalIsConsistent(M,w); assert b;
+ b,v,K:=NumericalIsConsistent(M,w[1]); assert b; nm:=MyNorm(w[1]);
+ if nm ne 0 then H("v*M-w[1]",E(MyNorm(v*M-w[1])/MyNorm(w[1])));
+ else assert MyNorm(v) eq 0; end if;
+ if MyNorm(M) ne 0 then H("M*PI*M",E(MyNorm(M*PI*M-M)/MyNorm(M)/COND)); end if;
+ if MyNorm(PI) ne 0 then
+  H("PI*M*PI",E(MyNorm(PI*M*PI-PI)/MyNorm(PI)/COND)); end if;
+ if MyNorm(M) ne 0 then T:=M*PI;
+  U:=(Type(R) eq FldRe) select Transpose(T) else ConjugateTranspose(T);
+  H("(M*PI)^T",E(MyNorm(T-U)/MyNorm(T)/COND)); end if;
+ if MyNorm(PI) ne 0 then T:=PI*M;
+  U:=(Type(R) eq FldRe) select Transpose(T) else ConjugateTranspose(T);
+  H("(PI*M)^T",E(MyNorm(T-U)/MyNorm(T)/COND)); end if;
+ if nc eq rk then return; end if;
+ w[1]:=Vector([my_rand(R,10) : i in [1..Ncols(w1)]]);
+ b:=NumericalIsConsistent(M,w[1]); assert not b;
+ b:=NumericalIsConsistent(M,w); assert not b; end procedure;
+
+procedure test_it(nr,nc,rk) p:=30;
+ assert nr ge rk and nc ge rk; assert rk ne 0; // "Real",nr,nc,rk;
+ RF:=RealField(p); M:=RMatrixSpace(RF,nr,nc)!0; // random real mat
+ for i in [1..rk],j in [1..nc] do M[i][j]:=my_rand(RF,100); end for;
+ for i in [1..nr-rk] do M[rk+i]:=&+[my_rand(RF,5)*M[u]: u in [1..rk]]; end for;
+ P:=PermutationMatrix(RF,Random(SymmetricGroup(nr))); M:=P*M;
+ M:=M*Random(1,10^10)/Random(1,10^10); check_mat(M,rk);
+ if rk eq 1 then Z:=Parent(M)!0; check_mat(Z,0); end if;
+ if nc ne rk then // rightmost rk cols not indep, should trigger re-call
+  M:=Transpose(M); M[nc]:=&+[my_rand(RF,5)*M[u] : u in [nc-rk+1,nc-1]];
+  P:=PermutationMatrix(RF,Random(SymmetricGroup(nr))); M:=P*Transpose(M);
+  check_mat(M,rk); end if;
+ CF:=ComplexField(p); M:=RMatrixSpace(CF,nr,nc)!0; // "Complex",nr,nc,rk;
+ for i in [1..rk],j in [1..nc] do M[i][j]:=my_rand(CF,100); end for;
+ for i in [1..nr-rk] do M[rk+i]:=&+[my_rand(CF,5)*M[u] :u in [1..rk]]; end for;
+ P:=PermutationMatrix(CF,Random(SymmetricGroup(nr))); M:=P*M;
+ M:=M*Random(1,10^10)/Random(1,10^10); check_mat(M,rk);
+ if rk eq 1 then Z:=Parent(M)!0; check_mat(Z,0); end if;
+ if nc ne rk then // rightmost rk cols not indep, should trigger re-call
+  M:=Transpose(M); M[nc]:=&+[my_rand(CF,5)*M[u] : u in [nc-rk+1,nc-1]];
+  P:=PermutationMatrix(CF,Random(SymmetricGroup(nr))); M:=P*Transpose(M);
+  check_mat(M,rk); end if; end procedure;
+
+function get_random_mat(F,sz,nr,nc)
+ return Matrix(nr,nc,[my_rand(F,100) : i in [1..nr*nc]]); end function;
+
+procedure test_more(nr,nc,rk) p:=30;
+ assert nr ge rk and nc ge rk; assert rk ne 0; // "Real",nr,nc,rk;
+ RF:=RealField(p); M:=RMatrixSpace(RF,nr,nc)!0; // random real mat
+ for i in [1..rk] do M[i][i]:=4^i*my_rand(RF,100); end for; // largish cond
+ B:=get_random_mat(RF,100,nc,nc); A:=get_random_mat(RF,100,nr,nr); M:=A*M*B;
+ B:=get_random_mat(RF,100,nc,nc); A:=get_random_mat(RF,100,nr,nr); M:=A*M*B;
+ check_mat(M,rk);
+ CF:=ComplexField(p); M:=RMatrixSpace(CF,nr,nc)!0; // "Complex",nr,nc,rk;
+ for i in [1..rk] do M[i][i]:=4^i*my_rand(CF,100); end for; // largish cond
+ B:=get_random_mat(CF,100,nc,nc); A:=get_random_mat(CF,100,nr,nr); M:=A*M*B;
+ B:=get_random_mat(CF,100,nc,nc); A:=get_random_mat(CF,100,nr,nr); M:=A*M*B;
+ check_mat(M,rk); end procedure;
+
+////////////////////////////////////////////////////////////////////////
+
+// g:=Getpid(); "Setting seed to",g; SetSeed(g); // Steve doesn't like this
+SetMark(true);
+"14x23",Cputime(); test_it(14,23,12); test_it(23,14,12);
+"15x18",Cputime(); test_it(15,18,15); test_it(18,15,15);
+"12x12",Cputime(); test_it(12,12,9); test_it(12,12,12);
+"others",Cputime(); test_it(8,17,3); test_it(12,6,2);
+L:=6;
+for r in [1..L] do "test_it",r,Cputime();
+ for c in [1..L],rk in [1..Min(r,c)] do test_it(r,c,rk); end for; end for;
+L:=8;
+for r in [1..L] do "test_more",r,Cputime();
+ for c in [1..L],rk in [1..Min(r,c)] do test_more(r,c,rk); end for; end for;
+
+////////////////////////////////////////////////////////////////////////
+
+// Hessenberg is easy to test, essentially just RQ in both directions
+
+procedure test_hessenberg_R(sz,prec)//printf "real_hessenberg %o %o\n",sz,prec;
+ R:=RealField(prec); A:=[-10*sz^2-10..10*sz^2+10];
+ M:=Matrix(sz,sz,[R|Random(A) : i in [1..sz^2]]);
+ H,Q:=NumericalHessenbergForm(M);
+ mx:=Max([Abs(x) : x in Eltseq(Q*Transpose(Q)-1)]);
+ assert mx lt sz*10^(-prec+2);
+ my:=Max([Abs(x) : x in Eltseq(Q*M*Transpose(Q)-H)]);
+ nm:=&+[Abs(x) : x in Eltseq(H)]; assert my le sz*nm*10^(-prec+2);
+ for r in [1..sz],c in [1..r-2] do assert IsZero(H[r,c]); end for;
+ end procedure;
+
+procedure test_hessenberg_C(sz,prec) //printf "cpx_hessenberg %o %o\n",sz,prec;
+ C<I>:=ComplexField(prec); A:=[-10*sz^2-10..10*sz^2+10];
+ M:=Matrix(sz,sz,[C|Random(A)+Random(A)*I : i in [1..sz^2]]);
+ H,Q:=NumericalHessenbergForm(M);
+ mx:=Max([Abs(x) : x in Eltseq(Q*ConjugateTranspose(Q)-1)]);
+ assert mx lt sz*10^(-prec+2);
+ my:=Max([Abs(x) : x in Eltseq(Q*M*ConjugateTranspose(Q)-H)]);
+ nm:=&+[Abs(x) : x in Eltseq(H)]; assert my le sz*nm*10^(-prec+2);
+ for r in [1..sz],c in [1..r-2] do assert IsZero(H[r,c]); end for;
+ end procedure;
+
+"hessenberg_real",Cputime();
+for sz in [1..15],prec in [20,40,70] do test_hessenberg_R(sz,prec); end for;
+"hessenberg_complex",Cputime();
+for sz in [1..15],prec in [20,40,70] do test_hessenberg_C(sz,prec); end for;
+
+////////////////////////////////////////////////////////////////////////
+
+// Schur is not so easy, involving ev convergence, but first the general:
+
+procedure test_schur_R(sz,prec) // printf "real_schur %o %o\n",sz,prec;
+ R:=RealField(prec); A:=[-10*sz^2-10..10*sz^2+10];
+ M:=Matrix(sz,sz,[R|Random(A) : i in [1..sz^2]]);
+ H,Q:=NumericalSchurForm(M);
+ mx:=Max([Abs(x) : x in Eltseq(Q*Transpose(Q)-1)]);
+ assert mx lt sz*10^(-prec+2);
+ my:=Max([Abs(x) : x in Eltseq(Q*M*Transpose(Q)-H)]);
+ nm:=&+[Abs(x) : x in Eltseq(H)]; assert my le sz*nm*10^(-prec+2);
+ for r in [1..sz],c in [1..r-2] do assert IsZero(H[r,c]); end for;
+ for r in [2..sz-1] do if H[r,r-1] eq 0 then continue; end if;
+  assert H[r+1,r] eq 0; end for; end procedure;
+
+procedure test_schur_C(sz,prec) // printf "cpx_schur %o %o\n",sz,prec;
+ C<I>:=ComplexField(prec); A:=[-10*sz^2-10..10*sz^2+10];
+ M:=Matrix(sz,sz,[C|Random(A)+Random(A)*I : i in [1..sz^2]]);
+ H,Q:=NumericalSchurForm(M);
+ mx:=Max([Abs(x) : x in Eltseq(Q*ConjugateTranspose(Q)-1)]);
+ assert mx lt sz*10^(-prec+2);
+ my:=Max([Abs(x) : x in Eltseq(Q*M*ConjugateTranspose(Q)-H)]);
+ nm:=&+[Abs(x) : x in Eltseq(H)]; assert my le sz*nm*10^(-prec+2);
+ for r in [1..sz],c in [1..r-1] do assert IsZero(H[r,c]); end for;
+ end procedure;
+
+"schur_real",Cputime();
+for sz in [1..15],prec in [15,25,35] do test_schur_R(sz,prec); end for;
+"schur_complex",Cputime();
+for sz in [1..15],prec in [15,25,35] do test_schur_C(sz,prec); end for;
+
+////////////////////////////////////////////////////////////////////////
+
+// Now for tricky Schur: repeated evs, zero evs, split case, symschur, etc.
+
+procedure test_split_schur_R(sz1,sz2,prec) sz:=sz1+sz2;
+ // printf "real_split_schur %o %o %o\n",sz1,sz2,prec;
+ R:=RealField(prec); A:=[-10*sz^2-10..10*sz^2+10];
+ M1:=Matrix(sz1,sz1,[R|Random(A) : i in [1..sz1^2]]);
+ M2:=Matrix(sz2,sz2,[R|Random(A) : i in [1..sz2^2]]);
+ M:=DiagonalJoin(M1,M2); H,Q:=NumericalSchurForm(M);
+ mx:=Max([Abs(x) : x in Eltseq(Q*Transpose(Q)-1)]);
+ assert mx lt sz*10^(-prec+2);
+ my:=Max([Abs(x) : x in Eltseq(Q*M*Transpose(Q)-H)]);
+ nm:=&+[Abs(x) : x in Eltseq(H)]; assert my le sz*nm*10^(-prec+2);
+ for r in [1..sz],c in [1..r-2] do assert IsZero(H[r,c]); end for;
+ for r in [2..sz-1] do if H[r,r-1] eq 0 then continue; end if;
+  assert H[r+1,r] eq 0; end for; end procedure;
+
+procedure test_split_schur_C(sz1,sz2,prec) sz:=sz1+sz2;
+ // printf "cpx_split_schur %o %o %o\n",sz1,sz2,prec;
+ C<I>:=ComplexField(prec); A:=[-10*sz^2-10..10*sz^2+10];
+ M1:=Matrix(sz1,sz1,[C|Random(A)+Random(A)*I : i in [1..sz1^2]]);
+ M2:=Matrix(sz2,sz2,[C|Random(A)+Random(A)*I : i in [1..sz2^2]]);
+ M:=DiagonalJoin(M1,M2); H,Q:=NumericalSchurForm(M);
+ mx:=Max([Abs(x) : x in Eltseq(Q*ConjugateTranspose(Q)-1)]);
+ assert mx lt sz*10^(-prec+2);
+ my:=Max([Abs(x) : x in Eltseq(Q*M*ConjugateTranspose(Q)-H)]);
+ nm:=&+[Abs(x) : x in Eltseq(H)]; assert my le sz*nm*10^(-prec+2);
+ for r in [1..sz],c in [1..r-1] do assert IsZero(H[r,c]); end for;
+ end procedure;
+
+"split_schur_R",Cputime();
+for s1,s2 in [1..7],p in [15,25,35] do test_split_schur_R(s1,s2,p); end for;
+"split_schur_C",Cputime();
+for s1,s2 in [1..7],p in [15,25,35] do test_split_schur_C(s1,s2,p); end for;
+
+////////////////////////////////////////////////////////////////////////
+
+procedure test_rep_schur_R(sz,prec) // printf "real_rep_schur %o %o\n",sz,prec;
+ R:=RealField(prec); A:=[-10*sz^2-10..10*sz^2+10];
+ M:=Matrix(sz,sz,[R|Random(A) : i in [1..sz^2]]); M:=DiagonalJoin(M,M);
+ for c in [sz+1..sz+sz],r in [1..sz] do M[r,c]:=Random(A); end for;
+ H,Q:=NumericalSchurForm(M);
+ mx:=Max([Abs(x) : x in Eltseq(Q*Transpose(Q)-1)]);
+ assert mx lt sz*10^(-prec+2);
+ my:=Max([Abs(x) : x in Eltseq(Q*M*Transpose(Q)-H)]);
+ nm:=&+[Abs(x) : x in Eltseq(H)]; assert my le sz*nm*10^(-prec+2);
+ for r in [1..sz],c in [1..r-2] do assert IsZero(H[r,c]); end for;
+ for r in [2..sz-1] do if H[r,r-1] eq 0 then continue; end if;
+  assert H[r+1,r] eq 0; end for; end procedure;
+
+procedure test_rep_schur_C(sz,prec) // printf "cpx_rep_schur %o %o\n",sz,prec;
+ C<I>:=ComplexField(prec); A:=[-10*sz^2-10..10*sz^2+10];
+ M:=Matrix(sz,sz,[C|Random(A)+I*Random(A) : i in [1..sz^2]]);
+ M:=DiagonalJoin(M,M);
+ for c in [sz+1..sz+sz],r in [1..sz] do M[r,c]:=Random(A)+I*Random(A); end for;
+ H,Q:=NumericalSchurForm(M);
+ mx:=Max([Abs(x) : x in Eltseq(Q*ConjugateTranspose(Q)-1)]);
+ assert mx lt sz*10^(-prec+2);
+ my:=Max([Abs(x) : x in Eltseq(Q*M*ConjugateTranspose(Q)-H)]);
+ nm:=&+[Abs(x) : x in Eltseq(H)]; assert my le sz*nm*10^(-prec+2);
+ for r in [1..sz],c in [1..r-1] do assert IsZero(H[r,c]); end for;
+ end procedure;
+
+"rep_schur_R",Cputime();
+for sz in [2..10],prec in [15,25,35] do test_rep_schur_R(sz,prec); end for;
+"rep_schur_C",Cputime();
+for sz in [2..10],prec in [15,25,35] do test_rep_schur_C(sz,prec); end for;
+
+////////////////////////////////////////////////////////////////////////
+
+procedure test_block_schur_R(sz1,sz2,bsz,prec) sz:=sz1+sz2+bsz;
+ // printf "real_block_schur %o %o %o %o\n",sz1,sz2,bsz,prec;
+ R:=RealField(prec); A:=[-10*sz^2-10..10*sz^2+10];
+ M1:=Matrix(sz1,sz1,[R|Random(A) : i in [1..sz1^2]]);
+ M2:=Matrix(sz2,sz2,[R|Random(A) : i in [1..sz2^2]]);
+ B:=Matrix(bsz,bsz,[R|0 : i in [1..bsz^2]]);
+ for r,c in [1..bsz] do if c gt r then B[r,c]:=Random(A); end if; end for;
+ M:=DiagonalJoin(<M1,B,M2>); H,Q:=NumericalSchurForm(M);
+ mx:=Max([Abs(x) : x in Eltseq(Q*Transpose(Q)-1)]);
+ assert mx lt sz*10^(-prec+2);
+ my:=Max([Abs(x) : x in Eltseq(Q*M*Transpose(Q)-H)]);
+ nm:=&+[Abs(x) : x in Eltseq(H)]; assert my le sz*nm*10^(-prec+2);
+ for r in [1..sz],c in [1..r-2] do assert IsZero(H[r,c]); end for;
+ for r in [2..sz-1] do if H[r,r-1] eq 0 then continue; end if;
+  assert H[r+1,r] eq 0; end for; end procedure;
+
+procedure test_block_schur_C(sz1,sz2,bsz,prec) sz:=sz1+sz2+bsz;
+ // printf "cpx_block_schur %o %o %o %o\n",sz1,sz2,bsz,prec;
+ C<I>:=ComplexField(prec); A:=[-10*sz^2-10..10*sz^2+10];
+ M1:=Matrix(sz1,sz1,[C|Random(A)+Random(A)*I : i in [1..sz1^2]]);
+ M2:=Matrix(sz2,sz2,[C|Random(A)+Random(A)*I : i in [1..sz2^2]]);
+ B:=Matrix(bsz,bsz,[C|0 : i in [1..bsz^2]]);
+ for r,c in [1..bsz] do
+  if c gt r then B[r,c]:=Random(A)+Random(A)*I; end if; end for;
+ M:=DiagonalJoin(<M1,B,M2>); H,Q:=NumericalSchurForm(M);
+ mx:=Max([Abs(x) : x in Eltseq(Q*ConjugateTranspose(Q)-1)]);
+ assert mx lt sz*10^(-prec+2);
+ my:=Max([Abs(x) : x in Eltseq(Q*M*ConjugateTranspose(Q)-H)]);
+ nm:=&+[Abs(x) : x in Eltseq(H)]; assert my le sz*nm*10^(-prec+2);
+ for r in [1..sz],c in [1..r-1] do assert IsZero(H[r,c]); end for;
+ end procedure;
+
+"block_schur_R",Cputime();
+for s1,s2 in [1..5],p in [15,25,35],bsz in [1..3] do
+ test_block_schur_R(s1,s2,bsz,p); end for;
+"block_schur_C",Cputime();
+for s1,s2 in [1..5],p in [15,25,35],bsz in [1..3] do
+ test_block_schur_C(s1,s2,bsz,p); end for;
+
+////////////////////////////////////////////////////////////////////////
+
+// check the evs with determinant (instead of Q,H)
+// symmetric schur is not a special case with Transform on, but symm evs is
+
+procedure test_eigen_schur_R(sz,prec) DET:=Determinant;
+ // printf "real_eigen_schur %o %o\n",sz,prec; 
+ R:=RealField(prec); A:=[-10*sz^2-10..10*sz^2+10];
+ M:=Matrix(sz,sz,[R|Random(A) : i in [1..sz^2]]);
+ E:=NumericalEigenvalues(M);
+ C:=ComplexField(prec); MC:=ChangeRing(M,C);
+ mx:=Max([Abs(DET(MC+(i/10)*E[1]-(1-i/10)*E[sz])) : i in [1..9]]);
+ mx:=Max(Abs(DET(M)),mx); // using the line between them is dodgy, esp dim 2
+ my:=Max([Abs(Determinant(MC-e)) : e in E]);
+ assert my le sz^3*mx*10^(-prec+3); end procedure;
+// random bound, should be something with condition number?
+
+procedure test_eigen_schur_C(sz,prec) DET:=Determinant;
+ // printf "cpx_eigen_schur %o %o\n",sz,prec; 
+ C<I>:=ComplexField(prec); A:=[-10*sz^2-10..10*sz^2+10];
+ M:=Matrix(sz,sz,[C|Random(A)+I*Random(A) : i in [1..sz^2]]);
+ E:=NumericalEigenvalues(M);
+ mx:=Max([Abs(DET(M+(i/10)*E[1]-(1-i/10)*E[sz])) : i in [1..9]]);
+ mx:=Max(Abs(DET(M)),mx); // using the line between them is dodgy, esp dim 2
+ my:=Max([Abs(Determinant(M-e)) : e in E]);
+ assert my le sz^3*mx*10^(-prec+3); end procedure;
+
+"eigen_schur_R",Cputime();
+for s in [1..12],p in [15,25,35] do test_eigen_schur_R(s,p); end for;
+"eigen_schur_C",Cputime();
+for s in [1..12],p in [15,25,35] do test_eigen_schur_C(s,p); end for;
+
+////////////////////////////////////////////////////////////////////////
+
+// And now, symm evs
+
+procedure test_eigen_symschur_R(sz,prec) DET:=Determinant;
+ // printf "real_eigen_symschur %o %o\n",sz,prec; 
+ R:=RealField(prec); A:=[-10*sz^2-10..10*sz^2+10];
+ M:=Matrix(sz,sz,[R|Random(A) : i in [1..sz^2]]);
+ M:=M+Transpose(M); E:=NumericalEigenvalues(M);
+ mx:=Max([Abs(DET(M+(i/10)*E[1]-(1-i/10)*E[sz])) : i in [1..9]]);
+ my:=Max([Abs(Determinant(M-e)) : e in E]);
+ assert my le sz^3*mx*10^(-prec+3); end procedure;
+// random bound, should be something with condition number?
+
+procedure test_eigen_symschur_C(sz,prec) DET:=Determinant;
+ // printf "cpx_eigen_symschur %o %o\n",sz,prec; 
+ C<I>:=ComplexField(prec); A:=[-10*sz^2-10..10*sz^2+10];
+ M:=Matrix(sz,sz,[C|Random(A)+I*Random(A) : i in [1..sz^2]]);
+ M:=M+ConjugateTranspose(M); E:=NumericalEigenvalues(M);
+ mx:=Max([Abs(DET(M+(i/10)*E[1]-(1-i/10)*E[sz])) : i in [1..9]]);
+ my:=Max([Abs(Determinant(M-e)) : e in E]);
+ assert my le sz^3*mx*10^(-prec+3); end procedure;
+
+"eigen_symschur_R",Cputime();
+for s in [1..15],p in [15,25,35] do test_eigen_symschur_R(s,p); end for;
+"eigen_symschur_C",Cputime();
+for s in [1..15],p in [15,25,35] do test_eigen_symschur_C(s,p); end for;
+
+////////////////////////////////////////////////////////////////////////
+
+// should do more checks with repeated eigenvalues!
+
+// evs that are zero
+
+procedure test_ev0_R(sz,ker,prec) if ker gt sz then return; end if;
+ // printf "test_ev0_R %o %o %o\n",sz,ker,prec;
+ R:=RealField(prec); B:=sz+1; A:=[-B*sz-B..B*sz+B]; DET:=Determinant;
+ M:=Matrix(sz,sz,[R|Random(A) : i in [1..sz^2]]);
+ for k in [1..ker] do M[k]:=0; end for;
+ for k in [1..ker] do M[k]:=&+[Random([1,-1])*M[i] : i in [1..sz]]; end for;
+ for u in [1..2*sz] do a:=Random([1..sz]); b:=Random([1..sz]);
+  if a ne b then SwapRows(~M,a,b); end if; end for;
+ v:=Valuation(CharacteristicPolynomial(ChangeRing(M,Integers())));
+ if ker ne v then "Kernel too large.. redo"; $$(sz,ker,prec); return; end if;
+ E:=NumericalEigenvalues(M); mE:=Max([Abs(e) : e in E]);
+ mM:=Max([Abs(x) : x in Eltseq(M)]);
+ X:=[e : e in E | Abs(e) le sz^2*mM*10^(-prec+2*ker+1)];
+ assert #X ge ker; end procedure;
+// tricky, as with lots of zero evs, the numerics are worse
+// but still, whatever bound is given here is just a garbagey kludge
+
+procedure test_ev0_C(sz,ker,prec) if ker gt sz then return; end if;
+ // printf "test_ev0_C %o %o %o\n",sz,ker,prec;
+ C<I>:=ComplexField(prec); B:=sz+1; A:=[-B*sz-B..B*sz+B]; DET:=Determinant;
+ M:=Matrix(sz,sz,[C|Random(A)+Random(A)*I : i in [1..sz^2]]);
+ for k in [1..ker] do M[k]:=0; end for;
+ for k in [1..ker] do
+  M[k]:=&+[(Random([1,-1])+Random([1,-1])*I)*M[i] : i in [1..sz]]; end for;
+ Q<i>:=QuadraticField(-1);
+ MQ:=Matrix(sz,sz,[Q![Integers()|Real(e),Imaginary(e)] : e in Eltseq(M)]);
+ v:=Valuation(CharacteristicPolynomial(MQ));
+ if ker ne v then "Kernel too large.. redo"; $$(sz,ker,prec); return; end if;
+ for u in [1..2*sz] do a:=Random([1..sz]); b:=Random([1..sz]);
+  if a ne b then SwapRows(~M,a,b); end if; end for;
+ E:=NumericalEigenvalues(M); mE:=Max([Abs(e) : e in E]);
+ mM:=Max([Abs(x) : x in Eltseq(M)]);
+ X:=[e : e in E | Abs(e) le sz^2*mM*10^(-prec+2*ker+1)];
+ assert #X ge ker; end procedure;
+
+"test_ev0_R",Cputime();
+for s in [1..12],k in [1..3],p in [15,24,32] do test_ev0_R(s,k,p); end for;
+"test_ev0_C",Cputime();
+for s in [1..12],k in [1..3],p in [15,24,32] do test_ev0_C(s,k,p); end for;
+
+////////////////////////////////////////////////////////////////////////
+
+// numerical bidiagonal is again not much more than RQ
+
+procedure test_bidiagonal_R(r,c,prec)
+ // printf "real_bidiag %o %o %o\n",r,c,prec;
+ R:=RealField(prec); sz:=Max(r,c); A:=[-10*sz^2-10..10*sz^2+10];
+ M:=Matrix(r,c,[R|Random(A) : i in [1..r*c]]);
+ H,U,V:=NumericalBidiagonalForm(M);
+ mx:=Max([Abs(x) : x in Eltseq(U*Transpose(U)-1)]);
+ assert mx lt r*c*10^(-prec+2);
+ mx:=Max([Abs(x) : x in Eltseq(V*Transpose(V)-1)]);
+ assert mx lt r*c*10^(-prec+2);
+ my:=Max([Abs(x) : x in Eltseq(U*M*Transpose(V)-H)]);
+ nm:=&+[Abs(x) : x in Eltseq(H)]; assert my le r*c*nm*10^(-prec+2);
+ for i in [1..r],j in [1..c] do if i eq j then continue; end if;
+  if r gt c and i eq j+1 then continue; end if;
+  if r le c and i+1 eq j then continue; end if; assert IsZero(H[i,j]); end for;
+ end procedure;
+
+procedure test_bidiagonal_C(r,c,prec)
+ // printf "cpx_bidiag %o %o %o\n",r,c,prec;
+ C<I>:=ComplexField(prec); sz:=Max(r,c); A:=[-10*sz^2-10..10*sz^2+10];
+ M:=Matrix(r,c,[C|Random(A)+I*Random(A) : i in [1..r*c]]);
+ H,U,V:=NumericalBidiagonalForm(M);
+ mx:=Max([Abs(x) : x in Eltseq(U*ConjugateTranspose(U)-1)]);
+ assert mx lt r*c*10^(-prec+2);
+ mx:=Max([Abs(x) : x in Eltseq(V*ConjugateTranspose(V)-1)]);
+ assert mx lt r*c*10^(-prec+2);
+ my:=Max([Abs(x) : x in Eltseq(U*M*ConjugateTranspose(V)-H)]);
+ nm:=&+[Abs(x) : x in Eltseq(H)]; assert my le r*c*nm*10^(-prec+2);
+ for i in [1..r],j in [1..c] do if i eq j then continue; end if;
+  if r gt c and i eq j+1 then continue; end if;
+  if r le c and i+1 eq j then continue; end if; assert IsZero(H[i,j]); end for;
+ end procedure;
+
+"test_bidiagonal_R",Cputime();
+for r,c in [1..15],prec in [20,30,45] do test_bidiagonal_R(r,c,prec); end for;
+"test_bidiagonal_C",Cputime();
+for r,c in [1..15],prec in [20,30,45] do test_bidiagonal_C(r,c,prec); end for;
+
+////////////////////////////////////////////////////////////////////////
+
+// finally, the SVD, which (definitely) needs some extra ev tests
+
+procedure test_svd_R(r,c,prec) // printf "real_svd %o %o %o\n",r,c,prec;
+ R:=RealField(prec); sz:=Max(r,c); A:=[-10*sz^2-10..10*sz^2+10];
+ M:=Matrix(r,c,[R|Random(A) : i in [1..r*c]]);
+ S,U,V:=NumericalSingularValueDecomposition(M);
+ mx:=Max([Abs(x) : x in Eltseq(U*Transpose(U)-1)]);
+ assert mx lt r*c*10^(-prec+2);
+ mx:=Max([Abs(x) : x in Eltseq(V*Transpose(V)-1)]);
+ assert mx lt r*c*10^(-prec+2);
+ my:=Max([Abs(x) : x in Eltseq(U*M*Transpose(V)-S)]);
+ nm:=&+[Abs(x) : x in Eltseq(S)]; assert my le r*c*nm*10^(-prec+2);
+ for i in [1..r],j in [1..c] do if i eq j then continue; end if;
+ assert IsZero(S[i,j]); end for; end procedure;
+
+procedure test_svd_C(r,c,prec) // printf "cpx_svd %o %o %o\n",r,c,prec;
+ C<I>:=ComplexField(prec); sz:=Max(r,c); A:=[-10*sz^2-10..10*sz^2+10];
+ M:=Matrix(r,c,[C|Random(A)+I*Random(A) : i in [1..r*c]]);
+ S,U,V:=NumericalSingularValueDecomposition(M);
+ mx:=Max([Abs(x) : x in Eltseq(U*ConjugateTranspose(U)-1)]);
+ assert mx lt r*c*10^(-prec+2);
+ mx:=Max([Abs(x) : x in Eltseq(V*ConjugateTranspose(V)-1)]);
+ assert mx lt r*c*10^(-prec+2);
+ my:=Max([Abs(x) : x in Eltseq(U*M*ConjugateTranspose(V)-S)]);
+ nm:=&+[Abs(x) : x in Eltseq(S)]; assert my le r*c*nm*10^(-prec+2);
+ for i in [1..r],j in [1..c] do if i eq j then continue; end if;
+ assert IsZero(S[i,j]); end for; end procedure;
+
+"test_svd_R",Cputime();
+for r,c in [1..15],prec in [15,25,35] do test_svd_R(r,c,prec); end for;
+"test_svd_C",Cputime();
+for r,c in [1..15],prec in [15,25,35] do test_svd_C(r,c,prec); end for;
+
+////////////////////////////////////////////////////////////////////////
+
+procedure test_svd_rk_R(r,c,k,prec) assert k eq 1; // hmm
+ // printf "real_svd_rk %o %o %o %o\n",r,c,k,prec;
+ R:=RealField(prec); sz:=Max(r,c); A:=[-10*sz^2-10..10*sz^2+10];
+ M:=Matrix(r,c,[R|Random(A) : i in [1..r*c]]);
+ flip:=false; if c lt r then flip:=true; M:=Transpose(M); end if;
+ for i in [1..k] do U:=[1..Nrows(M)]; u:=Random(U); Exclude(~U,u);
+  if #U eq 0 then M[u]:=0*M[u]; else M[u]:=&+[M[i] : i in U]; end if; end for;
+ if flip then M:=Transpose(M); end if;
+ S,U,V:=NumericalSingularValueDecomposition(M);
+ mx:=Max([Abs(x) : x in Eltseq(U*Transpose(U)-1)]);
+ assert mx lt r*c*10^(-prec+2);
+ mx:=Max([Abs(x) : x in Eltseq(V*Transpose(V)-1)]);
+ assert mx lt r*c*10^(-prec+2);
+ my:=Max([Abs(x) : x in Eltseq(U*M*Transpose(V)-S)]);
+ nm:=&+[Abs(x) : x in Eltseq(S)]; assert my le r*c*nm*10^(-prec+2);
+ for i in [1..r],j in [1..c] do if i eq j then continue; end if;
+  assert IsZero(S[i,j]); end for;
+ rk:=Min(r,c); for i in [0..k-1] do assert IsZero(S[rk-i,rk-i]); end for;
+ end procedure;
+
+procedure test_svd_rk_C(r,c,k,prec) assert k eq 1; // hmm
+ // printf "cpx_svd_rk %o %o %o %o\n",r,c,k,prec;
+ C<I>:=ComplexField(prec); sz:=Max(r,c); A:=[-10*sz^2-10..10*sz^2+10];
+ M:=Matrix(r,c,[C|Random(A)+I*Random(A) : i in [1..r*c]]);
+ flip:=false; if c lt r then flip:=true; M:=Transpose(M); end if;
+ for i in [1..k] do U:=[1..Nrows(M)]; u:=Random(U); Exclude(~U,u);
+  if #U eq 0 then M[u]:=0*M[u]; else M[u]:=&+[M[i] : i in U]; end if; end for;
+ if flip then M:=Transpose(M); end if;
+ S,U,V:=NumericalSingularValueDecomposition(M);
+ mx:=Max([Abs(x) : x in Eltseq(U*ConjugateTranspose(U)-1)]);
+ assert mx lt r*c*10^(-prec+2);
+ mx:=Max([Abs(x) : x in Eltseq(V*ConjugateTranspose(V)-1)]);
+ assert mx lt r*c*10^(-prec+2);
+ my:=Max([Abs(x) : x in Eltseq(U*M*ConjugateTranspose(V)-S)]);
+ nm:=&+[Abs(x) : x in Eltseq(S)]; assert my le r*c*nm*10^(-prec+2);
+ for i in [1..r],j in [1..c] do if i eq j then continue; end if;
+  assert IsZero(S[i,j]); end for;
+ rk:=Min(r,c); for i in [0..k-1] do assert IsZero(S[rk-i,rk-i]); end for;
+ end procedure;
+
+"test_svd_rk_R",Cputime();
+for r,c in [1..10],k in [1..1],prec in [15,25,35] do
+ test_svd_rk_R(r,c,k,prec); end for;
+"test_svd_rk_C",Cputime();
+for r,c in [1..10],k in [1..1],prec in [15,25,35] do
+ test_svd_rk_C(r,c,k,prec); end for;
+
+////////////////////////////////////////////////////////////////////////
+
+// test everything with zero matrices as input
+
+procedure test_zero(R,r) // printf "test_zero %o %o\n",R,r;
+ Z:=MatrixAlgebra(R,r)!0; H,Q:=NumericalHessenbergForm(Z); assert H eq 0;
+ H,Q:=NumericalSchurForm(Z); assert H eq 0;
+ E:=NumericalEigenvalues(Z); assert #Set(E) eq 1 and E[1] eq 0;
+ for c in [1..r] do M:=Matrix(r,c,[R!0 : i in [1..r*c]]);
+  B,U,V:=NumericalBidiagonalForm(M); assert B eq 0;
+  B,U,V:=NumericalBidiagonalForm(Transpose(M)); assert B eq 0;
+  S,U,V:=NumericalSingularValueDecomposition(M); assert S eq 0;
+  S,U,V:=NumericalSingularValueDecomposition(Transpose(M)); assert S eq 0;
+  end for; end procedure;
+  
+"test_zero",Cputime();
+for r in [1..20] do test_zero(RealField(25),r); end for;
+for r in [1..20] do test_zero(ComplexField(25),r); end for;
+
+////////////////////////////////////////////////////////////////////////
+
+// And the joy of dimension 0...
+
+procedure test_dim_zero(R) // printf "test_dim_zero %o\n",R;
+ Z:=MatrixAlgebra(R,0)!0; H,Q:=NumericalHessenbergForm(Z); assert H eq 0;
+ H,Q:=NumericalSchurForm(Z); assert H eq 0;
+ E:=NumericalEigenvalues(Z); assert #E eq 0;
+ for c in [0..2] do M:=Matrix(0,c,[R|]);
+  B,U,V:=NumericalBidiagonalForm(M); assert B eq 0;
+  B,U,V:=NumericalBidiagonalForm(Transpose(M)); assert B eq 0;
+  S,U,V:=NumericalSingularValueDecomposition(M); assert S eq 0;
+  S,U,V:=NumericalSingularValueDecomposition(Transpose(M)); assert S eq 0;
+  end for; end procedure;
+  
+"test_dim_zero",Cputime();
+test_dim_zero(RealField(25)); test_dim_zero(ComplexField(25));

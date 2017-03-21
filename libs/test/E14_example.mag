@@ -1,0 +1,197 @@
+// Example from Don Taylor's Book.
+
+
+
+// original file: taylor.tex, line: 0
+// Example: E14 ()
+print "Example: E14";
+load "E14_funcs";
+ei := GetEchoInput();
+SetEchoInput(true);
+fano := { <n, (n+1) mod 7, (n+3) mod 7> : n in [0..6] };
+sc := [ <f[1^g]+2,f[2^g]+2,f[3^g]+2,Sign(g)> : g in Sym(3),f in fano];
+sc cat:= [ <i,i,1,-1> : i in [2..8] ]
+  cat [ <1,i,i,1> : i in [1..8] ] cat [<i,1,i,1> : i in [2..8] ];
+Cayley := func< R | Algebra< R, 8 | sc > >;
+R<u1,u2,u3,u4,u5,u6,u7,u8,v1,v2,v3,v4,v5,v6,v7,v8> :=
+      PolynomialRing(Rationals(),16);
+A := Cayley(R);
+u := A![u1,u2,u3,u4,u5,u6,u7,u8];
+v := A![v1,v2,v3,v4,v5,v6,v7,v8];
+u*v;
+Q := func< x | InnerProduct(x,x) >;
+Q(u), Q(u*v) eq Q(u)*Q(v);
+Cay5 := Cayley(GF(5));
+Der5 := DerivationBasis(Cay5);
+Nrows(Der5);
+SemisimpleType(LieAlg(Der5));
+RD := RootDatum("E6");
+Phi := Roots(RD);
+ChangeUniverse(~Phi,RSpace(Integers(),6));
+
+X10 := Reverse([ x : x in Phi | x[1] eq 1 and x[6] eq 0 ]);
+X01 := Reverse([ x : x in Phi | x[1] eq 0 and x[6] eq 1 ]);
+X11 := Reverse([ x : x in Phi | x[1] eq 1 and x[6] eq 1 ]);
+#Phi, #X10, #X01, #X11;
+X10[1];
+X00 := {@ x : x in Phi | x[1] eq 0 and x[6] eq 0 @};
+d4e10 := [ LieRootMatrix(RD,Phi[i],X10) : i in [2..5] ];
+d4f10 := [ LieRootMatrix(RD,-Phi[i],X10) : i in [2..5] ];
+d4e01 := [ LieRootMatrix(RD,Phi[i],X01) : i in [2..5] ];
+d4f01 := [ LieRootMatrix(RD,-Phi[i],X01) : i in [2..5] ];
+d4e11 := [ LieRootMatrix(RD,Phi[i],X11) : i in [2..5] ];
+d4f11 := [ LieRootMatrix(RD,-Phi[i],X11) : i in [2..5] ];
+forall{ i : i in [1..4] | Transpose(d4e10[i]) eq d4f10[i] };
+C := CartanMatrix(RD);
+X10[1]*C, X01[1]*C; X11[1]*C;
+sigma := Sym(4)!(1,2);
+tau := Sym(4)!(1,4);
+d4es11 := [ d4e11[i^sigma] : i in [1..#d4e11] ];
+d4fs11 := [ d4f11[i^sigma] : i in [1..#d4f11] ];
+
+d4et11 := [ d4e11[i^tau] : i in [1..#d4e11] ];
+d4ft11 := [ d4f11[i^tau] : i in [1..#d4f11] ];
+V := RSpace(Integers(), 8);
+M := MatrixRing(Integers(), 8);
+basisSeq := func< s, L |
+ [ i eq 0 select V.1 else Self(s[i][1]) * L[s[i][2]] : i in [0..#s] ] >;
+d4s10  := [ [1,2],[2,3],[3,4],[3,1],[5,4],[6,3],[7,2] ];
+d4s01  := [ [1,4],[2,3],[3,1],[3,2],[5,1],[6,3],[7,4] ];
+d4B10  := basisSeq(d4s10,d4f10);
+d4B01  := basisSeq(d4s01,d4f01);
+d4B10;
+d4B01;
+d4Bs11 := basisSeq(d4s10,d4fs11);
+d4Bt11 := basisSeq(d4s01,d4ft11);
+P10 := (M!d4Bs11)^-1 * M!d4B10;
+P01 := (M!d4Bt11)^-1 * M!d4B01;
+[ P10^-1 * e * P10 : e in d4es11 ] eq d4e10;
+[ P01^-1 * e * P01 : e in d4et11 ] eq d4e01;
+e10 := [ d4e10[1]+d4e10[2]+d4e10[4], d4e10[3] ];
+f10 := [ d4f10[1]+d4f10[2]+d4f10[4], d4f10[3] ];
+e01 := [ d4e01[1]+d4e01[2]+d4e01[4], d4e01[3] ];
+f01 := [ d4f01[1]+d4f01[2]+d4f01[4], d4f01[3] ];
+
+e11 := [ d4e11[1]+d4e11[2]+d4e11[4], d4e11[3] ];
+f11 := [ d4f11[1]+d4f11[2]+d4f11[4], d4f11[3] ];
+(e01 eq e11) and (f01 eq f11);
+[ (V.4+V.5) * e : e in (e10 cat f10) ];
+[ (V.4-V.5) * e : e in (e11 cat f11) ];
+xi := [ [1,1],[2,2],[3,1],[4,1],[5,2],[6,1] ];
+Bx := basisSeq(xi,f10);
+By := basisSeq(xi,f01);
+Bz := basisSeq(xi,f11);
+By eq Bz;
+Bx;
+Bz;
+coeffmat := M!0; ndxmat := M!0;
+for i := 1 to 8 do
+ a := Index(Phi,X10[i]);
+ for j := 1 to 8 do
+  c := LieConstant_N( RD, a, Index(Phi,X01[j]) );
+  if c ne 0 then
+   ndxmat[i,j] := Index(X11,X10[i]+X01[j]);
+   coeffmat[i,j] := c;
+  end if;
+ end for;
+end for;
+[ P10 * x * P10^-1 : x in e10 ] eq e11;
+[ P10 * x * P10^-1 : x in f10 ] eq f11;
+[ P01 * x * P01^-1 : x in e01 ] eq e11;
+[ P01 * x * P01^-1 : x in f01 ] eq f11;
+coeff := M!0; ndx := M!0;
+pi := Sym(8)!(4,5);
+sgn := [1,1,1,1,-1,-1,1,-1];
+for i := 1 to 8 do
+ a := Index(Phi,X10[i]);
+ for j := 1 to 8 do
+  c := LieConstant_N( RD, a, Index(Phi,X01[j^pi]) );
+  if c ne 0 then
+   ndx[i,j] := Index(X11,X10[i]+X01[j^pi]);
+   coeff[i,j] := c * sgn[i];
+  end if;
+ end for;
+end for;
+SplitOctonions := func< R |
+ Algebra< R,8 | [ < i, j, ndx[i,j], coeff[i,j] > : i,j in [1..8]
+	| ndx[i,j] ne 0 ] > >;
+O := SplitOctonions(Integers());
+forall{ g : g in (e11 cat f11) |   forall{ <i,j> : i,j in [1..8] |
+  apply(O.i*O.j,g) eq apply(O.i,g) * O.j + O.i * apply(O.j,g) } };
+assoc := func< x, y, z | (x * y) * z - x * (y * z) >;
+forall{ <i,j,k> : i,j,k in [1..8] |
+ assoc(O.i,O.j,O.k) + assoc(O.j,O.i,O.k) eq O!0 };
+forall{ <i,j,k> : i,j,k in [1..8] |
+ assoc(O.i,O.j,O.k) + assoc(O.i,O.k,O.j) eq O!0 };
+exists(i,j,k){<i,j,k> : i,j,k in [1..8] |
+ assoc(O.i,O.j,O.k) ne O!0 };
+i,j,k;
+Z := {@ x : x in Phi | x[1] eq -1 and x[6] eq -1 @};
+d4eZ := [ LieRootMatrix(RD,Phi[i],Z) : i in [2..5] ];
+d4fZ := [ LieRootMatrix(RD,-Phi[i],Z) : i in [2..5] ];
+eZ := [ d4eZ[1]+d4eZ[2]+d4eZ[4],d4eZ[3] ];
+fZ := [ d4fZ[1]+d4fZ[2]+d4fZ[4],d4fZ[3] ];
+forall{ i: i in [1..4] | d4e11[i] eq -d4eZ[i] and d4f11[i] eq -d4fZ[i] };
+d4sz := [ [1,1],[2,3],[3,2],[3,4],[5,2],[6,3],[7,1] ];
+d4Bz := basisSeq(d4sz, d4f11);
+d4Bz;
+d4Bz := basisSeq(d4sz, d4fZ);
+d4Bz eq Basis(V);
+eta := [1, -1, 1, -1, -1, 1, -1, 1];
+b := M!0;
+for i := 1 to 7 do 
+ for j := i+1 to 8 do
+  b[i,j] := eta[i] * KForm( RD, Z[i], X11[j] )/24;
+ end for; 
+end for;
+b;
+q := func< u | InnerProduct( uu * Matrix(B,b), uu )
+    where uu is Matrix(B,u) where B is BaseRing(Parent(u)) >;
+q(V.4-V.5);
+beta := func< u, v |
+ InnerProduct( Matrix(B,u)*Matrix(B,b+Transpose(b)), Matrix(B,v) )
+   where B is BaseRing(Parent(u)) >;
+forall{ <i,j,e> : i,j in [1..8], e in (d4e11 cat d4f11) |
+        beta( apply(O.i,e), O.j ) + beta( O.i, apply(O.j,e) ) eq 0 };
+OR := SplitOctonions(R);
+u := OR![u1,u2,u3,u4,u5,u6,u7,u8];
+v := OR![v1,v2,v3,v4,v5,v6,v7,v8];
+q(u*v) eq q(u)*q(v);
+u * v;
+q(u);
+forall{ i : i in [1..4] |
+ apply(u,d4es11[i])*v + u*apply(v,d4et11[i]) eq apply(u*v,d4e11[i])
+ and
+ apply(u,d4fs11[i])*v + u*apply(v,d4ft11[i]) eq apply(u*v,d4f11[i])
+};
+F := GF(5);
+G := GroupOfLieType("G2",F);
+Random(G);
+G2RD := RootDatum("G2");
+comm := func< a, b | a*b - b*a >;
+for sum in [ 3..NumPosRoots(G2RD) ] do
+ r,s := ExtraspecialPair( G2RD, sum );
+ c := LieConstant_N( G2RD, r, s );
+ e11[sum] := (1/c)*comm(e11[r],e11[s]);
+ f11[sum] := -(1/c)*comm(f11[r],f11[s]);
+end for;
+rho := Representation(G,ChangeUniverse(e11,Q),ChangeUniverse(f11,Q))
+      where Q is MatrixRing(Rationals(),8);
+imG := sub< GL(8,F) | [ rho(x) : x in Generators(G) ] >;
+O5 := SplitOctonions(F);
+Cputime(); // up to this point
+time X2 := { {W!x, -W!x} : x in O5 | x^2 eq 2 }
+    where W is VectorSpace(F,8);
+time _,P2,_ := OrbitAction(imG,X2); P2;
+IsPrimitive(P2);
+time CompositionFactors(Stabilizer(P2,1));
+time X1 := { {W!x, -W!x} : x in O5 | x^2 eq 1 and 
+       x ne 1 and x ne -1} where W is VectorSpace(F,8);
+time P1 := OrbitImage(imG,X1); P1;
+time CompositionFactors(Stabilizer(P1,1));
+time X0 := { {a*W!x: a in F | a ne 0} : x in O5 | x^2 eq 0 and x ne 0 }
+ where W is VectorSpace(F,8);
+time P0 := OrbitImage(imG,X0); P0;
+time CompositionFactors(Stabilizer(P0,1));
+SetEchoInput(ei);
+

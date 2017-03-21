@@ -1,0 +1,274 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Global Properties</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text659.htm">[Next]</A><A  HREF = "text657.htm">[Prev]</A> <A  HREF = "text659.htm">[Right]</A> <A  HREF = "text657.htm">[Left]</A> <A  HREF = "text653.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "7475">Global Properties</A></H3>
+
+<P>
+<P>
+Unless otherwise noted, the functions in this section assume that a 
+BSGS-representation for the group can be constructed.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text658.htm#7476">Group Order</A>
+<LI> <A  HREF = "text658.htm#7481">Membership and Equality</A>
+<LI> <A  HREF = "text658.htm#7490">Set Operations</A>
+</UL>
+<H4><A NAME = "7476">Group Order</A></H4>
+
+<P>
+<P>
+Unless the order is already known, each of the functions in this family will
+create a base and strong generating set for the group if one does not already
+exist. 
+
+
+<H5><A NAME = "7477">IsFinite(G) : GrpMat -&gt; Bool, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G, return whether G is finite together with
+the order of G if G is finite.
+The function rigorously proves
+its result (i.e., the result is not probable).
+Let R be the ring over which G is defined,
+and let the degree of G be n.
+If R is finite, then the first return value is trivially {<TT>true</TT>}.
+<P>
+If R is the integer ring or rational field,
+then the function works as follows. 
+The function successively generates random elements of G and
+tests whether each element has infinite order via the function
+<A  HREF = "text657.htm#HasFiniteOrder">HasFiniteOrder</A>; if so, then the non-finiteness of G is proven.
+Otherwise, at regular intervals, the function attempts to construct
+a positive definite form fixed by G (see the function
+<A  HREF = "text697.htm#GrpMatQZ:PositiveDefiniteForm">PositiveDefiniteForm</A> in the chapter on matrix groups over Q and Z), using
+a finite number of steps; if one is successively constructed,
+then the finiteness of G is proven.  The number of steps attempted
+for the positive definite form constructed is increased as the algorithm
+progresses; if G is finite, such a form must exist and will be found when
+enough steps are tried, while if G is infinite, an element of infinite
+order is found very quickly in practice.
+<P>
+If R is an algebraic number field of degree d over Q (including
+cyclotomic and quadratic fields), then the standard companion matrix
+blowup is applied to the generators of G to obtain an isomorphic
+matrix group of (nd) over Q, and the above algorithm is then
+applied to this matrix group.
+</BLOCKQUOTE>
+<H5><A NAME = "7478">Order(G) : GrpMat -&gt; RngIntElt</A></H5>
+<H5># G : GrpMat -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The order of the group G as an integer. If the order is not currently
+known, a base and strong generating set will be constructed for G.
+If G has infinite order, an error ensues.
+</BLOCKQUOTE>
+<H5><A NAME = "7479">FactoredOrder(G) : GrpMat -&gt; [ &lt;RngIntElt, RngIntElt&gt; ]</A></H5>
+<BLOCKQUOTE>
+The order of the group G returned as a factored integer. The format is
+the same as for <TT>FactoredIndex</TT>. If the order of G is not known,
+it will be computed.
+If G has infinite order, an error ensues.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7480">Example <TT>GrpMatGen_Order (H64E9)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; G := MatrixGroup&lt;2,Integers()|[1,1,0,1],[0,1,-1,0]&gt;;
+&gt; IsFinite(G);
+false
+&gt; G24, e := ChangeRing(G, Integers(24));
+&gt; Order(G24);
+9216
+&gt; G.-1*G.2;
+[ 1  1]
+[-1  0]
+&gt; (G.-1*G.2) @ e;
+[ 1  1]
+[23  0]
+&gt; (G24.2^2) @@ e;
+[23  0]
+[ 0 23]
+</PRE>
+<HR>
+<H4><A NAME = "7481">Membership and Equality</A></H4>
+
+
+
+<H5><A NAME = "7482">g in G : GrpMatElt, GrpMat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix g and a matrix group G, return
+<TT>true</TT> if g is an element of G, <TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "7483">g notin G : GrpMatElt, GrpMat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix g and a matrix group G, return
+<TT>true</TT> if g is not an element of G, <TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "7484">S subset G : { GrpMatElt }, GrpMat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G and a set S of matrices
+belonging to a group H, where G and H belong to the same
+generic group, return <TT>true</TT> if S is a subset of G, <TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "7485">H subset G : GrpMat, GrpMat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given matrix groups G and H belonging to the same
+generic group, return <TT>true</TT> if H is a subgroup of G, <TT>false</TT>
+otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "7486">S notsubset G : { GrpMatElt }, GrpMat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G and a set S of matrices
+belonging to a group H, where G and H belong to the same
+generic group, return <TT>true</TT> if S is not a subset of G, <TT>false</TT>
+otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "7487">H notsubset G : GrpMat, GrpMat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given matrix groups G and H belonging to the same
+generic group, return <TT>true</TT> if H is not a subgroup of G,
+<TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "7488">H eq G : GrpMat, GrpMat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given matrix groups G and H belonging to the same
+generic group, return <TT>true</TT> if G and H are the same group,
+<TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "7489">H ne G : GrpMat, GrpMat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given matrix groups G and H belonging to the same
+generic group, return <TT>true</TT> if G and H are distinct groups,
+<TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<H4><A NAME = "7490">Set Operations</A></H4>
+
+<P>
+<P>
+The creation of a base and strong generating set for a matrix
+group G provides us with a very compact representation of the set of
+elements of G.  A particular BSGS imposes an order on the elements of
+G (lexicographic ordering of base images). It thus makes sense to
+talk about the `number' of a group element relative to a particular
+BSGS.
+
+
+<H5><A NAME = "7491">NumberingMap(G) : GrpMat -&gt; Map</A></H5>
+<BLOCKQUOTE>
+A bijective mapping from the group G onto the set of integers
+ { 1 ... |G| }. The actual mapping depends upon
+the base and strong generating set chosen for G.
+</BLOCKQUOTE>
+<H5><A NAME = "7492">RandomProcess(G) : GrpMat -&gt; Process</A></H5>
+
+<PRE>    Slots: RngIntElt                    Default: 10</PRE>
+
+<PRE>    Scramble: RngIntElt                 Default: 20</PRE>
+<BLOCKQUOTE>
+Create a process to generate randomly chosen elements from the finite
+group G. The process is based on the product-replacement algorithm
+of <A  HREF = "text652.htm#bib_randomelements">[CLGM+95]</A>, modified by the use of an accumulator.
+At all times, N elements are stored where N is the maximum of
+the specified value for <TT>Slots</TT>
+and <TT>Ngens</TT>(G) + 1.
+Initially, these are just the generators of G.
+As well, one extra group element is stored, the accumulator. Initially,
+this is the identity.
+Random elements are now produced by successive calls to <TT>Random(P)</TT>,
+where P is the process created by this function.  Each such call
+chooses one of the elements in the slots and multiplies it into the
+accumulator.
+The element in that slot is replaced by the product of it and another
+randomly chosen slot. The random value returned is the new accumulator
+value.
+Setting <TT>Scramble := m</TT> causes m such operations to be performed
+before the process is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "7493">Random(G: parameters) : GrpMat -&gt; GrpMatElt</A></H5>
+
+<PRE>    Short: BoolElt                      Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+A randomly chosen element for the group G. If a BSGS is known
+for G, then the element chosen will be genuinely random. If
+no BSGS is known, then the <I>random</I> element is chosen by
+multiplying out a <I>random</I> word in the generators. Since it
+is not usually practical to choose words long enough to
+properly sample the elements of G, the element returned will
+usually be biased. The boolean-valued parameter <TT>Short</TT> is
+used in this situation to indicate that a short word will
+suffice. Thus, if <TT>Random</TT> is invoked with <TT>Short</TT>
+assigned the value <TT>true</TT> then the element is constructed
+using a short word.
+</BLOCKQUOTE>
+<H5><A NAME = "7494">Random(P) : Process -&gt; GrpMatElt</A></H5>
+<BLOCKQUOTE>
+Given a random element process P created by the function
+<TT>RandomProcess(G)</TT> for the finite group G,
+construct a random element of G by forming a
+random product over the expanded generating set constructed when the 
+process was created. For large degree groups, or groups for which a 
+BSGS is not known, this function should be used in preference to 
+<TT>Random(G)</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7495">Example <TT>GrpMatGen_Random (H64E10)</TT></A></H3>
+We use the random function to sample the orders of elements in 
+the group GL(20, 16).
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := GeneralLinearGroup(20, GF(16));
+&gt; RP := RandomProcess(G);
+&gt; [ FactoredOrder(Random(RP)) : i in [1..20] ];
+[
+    [ &lt;3, 1&gt;, &lt;5, 1&gt; ],
+    [ &lt;3, 2&gt;, &lt;5, 1&gt;, &lt;7, 1&gt;, &lt;11, 1&gt;, &lt;13, 1&gt;, &lt;17, 1&gt;, &lt;31, 1&gt;, &lt;41, 1&gt;, 
+    &lt;61681, 1&gt; ],
+    [ &lt;3, 1&gt;, &lt;5, 1&gt;, &lt;17, 1&gt;, &lt;23, 1&gt;, &lt;89, 1&gt;, &lt;257, 1&gt;, &lt;397, 1&gt;, &lt;683, 1&gt;,
+    &lt;2113, 1&gt; ],
+    [ &lt;3, 1&gt;, &lt;5, 1&gt; ],
+    [ &lt;3, 2&gt;, &lt;5, 1&gt;, &lt;7, 1&gt;, &lt;11, 1&gt;, &lt;13, 1&gt;, &lt;17, 1&gt;, &lt;31, 1&gt;, &lt;41, 1&gt;, 
+    &lt;61681, 1&gt; ],
+    [ &lt;3, 1&gt;, &lt;31, 1&gt;, &lt;8191, 1&gt; ],
+    [ &lt;3, 2&gt;, &lt;5, 1&gt;, &lt;7, 1&gt;, &lt;11, 1&gt;, &lt;13, 1&gt;, &lt;17, 1&gt;, &lt;31, 1&gt;, &lt;41, 1&gt;, 
+    &lt;61681, 1&gt; ],
+    [ &lt;3, 3&gt;, &lt;5, 1&gt;, &lt;7, 1&gt;, &lt;13, 1&gt;, &lt;17, 1&gt;, &lt;19, 1&gt;, &lt;29, 1&gt;, &lt;37, 1&gt;, 
+    &lt;43, 1&gt;, &lt;73, 1&gt;, &lt;109, 1&gt;, &lt;113, 1&gt;, &lt;127, 1&gt;, &lt;257, 1&gt; ],
+    [ &lt;5, 1&gt; ],
+    [ &lt;3, 1&gt;, &lt;5, 1&gt; ],
+    [ &lt;3, 1&gt;, &lt;5, 2&gt;, &lt;11, 1&gt;, &lt;17, 1&gt;, &lt;31, 1&gt;, &lt;41, 1&gt;, &lt;53, 1&gt;, &lt;157, 1&gt;, 
+    &lt;1613, 1&gt;, &lt;2731, 1&gt;, &lt;8191, 1&gt; ],
+    [ &lt;3, 2&gt;, &lt;5, 1&gt;, &lt;7, 1&gt;, &lt;13, 1&gt;, &lt;17, 1&gt;, &lt;97, 1&gt;, &lt;241, 1&gt;, &lt;257, 1&gt;, 
+    &lt;673, 1&gt; ],
+    [ &lt;3, 1&gt;, &lt;5, 1&gt;, &lt;17, 1&gt;, &lt;29, 1&gt;, &lt;43, 1&gt;, &lt;113, 1&gt;, &lt;127, 1&gt;, &lt;257, 1&gt;,
+    &lt;65537, 1&gt; ],
+    [ &lt;3, 1&gt;, &lt;5, 2&gt;, &lt;11, 1&gt;, &lt;29, 1&gt;, &lt;31, 1&gt;, &lt;41, 1&gt;, &lt;43, 1&gt;, &lt;113, 1&gt;, 
+    &lt;127, 1&gt; ],
+    [ &lt;3, 1&gt;, &lt;5, 2&gt;, &lt;11, 1&gt;, &lt;17, 1&gt;, &lt;31, 1&gt;, &lt;41, 1&gt;, &lt;53, 1&gt;, &lt;157, 1&gt;, 
+    &lt;1613, 1&gt;, &lt;2731, 1&gt;, &lt;8191, 1&gt; ],
+    [ &lt;3, 2&gt;, &lt;5, 2&gt;, &lt;11, 1&gt;, &lt;13, 1&gt;, &lt;17, 1&gt;, &lt;31, 1&gt;, &lt;41, 1&gt;, &lt;61, 1&gt;, 
+    &lt;151, 1&gt;, &lt;257, 1&gt;, &lt;331, 1&gt;, &lt;1321, 1&gt; ],
+    [ &lt;3, 1&gt;, &lt;5, 1&gt;, &lt;11, 1&gt;, &lt;31, 1&gt;, &lt;41, 1&gt;, &lt;257, 1&gt;, &lt;61681, 1&gt;, 
+    &lt;4278255361, 1&gt; ],
+    [ &lt;3, 2&gt;, &lt;5, 1&gt;, &lt;7, 1&gt;, &lt;11, 1&gt;, &lt;13, 1&gt;, &lt;17, 1&gt;, &lt;31, 1&gt;, &lt;41, 1&gt;, 
+    &lt;61681, 1&gt; ],
+    [ &lt;3, 1&gt;, &lt;5, 1&gt;, &lt;17, 1&gt;, &lt;23, 1&gt;, &lt;89, 1&gt;, &lt;257, 1&gt;, &lt;397, 1&gt;, &lt;683, 1&gt;,
+    &lt;2113, 1&gt; ], [ &lt;3, 2&gt;, &lt;5, 1&gt;, &lt;7, 1&gt;, &lt;11, 1&gt;, &lt;13, 1&gt;, &lt;23, 1&gt;, &lt;31, 1&gt;,
+    &lt;41, 1&gt;, &lt;89, 1&gt;, &lt;397, 1&gt;, &lt;683, 1&gt;, &lt;2113, 1&gt; ]
+]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text659.htm">[Next]</A><A  HREF = "text657.htm">[Prev]</A> <A  HREF = "text659.htm">[Right]</A> <A  HREF = "text657.htm">[Left]</A> <A  HREF = "text653.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

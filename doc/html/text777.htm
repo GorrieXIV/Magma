@@ -1,0 +1,142 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Calculating Cohomology</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text778.htm">[Next]</A><A  HREF = "text776.htm">[Prev]</A> <A  HREF = "text778.htm">[Right]</A> <A  HREF = "text776.htm">[Left]</A> <A  HREF = "text773.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "8827">Calculating Cohomology</A></H3>
+
+
+
+<H5><A NAME = "8828">CohomologyGroup(CM, n) : ModCoho, RngIntElt -&gt; ModTupRng</A></H5>
+<BLOCKQUOTE>
+Given a cohomology module CM for the group G acting on the module
+M and a non-negative integer n taking one of the values 0, 1 or 2, 
+this function returns the cohomology group H<sup>n</sup>(G, M).
+For modules defined over the ring of integers only, n may also be equal to 3.
+(In this case, H<sup>3</sup>(G, M) is computed as the second cohomology group of M
+regarded as a module over Q/Z.)
+If the group used to define CM was a finitely presented group, then n may
+only be equal to 0 or 1. Note that CM 
+must be a module returned by invoking <TT>CohomologyModule</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "8829">CohomologicalDimension(CM, n) : ModCoho, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a cohomology module CM for the group G acting on the module
+M defined over a finite field K and 
+a non-negative integer n taking one of the values 0, 1 or 2, 
+this function returns the dimension of H<sup>n</sup>(G, M) over K. Note 
+that this function may only be applied to the module returned 
+by a call to <TT>CohomologyModule(G, M)</TT>, where M 
+is a module over a finite field K. When n = 2, this function 
+is faster and may be applied to much larger examples than 
+<TT>CohomologyGroup(CM, n)</TT> but, unlike that function, it does 
+not enable the user to compute with explicit extensions and 
+two-cocycles.
+<P>
+Note that there are some alternative functions for performing these calculations
+described in other manual chapters.
+</BLOCKQUOTE>
+<H5><A NAME = "8830">CohomologicalDimension(M, n) : ModGrp, n -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+For K[G]-module M (with K a finite field and G a finite group),
+compute and return the K-dimension of the cohomology group H<sup>n</sup>(G, M)
+for n &ge;0. For n=0 and 1, this is carried out by using the function
+<TT>CohomologicalDimension(CM,n)</TT> just described. For n &ge;2, it is done
+recursively using projective covers and dimension shifting to reduce to the
+case n=1. 
+</BLOCKQUOTE>
+<H5><A NAME = "8831">CohomologicalDimensions(M, n) : ModGrp, n -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+For K[G]-module M (with K a finite field and G a finite group),
+compute and return the sequence of K-dimensions of the cohomology groups
+H<sup>k</sup>(G, M) for 1 &le;k &le;n. On account of the recursive method used, this
+is quicker than computing them all individually.
+</BLOCKQUOTE>
+<H5><A NAME = "8832">CohomologicalDimension(G, M, n) : GrpPerm, ModRng, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given the permutation group G, the K[G]-module M and an integer 
+n (equal to 1 or 2), return the dimension of the n-th cohomology 
+group of G acting on M. <I>Note that K must be a finite field of 
+prime order</I>. This function invokes Derek Holt's original C cohomology 
+code (see <A  HREF = "text772.htm#bib_holt-cohom">[Hol85b]</A>). In some cases it will be faster than the 
+function that uses the cohomology module data structure.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "8833">Example <TT>GrpCoh_coho-example (H73E2)</TT></A></H3>
+We examine the first and second cohomology groups of the 
+group A<sub>8</sub>. 
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := Alt(8);
+&gt; M := PermutationModule(G, GF(3));
+</PRE>
+<P>
+We first calculate the dimensions of H<sup>1</sup>(G, M) and H<sup>2</sup>(G, M) 
+using the old functions.
+<P>
+<P>
+<P>
+<PRE>
+&gt; time CohomologicalDimension(G, M, 1);
+0
+Time: 0.020
+&gt; time CohomologicalDimension(G, M, 2);
+1
+Time: 0.020
+</PRE>
+<P>
+We now recalculate the dimensions of H<sup>1</sup>(G, M) and H<sup>2</sup>(G, M) 
+using the new functions.
+<P>
+<P>
+<P>
+<PRE>
+&gt; X := CohomologyModule(G, M);
+&gt; time CohomologicalDimension(X, 1);
+0
+Time: 0.020
+&gt; time CohomologicalDimension(X, 2);
+1
+Time: 0.920
+&gt; X := CohomologyModule(G, M);
+&gt; time C:=CohomologyGroup(X, 2);
+Time: 4.070
+&gt; C;
+Full Vector space of degree 1 over GF(3)
+</PRE>
+<HR>
+<H3><A NAME = "8834">Example <TT>GrpCoh_more-difficult (H73E3)</TT></A></H3>
+In the case of &Omega;^ - (8, 3) acting on its natural module, 
+the new function succeeds, but the old function does not.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := OmegaMinus(8, 3);
+&gt; M := GModule(G);
+&gt; X := CohomologyModule(G, M);
+&gt; time CohomologicalDimension(X, 2);
+2
+Time: 290.280
+&gt; phi, P := PermutationRepresentation(G);
+&gt; MM := GModule(P, [ActionGenerator(M, i): i in [1..Ngens(G)]] );
+&gt; time CohomologicalDimension(P, MM, 2);
+
+Out of space.
+
+&gt;&gt; time CohomologicalDimension(P, MM, 2);
+                              ^
+Runtime error in 'CohomologicalDimension': Cohomology failed
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text778.htm">[Next]</A><A  HREF = "text776.htm">[Prev]</A> <A  HREF = "text778.htm">[Right]</A> <A  HREF = "text776.htm">[Left]</A> <A  HREF = "text773.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

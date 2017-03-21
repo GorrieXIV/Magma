@@ -1,0 +1,28 @@
+"Source: Text/Geometry/Crv.text";
+"Line: 3451";
+"Date: Wed Jun  8 14:01:03 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/Crv.text, line: 3451
+// Example: H120E22 ()
+print "Example: H120E22";
+ei := GetEchoInput();
+SetEchoInput(true);
+P2<x,y,z> := ProjectiveSpace(Rationals(),2);
+C := Curve(P2,x^3*y+y^3*z+z^3*x);
+phi := iso<C->C|[y,z,x],[z,x,y]>;
+// we will take the quotient by phi
+G := AutomorphismGroup(C,[phi]);
+CG,prj := CurveQuotient(G);
+CG;
+Genus(CG);
+assert $1 eq 1;
+// find a minimal elliptic Weierstrass model
+ptCG := prj(C![0,0,1]);
+E1, psi1 := EllipticCurve(CG,ptCG);
+E, psi := MinimalModel(E1);
+prj := Expand(prj * psi1 * psi); // get the composite map C -> E
+E;
+prj;
+Conductor(E);
+assert $1 eq 49;
+SetEchoInput(ei);

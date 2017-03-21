@@ -1,0 +1,16 @@
+H-key 0
+HallSubgroup 1
+HasAdditionAlgorithm 2
+HasOddDegreeModel 3
+hecke 4
+height 5
+HermitePolynomial 6
+HighestShortCoroot 7
+HilbertCharacterSubgroup 8
+holomorphs 9
+HomGenerators 10
+homology1 11
+homomorphism-element 12
+Hook 13
+hyperelliptic 14
+hypsplit 15

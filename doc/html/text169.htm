@@ -1,0 +1,778 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Advanced Factorization  Techniques: The Number Field Sieve</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text154.htm">[Next]</A><A  HREF = "text168.htm">[Prev]</A> <A  HREF = "text154.htm">[Right]</A> <A  HREF = "text168.htm">[Left]</A> <A  HREF = "text155.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "1325">Advanced Factorization  Techniques: The Number Field Sieve</A></H3>
+
+<P>
+<P>
+<P>
+Magma provides an experimental implementation of the fastest general
+purpose factoring algorithm known: the Number Field Sieve (NFS).
+The implementation may be used both as a General Number Field Sieve and
+a Special Number Field Sieve -- the only difference is in the selection
+of a suitable polynomial.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text169.htm#1326">The Magma Number Field Sieve Implementation</A>
+<LI> <A  HREF = "text169.htm#1328">Naive NFS</A>
+<LI> <A  HREF = "text169.htm#1330">Factoring with NFS Processes</A>
+<LI> <A  HREF = "text169.htm#1351">Data Files</A>
+<LI> <A  HREF = "text169.htm#1355">Distributing NFS Factorizations</A>
+<LI> <A  HREF = "text169.htm#1357">Magma and CWI NFS Interoperability</A>
+<LI> <A  HREF = "text169.htm#1360">Tools for Finding a Suitable Polynomial</A>
+</UL>
+<H4><A NAME = "1326">The Magma Number Field Sieve Implementation</A></H4>
+
+<P>
+<P>
+In order to make use of the Magma NFS, the user should have some 
+knowledge of the algorithm.  The Magma NFS implementation also 
+requires a significant amount of memory and disk space to be available
+for the duration of the factorization.  For example, factorization 
+of an 80-digit number may require at least 64 megabytes of RAM and 
+half a gigabyte of disk space.
+<P>
+Magma's NFS implementation uses one linear polynomial (the 
+"rational side") and one polynomial of higher degree (the
+"algebraic side").  At the time of writing this is not a major
+restriction, since the best methods for selecting polynomials for 
+factorization of numbers of more than 100 digits involve one linear
+and one non-linear polynomial.  Magma provides a number of functions
+to assist in choosing a good algebraic-side polynomial for the 
+factorization of a particular number, following the ideas of Montgomery
+and Murphy in <A  HREF = "text154.htm#bib_murphy">[Mur99]</A>.
+<P>
+Magma provides two methods for using the NFS implementation.
+The first is the one-step function <TT>NFS</TT>, which provides a
+naive NFS factorization attempt using default algorithm parameters.
+<P>
+The second, more powerful method is to work with an NFS process object, 
+splitting the algorithm into four stages: Sieving, Auxiliary data, Linear
+algebra and Final factorization.  This approach allows greater control over
+the algorithm, as the user may supply their own algorithm parameter values.
+It also allows the user to distribute the computationally intensive sieving
+and final factorization stages over several machines or processors.
+<P>
+Some functions are included to allow Magma users to co-operate in 
+factorization attempts using CWI tools.
+<P>
+A verbose flag may be set to obtain informative printing on progress
+in the various stages of the NFS algorithm. 
+
+
+<H5><A NAME = "1327">SetVerbose("NFS", v) : MonStgElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Set the verbose printing level for the NFS algorithms to the integer v.
+Currently the legal values for v are 0, 1, 2 and 3.
+<P>
+If the level is 0, no verbose output is produced.
+<P>
+If the level is 1, NFS will produce basic information about its progress, and
+will also print information on NFS algorithm parameters.
+<P>
+If the level is 2, NFS will provide more detailed information about progress
+and parameters.
+<P>
+If the level is 3, NFS will print out extremely detailed information about 
+progress and data.  This level will only be useful for experts and developers.
+</BLOCKQUOTE>
+<H4><A NAME = "1328">Naive NFS</A></H4>
+
+<P>
+<P>
+<P>
+Magma's Number Field Sieve implementation provides a one-step black-box
+function <TT>NFS</TT>. Here, the user provides the integer n to be factored, 
+a homogeneous bivariate integer polynomial F and integers m1 and m2 
+such that F(m1, m2) &equiv; 0 mod n. Magma will attempt to factor n 
+using F, m1 and m2,  automatically selecting the other parameters 
+(see below) for the algorithm. 
+<P>
+The automatically chosen parameters are NOT optimal in general,
+and therefore no conclusions should be drawn about the speed of 
+the implementation or the algorithm itself based on the use 
+of this function.
+<P>
+For example, note that the default algebraic factor base size 
+of <TT>NFS</TT> is chosen to be rather large to decrease the 
+likelihood of running out of useful relations.  This slows the
+algorithm considerably, since it increases the size of the matrix
+to be reduced -- but it also means that the algorithm should
+succeed in finding a factor unless one chooses a really bad polynomial.
+
+
+<H5><A NAME = "1329">NumberFieldSieve(n, F, m1, m2) : RngIntElt, RngMPolElt, RngIntElt, RngIntElt -&gt; RngIntElt</A></H5>
+<H5>NFS(n, F, m1, m2) : RngIntElt, RngMPolElt, RngIntElt, RngIntElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Performs the factorization of an integer n using the 
+Number Field Sieve with algebraic polynomial F, where 
+the integers m1 and m2 satisfy F(m1, m2) &equiv; 0 mod n.
+Returns a nontrivial factor of n if one is found, or 0 otherwise.
+</BLOCKQUOTE>
+<H4><A NAME = "1330">Factoring with NFS Processes</A></H4>
+
+<P>
+<P>
+<P>
+An NFS Process (an object of category <TT>NFSProc</TT>) encapsulates the data
+of a Magma NFS factorization.  
+It contains the number n to be factored, the algebraic polynomial
+F and the integers m<sub>1</sub> and m<sub>2</sub>.  It also provides access to a number
+of NFS algorithm parameters (such as approximate factor base sizes).  These
+parameters are attributes of the NFS process.
+If any of the parameters are not set, sensible (but not necessarily optimal)
+defaults will be provided by Magma.
+<P>
+<P>
+The NFS algorithm is divided into four stages:
+<DL COMPACT class='compact'>
+<DT>1.</DT><DD>Sieving
+<DT>2.</DT><DD>Auxiliary data gathering
+<DT>3.</DT><DD>Linear algebra
+<DT>4.</DT><DD>Factorization
+<P>
+</DL>
+The stages are described in detail below.
+<P>
+After creating an NFS process for the factorization attempt, the user should
+proceed through each of the four stages in the above order.
+
+
+<H5><A NAME = "1331">NFSProcess(n, F, m1, m2) : RngIntElt, RngMPolElt, RngIntElt, RngIntElt -&gt; NFSProc</A></H5>
+<BLOCKQUOTE>
+Given a (composite) integer n, a bivariate homogeneous integer polynomial F,
+and nonzero integers m1 and m2 such that F(m1, m2) &equiv; 0 mod n, this
+function creates an NFS process object for an NFS factorization of n.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "1332">Example <TT>RngInt_nfsprocessparameters (H18E10)</TT></A></H3>
+The attributes associated with an NFS process are:
+<P>
+<P>
+<PRE>
+&gt; ListAttributes(NFSProc);
+AlgebraicError              OutputFilename
+AlgebraicFBBound            RationalError
+AlgebraicLargePrimeBound    RationalFBBound
+CacheSize                   RationalLargePrimeBound
+F                           m1
+Firstb                      m2
+Lastb                       n
+Maximuma
+</PRE>
+<P>
+<TT>OutputFilename</TT> is the base name for NFS-generated data files.  
+These files (and their actual names) are discussed below.
+<P>
+<TT>AlgebraicFBBound</TT> is the upper bound for smooth primes in the 
+algebraic-side factor base, and <TT>RationalFBBound</TT>, the upper bound 
+for smooth primes in rational-side factor base.
+<P>
+<TT>Maximuma</TT> bounds the sieve interval for a:  NFS will sieve for
+relations with |a| &le; <TT>Maximuma</TT>.
+<P>
+<TT>Firstb</TT> is the first value of b to sieve on, and <TT>Lastb</TT> is 
+the last.
+<P>
+<TT>AlgebraicLargePrimeBound</TT> gives the upper bound for "large" 
+(non-smooth) primes in the algebraic-side factor base.  Similarly, 
+<TT>RationalLargePrimeBound</TT> is the upper bound for the rational side.
+<P>
+<TT>AlgebraicError</TT> defines an "error" tolerance for logarithm arithmetic
+on algebraic side.  Similarly, <TT>RationalError</TT> defines an "error" 
+tolerance for the rational side.
+<P>
+<TT>CacheSize</TT> is a flag reflecting the computer cache memory size, for 
+optimisation.
+<HR>
+<H5><A NAME = "1333">Attribute Selection</A></H5>
+
+<P>
+<P>
+<P>
+As a guideline for the selection of attributes, we include here
+a few examples of attributes that we have determined to be good
+for the Magma NFS implementation.
+
+
+<P>
+<P>
+The best choice for the factor base size depends on many variables, including
+the average log size and the Murphy &alpha; parameter (defined in <A  HREF = "text154.htm#bib_murphy">[Mur99]</A>) for the polynomial F.
+Our polynomials above are quite good: if the user does not know much
+about determining the quality of polynomials, then he or she should use 
+much larger factor bases.
+<HR>
+<H3><A NAME = "1334">Example <TT>RngInt_70digitnfs (H18E11)</TT></A></H3>
+Sample attributes for a 70-digit number:
+<P>
+<P>
+<PRE>
+&gt; n := 5235869680233366295366904510725458053043111241035678897933802235060927;
+&gt; R&lt;X,Y&gt; := PolynomialRing(Integers( ), 2);
+&gt; F := 2379600*X^4 - 12052850016*X^3*Y - 13804671642407*X^2*Y^2 +
+&gt;      11449640164912254*X*Y^3 + 7965530070546332840*Y^4 ;
+&gt; m1 := 6848906180202117;
+&gt; m2 := 1;
+&gt; P := NFSProcess(n,F,m1,m2);
+&gt; P`AlgebraicFBBound := 8*10^5;
+&gt; P`RationalFBBound := 6*10^5;
+&gt; P`OutputFilename := "/tmp/nfs_70_digit";
+&gt; P`Maximuma := 4194280;
+&gt; P`AlgebraicError := 16;
+&gt; P`RationalError := 14;
+</PRE>
+<HR>
+<H3><A NAME = "1335">Example <TT>RngInt_80digitnfs (H18E12)</TT></A></H3>
+Sample attributes for an 80-digit number:
+<P>
+<P>
+<PRE>
+&gt; n := 1871831866357686493451122722951040222063279350383738650253906933489072\
+&gt; 2483083589;
+&gt; P&lt;X,Y&gt; := PolynomialRing(Integers(),2);
+&gt; F := 15901200*X^4 + 9933631795*X^3*Y - 112425819157429*X^2*Y^2 -
+&gt;     231659214929438137*X*Y^3 - 73799500175565303965*Y^4;
+&gt; m1 := 1041619817688573426;
+&gt; m2 := 1;
+&gt; P := NFSProcess(n, F, m1, m2);
+&gt; P`AlgebraicFBBound := 8*10^5;
+&gt; P`RationalFBBound := 6*10^5;
+&gt; P`OutputFilename := "/tmp/nfs_80_dgit";
+&gt; P`Maximuma := 10485760;
+&gt; P`AlgebraicError := 16;
+&gt; P`RationalError := 14;
+</PRE>
+<HR>
+<H3><A NAME = "1336">Example <TT>RngInt_87digitnfs (H18E13)</TT></A></H3>
+Sample attributes for an 87-digit number:
+<P>
+<P>
+<PRE>
+&gt; n := 12118618732463427472219179104631767765107839384219612469780841876821498\
+&gt; 2402918637227743;
+&gt; P&lt;X,Y&gt; := PolynomialRing(Integers(),2);
+&gt; F := 190512000*X^4 - 450872401242*X^3*Y +
+&gt;     1869594915648551*X^2*Y^2 + 2568544235742498*X*Y^3 -
+&gt;     9322965583419801010104*Y^4;
+&gt; m1 := 28241170741195273211;
+&gt; m2 := 1;
+&gt; P := NFSProcess(n, F, m1, m2);
+&gt; P`AlgebraicFBBound := 16*10^5;
+&gt; P`RationalFBBound := 10^6;
+&gt; P`OutputFilename := "/tmp/nfs_87_digit";
+&gt; P`Maximuma := 2^24;
+&gt; P`AlgebraicError := 24;
+&gt; P`RationalError := 18;
+</PRE>
+<HR>
+<H5><A NAME = "1337">The Sieving Stage</A></H5>
+
+<P>
+<P>
+<P>
+Magma's NFS uses a "line-by-line" (or "classical")
+sieving algorithm.  Future versions may include lattice sieving.
+<P>
+The line-by-line siever sieves values of F(a, b) on the algebraic
+side and corresponding values a .m2 - b .m1 on the
+rational side.
+This is done by fixing a value of b (beginning with the parameter
+<TT>Firstb</TT>, if supplied), then sieving all
+values of a between -a<sub>0</sub> and a<sub>0</sub>, where a<sub>0</sub> is
+approximately equal to the parameter <TT>Maximuma</TT> (some rounding 
+off is done to make sure that the sieve interval length is divisible 
+by a high power of 2). When this is completed b is incremented, and
+the next value of b is processed.
+<P>
+The sieving continues until either the maximum value of b (specified
+by the parameter <TT>Lastb</TT>) has been reached, or until enough 
+relations are obtained to complete the factorization.  If <TT>Lastb</TT> is
+not defined, the sieve simply continues until enough relations are found.
+The number of relations required may be determined by the function 
+<TT>NumberOfRelationsRequired</TT>.
+<P>
+"Cycles" among partial relations are counted after every 256 iterations.
+<P>
+The sieve implementation uses (rounded natural) logarithms of primes
+to mark the sieve interval.  Moreover, the implementation does not sieve 
+with prime powers.  Therefore, we must allow for some error in scanning
+the sieve arrays for useful relations; the acceptable sieve threshold
+errors for each side are defined by the <TT>AlgebraicError</TT> and 
+<TT>RationalError</TT> parameters.  
+If, in addition, the user wants to take advantage of large prime
+relations (recommended), then larger error terms should be used.
+The implementation will keep relations having up to 2 large primes
+on each side, but will only find such relations if the user selects
+large enough sieve threshold error bounds.
+The user should be cautious when sieving for (and subsequently using)
+relations with large primes, as they greatly increase overall disk space 
+requirements.
+Some experimentation may be required in order to determine the best
+error bounds for speed or disk space optimization purposes.
+<P>
+The <TT>CacheSize</TT> parameter may be used to take advantage of the cache
+memory size of the computer: a value of 1 indicates a small
+cache size, 2 a medium cache size, and 3 a for large cache size.
+
+
+<H5><A NAME = "1338">NumberOfRelationsRequired(P) : NFSProc -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The minimum number of relations required for an NFS factor attempt with
+NFS process P.
+</BLOCKQUOTE>
+<H5><A NAME = "1339">FindRelations(P) : NFSProc -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given an NFS process P for factoring an integer n, generates relations
+to factor n with the Number Field Sieve algorithm.
+Returns the number of full relations plus the number of cycles found.
+</BLOCKQUOTE>
+<H5><A NAME = "1340">The Auxiliary Data Stage</A></H5>
+
+<P>
+<P>
+<P>
+In this stage of the algorithm, "cycles" <A  HREF = "text154.htm#bib_dodsonLenstra">[LD95]</A>
+are detected in the partial relations from the sieving stage, 
+and quadratic characters are calculated for the relations.
+This greatly improves the efficiency of the NFS.
+<P>
+In a typical factorization, the user should call the procedures
+<TT>CreateCycleFile</TT> and <TT>CreateCharacterFile</TT> in succession.
+
+
+<H5><A NAME = "1341">CreateCycleFile(P) : NFSProc -&gt; .</A></H5>
+<BLOCKQUOTE>
+Creates a file with all the cycle information that the NFS algorithm 
+requires to complete the matrix reduction and final factorization stages
+for the NFS process P. 
+</BLOCKQUOTE>
+<H5><A NAME = "1342">CycleCount(P) : NFSProc -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the number of cycles in the partial relations of the NFS process P.
+This function is mainly intended for factoring with multiple processors.
+</BLOCKQUOTE>
+<H5><A NAME = "1343">CycleCount(fn) : MonStgElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the number of cycles in the partial data file corresponding
+to the base file name fn.
+This function is mainly intended for factoring with multiple processors.
+</BLOCKQUOTE>
+<H5><A NAME = "1344">CreateCharacterFile(P) : NFSProc -&gt; .</A></H5>
+<BLOCKQUOTE>
+Creates a file with the quadratic character data for the full relations
+and cycles in the NFS process P.
+</BLOCKQUOTE>
+<H5><A NAME = "1345">CreateCharacterFile(P, cc) : NFSProc, RngIntElt -&gt; .</A></H5>
+<BLOCKQUOTE>
+Creates a file with the quadratic character data for the full relations
+and cycles in the NFS process P.
+There are cc sets of 32 quadratic character columns created.
+</BLOCKQUOTE>
+<H5><A NAME = "1346">Finding Dependencies: the Linear Algebra Stage</A></H5>
+
+<P>
+<P>
+<P>
+In this stage, the relations are collected together to form a matrix, 
+and then block Lanczos reduction is applied to find linear dependencies 
+among the relations.  These dependencies become candidates for factorization.
+
+
+<H5><A NAME = "1347">FindDependencies(P) : NFSProc -&gt; .</A></H5>
+<BLOCKQUOTE>
+Finds dependencies between relations in the NFS process P.
+</BLOCKQUOTE>
+<H5><A NAME = "1348">The Factorization Stage</A></H5>
+
+<P>
+<P>
+<P>
+In this stage, number field square roots are extracted and we attempt
+to factor the dependencies found in the linear algebra stage.
+
+
+<H5><A NAME = "1349">Factor(P) : NFSProc -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Try to factor with each dependency in the NFS process P until a proper 
+factor is found.
+Returns the factor, or 0 if no factor is found.
+</BLOCKQUOTE>
+<H5><A NAME = "1350">Factor(P,k) : NFSProc, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Attempt to factor with the k-th dependency in the NFS process P. 
+Returns a proper factor if found, 0 otherwise.
+</BLOCKQUOTE>
+<H4><A NAME = "1351">Data Files</A></H4>
+
+<P>
+<P>
+<P>
+Many data files are ued for an NFS factorization.  The user can control
+the names and location of the files by specifying the <TT>OutputFilename</TT>
+parameter; then all output files will have names beginning with the
+<TT>OutputFilename</TT> string, with a range of suffixes depending on their
+purpose.
+<P>
+In general, all files are appended to rather than overwritten; so to avoid
+inconsistencies (and to save disk space) the user should call 
+<TT>RemoveFiles</TT> after a successful factorization.
+<P>
+<P>
+When distributing factorizations, or collecting results from sieving stages
+that have been broken up into several runs for some reason (for example, if
+a process has been interrupted), Magma provides the function
+<TT>MergeFiles</TT>.  This takes a sequence of base filenames (which are
+treated as if they were the value for <TT>OutputFilename</TT>), and reads in the
+corresponding relation and partial relation files; it then combines the
+contents of these files, removing duplicates and corrupted lines of data, and
+places the results into new relation and partial relation files.
+
+
+<H5><A NAME = "1352">RemoveFiles(P) : NFSProc -&gt; .</A></H5>
+<BLOCKQUOTE>
+Deletes any data files created by the NFS process P.
+</BLOCKQUOTE>
+<H5><A NAME = "1353">MergeFiles(S, fn) : [MonStgElt], MonStgElt -&gt; RngIntElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Merges the NFS relation files named in the sequence S 
+(and their associated partial relation files) into a pair of 
+new relation and partial relation files, while removing 
+duplicate and corrupted lines of data; returns the number of 
+relations and the number of partial relations in the new output 
+files.
+The combined full relations are stored in a file named fn,
+and the partial relations in a file named fn_partials.
+</BLOCKQUOTE>
+<H5><A NAME = "1354">Magma Native NFS Data Files</A></H5>
+
+<P>
+<P>
+<P>
+Here we describe the files used in a typical Magma NFS factorization.
+These files all use formats peculiar to <TT>Magma</TT>'s NFS.
+<P>
+<P>
+The first kind of file created by NFS stores the relations generated in the
+sieving stage by the <TT>FindRelations</TT> procedure.
+The name of the file is precisely the <TT>OutputFilename</TT> string.
+<P>
+NFS also stores partial relations generated in the sieving stage; these are 
+stored in a file named <TT>OutputFilename</TT>_partials.
+<P>
+Whenever cycles <A  HREF = "text154.htm#bib_dodsonLenstra">[LD95]</A> are counted (for example, in 
+<TT>CycleCount</TT>, a file named <TT>OutputFilename</TT>_cycles is
+created to store them in.  Some other files are also created and 
+then deleted during the cycle counting process.
+<P>
+The quadratic characters calculated in <TT>CreateCharacterFile</TT> are
+stored in a file named <TT>OutputFilename</TT>_cc.
+<P>
+The linear algebra stage creates a file named 
+<TT>OutputFilename</TT>_null_space, which lists relations making up null
+space vectors for the NFS matrix.
+
+
+<H4><A NAME = "1355">Distributing NFS Factorizations</A></H4>
+
+<P>
+<P>
+<P>
+Magma provides a number of tools for distributing the sieving and
+final factoring stages over a number of computers.
+<P>
+<P>
+To distribute the sieving stage, each processor should get a
+unique range of b-values to sieve and unique data file names.
+During the sieving, the user must manually check when the combined
+data has enough relations to factor the number.
+To do this, the data files must first be merged using <TT>MergeFiles</TT>,
+and then the cycles can be counted with <TT>CycleCount</TT>.
+If the combined number of full relations plus the number of
+cycles exceeds the size of both factor bases combined,
+then the user can proceed to the other stages of the factorization 
+attempt using the merged data file name.
+<P>
+To distribute the factorization stage, the user may choose a dependency
+for each process to factor, then call <TT>Factor(P,k)</TT> where P is the
+NFS process and k the number specifying the dependency to factor, with
+a different value of k for each process.
+
+
+<HR>
+<H3><A NAME = "1356">Example <TT>RngInt_distributed (H18E14)</TT></A></H3>
+Here we demonstrate a distributed NFS factorization (of a very small n)
+over two processes, A and B -- which may be on different machines, or
+different magma processes on the same machine, or even in the same magma
+process.
+<P>
+We begin with process A:
+<P>
+<P>
+<PRE>
+&gt; R&lt;X,Y&gt; := PolynomialRing(Integers( ),2);
+&gt; n := 70478782497479747987234958341;
+&gt; F := 814*X^4 + 3172*X^3*Y - 49218*X^2*Y^2 - 142775*X*Y^3 
+&gt; - 65862*Y^4;
+&gt; m1 := 3050411;
+&gt; m2 := 1;
+&gt; A := NFSProcess(n,F,m1,m2);
+&gt; A`Firstb := 0;
+&gt; A`Lastb := 99;
+&gt; A`OutputFilename := "/tmp/nfs-distrib-A";
+&gt; FindRelations(A);
+3852
+</PRE>
+<P>
+Now, process B, with n, F, m1 and m2 as above:
+<P>
+<P>
+<PRE>
+&gt; B := NFSProcess(n,F,m1,m2);
+&gt; B`Firstb := 99;
+&gt; B`Lastb := 199;
+&gt; B`OutputFilename := "/tmp/nfs-distrib-B";
+&gt; FindRelations(B);
+2455
+</PRE>
+<P>
+Then later, on a single machine,
+<P>
+<P>
+<PRE>
+&gt; input_files := ["/tmp/nfs-distrib-A","/tmp/nfs-distrib-B"];
+&gt; P := NFSProcess(n,F,m1,m2);
+&gt; P`OutputFilename := "/tmp/nfs-distrib-all";
+&gt; MergeFiles(input_files, P`OutputFilename);
+4162 25925
+&gt; CycleCount(P);
+4368
+&gt; CreateCycleFile(P);
+&gt; CreateCharacterFile(P);
+&gt; FindDependencies(P);
+</PRE>
+<P>
+Now, the final factorization stage may be distributed over more than one
+processor also.  We attempt to factor a relation on A:
+<P>
+<P>
+<PRE>
+&gt; A`OutputFilename := "/tmp/nfs-distrib-all";
+&gt; Factor(A,9);  // factor dependency 9
+0
+</PRE>
+<P>
+No factor was found on machine A, but meantime on B:
+<P>
+<P>
+<PRE>
+&gt; B`OutputFilename := "/tmp/nfs-distrib-all";
+&gt; Factor(P,1);  // factor dependency 1
+94899629
+&gt; n mod $1, n div $1;
+0 742666575624650207929
+</PRE>
+<P>
+We have a successful factorisation.
+<HR>
+<H4><A NAME = "1357">Magma and CWI NFS Interoperability</A></H4>
+
+<P>
+<P>
+<P>
+At the time of writing, the record NFS factorizations were lead
+by the CWI group and by people using CWI's or Arjen Lenstra's code.
+The CWI tools use a different data file format to Magma's native 
+format, but Magma supplies some tools to allow users to assist in
+CWI factorization attempts.
+<P>
+<P>
+The user may generate relations in CWI relation format, rather than
+Magma native format, by using <TT>FindRelationsInCWIFormat</TT>.
+The user should note that relations in CWI format cannot at present 
+be used in the Auxiliary data, Linear algebra or Factorization
+stages of the Magma NFS.
+<P>
+Alternatively, assuming some Magma NFS relations have already
+been computed for a process, then the user may use the procedure 
+<TT>ConvertToCWIFormat</TT> to convert the relation data files 
+from Magma native format to CWI format.  
+The resulting data file is named <TT>OutputFilename</TT>_CWI_format,
+and will contain both the full and partial relations of the process.  
+
+
+<H5><A NAME = "1358">FindRelationsInCWIFormat(P) : NFSProc -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given an NFS process P for factoring an integer n, generates relations
+to factor n with the Number Field Sieve algorithm, in a file format
+suitable for use with CWI's NFS tools.  Returns the number of relations
+found.
+</BLOCKQUOTE>
+<H5><A NAME = "1359">ConvertToCWIFormat(P, pb) : NFSProc, RngIntElt -&gt; .;</A></H5>
+<BLOCKQUOTE>
+Converts the relation files of the NFS process P to CWI format,
+storing primes only greater than or equal to the prime printing 
+bound pb.  The resulting data file name will be named
+<TT>P`OutputFilename</TT>_CWI_format.
+</BLOCKQUOTE>
+<H4><A NAME = "1360">Tools for Finding a Suitable Polynomial</A></H4>
+
+<P>
+<P>
+Magma does not provide a function to select
+an optimal polynomial for the factorization of a given number.
+However, Magma does provide some functions that are useful for
+the implementation of the polynomial selection algorithms developed
+by Peter Montgomery and Brian Murphy in
+<A  HREF = "text154.htm#bib_murphy">[Mur99]</A>.
+<P>
+The functions <TT>BaseMPolynomial</TT>, <TT>MurphyAlphaApproximation</TT>,
+<TT>OptimalSkewness</TT>, <TT>BestTranslation</TT>, <TT>PolynomialSieve</TT>,
+and <TT>DickmanRho</TT>, will be useful for those wanting to implement
+polynomial selection routines within the Magma interpreter language.
+
+
+<H5><A NAME = "1361">BaseMPolynomial(n, m, d) : RngIntElt, RngIntElt, RngIntElt -&gt; RngMPolElt</A></H5>
+<BLOCKQUOTE>
+Given integers n, m and d, returns a homogeneous bivariate polynomial
+F = &sum;<sub>i=0</sub><sup>d</sup> c<sub>i</sub>X<sup>i</sup>Y<sup>d - i</sup> such that the coefficients c<sub>i</sub> give
+a base m representation of n: that is, &sum;<sub>i=0</sub><sup>d</sup> c<sub>i</sub>m<sup>i</sup> = n. The
+coefficients also satisfy |c<sub>i</sub>| &le;m/2.
+<P>
+This polynomial F may be used to factorize n using the number field
+sieve (with m<sub>1</sub> := m and m<sub>2</sub> := 1).
+<P>
+This function requires that d &ge;2 and n &ge;m<sup>d</sup>.
+</BLOCKQUOTE>
+<H5><A NAME = "1362">MurphyAlphaApproximation(F, b) : RngMPolElt, RngIntElt -&gt; FldReElt</A></H5>
+<BLOCKQUOTE>
+Given a univariate or homogeneous bivariate polynomial F, return
+an approximation of the &alpha; value of F,
+using primes less than the positive integer bound b.
+<P>
+The &alpha; value of a polynomial is defined in <A  HREF = "text154.htm#bib_murphy">[Mur99]</A>.
+<P>
+Since random sampling is used for primes dividing the discriminant,
+successive calls to this function will give slightly different results.
+</BLOCKQUOTE>
+<H5><A NAME = "1363">OptimalSkewness(F) : RngMPolElt -&gt; FldReElt, FldReElt</A></H5>
+<BLOCKQUOTE>
+Given a univariate or homogeneous bivariate polynomial F, 
+return its optimal skewness and corresponding average log size.
+<P>
+The optimal skewness and average log size values are defined in <A  HREF = "text154.htm#bib_murphy">[Mur99]</A>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "1364">Example <TT>RngInt_GetPoly (H18E15)</TT></A></H3>
+<P>
+This example illustrates an effective (though not optimal) method
+for finding a "good" polynomial for use in NFS factorizations.
+<P>
+Here we search for a degree d=4 polynomial to use in factoring
+a 52-digit integer n.  
+<P>
+We define the rating of a polynomial to be the sum of the &alpha; value
+and corresponding "average log size" (see <A  HREF = "text154.htm#bib_murphy">[Mur99]</A>).
+<P>
+We then proceed by
+iterating over base m polynomials with successive leading coefficients
+(with the values of m near ((m)<sup>1/d</sup>(m)^(1/(d + 1)))<sup>1/2</sup>, and
+chosen to minimize the second-to-leading coefficient),
+and choosing as a result the polynomial with the smallest rating.
+<P>
+<P>
+<P>
+<P>
+<PRE>
+&gt; n := RandomPrime(90)*RandomPrime(90);
+&gt; n;
+3596354707256253204076739374167770148715218949803889
+&gt; d := 4;
+&gt; approx_m := Iroot( Iroot( n, d+1 ) * Iroot( n, d ) , 2 );
+&gt; leading_coeff := n div approx_m^d;
+&gt; leading_coeff;
+143082
+&gt; m := Iroot( n div leading_coeff, d );
+&gt; P&lt;X,Y&gt; := PolynomialRing( Integers(), 2 );
+&gt; F&lt;X,Y&gt; := BaseMPolynomial(n,m,d);
+&gt; F;
+143082*X^4 + 463535*X^3*Y - 173869838910*X^2*Y^2 + 167201617413*X*Y^3 + 
+    159859288415*Y^4
+&gt; skew, als := OptimalSkewness( F );
+&gt; alpha := MurphyAlphaApproximation( F, 2000 );
+&gt; rating := als + alpha;
+&gt; rating;
+23.143714548914575193314917
+&gt; 
+&gt; best_rating := rating;
+&gt; best_m := m;
+&gt; for i in [1..100] do
+&gt;   leading_coeff := leading_coeff + 1;
+&gt;   m := Iroot( n div leading_coeff, d );
+&gt;   F&lt;X,Y&gt; := BaseMPolynomial(n,m,d);
+&gt;   skew, als := OptimalSkewness( F );
+&gt;   alpha := MurphyAlphaApproximation( F, 2000 );
+&gt;   rating := als + alpha;
+&gt;   if rating lt best_rating then
+&gt;     best_rating := rating;
+&gt;     best_m := m;
+&gt;   end if;
+&gt; end for;
+&gt; best_rating;
+20.899568473033257031950385
+&gt; best_m;
+398116527578
+&gt; F&lt;X,Y&gt; := BaseMPolynomial(n,best_m,d);
+&gt; F;
+143160*X^4 + 199085*X^3*Y - 9094377652*X^2*Y^2 - 93898749030*X*Y^3 - 
+    169859083883*Y^4
+&gt; OptimalSkewness( F );
+165.514255523681640625 20.969934467920612180646408
+&gt; MurphyAlphaApproximation( F, 2000 );
+-0.0542716157630141449500150842
+&gt; time NFS( n, F, best_m, 1 );
+...
+</PRE>
+<HR>
+<H5><A NAME = "1365">BestTranslation(F, m, a) : RngMPolElt, RngIntElt, FldReElt, FldReElt -&gt; RngMPolElt, RngIntElt, FldReElt, FldReElt</A></H5>
+<BLOCKQUOTE>
+Given a univariate or homogeneous bivariate polynomial F,
+an integer m, and real value a (which should be the average
+log size of F for some optimal skewness), returns a polynomial
+G and an integer m' such that G(m') = F(m), together with
+the average log size and optimal skewness of G.  The translation
+G is selected such that the average log size is a local minimum.
+</BLOCKQUOTE>
+<H5><A NAME = "1366">PolynomialSieve(F, m, J0, J1,MaxAlpha) : RngMPolElt, RngIntElt, RngIntElt, RngIntElt, FldReElt -&gt; List</A></H5>
+
+<PRE>    PrimeBound: RngIntElt               Default: 1000</PRE>
+<BLOCKQUOTE>
+Given a homogeneous bivariate integer polynomial F of degree d, 
+together with integers m, J<sub>0</sub> and J<sub>1</sub> and a real value <TT>MaxAlpha</TT>,
+returns a list of tuples, each of which contains a polynomial
+G = F + j<sub>1</sub>x<sup>2</sup>y<sup>d - 2</sup> - (|j<sub>0</sub>| + j<sub>1</sub>m)xy<sup>d - 1</sup> + (j<sub>0</sub>m)y<sup>d</sup>, 
+where |j<sub>0</sub>| &le;J<sub>0</sub> and |j<sub>1</sub>| &le;J<sub>1</sub> such that the &alpha; 
+value (see <A  HREF = "text154.htm#bib_murphy">[Mur99]</A>) of G is "better" (that is, lower) than 
+<TT>MaxAlpha</TT>.
+<P>
+Each tuple contains the data 
+<TT>&lt;</TT>average log size + &alpha;, skewness, &alpha;,
+G, m, j<sub>0</sub>, j<sub>1</sub> <TT>&gt;</TT>.
+<P>
+If the optional parameter <TT>PrimeBound</TT> is set, it is used as an upper
+bound for primes used to calculate &alpha;.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text154.htm">[Next]</A><A  HREF = "text168.htm">[Prev]</A> <A  HREF = "text154.htm">[Right]</A> <A  HREF = "text168.htm">[Left]</A> <A  HREF = "text155.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

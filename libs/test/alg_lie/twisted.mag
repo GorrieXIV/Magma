@@ -1,0 +1,30 @@
+
+TYPES := [*
+<"A2",2>,
+<"A3",2>,
+<"D4",2>,
+<"D4",3>,
+<"D5",2>,
+<"E6",2>
+*];
+
+Fs := [* GF(2), GF(3), GF(NextPrime(10^5)) *];
+
+for tp in TYPES do for F in Fs do
+	
+	R := TwistedRootDatum(RootDatum(tp[1]) : Twist := tp[2]);
+	
+	sd1, sd2 := GetSeed();
+	printf "seed: (%o, %o), R = %o, F = %o\n", sd1, sd2, R, F;
+	
+	L,_,_,H := TwistedLieAlgebra(R, F);
+	try
+		_ := TwistedBasis(L, H, R);
+	catch err
+		/* sometimes, in case A, there's just bad luck. */
+		if CartanName(R)[1] ne "A" then
+			error Sprintf("TwistedBasis failed for %o%o", TwistingDegree(R), CartanName(R));
+		end if;
+	end try;
+end for; end for;
+

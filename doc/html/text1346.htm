@@ -1,0 +1,179 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Creation Functions</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1347.htm">[Next]</A><A  HREF = "text1345.htm">[Prev]</A> <A  HREF = "text1347.htm">[Right]</A> <A  HREF = "text1345.htm">[Left]</A> <A  HREF = "text1344.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "14852">Creation Functions</A></H3>
+
+<P>
+<P>
+The general creation function for sheaves takes a graded module representing 
+the sheaf and a scheme X on which it is supported.  Special constructors are
+provided in the cases of the structure sheaf of X and the canonical sheaf of 
+X, when X is locally Cohen-Macaulay and equidimensional. The user may also 
+ask for Serre twists of a given sheaf. Other constructions deriving new sheaves 
+from existing sheaves will be described in later sections.
+
+
+<H5><A NAME = "14853">Sheaf(M, X) : ModMPol, Sch -&gt; ShfCoh</A></H5>
+<BLOCKQUOTE>
+Given an ordinary projective scheme X and a module M over the coordinate 
+ring of the ambient of X, such that M is annihilated by the defining ideal 
+of X, this function returns the sheaf defined by graded module M on scheme 
+X. 
+</BLOCKQUOTE>
+<H5><A NAME = "14854">StructureSheaf(X) : Sch -&gt; ShfCoh</A></H5>
+<H5>StructureSheaf(X, n) : Sch, RngIntElt -&gt; ShfCoh</H5>
+<BLOCKQUOTE>
+Given an ordinary projective scheme X, this function returns the structure 
+sheaf OX for X, which is the sheaf defined by the coordinate ring R<sub>X</sub> 
+of X, as a module.
+If the intrinsic is called with a second integer-valued argument n, 
+the object returned is a twisted version of the sheaf, that is, Serre's 
+twisting sheaf OX(n), which has R<sub>X</sub>(n) as its associated graded module 
+(see Section 5, Chapter II of <A  HREF = "text1343.htm#bib_hartshorne">[Har77]</A>).  These are all invertible 
+sheaves on X and OX(1) is the sheaf OX(H) corresponding to the 
+class of a hyperplane divisor H on X.
+</BLOCKQUOTE>
+<H5><A NAME = "14855">CanonicalSheaf(X) : Sch -&gt; ShfCoh</A></H5>
+<H5>CanonicalSheaf(X, n) : Sch, RngIntElt -&gt; ShfCoh</H5>
+<BLOCKQUOTE>
+Given an ordinary projective scheme X, this function returns the canonical
+sheaf KX for X. The scheme X should be an ordinary projective scheme 
+which is equidimensional and locally Cohen-Macaulay. That is, all of the primary 
+components of X should have the same dimension and its local rings should 
+all be Cohen-Macaulay rings.  These conditions aren't checked by Magma as 
+the necessary computations can be very expensive in general. A non-singular 
+variety always satisfies these conditions, and many singular normal varieties 
+do also. For example, any curve or normal surface will be equidimensional and 
+locally Cohen-Macaulay.  The stronger condition of being <I>arithmetically</I> 
+Cohen-Macaulay, can be checked by invoking the intrinsic <A  HREF = "text1351.htm#shf:arith_CM">IsArithmeticallyCohenMacaulay</A> 
+with the structure sheaf of X as argument.
+<P>
+Under these conditions, X has a canonical sheaf KX, defined up to isomorphism,
+which acts as a dualising sheaf. See Section 7, Chapter III of <A  HREF = "text1343.htm#bib_hartshorne">[Har77]</A> 
+and Chapter 21 of <A  HREF = "text1343.htm#bib_EisenbudCommAlg">[Eis95]</A> for the module-theoretic background. 
+For non-singular varieties, the canonical sheaf is the usual one: the highest 
+alternating power of the sheaf of Kahler differentials. The function returns 
+the canonical sheaf of X. It is computed from the dual complex to the minimal 
+free resolution of the coordinate ring of X.
+<P>
+If the intrinsic is invoked with an additional integer argument n, it returns 
+the nth Serre twist (see below) of the canonical sheaf KX(n). For a 
+non-singular variety of dimension d, the map into projective space corresponding 
+to KX(d - 1) is the important <I>adjunction map</I>.
+</BLOCKQUOTE>
+<H5><A NAME = "14856">Twist(S, n) : ShfCoh, RngIntElt -&gt; ShfCoh</A></H5>
+<BLOCKQUOTE>
+Given a sheaf S, the function returns the nth Serre twist of Para, 
+Para(n) isomorphic to Para tensor <sub>OX</sub>OX(n). If M is a module giving Para, 
+then M(n) gives Para(n).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "14857">Example <TT>Sheaf_creat_exs (H119E1)</TT></A></H3>
+We construct some sheaves associated with the smooth cubic surface
+defined by x<sup>3</sup> + y<sup>3</sup> + z<sup>3</sup> + t<sup>3</sup> in P<sup>3</sup>.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z,t&gt; := ProjectiveSpace(Rationals(),3);
+&gt; R := CoordinateRing(P);
+&gt; X := Scheme(P,x^3+y^3+z^3+t^3); 
+&gt; OX := StructureSheaf(X);
+</PRE>
+We first examine the underlying graded module of the structure sheaf.
+<P>
+<P>
+<PRE>
+&gt; Module(OX); 
+Reduced Module R^1/&lt;relations&gt;
+Relations:
+[x^3 + y^3 + z^3 + t^3]
+</PRE>
+Observe that the canonical sheaf KX of X is isomorphic to the
+twist OX( - 1) of the structure sheaf.
+<P>
+<P>
+<PRE>
+&gt; KX := CanonicalSheaf(X); 
+&gt; Module(KX);
+Reduced Module R^1/&lt;relations&gt; with grading [1]
+Relations:
+[x^3 + y^3 + z^3 + t^3]
+&gt; Module(StructureSheaf(X,-1));
+Reduced Module R^1/&lt;relations&gt; with grading [1]
+Relations:
+[x^3 + y^3 + z^3 + t^3]
+</PRE>
+Note that the module column weights are the negations of the Serre twist indices!
+<P>
+<P>
+<PRE>
+&gt; Module(Twist(OX,-1));
+Reduced Module R^1/&lt;relations&gt; with grading [1]
+Relations (Groebner basis):
+[x^3 + y^3 + z^3 + t^3]
+</PRE>
+The equations x=z, y=t define an (exceptional) line in X. We can get its 
+structure sheaf as a sheaf on X using the basic <TT>Sheaf</TT> constructor. 
+The associated invertible sheaf (L)(Y) of Y as a divisor on X
+can be obtained from the <TT>DivisorToSheaf</TT> intrinsic described later in
+the chapter.
+<P>
+<P>
+<PRE>
+&gt; IY := ideal&lt;R|[x+z,y+t]&gt;; // ideal of line
+&gt; OY := Sheaf(QuotientModule(IY),X);
+&gt; Module(OY);
+Graded Module R^1/&lt;relations&gt;
+Relations:
+[x + z],
+[y + t]
+&gt; Scheme(OY);
+Scheme over Rational Field defined by
+x^3 + y^3 + z^3 + t^3
+</PRE>
+<HR>
+<H5><A NAME = "14858">SheafOfDifferentials(X) : Sch -&gt; ShfCoh</A></H5>
+
+<PRE>    Maximize: BoolElt                   Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given an ordinary projective scheme X, this function returns the sheaf of
+1-differentials on X, &Omega;<sup>1</sup><sub>X/k</sub>. The function computes the natural 
+representing module for the sheaf coming from the embedding of X in 
+projective space (see Section 8, Chapter II of <A  HREF = "text1343.htm#bib_hartshorne">[Har77]</A>). If the 
+parameter <TT>Maximize</TT> is <TT>true</TT>, then the maximal module representing 
+this sheaf is computed and used to define it (see next section).
+</BLOCKQUOTE>
+<H5><A NAME = "14859">TangentSheaf(X) : Sch -&gt; ShfCoh</A></H5>
+
+<PRE>    Maximize: BoolElt                   Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+For an ordinary projective scheme X, this function returns the sheaf of tangent 
+vectors for X. The function computes the natural representing module for these
+sheaves coming from the embedding of X in projective space (see Section 8, Chapter
+II of <A  HREF = "text1343.htm#bib_hartshorne">[Har77]</A>). If the parameter <TT>Maximize</TT> is <TT>true</TT>, then the maximal
+module representing this sheaf is computed and used to define it (see next section).
+<P>
+Combining either of the above intrinsics with the <A  HREF = "text1351.htm#shf:loc-free">IsLocallyFree</A> intrinsic, 
+this gives an alternative method for checking non-singularity on varieties that
+are known to be (locally) Cohen-Macaulay. It is best to use the sheaf of 
+differentials since that is generally easier to compute.  This approach can be 
+much faster for varieties having high codimension than the usual Jacobian method.
+</BLOCKQUOTE>
+<H5><A NAME = "14860">HorrocksMumfordBundle(P) : Prj -&gt; ShfCoh</A></H5>
+<BLOCKQUOTE>
+The projective space P should be ordinary projective 4-space Prj<sup>4</sup> over a field. 
+The function returns the locally free rank 2 sheaf on P which represents the 
+Horrocks-Mumford bundle (see <A  HREF = "text1343.htm#bib_HorMum73">[HM73]</A>). The scheme of vanishing of a general 
+global section of this sheaf is a two dimensional Abelian variety in P.  
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text1347.htm">[Next]</A><A  HREF = "text1345.htm">[Prev]</A> <A  HREF = "text1347.htm">[Right]</A> <A  HREF = "text1345.htm">[Left]</A> <A  HREF = "text1344.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

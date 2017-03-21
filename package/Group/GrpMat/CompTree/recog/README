@@ -1,0 +1,220 @@
+MAGMA CompositionTree package
+-----------------------------
+
+Routines for constructing composition trees of matrix groups and
+permutation groups.
+
+Using a composition tree, one can
+- perform constructive membership testing
+- obtain a composition series
+- obtain a presentation
+
+
+Prerequisites:
+Magma version >= 2.15
+
+// Main node data structure
+CTNodeInfo := recformat<
+    Group : Grp,
+    WordGroup : GrpSLP,
+    RandomProcess : GrpRandProc,
+    Randomiser : UserProgram,
+    Depth : RngIntElt,
+    Number : RngIntElt,
+    Parent : Rec,
+    CBM : UserProgram,
+    EvalGroup : Grp,
+    Safe : BoolElt, // Safe to stop crisis here?
+    Type : MonStgElt, // Node type, as above
+    Verify : BoolElt, // Immediate verification using presentations?
+    Verified : BoolElt, // Node has been verified
+    MandarinVerify : BoolElt, // Quality control using Mandarins?
+    InputGens : SeqEnum, // Input gens, before Magma removals
+    GenMap : SeqEnum, // Indices of group gens in input gens
+    NiceData : Rec, // NiceInfo record
+    ActionMaps : Rec, // ActionMapsInfo record
+    Image : Rec, // CTNodeInfo record
+    Kernel : Rec, // CTNodeInfo record
+    KernelSLPs : SeqEnum, // SLPs of kernel gens in node input gens
+    HomFinders : Assoc, // Database of hom finder algorithms, user def order
+    HomFinderStamps : Assoc, // Stores HomFindStamp records
+    ModuleData : Rec, // ModuleInfo record
+    Scalar : GrpElt,
+    ScalarGroup : Grp,
+    PresentationData : Rec, // PresentationInfo record
+    FindPresentation : UserProgram, // Sets PresentationData
+    SLPMaps : Rec, // SLPMapsInfo record
+    LeafData : Rec, // LeafInfo record
+    FactorData : Rec, // FactorInfo record
+    // Sets FactorData`FactorSLPs, FactorData`ToFactor, FactorData`FactorToSLP
+    FindFactors : UserProgram, 
+    KernelBatchSize : RngIntElt, // Nr of elements to add at start or crises
+    MandarinBatchSize : RngIntElt, // Nr of mandarins to compute
+    Mandarins : SeqEnum,
+    MandarinSLPs : SeqEnum, // SLPs of mandarins in nice gens
+    MandarinScalars : SeqEnum,
+    // Assume a negative answer after too many Hom-finder failures
+    MaxHomFinderFails : RngIntElt,
+    // Upper bound on length of subgroup chains, for normal closure algorithm
+    SubgroupChainLength : RngIntElt,
+    // Should all GrpPerm be treated as leaves?
+    AnalysePermGroups : BoolElt,
+    // Can we find a short presentation quickly?
+    FastVerify : BoolElt,
+    // Number of random elements used in naming algorithms
+    NamingElements : RngIntElt,
+    // Leaves with larger order will not be fully refined using brute force
+    MaxQuotientOrder : RngIntElt,
+    // Only use fast tensor product test
+    FastTensorTest : BoolElt,
+    // Maximum number of kernel generators
+    MaxKernelGens : RngIntElt,
+    // Maximum group order for use of Verify
+    MaxBSGSVerifyOrder : RngIntElt,
+    // Batch size for unipotent kernels
+    UnipotentBatchSize : RngIntElt,
+    // Use presentations to obtain kernels, where possible
+    PresentationKernel : BoolElt,
+    LeafPriorities : SeqEnum
+    >;
+
+ParameterDefaults := [*
+    false,                         // Verify
+    false,                         // Scalar
+    5,                             // KernelBatchSize
+    100,                           // MandarinBatchSize
+    10^6,                          // MaxQuotientOrder
+    false,                         // FastTensorTest
+    0,                             // MaxKernelGens
+    2000,                          // MaxBSGSVerifyOrder
+    true,                          // AnalysePermGroups
+    200,                           // NamingElements
+    [],                            // Priorities
+    [],                            // LeafPriorities
+    1,                             // MaxHomFinderFails
+    5,                             // SubgroupChainLength
+    false,                         // KnownLeaf
+    100,                           // UnipotentBatchSize
+    true,                          // PresentationKernel
+    ""
+    *];
+
+The main intrinsics are:
+
+// General interface functions
+intrinsic CompositionTree(G :: GrpMat : 
+    Verify := ParameterDefaults[1],
+    Scalar := Identity(CoefficientRing(G)),
+    KernelBatchSize := ParameterDefaults[3],
+    MandarinBatchSize := ParameterDefaults[4],
+    MaxQuotientOrder := ParameterDefaults[5],
+    FastTensorTest := ParameterDefaults[6],
+    MaxKernelGens := ParameterDefaults[7],
+    MaxBSGSVerifyOrder := ParameterDefaults[8],
+    AnalysePermGroups := ParameterDefaults[9],
+    NamingElements := ParameterDefaults[10],
+    Priorities := ParameterDefaults[11],
+    LeafPriorities := ParameterDefaults[12],
+    MaxHomFinderFails := ParameterDefaults[13],
+    SubgroupChainLength := ParameterDefaults[14],
+    KnownLeaf := ParameterDefaults[15],
+    UnipotentBatchSize := ParameterDefaults[16],
+    PresentationKernel := ParameterDefaults[17],
+    Hard := false,
+    DebugNodeFile := ParameterDefaults[18]) -> SeqEnum
+    { Computes a composition tree and assigns as G`CTNodeData. }
+
+intrinsic HasCompositionTree(G :: Grp) -> BoolElt
+{ Does G have an attached composition tree?}
+
+intrinsic CleanCompositionTree(G :: Grp)
+{ Remove an attached composition tree from G }
+
+intrinsic CompositionTreeFastVerification(G :: Grp) -> BoolElt
+{ G must have a composition tree. Determines if the tree can be 
+  verified easily using presentations, ie if presentations 
+  on nice generators are known for all leaves. }
+
+intrinsic CompositionTreeVerify(G :: Grp) -> BoolElt, []
+   { G must have a composition tree. Verify the correctness
+     of the composition tree by constructing a presentation for G.
+     If G satisfies the presentation, then return true, and the
+     relators of the presentation as SLPs; otherwise return false.
+     The presentation is on the group returned by
+     CompositionTreeNiceGroup}
+
+intrinsic CompositionTreeFix(G :: Grp) 
+{ G must have a composition tree. 
+  Rebuild parts of a composition tree if a verification failed. }
+
+intrinsic CompositionTreeElementToWord(G :: Grp, g :: GrpElt) ->
+BoolElt, GrpSLPElt
+ { G must have a composition tree. If g is an element of G,
+   then return true and an SLP for g in the nice generators of G,
+   otherwise return false.}
+
+intrinsic CompositionTreeNiceToUser(G :: Grp) -> Map, [] 
+{ G must have a composition tree. Returns the coercion map from SLPs in
+  nice generators of G to SLPs in user generators of G, as well 
+  as the SLPs of the nice generators in the user generators. }
+
+intrinsic CompositionTreeSLPGroup(G :: Grp) -> GrpSLP, Map
+{ G must have a composition tree. Returns the nice word group 
+  for the root node, and the map from the nice word group to the group. }
+
+intrinsic CompositionTreeNiceGroup(G :: Grp) -> Grp
+   { G must have a composition tree. Returns the nice group for the
+    root node. }
+
+intrinsic CompositionTreeFactorNumber(G :: Grp, g ::GrpElt) -> RngIntElt
+  { Identifies the minimal i such that g lies in G_i of 
+   the composition series for G. }
+
+intrinsic CompositionTreeSeries(G :: Grp) ->
+    SeqEnum, List, List, List, BoolElt, SeqEnum
+    { Given a group G with a composition tree, returns:
+
+    1. Composition series, 1 = G_0 < G_1 < ... < G_k = G
+    2. Maps G_i -> S_i, where S_i is the standard copy of 
+       G_i / G_(i-1), i >= 1
+       The kernel of this map is G_(i-1). 
+       S_i may be the standard copy plus scalars Z, 
+       and the map is then a homomorphism modulo scalars, so that the
+       kernel is (G_(i-1).Z)/Z
+    3. Maps S_i -> G_i
+    4. Maps S_i -> WordGroup(S_i)
+    5. Flag to indicate if the series is a true composition series.
+    6. A sequence of the leaf nodes in the composition tree 
+       corresponding to each composition factor.
+
+    All maps are defined by rules, so Function can be applied on 
+    them to avoid built-in membership testing.
+    In certain cases the series is not a true composition series, 
+    because certain leaves could not be refined completely, 
+    due to too large indices.
+    }
+
+
+intrinsic DisplayCompTreeNodes(G :: Grp : 
+    NonTrivial := true, Leaves := true)
+{ Show information about the nodes in the composition tree. 
+  The tree is traversed in-order. If NonTrivial is true, then 
+  display only non-trivial nodes. If Leaves is true then 
+  display only leaves. }
+
+intrinsic SearchForDecomposition(G :: Grp) -> Grp, Grp, SeqEnum
+{ Compute image and kernel of a decomposition of G. Also return the
+  partial composition tree. }
+
+intrinsic CompositionTreeReductionInfo(G :: Grp, nodeNr :: RngIntElt) ->
+ { Return a string description of the reduction at node with number
+    nodeNr in the composition tree for G, 
+    as well as the image and kernel of the reduction. }
+
+intrinsic CompositionTreeCBM(G :: GrpMat) -> GrpMatElt
+{ Return a change of basis matrix that exhibits the 
+  Aschbacher reductions of G given by the composition tree. }
+
+intrinsic CompositionTreeOrder(G :: Grp) -> RngIntElt
+ {return order of group having composition tree}
+

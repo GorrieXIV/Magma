@@ -1,0 +1,38 @@
+"Source: Text/Geometry/Lseries.text";
+"Line: 2856";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/Lseries.text, line: 2856
+// Example: H133E35 ()
+print "Example: H133E35";
+ei := GetEchoInput();
+SetEchoInput(true);
+H := HypergeometricData([1,1,1],[2,2,2]);
+L := LSeries(H,2 : BadPrimes:=[<2,8,1>],SaveEuler:=10000);
+LSetPrecision(L,5);
+assert IsOrthogonal(L); // degree 3 weight 2
+S3 := Symmetrization(L,[3] : BadPrimes:=[<2,26,1>]);
+[Degree(x[1]) : x in Factorization(S3)];
+CFENew(S3); // 2^18 for deg 7 factor
+O3 := OrthogonalSymmetrization(L,[3] : BadPrimes:=[<2,18,1>]);
+Degree(O3);
+CFENew(O3); // L-coeffs already computed, thanks to SaveEuler
+LSetPrecision(L,20);
+S21 := Symmetrization(L,[2,1] : BadPrimes:=[<2,20,1>]); // deg 8
+CFENew(S21);
+LT := Translate(L,2);
+CFENew(S21/LT);
+D := Determinant(L); D;
+O2 := OrthogonalSymmetrization(L,[2] : BadPrimes:=[<2,10,1>]);
+CFENew(O2);
+TP := TensorProduct(O2,D : BadPrimes:=[<2,12,1>]);
+Q := Translate(S21/LT,2);
+P := PrimesUpTo(100);
+assert &and[EulerFactor(TP,p) eq EulerFactor(Q,p) : p in P];
+CFENew(S21/LT/D);       // the product of these
+CFENew(LT/D);           // last two is ~ 10^(-12)
+S := Symmetrization(L,[1,1] :  BadPrimes:=[<2,8,1>]);
+DL := TensorProduct(D,L : BadPrimes:=[<2,8,1>]);
+T := Translate(DL,-2);
+assert &and[EulerFactor(T,p)  eq EulerFactor(S,p) : p in P];
+SetEchoInput(ei);

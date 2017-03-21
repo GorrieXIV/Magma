@@ -1,0 +1,678 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Conjugacy</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text661.htm">[Next]</A><A  HREF = "text659.htm">[Prev]</A> <A  HREF = "text661.htm">[Right]</A> <A  HREF = "text659.htm">[Left]</A> <A  HREF = "text653.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "7505">Conjugacy</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text660.htm#7520">Conjugacy in Classical Groups</A>
+</UL>
+<H5><A NAME = "7506">Class(H, x) : GrpMat, GrpMatElt -&gt; { GrpMatElt }</A></H5>
+<H5>Conjugates(H, x) : GrpMat, GrpMatElt -&gt; { GrpMatElt }</H5>
+<BLOCKQUOTE>
+Given a group H and an element x belonging to a group K
+such that H and K are subgroups of the same general linear group,
+this function returns the set of conjugates of x under the
+action of H. If H = K, the function returns the conjugacy
+class of x in H.
+</BLOCKQUOTE>
+<H5><A NAME = "7507">ClassMap(G) : GrpMat -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Given a group G, construct the conjugacy classes and the class map f 
+for G. For any element x of G, f(x) will be the conjugacy class 
+representative chosen by the <TT>Classes</TT> function. 
+</BLOCKQUOTE>
+<H5><A NAME = "7508"></A><A NAME = "ConjugacyClasses">ConjugacyClasses</A>(G: parameters) : GrpMat -&gt; [ &lt; RngIntElt, RngIntElt, GrpMatElt &gt; ]</H5>
+<H5>Classes(G: parameters) : GrpMat -&gt; [ &lt; RngIntElt, RngIntElt, GrpMatElt &gt; ]</H5>
+
+<PRE>    WeakLimit: RngIntElt                Default: 500</PRE>
+
+<PRE>    StrongLimit: RngIntElt              Default: 5000</PRE>
+
+<PRE>    Al: MonStgElt                       Default: </PRE>
+<BLOCKQUOTE>
+Construct a set of representatives for the conjugacy classes of the matrix group G.
+The classes are returned as a sequence of triples containing the
+element order, the class length and a representative element for the
+class.
+The parameter <TT>Al</TT> enables the user to select
+the algorithm that is to be used.
+<P>
+<TT>Al := "Action"</TT>:  Create the classes of G by computing the
+orbits of the set of elements of G under the action of conjugation.
+This option is only feasible for small groups.
+<P>
+<P>
+<TT>Al := "Random"</TT>:  Construct the conjugacy classes of elements for
+a matrix group G using an algorithm that searches for representatives
+of all conjugacy of G by examining a random selection of group
+elements and their powers. The behaviour of this algorithm is
+controlled by two associated optional parameters <TT>WeakLimit</TT> and
+<TT>StrongLimit</TT>, whose values are positive integers n<sub>1</sub> and n<sub>2</sub>,
+say.  Before describing the effect of these parameters, some
+definitions are needed:  A mapping f: G -&gt; I is called a
+class invariant if f(g) = f(g<sup>h</sup>) for all g, h&isin;G.  In matrix
+groups, the primary invariant factors are used where possible, or the
+characteristic or minimal polynomials otherwise.  Two matrices g and
+h are said to be <I>weakly conjugate</I> with respect to the class
+invariant f if f(g) = f(h).  By definition, conjugacy implies weak
+conjugacy, but the converse is false. The random algorithm first
+examines n<sub>1</sub> random elements and their powers, using a test for weak
+conjugacy.  It then proceeds to examine a further n<sub>2</sub> random elements
+and their powers, using a test for ordinary conjugacy.  The idea behind
+this strategy is that the algorithm should attempt to find as many
+classes as possible using the very cheap test for weak conjugacy,
+before employing the more expensive ordinary conjugacy test to
+recognize the remaining classes.
+<P>
+<P>
+<TT>Al := "Extend"</TT>: Construct the conjugacy classes of G by first
+computing classes in a quotient G/N and then extending these classes
+to successively larger quotients G/H until the classes for G/1 are
+known.  More precisely, a series of subgroups 1 = G<sub>0</sub> &lt; G<sub>1</sub> &lt; ... &lt; G<sub>r</sub> = R &lt; G is computed such that R is the (solvable)
+radical of G and G<sub>i + 1</sub>/G<sub>i</sub> is elementary abelian.  The radical
+quotient G/R is computed and its classes and centralizers of their
+representatives found using the permutation group algorithm,
+and pulled back to G. 
+The parameters <TT>TFAl</TT> and <TT>ASAl</TT> control the algorithm
+used to compute the classes of G/R. See the <A  HREF = "text630.htm#GrpPerm"> <TT>GrpPerm</TT></A> chapter for
+more information on these parameters.
+<P>
+To extend from G/G<sub>i + 1</sub> to the next larger quotient G/G<sub>i</sub>, an affine
+action of each centralizer on a quotient of the elementary abelian layer
+G<sub>i + 1</sub>/G<sub>i</sub> is computed.  Each distinct orbit in that action gives rise
+to a new class of the larger quotient
+(see Mecky and Neubuser <A  HREF = "text652.htm#bib_mecky-neubuser">[MN89]</A>).
+<P>
+<P>
+<P>
+<TT>Al := "Lifting"</TT>:  Construct a permutation representation for G,
+compute the classes of the representation, and lift them back to
+G through the kernel of the representation. Successful when the
+kernel is small. Currently uses the permutation action of G on its 
+first basic orbit as the permutation representation.
+<P>
+<P>
+<TT>Al := "Classic"</TT>:  Construct the conjugacy classes by enumeration
+of class invariants. This algorithm is available only for classical
+groups.  It has been implemented for the following groups in their
+standard representation.
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>enspace groups containing the special linear group;
+<DT>(ii)</DT><DD>enspace subgroups of the conformal symplectic group that 
+contain the symplectic group in odd characteristic;
+<DT>(iii)</DT><DD>enspace the conformal unitary group;
+<DT>(iv)</DT><DD>enspace the general orthogonal groups in odd characteristic;
+<DT>(v)</DT><DD>enspace the conformal orthogonal groups in odd characteristic.
+<P>
+<P>
+<P>
+<P>
+</DL>
+<I>Default</I>: 
+The classic algorithm will be used if G is recognised to be one of 
+groups in the above list.
+<P>
+The action algorithm will be used if |G| &le;2000.
+If G is soluble then classes are computed in a PC-representation
+of G.
+<P>
+When |G| &gt;  2000 and the base ring of G is a finite field then
+the Extension algorithm is used.
+<P>
+Otherwise the Lifting algorithm is used, unless the kernel size exceeds
+10000. If there is a big kernel and the base ring of the group can
+be embedded in a field then the extension algorithm is used. 
+If this does not succeed 
+the random algorithm will be applied with the limits given by
+the parameters <TT>WeakLimit</TT> and <TT>StrongLimit</TT>.  If that fails to
+compute all the classes and |G|&le;100000, then the action algorithm
+will be used.
+</BLOCKQUOTE>
+<H5><A NAME = "7509">ClassRepresentative(G, x) : GrpMat, GrpMatElt -&gt; GrpMatElt</A></H5>
+<H5>ClassRepresentative(G, i) : GrpMat, RngIntElt -&gt; GrpMatElt</H5>
+<BLOCKQUOTE>
+Given a group G for which the conjugacy classes are known,
+return the designated representative for the conjugacy class of G
+containing x or the stored representative for conjugacy class i.
+</BLOCKQUOTE>
+<H5><A NAME = "7510">ClassCentraliser(G, i) : GrpMat, RngIntElt -&gt; GrpMat</A></H5>
+<H5>ClassCentralizer(G, i) : GrpMat, RngIntElt -&gt; GrpMat</H5>
+<BLOCKQUOTE>
+The centraliser of the representative element stored for conjugacy class
+number i in group G. The group computed is stored with the class
+table for reference by future calls to this function.
+</BLOCKQUOTE>
+<H5><A NAME = "7511">ClassRepresentativeFromInvariants(G, p, h, t) : GrpMat, SeqEnum, SeqEnum, FldFinElt -&gt; GrpMatElt</A></H5>
+<BLOCKQUOTE>
+Given a group G, for which the <I>classic</I> algorithm for computing
+conjugacy  classes is available, and  the class invariants p, h and t,
+return the standard class representative for the conjugacy class in G with 
+the given invariants.
+</BLOCKQUOTE>
+<H5><A NAME = "7512">IsConjugate(G, g, h) : GrpMat, GrpMatElt, GrpMatElt -&gt; BoolElt, GrpMatElt | Unass</A></H5>
+<BLOCKQUOTE>
+Given a group G and elements g and h belonging to G,
+return the value <TT>true</TT> if g and h are conjugate in G. The
+function returns a second value in the event that the elements
+are conjugate: an element k which conjugates g into h.
+</BLOCKQUOTE>
+<H5><A NAME = "7513">IsConjugate(G, H, K) : GrpMat, GrpMat, GrpMat -&gt; BoolElt, GrpMatElt | Unass</A></H5>
+<BLOCKQUOTE>
+Given a group G and subgroups H and K belonging to G,
+return the value <TT>true</TT> if H and K are conjugate in G. The
+function returns a second value in the event that the subgroups
+are conjugate: an element z which conjugates H into K.
+</BLOCKQUOTE>
+<H5><A NAME = "7514">IsGLConjugate(H, K) : GrpMat, GrpMat -&gt; BoolElt, GrpMatElt | Unass</A></H5>
+<BLOCKQUOTE>
+Given H and K, both subgroups of the same general linear group
+G = GL<sub>n</sub>(q), return the value <TT>true</TT> if H and K are conjugate 
+in G. 
+The function returns a second value in the event that the subgroups
+are conjugate: an element z which conjugates H into K.
+The algorithm is described in Roney-Dougal <A  HREF = "text652.htm#bib_IsGLConjugate">[RD04]</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "7515">Exponent(G) : GrpMat -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The exponent of the group G. 
+</BLOCKQUOTE>
+<H5><A NAME = "7516">NumberOfClasses(G) : GrpMat -&gt; RngIntElt</A></H5>
+<H5>Nclasses(G) : GrpMat -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The number of conjugacy classes of elements for the group G.
+</BLOCKQUOTE>
+<H5><A NAME = "7517">PowerMap(G) : GrpMat -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Given a group G, construct the power map for G. Suppose that the order 
+of G is m and that G has r conjugacy classes.  When the classes 
+are determined by Magma, they are numbered from 1 to r. Let C be 
+the set of class indices { 1, ..., r } and let P be the 
+set of integers { 1, ..., m }. The <I>power map</I> f 
+for G is the mapping,
+  f : C x P -&gt; C
+where the value of f(i, j) for i &isin;C and j &isin;P 
+is the number of the class which contains x<sub>i</sub><sup>j</sup>, 
+where x<sub>i</sub> is a representative of the i-th conjugacy class.
+</BLOCKQUOTE>
+<H5><A NAME = "7518">AssertAttribute(G, "Classes", Q) : GrpMat, MonStgElt, SeqEnum -&gt;</A></H5>
+<BLOCKQUOTE>
+Given a group G, and a sequence Q of k distinct elements of G, 
+one from each conjugacy class, use Q to define the classes attribute
+of G. The sequence Q may be either a sequence of elements of G
+or, preferably, a sequence of pairs <TT>&lt;GrpMatElt, RngIntElt&gt;</TT>
+giving class representatives and
+their class length. In this latter case, no backtrack searches are
+performed.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7519">Example <TT>GrpMatGen_RationalMatrixGroupDatabase (H64E12)</TT></A></H3>
+We take a group from the database of rational matrix groups
+and compute its conjugacy classes. The group has degree 12 and is written 
+over the integers.
+<P>
+<P>
+<PRE>
+&gt; DB := RationalMatrixGroupDatabase();
+&gt; G := Group(DB, 12, 3);
+&gt; FactoredOrder(G);
+[ &lt;2, 17&gt;, &lt;3, 8&gt;, &lt;5, 2&gt; ]
+&gt; CompositionFactors(G);
+    G
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    *
+    |  C(2, 3)                = S(4, 3)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    *
+    |  C(2, 3)                = S(4, 3)
+    *
+    |  Cyclic(2)
+    1
+</PRE>
+The conjugacy classes of <TT>G</TT> are computed as follows:
+<P>
+<P>
+<PRE>
+&gt; time cl := Classes(G);
+Time: 18.580
+&gt; #cl;
+1325
+</PRE>
+The group has 1325 conjugacy classes of elements.
+<HR>
+<H4><A NAME = "7520">Conjugacy in Classical Groups</A></H4>
+
+<P>
+<P>
+<P>
+According to Kleidman and Liebeck <A  HREF = "text652.htm#bib_KL90">[KL90]</A> a group G is
+a finite classical group if &Omega;&sube;G&sube;A or
+/line(&Omega;)&sube;G&sube;/line(A), where &Omega; and A
+are given by the following table and where the symbols /line(&Omega;)
+and /line(A) denote the groups &Omega; and A modulo scalars.
+<P>
+<P>
+<P>
+{vbox{
+  halign{#hfil&amp; #hfil&amp; #hfil&amp; #hfil cr
+    type &amp; &Omega; &amp; &Delta; &amp; A cr
+    noalign{vskip2pt hrule vskip2pt}
+    linear &amp; SL(n, q)&amp; GL(n, q) &amp;GammaL<sup> * </sup>(n, q)cr
+    symplectic &amp; Sp(n, q) &amp; CSp(n, q) &amp; GammaSp(n, q)cr
+    unitary &amp; SU(n, q) &amp; CU(n, q) &amp; GammaU(n, q) cr
+    orthogonal &amp; &Omega;<sup>&epsilon;</sup>(n, q) &amp; CO<sup>&epsilon;</sup>(n, q) &amp; 
+        GammaO<sup>&epsilon;</sup>(n, q)cr
+    noalign{vskip2pt hrule}}
+}}
+<P>
+<P>
+<P>
+If V is a vector space of dimension n over the field GF(q), then
+GammaL<sup> * </sup>(n, q) is the set of all semilinear bijections from V to V
+together with all semilinear bijections from V to V<sup> * </sup>.  There is a 
+well-defined multiplication (see <A  HREF = "text652.htm#bib_taylor-1992">[Tay92]</A>) which makes this
+set a group; the group GammaL(n, q) of all semilinear transformations 
+of V is a subgroup of index 2.  The other groups in
+column A are the subgroups of GammaL(n, q<sup>d</sup>) which preserve an
+alternating, hermitian or quadratic form up to a scalar multiple, where d
+is 2 in the case of unitary groups and 1 otherwise.
+<P>
+The groups in the last three rows of column &Delta; are the so-called
+<I>conformal</I> groups; they are the groups A&cap;GL(n, q) which preserve
+an alternating, hermitian or quadratic form up to a scalar multiple.
+<P>
+Important examples of classical groups, which in general are in neither
+column &Omega; nor column &Delta;, are the general orthogonal groups
+GO<sup>&epsilon;</sup>(n, q), which preserve a quadratic form. In magma these
+are the groups <TT>GO(n,q), GOPlus(n,q)</TT> or <TT>GOMinus(n,q)</TT> where
+&epsilon; is respectively 0, + or -.
+<P>
+As described in the documentation for the <A  HREF = "text660.htm#ConjugacyClasses">ConjugacyClasses</A> intrinsic,
+magma constructs the classes by first computing a complete collection of
+invariants and then determining a representative matrix for each invariant.
+The intention is to implement this for all groups G such that
+&Omega;&sube;G&sube;&Delta;.  Currently (at magma version 2.21-12)
+this implementation is invoked automatically when constructing the conjugacy
+classes for G such that SL(n, q)&sube;G&sube;GL(n, q) or
+Sp(n, q)&sube;G&sube;CSp(n, q) (when q is odd), and for the
+conformal unitary groups CU(n, q).
+<P>
+When q is odd there are implementations for the symplectic groups 
+Sp(2n, q), the conformal symplectic groups CSp(2n, q), and the general and 
+conformal orthogonal groups GO<sup>&epsilon;</sup>(n, q) and CO<sup>&epsilon;</sup>(n, q)
+that can be accessed using the intrinsics described in the remainder of this 
+section.
+<P>
+The implementation is based on Milnor <A  HREF = "text652.htm#bib_milnor-1969">[Mil69]</A> combined with the
+fundamental work of Wall <A  HREF = "text652.htm#bib_wall-1963">[Wal63]</A> as interpreted in the theses
+of Fulman <A  HREF = "text652.htm#bib_fulman-phd">[Ful97]</A> and Britnell <A  HREF = "text652.htm#bib_britnell-dphil">[Bri03]</A>.
+<P>
+<P>
+<P>
+<P>
+<B>Class invariants.</B>
+The conjugacy classes in the group GL(n, q) are parametrised by sequences
+of pairs &lt; f, &mu;(f) &gt; where f is an irreducible polynomial
+and &mu;(f) is a partition such that 
+<P>
+  &sum;<sub>f</sub>deg(f)|&mu;(f)| = n.
+<P>
+<P>
+In the following description a partition of an integer n will be
+represented by a sequence [&lt; 1, m<sub>1</sub> &gt;, &lt; 2, m<sub>2</sub> &gt;, ..., 
+&lt; n, m<sub>n</sub> &gt;], omitting the terms with m<sub>i</sub> = 0, and such that
+n = &sum;<sub>i=1</sub><sup>n</sup> im<sub>i</sub>.
+<P>
+For the conjugacy classes of the classical groups there are restrictions on
+the polynomials and partitions that can occur.
+<P>
+<P>
+<P>
+<B>Symplectic groups.</B>
+If f(t)&isin;k[t] is a polynomial of degree d (over a field k) such that
+f(0)&ne;0, the <I>dual</I> of f(t) is the polynomial f<sup> * </sup>(t) =
+f(0)<sup> - 1</sup>t<sup>d</sup>f(t<sup> - 1</sup>).
+<P>
+A polynomial f(t) is *-<I>symmetric</I> if f<sup> * </sup>(t) = f(t); it is
+*-<I>irreducible</I> if it has no proper *-symmetric factors. If g&isin;Sp(2n, q), then g preserves a non-degenerate alternating form and from
+this it follows that the minimal polynomial of g is *-symmetric.
+
+
+<H5><A NAME = "7521">DualPolynomial(f) : RngUPolElt -&gt; RngUPolElt</A></H5>
+<BLOCKQUOTE>
+The dual of the polynomial f.
+</BLOCKQUOTE>
+<H5><A NAME = "7522">StarIredduciblePolynomials(F,d) : FldFin, RngIntElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The sequence of all *-irreducible polynomials of degree d with
+coefficients in F.
+<P> A symplectic <I>signed partition</I> of an integer n is a sequence
+[&lt; 1, m<sub>1</sub> &gt;, &lt; pm2, m<sub>2</sub> &gt;, ..., &lt; n, m<sub>n</sub> &gt;],
+such that the unsigned sequence 
+[&lt; 1, m<sub>1</sub> &gt;, &lt; 2, m<sub>2</sub> &gt;, ..., &lt; n, m<sub>n</sub> &gt;]
+is a partition of n, where m<sub>i</sub> is even for all odd i.  Only the terms
+&lt; i, m<sub>i</sub> &gt; where i is even are signed.
+<P>
+The conjugacy classes of Sp(2n, q) are in one-to-one correspondence with
+sequences of pairs &lt; f, &mu;(f) &gt;, where f is a 
+*-irreducible polynomial and &mu;(f) is a partition if deg (f) &gt; 1 and
+a symplectic signed partition if deg(f) = 1. (Note that t - 1  and 
+t + 1 are the only *-irreducible polynomials of odd degree.) Such a
+sequence is called a <I>conjugacy invariant</I> for Sp(2n, q).
+</BLOCKQUOTE>
+<H5><A NAME = "7523"></A><A NAME = "RepresentativeMatrixSp">RepresentativeMatrixSp</A>(inv) : SetIndx[Tup] -&gt; GrpMatElt</H5>
+<BLOCKQUOTE>
+Return a representative of the symplectic conjugacy class with
+invariant <TT>inv</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "7524">ConjugacyInvariantSp(g) : GrpMatElt -&gt; SetIndx[Tup]</A></H5>
+<BLOCKQUOTE>
+Given an element g in a symplectic group over a finite field, return
+the corresponding conjugacy invariant.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7525">Example <TT>GrpMatGen_ccinvariant (H64E13)</TT></A></H3>
+An example of a conjugacy class invariant for the symplectic group
+Sp(18, 11) is
+<P>
+<P>
+<P>
+<PRE>
+&gt; F := GF(11);
+&gt; _&lt;t&gt; := PolynomialRing(F);
+&gt; inv := {@ &lt;t + 1, [&lt; -2,1&gt;]&gt;, &lt;t^4 + 7*t^3 + 7*t + 1, [&lt;1,2&gt;, &lt;2,1&gt;]&gt; @};
+</PRE>
+<P>
+The corresponding conjugacy class representative is
+<P>
+<P>
+<P>
+<PRE>
+&gt; M := RepresentativeMatrixSp(inv);
+</PRE>
+<P>
+Check that the conjugacy invariant of M equals our initial choice.
+<P>
+<P>
+<P>
+<PRE>
+&gt; inv eq ConjugacyInvariantSp(M);
+<TT>true</TT>
+</PRE>
+<HR>
+<H3><A NAME = "7526">Example <TT>GrpMatGen_conjtest (H64E14)</TT></A></H3>
+Using these intrinsics we can construct a test for conjugacy in a
+symplectic group.
+<P>
+<P>
+<P>
+<PRE>
+&gt; isConjugate := func&lt; g,h |
+&gt;   ConjugacyInvariantSp(g) eq ConjugacyInvariantSp(h) &gt;;
+&gt; F := GF(5);
+&gt; G := Sp(4,F);
+&gt; g := G!Matrix(F,4,4, [1,2,3,3, 3,2,4,2, 0,3,1,2, 2,0,3,1]);
+&gt; h := G!Matrix(F,4,4, [0,4,2,3, 2,3,3,0, 2,3,3,3, 0,4,1,2]);
+&gt; isConjugate(g,h);
+<TT>false</TT>
+&gt; m := G!Matrix(F,4,4, [4,3,4,2, 3,0,2,0, 1,4,2,3, 2,1,1,4]);
+&gt; isConjugate(g,m);
+<TT>true</TT>
+</PRE>
+<HR>
+<H5><A NAME = "7527"></A><A NAME = "ClassInvariantsSp">ClassInvariantsSp</A>(d,q) : RngIntElt, RngIntElt -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+The sequence of conjugacy class invariants for the symplectic group
+Sp(d, q).
+</BLOCKQUOTE>
+<H5><A NAME = "7528">CentraliserOrderSp(inv) : SetIndx[Tup] -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a symplectic conjugacy invariant <TT>inv</TT>, return the order
+of the centraliser of the representative matrix.
+</BLOCKQUOTE>
+<H5><A NAME = "7529">ClassesSp(d,q) : RngIntElt, RngIntElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Construct a set of representatives for the conjugacy classes of the
+symplectic group Sp(d, q). The classes are returned in the same format used
+by <A  HREF = "text660.htm#ConjugacyClasses">ConjugacyClasses</A>, i.e., as a sequence of triples containing the
+element order, the class length and a representative element for the class.
+</BLOCKQUOTE>
+<H5><A NAME = "7530">ClassRepresentativesSp(d,q) : RngIntElt, RngIntElt -&gt; SeqEnum, SeqEnum</A></H5>
+<BLOCKQUOTE>
+This combines <A  HREF = "text660.htm#RepresentativeMatrixSp">RepresentativeMatrixSp</A> and <A  HREF = "text660.htm#ClassInvariantsSp">ClassInvariantsSp</A>.
+The first return value is the sequence of class representatives of the
+symplectic group Sp(d, q).  The second return value is the corresponding
+sequence of conjugacy class invariants.
+<P>
+<P>
+<P>
+<P>
+<B>Conformal symplectic groups.</B>
+If g belongs to the conformal symplectic group C over the field F there
+is a non-zero element &phi;&isin;F such that gJg^(sevenrm tr) = &phi; 
+J, where J is the matrix of the alternating form preserved by C.  In
+this case the minimal polynomial of g is &phi;-symmetric in the sense of
+the following definition.
+<P>
+Given &phi;&isin;F<sup> x </sup> and a polynomial f(t) of degree d such that
+f(0)&ne;0, the &phi;-<I>dual</I> of f(t) is
+<P>
+  f<sup>[&phi;]</sup>(t) = f(0)<sup> - 1</sup>t<sup>d</sup> f(&phi; t<sup> - 1</sup>).
+<P>
+The polynomial f(t) is &phi;-<I>symmetric</I> if f<sup>[&phi;]</sup>(t) = f(t).
+Thus f(t) is &phi;-symmetric if and only if t<sup>d</sup> f(&phi; t<sup> - 1</sup>) =
+f(0)f(t).  For example t<sup>2</sup> - &phi; and t<sup>2</sup> + &phi; are &phi;-symmetric
+and if &phi; = &lambda;<sup>2</sup>, then t - &lambda; and t + &lambda; are
+&phi;-symmetric.
+<P>
+A polynomial f(t) is &phi;-<I>irreducible</I> if it is &phi;-symmetric
+and has no proper &phi;-symmetric factors.
+</BLOCKQUOTE>
+<H5><A NAME = "7531">PhiDual(f,phi) : RngUPolElt -&gt; RngUPolElt</A></H5>
+<BLOCKQUOTE>
+The &phi;-dual of the polynomial f.
+</BLOCKQUOTE>
+<H5><A NAME = "7532">PhiIredduciblePolynomials(F,d) : FldFin, RngIntElt -&gt; SeqEnum[Tup]</A></H5>
+<BLOCKQUOTE>
+The sequence of pairs &lt; &phi;,  pols &gt; where <TT>pols</TT>
+is the sequence of all monic polynomials of degree d over the field F with
+no proper &phi;-symmetric factor and &phi; runs through the non-zero elements
+of F.
+<P>
+<P>
+<P>
+<P>
+Each conjugacy class of CSp(2n, q) will be represented by a pair
+&lt; &phi;, &Xi; &gt;, where &phi;&isin;F<sup> x </sup> and &Xi; is an indexed
+set of pairs &lt; f, &mu; &gt;, where f is a &phi;-irreducible
+polynomial and &mu; is either a partition or, in the case that f divides 
+t<sup>2</sup> - &phi;, a symplectic signed partition.  That is, a conjugacy class
+invariant has the form &lt; &phi;, 
+{@  &lt; f<sub>1</sub>, &mu;<sub>1</sub> &gt;, &lt; f<sub>2</sub>, &mu;<sub>2</sub> &gt;, ... @} &gt;.
+</BLOCKQUOTE>
+<H5><A NAME = "7533"></A><A NAME = "RepresentativeMatrixCSp">RepresentativeMatrixCSp</A>(inv) : SetIndx[Tup] -&gt; GrpMatElt</H5>
+<BLOCKQUOTE>
+Return a representative of the conjugacy class with invariant
+<TT>inv</TT> in the conformal symplectic group.
+</BLOCKQUOTE>
+<H5><A NAME = "7534">ConjugacyInvariantCSp(g) : GrpMatElt -&gt; SetIndx[Tup]</A></H5>
+<BLOCKQUOTE>
+Given an element g in a conformal symplectic group over a finite
+field, return the corresponding conjugacy invariant.
+</BLOCKQUOTE>
+<H5><A NAME = "7535"></A><A NAME = "ClassInvariantsCSp">ClassInvariantsCSp</A>(d,q) : RngIntElt, RngIntElt -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+The sequence of conjugacy class invariants for the conformal symplectic
+group CSp(d, q).
+</BLOCKQUOTE>
+<H5><A NAME = "7536">CentraliserOrderCSp(inv) : SetIndx[Tup] -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The order of the centraliser of any element in the conformal symplectic
+group whose conjugacy invariant is <TT>inv</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "7537">ClassesCSp(d,q) : RngIntElt, RngIntElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Construct a set of representatives for the conjugacy classes of the
+conformal symplectic group Sp(d, q). The classes are returned in the same
+format used by <A  HREF = "text660.htm#ConjugacyClasses">ConjugacyClasses</A>, i.e., as a sequence of triples
+containing the element order, the class length and a representative element
+for the class.
+</BLOCKQUOTE>
+<H5><A NAME = "7538">ClassRepresentativesCSp(d,q) : RngIntElt, RngIntElt -&gt; SeqEnum,SeqEnum</A></H5>
+<BLOCKQUOTE>
+This combines <A  HREF = "text660.htm#RepresentativeMatrixCSp">RepresentativeMatrixCSp</A> and 
+<A  HREF = "text660.htm#ClassInvariantsCSp">ClassInvariantsCSp</A>. The first return value is the sequence of class
+representatives of the conformal symplectic group CSp(d, q).  The second
+return value is the corresponding sequence of conjugacy class invariants.
+</BLOCKQUOTE>
+<P>
+<P>
+<P>
+<B>Extended symplectic groups.</B>
+A group G is an <I>extended symplectic group</I> if
+Sp(n, q)&sube;G &sube;CSp(n, q).
+<H5><A NAME = "7539">ExtendedSymplecticGroup(n,q,m) : RngIntElt, RngIntElt, RngIntElt -&gt; GrpMat</A></H5>
+<H5>ExtendedSp(n,q,m) : RngIntElt, RngIntElt, RngIntElt -&gt; GrpMat</H5>
+<BLOCKQUOTE>
+The subgroup of CSp(n, q) that contains Sp(n, q) as a subgroup of 
+index m.
+</BLOCKQUOTE>
+<H5><A NAME = "7540">IndexOfSp(G) : GrpMat -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The index of the symplectic group in G.  This function fails with
+a runtime exception if G is not an extended symplectic group.
+</BLOCKQUOTE>
+<H5><A NAME = "7541">ClassInvariantsExtSp(n,q,m) : RngIntElt, RngIntElt, RngIntElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The sequence of conjugacy class invariants for the extended
+symplectic group of dimension n and index m over the field
+of q elements.
+</BLOCKQUOTE>
+<H5><A NAME = "7542">ClassRepresentativesExtSp(n,q,m) : RngIntElt, RngIntElt -&gt; SeqEnum, SeqEnum</A></H5>
+<BLOCKQUOTE>
+The first return value is the sequence of representatives for the
+conjugacy classes of the extended symplectic group of dimension n 
+and index m over the field of q elements.  The second return
+value is the sequence of class invariants (as returned by
+<TT>ClassInvariantsExtSp(n,q,m)</TT>).
+</BLOCKQUOTE>
+<H5><A NAME = "7543">ClassesExtSp(n,q,m) : RngIntElt, RngIntElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+A set of representatives for the conjugacy classes of the extended
+symplectic group of dimension n and index m over the field of 
+q elements.  The classes are returned in the same format used by 
+<A  HREF = "text660.htm#ConjugacyClasses">ConjugacyClasses</A>, i.e., as a sequence of triples containing the
+element order, the class length and a representative element for the
+class.
+</BLOCKQUOTE>
+<P>
+<P>
+<P>
+<B>Orthogonal groups.</B>
+<P>
+<P>
+An orthogonal <I>signed partition</I> of an integer n is a sequence
+[&lt; &#8723; 1, m<sub>1</sub> &gt;, &lt; 2, m<sub>2</sub> &gt;, ..., &lt; n, m<sub>n</sub> &gt;],
+such that the unsigned sequence 
+[&lt; 1, m<sub>1</sub> &gt;, &lt; 2, m<sub>2</sub> &gt;, ..., &lt; n, m<sub>n</sub> &gt;]
+is a partition of n, where m<sub>i</sub> is even for all even i.  Only the terms
+&lt; i, m<sub>i</sub> &gt; where i is odd are signed.
+<P>
+The conjugacy classes of GO<sup>&epsilon;</sup>(n, q) are in one-to-one 
+correspondence with sequences of pairs &lt; f, &mu;(f) &gt;, where f
+is a *-irreducible polynomial and &mu;(f) is a partition if deg (f) &gt; 1
+and an orthogonal signed partition if deg(f) = 1. (Note that t - 1  
+and t + 1 are the only *-irreducible polynomials of odd degree.)
+Such a sequence is called a <I>conjugacy invariant</I> for 
+GO<sup>&epsilon;</sup>(n, q).
+<H5><A NAME = "7544"></A><A NAME = "RepresentativeMatrixO">RepresentativeMatrixO</A>(inv) : SetIndx[Tup] -&gt; GrpMatElt</H5>
+<BLOCKQUOTE>
+Return a representative of the conjugacy class in an orthogonal group with
+invariant <TT>inv</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "7545">ConjugacyInvariantO(g) : GrpMatElt -&gt; SetIndx[Tup]</A></H5>
+<BLOCKQUOTE>
+Given an element g in an orthogonal group over a finite field, return
+the corresponding conjugacy invariant.
+</BLOCKQUOTE>
+<H5><A NAME = "7546"></A><A NAME = "ClassInvariantsGO">ClassInvariantsGO</A>(d,q) : RngIntElt, RngIntElt -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+The sequence of conjugacy class invariants for the orthogonal group
+GO(d, q).
+</BLOCKQUOTE>
+<H5><A NAME = "7547"></A><A NAME = "ClassInvariantsGOPlus">ClassInvariantsGOPlus</A>(d,q) : RngIntElt, RngIntElt -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+The sequence of conjugacy class invariants for the orthogonal group
+GO^ + (d, q).
+</BLOCKQUOTE>
+<H5><A NAME = "7548"></A><A NAME = "ClassInvariantsGOMinus">ClassInvariantsGOMinus</A>(d,q) : RngIntElt, RngIntElt -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+The sequence of conjugacy class invariants for the orthogonal group
+GO^ - (d, q).
+</BLOCKQUOTE>
+<H5><A NAME = "7549">CentraliserOrderO(inv) : SetIndx[Tup] -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given an orthogonal conjugacy invariant <TT>inv</TT>, return the order
+of the centraliser of the representative matrix.
+</BLOCKQUOTE>
+<H5><A NAME = "7550">ClassesGO(d,q) : RngIntElt, RngIntElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Construct a set of representatives for the conjugacy classes of the
+orthogonal group GO(d, q). The classes are returned in the format used
+by <A  HREF = "text660.htm#ConjugacyClasses">ConjugacyClasses</A>, i.e., as a sequence of triples containing the
+element order, the class length and a representative element for the class.
+</BLOCKQUOTE>
+<H5><A NAME = "7551">ClassesGOPlus(d,q) : RngIntElt, RngIntElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Construct a set of representatives for the conjugacy classes of the
+orthogonal group GO^ + (d, q). The classes are returned in the format
+used by <A  HREF = "text660.htm#ConjugacyClasses">ConjugacyClasses</A>, i.e., as a sequence of triples containing
+the element order, the class length and a representative element for the class.
+</BLOCKQUOTE>
+<H5><A NAME = "7552">ClassesGOMinus(d,q) : RngIntElt, RngIntElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Construct a set of representatives for the conjugacy classes of the
+orthogonal group GO^ - (d, q). The classes are returned in the format
+used by <A  HREF = "text660.htm#ConjugacyClasses">ConjugacyClasses</A>, i.e., as a sequence of triples containing the
+element order, the class length and a representative element for the class.
+</BLOCKQUOTE>
+<H5><A NAME = "7553">ClassRepresentativesGO(d,q) : RngIntElt, RngIntElt -&gt; SeqEnum, SeqEnum</A></H5>
+<BLOCKQUOTE>
+This combines <A  HREF = "text660.htm#RepresentativeMatrixO">RepresentativeMatrixO</A> and <A  HREF = "text660.htm#ClassInvariantsGO">ClassInvariantsGO</A>.
+The first return value is the sequence of class representatives of the
+orthogonal group GO(d, q).  The second return value is the corresponding
+sequence of conjugacy class invariants.
+</BLOCKQUOTE>
+<H5><A NAME = "7554">ClassRepresentativesGOPlus(d,q) : RngIntElt, RngIntElt -&gt; SeqEnum, SeqEnum</A></H5>
+<BLOCKQUOTE>
+This combines <A  HREF = "text660.htm#RepresentativeMatrixO">RepresentativeMatrixO</A> and <A  HREF = "text660.htm#ClassInvariantsGOPlus">ClassInvariantsGOPlus</A>.
+The first return value is the sequence of class representatives of the
+orthogonal group GO^ + (d, q).  The second return value is the corresponding
+sequence of conjugacy class invariants.
+</BLOCKQUOTE>
+<H5><A NAME = "7555">ClassRepresentativesGOMinus(d,q) : RngIntElt, RngIntElt -&gt; SeqEnum, SeqEnum</A></H5>
+<BLOCKQUOTE>
+This combines <A  HREF = "text660.htm#RepresentativeMatrixO">RepresentativeMatrixO</A> and <A  HREF = "text660.htm#ClassInvariantsGOMinus">ClassInvariantsGOMinus</A>.
+The first return value is the sequence of class representatives of the
+orthogonal group GO^ - (d, q).  The second return value is the
+corresponding sequence of conjugacy class invariants.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text661.htm">[Next]</A><A  HREF = "text659.htm">[Prev]</A> <A  HREF = "text661.htm">[Right]</A> <A  HREF = "text659.htm">[Left]</A> <A  HREF = "text653.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

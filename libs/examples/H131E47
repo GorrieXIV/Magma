@@ -1,0 +1,54 @@
+"Source: Text/Geometry/CrvHyp.text";
+"Line: 7160";
+"Date: Wed Jun  8 17:42:16 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/CrvHyp.text, line: 7160
+// Example: H131E47 ()
+print "Example: H131E47";
+ei := GetEchoInput();
+SetEchoInput(true);
+SetSeed(1);
+K<x> := PolynomialRing(RationalField());
+C<i> := ComplexField(100);
+KC<xc> := PolynomialRing(C);
+f1 := x^5 - 4*x^4 + 8*x^2 - 4*x;
+f1C := Evaluate(f1,xc);
+A1 := AnalyticJacobian(f1C);
+f2 := x^5 + 4*x^4 + 10*x^3 + 12*x^2 + x;
+f2C := Evaluate(f2,xc);
+A2 := AnalyticJacobian(f2C);
+Mlst := AnalyticHomomorphisms(SmallPeriodMatrix(A1),SmallPeriodMatrix(A2));
+Mlst;
+
+P1 := BigPeriodMatrix(A1);
+P2 := BigPeriodMatrix(A2);
+alst := [Submatrix(P2*Matrix(C,M),1,1,2,2)
+         *Submatrix(P1,1,1,2,2)^-1 : M in Mlst];
+alst[1][1,1];
+
+SetDefaultRealFieldPrecision(100);
+pol := PowerRelation(C!alst[4][1,1],8:Al:="LLL");
+Evaluate(pol,x);
+aroot := C!Roots(Evaluate(x^8 + 12*x^6 + 34*x^4 + 52*x^2 + 1,xc))[1][1];
+basis := [aroot^i : i in [0..7]];
+LinearRelation(Append(basis,alst[1][1,1]));
+alpha := alst[3];
+alpha;
+Matrix(2,2,[Round(Real(x)) : x in Eltseq(alpha)]);
+C1 := HyperellipticCurve(f1);
+J1 := Jacobian(C1);
+pts1 := RationalPoints(J1:Bound:=500);
+pts1;
+P1 := pts1[8]; P1;
+div1 := [r[1] : r in Roots(Evaluate(ElementToSequence(P1)[1],xc))];
+div1 := [<d1,Evaluate(ElementToSequence(P1)[2],d1)> : d1 in div1];
+pt1 := &+[ToAnalyticJacobian(d[1],d[2],A1) : d in div1];
+P2 := FromAnalyticJacobian(alpha*pt1,A2);
+clst := Coefficients((xc-P2[1][1])*(xc-P2[2][1]));
+xpol := K![BestApproximation(Re(c),10^50) : c in clst];
+xpol;
+C2 := HyperellipticCurve(f2);
+J2 := Jacobian(C2);
+pts2 := RationalPoints(J2:Bound:=500);
+pts2;
+SetEchoInput(ei);

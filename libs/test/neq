@@ -1,0 +1,91 @@
+
+//////////////////////////////////////////////////////
+// NormEquation test : miscellaneous examples
+//////////////////////////////////////////////////////
+
+
+//////////////////////////////////////////////////////
+// Examples copied from top of 
+// package/Ring/FldNum/Neq.m
+
+// #1
+
+ Q:=Rationals();
+ E:=RadicalExtension(Q,2,-33);
+ F:=RadicalExtension(E,2,-1);
+ O:=MaximalOrder(F);
+ Oa := MaximalOrder(O);
+ Oa := AbsoluteOrder(O);
+ K := FieldOfFractions(Oa);
+ S := Support(2*3*5*Oa);
+ S := [x : x in S];
+ #S;
+ SUnitGroup(S:Raw);
+ U, mU, B := $1;
+ SUnitAction(mU, map<FieldOfFractions(Oa) -> E | x :-> Norm(F!x)>, S:Base := B);
+
+// #2 : "example showing the need for mu_exp"
+
+ SetVerbose("ClassGroup", 3);
+ SetClassGroupBounds(500);
+ SetSeed(1);
+ x := PolynomialRing(Rationals()).1;
+ K := NumberField(x^4 + 17*x^2 + 7569);
+ a := 1/87*(-13*K.1^3 + 910*K.1 + 14181);
+ b := 1/174*(K.1^3 + 104*K.1 + 783);
+ L := ext< K | Polynomial([ -a, 0, 1]) >;
+ SetVerbose("NormEquation", 2);
+ SetVerbose("NormEquation", 3);
+ NormEquation(L,b);
+
+
+
+//////////////////////////////////////////////////////
+// This was a bug due to bad precision in lll of ideal
+
+_<x> := PolynomialRing(Rationals());
+
+F<theta_1> := NumberField(x^4 - 289*x^2 - 51984);
+
+a := 1/114*(26451703752209*theta_1^3 + 19249393074339*theta_1^2
+            - 8448132167401964*theta_1 + 43208602242280152);
+K := ext< F | Polynomial([F| a, 0, 1 ]) >;
+
+b := 1/38*(4531058503456311657008595590188111393039968129542052695366181*theta_1^3
+     - 92241689193724346746019064242388126301555020081256547963780881*theta_1^2
+     + 568347832543612436995429427457484950336130631005110871686064874*theta_1
+     - 11570224503485110180830720536848379692240471503278026043417721106);
+
+NormEquation(K, b);
+
+
+
+
+//////////////////////////////////////////////////////
+// This was a bug (returned false -- wrong answer!)
+// which occurred for all moderately large input
+// due to calling  order_norm_equation_im2
+
+_<x>:=PolynomialRing(Integers());
+
+for F in [* QuadraticField(-1), NumberField(x^2 + 1) *] do
+
+    ZF := Integers(F);
+    N := 5317302389238379145888528508659120911396244113;
+
+    b, sols := NormEquation(ZF, N);
+    assert b;
+    assert forall{x : x in sols | Norm(x) eq N};
+
+    s := ZF!1;
+    for t in Factorisation(N) do
+        p, e := Explode(t);
+        b, sols := NormEquation(ZF, p);
+        assert b;
+        assert forall{x : x in sols | Norm(x) eq p};
+        s *:= sols[1] ^ e;
+    end for;
+    assert Norm(s) eq N;
+
+end for;
+

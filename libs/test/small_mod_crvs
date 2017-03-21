@@ -1,0 +1,117 @@
+// SmallModularCurve tests
+
+function PowSerDelta(f,d)
+  p := AbsolutePrecision(f);
+  v := Valuation(f);
+  R := Parent(f);
+  pol :=  PolynomialRing(BaseRing(R))!Coefficients(f);
+  pol *:= (Parent(pol).1)^v;
+  return Evaluate(pol,q^d)+O(q^p) where q is R.1;
+end function;
+
+function Eisensteinp(k,p,R,prec)
+    assert IsEven(k);
+    eis := Eisenstein(k,R.1+O(R.1^(prec+1)));
+    return -eis+p^(k div 2)*PowSerDelta(eis,p);
+end function;
+
+Q := Rationals();
+R<q> := LaurentSeriesRing(Q);
+Ns := [N : N in [1..100] | IsInSmallModularCurveDatabase(N)];
+
+//Test for E2N
+
+for N in Ns do
+C := SmallModularCurve(N);
+e2 := E2NForm(C,N);
+F := FunctionField(C);
+AF,fmp := AlgorithmicFunctionField(F);
+s := Inverse(fmp)(SeparatingElement(AF));
+ds := Differential(s);
+qs := qExpansionsOfGenerators(N,R,100);
+if #qs lt Rank(CoordinateRing(Ambient(C))) then
+  qs := qs cat [1];
+end if;
+e2q :=q*Evaluate(ProjectiveRationalFunction(e2/ds),qs)*
+   Derivative(Evaluate(ProjectiveRationalFunction(s),qs));
+E2n := Eisensteinp(2,N,R,100);
+boo := IsWeaklyZero(e2q-E2n);
+assert boo;
+end for;
+
+//Test for E4
+
+E4 := Eisenstein(4,q+O(q^101));
+for N in Ns do
+C := SmallModularCurve(N);
+e4,w := E4Form(C,N);
+F := FunctionField(C);
+AF,fmp := AlgorithmicFunctionField(F);
+s := Inverse(fmp)(SeparatingElement(AF));
+ds := Differential(s);
+qs := qExpansionsOfGenerators(N,R,100);
+if #qs lt Rank(CoordinateRing(Ambient(C))) then
+  qs := qs cat [1];
+end if;
+e4q :=q^2*Evaluate(ProjectiveRationalFunction(e4*(w/ds)^2),qs)*
+   Derivative(Evaluate(ProjectiveRationalFunction(s),qs))^2;
+boo := IsWeaklyZero(e4q-E4);
+assert boo;
+end for;
+
+//Test for E6
+
+E6 := Eisenstein(6,q+O(q^101));
+for N in Ns do
+C := SmallModularCurve(N);
+e6,w := E6Form(C,N);
+F := FunctionField(C);
+AF,fmp := AlgorithmicFunctionField(F);
+s := Inverse(fmp)(SeparatingElement(AF));
+ds := Differential(s);
+qs := qExpansionsOfGenerators(N,R,100);
+if #qs lt Rank(CoordinateRing(Ambient(C))) then
+  qs := qs cat [1];
+end if;
+e6q :=q^3*Evaluate(ProjectiveRationalFunction(e6*(w/ds)^3),qs)*
+   Derivative(Evaluate(ProjectiveRationalFunction(s),qs))^3;
+boo := IsWeaklyZero(e6q-E6);
+assert boo;
+end for;
+
+//Projection map tests
+
+for N in Ns do
+C := SmallModularCurve(N);
+ds := Reverse(Prune(Divisors(N)));
+qs := qExpansionsOfGenerators(N,R,100);
+if #qs eq Rank(CoordinateRing(Ambient(C))) then
+  qs := [qs[i]/qs[#qs] : i in [1..(#qs)-1]];
+end if;
+for M in ds do
+CM := SmallModularCurve(M);
+prj := ProjectionMap(C,N,CM,M);
+prja := RestrictionToPatch(prj,1,1);
+defs := DefiningPolynomials(prja);
+qs1 := qExpansionsOfGenerators(M,R,100);
+if #qs1 eq Rank(CoordinateRing(Ambient(CM))) then
+  qs1 := [qs1[i]/qs1[#qs1] : i in [1..(#qs1)-1]];
+end if;
+boo := &and[IsWeaklyZero(qs1[i] - Evaluate(defs[i],qs)) : i in [1..#qs1]];
+assert boo;
+end for;
+end for;
+
+// qExpansions test
+
+for N in Ns do
+if GenusX0N(N) eq 0 then continue; end if;
+C := SmallModularCurve(N);
+qs := qExpansionsOfGenerators(N,R,100);
+if #qs lt Rank(CoordinateRing(Ambient(C))) then
+  qs := qs cat [1];
+end if;
+defs := DefiningPolynomials(C);
+boo := &and[IsWeaklyZero(Evaluate(f,qs)) : f in defs];
+assert boo;
+end for;

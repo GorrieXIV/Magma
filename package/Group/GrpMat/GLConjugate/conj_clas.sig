@@ -1,0 +1,3 @@
+174,1
+S,IsGLConjugateClassical,"If conjugates of H and K are conjugate inside a classical group, then returns true and a matrix conjugating H to K. If H and K are shown not to be conjugate inside the general linear group then returns false. Otherwise, returns ""unknown""",0,2,0,0,0,0,0,0,0,178,,0,0,178,,36,180,-38,-38,-38,-38
+S,IsGLConjugateBigClassical,"If conjugates of H and K both contain a classical group Omega and sit inside a classical group Delta, then returns true and a matrix conjugating H to K. If H and K are shown not to be conjugate inside the general linear group then returns false. Otherwise, returns ""unknown""",0,2,0,0,0,0,0,0,0,178,,0,0,178,,36,-38,-38,-38,-38,-38

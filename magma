@@ -1,0 +1,55 @@
+#!/bin/sh
+
+ROOT="/home/kason/school/magma"
+
+if [ "$ROOT" = "....." ]
+then
+    echo "You must edit the 'magma' script and change the ..... at the" >&2
+    echo "top of the file to the full pathname of the place where the" >&2
+    echo "Magma files currently are." >&2
+    exit 1
+fi
+
+MAGMAPASSFILE="$ROOT/magmapassfile"
+export MAGMAPASSFILE
+MAGMA_HELP_DIR="$ROOT/InternalHelp"
+export MAGMA_HELP_DIR
+MAGMA_HTML_DIR="$ROOT/doc/html"
+export MAGMA_HTML_DIR
+MAGMA_SYSTEM_SPEC="$ROOT/package/spec"
+export MAGMA_SYSTEM_SPEC
+
+if [ "${MAGMA_STARTUP_FILE}" = "" ]
+then
+    if [ -f "${HOME}/.magmarc" ]
+    then
+	MAGMA_STARTUP_FILE="${HOME}/.magmarc"
+	export MAGMA_STARTUP_FILE
+    fi  
+fi
+
+if [ "$MAGMA_LIBRARIES" = "" ]
+then
+    MAGMA_LIBRARY_ROOT="$ROOT/libs"
+    MAGMA_LIBRARIES="examples:galpols:intro:isolgps:matgps:pergps:simgps:solgps"
+
+    export MAGMA_LIBRARY_ROOT
+    export MAGMA_LIBRARIES
+fi
+
+# Special handling for Mac OS X due to the very small default stack limit:
+if [ "x`uname`" = xDarwin ]
+then
+    ulimit -s hard
+
+    # This is to find the dynamically-linked GMP library:
+    DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$ROOT
+    export DYLD_LIBRARY_PATH
+fi
+
+if [ $# = 0 ]
+then
+    exec "$ROOT/magma.avx64.exe"
+else
+    exec "$ROOT/magma.avx64.exe" "$@"
+fi

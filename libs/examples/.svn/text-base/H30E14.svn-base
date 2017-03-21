@@ -1,0 +1,52 @@
+"Source: Text/Lat/Lat.text";
+"Line: 3690";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Lat/Lat.text, line: 3690
+// Example: H30E14 ()
+print "Example: H30E14";
+ei := GetEchoInput();
+SetEchoInput(true);
+function KnapsackLattice(Q, s)
+    n := #Q;
+    X := RMatrixSpace(IntegerRing(), n + 1, n + 2) ! 0;
+    for i := 1 to n do
+        X[i][i] := 2;
+        X[i][n + 1] := n * Q[i];
+        X[n + 1][i] := 1;
+    end for;
+    X[n + 1][n + 1] := n * s;
+    X[n + 1][n + 2] := 1;
+    return Lattice(X);
+end function;
+function KnapsackSolutions(L)
+    n := Rank(L) - 1;
+    M := n + 1;
+    S := ShortVectors(L, M, M);
+    return [
+        [i: i in [1 .. n] | v[i] ne v[n + 2]]: t in S |
+            forall{i: i in [1 .. n] cat [n + 2] | Abs(v[i]) eq 1} and
+                v[n + 1] eq 0 where v is t[1]
+    ];
+end function;
+Q := [ 52, 218, 755, 221, 574, 593, 172, 771, 183, 810, 437, 137 ];
+s := 2676;
+L := KnapsackLattice(Q, s);
+L;
+S := KnapsackSolutions(L);
+S;
+[&+[Q[i]: i in s]: s in S];
+b := 1000;    
+n := 50;      
+SetSeed(1);
+Q := [Random(1, 2^b): i in [1 .. n]];
+I := { };
+while #I lt n div 2 do
+    Include(~I, Random(1, n));
+end while;
+I := Sort(Setseq(I)); I;
+s := &+[Q[i]: i in I]; Ilog2(s);
+time L := KnapsackLattice(Q, s);
+[Ilog2(Norm(b)): b in Basis(L)];
+time KnapsackSolutions(L);
+SetEchoInput(ei);

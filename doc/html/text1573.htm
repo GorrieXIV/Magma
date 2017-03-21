@@ -1,0 +1,118 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Bases</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1574.htm">[Next]</A><A  HREF = "text1572.htm">[Prev]</A> <A  HREF = "text1574.htm">[Right]</A> <A  HREF = "text1572.htm">[Left]</A> <A  HREF = "text1570.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "17622">Bases</A></H3>
+
+<P>
+<P>
+<P>
+Any space of modular forms that
+can be created in Magma is of the form M<sub>Z</sub> tensor <sub>Z</sub> R
+for some ring R and some space M<sub>Z</sub> of modular forms
+defined over Z.  The basis of M is the image in M of
+<TT>Basis(M_Z)</TT>, and <TT>Basis(M_Z)</TT> is in Hermite normal
+form.
+<P>
+Note that in order to determine this basis over Z, it is necessary
+to compute q-expansions up to a "Sturm bound" for M
+(see <TT>PrecisionBound)</TT>. The precision
+used internally will therefore be at least as large as this bound. 
+If desired, however, one can compute q-expansions to lower precision
+by working directly with spaces of modular symbols.
+
+
+<H5><A NAME = "17623">Basis(M) : ModFrm -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The canonical basis of the space of modular forms or half-integral 
+weight forms M.  
+</BLOCKQUOTE>
+<H5><A NAME = "17624">Basis(M, prec) : ModFrm, RngIntElt -&gt; [RngSerPowElt]</A></H5>
+<H5>qExpansionBasis(M, prec) : ModFrm, RngIntElt -&gt; [RngSerPowElt]</H5>
+<BLOCKQUOTE>
+A sequence containing q-expansions (to the specified precision)
+of the elements of <TT>Basis(M)</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "17625">PrecisionBound(M : parameters) : ModFrm  -&gt; RngIntElt</A></H5>
+
+<PRE>    Exact: BoolElt                      Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+An integer b such that f + O(q<sup>b</sup>) determines
+any modular form f in the given space M of modular forms or 
+half-integral weight forms.  If the optional parameter 
+<TT>Exact</TT> is set to <TT>true</TT>, or if a q-expansion basis has already
+been computed for M, then the result is best-possible, ie
+the <I>smallest</I> integer b such that f + O(q<sup>b</sup>) determines
+any modular form f in M. Otherwise it is a "Sturm bound"
+similar to (although in some cases sharper than) the bounds given 
+in section 9.4 of <A  HREF = "text1569.htm#bib_stein-modular-forms-book">[Ste07]</A>.
+<P>
+<I>Note:</I> In some much older versions of Magma the default
+was <TT>Exact := true</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "17626">RModule(M) : ModFrm -&gt; ModTupRng, Map</A></H5>
+<H5>RSpace(M) : ModFrm -&gt; ModTupRng, Map</H5>
+<H5>VectorSpace(M) : ModFrm -&gt; ModTupRng, Map</H5>
+
+<PRE>    Ring: Rng                           Default: </PRE>
+<BLOCKQUOTE>
+An abstract free module isomorphic to the given space of modular forms M,
+over the same base ring (unless <TT>Ring</TT> is specified). 
+The second returned object is a map from the abstract module to/from M.
+<P>
+This function is needed when one wants to use linear algebra 
+functions on M (since in Magma, a space of modular forms is not 
+a subtype of vector space).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17627">Example <TT>ModFrm_Bases (H138E6)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; M := ModularForms(Gamma1(16),3); M;
+Space of modular forms on Gamma_1(16) of weight 3 and dimension 23 
+over Integer Ring.
+&gt; Dimension(CuspidalSubspace(M));
+9
+&gt; SetPrecision(M,19);
+&gt; Basis(NewSubspace(CuspidalSubspace(M)))[1];
+q - 76*q^8 + 39*q^9 + 132*q^10 - 44*q^11 + 84*q^12 - 144*q^13 - 
+232*q^14 + 120*q^15 + 160*q^16 + 158*q^17 - 76*q^18 + O(q^19)
+</PRE>
+We can print the whole basis to less precision:
+<P>
+<P>
+<PRE>
+&gt; SetPrecision(M,10);
+&gt; Basis(NewSubspace(CuspidalSubspace(M)));
+[
+    q - 76*q^8 + 39*q^9 + O(q^10),
+    q^2 + q^7 - 58*q^8 + 30*q^9 + O(q^10),
+    q^3 + 2*q^7 - 42*q^8 + 18*q^9 + O(q^10),
+    q^4 + q^7 - 26*q^8 + 13*q^9 + O(q^10),
+    q^5 + 2*q^7 - 18*q^8 + 5*q^9 + O(q^10),
+    q^6 + 2*q^7 - 12*q^8 + 3*q^9 + O(q^10),
+    3*q^7 - 8*q^8 + O(q^10)
+]
+</PRE>
+Note the coefficient 3 of q<sup>7</sup>, which emphasizes that
+this is not the reduced echelon form over a field, but the
+image of a reduced form over the integers:
+<P>
+<P>
+<PRE>
+&gt; MQ := BaseExtend(M,RationalField());
+&gt; Basis(NewSubspace(CuspidalSubspace(MQ)))[7];
+3*q^7 - 8*q^8 + O(q^10)
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1574.htm">[Next]</A><A  HREF = "text1572.htm">[Prev]</A> <A  HREF = "text1574.htm">[Right]</A> <A  HREF = "text1572.htm">[Left]</A> <A  HREF = "text1570.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

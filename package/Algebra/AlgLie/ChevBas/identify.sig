@@ -1,0 +1,4 @@
+174,1
+A,AlgLie,2,ReductiveType,DidComputeSTSA
+S,ReductiveType,"Attempt to identify the reductive Lie algebra L with a split toral subalgebra H. Returns four values. The first is a root datum, the second is a string describing the isomorphism type of L, the third is a decomposition Q of L into direct summands, and the fourth is a sequence of records containing extra information on each of the elements of Q",0,2,0,0,0,0,0,0,0,15,,0,0,15,,489,298,82,82,-38,-38
+S,ReductiveType,"Attempt to identify the reductive Lie algebra L defined over a finite field k. Returns four values. The first is a root datum, the second is a string describing the isomorphism type of L, the third is a decomposition Q of L into direct summands, and the fourth is a sequence of records containing extra information on each of the elements of Q",0,1,0,0,0,0,0,0,0,15,,489,298,82,82,-38,-38

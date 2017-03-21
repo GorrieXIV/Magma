@@ -1,0 +1,43 @@
+for binop in ['+', '-', '*'] do
+    print binop : Minimal;
+    for x, y in Q do
+	print x, y;
+	print binop(x, y);
+    end for;
+end for;
+for binop in ['/'] do
+    print binop : Minimal;
+    for x in Q, y in [z: z in Q | not IsZero(z)] do
+	print x, y;
+	print binop(x, y);
+    end for;
+end for;
+
+for x, y in Q do
+    error if x + (-y) ne x - y, "negate", x, y;
+    if not IsZero(y) then
+	error if Norm(x * (1/y) - x / y) gt epsilon, "invert", x, y;
+    end if;
+end for;
+for x, y in Q do
+    if IsZero(x) then
+	if Real(y) le zero then
+	    ;
+	else
+	    error if not IsZero(x^y), "0^x != 0", x, y, x^y;
+	end if;
+    elif IsZero(y) then
+	error if not IsOne(x^y), "x^0 != 1", x, y, x^y;
+    else
+	error if Norm(x^y - Exp(y * Log(x))) gt epsilon, "x^y != Exp(y*Log(x))", x, y, Norm(x^y - Exp(y * Log(x)));
+    end if;
+end for;
+for x in Q do
+    if IsZero(x) then
+	continue;
+    end if;
+    for i in [-10 .. 10] do
+	error if x^i ne x^(R!i), "powerint incompat", x, i;
+	error if Norm(x^i - Exp(i*Log(x))) gt epsilon, "powerint vs log", x, i;
+    end for;
+end for;

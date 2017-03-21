@@ -1,0 +1,596 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Operators on Sequences</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text101.htm">[Next]</A><A  HREF = "text99.htm">[Prev]</A> <A  HREF = "text101.htm">[Right]</A> <A  HREF = "text99.htm">[Left]</A> <A  HREF = "text96.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "764">Operators on Sequences</A></H3>
+
+<P>
+<P>
+This section lists functions for obtaining information about
+existing sequences, for modifying sequences and for creating
+sequences from others. Most of these operators only apply to
+enumerated sequences.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text100.htm#765">Access Functions</A>
+<LI> <A  HREF = "text100.htm#770">Selection Operators on Enumerated Sequences</A>
+<LI> <A  HREF = "text100.htm#779">Modifying Enumerated Sequences</A>
+<LI> <A  HREF = "text100.htm#796">Creating New Enumerated Sequences from Existing Ones</A>
+</UL>
+<H4><A NAME = "765">Access Functions</A></H4>
+
+
+
+<H5><A NAME = "766"># S : SeqEnum -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the length of the enumerated sequence S, which is
+the index of the last term of S whose value is defined.
+The length of the empty sequence is zero.
+</BLOCKQUOTE>
+<H5><A NAME = "767">Parent(S) : SeqEnum -&gt; Str</A></H5>
+<BLOCKQUOTE>
+Returns the parent structure for a sequence S, that is, the structure
+consisting of all (enumerated) sequences over the universe of S.
+</BLOCKQUOTE>
+<H5><A NAME = "768">Universe(S) : SeqEnum -&gt; Str</A></H5>
+<BLOCKQUOTE>
+Returns the `universe' of the sequence S,
+that is, the common structure to which all elements of the sequence belong.
+This universe may itself be a set or sequence.
+An error is signalled when S is the null sequence.
+</BLOCKQUOTE>
+<H5><A NAME = "769">S[i] : SeqEnum, RngIntElt -&gt; Elt</A></H5>
+<BLOCKQUOTE>
+The i-th term s<sub>i</sub> of the sequence S. If i &le;0, or 
+i &gt; #S + 1, or S[i] is not defined, then an error results.
+Here i is allowed to be a multi-index (see Introduction for
+the interpretation).
+This can be used as the left hand side of an assignment:
+<TT>S[i] := x</TT>
+redefines the i-th term of the sequence S to be x.
+If i &le;0,
+then an error results. If i &gt; n, then the sequence [s<sub>1</sub>, ..., 
+s<sub>n</sub>, s<sub>n + 1</sub>, ..., s<sub>i - 1</sub>, x] replaces S, where s<sub>n + 1</sub>, ..., 
+s<sub>i - 1</sub> are all undefined.
+Here i is allowed to be a multi-index.
+<P>
+An error occurs if x cannot be coerced into the universe of S.
+</BLOCKQUOTE>
+<H4><A NAME = "770">Selection Operators on Enumerated Sequences</A></H4>
+
+<P>
+<P>
+Here, S denotes an
+enumerated sequence [s<sub>1</sub>, ..., s<sub>n</sub>].
+Further, i and j are integers or
+multi-indices (see Introduction).
+
+
+<H5><A NAME = "771">S[I] : SeqEnum, [RngIntElt] -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The sequence [s<sub>i<sub>1</sub></sub>, ..., s<sub>i<sub>r</sub></sub>] consisting of terms selected 
+from the sequence S, according to the terms of the integer sequence 
+I. If any term of I lies outside the range 1 to #S, then an error 
+results. If I is the empty sequence, then the empty set with universe
+the same as that of S is returned.
+<P>
+The effect of <TT>T := S[I]</TT> differs from that of
+<TT>T := [ S[i] : i in I ]</TT>: if in the first case an undefined entry
+occurs for i&isin;I between 1 and #S it will be copied over;
+in the second such undefined entries will lead to an error.
+</BLOCKQUOTE>
+<H5><A NAME = "772">Minimum(S) : SeqEnum -&gt; Elt, RngIntElt</A></H5>
+<H5>Min(S) : SeqEnum -&gt; Elt, RngIntElt</H5>
+<BLOCKQUOTE>
+Given a non-empty, complete enumerated sequence S such that <TT>lt</TT> and <TT>eq</TT>
+are defined on the universe of S, this function returns two values:
+a minimal element s in S, as well as the first position i such that s=S[i].
+</BLOCKQUOTE>
+<H5><A NAME = "773">Maximum(S) : SeqEnum -&gt; Elt, RngIntElt</A></H5>
+<H5>Max(S) : SeqEnum -&gt; Elt, RngIntElt</H5>
+<BLOCKQUOTE>
+Given a non-empty, complete enumerated sequence S such that <TT>gt</TT> and <TT>eq</TT>
+are defined on the universe of S, this function returns two values:
+a maximal element s in S, as well as the first position i such that s=S[i].
+</BLOCKQUOTE>
+<H5><A NAME = "774">Index(S, x) : SeqEnum, Elt -&gt; RngIntElt</A></H5>
+<H5>Index(S, x, f) : SeqEnum, Elt, RngIntElt -&gt; RngIntElt</H5>
+<H5>Position(S, x) : SeqEnum, Elt -&gt; RngIntElt</H5>
+<H5>Position(S, x, f) : SeqEnum, Elt, RngIntElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Returns either the position of the first occurrence of x in the sequence
+S, or zero if S does not contain x. The second variants of each function
+starts the search at position f. This can save time in second 
+(and subsequent) searches for the same entry further on. 
+If no occurrence of x in S from position f onwards is found, then zero is 
+returned.
+</BLOCKQUOTE>
+<H5><A NAME = "775">Representative(R) : SeqEnum -&gt; Elt</A></H5>
+<H5>Rep(R) : SeqEnum -&gt; Elt</H5>
+<BLOCKQUOTE>
+An (arbitrary) element chosen from the enumerated sequence R
+</BLOCKQUOTE>
+<H5><A NAME = "776">Random(R) : SeqEnum -&gt; Elt</A></H5>
+<BLOCKQUOTE>
+A random element chosen from the enumerated sequence R. Every element
+has an equal probability of being chosen. Successive
+invocations of the function will result in independently
+chosen elements being returned as the value of the function.
+If R is empty an error occurs.
+</BLOCKQUOTE>
+<H5><A NAME = "777">Explode(R) : SeqEnum -&gt; List</A></H5>
+<BLOCKQUOTE>
+Given an enumerated sequence R of length r this function returns
+the r entries of the sequence (in order).
+</BLOCKQUOTE>
+<H5><A NAME = "778">Eltseq(R) : SeqEnum -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The enumerated sequence R itself.  This function is just included for
+completeness.
+</BLOCKQUOTE>
+<H4><A NAME = "779">Modifying Enumerated Sequences</A></H4>
+
+<P>
+<P>
+The operations given here are available as both procedures
+and functions. In the procedure
+version, the given sequence is destructively modified `in place'.
+This is very efficient, since it is not necessary to make
+a copy of the sequence.
+In the function version, the given sequence is not changed,
+but a modified version of it is returned. This is more 
+suitable if the old sequence is still required.
+Some of the functions also return useful but non-obvious values.
+<P>
+Here, S denotes an enumerated sequence, and x an
+element of some structure V. The modifications
+involving S and x will only be successful if x can be coerced
+into the universe of S; an error occurs if this fails.
+(See the Introduction to this Part).
+
+
+<H5><A NAME = "780">Append(~S, x) : SeqEnum, Elt -&gt;</A></H5>
+<H5>Append(S, x) : SeqEnum, Elt -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Create an enumerated sequence by adding the
+object x to the end of S, i.e., the enumerated
+sequence [s<sub>1</sub>, ... s<sub>n</sub>, x]. 
+<P>
+There are two versions of this: a procedure, where S is replaced
+by the appended sequence, and a function, which returns the
+new sequence. The procedural version takes a reference
+~S to S as an argument.
+<P>
+Note that the procedural version is much more efficient since
+the sequence S will not be copied.
+</BLOCKQUOTE>
+<H5><A NAME = "781">Exclude(~S, x) : SeqEnum, Elt -&gt;</A></H5>
+<H5>Exclude(S, x) : SeqEnum, Elt -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Create an enumerated sequence obtained
+by removing the first occurrence of the object x 
+from S, i.e., the sequence 
+[s<sub>1</sub>, ... s<sub>i - 1</sub>, s<sub>i + 1</sub>, ..., s<sub>n</sub>], where s<sub>i</sub> is 
+the first term of S that is equal to x. If x is not in S
+then this is just S.
+<P>
+There are two versions of this: a procedure, where S is replaced
+by the new sequence, and a function, which returns the
+new sequence. The procedural version takes a reference
+~S to S as an argument.
+<P>
+Note that the procedural version is much more efficient since
+the sequence S will not be copied.
+</BLOCKQUOTE>
+<H5><A NAME = "782">Include(~S, x) : SeqEnum, Elt -&gt;</A></H5>
+<H5>Include(S, x) : SeqEnum, Elt -&gt;  SeqEnum</H5>
+<BLOCKQUOTE>
+Create a sequence by adding the object x to the end of
+S, provided that no term of S is equal to x. Thus, if x does 
+not occur in S, the enumerated sequence [s<sub>1</sub>, ..., s<sub>n</sub>, x] is
+created.
+<P>
+There are two versions of this: a procedure, where S is replaced
+by the new sequence, and a function, which returns the
+new sequence. The procedural version takes a reference 
+~S to S as an argument.
+<P>
+Note that the procedural version is much more efficient since
+the sequence S will not be copied.
+</BLOCKQUOTE>
+<H5><A NAME = "783">Insert(~S, i, x) : SeqEnum, RngIntElt, Elt -&gt;</A></H5>
+<H5>Insert(S, i, x) : SeqEnum, RngIntElt, Elt -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Create the sequence formed by inserting the object x at position i in 
+S and moving the terms S[i], ..., S[n] down one place,
+i.e., the enumerated
+sequence 
+[s<sub>1</sub>, ... s<sub>i - 1</sub>, x, s<sub>i</sub>, ..., s<sub>n</sub>]. 
+Note that i may be bigger than the length n of S, in which case
+the new length of S will be i, and the entries S[n + 1], ...,
+S[i - 1] will be undefined.
+<P>
+There are two versions of this: a procedure, where S is replaced
+by the new sequence, and a function, which returns the
+new sequence. The procedural version takes a reference
+~S to S as an argument.
+<P>
+Note that the procedural version is much more efficient since
+the sequence S will not be copied.
+</BLOCKQUOTE>
+<H5><A NAME = "784">Insert(~S, k, m, T) : SeqEnum, RngIntElt, RngIntElt, SeqEnum -&gt;</A></H5>
+<H5>Insert(S, k, m, T) : SeqEnum, RngIntElt, RngIntElt, SeqEnum -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Create the sequence [s<sub>1</sub>, ..., s<sub>k - 1</sub>, t<sub>1</sub>, ..., t<sub>l</sub>, s<sub>m + 1</sub>, ..., s<sub>n</sub>]. If k &le;0 or 
+k &gt; m + 1, then an error results. If k = m + 1 then the terms of T 
+will be inserted into S immediately before the term s<sub>k</sub>. If k &gt; n,	then the sequence
+[s<sub>1</sub>, ..., s<sub>n</sub>, s<sub>n + 1</sub>, ..., s<sub>k - 1</sub>, t<sub>1</sub>, ..., t<sub>l</sub>] is
+created, where s<sub>n + 1</sub>, ..., s<sub>k - 1</sub> are all undefined.
+In the case where T is the empty sequence, terms s<sub>k</sub>, ..., s<sub>m</sub> 
+are deleted from S.
+<P>
+There are two versions of this: a procedure, where S is replaced
+by the new sequence, and a function, which returns the
+new sequence. The procedural version takes a reference
+~S to S as an argument.
+<P>
+Note that the procedural version is much more efficient since
+the sequence S will not be copied.
+</BLOCKQUOTE>
+<H5><A NAME = "785">Prune(~S) : SeqEnum -&gt;</A></H5>
+<H5>Prune(S) : SeqEnum -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Create the enumerated sequence formed by removing the last term of the
+sequence S, i.e., the sequence [s<sub>1</sub>, ..., s<sub>n - 1</sub>].
+An error occurs if S is empty.
+<P>
+There are two versions of this: a procedure, where S is replaced
+by the new sequence, and a function, which returns the
+new sequence.
+The procedural version takes a reference
+~S to S as an argument.
+<P>
+Note that the procedural version is much more efficient since
+the sequence S will not be copied.
+</BLOCKQUOTE>
+<H5><A NAME = "786">Remove(~S, i) : SeqEnum, RngIntElt -&gt;</A></H5>
+<H5>Remove(S, i) : SeqEnum, RngIntElt -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Create the enumerated sequence
+formed by removing the i-th term from S, 
+i.e., the sequence 
+[s<sub>1</sub>, ... s<sub>i - 1</sub>, s<sub>i + 1</sub>, ..., s<sub>n</sub>]. 
+An error occurs if i&lt;1 or i&gt;n.
+<P>
+There are two versions of this: a procedure, where S is replaced
+by the new sequence, and a function, which returns the
+new sequence. The procedural version takes a reference
+~S to S as an argument.
+<P>
+Note that the procedural version is much more efficient since
+the sequence S will not be copied.
+</BLOCKQUOTE>
+<H5><A NAME = "787">Reverse(~S) : SeqEnum -&gt;</A></H5>
+<H5>Reverse(S) : SeqEnum -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Create the enumerated sequence formed by reversing the order of the terms in
+the complete enumerated sequence S,
+i.e., the sequence [s<sub>n</sub>, ..., s<sub>1</sub>].
+<P>
+There are two versions of this: a procedure, where S is replaced
+by the new sequence, and a function, which returns the
+new sequence. The procedural version takes a reference
+~S to S as an argument.
+<P>
+Note that the procedural version is much more efficient since
+the sequence S will not be copied.
+</BLOCKQUOTE>
+<H5><A NAME = "788">Rotate(~S, p) : SeqEnum, RngIntElt -&gt;</A></H5>
+<H5>Rotate(S, p) : SeqEnum, RngIntElt -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Given a complete sequence S and an integer p, create the enumerated 
+sequence formed by cyclically rotating
+the terms of the sequence p terms: if p is positive, rotation
+will be to the right; if p is negative, S is cyclically rotated
+-p terms to the left; if p is zero nothing happens.
+<P>
+There are two versions of this: a procedure, where S is replaced
+by the new sequence, and a function, which returns the
+new sequence. The procedural version takes a reference
+~S to S as an argument.
+<P>
+Note that the procedural version is much more efficient since
+the sequence S will not be copied.
+</BLOCKQUOTE>
+<H5><A NAME = "789">Sort(~S) : SeqEnum -&gt;</A></H5>
+<H5>Sort(S) : SeqEnum -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Given a complete enumerated
+sequence S whose terms belong to a structure on which
+<TT>lt</TT> and <TT>eq</TT> are defined, create the enumerated 
+sequence formed by (quick-)sorting the terms of S into increasing order.
+<P>
+There are two versions of this: a procedure, where S is replaced
+by the new sequence, and a function, which returns the
+new sequence. The procedural version takes a reference
+~S to S as an argument.
+<P>
+Note that the procedural version is much more efficient since
+the sequence S will not be copied.
+</BLOCKQUOTE>
+<H5><A NAME = "790">Sort(~S, C) : SeqEnum, UserProgram -&gt;</A></H5>
+<H5>Sort(~S, C, ~p) : SeqEnum, UserProgram, GrpPermElt -&gt;</H5>
+<H5>Sort(S, C) : SeqEnum, UserProgram -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Given a complete enumerated
+sequence S and a comparison function C which
+compares elements of S, create the enumerated 
+sequence formed by sorting the terms of S into increasing order with
+respect to C.  The comparison function C must take two arguments
+and return an integer less than, equal to, or greater
+than 0 according to whether the first argument is less than, equal to,
+or greater than the second argument (e.g.: <TT>func&lt;x, y | x - y&gt;</TT>).
+<P>
+There are three versions of this:
+a procedure, where S is replaced by the new sequence,
+a procedure, where S is replaced by the new sequence and the corresponding
+permutation p is set, and a function, which returns the
+new sequence and the corresponding permutation. The procedural version
+takes a reference ~S to S as an argument.
+Note that the procedural version is much more efficient since
+the sequence S will not be copied.
+</BLOCKQUOTE>
+<H5><A NAME = "791">ParallelSort(~S, ~T) : SeqEnum, SeqEnum -&gt;</A></H5>
+<BLOCKQUOTE>
+Given a complete enumerated sequence S, sorts it in place and
+simultaneously sorts T in the same order.
+That is, whenever the sorting process would swap the two elements
+<TT>S[i]</TT> and <TT>S[j]</TT> then the two elements
+<TT>T[i]</TT> and <TT>T[j]</TT> are also swapped.
+</BLOCKQUOTE>
+<H5><A NAME = "792">Undefine(~S, i) : SeqEnum, RngIntElt -&gt;</A></H5>
+<H5>Undefine(S, i) : SeqEnum, RngIntElt -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Create the sequence which is the same as the enumerated
+sequence S but with the i-th
+term of S undefined; i may be bigger than #S, but i&le;0
+produces an error.
+<P>
+There are two versions of this: a procedure, where S is replaced
+by the new sequence, and a function, which returns the
+new sequence. The procedural version takes a reference
+~S to S as an argument.
+<P>
+Note that the procedural version is much more efficient since
+the sequence S will not be copied.
+</BLOCKQUOTE>
+<H5><A NAME = "793">ChangeUniverse(S, V) : SeqEnum, Str -&gt;</A></H5>
+<H5>ChangeUniverse(S, V) : SeqEnum, Str -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Given a sequence S with universe U and a structure V
+which contains U, construct a sequence which consists    
+of the elements of S coerced into V.
+<P>
+There are two versions of this: a procedure, where S is replaced
+by the new sequence, and a function, which returns the new sequence.
+The procedural version takes a reference
+~S to S as an argument.
+<P>
+Note that the procedural version is much more efficient since                
+the sequence S will not be copied.
+</BLOCKQUOTE>
+<H5><A NAME = "794">CanChangeUniverse(S, V) : SeqEnum, Str -&gt; Bool, SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a sequence S with universe U and a structure V
+which contains U, attempt to construct a sequence T which consists
+of the elements of S coerced into V; if successful, return
+<TT>true</TT> and T, otherwise return <TT>false</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "795">Example <TT>Seq_Farey (H10E3)</TT></A></H3>
+We present three ways to obtain the Farey series F<sub>n</sub> of degree n.
+<P>
+The Farey series F<sub>n</sub> of degree n consists of all rational numbers with
+denominator less than or equal to n, in order of magnitude.
+Since we will need numerator and denominator often, we first
+abbreviate those functions.
+<P>
+<P>
+<PRE>
+&gt; D := Denominator;
+&gt; N := Numerator;
+</PRE>
+The first method calculates the entries in order. It uses the fact that for any
+three consecutive Farey fractions (p)/(q), (p')/(q'), (p")/(q")
+of degree n:
+p"=&lfloor;((q + n)/q') &rfloor;p' - p,  
+q"=&lfloor;((q + n)/q') &rfloor;q' - q.
+<P>
+<P>
+<PRE>
+&gt; farey := function(n)
+&gt;    f := [ RationalField() | 0, 1/n ];
+&gt;    p := 0;
+&gt;    q := 1;
+&gt;    while p/q lt 1 do
+&gt;       p := ( D(f[#f-1]) + n) div D(f[#f]) * N(f[#f])  - N(f[#f-1]);
+&gt;       q := ( D(f[#f-1]) + n) div D(f[#f]) * D(f[#f])  - D(f[#f-1]);
+&gt;       Append(~f, p/q);
+&gt;    end while;
+&gt;    return f;
+&gt; end function;
+</PRE>
+The second method calculates the Farey series recursively.
+It uses the property that F<sub>n</sub> may be obtained from F<sub>n - 1</sub>
+by inserting a new fraction (namely (p + p')/(q + q')) between
+any two consecutive rationals (p)/(q) and (p')/(q')
+in F<sub>n - 1</sub> for which q + q' equals n.
+<P>
+<P>
+<PRE>
+&gt; function farey(n)
+&gt;    if n eq 1 then
+&gt;       return [RationalField() | 0, 1 ];
+&gt;    else
+&gt;       f := farey(n-1);
+&gt;       i := 0;
+&gt;       while i lt #f-1 do
+&gt;          i +:= 1;
+&gt;          if D(f[i]) + D(f[i+1]) eq n then
+&gt;             Insert( ~f, i+1, (N(f[i]) + N(f[i+1]))/(D(f[i]) + D(f[i+1])));
+&gt;          end if;
+&gt;       end while;
+&gt;       return f;
+&gt;    end if;
+&gt; end function;
+</PRE>
+The third method is very straightforward, and uses <TT>Sort</TT> and <TT>Setseq</TT>
+(defined above).
+<P>
+<P>
+<PRE>
+&gt; farey := func&lt; n |
+&gt;               Sort(Setseq({ a/b : a in { 0..n }, b in { 1..n } | a le b }))&gt;;
+&gt; farey(6);
+[ 0, 1/6, 1/5, 1/4, 1/3, 2/5, 1/2, 3/5, 2/3, 3/4, 4/5, 5/6, 1 ]
+</PRE>
+<HR>
+<H4><A NAME = "796">Creating New Enumerated Sequences from Existing Ones</A></H4>
+
+
+
+<H5><A NAME = "797">S cat T : SeqEnum, SeqEnum -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The enumerated sequence formed by concatenating the terms of
+S with the terms of T, i.e. the sequence 
+[s<sub>1</sub>, ..., s<sub>n</sub>, t<sub>1</sub>, ..., t<sub>m</sub>].
+<P>
+If the universes of S and T are different, an attempt
+to find a common overstructure is made; if this fails an error
+results (see the Introduction).
+</BLOCKQUOTE>
+<H5><A NAME = "798">S cat:= T : SeqEnum, SeqEnum -&gt;</A></H5>
+<BLOCKQUOTE>
+Mutation assignment: change S to be the concatenation of
+S and T. Functionally equivalent to <TT>S := S cat T</TT>.
+<P>
+If the universes of S and T are different, an attempt
+to find a common overstructure is made; if this fails an error
+results (see the Introduction).
+</BLOCKQUOTE>
+<H5><A NAME = "799">Partition(S, p) : SeqEnum, RngIntElt -&gt; SeqEnum(SeqEnum)</A></H5>
+<BLOCKQUOTE>
+Given a complete non-empty sequence S as well as an integer p that divides
+the length n of S, construct the sequence whose terms are
+the sequences formed by taking p terms of S at a time.
+</BLOCKQUOTE>
+<H5><A NAME = "800">Partition(S, P) : SeqEnum, [RngIntElt] -&gt; SeqEnum(SeqEnum)</A></H5>
+<BLOCKQUOTE>
+Given a complete non-empty sequence S as well as a complete
+sequence of positive integers P, such that the sum of the entries
+of P equals the length of S,
+construct the sequence whose terms are
+the sequences formed by taking P[i] terms of S, for
+i=1, ..., #P.
+</BLOCKQUOTE>
+<H5><A NAME = "801">Setseq(S) : SetEnum -&gt; SeqEnum</A></H5>
+<H5>SetToSequence(S) : SetEnum -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Given a set S, construct a sequence whose terms are the elements of 
+S taken in some arbitrary order.
+</BLOCKQUOTE>
+<H5><A NAME = "802">Seqset(S) : SeqEnum -&gt; SetEnum</A></H5>
+<H5>SequenceToSet(S) : SeqEnum -&gt; SetEnum</H5>
+<BLOCKQUOTE>
+Given a sequence S, create a set whose elements are the distinct terms of S.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "803">Example <TT>Seq_EgyptianFractions (H10E4)</TT></A></H3>
+The following example illustrates several of the access, creation
+and modification operations on sequences.
+<P>
+Given a rational number r, this function returns a sequence of
+different integers d<sub>i</sub> such that r=&sum;1/d<sub>i</sub> <A  HREF = "text95.htm#bib_Beeckmans_Egyptian">[Bee93]</A>.
+<P>
+<P>
+<PRE>
+&gt; egyptian := function(r)
+&gt;       n := Numerator(r);
+&gt;       d := Denominator(r);
+&gt;       s := [d : i in [1..n]];
+&gt;       t := { d };
+&gt;       i := 2;
+&gt;       while i le #s do
+&gt;              c := s[i];
+&gt;              if c in t then
+&gt;                     Remove(~s, i);
+&gt;                     s cat:= [c+1, c*(c+1)];
+&gt;              else
+&gt;                     t join:= { c };
+&gt;                     i := i+1;
+&gt;              end if;
+&gt;       end while;
+&gt;       return s;
+&gt; end function;
+</PRE>
+Note that the result may be rather larger than necessary:
+<P>
+<P>
+<PRE>
+&gt; e := egyptian(11/13);
+&gt; // Check the result!
+&gt; &amp;+[1/d : d in e];
+11/13
+&gt; #e;
+2047
+&gt; #IntegerToString(Maximum(e));
+1158
+</PRE>
+while instead of this sequence of 2047 integers, the biggest of
+the entries having 1158 decimal digits, the following equation also holds:
+(1/3) + (1/4) + (1/6) + (1/12) + (1/78)=(11/13).
+<HR>
+<H5><A NAME = "804">Operations on Sequences of Booleans</A></H5>
+
+<P>
+<P>
+The following operations work pointwise on sequences of booleans of equal length.
+
+
+<H5><A NAME = "805">And(S, T) : [ BoolElt ], [ BoolElt ] -&gt; [BoolElt]</A></H5>
+<H5>And(~S, T) : [ BoolElt ], [ BoolElt ] -&gt;</H5>
+<BLOCKQUOTE>
+The sequence whose ith entry is the logical and of the ith entries
+of S and T. The result is placed in S if it is given by reference (~).
+</BLOCKQUOTE>
+<H5><A NAME = "806">Or(S, T) : [ BoolElt ], [ BoolElt ] -&gt; [ BoolElt ]</A></H5>
+<H5>Or(~S, T) : [ BoolElt ], [ BoolElt ] -&gt;</H5>
+<BLOCKQUOTE>
+The sequence whose ith entry is the logical or of the ith entries of S
+and T. The result is placed in S if it is given by reference.
+</BLOCKQUOTE>
+<H5><A NAME = "807">Xor(S, T) : [ BoolElt ], [ BoolElt ] -&gt; [ BoolElt ]</A></H5>
+<H5>Xor(~S, T) : [ BoolElt], [ BoolElt ] -&gt;</H5>
+<BLOCKQUOTE>
+The sequence whose ith entry is the logical xor of the ith entries of S
+and T. The result is placed in S if it is given by reference.
+</BLOCKQUOTE>
+<H5><A NAME = "808">Not(S) : [ BoolElt ] -&gt; [ BoolElt ]</A></H5>
+<H5>Not(~S) : [ BoolElt ] -&gt;</H5>
+<BLOCKQUOTE>
+The sequence whose ith entry is the logical not of the ith entry of 
+S. The result is placed in S if it is given by reference.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text101.htm">[Next]</A><A  HREF = "text99.htm">[Prev]</A> <A  HREF = "text101.htm">[Right]</A> <A  HREF = "text99.htm">[Left]</A> <A  HREF = "text96.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

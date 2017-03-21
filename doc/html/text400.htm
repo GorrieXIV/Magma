@@ -1,0 +1,1344 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Galois Groups</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text401.htm">[Next]</A><A  HREF = "text399.htm">[Prev]</A> <A  HREF = "text401.htm">[Right]</A> <A  HREF = "text399.htm">[Left]</A> <A  HREF = "text398.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "4123">Galois Groups</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+Finding Galois groups (of normal closures) of algebraic fields is a hard 
+problem, in general. 
+All practical currently-used algorithms fall into two
+groups: The absolute resolvent method <A  HREF = "text397.htm#bib_MK2">[SM85]</A>
+and the method of Stauduhar
+<A  HREF = "text397.htm#bib_Stau">[Sta73]</A>.
+<P>
+The Magma implementation is based on an extension of the method of
+Stauduhar by <A  HREF = "text397.htm#bib_GK1">[GK00]</A>, <A  HREF = "text397.htm#bib_geissler">[Gei03]</A> and recent work by Kl&uuml;ners and Fieker <A  HREF = "text397.htm#bib_fieker_galois">[FK14]</A>, Elsenhans <A  HREF = "text397.htm#bib_elsenhans_paper">[Els12]</A>, <A  HREF = "text397.htm#bib_elsenhans_short">[Els14]</A>, <A  HREF = "text397.htm#bib_elsenhans_improved_relative_invariants">[Els16]</A> and Sutherland <A  HREF = "text397.htm#bib_suth_galois">[Sut15]</A>.
+<P>
+For polynomials over Z, Q, number fields and global function fields 
+and irreducible polynomials over function fields over Q, 
+Magma is able to compute
+the Galois group without any a-priori restrictions on the degree.
+Note, however, that the running time and memory constraints
+can make computations in degree &gt;50 impossible, although
+computations in degree &gt;200 have been successful as well.
+In contrast to the absolute resolvent method, it also
+provides the explicit action on the roots of the polynomial f which
+generates the algebraic field.
+On demand, the older
+version which is restricted to a maximum degree of 23, is still available.
+<P>
+Roughly speaking, the method of Stauduhar traverses the subgroup lattice
+of transitive permutation groups of degree n from the symmetric
+group to the actual Galois group.  This is done by using so-called
+relative resolvents. Resolvents are polynomials whose splitting fields
+are subfields of the splitting field of the given polynomial which are computed
+using approximations of the roots of the polynomial f. 
+<P>
+If the field (or the field defined by a polynomial) has subfields 
+(i.e. the Galois group is imprimitive) the current implementation changes
+the starting point of the algorithm in the subgroup lattice, to get as
+close as possible to the actual Galois group. This is done via
+computation of subfields of a stem field of f, that is the field
+extension of Q which we get by adjoining a root of f to
+Q. Using this knowledge of the subfields, the Galois group is 
+found as a subgroup of the intersection of suitable wreath products 
+which may be easily computed. This intersection is a good starting 
+point for the algorithm.
+<P>
+If the field (or the field defined by a polynomial) does not have subfields
+(i.e. the Galois group is primitive) we use a combination of the method of Stauduhar
+and the absolute resolvent method.  The Frobenius automorphism of the
+underlying p-adic field or the complex conjugation, when using
+complex approximations of the roots of the polynomial f, already
+determines a subgroup of the Galois group, which is used to speed up
+computations in the primitive case.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text400.htm#4131">Straight-line Polynomials</A>
+<LI> <A  HREF = "text400.htm#4141">Invariants</A>
+<LI> <A  HREF = "text400.htm#4149">Subfields and Subfield Towers</A>
+<LI> <A  HREF = "text400.htm#4155">Solvability by Radicals</A>
+<LI> <A  HREF = "text400.htm#4159">Linear Relations</A>
+<LI> <A  HREF = "text400.htm#4164">Other</A>
+</UL>
+<H5><A NAME = "4124"></A><A NAME = "RngOrd:GaloisGroup">GaloisGroup</A>(f) : RngUPolElt[RngInt] -&gt; GrpPerm, SeqEnum, GaloisData</H5>
+<H5>GaloisGroup(f) : RngUPolElt[FldRat] -&gt; GrpPerm, SeqEnum, GaloisData</H5>
+<H5>GaloisGroup(f) : RngUPolElt[FldAlg] -&gt; GrpPerm, SeqEnum, GaloisData</H5>
+<H5>GaloisGroup(f) : RngUPolElt[RngOrd] -&gt; GrpPerm, SeqEnum, GaloisData</H5>
+
+<PRE>    Prime: RngElt                       Default: </PRE>
+
+<PRE>    ShortOK: BoolElt                    Default: <TT>false</TT></PRE>
+
+<PRE>    Ring: GaloisData                    Default: </PRE>
+
+<PRE>    NextPrime: UserProgram              Default: </PRE>
+
+<PRE>    SetVerbose("GaloisGroup", n):       Maximum: 5</PRE>
+
+<PRE>    SetVerbose("Invariant", n):         Maximum: 3</PRE>
+<BLOCKQUOTE>
+Given a polynomial f over the integers, rationals, a number field or an order
+thereof, compute the
+Galois group of a splitting field for f, ie. determine the
+subgroup of the permutations of the roots of f in a splitting
+field that correspond to field automorphisms. The method
+applied here is a variant of Stauduhar's algorithm, but with 
+no dependency on the explicit classification of transitive groups and
+thus no a-priori degree limitation. It must be stated though
+that this function does not return proven results, if such
+results are necessary, one needs to call <A  HREF = "text400.htm#RngOrd:GaloisProof">GaloisProof</A> afterwards.
+<P>
+Along with the Galois group of a splitting field for f, the roots of f, 
+scaled to be algebraic integers, in
+a local splitting field and a <TT>GaloisData</TT> structure are returned.
+<P>
+The prime to use for splitting field computations can be given via the parameter
+<TT>Prime</TT>. The method of choosing of primes for splitting field computations can be
+given by the parameter <TT>NextPrime</TT>. 
+<P>
+If a <TT>GaloisData</TT> structure has
+been computed for this polynomial it can be provided in <TT>Ring</TT>.
+If <TT>ShortOK</TT> is set to <TT>true</TT> then the results of a descent using short
+cosets <A  HREF = "text397.htm#bib_elsenhans_short">[Els14]</A> will be assumed to be as reliable as a 
+descent which did not use short cosets.
+</BLOCKQUOTE>
+<H5><A NAME = "4125"></A><A NAME = "RngOrd:GaloisGroup-fld">GaloisGroup</A>(K) : FldNum -&gt; GrpPerm, SeqEnum, GaloisData</H5>
+<H5>GaloisGroup(K) : FldNum[FldRat] -&gt; GrpPerm, SeqEnum, GaloisData</H5>
+<H5>GaloisGroup(K) : FldNum[FldNum[FldRat]] -&gt; GrpPerm, SeqEnum, GaloisData</H5>
+
+<PRE>    Prime: RngElt                       Default: </PRE>
+
+<PRE>    ShortOK: BoolElt                    Default: <TT>false</TT></PRE>
+
+<PRE>    Ring: GaloisData                    Default: </PRE>
+
+<PRE>    NextPrime: UserProgram              Default: </PRE>
+
+<PRE>    Current: BoolElt                    Default: <TT>false</TT></PRE>
+
+<PRE>    Subfields: BoolElt                  Default: <TT>true</TT></PRE>
+
+<PRE>    Old: BoolElt                        Default: <TT>false</TT></PRE>
+
+<PRE>    Type: MonStgElt                     Default: "p-Adic"</PRE>
+
+<PRE>    Prec: RngIntElt                     Default: 20</PRE>
+
+<PRE>    Time: BoolElt                       Default: <TT>true</TT></PRE>
+
+<PRE>    SetVerbose("GaloisGroup", n):       Maximum: 5</PRE>
+
+<PRE>    SetVerbose("Invariant", n):         Maximum: 3</PRE>
+<BLOCKQUOTE>
+Given a number field K, compute the Galois group of
+a normal closure of K. The group is returned as an abstract
+permutation group acting on the roots of the defining polynomial
+of K in a suitable splitting field.  The method
+applied here is a variant of Stauduhar's algorithm, but with 
+no dependency on the explicit classification of transitive groups and
+thus no a-priori degree limitation. It must be stated though
+that this function does not return proven results, if such
+results are necessary, one needs to call <A  HREF = "text400.htm#RngOrd:GaloisProof">GaloisProof</A> afterwards.
+<P>
+Along with the Galois group of a splitting field for K, the roots of the 
+defining polynomial of K, 
+scaled to be algebraic integers, in
+a local splitting field and a <TT>GaloisData</TT> structure are returned.
+<P>
+The prime to use for splitting field computations can be given via the parameter
+<TT>Prime</TT>. The method of choosing of primes for splitting field computations can be
+given by the parameter <TT>NextPrime</TT>.
+<P>
+If a <TT>GaloisData</TT> structure has
+been computed for the defining polynomial it can be provided in <TT>Ring</TT>.
+If <TT>Old</TT> is set to <TT>true</TT> the older version of <A  HREF = "text397.htm#bib_GK1">[GK00]</A>, <A  HREF = "text397.htm#bib_geissler">[Gei03]</A> will be 
+used for the computation.
+<P>
+If <TT>Subfields</TT> is set to <TT>false</TT> then the <TT>Subfields</TT> of K will not
+be used during the computation of the Galois group.
+If <TT>Current</TT> is set to <TT>true</TT> then the previously computed subfields of
+K only will be used in the Galois group computation and no more will be 
+computed.
+<P>
+If <TT>Type</TT> is set to <TT>"Complex"</TT> then roots of f in the complex field
+will be used rather than roots of f in a p-adic completion. If <TT>Type</TT>
+is set to <TT>"Complex"</TT>, the parameter 
+<TT>Prec</TT> can be set to the minimum precision required in the roots of f.
+<P>
+If <TT>ShortOK</TT> is set to <TT>true</TT> then the results of a descent using short
+cosets <A  HREF = "text397.htm#bib_elsenhans_short">[Els14]</A> will be assumed to be as reliable as a descent 
+which did not use short cosets.
+If <TT>Time</TT> is set to <TT>true</TT> then the time taken for lifting of roots will be
+stored in the attribute <TT>Time</TT> of the third return value.
+</BLOCKQUOTE>
+<H5><A NAME = "4126"></A><A NAME = "RngOrd:GaloisProof">GaloisProof</A>(f, S) : RngUPolElt, GaloisData -&gt; BoolElt</H5>
+<H5>GaloisProof(K, S) : FldAlg, GaloisData -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Given the resulting <TT>GaloisData</TT> structure S of a (conditional) 
+computation by <TT>GaloisGroup</TT>
+for either a polynomial f over the integers or
+an absolute number field K, try to find proofs for the conditional
+steps of the algorithm. The method employed here is to show that
+a suitable resolvent polynomial has a factor of a specific degree
+that can be used to differentiate between the possible groups.
+</BLOCKQUOTE>
+<H5><A NAME = "4127">GaloisRoot(f, i, S) : RngUPolElt, RngIntElt, GaloisData -&gt; RngElt</A></H5>
+<H5><A NAME = "RngOrd:GaloisRoot">GaloisRoot</A>(i, S) : RngIntElt, GaloisData -&gt; RngElt</H5>
+
+<PRE>    Prec: RngIntElt                     Default: 20</PRE>
+
+<PRE>    Bound: RngIntElt                    Default: 0</PRE>
+
+<PRE>    Scaled: BoolElt                     Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a polynomial f (optional) and the resulting <TT>GaloisData</TT> S of a 
+computation
+of a Galois group, return the ith root of f in the ordering
+obtained from the Galois process or
+compute the ith conjugate of the primitive element
+used during the computation, to the given precision.
+<P>
+The precision can be specified either directly by setting
+<TT>Prec</TT> to the desired p-adic precision or by giving
+a bound B in <TT>Bound</TT>. In the latter case the p-adic precision k
+will be calculated such that p<sup>k</sup> &gt; B.
+If <TT>Scaled</TT> is set to <TT>false</TT> a root of f is returned. 
+Otherwise the result is a scalar multiple of the root which is an
+algebraic integer.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "4128">Stauduhar(G, H, S, B) : GrpPerm, GrpPerm, GaloisData, RngIntElt -&gt; RngIntElt, GrpPermElt, BoolElt, RngSLPolElt</A></H5>
+
+<PRE>    SetVerbose("GaloisGroup", n):       Maximum: 5</PRE>
+
+<PRE>    SetVerbose("Invariant", n):         Maximum: 3</PRE>
+
+<PRE>    AlwaysTransform: BoolElt            Default: <TT>false</TT></PRE>
+
+<PRE>    Coset: SeqEnum                      Default: </PRE>
+
+<PRE>    PreCompInvar: UserProgram           Default: </PRE>
+<BLOCKQUOTE>
+This function gives access to a single step of the Stauduhar method:
+Let G be a permutation group known to contain the Galois
+group of the object under investigation with the numbering
+of the "roots" determined by S. Furthermore, let B be a bound
+on the absolute value of the complex roots of the object and H
+be a (maximal) subgroup of G. Under these circumstances, the intrinsic
+will decide if there is some g&isin;G such that the Galois group is 
+contained in H<sup>g</sup>. The primary return value can be:
+<DL COMPACT class='compact'>
+<DT>1</DT><DD>if the Galois group is proven to be a subgroup of H<sup>g</sup>
+  up to precision problems, indicated by the 3rd value
+<DT>-1</DT><DD>if there is a proof that the Galois group is contained in
+  a proper subgroup of G and maybe in H<sup>g</sup>
+<DT>-2</DT><DD>if the Galois group may be in H<sup>g</sup>, but we could not prove that
+  it is in a proper subgroup of G
+<DT>0</DT><DD>the Galois group is not contained in a conjugate of H.
+<P>
+</DL>
+In case of a non-zero result, the second return value will be
+the element g conjugating H, the third value will be <TT>true</TT> or 
+<TT>false</TT>, depending on whether the p-adic bound used were proven or
+heuristic and the fourth value is the invariant used to separate the 
+groups.
+<P>
+The optional parameter <TT>Coset</TT> can be used to pass
+a transversal of G/H in, while <TT>PreCompInvar</TT> should
+contain a suitable invariant separating G and H if set.
+If <TT>AlwaysTransform</TT> is set to <TT>true</TT> then a transformation will always be
+applied to the roots.
+</BLOCKQUOTE>
+<H5><A NAME = "4129">IsInt(x, B, S) : RngElt, RngIntElt, GaloisData -&gt; BoolElt, RngElt</A></H5>
+<BLOCKQUOTE>
+Given an element x in the splitting field determined by the <TT>GaloisData</TT>
+structure S
+and a bound B on the complex absolute value, determine if there 
+exists an element y &isin;Z or an extension of Z defined by the polynomial
+the Galois group is being computed for, such that y=x up the 
+precision of x and such that |y|&lt;B. In case such a y exists, 
+it is returned as a second return value.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "4130">Example <TT>RngOrdGal_GaloisGroups (H39E4)</TT></A></H3>
+A Galois group computation is shown below.
+<P>
+<P>
+<PRE>
+&gt; Z:= Integers();
+&gt; P&lt;x&gt;:= PolynomialRing(Z);
+&gt; G, R, S := GaloisGroup(x^6-108);
+&gt; G;
+Permutation group G acting on a set of cardinality 6
+Order = 6 = 2 * 3
+    (1, 5, 3)(2, 6, 4)
+    (1, 2)(3, 6)(4, 5)
+&gt; R;
+[ -58648*$.1 + 53139 + O(11^5), 58648*$.1 - 19478 +
+O(11^5), -43755*$.1 - 72617 + O(11^5), 58648*$.1 -
+    53139 + O(11^5), -58648*$.1 + 19478 + O(11^5),
+    43755*$.1 + 72617 + O(11^5) ]
+&gt; S;
+GaloisData over Z_11
+
+&gt; time G, _, S := GaloisGroup(x^32-x^16+2);
+Time: 65.760
+&gt; #G;
+2048
+</PRE>
+Some examples for the relative case
+<P>
+<P>
+<PRE>
+&gt; load galpols;
+&gt; f := PolynomialWithGaloisGroup(9, 14);
+&gt; G := GaloisGroup(f);
+&gt; TransitiveGroupIdentification(G);
+14 9
+&gt; M := MaximalOrder(f);
+&gt; kM := FieldOfFractions(M);
+&gt; f:= Factorisation(Polynomial(kM, f))[2][1];
+&gt; f;
+$.1^8 + (-2/1*kM.1 + kM.2)*$.1^7 + (-60/1*kM.1 -
+    2/1*kM.2 + kM.3)*$.1^6 + (120/1*kM.1 - 60/1*kM.2 -
+    2/1*kM.3 + kM.4)*$.1^5 + (980/1*kM.1 + 120/1*kM.2 -
+    60/1*kM.3 - 2/1*kM.4 + kM.5)*$.1^4 + (-1808/1*kM.1
+    + 980/1*kM.2 + 120/1*kM.3 - 60/1*kM.4 - 2/1*kM.5 +
+    kM.6)*$.1^3 + (-4012/1*kM.1 - 1808/1*kM.2 +
+    980/1*kM.3 + 120/1*kM.4 - 60/1*kM.5 - 2/1*kM.6 +
+    kM.7)*$.1^2 + (4936/1*kM.1 - 4013/1*kM.2 -
+    1809/1*kM.3 + 979/1*kM.4 + 118/1*kM.5 - 60/1*kM.6 -
+    4/1*kM.7 + 3/1*kM.8)*$.1 - 208769062021/1*kM.1 +
+    51146604497/1*kM.2 - 30878218588/1*kM.3 +
+    50063809507/1*kM.4 - 52067647419/1*kM.5 -
+    94281823910/1*kM.6 + 69906801827/1*kM.7 -
+    182364865509/1*kM.8 + 214706745867/1*kM.9
+&gt; g, r, p:= GaloisGroup(f);
+&gt; TransitiveGroupIdentification(g);
+5 8
+</PRE>
+Since g is derived from a factor of the original f, the 
+Galois group should be isomorphic to a subgroup of G:
+<P>
+<P>
+<PRE>
+&gt; Subgroups(G:OrderEqual := #g);
+Conjugacy classes of subgroups
+------------------------------
+
+[1]     Order 8            Length 9
+        Permutation group acting on a set of
+        cardinality 9
+        Order = 8 = 2^3
+            (2, 4, 5, 3)(6, 8, 7, 9)
+            (2, 7, 5, 6)(3, 9, 4, 8)
+            (2, 5)(3, 4)(6, 7)(8, 9)
+&gt; IsIsomorphic(g, $1[1]`subgroup);
+true Homomorphism of GrpPerm: g, Degree 8, Order 2^3
+into GrpPerm: $, Degree 9, Order 2^3 induced by
+    (1, 2, 3, 8)(4, 5, 6, 7) |--&gt; (2, 4, 5, 3)(6, 8, 7, 9)
+    (1, 7, 3, 5)(2, 6, 8, 4) |--&gt; (2, 7, 5, 6)(3, 9, 4, 8)
+</PRE>
+<HR>
+<H4><A NAME = "4131">Straight-line Polynomials</A></H4>
+
+<P>
+<P>
+One of the most important tools in the computational Galois theory
+are invariants, that is multivariate polynomials that are invariant
+under some permutation group. While invariant theory in general is
+a rich and classical branch of mathematics, and is supported by
+a powerful magma module, Chapter <A  HREF = "text1272.htm#13947">INVARIANT THEORY</A>, the more
+specific needs in the Galois theory are best met with a
+different set of functions.
+Invariants, in this chapter are multivariate polynomials in
+straight-line representation, the polynomials are represented as
+programs without branches. The category of these polynomials
+is of type <A NAME = "RngSLPol"><TT>RngSLPol</TT></A> and its elements are of type
+<A NAME = "RngSLPolElt"><TT>RngSLPolElt</TT></A>.
+A consequence of this representation is that certain operations
+are very fast, while others are impossible - or at least very difficult.
+For example, representing (a - b)<sup>1000</sup>(a + b)<sup>1000</sup> - (a<sup>2</sup> - b<sup>2</sup>)<sup>1000</sup> is trivial, 
+this is a short program
+with just a few steps: 
+<DL COMPACT class='compact'>
+<DT>1</DT><DD>subtract b from a
+<DT>2</DT><DD>raise to the 1000th power
+<DT>3</DT><DD>add a and b
+<DT>4</DT><DD>raise to the 1000th power
+<DT>5</DT><DD>multiply the results of steps 2 and 4
+<DT>6</DT><DD>subtract b<sup>2</sup> from a<sup>2</sup> and raise to the 1000th power
+<DT>7</DT><DD>subtract the result of step 7 from 5
+<P>
+</DL>
+Now, while it is trivial to evaluate this polynomial at, for example, 
+any pair of elements in any finite ring, it is very difficult to see that,
+in fact, the polynomial is identical to zero -- when expanded as a polynomial.
+
+
+<H5>x * y : RngSLPolElt, RngSLPolElt -&gt; RngSLPolElt</H5>
+
+<H5>x + y : RngSLPolElt, RngSLPolElt -&gt; RngSLPolElt</H5>
+
+<H5>x - y : RngSLPolElt, RngSLPolElt -&gt; RngSLPolElt</H5>
+
+<H5>- x : RngSLPolElt -&gt; RngSLPolElt</H5>
+
+
+
+<H5><A NAME = "4132">SLPolynomialRing(R, n) : Rng, RngIntElt -&gt; RngSLPol</A></H5>
+
+<PRE>    Global: BoolElt                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Creates the ring of multivariate straight-line polynomials over
+the ring R with n indeterminates.
+If <TT>Global</TT> is set to <TT>true</TT> then an existing straight-line polynomial 
+ring will be returned if one has previously constructed.
+</BLOCKQUOTE>
+<H5><A NAME = "4133">Name(R, i) : RngSLPol, RngIntElt -&gt; RngSLPolElt</A></H5>
+<H5>R . i : RngSLPol, RngIntElt -&gt; RngSLPolElt</H5>
+<BLOCKQUOTE>
+Return the ith indeterminate of the SL-polynomial ring R.
+</BLOCKQUOTE>
+<H5><A NAME = "4134">BaseRing(R) : RngSLPol -&gt; Rng</A></H5>
+<H5>CoefficientRing(R) : RngSLPol -&gt; Rng</H5>
+<BLOCKQUOTE>
+Return the coefficient ring of R.
+</BLOCKQUOTE>
+<H5><A NAME = "4135">Rank(R) : RngSLPol -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Return the rank of the SL-polynomial ring, ie the number of
+independent indeterminates over the coefficient ring.
+</BLOCKQUOTE>
+<H5><A NAME = "4136">SetEvaluationComparison(R, F, n) : RngSLPol, FldFin, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+For a SL-polynomial ring R, prepare "probabilistic" comparison
+of straight-line polynomials, using evaluation at n tuples drawn
+at random from the finite field F.
+<P>
+In order to allow a probabilistic test for "equality" of SL-polynomials
+in places where a strict, deterministic test is not necessary, this 
+allows comparison of SL-polynomials through their values at random
+evaluation points.
+</BLOCKQUOTE>
+<H5><A NAME = "4137">GetEvaluationComparison(R) : RngSLPol -&gt; FldFin, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Return the finite field and the number of random samples used to compare
+polynomials. If <TT>SetEvaluationComparison</TT> has not been called, the 
+1st return value will be <TT>false</TT> while the second is undefined.
+</BLOCKQUOTE>
+<H5><A NAME = "4138"></A><A NAME = "SLPol:init_eval">InitializeEvaluation</A>(R, S) : RngSLPol, [RngElt] -&gt;</H5>
+<BLOCKQUOTE>
+Store the point to evaluate straight line polynomials with parent R to
+contain the elements of the sequence S whose length is the rank of R
+and whose elements are coercible into R.
+</BLOCKQUOTE>
+<H5><A NAME = "4139">Derivative(x, i) : RngSLPolElt, RngIntElt -&gt; RngSLPolElt</A></H5>
+<BLOCKQUOTE>
+The ith partial derivative of the SL-polynomial x.
+</BLOCKQUOTE>
+<H5><A NAME = "4140">Evaluate(f) : RngSLPolElt -&gt; RngElt</A></H5>
+<H5>Evaluate(f, S) : RngSLPolElt, [RngElt] -&gt; RngElt</H5>
+<H5>Evaluate(f, S, m) : RngSLPolElt, [RngElt], Map -&gt; RngElt</H5>
+<BLOCKQUOTE>
+Return the evaluation of the straight-line polynomial f at 
+the elements of the sequence S where S contains the rank of the parent
+of f many elements coercible into the coefficient ring of f
+and if not given as an argument to this intrinsic is the sequence which was last
+input to <A  HREF = "text400.htm#SLPol:init_eval">InitializeEvaluation</A>.
+The map m from the coefficient ring of f into the universe of S
+can be specified if required.
+</BLOCKQUOTE>
+<H4><A NAME = "4141">Invariants</A></H4>
+
+<P>
+<P>
+At the core of the computation of Galois groups is the single Stauduhar
+step where, for a group G and a (maximal) subgroup U the programme
+decides if the Galois group is a subgroup of U - provided it was contained in G.
+This is achieved by evaluating a G-relative U-invariant polynomial
+f&isin;Z[x<sub>1</sub>, ..., x<sub>n</sub>] (or f &isin;F<sub>q</sub>[t][x<sub>1</sub>, ..., x<sub>n</sub>] when the
+characteristic of the coefficient ring of the input polynomial is prime). 
+In this subsection several functions
+are collected that allow a user to access magma's internally used
+invariants. In what follows, an invariant is always a multivariate
+polynomial f in n indeterminates where n is the degree of G
+i.e. G&lt;S<sub>n</sub>. Invariants are represented as straight-line polynomials
+that allow the very compact representation and fast evaluation
+of polynomials.
+
+
+<H5><A NAME = "4142"></A><A NAME = "RngOrd:GaloisGroupInvariant">GaloisGroupInvariant</A>(G, H) : GrpPerm, GrpPerm -&gt; RngSLPolElt</H5>
+
+<PRE>    DoCost: BoolElt                     Default: <TT>false</TT></PRE>
+
+<PRE>    Worklevel: RngIntElt                Default: -1</PRE>
+
+<PRE>    SetVerbose("GaloisGroup", n):       Maximum: 3</PRE>
+<BLOCKQUOTE>
+For subgroups H&lt;G of the symmetric group on n elements, where
+H is maximal in G and G is transitive, compute a G-relative
+H-invariant. 
+This is done by carefully comparing certain group theoretical properties
+of the group pair in question to find invariant polynomials of special
+types that are easy to evaluate. If this fails, generic invariants
+will be used.
+<P>
+If <TT>DoCost</TT> is <TT>true</TT>, two values are returned: the first return
+value in this case is an estimate for the number of multiplications
+necessary to evaluate the invariant, while the second value is a
+function that can be evaluated without arguments to compute the invariant.
+This is done to allow to compare invariants by their computational
+complexity before actually committing and computing them explicitly as this
+can be very time consuming.
+<P>
+If <TT>Worklevel</TT> is set to an integer different from -1 only certain
+types of invariants are tested for suitability for this particular
+pair of groups. In this case a special return value of <TT>false</TT> indicates
+that Magma was unable to find an invariant at this level. Roughly speaking,
+the higher the <TT>Worklevel</TT>, the more time-consuming the invariant
+will be, both in terms of the time spend in finding as well as the
+time necessary to evaluate the invariant.
+</BLOCKQUOTE>
+<H5><A NAME = "4143"></A><A NAME = "RngOrd:RelativeInvariant">RelativeInvariant</A>(G, H) : GrpPerm, GrpPerm -&gt; RngSLPolElt</H5>
+
+<PRE>    IsMaximal: BoolElt                  Default: <TT>false</TT></PRE>
+
+<PRE>    Risk: BoolElt                       Default: <TT>false</TT></PRE>
+
+<PRE>    SetVerbose("Invariant", n):         Maximum: 3</PRE>
+<BLOCKQUOTE>
+For a pair of subgroups H&lt;G of the symmetric group where H is 
+not necessarily maximal in G, find a G-relative H-invariant
+polynomial. The computation splits into three phases:
+<DL COMPACT class='compact'>
+<DT></DT><DD>- First, a subgroup chain between H and G is computed such
+that each step in the chain is a maximal subgroup.
+<DT></DT><DD>- Second, for each pair U<sub>i</sub>&lt;U<sub>i + 1</sub> of maximal subgroups
+one fixed invariant is computed
+<DT></DT><DD>- Third, in the last step, the invariants are combined to
+produce a G-relative H-invariant.
+<P>
+</DL>
+If <TT>IsMaximal</TT> is set to <TT>true</TT>, Magma will not compute a subgroup
+chain but instead assume that H is a maximal subgroup of G.
+Otherwise Magma will compute all minimal overgroups of H in G and call
+<A  HREF = "text400.htm#RngOrd:GaloisGroupInvariant">GaloisGroupInvariant</A> for each of them.
+Finally, Magma will combine these invariants to a relative one.
+<P>
+The parameter <TT>Risk</TT> refers to an old version of the function and 
+does not have an effect.
+</BLOCKQUOTE>
+<H5><A NAME = "4144">CombineInvariants(R, G, H1, H2, H3) : Rng, GrpPerm, Tup&lt;GrpPerm, RngSLPolElt&gt;, Tup&lt;GrpPerm, RngSLPolElt&gt;, GrpPerm -&gt; RngSLPolElt</A></H5>
+<BLOCKQUOTE>
+Given a subgroup G&lt;S<sub>n</sub> and three maximal subgroups H<sub>1</sub>, H<sub>2</sub> and H<sub>3</sub>
+of G two of which have already known invariants, try to derive an invariant
+for H<sub>3</sub> from the known ones over the ring R (usually Z). 
+The input for H<sub>1</sub> and H<sub>2</sub>
+consists of a tuple with two (or three) entries, the first specifying
+the actual subgroup, the second the G-relative H<sub>i</sub>-invariant and
+the optional third a Tschirnhaus transformation that should be done
+before the invariant is evaluated.
+<P>
+The typical situation in which this function
+is used is the case of H<sub>1</sub> and H<sub>2</sub> being index 2 subgroups of G.
+In this case elementary theory immediately guarantees a third subgroup H<sub>3</sub>
+of index 2. For this function to work, the core of H<sub>1</sub> &cap;H<sub>2</sub> must
+be contained in H<sub>3</sub>. This is only useful if the index of the
+core is not too large.
+</BLOCKQUOTE>
+<H5><A NAME = "4145">IsInvariant(F, p) : RngSLPolElt, GrpPermElt -&gt; BoolElt</A></H5>
+
+<PRE>    Sign: BoolElt                       Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+For a multivariate polynomial F in straight-line representation and a
+permutation p this function tests if F<sup>p</sup> = F with a high probability.
+In particular, this function will evaluate F at random elements in 
+some large finite field, then permute the evaluation points by p and
+evaluate again. If the values agree, the polynomial is most likely invariant
+under p, if they disagree than the polynomial is definitely not
+invariant. The probability of failure is related to the probability
+of guessing a zero of a multivariate polynomial at random.
+<P>
+In order to get a proof for the invariants, one can convert F into
+a standard multivariate polynomial and check directly that this is invariant.
+However, for the invariants typically constructed in the
+Galois package, the conversion into a multivariate polynomial will
+not be possible due to the large degree of the polynomial and the resulting
+large number of terms.
+<P>
+If <TT>Sign</TT> is set to <TT>true</TT>, the function checks instead for
+F<sup>p</sup> = - F.
+</BLOCKQUOTE>
+<H5><A NAME = "4146">Bound(I, B) : RngSLPolElt, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a multivariate polynomial I in straight-line representation and an
+integer B, compute an integer M such that
+|I(x<sub>1</sub>, ..., x<sub>n</sub>)|&le;M
+for all complex numbers |x<sub>i</sub>|&le;B. This returns a bound for the 
+size of an evaluation of I.
+</BLOCKQUOTE>
+<H5><A NAME = "4147">Bound(I, B) : RngSLPolElt, RngElt -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+Given a multivariate polynomial I in straight-line representation and B, a
+power series over the integers, compute a power series M such that
+for all choices of power series x<sub>i</sub> such that the coefficients of x<sub>i</sub>
+are bounded in absolute value by those of B we have that
+the power series
+I(x<sub>1</sub>, ..., x<sub>n</sub>)
+has coefficients bounded by those of M.
+</BLOCKQUOTE>
+<H5><A NAME = "4148">PrettyPrintInvariant(I) : RngSLPolElt -&gt; MonStgElt</A></H5>
+<BLOCKQUOTE>
+Prints the straight-line polynomial I into a string. 
+The printing shows the way the polynomial is stored internally.
+E.g. the reuse of subexpressions gets visible. 
+</BLOCKQUOTE>
+<H4><A NAME = "4149">Subfields and Subfield Towers</A></H4>
+
+<P>
+<P>
+<P>
+The result of a Galois group computation contains,
+in addition to the Galois group as an abstract group, the explicit action
+of the group on the roots of the underlying polynomial in some
+splitting field. This explicit action, together with the availability
+of invariants for group pairs, can be used to compute arbitrary 
+subfields of the splitting field.
+
+
+<H5><A NAME = "4150">GaloisSubgroup(K, U) : FldNum, GrpPerm -&gt; FldNum, UserProgram</A></H5>
+<H5><A NAME = "RngOrdGal:GaloisSubgroup">GaloisSubgroup</A>(S, U) : GaloisData, GrpPerm -&gt; FldNum, UserProgram</H5>
+<H5>GaloisSubgroup(f, U) : RngUPolElt, GrpPerm -&gt; FldNum, UserProgram</H5>
+
+<PRE>    SetVerbose("Invariant", n):         Maximum: 2</PRE>
+<BLOCKQUOTE>
+Given either a polynomial f or number field K or a successful
+computation of a Galois group in S and a subgroup U&lt;G where
+G is the Galois group, find a defining polynomial for the
+subfield of the splitting field that is fixed by U.
+</BLOCKQUOTE>
+<H5><A NAME = "4151">GaloisQuotient(K, Q) : FldNum, GrpPerm -&gt; SeqEnum[FldNum]</A></H5>
+<H5>GaloisQuotient(f, Q) : RngUPolElt, GrpPerm -&gt; SeqEnum[FldNum]</H5>
+<H5>GaloisQuotient(S, Q) : GaloisData, GrpPerm -&gt; SeqEnum[FldNum]</H5>
+
+<PRE>    SetVerbose("Invariant", n):         Maximum: 2</PRE>
+<BLOCKQUOTE>
+Given either a polynomial f or number field K or a successful
+computation of a Galois group in S and a permutation group Q,
+find all subfields of the splitting field that have a 
+Galois group isomorphic to Q. This is done by finding all
+subgroups U of the Galois group G such that the permutation
+action of G on the cosets G/U is isomorphic to Q.
+</BLOCKQUOTE>
+<H5><A NAME = "4152">GaloisSubfieldTower(S, L) : GaloisData, [GrpPerm] -&gt; FldNum, [Tup&lt;RngSLPolElt, RngUPolElt, [GrpPermElt]&gt;], UserProgram, UserProgram</A></H5>
+
+<PRE>    Risk: BoolElt                       Default: <TT>false</TT></PRE>
+
+<PRE>    MinBound: RngIntElt                 Default: 1</PRE>
+
+<PRE>    MaxBound: RngIntElt                 Default: &infin;</PRE>
+
+<PRE>    Inv: [RngSLPolElt]                  Default: <TT>false</TT></PRE>
+
+<PRE>    SetVerbose("GaloisTower", n):       Maximum: 2</PRE>
+<BLOCKQUOTE>
+For data computed as the third return value of <A  HREF = "text400.htm#RngOrd:GaloisGroup">GaloisGroup</A> 
+and a subgroup chain U<sub>1</sub> &gt; U<sub>2</sub> &gt; ... &gt; U<sub>s</sub>, compute the
+corresponding tower of fixed fields K<sub>i</sub> that is fixed by the 
+operation of U<sub>i</sub> on the roots of f as ordered in S.
+<P>
+Currently, this function only works for polynomials defined
+over Q or absolute extensions of Q.
+<P>
+The first return value is the largest number field in the tower, that is
+the field fixed by the smallest group in the chain as an extension
+of the fixed field of the second group ... .
+The second return value is a sequence of tuples each containing
+the data used to generate one step:
+<DL COMPACT class='compact'>
+<DT></DT><DD>- The first item is the invariant used in this step. This 
+  corresponds directly to the choice of the primitive element.
+<DT></DT><DD>- The second item is the Tschirnhaus transformation on this level
+<DT></DT><DD>- The third item is a transversal of U<sub>i</sub> over U<sub>i + 1</sub>, the 
+  fixed ordering of which gives the ordering of the "relative
+  conjugates"
+<P>
+</DL>
+The third and fourth return values can be used to algebraically
+identify arbitrary elements of the splitting field that are defined
+by multivariate polynomials. The third is a function that 
+takes a vector of p-adic conjugates and returns an algebraic 
+representation of the element, the fourth takes an invariant and
+computes precision bounds for the precision necessary so that 
+the algebraic recognition will work.
+<P>
+If <TT>Risk</TT> is set to <TT>true</TT>, then for non-maximal subgroup
+pairs U<sub>i</sub>&gt; U<sub>i + 1</sub> the "risky" version of <A  HREF = "text400.htm#RngOrd:RelativeInvariant">RelativeInvariant</A>
+is used.
+<P>
+The parameter <TT>MinBound</TT> can be used to specify a minimal p-adic
+precision that should be used internally. This can be used to avoid
+the calculation of an increase in precision which can be costly. On the other
+hand, to work in larger precision than necessary also incurs a time
+penalty.
+<P>
+The parameter <TT>MaxBound</TT> can be used to limit the p-adic
+precision used internally. Especially when the chain get longer, the
+internally used precision estimates become more and more pessimistic thus
+forcing higher and higher precision. In certain cases when it is possible
+to verify the correctness of the result independently, a smaller
+precision can speed the computation up considerably.
+<P>
+If the parameter <TT>Inv</TT> is given it should contain a sequence of 
+invariants, the i-th entry need be an U<sub>i</sub> relative U<sub>i + 1</sub> invariant.
+The invariants used correspond almost directly to the relative
+primitive elements computed at each step in the tower.
+This is useful in situation where either certain primitive elements are
+necessary or where certain invariants are known.
+</BLOCKQUOTE>
+<H5><A NAME = "4153">GaloisSplittingField(f) : RngUPolElt -&gt; FldNum, [FldNumElt], GrpPerm, [[FldNumElt]]</A></H5>
+
+<PRE>    Galois: Tup&lt;GrpPerm, [RngElt], GaloisData&gt; Default: </PRE>
+
+<PRE>    Roots: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    AllAuto: BoolElt                    Default: <TT>false</TT></PRE>
+
+<PRE>    Stab: BoolElt                       Default: <TT>true</TT></PRE>
+
+<PRE>    Chain: [GrpPerm]                    Default: <TT>false</TT></PRE>
+
+<PRE>    Inv: [RngSLPolElt]                  Default: <TT>false</TT></PRE>
+
+<PRE>    Name: MonStgElt                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+For a polynomial f in Z[t], Q[t] or over an absolute number field
+this function computes the splitting field of f as a tower of
+fields. The various parameter can be used to force certain
+subfield towers and/ or compute additional data. By default
+<TT>Stab</TT> is set to <TT>true</TT>, which means that the splitting field
+will be the tower corresponding to the chain of stabilizers
+of {1}, {1, 2}, ..., {1, ..., n}.
+Also by default <TT>Roots</TT> is set to <TT>true</TT>, which means that the roots
+of f are expressed as elements of the splitting field.
+If <TT>Roots</TT> is set to <TT>false</TT>, only the field is computed and returned.
+<P>
+The third return value will be the Galois group, the optional fourth value
+the automorphisms.
+<P>
+If the parameter <TT>Galois</TT> is used, it should contain a list or triplet
+containing the output of <TT>GaloisGroup(f);</TT>.
+<P>
+If <TT>Chain</TT> is set to a sequence of subgroups, this chain is
+used to compute a subfield tower. In this case the first elements
+must be G, the full Galois group. If <TT>Chain</TT> is used, <TT>Inv</TT>
+can be used to provide the invariants as well.
+<P>
+If <TT>AllAuto</TT> is set to <TT>true</TT>, the full automorphism group
+of the splitting field is computed as a sequence of sequences giving the
+all the roots of the relative polynomials.
+<P>
+If <TT>Name</TT> is given, it should be set to a string. In this case
+the primitive element of the i-subfield in the tower will be
+called <TT>Name.i</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "4154">Example <TT>RngOrdGal_galois-subfield (H39E5)</TT></A></H3>
+We start with a small example, to illustrate some of the parameters and 
+their influence:
+<P>
+<P>
+<PRE>
+&gt; P&lt;x&gt; := PolynomialRing(IntegerRing());
+&gt; f := x^3-2;
+&gt; GaloisSplittingField(f);
+Number Field with defining polynomial $.1^2 +
+    $.1*$.1 + $.1^2 over its ground field
+[
+    $.1,
+    $.1,
+    -$.1 - $.1
+]
+Symmetric group acting on a set of cardinality 3
+Order = 6 = 2 * 3
+    (1, 2, 3)
+    (1, 2)
+&gt; K, R, G := $1;
+&gt; K:Maximal;
+
+  K
+  |
+  |
+  $1
+  |
+  |
+  Q
+
+K : $.1^2 + $.1*$.1 + $.1^2
+$1 : x^3 - 2
+&gt; [x^3 : x in R];
+[
+    2,
+    2,
+    2
+]
+</PRE>
+The fact that by default all generators are called <TT>$.1</TT>
+makes this hard to read, so let us assign other names:
+<P>
+<P>
+<PRE>
+&gt; GaloisSplittingField(f:Name := "K");
+Number Field with defining polynomial K1^2 + K2*K1
+    + K2^2 over its ground field
+[
+    K2,
+    K1,
+    -K1 - K2
+]
+Symmetric group G acting on a set of cardinality 3
+Order = 6 = 2 * 3
+    (1, 2, 3)
+    (1, 2)
+&gt; (K where K := $1):Maximal;
+
+  $1&lt;K1&gt;
+    |
+    |
+  $2&lt;K2&gt;
+    |
+    |
+    Q
+
+$1 : K1^2 + K2*K1 + K2^2
+$2 : x^3 - 2
+
+</PRE>
+So now we can easily see that the splitting field is a relative
+quadratic extension of the degree 3 stem field. Now we try a different
+subgroup chain:
+<P>
+<P>
+<PRE>
+&gt; G, r, S := GaloisGroup(f);
+&gt; GaloisSplittingField(f:Galois := &lt;G, r, S&gt;, 
+&gt;     Chain := CompositionSeries(G), Name := "K", AllAuto);
+Number Field with defining polynomial K1^3 - 2
+over its ground field
+[
+    K1,
+    1/6*K2*K1,
+    1/6*(-K2 - 6)*K1
+]
+Symmetric group G acting on a set of cardinality 3
+Order = 6 = 2 * 3
+    (1, 2, 3)
+    (1, 2)
+[
+    [
+        K2,
+        -K2 - 6
+    ],
+    [
+        K1,
+        1/6*K2*K1,
+        1/6*(-K2 - 6)*K1
+    ]
+]
+&gt; (K where K := $1):Maximal;
+
+  $1&lt;K1&gt;
+    |
+    |
+  $2&lt;K2&gt;
+    |
+    |
+    Q
+
+$1 : K1^3 - 2
+$2 : x^2 + 6*x + 36
+</PRE>
+<P>
+<P>
+<PRE>
+&gt; f := x^10 - 20*x^8 + 149*x^6 - 519*x^4 + 851*x^2 - 529;
+&gt; G, r, S := GaloisGroup(f);G,r,S;
+&gt; TransitiveGroupIdentification(G);
+8 10
+&gt; TransitiveGroupDescription(G);
+[2^4]5
+</PRE>
+Thus the Galois group of f is isomorphic to ()<sub>1</sub>0T<sub>8</sub> 
+of type <TT>[2^4]5</TT> and order 80.
+<P>
+We first compute the splitting field directly:
+<P>
+<P>
+<PRE>
+&gt; time _ := SplittingField(f);
+</PRE>
+This takes a long time, mainly because of the type of the Galois group
+which will require a field tower involving 5 steps and factorisation 
+of a polynomial in such a tower.
+Now, we try the same by using the Galois information:
+<P>
+<P>
+<PRE>
+&gt; time K, R := GaloisSplittingField(f:Name := "K");
+Time: 4.740
+&gt; K:Maximal;
+
+  K&lt;K1&gt;
+    |
+    |
+  $1&lt;K2&gt;
+    |
+    |
+  $2&lt;K3&gt;
+    |
+    |
+  $3&lt;K4&gt;
+    |
+    |
+    Q
+
+K : K1^2 + 1/23*(-12*K4^8 + 217*K4^6 - 1374*K4^4
+    + 3606*K4^2 - 3381)
+$1 : K2^2 + 1/23*(18*K4^8 - 314*K4^6 + 1877*K4^4 -
+    4512*K4^2 + 3588)
+$2 : K3^2 + 1/23*(-5*K4^8 + 77*K4^6 - 377*K4^4 +
+    663*K4^2 - 437)
+$3 : x^10 - 20*x^8 + 149*x^6 - 519*x^4 + 851*x^2 -
+    529
+&gt; [ Evaluate(f, x) eq 0 : x in R];
+[ true, true, true, true, true, true, true, true,
+true, true ]
+</PRE>
+From the type of the Galois group, <TT>[2^4]5</TT> we expect G to have
+a normal subgroup A of type C<sub>2</sub><sup>4</sup> such that the quotient G/A is
+a cyclic group of order 5. To find that subfield we can for example
+use the Galois computations again:
+<P>
+<P>
+<PRE>
+&gt; A := NormalSubgroups(G:OrderEqual := 16)[1]`subgroup;
+&gt; GaloisSubgroup(S, A);
+x^5 + 1682*x^4 + 715964*x^3 + 99797360*x^2 +
+    5206504944*x + &equiv;9915488
+(x5 + x10)
+</PRE>
+The second return value x<sub>5</sub> + x<sub>10</sub> also tells us that the primitive element
+of the subfield is the sum of two roots of f, namly the 5-th and 10-th 
+in our fixed ordering.
+<P>
+Suppose we want to work in the degree 16 extension over this field,
+that is we want to work in the fixed field of the trivial subgroup over
+the field fixed by A:
+<P>
+<P>
+<PRE>
+&gt; K, D, Reco, Bnd := GaloisSubfieldTower(S, [A, sub&lt;G|&gt;]);
+&gt; GK := GaloisGroup(K);
+&gt; #GK;
+16
+&gt; AbelianInvariant(GK);
+[ 2, 2, 2, 2 ]
+</PRE>
+As an abstract field, K as the splitting field can be described as a quotient
+of Q[x<sub>1</sub>, ..., x<sub>10</sub>]/I for some suitable ideal I also known
+as the Galois ideal. On the other hand, by tensoring with some p-adic
+complection Q<sub>p</sub> we get an embedding of K into K<sub>p</sub><sup>#G</sup>=:&Gamma;.
+The sequence D that is returned as the 2nd value contains the information
+necessary to map elements in Z[x<sub>1</sub>, ..., x<sub>10</sub>] via
+&Gamma; to K.
+Suppose we want to find x<sub>1</sub>, ie. a root of f in K. We first have to get
+the p-adic image in &Gamma;, with appropriate precision.
+Step one is to define a suitable multivariate polynomial i that
+will represent x<sub>1</sub>.
+<P>
+The second step is to compute an integer B such that all complex conjugates
+if i are bounded by B in absolute value. For this we can use
+information about the size of the roots of f stored in S.
+<P>
+The next step now is to get a bound for the p-adic precision.
+<P>
+<P>
+<PRE>
+&gt; R := SLPolynomialRing(Integers(), 10);
+&gt; i := R.1;
+&gt; B := S`max_comp; 
+&gt; bound := Bnd(B);
+</PRE>
+Now, we need to get the p-adic conjugates of x<sub>1</sub>, ie. the image in 
+&Gamma;. The third entry in each of the elements of D contains coset
+representatives that give the relative conjugates:
+<P>
+<P>
+<PRE>
+&gt; rt := [GaloisRoot(i, S:Bound := bound) : i in [1..10]];
+&gt; con := CartesianProduct(Reverse([x[3]: x in D]));
+&gt; gamma := [Evaluate(i, PermuteSequence(rt, &amp;*p)) : p in con];
+&gt; im := Reco(gamma: Bound := B);
+&gt; time Evaluate(f, im) eq 0;
+</PRE>
+Before we try to find an automorphism of the base field using this method
+we want to find the primitive element of the base field of K.
+The primitive element is essentially given by the 1st part of D.
+Note that here a Tschirnhaus-transformation was necessary.
+<P>
+<P>
+<PRE>
+&gt; i := D[1][1]; t := D[1][2];
+&gt; B := Bound(i, Evaluate(t, S`max_comp));
+&gt; bound := Bnd(B);
+&gt; rt := [GaloisRoot(i, S:Bound := bound) : i in [1..10]];
+&gt; rt := [Evaluate(t, x) : x in rt];
+&gt; gamma := [Evaluate(i, PermuteSequence(rt, &amp;*p)) : p in con];
+&gt; im := Reco(gamma : Bound := B);
+&gt; im;
+$.1
+&gt; im eq K.2;
+true;
+</PRE>
+Now for the automorphism - all we have to change is to permute the
+roots
+as we already have the permutation group.
+<P>
+<P>
+<PRE>
+&gt; rt := PermuteSequence(rt, Random(G));
+&gt; gamma := [Evaluate(i, PermuteSequence(rt, &amp;*p)) : p in con];
+&gt; au := Reco(gamma : Bound := B);
+&gt; au;
+1/92*(-9*$.1^4 + 386*$.1^3 - 5854*$.1^2 + 37120*$.1 - 82288)
+</PRE>
+In order to "find" arbitrary (integral) elements this way one has to
+<DL COMPACT class='compact'>
+<DT></DT><DD>- define the element as a multivariate polynomial in 
+  the roots, i
+<DT></DT><DD>- with the aid of <TT>Bound</TT> and the knowledge of the complex
+  roots of f, find a bound B of the complex embeddings of i
+  and use <TT>Bnd</TT> as above to find a bound M on the
+  p-adic precision
+<DT></DT><DD>- use the information in D to compute i in &Gamma;, ie
+  all p-adic conjugates in the "correct" ordering
+<DT></DT><DD>- use <TT>Reco</TT> to find the algebraic representation.  </DL>
+<HR>
+<H4><A NAME = "4155">Solvability by Radicals</A></H4>
+
+<P>
+<P>
+For a polynomial f&isin;Z[t] with solvable Galois group it is well known
+that the roots of f can be expressed as nested radicals. On the other hand
+no good algorithm is known to achieve this. Here we use the explicit
+action of the Galois group of f as a permutation group on the p-adic
+roots to compute such a representation.
+
+
+<H5><A NAME = "4156">SolveByRadicals(f) : RngUPolElt -&gt; FldNum, [FldNumElt], [FldNumElt]</A></H5>
+
+<PRE>    Prime: RngIntElt                    Default: <TT>false</TT></PRE>
+
+<PRE>    Name: MonStgElt                     Default: <TT>false</TT></PRE>
+
+<PRE>    Galois: Tup&lt;GrpPerm, [RngElt], GaloisData&gt; Default: </PRE>
+
+<PRE>    UseZeta_p: BoolElt                  Default: <TT>false</TT></PRE>
+
+<PRE>    MaxBound: RngIntElt                 Default: &infin;</PRE>
+
+<PRE>    SetVerbose("GaloisTower", n):       Maximum: 3</PRE>
+<BLOCKQUOTE>
+For a polynomial f&isin;Z[t] with solvable Galois group, a
+splitting field as a tower of radical extensions is computed together
+with algebraic representations of the roots of f as elements
+in the splitting field. The third return value contains the non-trivial roots of 
+unity which are used.
+<P>
+If the parameter <TT>Galois</TT> is used, it should contain a list or triplet
+containing the output of <TT>GaloisGroup(f);</TT>.
+<P>
+If <TT>Prime</TT> is used, and <TT>Galois</TT> is unspecified, the value
+of <TT>Prime</TT> is passed onto the Galois group computation and can
+therefore be used to choose the p-adic field.
+<P>
+If <TT>UseZeta_p</TT> is set to <TT>true</TT>, then the expression for the
+roots of p will contain pure radicals and roots of unity. By default,
+if <TT>UseZeta_p</TT> is <TT>false</TT>, radical expressions for the roots
+of unit necessary will also be computed.
+<P>
+If <TT>MaxBound</TT> is given, it will be used as an upper bound
+for the p-adic precision used internally. Expecially when the radical tower
+contains many steps, the internally used precision estimates become more and
+more pessimistic, thus resulting in larger and larger precision.
+<P>
+If <TT>Name</TT> is set to some string, the i-th level primitive element
+in the tower will be called <TT>Name.i</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "4157">CyclicToRadical(K, a, z) : FldNum, FldNumElt, RngElt -&gt; FldNum, [FldNumElt], [FldNumElt]</A></H5>
+<BLOCKQUOTE>
+Let K/k be a number field with cyclic automorphism group of order n
+generated by K.1 to a and z be a n-th root of unity in k.
+This function will return a field L isomorphic to K such that
+L is a Kummer extension, ie. the defining polynomial for L
+will be of the form t<sup>n</sup> - b for some b in the coefficient
+field k of K.
+The second returned value contains the roots of f in L while
+the third return value contains the roots of unity used.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "4158">Example <TT>RngOrdGal_solve-radical (H39E6)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; P&lt;x&gt; := PolynomialRing(IntegerRing());
+&gt; f := x^6 - x^5 - 6*x^4 + 7*x^3 + 4*x^2 - 5*x + 1;
+&gt; K, R := SolveByRadicals(f:Name := "K.");
+&gt; K:Maximal;
+
+   K&lt;K.1&gt;
+     |
+     |
+  $1&lt;K.2&gt;
+     |
+     |
+  $2&lt;K.3&gt;
+     |
+     |
+  $3&lt;K.4&gt;
+     |
+     |
+     Q
+
+K : K.1^3 + 1/2*(3*K.4 - 11)*K.2 + 1/2*(-27*K.4 + 23)
+$1 : K.2^2 - 5
+$2 : K.3^3 - 228*K.4 + 532
+$3 : K.4^2 + 3
+
+&gt; [ Evaluate(f, x) eq 0 : x in R];
+[ true, true, true, true, true, true ]
+</PRE>
+Note that every step in the tower defining K is radical, ie. given
+by an equation of type x<sup>n</sup> - a.
+<HR>
+<H4><A NAME = "4159">Linear Relations</A></H4>
+
+<P>
+<P>
+An important question for various problems is that of finding all linear
+(additive)
+relations between the roots of some integral polynomial. While there is a
+obvious algorithm if the splitting field can be constructed explicitly,
+there is no obvious way of doing it in general.
+In this section we provide two algorithms to find those and more
+general relations and a third that can verify arbitrary relations.
+
+
+<H5><A NAME = "4160">LinearRelations(f) : RngUPolElt -&gt; Mtrx, GaloisData</A></H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Galois: Tup&lt;GrpPerm, [RngElt], GaloisData&gt; Default: </PRE>
+
+<PRE>    UseAction: BoolElt                  Default: <TT>false</TT></PRE>
+
+<PRE>    UseLLL: BoolElt                     Default: <TT>true</TT></PRE>
+
+<PRE>    Power: RngIntElt                    Default: 1</PRE>
+
+<PRE>    kMax: RngIntElt                     Default: &infin;</PRE>
+
+<PRE>    LogLambdaMax: RngIntElt             Default: &infin;</PRE>
+<BLOCKQUOTE>
+Given an integral monic polynomial f, this function finds a basis
+for the module of additive relations between the roots of f in some
+algebraic closure.
+The ordering of the roots is the same as chosen by the computation
+of the Galois group of f, in fact, the roots used are precisely the
+ones returned by <A  HREF = "text400.htm#RngOrd:GaloisRoot">GaloisRoot</A>.
+The output consists of a basis for the relation module encoded
+in a matrix and the Galois data encoding the ordering of the roots.
+The algorithm is described in <A  HREF = "text397.htm#bib_deGraafFieker">[dGF07]</A>.
+<P>
+If <TT>Power</TT> is set to an integer larger than one, the module
+of relations between the powers of the roots is computed.
+</BLOCKQUOTE>
+<H5><A NAME = "4161">LinearRelations(f, I) : RngUPolElt, [RngSLPolElt] -&gt; Mtrx, GaloisData</A></H5>
+
+<PRE>    Proof: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Galois: Tup&lt;GrpPerm, [RngElt], GaloisData&gt; Default: </PRE>
+
+<PRE>    UseAction: BoolElt                  Default: <TT>false</TT></PRE>
+
+<PRE>    UseLLL: BoolElt                     Default: <TT>true</TT></PRE>
+
+<PRE>    Power: RngIntElt                    Default: 1</PRE>
+
+<PRE>    kMax: RngIntElt                     Default: &infin;</PRE>
+
+<PRE>    LogLambdaMax: RngIntElt             Default: &infin;</PRE>
+<BLOCKQUOTE>
+Let f be an integral monic polynomial and &alpha;<sub>1</sub>, ..., &alpha;<sub>n</sub>
+be the roots of f in some splitting field in a fixed ordering. The
+field and the ordering used here are the ones chosen by the computation
+of the Galois group of f. The splitting field K of f
+be represented as a quotient Q[x<sub>1</sub>, ..., x<sub>n</sub>]/J for
+some suitable ideal J, thus elements in K can be represented as
+multivariate polynomials in the roots &alpha;<sub>i</sub>.
+The sequence I that is passed into this function is interpreted to
+contain elements in K given via the polynomials in I.
+This function computes a basis for the module of relations between
+the elements represented by I.
+The algorithm is described in <A  HREF = "text397.htm#bib_deGraafFieker">[dGF07]</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "4162">VerifyRelation(f, F) : RngUPolElt, RngSLPolElt -&gt; BoolElt</A></H5>
+
+<PRE>    Galois: Tup&lt;GrpPerm, [RngElt], GaloisData&gt; Default: </PRE>
+
+<PRE>    kMax: RngIntElt                     Default: &infin;</PRE>
+<BLOCKQUOTE>
+Let f be an integral monic polynomial and &alpha;<sub>1</sub>, ..., &alpha;<sub>n</sub>
+be the roots of f in some splitting field in a fixed ordering. The
+field and the ordering used here are the ones chosen by the computation
+of the Galois group of f. The splitting field K of f
+be represented as a quotient Q[x<sub>1</sub>, ..., x<sub>n</sub>]/J for
+some suitable ideal J, thus elements in K can be represented as
+multivariate polynomials in the roots &alpha;<sub>i</sub>.
+For a polynomial F in the roots of f, this function verifies if 
+F evaluated at the roots of f equals zero, ie. if F describes
+a relation between the roots.
+The algorithm is described in <A  HREF = "text397.htm#bib_deGraafFieker">[dGF07]</A>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "4163">Example <TT>RngOrdGal_linear-relations (H39E7)</TT></A></H3>
+The following example originates in a paper <A  HREF = "text397.htm#bib_poonen2004">[BDE+]</A> where,
+among other things, polynomials are constructed whose roots have a
+maximal number of linear dependencies.  (This example is not extremal.)
+<P>
+<P>
+<PRE>
+&gt; ST := ShephardTodd(8);
+&gt; R := InvariantRing(ST);
+&gt; p := PrimaryInvariants(R);
+&gt; p;
+[
+    x1^8 + (-4*i - 4)*x1^7*x2 + 14*i*x1^6*x2^2 + (-14*i + 
+        14)*x1^5*x2^3 - 21*x1^4*x2^4 + (14*i + 14)*x1^3*x2^5
+        - 14*i*x1^2*x2^6 + (4*i - 4)*x1*x2^7 + x2^8,
+    x1^12 + (-6*i - 6)*x1^11*x2 + 33*i*x1^10*x2^2 + (-55*i +
+        55)*x1^9*x2^3 - 231/2*x1^8*x2^4 + (66*i + 
+        66)*x1^7*x2^5 + (-66*i + 66)*x1^5*x2^7 - 
+        231/2*x1^4*x2^8 + (55*i + 55)*x1^3*x2^9 - 
+        33*i*x1^2*x2^10 + (6*i - 6)*x1*x2^11 + x2^12
+]
+&gt; res := Resultant(p[1]-2, p[2]-3, 2);
+&gt; f4  := Polynomial(Rationals(), UnivariatePolynomial(res));
+&gt; bool, f := IsPower(f4, 4);
+&gt; bool, f;
+true 
+27/4*x^24 - 135*x^16 + 405*x^12 - 405*x^8 + 162*x^4 - 1
+&gt; G, R, S := GaloisGroup(f);
+&gt; #G;
+192
+&gt; rel := LinearRelations(f : Galois := &lt;G, R, S&gt;);
+&gt; #rel;
+20
+</PRE>
+There are 20 linear relations between the 24 roots, that is, they span
+a vector space of dimension 4 over Q.
+We demonstrate how to check one of the relations.
+<P>
+<P>
+<PRE>
+&gt; v := rel[3];
+&gt; v;
+[ 0, 0, 0, -1, 0, -1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+&gt; IR := SLPolynomialRing(Integers(), 24);
+&gt; r := &amp;+ [v[i]*IR.i : i in [1..24]];
+&gt; r;
+(x7 + ((-1 * x4) + (-1 * x6)))
+&gt; VerifyRelation(f, r : Galois := &lt;G, R, S&gt;);
+true
+</PRE>
+Next we give a primitive element in the splitting field (of degree 192 over Q)
+such that the Q-vector space spanned by all 192 conjugates has dimension 4.
+The element is defined as a linear combination of the 24 roots (most random 
+choices work).  We show that the element is primitive by checking that the 192
+p-adic conjugates are distinct.
+<P>
+<P>
+<PRE>
+&gt; I := &amp;+ [ (e[n]-1)*IR.n : n in [1..24]] where e is Eltseq(Random(Sym(24)));
+&gt; Iorbit := [Apply(g, I) : g in G];
+&gt; #{Evaluate(i, R) : i in Iorbit};
+192
+</PRE>
+Thus the 192 conjugates are distinct, and by construction they lie in the
+linear span of the alpha<sub>i</sub>, which has dimension 4 over Q as shown.
+It is possible to check this directly (i.e. p-adically, using the Galois data).
+<P>
+<P>
+<PRE>
+&gt; time #LinearRelations(f, Iorbit : Galois := &lt;G, R, S&gt;, Proof := false);
+188
+Time: 645.450
+</PRE>
+One expects most primitive elements of the field not to share this property.
+We define one by choosing a polynomial I = x<sub>1</sub> + x<sub>n</sub><sup>2</sup> that has trivial
+stabilizer in G.
+<P>
+<P>
+<PRE>
+&gt; exists(n){n : n in [1..24] | #Orbit(G, [1,n]) eq 192}; n;
+true
+2
+&gt; I := IR.1 + IR.n^2;
+&gt; Iorbit := [Apply(g, I) : g in G];
+&gt; #{Evaluate(i, R) : i in Iorbit};
+192
+&gt; time #LinearRelations(f, Iorbit : Galois := &lt;G, R, S&gt;, Proof := false);
+182
+Time: 816.120
+</PRE>
+<HR>
+<H4><A NAME = "4164">Other</A></H4>
+
+
+
+<H5><A NAME = "4165">ConjugatesToPowerSums(I) : [] -&gt; []</A></H5>
+<BLOCKQUOTE>
+For elements in a sequence I, compute the sequence containing the
+power sums &sum;I<sub>i</sub><sup>j</sup> for j=1, ..., # I.
+If I is interpreted to contain the Galois conjugates of some 
+algebraic number (or the roots of some polynomial) then this computed
+the power sums.
+</BLOCKQUOTE>
+<H5><A NAME = "4166">PowerSumToElementarySymmetric(I) : [] -&gt; []</A></H5>
+<BLOCKQUOTE>
+Given a sequence I of elements, interpreted as power sums of some
+algebraic number x, use Newton's
+relations to compute the elementary symmetric functions in the conjugates
+of x. In general for this to succeed, the characteristic of the underlying
+ring
+needs to be larger than the length of the sequence.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text401.htm">[Next]</A><A  HREF = "text399.htm">[Prev]</A> <A  HREF = "text401.htm">[Right]</A> <A  HREF = "text399.htm">[Left]</A> <A  HREF = "text398.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

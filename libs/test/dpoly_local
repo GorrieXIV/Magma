@@ -1,0 +1,106 @@
+/*
+Multivariate localization polynomials test.
+AKS Oct 08.
+*/
+
+
+ClearVerbose();
+
+VERB := true;
+VERB := false;
+
+/*******************************************************************************
+				Constants
+*******************************************************************************/
+
+Z := IntegerRing();
+Q := RationalField();
+
+/*******************************************************************************
+				Milnor
+*******************************************************************************/
+
+P<x,y,z> := PolynomialRing(Q, 3);
+assert [MilnorNumber(x*y*z + x^d + y^d + z^d): d in [1..40]] eq
+    [ 0, 1, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35, 38, 41, 44, 47, 50,
+    53, 56, 59, 62, 65, 68, 71, 74, 77, 80, 83, 86, 89, 92, 95, 98, 101,
+    104, 107, 110, 113, 116, 119 ];
+assert [TjurinaNumber(x*y*z + x^d + y^d + z^d): d in [1..40]] eq
+    [ 0, 1, 8, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46, 49, 52,
+    55, 58, 61, 64, 67, 70, 73, 76, 79, 82, 85, 88, 91, 94, 97, 100, 103,
+    106, 109, 112, 115, 118 ];
+
+P<x,y,z,w> := PolynomialRing(Q, 4);
+assert [MilnorNumber(x*y*z*w + x^d + y^d + z^d + w^d): d in [1..40]] eq
+    [ 0, 1, 16, 81, 131, 193, 267, 353, 451, 561, 683, 817, 963, 1121,
+    1291, 1473, 1667, 1873, 2091, 2321, 2563, 2817, 3083, 3361, 3651,
+    3953, 4267, 4593, 4931, 5281, 5643, 6017, 6403, 6801, 7211, 7633,
+    8067, 8513, 8971, 9441 ];
+assert [TjurinaNumber(x*y*z*w + x^d + y^d + z^d + w^d): d in [1..40]] eq
+    [ 0, 1, 15, 81, 107, 165, 235, 317, 411, 517, 635, 765, 907, 1061,
+    1227, 1405, 1595, 1797, 2011, 2237, 2475, 2725, 2987, 3261, 3547,
+    3845, 4155, 4477, 4811, 5157, 5515, 5885, 6267, 6661, 7067, 7485,
+    7915, 8357, 8811, 9277 ];
+
+/*******************************************************************************
+				Other
+*******************************************************************************/
+
+R<x,y,z> := PolynomialRing(RationalField(), 3);
+I := Ideal([x, y, z]);
+M := Module(R, 1);
+S := sub<M | [[f]: f in Basis(I)]>;
+S;
+p := Presentation(S);
+BettiTable(p);
+C:=FreeResolution(p);
+Terms(C);
+time BettiTable(C);
+time BettiTable(p);
+BettiNumbers(Localization(S));
+L:=Localization(p);
+BettiNumbers(L);
+assert $1 eq $2;
+// Coordinates(L, Basis(L)[1]);
+
+/*******************************************************************************
+				Other
+*******************************************************************************/
+
+procedure check_coord(I, B)
+    Groebner(I);
+    IB := Basis(I);
+    for i := 1 to #B do
+	f := B[i];
+	C := Coordinates(I, f);
+	assert &+[C[i]*IB[i]: i in [1..#IB]] eq f;
+    end for;
+end procedure;
+
+for K in <Q, GF(2), GF(3), GF(23)> do
+    P<x,y,z> := LocalPolynomialRing(K, 3);
+    for B in 
+	[
+	    [x*y + z^4, y^2 + z^4, x*y + z^5],
+	    [x*y + y^3 + z^4, y^2*z + x*y^4 + z^5, y*z + y^3 + z^6]
+	]
+    do
+
+K;
+B;
+
+	I := Ideal(B);
+"Natural B";
+	check_coord(I, B);
+"Natural GB";
+	check_coord(I, GroebnerBasis(I));
+
+	I := IdealWithFixedBasis(B);
+"Fixed B";
+	check_coord(I, B);
+"Fixed GB";
+	check_coord(I, GroebnerBasis(I));
+
+    end for;
+end for;
+

@@ -1,0 +1,394 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Evaluation in Magma</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text62.htm">[Next]</A><A  HREF = "text60.htm">[Prev]</A> <A  HREF = "text62.htm">[Right]</A> <A  HREF = "text60.htm">[Left]</A> <A  HREF = "text56.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "540">Evaluation in Magma</A></H3>
+
+<P>
+<P>
+Evaluation is the process of computing (or constructing) a value from an
+expression. For example the value 3 can be computed from the expression <TT>1+2</TT>.
+Computing a value from an expression is also known as <I>evaluating an 
+expression</I>.
+<P>
+There are two aspects to evaluation, namely <I>when</I> and <I>how</I> it is performed.
+This section discusses these two aspects.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text61.htm#541">Call by Value Evaluation</A>
+<LI> <A  HREF = "text61.htm#542">Magma's Evaluation Process</A>
+<LI> <A  HREF = "text61.htm#543">Function Expressions</A>
+<LI> <A  HREF = "text61.htm#544">Function Values Assigned to Identifiers</A>
+<LI> <A  HREF = "text61.htm#545">Recursion and Mutual Recursion</A>
+<LI> <A  HREF = "text61.htm#546">Function Application</A>
+<LI> <A  HREF = "text61.htm#547">The Initial Context</A>
+</UL>
+<H4><A NAME = "541">Call by Value Evaluation</A></H4>
+
+<P>
+<P>
+Magma  employs call by value evaluation. This means that the arguments 
+to a function are evaluated before the function is applied to those arguments. 
+Assume f is a function value. Say we type,
+<P>
+<P>
+<PRE>
+&gt; r := f( 6+7, true or false );
+</PRE>
+Magma  evaluates the two arguments to 13 and true respectively, <I>before</I> 
+applying f.
+<P>
+While knowing the exact point at which arguments are evaluated is not usually 
+very important, there are cases where such knowledge is crucial. Say we type,
+<P>
+<P>
+<PRE>
+&gt; f := function( n, b )
+&gt; if b then return n else return 1;
+&gt; end function;
+</PRE>
+and we apply f as follows
+<P>
+<P>
+<PRE>
+&gt; r := f( 4/0, false );
+</PRE>
+Magma  treats this as an error since the 4/0 is evaluated, and an error 
+produced, <I>before</I> the function f is applied. 
+<P>
+By contrast some languages evaluate the arguments to a function only if those
+arguments are encountered when executing the function. This evaluation process 
+is known as call by name evaluation. In the above example r would be set to 
+the value 1 and the expression 4/0 would never be evaluated because b is
+<TT>false</TT> and hence the argument n would never be encountered.
+<P>
+Operators like + and * are treated as infix functions. So
+<P>
+<P>
+<PRE>
+&gt; r := 6+7;
+</PRE>
+is treated as the function application,
+<P>
+<P>
+<PRE>
+&gt; r := '+'(6,7);
+</PRE>
+Accordingly all arguments to an operator are evaluated before the operator
+is applied.
+<P>
+There are three operators, `select', `and' and `or' that are exceptions to this 
+rule and are thus not treated as infix functions. These operators use call by 
+name evaluation and only evaluate arguments as need be. For example if
+we type,
+<P>
+<P>
+<PRE>
+&gt; false and (4/0 eq 6);
+</PRE>
+Magma  will reply with the answer false since Magma  knows that <TT>false and X</TT>
+for all X is false.
+
+
+<H4><A NAME = "542">Magma's Evaluation Process</A></H4>
+
+<P>
+<P>
+Let us examine more closely how Magma  evaluates an expression
+as it will help later in understanding more complex examples, specifically 
+those using functions and maps. To evaluate an expression Magma  proceeds
+by a process of identifier substitution, followed by simplification
+to a canonical form. Specifically expression evaluation proceeds as follows,
+<DL COMPACT class='compact'>
+<DT>(1)</DT><DD>replace each identifier in the expression by its value in the current context. 
+<DT>(2)</DT><DD>simplify the resultant <I>value</I> to its canonical form.
+<P>
+<P>
+</DL>
+The key point here is that the replacement step takes an expression and
+yields an unsimplified <I>value</I>! A small technical note: to avoid
+the problem of having objects that are part expressions, part values, all
+substitutions in step 1 are assumed to be done simultaneously for all 
+identifiers in the expression. The examples in this chapter will however show 
+the substitutions being done in sequence and will therefore be somewhat vague
+about what exactly these hybrid objects are!
+<P>
+To clarify this process assume that we type,
+<P>
+<P>
+<PRE>
+&gt; a := 6;
+&gt; b := 7;
+</PRE>
+producing the context <TT>[ (a,6), (b,7) ]</TT>.
+Now say we type,
+<P>
+<P>
+<PRE>
+&gt; c := a+b;
+</PRE>
+This produces the context <TT>[ (a,6), (b,7), (c,13) ]</TT>. By following the
+process outlined above we can see how this context is calculated. The
+steps are,
+<DL COMPACT class='compact'>
+<DT>(1)</DT><DD>replace <TT>a</TT> in the expression <TT>a+b</TT> by its value in the current context
+giving <TT>6+b</TT>.
+<DT>(2)</DT><DD>replace <TT>b</TT> in <TT>6+b</TT> by its value in the current context giving <TT>6+7</TT>.
+<DT>(3)</DT><DD>simplify <TT>6+7</TT> to <TT>13</TT>
+<P>
+<P>
+</DL>
+The result value of <TT>13</TT> is then assigned to <TT>c</TT> giving the previously stated
+context.
+
+
+<H4><A NAME = "543">Function Expressions</A></H4>
+
+<P>
+<P>
+Magma's evaluation process might appear to be an overly formal way of stating 
+the obvious about calculating expression values. This formality is useful,
+however when it comes to function (and map) expressions.
+<P>
+Functions in Magma  are first class values, meaning that Magma  treats function
+values just like it treats any other type of value (e.g., integer values). A
+function value may be passed as an argument to another function, may be 
+returned as the result of a function, and may be assigned to an identifier in 
+the same way that any other type of value is. Most importantly however function
+expressions are evaluated <I>exactly</I> as are all other expressions. The fact
+that Magma  treats functions as first class values is why Magma  is said to have 
+an essentially functional subset.
+<P>
+Take the preceding example. It was,
+<P>
+<P>
+<PRE>
+&gt; a := 6;
+&gt; b := 7;
+&gt; c := a+b;
+</PRE>
+giving the context <TT>[ (a,6),(b,7),(c,13) ]</TT>. Now say I type,
+<P>
+<P>
+<PRE>
+&gt; d := func&lt; n | a+b+c+n &gt;;
+</PRE>
+Magma  uses the same process to evaluate the function expression 
+<TT>func&lt; n | a+b+c+n &gt;</TT> on the right hand side of the assignment <TT>d := ...</TT> 
+as it does to evaluate expression <TT>a+b</TT> on the right hand side of the 
+assignment <TT>c := ...</TT>. So evaluation of this function expression proceeds as 
+follows,
+<DL COMPACT class='compact'>
+<DT>(1)</DT><DD>replace <TT>a</TT> in the expression <TT>func&lt; n | a+b+c+n &gt;</TT> by its value in
+the current context giving <TT>func&lt; n | 6+b+c+n &gt;</TT>.
+<DT>(2)</DT><DD>replace <TT>b</TT> in <TT>func&lt; n | 6+b+c+n &gt;</TT> by its value in the current
+context giving <TT>func&lt; n | 6+7+c+n &gt;</TT>.
+<DT>(3)</DT><DD>replace c in <TT>func&lt; n | 6+7+c+n &gt;</TT> by its value in the
+current context giving <TT>FUNC(n : 6+7+13+n)</TT>
+<DT>(4)</DT><DD>simplify the resultant <I>value</I> <TT>FUNC(n : 6+7+13+n)</TT> to the <I>value</I> 
+<TT>FUNC(n : 26+n)</TT>.
+<P>
+<P>
+</DL>
+Note again that the process starts with an expression and ends with a value,
+and that throughout the function expression is evaluated just like any other
+expression. A small technical point: function simplification may not in fact
+occur but the user is guaranteed that the simplification process will at
+least produce a function extensionally equal to the function in its canonical
+form.
+<P>
+The resultant function value is now assigned to d just like any other type
+of value would be assigned to an identifier yielding the context <TT>[ (a,6),(b,7),
+(c,8), (d,FUNC(n : 26+n)) ]</TT>. 
+<P>
+As a final point note that changing the value of any of a, b, and c, 
+does <I>not</I> change the value of d!
+
+
+<H4><A NAME = "544">Function Values Assigned to Identifiers</A></H4>
+
+<P>
+<P>
+Say we type the following,
+<P>
+<P>
+<PRE>
+&gt; a := 1;
+&gt; b := func&lt; n | a &gt;;
+&gt; c := func&lt; n | b(6) &gt;;
+</PRE>
+The first line leaves a context of the form <TT>[ (a,1) ]</TT>.
+The second line leaves 
+a context of the form <TT>[ (a,1), (b,FUNC(n : 1)) ]</TT>.
+<P>
+The third line is evaluated as follows,
+<DL COMPACT class='compact'>
+<DT>(1)</DT><DD>replace the value of <TT>b</TT> in the expression <TT>func&lt; n | b(6) &gt;</TT> by its value in the current context giving <TT>FUNC(n : (FUNC(n : 1))(6))</TT>.
+<DT>(2)</DT><DD>simplify this value to <TT>FUNC(n : 1)</TT> since applying the function 
+value <TT>FUNC(n : 1)</TT> to the argument 6 always yields 1.
+<P>
+<P>
+</DL>
+The key point here is that identifiers whose assigned value is a function 
+value (in this case b), are treated exactly like identifiers whose assigned 
+value is any other type of value.
+<P>
+Now look back at the example at the end of the previous section. One step in 
+the series of replacements was not mentioned. Remember that <TT>+</TT> is treated as a 
+shorthand for an infix function. So <TT>a+b</TT> is equivalent to <TT>'+'(a,b)</TT>. <TT>+</TT> is an 
+identifier (assigned a function value), and so in the replacement part of 
+the evaluation process there should have been an extra step, namely, 
+<DL COMPACT class='compact'>
+<DT>(4)</DT><DD>replace <TT>+</TT> in <TT>func&lt; n : 6+7+13+n &gt;</TT> by its value in the current context giving <TT>FUNC(n : A( A( A(6,7), 13 ), n ))</TT>.
+<DT>(5)</DT><DD>simplify the resultant value to <TT>FUNC(n : A( 26, n ))</TT>.
+where <TT>A</TT> is the (function) value that is the addition function.</DL>
+
+
+<H4><A NAME = "545">Recursion and Mutual Recursion</A></H4>
+
+<P>
+<P>
+How do we write recursive functions? Function expressions have no names so how 
+can a function expression apply <I>itself</I> to do recursion? 
+<P>
+It is tempting to say that the function expression could recurse by using the
+identifier that the corresponding function value is to be assigned to. But
+the function value may not be being assigned at all: it may simply be being 
+passed as an actual argument to some other function value. Moreover even if 
+the function value were being assigned to an identifier the function expression 
+cannot use that identifier because the assignment rules say that the
+identifiers on the left hand side of the <TT>:=</TT> in an assignment statement are not
+considered declared on the right hand side, unless they were previously 
+declared. 
+<P>
+The solution to the problem is to use the <TT>$$</TT> pseudo-identifier. <TT>$$</TT> is
+a placeholder for the function value denoted by the function expression 
+inside which the <TT>$$</TT> occurs. An example serves to illustrate the use of <TT>$$</TT>. 
+A recursive factorial function can be defined as follows,
+<P>
+<P>
+<PRE>
+&gt; factorial := function(n) 
+&gt; if n eq 1 then
+&gt; return 1;
+&gt; else 
+&gt; return n * $$(n-1); 
+&gt; end if;
+&gt; end function;
+</PRE>
+Here <TT>$$</TT> is a placeholder for the function value that the function expression 
+<TT>function(n) if n eq ... end function</TT> denotes (those worried that the denoted 
+function value appears to be defined in terms of itself are referred to the 
+fixed point semantics of recursive functions in any standard text on 
+denotational semantics).
+<P>
+A similar problem arises with mutual recursion where a function value f 
+applies another function value g, and g likewise applies f. For example,
+<P>
+<P>
+<PRE>
+&gt; f := function(...) ... a := g(...); ... end function;
+&gt; g := function(...) ... b := f(...); ... end function;
+</PRE>
+Again Magma's evaluation process appears to make this impossible, since
+to construct f Magma  requires a value for g, but to construct g Magma 
+requires a value for f. Again there is a solution. An identifier can be 
+declared `forward' to inform Magma  that a function expression for the forward 
+identifier will be supplied later. The functions f and g above can 
+therefore be declared as follows,
+<P>
+<P>
+<PRE>
+&gt; forward f, g;
+&gt; f := function(...) ... a := g(...); ... end function;
+&gt; g := function(...) ... b := f(...); ... end function;
+</PRE>
+(strictly speaking it is only necessary to declare g forward as the value of 
+f will be known by the time the function expression <TT>function(...) ...
+b := f(...); ... end function</TT> is evaluated).
+
+
+<H4><A NAME = "546">Function Application</A></H4>
+
+<P>
+<P>
+It was previously stated that Magma  employs call by value evaluation, meaning
+that the arguments to a function are evaluated before the function is applied. 
+This subsection discusses how functions are applied once their arguments have 
+been evaluated.
+<P>
+Say we type,
+<P>
+<P>
+<PRE>
+&gt; f := func&lt; a, b | a+b &gt;;
+</PRE>
+producing the context <TT>[ (f,FUNC(a,b : a+b)) ]</TT>.
+<P>
+Now say we apply f by typing,
+<P>
+<P>
+<PRE>
+&gt; r := f( 1+2, 6+7 ).
+</PRE>
+How is the value to be assigned to r calculated? If we follow the evaluation
+process we will reach the final step which will say something like,
+<PRE>
+\    ``simplify (FUNC(a, b : A(a,b)))(3,13) to its canonical form''
+</PRE>where as before A is the value that is the addition function.
+How is this simplification performed? How are function values applied to 
+actual function arguments to yield result values? Not unsurprisingly the 
+answer is via a process of substitution. The evaluation of a function 
+application proceeds as follows,
+<DL COMPACT class='compact'>
+<DT>(1)</DT><DD>replace each formal argument in the function body by the corresponding
+actual argument.
+<DT>(2)</DT><DD>simplify the function body to its canonical form.
+<P>
+<P>
+</DL>
+Exactly what it means to "simplify the function body ..." is intentionally left
+vague as the key point here is the process of replacing formal arguments by 
+values in the body of the function.
+
+
+<H4><A NAME = "547">The Initial Context</A></H4>
+
+<P>
+<P>
+The only thing that remains to consider with the evaluation semantics, is
+how to get the ball rolling. Where do the initial values for things like
+the addition function come from? The answer is that when Magma  starts up it 
+does so with an initial context defined. This initial context has assignments 
+of all the built-in Magma  function values to the appropriate identifiers. The 
+initial context contains for example the assignment of the addition function 
+to the identifier <TT>+</TT>, the multiplication function to the identifier <TT>*</TT>, etc.
+<P>
+If, for example, we start Magma  and immediately type,
+<P>
+<P>
+<PRE>
+&gt; 1+2;
+</PRE>
+then in evaluating the expression <TT>1+2</TT> Magma will
+replace <TT>+</TT> by its value in the initial context.
+<P>
+Users interact with this initial context by typing statements at the top
+level (i.e., statements not inside any function or procedure). A user can
+change the initial context through re-assignment or expand it through
+new assignments.
+
+
+<PRE></PRE> <A  HREF = "text62.htm">[Next]</A><A  HREF = "text60.htm">[Prev]</A> <A  HREF = "text62.htm">[Right]</A> <A  HREF = "text60.htm">[Left]</A> <A  HREF = "text56.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

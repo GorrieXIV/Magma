@@ -1,0 +1,120 @@
+/* 
+ * Tests for representations of grp_lie
+ *
+ * Dan Roozemond, Mar 2011
+ */
+                          
+M := Matrix(Integers(), 3,4,[1,-1,0,0,0,1,-1,0,0,0,1,-1]);
+cases := [*
+	<RootDatum("A1"), GF(17), "std">,
+	<RootDatum("A1"), GF(17), "ad">,
+	<RootDatum("A2T1"), GF(17), "ad">,
+	<RootDatum(M, M), Rationals(), "std">,
+	<RootDatum("A4T1" : Isogeny := "SC"), Rationals(), "std">,
+	<RootDatum("T1A2" : Isogeny :="SC"), Rationals(), "std">,
+	<RootDatum("T1A2" : Isogeny :="Ad"), Rationals(), "std">,
+	<RootDatum("A2T2C3" : Isogeny :="SC"), Rationals(), "std">,
+	<RootDatum("B2"), GF(17,3), "ad">,
+	<RootDatum("B2T1"), GF(83), "std">,
+	<RootDatum("C3"), GF(17,3), "std">,
+	<RootDatum("D4"), GF(101), "std">,
+	<RootDatum("D5" : Isogeny := "SC"), GF(101), "std">,
+	<RootDatum("D5" : Isogeny := "SC"), GF(101), "ad">,
+	<RootDatum("E6" : Isogeny := "SC"), GF(101), "std">,
+	<RootDatum("F4"), GF(101), "std">,
+	<RootDatum("F4T2"), GF(101), "ad">,
+	<RootDatum("G2"), GF(5,6), "std">,
+	<RootDatum("G2"), GF(5,3), "ad">
+*];                                                                                                      
+
+reps := AssociativeArray(Strings());
+reps["std"] := StandardRepresentation;
+reps["ad"]  := AdjointRepresentation;
+
+nrnd := 7;
+
+myrndfunc := function(G)
+	k := BaseRing(G);
+	if IsFinite(k) then return Random(G); end if;
+	
+	N := Rank(G);
+	NR := 2*NumPosRoots(RootDatum(G));
+	rndeltk := function(nonzero)
+		repeat num := Random(GF(101)); until (not nonzero) or (not IsZero(num));
+		repeat den := Random(GF(101)); until (not IsZero(den));
+		return k!((Integers()!num)/(Integers()!den));
+	end function;
+	rndrt := func< | elt<G | <Random([1..NR]), rndeltk(false)> > >;
+	rndh := func< | elt<G | Vector([ rndeltk(true) : i in [1..N] ])> >;
+	return &*[ G | rndrt()*rndh() : i in [1..6] ];
+end function;
+
+for c in cases do
+	//Init, print info
+	R := c[1];
+	k := c[2];
+	repn := c[3];
+	repf := reps[repn];
+	sd1, sd2 := GetSeed();
+	printf "%o, k = %o, rep = %o;\n   SetSeed(%o, %o);\n", R, k, repn, sd1, sd2;
+	
+	//Construct grp, repr
+	printf "   Construct grp & reps... ";
+	G := GroupOfLieType(R, k);
+	rho := repf(G : NoWarning);
+	printf "OK\n";
+	
+	//Construct rnd. elts.
+	re := [ myrndfunc(G) : i in [1..nrnd] ];
+	
+	//Test rho is a homomorphism
+	isproj := (assigned rho`IsProjectiveRepresentation and rho`IsProjectiveRepresentation);
+	printf "   Test that rho is a hom on %o products of 'random' elts... ", nrnd-1;
+	if isproj then
+		assert forall{i : i in [1..nrnd-1] | IsScalar(rho(re[i])*rho(re[i+1])*rho(re[i]*re[i+1])^-1) }; 
+	else
+		assert forall{i : i in [1..nrnd-1] | IsOne(rho(re[i])*rho(re[i+1])*rho(re[i]*re[i+1])^-1) }; 
+	end if;
+	printf "OK\n";
+	
+	//Construct inv, if it exists.
+	printf "   Constructing inverse... ";
+	try
+		rhoinv := Inverse(rho);
+		ok := true;
+		isred := false;
+	catch e
+		if e`Object cmpeq "The representation is reducible" then
+			ok := true;
+			isred := true;
+		else
+			ok := false;
+			theerr := e;
+		end if;
+	end try;
+	if (not ok) then
+		printf "ERROR: %o\n", theerr;
+		continue;
+	elif isred then
+		printf "reducible. Skipping the rest.\n";
+		continue;
+	end if;
+	printf "OK\n";
+	
+	//Test rho, rhoinv on generators
+	printf "   Test on gens... ";
+	if not IsFinite(k) then
+		printf "N/A\n";
+	else
+		assert forall{g : g in Generators(G) | rho(rhoinv(rho(g))) eq rho(g) };
+		printf "OK\n";
+	end if;
+	
+	//Test on some "random" elements.    
+	printf "   Test rhoinv on %o 'random' elts... ", nrnd;
+	assert forall{t : t in re | rho(rhoinv(rho(t))) eq rho(t) };
+	printf "OK\n";
+end for;
+
+                          
+

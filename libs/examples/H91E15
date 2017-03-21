@@ -1,0 +1,49 @@
+"Source: Text/Algebra/AlgQuat.text";
+"Line: 1502";
+"Date: Tue Jun  7 22:38:11 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Algebra/AlgQuat.text, line: 1502
+// Example: H91E15 ()
+print "Example: H91E15";
+ei := GetEchoInput();
+SetEchoInput(true);
+SetSeed(1);
+A := AssociativeAlgebra(QuaternionAlgebra<Rationals() | -1,1>);
+vecs := [&+[Random(10)*A.i : i in [1..4]] : j in [1..4]];
+Mchange := Matrix(Rationals(),4,4,&cat[Eltseq(vecs[i]) : i in [1..4]]);
+Mchange := Mchange^(-1);
+seq := [<i,j,k,((vecs[i]*vecs[j])*Mchange)[k]> : i,j,k in [1..4]];
+A := AssociativeAlgebra<Rationals(),4 | seq>;
+bl, Aquat, phi := IsQuaternionAlgebra(A);
+bl;
+assert $1;
+Aquat;
+Aquat.1^2, Aquat.2^2;
+phi;
+A := Algebra(MatrixAlgebra(Rationals(),2));
+IsQuaternionAlgebra(A);
+A := Algebra(FPAlgebra<Rationals(), x,y | x^2, y^2, x*y+y*x>);
+IsQuaternionAlgebra(A);
+assert not $1;
+A := Algebra(FPAlgebra<Rationals(), x | x^4+x^2+1>);
+IsQuaternionAlgebra(A);
+assert not $1;
+A := Algebra(FPAlgebra<GF(2), x,y | x^2, y^2, x*y+y*x+1>);
+IsQuaternionAlgebra(A);
+assert not $1;
+F<a,b,x,y,z,w> := FieldOfFractions(PolynomialRing(GF(2),6));
+M := [[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1],
+      [0,1,0,0],[a,1,0,0],[0,0,0,1],[0,0,a,1],
+      [0,0,1,0],[0,0,1,1],[b,0,0,0],[b,b,0,0],
+      [0,0,0,1],[0,0,a,0],[0,b,0,0],[a*b,0,0,0]];
+A<alpha,beta> := AssociativeAlgebra<F,4 | M>;
+alpha^2+alpha+a;
+beta^2+b;
+bl, Aquat, phi := IsQuaternionAlgebra(A);
+bl;
+assert $1;
+Aquat;
+theta := phi(x+y*alpha+z*beta+w*alpha*beta);
+Trace(theta);
+Norm(theta);
+SetEchoInput(ei);

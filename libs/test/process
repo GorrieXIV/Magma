@@ -1,0 +1,62 @@
+// Test Hermite form process
+printf "------ Hermite Form Processes ------\n";
+
+P:=HermiteNormalFormProcess(60,3);
+while not IsEmpty(P) do
+    H:=Current(P);
+    assert HermiteForm(H) eq H;
+    Advance(~P);
+end while;
+
+// Test user processes
+printf "------ User Processes ------\n";
+
+function initial_value( P )
+    // Recover the data for this process
+    data:=GetUserProcessData( P );
+    S:=data[1];
+    k:=data[2];
+    // Is there anything to do?
+    if #S eq 0 then return false,_; end if;
+    // We begin by converting S to a sequence
+    S:=SetToSequence(S);
+    // Update the data and return the initial value
+    I:=[Integers() | 1 : i in [1..k]];
+    SetUserProcessData( P, [* S, k, I *] );
+    return true, [Universe(S) | S[1] : i in [1..k]];
+end function;
+
+function next_value( P )
+    // Recover the data for this process
+    data:=GetUserProcessData( P );
+    S:=data[1];
+    k:=data[2];
+    I:=data[3];
+    n:=#S;
+    // Compute the next index
+    i:=#I;
+    I[i] +:= 1;
+    while I[i] gt n do
+        // Are we finished?
+        if i eq 1 then return false,_; end if;
+        // No -- move on
+        I[i]:=1;
+        i -:= 1;
+        I[i] +:= 1;
+    end while;
+    // Update the process data and return the result
+    SetUserProcessData( P, [* S, k, I *] );
+    return true, [Universe(S) | S[i] : i in I];
+end function;
+
+S:={"a","b","c","d","e"};
+k:=4;
+P:=UserProcess( "Subsequences", initial_value, next_value, [* S, k *] );
+
+result:={};
+while not IsEmpty(P) do
+    Include(~result,Current(P));
+    Advance(~P);
+end while;
+
+assert result eq Subsequences(S,k);

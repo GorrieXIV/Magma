@@ -1,0 +1,36 @@
+"Source: Text/Geometry/CrvHyp.text";
+"Line: 4376";
+"Date: Wed Jun  8 17:42:16 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/CrvHyp.text, line: 4376
+// Example: H131E30 ()
+print "Example: H131E30";
+ei := GetEchoInput();
+SetEchoInput(true);
+P<x> := PolynomialRing(Rationals());
+C := HyperellipticCurve(x^6+x^2+2);
+J := Jacobian(C);
+ptsC := Points(C : Bound:=1000); 
+ptsJ := [ ptsC[i] - ptsC[1] : i in [2,3,4,5,6] ];
+ptsJ;
+[ Height(P) : P in ptsJ ];
+ReducedBasis(ptsJ);
+P := ptsJ[3]; 
+P;
+Jtors, maptoJ := TorsionSubgroup(J); 
+{ptsJ[1], ptsJ[4]} subset { pt + maptoJ(T) : pt in {P,-P}, T in Jtors }; 
+assert $1;
+Height(23*P)/Height(P);
+HC := HeightConstant(J : Effort:=2, Factor); 
+HC;
+for T in Jtors do
+    NaiveHeight(maptoJ(T));
+end for;
+// Does the inequality hold for 23*P?
+NaiveHeight(23*P) - Height(23*P) le HeightConstant(J);
+assert $1;
+LogarithmicBound := Height(P) + HeightConstant(J);  // Bound on the naive h(Q)
+AbsoluteBound := Ceiling(Exp(LogarithmicBound));
+PtsUpToAbsBound := Points(J : Bound:=AbsoluteBound );  
+ReducedBasis( [ pt : pt in PtsUpToAbsBound ]);
+SetEchoInput(ei);

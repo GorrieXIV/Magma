@@ -1,0 +1,280 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Operations on Structure  Constant Algebras and Elements</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text916.htm">[Next]</A><A  HREF = "text912.htm">[Prev]</A> [_____] <A  HREF = "text912.htm">[Left]</A> <A  HREF = "text910.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "10305">Operations on Structure  Constant Algebras and Elements</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text913.htm#10306">Operations on Structure Constant  Algebras</A>
+<LI> <A  HREF = "text913.htm#10312">Indexing Elements</A>
+<LI> <A  HREF = "text913.htm#10315">The Module Structure of a Structure Constant Algebra</A>
+<LI> <A  HREF = "text913.htm#10323">Homomorphisms</A>
+</UL>
+<H4><A NAME = "10306">Operations on Structure Constant  Algebras</A></H4>
+
+
+
+<H5><A NAME = "10307">IsCommutative(A) : AlgGen -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the algebra A is commutative; otherwise <TT>false</TT>.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "10308">IsAssociative(A) : AlgGen -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the algebra A is associative; otherwise <TT>false</TT>.
+<P>
+<P>
+Note that for a structure constant algebra of dimension n this requires
+up to n<sup>3</sup> tests.
+</BLOCKQUOTE>
+<H5><A NAME = "10309">IsLie(A) : AlgGen -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the algebra A is a Lie algebra; otherwise <TT>false</TT>.
+<P>
+<P>
+Note that for a structure constant algebra of dimension n this requires
+about n<sup>3</sup>/3 tests of the Jacobi identity.
+</BLOCKQUOTE>
+<H5><A NAME = "10310">DirectSum(A, B) : AlgGen, AlgGen -&gt; AlgGen</A></H5>
+<BLOCKQUOTE>
+Construct a structure constant algebra of dimension n + m where n and m are
+the dimensions of the algebras A and B, respectively. The basis of the new algebra is
+the concatenation of the bases of A and B and the products a * b where
+a &isin;A and b &isin;B are defined to be 0.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "10311">Example <TT>AlgCon_jordan (H85E1)</TT></A></H3>
+<P>
+We define a structure constant algebra which is a Jordan algebra.
+<P>
+<P>
+<PRE>
+&gt; M := MatrixAlgebra( GF(3), 2 );
+&gt; B := Basis(M);
+&gt; C := &amp;cat[Coordinates(M,(B[i]*B[j]+B[j]*B[i])/2) : j in [1..#B], i in [1..#B]];
+&gt; A := Algebra&lt; GF(3), #B | C &gt;;
+&gt; #A;
+81
+&gt; IsAssociative(A);
+false
+&gt; IsLie(A);        
+false
+&gt; IsCommutative(A);
+true
+</PRE>
+This is a good start, as one of the defining properties of Jordan algebras is
+that they are commutative. The other property is that the identity
+(x<sup>2</sup> * y) * x = x<sup>2</sup> * (y * x) holds for all x, y &isin;A.
+We check this on a random pair.
+<P>
+<P>
+<PRE>
+&gt; x := Random(A); y := Random(A); print (x^2*y)*x - x^2*(y*x);
+(0 0 0 0)
+</PRE>
+The algebra is small enough to check this identity on all elements.
+<P>
+<P>
+<PRE>
+&gt; forall{&lt;x, y&gt;: x, y in A | (x^2*y)*x eq x^2*(y*x)};
+true
+</PRE>
+So the algebra is in fact a Jordan algebra (which was
+clear by construction).
+We finally have a look at the structure constants.
+<P>
+<P>
+<PRE>
+&gt; BasisProducts(A);
+[
+    [ (1 0 0 0), (0 2 0 0), (0 0 2 0), (0 0 0 0) ],
+    [ (0 2 0 0), (0 0 0 0), (2 0 0 2), (0 2 0 0) ],
+    [ (0 0 2 0), (2 0 0 2), (0 0 0 0), (0 0 2 0) ],
+    [ (0 0 0 0), (0 2 0 0), (0 0 2 0), (0 0 0 1) ]
+]
+</PRE>
+<HR>
+<H4><A NAME = "10312">Indexing Elements</A></H4>
+
+
+
+<H5><A NAME = "10313">a[i] : AlgGenElt, RngIntElt -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+If a is an element of a structure constant algebra A of dimension n
+and 1 &le;i&le;n is a positive integer, then the i-th component 
+of the element a is returned (as an element of the base ring R of A). 
+</BLOCKQUOTE>
+<H5><A NAME = "10314">a[i] := r : AlgGenElt, RngIntElt, RngElt -&gt;  AlgGenElt</A></H5>
+<BLOCKQUOTE>
+Given an element a belonging to a structure constant algebra of dimension n
+over R, a positive integer 1 &le;i&le;n and an element r &isin;R, 
+the i-th component of the element a is redefined to be r.
+</BLOCKQUOTE>
+<H4><A NAME = "10315">The Module Structure of a Structure Constant Algebra</A></H4>
+
+
+
+<H5><A NAME = "10316">Module(A) : AlgGen -&gt; ModTupRng</A></H5>
+<BLOCKQUOTE>
+The module R<sup>n</sup> underlying the structure constant algebra A.
+</BLOCKQUOTE>
+<H5><A NAME = "10317">Degree(A) : AlgGen -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The degree (= dimension) of the module underlying the algebra A.
+</BLOCKQUOTE>
+<H5><A NAME = "10318">Degree(a) : AlgGenElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given an element belonging to the structure constant algebra A of dimension 
+n, return n.
+</BLOCKQUOTE>
+<H5><A NAME = "10319">ElementToSequence(a) : AlgGenElt -&gt; SeqEnum</A></H5>
+<H5>Eltseq(a) : AlgGenElt -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+The sequence of coefficients of the structure constant algebra element a.
+</BLOCKQUOTE>
+<H5><A NAME = "10320">Coordinates(S, a) : AlgGen, AlgGenElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Let a be an element of a structure constant algebra A and let S be
+a subalgebra of A containing a. This function returns the coefficients
+of a with respect to the basis of S.
+</BLOCKQUOTE>
+<H5><A NAME = "10321">InnerProduct(a, b) : AlgGenElt, AlgGenElt -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+The (Euclidean) inner product of the coefficient vectors of a and b, where
+a and b are elements of some structure constant algebra A.
+</BLOCKQUOTE>
+<H5><A NAME = "10322">Support(a) : AlgGenElt -&gt; SetEnum</A></H5>
+<BLOCKQUOTE>
+The support of the structure constant algebra element a;
+i.e. the set of indices of the non-zero components of a.
+</BLOCKQUOTE>
+<H4><A NAME = "10323">Homomorphisms</A></H4>
+
+
+
+<H5><A NAME = "10324">hom&lt; A -&gt; B | Q &gt; : AlgGen, AlgGen, [ AlgGenElt ] -&gt; Map</A></H5>
+<H5>hom&lt; A -&gt; B | Q &gt; : AlgGen, TupMod, [ TupModElt ] -&gt; Map</H5>
+<BLOCKQUOTE>
+Given a structure constant algebra A of dimension n over R and either
+a structure constant algebra B over R or a module B over R,
+construct the homomorphism from A to B specified by Q.
+The sequence Q may be of the form [b<sub>1</sub>, ..., b<sub>n</sub>], b<sub>i</sub> &isin;B,
+indicating that the i-th basis element of A is mapped to b<sub>1</sub> or
+of the form [&lt;a<sub>1</sub>, b<sub>1</sub>&gt;, ..., &lt;a<sub>n</sub>, b<sub>n</sub>&gt;] indicating that a<sub>i</sub> maps to 
+b<sub>i</sub>, where the a<sub>i</sub> (1 &le;i &le;n) must form a basis of A.
+<P>
+<P>
+Note that this is in general only a module homomorphism, it is not checked
+whether it is an algebra homomorphism.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "10325">Example <TT>AlgCon_cayley (H85E2)</TT></A></H3>
+<P>
+We construct the real Cayley algebra, which is a non-associative algebra of
+dimension 8, containing 7 quaternion algebras. If the basis elements are
+labelled 1, ..., 8 and 1 corresponds to the identity, these quaternion
+algebras are spanned by 
+{ 1, (n + 1) mod 7 + 2, (n + 2) mod 7 + 2, (n + 4) mod 7 + 4 }, where 
+0 &le;n &le;6.
+We first define a function, which, given three indices i, j, k constructs a
+sequence with the structure constants for the quaternion algebra spanned by
+1, i, j, k in the quadruple notation.
+<P>
+<P>
+<PRE>
+&gt; quat := func&lt;i,j,k | [&lt;1,1,1, 1&gt;, &lt;i,i,1, -1&gt;, &lt;j,j,1, -1&gt;, &lt;k,k,1, -1&gt;,
+&gt;   &lt;1,i,i, 1&gt;, &lt;i,1,i, 1&gt;, &lt;1,j,j, 1&gt;, &lt;j,1,j, 1&gt;, &lt;1,k,k, 1&gt;, &lt;k,1,k, 1&gt;,
+&gt;   &lt;i,j,k, 1&gt;, &lt;j,i,k, -1&gt;, &lt;j,k,i, 1&gt;, &lt;k,j,i, -1&gt;, &lt;k,i,j, 1&gt;, &lt;i,k,j, -1&gt;]&gt;;
+</PRE>
+We now define the sequence of non-zero structure constants for the Cayley
+algebra using the function <TT>quat</TT>. Some structure constants are defined
+more than once and we have to get rid of these when defining the algebra.
+<P>
+<P>
+<PRE>
+&gt; con := &amp;cat[quat((n+1) mod 7 +2, (n+2) mod 7 +2, (n+4) mod 7 +2):n in [0..6]];
+&gt; C := Algebra&lt; Rationals(), 8 | Setseq(Set(con)) &gt;;
+&gt; C;
+Algebra of dimension 8 with base ring Rational Field
+&gt; IsAssociative(C);
+false
+&gt; IsAssociative( sub&lt; C | C.1, C.2, C.3, C.5 &gt; );
+true
+</PRE>
+The integral elements in this algebra are those where either all coefficients
+are integral or exactly 4 coefficients lie in 1/2 + Z in positions
+i<sub>1</sub>, i<sub>2</sub>, i<sub>3</sub>, i<sub>4</sub>, such that i<sub>1</sub>, i<sub>2</sub>, i<sub>3</sub>, i<sub>4</sub> are a basis of one of the
+7 quaternion algebras or a complement of such a basis. These elements are
+called the integral Cayley numbers and form a Z-algebra. The units in this
+algebra are the elements with either one entry &#8723; 1 and the others 0 or
+with 4 entries &#8723; 1/2 and 4 entries 0, where the non-zero entries are in
+the positions as described above. This gives 240 units and they form
+(after rescaling with Sqrt(2)) the roots in the root lattice of type E<sub>8</sub>.
+<P>
+<P>
+<PRE>
+&gt; a := (C.1 - C.2 + C.3 - C.5) / 2;
+&gt; MinimalPolynomial(a);
+$.1^2 - $.1 + 1
+&gt; MinimalPolynomial(a^-1);
+$.1^2 - $.1 + 1
+&gt; MinimalPolynomial(C.2+C.3); 
+$.1^2 + 2
+&gt; MinimalPolynomial((C.2+C.3)^-1);
+$.1^2 + 1/2
+</PRE>
+Tensoring the integral Cayley algebra with a finite field gives a finite
+Cayley algebra. As the Z-algebra generated by the chosen basis for C has
+index 2<sup>4</sup> in the full integral Cayley algebra, we can get the finite
+Cayley algebras by applying the <TT>ChangeRing</TT> function for finite fields
+of odd characteristic.
+The Cayley algebra over GF(q) has the simple group G<sub>2</sub>(q) as its 
+automorphism group. Since the identity has to be fixed, every automorphism
+is determined by its image on the remaining 7 basis elements. Each of
+these has minimal polynomial x<sup>2</sup> + 1, hence one obtains a permutation
+representation of G<sub>2</sub>(q) on the elements with this minimal polynomial.
+As &#8723;-pairs have to be preserved, this number can be divided by 2.
+<P>
+<P>
+<PRE>
+&gt; C3 := ChangeRing( C, GF(3) );
+&gt; f := MinimalPolynomial(C3.2);
+&gt; f;
+$.1^2 + 1
+&gt; #C3;
+6561
+&gt; time Im := [ c : c in C3 | MinimalPolynomial(c) eq f ];
+Time: 3.099
+&gt; #Im;
+702
+&gt; C5 := ChangeRing( C, GF(5) );
+&gt; f := MinimalPolynomial(C5.2);
+&gt; f;
+$.1^2 + 1
+&gt; #C5;
+390625
+&gt; time Im := [ c : c in C5 | MinimalPolynomial(c) eq f ];
+Time: 238.620
+&gt; #Im;
+15750
+</PRE>
+In the case of the Cayley algebra over GF(3) we obtain a permutation
+representation of degree 351, which is in fact the smallest possible degree
+(corresponding to the representation on the cosets of the largest maximal 
+subgroup U<sub>3</sub>(3):2).
+Over GF(5), the permutation representation is of degree 7875, corresponding
+to the maximal subgroup L<sub>3</sub>(5):2, the smallest possible degree being 3906.
+<PRE></PRE> <A  HREF = "text916.htm">[Next]</A><A  HREF = "text912.htm">[Prev]</A> [_____] <A  HREF = "text912.htm">[Left]</A> <A  HREF = "text910.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

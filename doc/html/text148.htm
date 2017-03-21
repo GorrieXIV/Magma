@@ -1,0 +1,246 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Coercion</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text149.htm">[Next]</A><A  HREF = "text147.htm">[Prev]</A> <A  HREF = "text149.htm">[Right]</A> <A  HREF = "text147.htm">[Left]</A> <A  HREF = "text145.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "1003">Coercion</A></H3>
+
+<P>
+<P>
+A ring element can often be coerced into a ring other than its parent.
+The need for this occurs for example when one wants to perform a binary ring
+operation on
+elements of different structures, or when an intrinsic function is
+invoked on elements for which it has not been defined.
+<P>
+The basic principle is that such an operation may be performed whenever it
+makes sense mathematically. Before the operation can be performed however,
+an element may need to be coerced into some structure in which
+the operation can legally be performed.
+There are two types of coercion: <I>automatic</I> and <I>forced</I>
+coercion. Automatic coercion occurs when Magma  can figure out for
+itself what the target structure should be, and how elements of the
+originating structure can be coerced into that structure.
+In other cases Magma  may still be able to perform the coercion, provided
+the target structure has been specified; for this type of coercion
+<TT>R ! x</TT> instructs Magma  to execute the coercion of element x
+into ring R.
+<P>
+The precise rules for automatic and forced coercion between rings are
+explained in the next two subsections.
+It is good to keep an important general distinction between automatic
+and forced coercion in mind: whether or not automatic coercion will succeed
+depends on the originating and the target structure alone,
+while for forced coercion success may
+depend on the particular element as well. Thus, integers can be
+lifted automatically to the rationals if necessary, but conversely,
+only the integer elements of Q can be coerced into Z by using <TT>!</TT>.
+<P>
+The subsections below will describe for specific rings R and S in Magma 
+whether or not an element r of R can be lifted automatically or by
+force into S. Suppose that the unary Magma  function <TT>Function</TT> takes
+elements of the type of S as argument and one is interested in the result
+of that function when applied to r. If R can be coerced automatically
+into a unique structure S of the desired type,
+then <TT>Function(r)</TT> will produce the required result. If
+R cannot be coerced automatically into such S, but forced coercion on r is
+possible, then <TT>Function(S ! r)</TT> will yield the desired effect.
+If, finally, neither automatic nor forced coercion is possible, it may be possible to
+define a map m from R to S, and then <TT>Function( m(r) )</TT> will
+give the answer.
+<P>
+For example, the function <TT>Order</TT> is defined for
+elements of residue class rings (among others). But <TT>Order(3)</TT> has no obvious
+interpretation (and an error will arise) because there is not a unique
+residue class ring in which this should be evaluated.
+<P>
+If a binary operation <IMG SRC="open.gif" ALT="" WIDTH=7 HEIGHT=7>: C x C -&gt; C
+on members C of a category of rings (C) is applied to elements
+r and s of members R and S from (C), the same rules for
+coercion will be used to determine the legality of r<IMG SRC="open.gif" ALT="" WIDTH=7 HEIGHT=7> s. If
+s can be coerced automatically into R, then this will take
+place and r<IMG SRC="open.gif" ALT="" WIDTH=7 HEIGHT=7> s will be evaluated in R; otherwise, if
+r can be coerced automatically into S, then
+r<IMG SRC="open.gif" ALT="" WIDTH=7 HEIGHT=7> s will be evaluated in S.
+If neither succeeds, then, in certain cases, Magma will try to find
+an existing <I>common overstructure</I> T for R and S, that is,
+an object T from (C) such that &sub;T&sup;S; then both
+r and s will be coerced into T and the result t=r<IMG SRC="open.gif" ALT="" WIDTH=7 HEIGHT=7> s will be 
+returned as an element of T. If none of these cases apply,
+an error results. It may still be possible to evaluate
+by forced coercion of r into S or s into R, using
+<TT>(S ! r) o s</TT> or using <TT>r o (R ! s)</TT>.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text148.htm#1004">Automatic Coercion</A>
+<LI> <A  HREF = "text148.htm#1005">Forced Coercion</A>
+</UL>
+<H4><A NAME = "1004">Automatic Coercion</A></H4>
+
+<P>
+<P>
+We will first deal with the easier of the two cases: automatic coercion.
+A simple demonstration of the desirability of automatic coercion 
+is given by the following example:
+<P>
+<P>
+<PRE>
+1 + (1/2);
+</PRE>
+<P>
+It is obvious that one wants the result to be 3/2: we want to
+identify the integer 1 with the rational number 1 and perform the
+addition in Q, that is, we clearly wish to have automatic coercion
+from Z to Q.
+<P>
+The basic rule for automatic coercion is:
+automatic coercion will only take place when there
+exists a unique target structure and an obvious 
+homomorphism from the parent structure to the target structure
+In particular, if one structure is naturally
+contained in the other (and Magma knows about it!),
+automatic coercion will take place. (The provision
+that Magma  must know about the embedding is in particular relevant for
+finite fields and number fields; in these cases it is possible to create
+subrings, or even isomorphic rings/fields, for which the embedding is not
+known.)
+<P>
+Also, for any ring R there is a natural ring homomorphism Z -&gt; R,
+hence any integer can be coerced automatically into any ring.
+<P>
+See the (pdf) Handbook for a table detailing the rules for automatic coercion.
+It is appropriate here to make some general remarks only.
+<P>
+Integers will be automatically coerced into any ring, and rationals
+into any ring except a finite field or a residue class ring.
+<P>
+Operations involving elements of real or complex fields of different
+precisions automatically coerce the numbers into the field with the 
+higher precision. 
+<P>
+Elements of different finite field elements can be
+operated upon with automatic coercion only if one field is a subset
+of the other or both fields  have been created inside another finite field.
+<P>
+<P>
+In addition to these rules, general rules apply to
+polynomial and matrix algebras. The rules for polynomial rings are
+as follows.
+An element s from a ring S can be automatically coerced
+into R[X<sub>1</sub>, ..., X<sub>n</sub>] if
+either S equals R[X<sub>1</sub>, ..., X<sub>i</sub>] for some 1&le;i&le;n,
+or S=R. Note that in the latter case the element s must be an element of the
+coefficient ring R, and that it is not sufficient for it
+to be coercible into R.
+<P>
+So, for example, we can add an integer and a polynomial over the
+integers, we can add an element f of Z[X] and g of
+Z[X, Y], but <I>not</I> an integer and a polynomial
+over the rationals.
+<P>
+An element s can be coerced automatically
+in the matrix ring M<sub>n, n</sub>(R) if it is coercible automatically into the coefficient ring R, in which case s will
+be identified with the diagonal matrix that has each diagonal entry equal to s.
+<P>
+So we can add an integer and a matrix ring element
+over the rationals, but we cannot automatically add
+elements of M<sub>n, n</sub>(Z) and 
+M<sub>n, n</sub>(Q), nor elements from M<sub>2, 2</sub>(Z) and M<sub>3, 3</sub>(Z).
+
+
+<H4><A NAME = "1005">Forced Coercion</A></H4>
+
+<P>
+<P>
+In certain cases where automatic coercion will not take place, one can
+cast an element into the ring in which the operation should take place.
+<P>
+If, for example, one is working in a ring Z/pZ, and p happens
+to be prime, it may occur that one wishes to perform some finite
+field operations on an element in the ring; if F is a finite field
+of characteristic p an element x of Z/pZ can be cast into
+an element of F using
+<TT>F ! x;</TT>
+<P>
+See the (pdf) Handbook for a table detailing the rules for non-automatic coercion.
+It is appropriate here to make some general remarks only.
+<P>
+Non-automatic coercion may only apply
+to certain elements of the domain; thus only those elements of Q can be
+coerced into Z that are in fact integers. Similarly, if an element
+of a quadratic field with a negative discriminant is to be
+coerced into a real field then it must correspond to a 
+complex number with no imaginary part.
+<P>
+An element from F<sub>p<sup>s</sup></sub> can only be coerced
+into Z/mZ if s=1 and m=p. 
+<P>
+Any element from F<sub>p<sup>s</sup></sub>
+can be coerced into F<sub>p<sup>r</sup></sub> if s divides r, and otherwise
+only a subset of the field is coercible. Similarly for cyclotomic
+fields.
+<P>
+<P>
+The rules for coercion from and to polynomial rings and matrix rings
+are as follows.
+<P>
+If an attempt is made to forcibly coerce s into P=R[X<sub>1</sub>, ..., X<sub>n</sub>],
+the following steps are executed successively:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>if s is an element of P it remains unchanged;
+<DT>(b)</DT><DD>if s is a sequence, then the zero element of P is returned
+if s is empty, and if it is non-empty but the elements of the sequence
+can be coerced into P[X<sub>1</sub>, ..., X<sub>n - 1</sub>] then the polynomial equaling the sum over j of s[j]X<sub>n</sub><sup>j - 1</sup>
+is returned;
+<DT>(c)</DT><DD>if s can be coerced into the coefficient ring R, then
+the constant polynomial s is returned;
+<DT>(d)</DT><DD>if s is a polynomial in R[X<sub>1</sub>, ..., X<sub>k</sub>] for some
+1&le;k&le;n, then it is lifted in the obvious way into P;
+<DT>(e)</DT><DD>if s is a polynomial in R[X<sub>1</sub>, ..., X<sub>k</sub>] for some
+k &gt; n, but constant in the indeterminates X<sub>n + 1</sub>, ..., X<sub>k</sub>,
+then s is projected down in the obvious way to P.
+<P>
+<P>
+</DL>
+If none of these steps successfully coerces s into P, an error
+occurs.
+<P>
+The ring element s can be coerced into M<sub>n, n</sub>(R) if
+either it can be coerced into R (in which case s will
+be identified with the diagonal matrix with s on the diagonal), or
+s&isin;S=M<sub>n, n</sub>(R'), where R' can be coerced into R.
+Also a sequence of n<sup>2</sup> elements coercible into R can be coerced
+into the matrix ring M<sub>n, n</sub>(R).
+<P>
+Elements from a matrix ring M<sub>n, n</sub>(R) can only be coerced into rings other
+than a matrix ring if n=1; in that case
+the usual rules for the coefficient ring R apply.
+<P>
+<P>
+Note that in some cases it is possible to go from (a subset of) some
+structure to another in two steps, but not directly: it is possible to
+go
+<P>
+<P>
+<PRE>
+&gt; y := L ! (Q ! x)
+</PRE>
+<P>
+to coerce a rational element of one number field into another via the rationals.
+<P>
+Finally we note that the binary Boolean operator <TT>in</TT> returns true if
+and only if forced coercion will be successful.
+
+
+<PRE></PRE> <A  HREF = "text149.htm">[Next]</A><A  HREF = "text147.htm">[Prev]</A> <A  HREF = "text149.htm">[Right]</A> <A  HREF = "text147.htm">[Left]</A> <A  HREF = "text145.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

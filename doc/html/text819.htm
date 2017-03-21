@@ -1,0 +1,147 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Small Group Identification</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text820.htm">[Next]</A><A  HREF = "text818.htm">[Prev]</A> <A  HREF = "text820.htm">[Right]</A> <A  HREF = "text818.htm">[Left]</A> <A  HREF = "text808.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "9438">Small Group Identification</A></H3>
+
+<P>
+<P>
+This section describes some special issues arising with the identification of
+a finitely presented group using the database of small groups described in
+Section <A  HREF = "text744.htm#8512">Database of Small Groups</A>.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text819.htm#9441">Concrete Representations of Small Groups</A>
+</UL>
+<H5><A NAME = "9439"></A><A NAME = "GrpFP_1:IdentifyGroup">IdentifyGroup</A>(G): GrpFP -&gt; Tup</H5>
+<H5>IdentifyGroup(D, G): DB, GrpFP -&gt; Tup</H5>
+<BLOCKQUOTE>
+Locate the pair of integers &lt; o, n &gt; so that
+<TT>SmallGroup(o, n)</TT> is isomorphic to G. If the construction of a
+permutation representation for G fails or if there is no group
+isomorphic to G in the database, then an error will result.
+<P>
+<P>
+When trying to look up a finitely presented group G in the database
+of small groups, Magma tries to construct a permutation
+representation of G by enumerating the cosets of the trivial
+subgroup in G.  Assuming that a group isomorphic to G is contained
+in the database, the resulting coset table will be fairly small.
+Hence for performance reasons, a coset limit of 100.o is
+imposed, where o is the maximal order of groups in the database,
+unless the order of G is <I>known</I> to be less or equal to o.
+If, on the other hand, |G|&le;o is known, the global set of
+parameters for implicitly invoked coset enumerations applies. This
+set of parameters can be changed using the function
+<A  HREF = "text814.htm#GrpFP_1:SetGlobalTCParameters">SetGlobalTCParameters</A>.
+<P>
+If the coset enumeration for G fails with the coset limit
+100.o, this can be seen as a reasonable indication that
+G is probably too large to be contained in the database of small
+groups.
+<P>
+To deal with cases where the coset enumeration fails although G is
+known or suspected to be small enough, it is recommended to attempt
+to compute the order of G using the function <A  HREF = "text814.htm#GrpFP_1:Order">Order</A>
+before the actual group identification.  If G that way can be
+shown to be small enough to be contained in the database, the function
+<A  HREF = "text814.htm#GrpFP_1:SetGlobalTCParameters">SetGlobalTCParameters</A> can be used to control the
+behaviour of coset enumerations in a subsequent call to
+<TT>IdentifyGroup</TT>.  The following example illustrates this.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9440">Example <TT>GrpFP_1_IdentifyGroup (H75E83)</TT></A></H3>
+<P>
+Consider the group defined by the presentation
+  &lt;  a, b | (ba<sup> - 1</sup>)<sup>3</sup>,  (ba<sup> - 1</sup>b)<sup>2</sup>, 
+      a<sup>12</sup>b<sup>2</sup>a<sup>7</sup>b<sup>2</sup>ab<sup>2</sup>  &gt;. 
+<P>
+<P>
+<PRE>
+&gt; G := Group&lt;a,b | (b*a^-1)^3, (b*a^-1*b)^2,
+&gt;                  a^12*b^2*a^7*b^2*a*b^2 &gt;;
+</PRE>
+We suspect (for some reason) that G is a small group and want to identify
+its isomorphism type in the database of small groups.
+<P>
+<P>
+<PRE>
+&gt; IdentifyGroup(G);
+IdentifyGroup(
+    G: GrpFP: G
+)
+In file "/home/magma/package/Group/Grp/smallgps2.m", line 220, 
+column 25:
+&gt;&gt;     res := IdentifyGroup(db, G);
+                           ^
+Runtime error in 'IdentifyGroup': Coset enumeration failed; group
+may be too large (see handbook entry for details)
+</PRE>
+The group couldn't be identified, because it was not possible to obtain a
+permutation representation with the default value of the coset limit.
+<P>
+Since we still think the group should be small, we try to prove this using
+the function <A  HREF = "text814.htm#GrpFP_1:Order">Order</A>.
+<P>
+<P>
+<PRE>
+&gt; Order(G : Print := true);
+INDEX = 6 (a=6 r=66709 h=999999 n=999999; l=1247 c=1.56; m=969169
+t=999998)
+6
+</PRE>
+We were correct; the group is in fact very small. However, we can see from
+the output of the <TT>Order</TT> command that this wasn't that easy to find
+out: almost one million cosets were used in the coset enumeration.
+<P>
+Since the order of G is now known to the system, a subsequent call to
+<TT>IdentifyGroup</TT> will now use the global parameters for implicitly
+invoked coset enumerations. To be on the safe side, we tell the system
+to be prepared to work a little harder using the function
+<A  HREF = "text814.htm#GrpFP_1:SetGlobalTCParameters">SetGlobalTCParameters</A> and try again to identify G.
+<P>
+<P>
+<PRE>
+&gt; SetGlobalTCParameters( : Strategy := "Hard");
+&gt;
+&gt; IdentifyGroup(G);
+&lt;6, 1&gt;
+</PRE>
+Now G can be identified.
+<HR>
+<H4><A NAME = "9441">Concrete Representations of Small Groups</A></H4>
+
+<P>
+<P>
+When a finitely-presented group is known to small, it may be useful to
+write it concretely as a permutation or PC-group.
+There are two utilities provided for this purpose.
+
+
+<H5><A NAME = "9442">PermutationGroup(G) : GrpFP -&gt; GrpPerm, GrpHom</A></H5>
+<BLOCKQUOTE>
+Construct a faithful permutation representation of G, and the isomorphism
+from G to the representation. The algorithm first computes the order of
+G, then takes the regular representation of G, and reduces the degree.
+Thus the command is restricted to small groups.
+</BLOCKQUOTE>
+<H5><A NAME = "9443">PCGroup(G) : GrpFP -&gt; GrpPC, GrpHom</A></H5>
+<BLOCKQUOTE>
+Construct a faithful PC-group representation of G, and the isomorphism
+from G to the representation. The algorithm first computes the order of
+G, then computes the soluble quotient of G with the order found.
+Thus the command is restricted to small soluble groups.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text820.htm">[Next]</A><A  HREF = "text818.htm">[Prev]</A> <A  HREF = "text820.htm">[Right]</A> <A  HREF = "text818.htm">[Left]</A> <A  HREF = "text808.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

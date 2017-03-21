@@ -1,0 +1,496 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Printing</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text33.htm">[Next]</A><A  HREF = "text31.htm">[Prev]</A> <A  HREF = "text33.htm">[Right]</A> <A  HREF = "text31.htm">[Left]</A> <A  HREF = "text29.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "252">Printing</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text32.htm#253">The <TT>print</TT>-Statement</A>
+<LI> <A  HREF = "text32.htm#255">The <TT>printf</TT> and <TT>fprintf</TT> Statements</A>
+<LI> <A  HREF = "text32.htm#261">Verbose Printing (<TT>vprint</TT>, <TT>vprintf</TT>)</A>
+<LI> <A  HREF = "text32.htm#264">Automatic Printing</A>
+<LI> <A  HREF = "text32.htm#271">Indentation</A>
+<LI> <A  HREF = "text32.htm#276">Printing to a File</A>
+<LI> <A  HREF = "text32.htm#281">Printing to a String</A>
+<LI> <A  HREF = "text32.htm#285">Redirecting Output</A>
+</UL>
+<H4><A NAME = "253">The <TT>print</TT>-Statement</A></H4>
+
+
+
+<H5><A NAME = "254">print expression;</A></H5>
+<H5>print expression, ..., expression;</H5>
+<H5>print expression : parameters;</H5>
+<BLOCKQUOTE>
+Print the value of the expression. Some limited ways of formatting 
+output are described in the section on strings.  Four levels of printing 
+(that may in specific cases coincide) exist, and may
+be indicated after the colon: <TT>Default</TT> (which is the same as the level
+obtained if no level is indicated), <TT>Minimal</TT>, <TT>Maximal</TT>, and 
+<TT>Magma</TT>. The last of these produces output representing the value of 
+the identifier as valid Magma-input (when possible).
+</BLOCKQUOTE>
+<H4><A NAME = "255">The <TT>printf</TT> and <TT>fprintf</TT> Statements</A></H4>
+
+
+
+<H5><A NAME = "256">printf format, expression, ..., expression;</A></H5>
+<BLOCKQUOTE>
+Print values of the expressions under control of format.  The first argument,
+the <I>format string</I>, must be a string which contains two types of objects:
+plain characters, which are simply printed, and conversion specifications
+(indicated by the <TT>%</TT> character), each of which causes conversion and
+printing of zero or more of the expressions.  (Use <TT>%%</TT> to get a literal
+percent character.) Currently, the only conversion specifications allowed are:
+<TT>%o</TT> and <TT>%O</TT>, which stand for "object",
+<TT>%m</TT>, which stands for "magma",
+and <TT>%h</TT>, which stands for "hexadecimal".
+<P>
+The hexadecimal conversion specification will print its argument in
+hexadecimal; currently, it only supports integer arguments.
+The object and magma conversion specifications each print the corresponding
+argument; they differ only in the printing mode used.
+The <TT>%o</TT> form uses the default printing mode, while the <TT>%O</TT>
+form uses the printing mode specified by the next argument (as a string).
+The "magma" conversion specification uses a printing mode of <TT>Magma</TT>.
+It is thus equivalent to (but shorter than) using <TT>%O</TT> and an extra
+argument of <TT>"Magma"</TT>.
+<P>
+For each of these conversion specifications, the object can be
+printed in a field of a particular width by placing extra characters
+immediately after the <TT>%</TT> character: digits describing a positive integer,
+specifying a field with width equal to that number and with
+right-justification; digits describing a negative integer, specifying a field
+with width equal to the absolute value of the number and with
+left-justification; or the character <TT>*</TT> specifying a field width given by
+the next appropriate expression argument (with justification determined by the
+sign of the number).  This statement is thus like the C language function <TT>printf()</TT>, except that <TT>%o</TT> (and <TT>%O</TT> and <TT>%m</TT>) covers all kinds of objects
+--- it is not necessary to have different conversion specifications for the
+different types of Magma objects.  Note also that this statement does <I>not</I> print a newline character after its arguments while the <TT>print</TT>
+statement does (a <TT>\n</TT> character should be placed in the format string if
+this is desired).  A newline character will be printed just before the next
+prompt, though, if there is an incomplete line at that point.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "257">Example <TT>IO_printf (H3E4)</TT></A></H3>
+The following statements demonstrate simple uses of <I>printf</I>.
+<P>
+<P>
+<PRE>
+&gt; for i := 1 to 150 by 33 do printf "[%3o]\n", i; end for;
+[  1]
+[ 34]
+[ 67]
+[100]
+[133]
+&gt; for i := 1 to 150 by 33 do printf "[%-3o]\n", i; end for;
+[1  ]
+[34 ]
+[67 ]
+[100]
+[133]
+&gt; for w := 1 to 5 do printf "[%*o]", w, 1; end for;
+[1][ 1][  1][   1][    1]
+</PRE>
+<HR>
+<H3><A NAME = "258">Example <TT>IO_printf2 (H3E5)</TT></A></H3>
+Some further uses of the <TT>printf</TT> statement are illustrated below.
+<P>
+<P>
+<PRE>
+&gt; x := 3;
+&gt; y := 4;
+&gt; printf "x = %o, y = %o\n", x, y;
+x = 3, y = 4
+&gt; printf "G'"; printf "day";  
+G'day
+&gt; p := 53.211;                                 
+&gt; x := 123.2;
+&gt; printf "%.3o%% of %.2o is %.3o\n", p, x, p/100.0 * x;
+53.211
+&gt; Zx&lt;x&gt; := PolynomialRing(Integers());
+&gt; printf "%O\n", x, "Magma";
+Polynomial(\[0, 1])
+</PRE>
+<HR>
+<H5><A NAME = "259">fprintf file, format, expression, ..., expression;</A></H5>
+<BLOCKQUOTE>
+Print values of the expressions under control of format into the file
+given by file.  The first argument file must be either a string
+specifying a file which can be opened for appending (tilde expansion
+is performed on the filename), or a file object (see the section
+below on external files) opened for writing.  The rest of the arguments
+are exactly as in the <TT>printf</TT> statement.
+In the string (filename) case, the file is opened for appending, the string
+obtained from the formatted printing of the other arguments is appended to
+the file, and the file is closed.
+In the file object case, the string
+obtained from the formatted printing of the other arguments is simply
+appended to the file.
+Note that this statement, like <TT>printf</TT>,
+does <I>not</I> print a newline character after its arguments
+(a <TT>\n</TT> character should be placed in the format string if this is
+desired).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "260">Example <TT>IO_printf (H3E6)</TT></A></H3>
+The following statements demonstrate a (rather contrived) use of <TT>fprintf</TT>
+with a file pipe.
+<P>
+<P>
+<PRE>
+&gt; p := 1000000000000000000000000000057;
+&gt; F := POpen("sort -n", "w");
+&gt; for i := 100 to 110 do
+&gt;    fprintf F, "%30o (2^%o mod p)\n", 2^i mod p, i;
+&gt; end for;
+&gt; // Close F and then see output on standard output:
+&gt; delete F;
+ 37107316853453566312041115519 (2^109 mod p)
+ 70602400912917605986812821219 (2^102 mod p)
+ 74214633706907132624082231038 (2^110 mod p)
+129638414606681695789005139447 (2^106 mod p)
+141204801825835211973625642438 (2^103 mod p)
+259276829213363391578010278894 (2^107 mod p)
+267650600228229401496703205319 (2^100 mod p)
+282409603651670423947251284876 (2^104 mod p)
+518553658426726783156020557788 (2^108 mod p)
+53530120045645&#8802;993406410638 (2^101 mod p)
+564819207303340847894502569752 (2^105 mod p)
+</PRE>
+<HR>
+<H4><A NAME = "261">Verbose Printing (<TT>vprint</TT>, <TT>vprintf</TT>)</A></H4>
+
+<P>
+<P>
+The following statements allow convenient printing of information conditioned
+by whether an appropriate verbose flag is turned on.
+
+
+<H5><A NAME = "262">vprint flag: expression, ..., expression;</A></H5>
+<H5>vprint flag, n: expression, ..., expression;</H5>
+<BLOCKQUOTE>
+If the verbose flag <I>flag</I> (see the function <TT>SetVerbose</TT>)
+has a level greater than or equal to n, print the expressions to
+the right of the colon exactly as in the <TT>print</TT> statement.
+If the flag has 
+level 0 (i.e. is not turned on), do nothing.
+In the first form of this statement, where
+a specific level is not given, n is taken to be 1.
+This statement is useful in Magma code
+found in packages
+where one wants to print verbose information if an
+appropriate verbose flag is turned on.
+</BLOCKQUOTE>
+<H5><A NAME = "263">vprintf flag: format, expression, ..., expression;</A></H5>
+<H5>vprintf flag, n: format, expression, ..., expression;</H5>
+<BLOCKQUOTE>
+If the verbose flag <I>flag</I> (see the function <TT>SetVerbose</TT>)
+has a level greater than or equal to n, print using the format
+and the expressions to the right of the colon exactly as in the
+<TT>printf</TT> statement.
+If the flag has level 0 (i.e. is not turned on), do nothing.
+In the first form of this statement, where
+a specific level is not given, n is taken to be 1.
+This statement is useful in Magma code
+found in packages
+where one wants to print verbose information if an
+appropriate verbose flag is turned on.
+<P>
+</BLOCKQUOTE>
+<H4><A NAME = "264">Automatic Printing</A></H4>
+
+<P>
+<P>
+Magma allows <I>automatic printing</I> of expressions: basically,
+a statement consisting of an expression (or list of expressions) alone
+is taken as a shorthand for the <TT>print</TT>-statement.
+<P>
+Some subtleties are involved in understanding the precise behaviour of
+Magma in interpreting lone expressions as statements.  The rules
+Magma follows are outlined here.  In the following, a <I>call-form</I>
+means any expression of the form f((arguments)); that is, anything
+which could be a procedure call <I>or</I> a function call.
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>Any single expression followed by a semicolon which is not a call-form
+is printed, just as if you had `print' in front of it.
+<DT>(b)</DT><DD>For a single call-form followed by a semicolon (which could be
+a function call or procedure call), the first signature which matches
+the input arguments is taken and if that is procedural, the whole
+call is taken as a procedure call, otherwise it is taken as function
+call and the results are printed.
+<DT>(c)</DT><DD>A comma-separated list of any expressions is printed, just as if
+you had `print' in front of it.
+Here any call-form is taken as
+a function call only so procedure calls are impossible.
+<DT>(d)</DT><DD>A print level modifier is allowed after an expression list (whether the
+list has length 1 or more).
+Again any call-form is taken as
+a function call only so procedure calls are impossible.
+<DT>(e)</DT><DD>Any list of objects printed, whether by any of the above rules or by
+the `print' statement, is placed in the previous value buffer.
+<TT>$1</TT> gives the last printed list, <TT>$2</TT> the one before, etc.
+Note that multi-return values stay as a list of values in the
+previous value buffer.  The only way to get at the individual values
+of such a list is by assignment to a list of identifiers, or by <TT>where</TT>
+(this is of course the only way to get the second result out of
+<TT>Quotrem</TT>, etc.).  In other places, a <TT>$1</TT> expression is evaluated
+with principal value semantics.
+<P>
+<P>
+</DL>
+Magma also provides procedures to manipulate the previous value
+buffer in which $1, etc. are stored.
+
+
+<H5><A NAME = "265">ShowPrevious() : -&gt;</A></H5>
+<BLOCKQUOTE>
+Show all the previous values stored.
+This does <I>not</I> change the contents of the previous value buffer.
+</BLOCKQUOTE>
+<H5><A NAME = "266">ShowPrevious(i) : RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Show the i-th previous value stored.
+This does <I>not</I> change the contents of the previous value buffer.
+</BLOCKQUOTE>
+<H5><A NAME = "267">ClearPrevious() : -&gt;</A></H5>
+<BLOCKQUOTE>
+Clear all the previous values stored.  This is useful for ensuring
+that no more memory is used than that referred to by the current
+identifiers.
+</BLOCKQUOTE>
+<H5><A NAME = "268">SetPreviousSize(n) : RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Set the size of the previous value buffer (this is not
+how many values are defined in it at the moment, but the maximum number
+that will be stored).  The default size is 3.
+</BLOCKQUOTE>
+<H5><A NAME = "269">GetPreviousSize() : -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Return the size of the previous value buffer.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "270">Example <TT>IO_auto-print (H3E7)</TT></A></H3>
+Examples which illustrate point (a):
+<P>
+<P>
+<PRE>
+&gt; 1;
+1
+&gt; x := 3;
+&gt; x;
+3
+</PRE>
+Examples which illustrate point (b):
+<P>
+<P>
+<PRE>
+&gt; 1 + 1;            // really function call '+'(1, 1)
+2
+&gt; Q := [ 0 ];
+&gt; Append(~Q, 1);    // first (in fact only) match is procedure call
+&gt; Append(Q, 1);     // first (in fact only) match is function call
+[ 0, 1, 1 ]
+&gt; // Assuming fp is assigned to a procedure or function:
+&gt; fp(x);            // whichever fp is at runtime
+&gt; SetVerbose("Meataxe", true);  // simple procedure call
+</PRE>
+Examples which illustrate point (c):
+<P>
+<P>
+<PRE>
+&gt; 1, 2;
+1 2
+&gt; // Assuming f assigned:
+&gt; f(x), 1;                            // f only can be a function
+&gt; SetVerbose("Meataxe", true), 1;     // type error in 'SetVerbose'
+&gt; // (since no function form)
+</PRE>
+Examples which illustrate point (d):
+<P>
+<P>
+<PRE>
+&gt; 1: Magma;
+1
+&gt; Sym(3), []: Maximal;
+Symmetric group acting on a set of cardinality 3
+Order = 6 = 2 * 3
+[]
+&gt; SetVerbose("Meataxe", true): Magma; // type error as above
+</PRE>
+Examples which illustrate point (e):
+<P>
+<P>
+<PRE>
+&gt; 1;
+1
+&gt; $1;
+1
+&gt; 2, 3;
+2 3
+&gt; $1;
+2 3
+&gt; Quotrem(124124, 123);
+1009 17
+&gt; $1;
+1009 17
+&gt; a, b := $1;
+&gt; a;
+1009
+</PRE>
+<HR>
+<H4><A NAME = "271">Indentation</A></H4>
+
+<P>
+<P>
+Magma has an indentation level which determines how many initial spaces
+should be printed before each line.  The level can be increased or decreased.
+Each time the top level of Magma is reached (i.e. a prompt is printed),
+the level is reset to 0.  The level is usually changed in verbose output
+of recursive functions and procedures.
+The functions <TT>SetIndent</TT> and <TT>GetIndent</TT> are used to control
+and examine the number of spaces used for each indentation level (default
+4).
+
+
+<H5><A NAME = "272">IndentPush() : -&gt;</A></H5>
+<BLOCKQUOTE>
+Increase (push) the indentation level by 1.
+Thus the beginning of a line will have s more spaces than before,
+where s is the current number of indentation spaces.
+</BLOCKQUOTE>
+<H5><A NAME = "273">IndentPush(C) : RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Increases the indentation level by C.
+</BLOCKQUOTE>
+<H5><A NAME = "274">IndentPop() : -&gt;</A></H5>
+<BLOCKQUOTE>
+Decrease (pop) the indentation level by 1.
+Thus the beginning of a line will have s fewer spaces than before,
+where s is the current number of indentation spaces.  If the
+current level is already 0, an error occurs.
+</BLOCKQUOTE>
+<H5><A NAME = "275">IndentPop(C) : RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Decreases the indent level by C.
+</BLOCKQUOTE>
+<H4><A NAME = "276">Printing to a File</A></H4>
+
+
+
+<H5><A NAME = "277">PrintFile(F, x) : MonStgElt, Any -&gt;</A></H5>
+<H5>Write(F, x) : MonStgElt, Any -&gt;</H5>
+
+<PRE>    Overwrite: BoolElt                  Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Print x to the file specified by the string F. If this file
+already exists, the output will be appended, unless the optional
+parameter <TT>Overwrite</TT> is set to true, in which case the
+file is overwritten.
+</BLOCKQUOTE>
+<H5><A NAME = "278">WriteBinary(F, s) : MonStgElt, BStgElt -&gt;</A></H5>
+
+<PRE>    Overwrite: BoolElt                  Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Write the binary string s to the file specified by the string F. If this
+file already exists, the output will be appended, unless the optional parameter
+<TT>Overwrite</TT> is set to true, in which case the file is overwritten.
+</BLOCKQUOTE>
+<H5><A NAME = "279">PrintFile(F, x, L) : MonStgElt, Any, MonStgElt -&gt;</A></H5>
+<H5>Write(F, x, L) : MonStgElt, Any, MonStgElt -&gt;</H5>
+
+<PRE>    Overwrite: BoolElt                  Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Print x in format defined by the string L
+to the file specified by the string F. If this file
+already exists, the output will be appended unless the optional
+parameter <TT>Overwrite</TT> is set to true, in which case the
+file is overwritten. The level L can be
+any of the print levels on the <TT>print</TT> command above
+(i.e., it must be one of the strings <TT>"Default"</TT>, <TT>"Minimal"</TT>,
+<TT>"Maximal"</TT>, or <TT>"Magma"</TT>).
+</BLOCKQUOTE>
+<H5><A NAME = "280">PrintFileMagma(F, x) : MonStgElt, Any -&gt;</A></H5>
+
+<PRE>    Overwrite: BoolElt                  Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Print x in Magma format
+to the file specified by the string F. If this file
+already exists, the output will be appended, unless the optional
+parameter <TT>Overwrite</TT> is set to true, in which case the
+file is overwritten.
+</BLOCKQUOTE>
+<H4><A NAME = "281">Printing to a String</A></H4>
+
+<P>
+<P>
+<P>
+Magma allows the user to obtain the string corresponding to the output 
+obtained when printing an object by means of the <TT>Sprint</TT> function.
+The <TT>Sprintf</TT> function allows formatted printing like the <TT>printf</TT>
+statement.
+
+
+<H5><A NAME = "282">Sprint(x) : Elt -&gt; MonStgElt</A></H5>
+<H5>Sprint(x, L) : Elt, MonStgElt -&gt; MonStgElt</H5>
+<BLOCKQUOTE>
+Given any Magma object x, this function returns a string containing
+the output obtained when x is printed.  If a print level L is given
+also (a string), the printing is done according to that level (see the
+<TT>print</TT> statement for the possible printing levels).
+</BLOCKQUOTE>
+<H5><A NAME = "283">Sprintf(F, ...) : MonStgElt, ... -&gt; MonStgElt</A></H5>
+<BLOCKQUOTE>
+Given a format string F, together with appropriate extra arguments
+corresponding to F, return the string resulting from the formatted
+printing of F and the arguments.  The format string F and arguments
+should be exactly as for the <TT>printf</TT> statement -- see that statement
+for details.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "284">Example <TT>IO_Sprintf (H3E8)</TT></A></H3>
+We demonstrate elementary uses of <TT>Sprintf</TT>.
+<P>
+<P>
+<PRE>
+&gt; Q := [Sprintf("{%4o&lt;-&gt;%-4o}", x, x): x in [1,10,100,1000]];
+&gt; Q;
+[ {   1&lt;-&gt;1   }, {  10&lt;-&gt;10  }, { 100&lt;-&gt;100 }, {1000&lt;-&gt;1000} ]
+</PRE>
+<HR>
+<H4><A NAME = "285">Redirecting Output</A></H4>
+
+
+
+<H5><A NAME = "286">SetOutputFile(F) : MonStgElt -&gt;</A></H5>
+
+<PRE>    Overwrite: BoolElt                  Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Redirect all Magma output to the file specified by the
+string F. By using <TT>SetOutputFile(F: Overwrite := true)</TT>
+the file F is emptied before output is written onto it.
+</BLOCKQUOTE>
+<H5><A NAME = "287">UnsetOutputFile() : -&gt;</A></H5>
+<BLOCKQUOTE>
+Close the output file, so that output will be directed to standard output
+again.
+</BLOCKQUOTE>
+<H5><A NAME = "288">HasOutputFile() : -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+If Magma currently has an output or log file F, return <TT>true</TT> and
+F; otherwise return <TT>false</TT>.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text33.htm">[Next]</A><A  HREF = "text31.htm">[Prev]</A> <A  HREF = "text33.htm">[Right]</A> <A  HREF = "text31.htm">[Left]</A> <A  HREF = "text29.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

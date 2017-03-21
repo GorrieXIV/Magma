@@ -1,0 +1,98 @@
+
+procedure rational_test(n, range)
+    print "rational_test: n:", n, "range: ", range;
+
+    for i in {1.. n} do
+	p := Random(-range, range);
+	q := Random(1, range);
+
+	a := p/q;
+	assert a eq elt<RationalField() | p, q>;
+	assert a eq RationalField() ! [p, q];
+
+	assert Numerator(a) eq p / Gcd(p, q);
+	assert Denominator(a) eq q / Gcd(p, q);
+
+	b := Random(-range, range) / Random(1, range);
+	c := Random(-range, range) / Random(1, range);
+
+	assert a + 1 eq 1 + a;
+	assert a + b eq b + a;
+	assert a * 0 eq 0;
+	assert a * b eq b * a;
+	assert a * (b + c) eq a * b + a * c;
+
+	assert a^3 eq a*a*a;
+	assert a eq 0 or a^-4 eq (1/a)^4;
+	assert b eq 0 or b^-4 eq 1/b/b/b/b;
+
+	assert Abs(a) eq a or Abs(a) eq -a;
+	assert Abs(-a) eq Abs(a);
+
+	assert Ceiling(a) ge a;
+
+	assert Min(a, b) eq a or Min(a, b) eq b;
+	assert Min(a, c) eq Min(c, a);
+
+	assert Max(a, -a) eq Abs(a);
+	assert Min(a, -a) eq -Abs(a);
+
+	new_a := a;
+	new_a +:= 1;
+	assert new_a - 1 eq a;
+	new_a -:= 2/3;
+	assert new_a eq a + 1/3;
+	new_b := b;
+	new_b *:= 5;
+	assert new_b / 5 eq b;
+	new_b /:= 5;
+	assert new_b eq b;
+	new_c := c;
+	new_c ^:= 5;
+	assert new_c eq c^5;
+	new_c +:= 2;
+	new_c /:= new_c;
+	assert new_c eq 1;
+
+    end for;
+end procedure;
+
+// show mem;
+
+assert Denominator(0/5) eq 1;
+assert Numerator(0/5) eq 0;
+assert Round(0/5) eq 0;
+assert Round(1/5) eq 0;
+assert Round(1/2) eq 1;
+assert Round(-1/3) eq 0;
+assert Round(-1/2) eq -1;
+assert Round(-3/5) eq -1;
+
+assert Ceiling(1/2) eq 1;
+assert Ceiling(-1/2) eq 0;
+assert Ceiling(-2/1) eq -2;
+assert Ceiling(2/1) eq 2;
+
+assert 1/2 lt 1;
+assert 1/2 le 1;
+assert 2/2 le 1;
+assert 2/2 eq 1;
+
+rational_test(1000, 2^15);
+rational_test(1000, 10);
+rational_test(100, 10^50);
+
+
+a0 := 21394732198743219874983217432174;
+b0 := 32198473219874983217498732149;
+C0 := 210847321047081740873214;
+p := 1641939777281644585216012745731310742699067363901579995454215257862246717295463129808146669695262539164567117138443321485041472345036356894978599687971;
+q := 1641939777281644585216012745731310742699067363901579995454215257862246717295463129808146669695262539164567117138443321485041472345136356894978599688027;
+N:=p*q;
+C:=Ceiling(Sqrt(RealField(1000)!N));
+r:=q-C;
+s:=C-p;
+a:=N/C;
+b:=(r-s)-r*s/C;
+assert a eq C+b;
+assert a-C eq b; /* Fails before 2.18-5 */

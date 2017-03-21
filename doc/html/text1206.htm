@@ -1,0 +1,419 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Polynomial Rings and Ideals</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1207.htm">[Next]</A><A  HREF = "text1205.htm">[Prev]</A> <A  HREF = "text1207.htm">[Right]</A> <A  HREF = "text1205.htm">[Left]</A> <A  HREF = "text1203.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "13450">Polynomial Rings and Ideals</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1206.htm#13451">Creation of Polynomial Rings and Accessing their Monomial Orders</A>
+<LI> <A  HREF = "text1206.htm#13458">Creation of Graded Polynomial  Rings</A>
+<LI> <A  HREF = "text1206.htm#13461">Element Operations Using the  Grading</A>
+<LI> <A  HREF = "text1206.htm#13470">Creation of Ideals and Accessing their Bases</A>
+</UL>
+<H4><A NAME = "13451">Creation of Polynomial Rings and Accessing their Monomial Orders</A></H4>
+
+<P>
+<P>
+Multivariate polynomial rings are created from
+a coefficient ring, the number of variables, and a monomial order.
+If no order is specified,
+the monomial order is taken to be the lexicographical order.
+This section is briefly repeated from Section <A  HREF = "text224.htm#1916">Creation of Polynomial Rings</A>
+in the multivariate polynomial rings chapter, so as to show how
+one can set up the polynomial ring in which to create an ideal.
+<P>
+Please note that the Gr&ouml;bner basis of an ideal with respect to the 
+lexicographical order is often much more complicated and difficult to
+compute than the Gr&ouml;bner basis of the same ideal with respect to other
+monomial orders (e.g. the <TT>grevlex</TT> order), so it may be preferable
+to use another order if the Gr&ouml;bner
+basis with respect to any order is desired (see also the function
+<A  HREF = "text1207.htm#EasyIdeal">EasyIdeal</A> below).  Yet the lexicographical order is the most
+natural order and is often the desired order so that is why it is used
+by default if no specific order is given.
+
+
+<H5><A NAME = "13452"></A><A NAME = "GB:PolynomialRing">PolynomialRing</A>(R, n) : Rng, RngIntElt -&gt; RngMPol</H5>
+<H5><A NAME = "GB:PolynomialAlgebra">PolynomialAlgebra</A>(R, n) : Rng, RngIntElt -&gt; RngMPol</H5>
+
+<PRE>    Global: BoolElt                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Create a multivariate polynomial ring in n&gt;0 variables over the ring R.
+The ring is regarded as an R-algebra via the usual identification of elements of R and the constant polynomials.
+The lexicographical ordering
+on the monomials is used for this default construction (see next function).
+<P>
+By default, a <I>non-global</I> polynomial ring will be returned;
+if the parameter <TT>Global</TT> is set to <TT>true</TT>, then the
+unique global polynomial ring over R with n variables will be
+returned.  This may be useful in some contexts, but a non-global result
+is returned by default since one often wishes to have several rings
+with the same numbers of variables but with different variable names
+(and create mappings between them, for example).
+Explicit coercion is always allowed between polynomial rings having the
+same number of variables (and suitable base rings), whether they are
+global or not, and the coercion maps the i-variable of one ring to
+the i-th variable of the other ring.
+</BLOCKQUOTE>
+<H5><A NAME = "13453">PolynomialRing(R, n, order) : Rng, RngIntElt, MonStgElt, ... -&gt; RngMPol</A></H5>
+<H5>PolynomialAlgebra(R, n, order) : Rng, RngIntElt, MonStgElt, ... -&gt; RngMPol</H5>
+<BLOCKQUOTE>
+Create a multivariate polynomial ring in n&gt;0 variables over the
+ring R with the given order order on the monomials.  See the
+section on monomial orders for the valid values for the argument
+order.
+</BLOCKQUOTE>
+<H5><A NAME = "13454"></A><A NAME = "GB:PolynomialRingTup">PolynomialRing</A>(R, n, T) : Rng, RngIntElt, Tup -&gt; RngMPol</H5>
+<H5>PolynomialAlgebra(R, n, T) : Rng, RngIntElt, Tup -&gt; RngMPol</H5>
+<BLOCKQUOTE>
+Create a multivariate polynomial ring in n&gt;0 variables over the
+ring R with the order given by the tuple T on the monomials.
+T must be a tuple whose components match the valid arguments
+for the monomial orders in Section <A  HREF = "text1205.htm#13440">Representation and Monomial  Orders</A> (or
+a tuple returned by the following function <A  HREF = "text1206.htm#GB:MonomialOrder">MonomialOrder</A>).
+</BLOCKQUOTE>
+<H5><A NAME = "13455"></A><A NAME = "GB:MonomialOrder">MonomialOrder</A>(P) : RngMPol -&gt; Tup</H5>
+<BLOCKQUOTE>
+Given a polynomial ring P (or an ideal thereof), return a description
+of the monomial order of P.  This is returned as a tuple which
+matches the relevant arguments listed for each possible order in
+Section <A  HREF = "text1205.htm#13440">Representation and Monomial  Orders</A>, so may be passed as the
+third argument to the function <A  HREF = "text1206.htm#GB:PolynomialRingTup">PolynomialRing</A> above.
+</BLOCKQUOTE>
+<H5><A NAME = "13456"></A><A NAME = "GB:MonomialOrderWeightVectors">MonomialOrderWeightVectors</A>(P) : RngMPol -&gt; [ [ FldRatElt ] ]</H5>
+<BLOCKQUOTE>
+Given a polynomial ring P of rank n (or an ideal thereof),
+return the weight vectors of the underlying monomial order as a
+sequence of n sequences of n rationals.  See, for example,
+<A  HREF = "text1202.htm#bib_UAG_CLO">[CLO98, p. 153]</A> for more information.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13457">Example <TT>GB_Order (H111E1)</TT></A></H3>
+We show how one can construct different polynomial rings with different orders.
+<P>
+<P>
+<PRE>
+&gt; Z := IntegerRing();
+&gt; // Construct polynomial ring with DEFAULT lex order
+&gt; P&lt;a,b,c,d&gt; := PolynomialRing(Z, 4);
+&gt; MonomialOrder(P);
+&lt;"lex"&gt;
+&gt; MonomialOrderWeightVectors(P);
+[
+    [ 1, 0, 0, 0 ],
+    [ 0, 1, 0, 0 ],
+    [ 0, 0, 1, 0 ],
+    [ 0, 0, 0, 1 ]
+]
+&gt; // Construct polynomial ring with grevlex order
+&gt; P&lt;a,b,c,d&gt; := PolynomialRing(Z, 4, "grevlex");
+&gt; MonomialOrder(P);
+&lt;"grevlex"&gt;
+&gt; MonomialOrderWeightVectors(P);
+[
+    [ 1, 1, 1, 1 ],
+    [ 1, 1, 1, 0 ],
+    [ 1, 1, 0, 0 ],
+    [ 1, 0, 0, 0 ]
+]
+&gt; // Construct polynomial ring with block elimination and a &gt; d &gt; b &gt; c
+&gt; P&lt;a,b,c,d&gt; := PolynomialRing(Z, 4, "elim", [1, 4], [2, 3]);
+&gt; MonomialOrder(P);
+&lt;"elim", [ 1, 4 ], [ 2, 3 ]&gt;
+&gt; MonomialOrderWeightVectors(P);
+[
+    [ 1, 0, 0, 1 ],
+    [ 1, 0, 0, 0 ],
+    [ 0, 1, 1, 0 ],
+    [ 0, 1, 0, 0 ]
+]
+&gt; a + b + c + d;
+a + d + b + c
+&gt; a + d^10 + b + c^10;
+d^10 + a + c^10 + b
+&gt; a + d^10 + b + c;   
+d^10 + a + b + c
+&gt; // Construct polynomial ring with weight order and x &gt; y &gt; z
+&gt; P&lt;x, y, z&gt; := PolynomialRing(Z, 3, "weight", [100,10,1, 1,10,100, 1,1,1]);
+&gt; MonomialOrder(P);
+&lt;"weight", [ 100, 10, 1, 1, 10, 100, 1, 1, 1 ]&gt;
+&gt; MonomialOrderWeightVectors(P);
+[
+    [ 100, 10, 1 ],
+    [ 1, 10, 100 ],
+    [ 1, 1, 1 ]
+]
+&gt; x + y + z;
+x + y + z
+&gt; (x+y^2+z^3)^4;
+x^4 + 4*x^3*y^2 + 4*x^3*z^3 + 6*x^2*y^4 + 12*x^2*y^2*z^3 +
+    6*x^2*z^6 + 4*x*y^6 + 12*x*y^4*z^3 + 12*x*y^2*z^6 +
+    4*x*z^9 + y^8 + 4*y^6*z^3 + 6*y^4*z^6 +
+    4*y^2*z^9 + z^12
+</PRE>
+<HR>
+<H4><A NAME = "13458">Creation of Graded Polynomial  Rings</A></H4>
+
+<P>
+<P>
+<P>
+It is possible within Magma to assign weights to the variables of
+a multivariate polynomial ring.  This means that monomials of the ring
+then have a <I>weighted degree</I> with respect to the weights
+of the variables.  Such a multivariate polynomial ring is called
+<I>graded</I> or <I>weighted</I>.
+A polynomial of the ring whose monomials all have the
+same weighted degree is called <I>homogeneous</I>.  The polynomial
+ring can be decomposed as the direct sum of graded homogeneous
+components.
+<P>
+Suppose a polynomial ring P has n variables x<sub>1</sub>, ..., x<sub>n</sub> and the
+weights for the variables are d<sub>1</sub>, ..., d<sub>n</sub> respectively.
+Then for a monomial m = x<sub>1</sub><sup>e<sub>1</sub></sup> ... x<sub>n</sub><sup>e<sub>n</sub></sup> of P
+(with e<sub>i</sub> &ge;0 for 1 &le;i &le;n), the <I>weighted degree</I>
+of m is defined to be &sum;<sub>i=1</sub><sup>n</sup> e<sub>i</sub> d<sub>i</sub>.
+<P>
+A polynomial ring created without a specific weighting (using the default
+version of the <A  HREF = "text1206.htm#GB:PolynomialRing">PolynomialRing</A> function or similar)
+has weight 1 for each variable so the weighted degree coincides with the
+total degree.
+<P>
+The following functions allow one to create and operate on elements of
+polynomial rings with specific weights for the variables.
+
+
+<H5><A NAME = "13459">PolynomialRing(R, Q) : Rng, [ RngIntElt ] -&gt; RngMPol</A></H5>
+<H5>PolynomialAlgebra(R, Q) : Rng, [ RngIntElt ] -&gt; RngMPol</H5>
+<BLOCKQUOTE>
+Given a ring R and a non-empty sequence Q of positive integers,
+create a multivariate polynomial ring in n=#Q variables over the ring
+R with the weighted degree of the i-th variable set to be Q[i]
+for each i.  The rank n of the polynomial is determined by the length
+of the sequence Q.
+(The angle bracket notation can be used to assign names to the variables,
+just like in the usual invocation of the <TT>PolynomialRing</TT> function.)
+<P>
+As of V2.15, the default monomial order chosen is the <TT>grevlexw</TT>
+order with weights given by Q, since the Gr&ouml;bner basis of an ideal
+w.r.t. this order tends to be smaller if the ideal is homogeneous w.r.t.
+the grading.
+</BLOCKQUOTE>
+<H5><A NAME = "13460">Grading(P) : RngMPol -&gt; [ RngIntElt ]</A></H5>
+<H5>VariableWeights(P) : RngMPol -&gt; [ RngIntElt ]</H5>
+<BLOCKQUOTE>
+Given a graded polynomial ring P (or an ideal thereof), return
+the variable weights of P as a sequence of n integers where n
+is the rank of P.  If P was constructed without specific weights,
+the sequence containing n copies of the integer 1 is returned.
+</BLOCKQUOTE>
+<H4><A NAME = "13461">Element Operations Using the  Grading</A></H4>
+
+
+
+<H5><A NAME = "13462">Degree(f) : RngMPolElt -&gt; RngIntElt</A></H5>
+<H5>WeightedDegree(f) : RngMPolElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Given a polynomial f of the graded polynomial ring P, this
+function returns the weighted degree of f, which is the maximum
+of the weighted degrees of all monomials that occur in f.
+The weighted degree of a monomial m depends on the weights assigned
+to the variables of the polynomial ring P --- see the introduction
+of this section for details.
+Note that this is different from the natural total degree of f which
+ignores any weights.
+</BLOCKQUOTE>
+<H5><A NAME = "13463">LeadingWeightedDegree(f) : RngMPolElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a polynomial f of the graded polynomial ring P, this
+function returns the leading weighted degree of f, which is the
+weighted degree of the leading monomial of f.
+The weighted degree of a monomial m depends on the weights assigned
+to the variables of the polynomial ring P --- see the introduction
+of this section for details.
+</BLOCKQUOTE>
+<H5><A NAME = "13464">IsHomogeneous(f) : RngMPolElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a polynomial f of the graded polynomial ring P, this
+function returns whether f is homogeneous with respect to the
+weights on the variables of P (i.e., whether the weighted degrees
+of the monomials of f are all equal).
+</BLOCKQUOTE>
+<H5><A NAME = "13465">HomogeneousComponent(f, d) : RngMPolElt, RngIntElt -&gt; RngMPolElt</A></H5>
+<BLOCKQUOTE>
+Given a polynomial f of the graded polynomial ring P, this
+function returns the <I>weighted</I> degree-d homogeneous component
+of f which is the sum of all the terms of f whose monomials have
+weighted degree d.  d must be greater than or equal to 0.  If
+f has no terms of weighted degree d, then the result is 0.
+</BLOCKQUOTE>
+<H5><A NAME = "13466">HomogeneousComponents(f) : RngMPolElt -&gt; [ RngMPolElt ]</A></H5>
+<BLOCKQUOTE>
+Given a polynomial f of the graded polynomial ring P, this
+function returns the <I>weighted</I> degree-d homogeneous component
+of f which is the sum of all the terms of f whose monomials have
+weighted degree d.  d must be greater than or equal to 0.  If
+f has no terms of weighted degree d, then the result is 0.
+</BLOCKQUOTE>
+<H5><A NAME = "13467"></A><A NAME = "GB:MonomialsOfDegree">MonomialsOfDegree</A>(P, d) : RngMPolElt, RngIntElt -&gt; {@ RngMPolElt @}</H5>
+<BLOCKQUOTE>
+Given a polynomial ring P and a non-negative integer d, return an
+indexed set consisting of all monomials in P with total degree
+d.  If P is graded, the grading is ignored.
+</BLOCKQUOTE>
+<H5><A NAME = "13468"></A><A NAME = "GB:MonomialsOfWeightedDegree">MonomialsOfWeightedDegree</A>(P, d) : RngMPolElt, RngIntElt -&gt; {@ RngMPolElt @}</H5>
+<BLOCKQUOTE>
+Given a graded polynomial ring P and a non-negative integer d, return an
+indexed set consisting of all monomials in P with weighted degree
+d.  If P has the trivial grading, then this function is equivalent
+to the function <A  HREF = "text1206.htm#GB:MonomialsOfDegree">MonomialsOfDegree</A>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "13469">Example <TT>GB_Graded (H111E2)</TT></A></H3>
+We create a simple graded polynomial ring and perform various simple
+operations on it.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x, y, z&gt; := PolynomialRing(RationalField(), [1, 2, 4]);
+&gt; P;
+Graded Polynomial ring of rank 3 over Rational Field
+Order: Grevlex with weights [1, 2, 4]
+Variables: x, y, z
+Variable weights: [1, 2, 4]
+&gt; VariableWeights(P);
+[ 1, 2, 4 ]
+&gt; Degree(x);
+1
+&gt; Degree(y);
+2
+&gt; Degree(z);
+4
+&gt; Degree(x^2*y*z^3); // Weighted total degree
+16
+&gt; TotalDegree(x^2*y*z^3); // Natural total degree
+6
+&gt; IsHomogeneous(x);
+true
+&gt; IsHomogeneous(x + y);
+false
+&gt; IsHomogeneous(x^2 + y);
+true
+&gt; I := ideal&lt;P | x^2*y + z, (x^4 + z)^2, y^2 + z&gt;;
+&gt; IsHomogeneous(I);
+true
+&gt; MonomialsOfDegree(P, 4);        
+{@
+    x^4,
+    x^3*y,
+    x^3*z,
+    x^2*y^2,
+    x^2*y*z,
+    x^2*z^2,
+    x*y^3,
+    x*y^2*z,
+    x*y*z^2,
+    x*z^3,
+    y^4,
+    y^3*z,
+    y^2*z^2,
+    y*z^3,
+    z^4
+@}
+&gt; MonomialsOfWeightedDegree(P, 4);
+{@
+    x^4,
+    x^2*y,
+    y^2,
+    z
+@}
+</PRE>
+<HR>
+<H4><A NAME = "13470">Creation of Ideals and Accessing their Bases</A></H4>
+
+<P>
+<P>
+<P>
+Within the general context of ideals of polynomial rings, the
+term "basis" will refer
+to an <I>ordered</I> sequence of polynomials which generate an ideal.
+(Thus a basis can contain duplicates and zero elements so is not like
+a basis of a vector space.)
+<P>
+One normally creates an ideal by the <A  HREF = "text1206.htm#GB:ideal">ideal</A> constructor or
+<A  HREF = "text1206.htm#GB:Ideal">Ideal</A> function, described
+below.  But it is also possible to create an ideal with a specific
+basis U and then find the coordinates of polynomials from the
+polynomial ring with respect to U (see the function <A  HREF = "text1207.htm#GB:Coordinates">Coordinates</A>
+below).  This is done by specifying a <I>fixed basis</I> with the
+<A  HREF = "text1206.htm#GB:IdealWithFixedBasis">IdealWithFixedBasis</A> intrinsic function.
+In this case, when Magma computes the Gr&ouml;bner basis of the ideal (see
+below), extra information is stored so that polynomials of the ideal
+can be rewritten in terms of the original fixed basis.  However, the use of
+this feature makes the Gr&ouml;bner basis computation much more expensive
+so an ideal should usually <B>not</B> be created with a fixed basis.
+
+
+<H5><A NAME = "13471"></A><A NAME = "GB:ideal">ideal</A>&lt;P | L&gt; : RngMPol, List -&gt; RngMPol</H5>
+<BLOCKQUOTE>
+Given a multivariate polynomial ring P,
+return the ideal of P generated by the elements of P specified by
+the list L.  Each term of the list L must be an expression defining
+an object of one of the following types:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>An element of P;
+<DT>(b)</DT><DD>A set or sequence of elements of P;
+<DT>(c)</DT><DD>An ideal of P;
+<DT>(d)</DT><DD>A set or sequence of ideals of P.</DL>
+</BLOCKQUOTE>
+<H5><A NAME = "13472"></A><A NAME = "GB:Ideal">Ideal</A>(B) : [ RngMPolElt ] -&gt; RngMPol</H5>
+<H5>Ideal(B) : { RngMPolElt } -&gt; RngMPol</H5>
+<BLOCKQUOTE>
+Given a set or sequence B of polynomials from a polynomial ring P,
+return the ideal of P generated by the elements of B with
+the given basis B.  This is equivalent to the above <TT>ideal</TT>
+constructor, but is more convenient when one simply has a set or sequence
+of polynomials.
+</BLOCKQUOTE>
+<H5><A NAME = "13473"></A><A NAME = "GB:IdealOfElt">Ideal</A>(f) : RngMPolElt -&gt; RngMPol</H5>
+<BLOCKQUOTE>
+Given a polynomial f from a polynomial ring P,
+return the principal ideal of P generated by f.
+</BLOCKQUOTE>
+<H5><A NAME = "13474"></A><A NAME = "GB:IdealWithFixedBasis">IdealWithFixedBasis</A>(B) : [ RngMPolElt ] -&gt; RngMPol</H5>
+<BLOCKQUOTE>
+Given a sequence B of polynomials from a polynomial ring P,
+return the ideal of P generated by the elements of B with the given
+fixed basis B.  When the function <A  HREF = "text1207.htm#GB:Coordinates">Coordinates</A> is called, its
+result will be with respect to the entries of B instead of the Gr&ouml;bner
+basis of I.
+<B>WARNING:</B> this function should <I>only</I> be used
+when it is desired to express polynomials of the ideal in terms of the
+elements of B, as the computation of the Gr&ouml;bner basis in this case
+is <I>very</I> expensive, so it should be avoided if these expressions are
+not wanted.
+</BLOCKQUOTE>
+<H5><A NAME = "13475">Basis(I) : RngMPol -&gt; [ RngMPolElt ]</A></H5>
+<BLOCKQUOTE>
+Given an ideal I, return the current basis of I.  If I has a fixed basis,
+that is returned; otherwise the current basis of I (whether it has been
+converted to a Gr&ouml;bner basis or not -- see below) is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "13476">BasisElement(I, i) : RngMPol, RngIntElt -&gt; RngMPolElt</A></H5>
+<BLOCKQUOTE>
+Given an ideal I together with an integer i, return the i-th element
+of the current basis of I.  This the same as <TT>Basis(I)[i]</TT>.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text1207.htm">[Next]</A><A  HREF = "text1205.htm">[Prev]</A> <A  HREF = "text1207.htm">[Right]</A> <A  HREF = "text1205.htm">[Left]</A> <A  HREF = "text1203.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

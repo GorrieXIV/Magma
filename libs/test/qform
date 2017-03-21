@@ -1,0 +1,87 @@
+
+P := QuadraticForms(328);
+N := QuadraticForms(-231);
+
+assert IsIdentity(One(P));
+assert IsIdentity(One(N));
+
+assert Order(One(P)) eq 1;
+assert Order(One(N)) eq 1;
+
+assert Discriminant(PrimeForm(P, 3)) eq Discriminant(P);
+assert Discriminant(elt<N | 5, 7>) eq Discriminant(N);
+
+/* assert &and[IsReduced(f) : f in ReducedForms(328)]; */
+assert &and[IsReduced(f) : f in ReducedForms(-231)];
+
+assert IsDiscriminant(Discriminant(P));
+assert IsDiscriminant(Discriminant(N));
+assert IsFundamental(Discriminant(P));
+assert IsFundamental(Discriminant(N));
+
+assert FundamentalDiscriminant(Discriminant(P)*16) eq Discriminant(P);
+assert FundamentalDiscriminant(Discriminant(N)*64) eq Discriminant(N);
+
+/*
+Weber Polynomial
+*/
+
+/*
+Composition
+*/
+
+O := Order(PrimeForm(P, 3));
+F := Factorization(O);
+assert IsEquivalent(Power(PrimeForm(P, 3), O), One(P));
+assert &and[not IsIdentity(Power(PrimeForm(P, 3), O div F[i][1])) : i in [1 .. #F]];
+O := Order(elt<N | 5, 7>);
+F := Factorization(O);
+assert elt<N | 5, 7>^Order(elt<N | 5, 7>) eq One(N);
+assert IsEquivalent(Power(elt<N | 5, 7>, Order(elt<N | 5, 7>)), One(N));
+assert &and[not IsIdentity(Power(elt<N | 5, 7>, O div F[i][1])) : i in [1 .. #F]];
+
+assert &and[IsEquivalent(f, g) : f, g in ReductionOrbit(PrimeForm(P, 11))];
+assert &and[ReductionStep(f[i]) eq f[i + 1] : i in [1 .. #f - 1]] 
+				    where f is ReductionOrbit(elt<P | 3, 8>);
+
+A := MatrixAlgebra(Integers(), 2);
+M := A![1, 0, 0, 1];
+assert One(P)*M eq One(P);
+assert One(N)*M eq One(N);
+
+M := A![1, 0, 0, -1];
+assert One(P)*M eq P!-1;
+assert One(N)*M eq N!-1;
+
+M := A![1, 0, -1, 1];
+assert (PrimeForm(P, 3)*M)*M^-1 eq PrimeForm(P, 3);
+assert (elt<N | 8, 5>*M)*M^-1 eq elt<N | 8, 5>;
+
+M := A![1, 1, -1, 0];
+assert (PrimeForm(P, 2)*M)*M^-1 eq PrimeForm(P, 2);
+assert (elt<N | 11, 11>*M)*M^-1 eq elt<N | 11, 11>;
+
+M := A![1, -1, 0, 1];
+assert (elt<P | 9, 2>*M)*M^-1 eq elt<P | 9, 2>;
+assert (PrimeForm(N, 7)*M)*M^-1 eq PrimeForm(N, 7);
+
+M := A![2, 1, 1, 1];
+assert (elt<P | 78, 4>*M)*M^-1 eq elt<P | 78, 4>;
+assert (PrimeForm(N, 3)*M)*M^-1 eq PrimeForm(N, 3);
+
+
+/* Transform */
+
+TEST_COUNT:=10000;
+DISC_LIMIT:=10000;
+k:=100; // abs value
+l:=10; // number of mats
+
+for i in [1..TEST_COUNT] do d:=Random([-DISC_LIMIT..-3]);
+ if not IsFundamental(d) then continue; end if;
+ Q:=QuadraticForms(d); M:=RandomSLnZ(2,k,l); g:=Random(Q); f:=g*M;
+ r,T:=ReducedForm(f); assert f*T eq r; end for;
+
+Q:=QuadraticForms(-3); // check (1,1,1), a=b=c
+for i in [1..TEST_COUNT] do M:=RandomSLnZ(2,k,l); g:=Random(Q); f:=g*M;
+ r,T:=ReducedForm(f); assert f*T eq r; end for;

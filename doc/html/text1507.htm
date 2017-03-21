@@ -1,0 +1,515 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Examples</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1508.htm">[Next]</A><A  HREF = "text1506.htm">[Prev]</A> <A  HREF = "text1508.htm">[Right]</A> <A  HREF = "text1506.htm">[Left]</A> <A  HREF = "text1504.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "17127">Examples</A></H3>
+
+
+
+<HR>
+<H3><A NAME = "17128">Example <TT>HypGeomMot_hypergeom-mot-first-example (H132E1)</TT></A></H3>
+Our first example constructs some hypergeometric motives, and recognises
+them as being related to elliptic curves or Artin representations.
+<P>
+<P>
+<P>
+<PRE>
+&gt; H := HypergeometricData([1/2],[0]); // weight 0
+&gt; t := 3/5;
+&gt; A := ArtinRepresentation(H,t);
+&gt; D := Discriminant(Integers(Field(A))); // -24
+&gt; assert IsSquare(D/(t*(t-1))); // Q(sqrt(t(t-1)))
+&gt; R := ArtinRepresentationQuadratic(-24);
+&gt; assert A eq R;
+&gt; //
+&gt; H := HypergeometricData([1/4,3/4],[0,0]);
+&gt; Weight(H);
+1
+&gt; DefiningPolynomials(H);
+y^2 + 1, y^2 - 2*y + 1
+&gt; t := 3/2;
+&gt; E := EllipticCurve(H,t); E;
+Elliptic Curve defined by y^2 + x*y = x^3 + 1/96*x over Q
+&gt; P := PrimesInInterval(5,100);
+&gt; &amp;and[EulerFactor(E,p) eq EulerFactor(H,t,p) : p in P];
+true
+&gt; //
+&gt; f := CyclotomicPolynomial(6)*CyclotomicPolynomial(2);
+&gt; g := CyclotomicPolynomial(1)^3;
+&gt; H := HypergeometricData(f,g); H;
+Hypergeometric data given by [ 1/6, 1/2, 5/6 ] and [ 0, 0, 0 ]
+&gt; Weight(H);
+2
+&gt; GammaList(H);
+[* -1, -1, -1, -3, 6 *]
+&gt; GammaArray(H);
+[ -3, 0, -1, 0, 0, 1 ]
+&gt; [EulerFactor(H,4,p) : p in [5,7,11,13,17,19]];
+[ 125*y^3 + 20*y^2 + 4*y + 1, 343*y^3 - 42*y^2 - 6*y + 1,
+  -1331*y^3 - 22*y^2 + 2*y + 1, -2197*y^3 - 156*y^2 + 12*y + 1,
+  4913*y^3 + 323*y^2 + 19*y + 1, 6859*y^3 - 57*y^2 - 3*y + 1 ]
+&gt; //
+&gt; _&lt;u&gt; := FunctionField(Rationals());
+&gt; H := HypergeometricData([-2,0,0,-1,0,1] : Print:="alpha_beta");
+&gt; H; // weight 1
+Hypergeometric data given by [1/6,1/3,2/3,5/6] and [0,0,1/4,3/4]
+&gt; HyperellipticCurve(H); // defined over Q(u)
+Hyperelliptic Curve defined by y^2 = 4*x^6 - 8*x^5 + 4*x^4 - 64/729/u
+&gt; t := 4;
+&gt; C := Specialization($1,t); // only works over Q(u)
+&gt; &amp;and[EulerFactor(C,p) eq EulerFactor(H,t,p) : p in P];
+true
+&gt; //
+&gt; H := HypergeometricData([0,-1,0,1,0,1,0,-1] : Print:="alpha_beta");
+&gt; H; // weight 1
+Hypergeometric data given by [1/6,1/3,2/3,5/6] and [1/8,3/8,5/8,7/8]
+&gt; MValue(H);
+729/4096
+&gt; t := 3; // could alternatively specialize later
+&gt; E := EllipticCurve(H,t); aInvariants(E);
+[ 0, 0, -s, -s, 0] where s^2 is 4096/2187
+&gt; &amp;and[EulerFactor(E,p) eq EulerFactor(H,t,p) : p in P];
+true
+</PRE>
+<HR>
+<H3><A NAME = "17129">Example <TT>HypGeomMot_hg-twist-example (H132E2)</TT></A></H3>
+This is a simple example of twisting hypergeometric data,
+showing that a related Artin motive is obtained for the 
+given weight 0 data.
+<P>
+<P>
+<P>
+<PRE>
+&gt; f := CyclotomicPolynomial(6);
+&gt; g := CyclotomicPolynomial(1)*CyclotomicPolynomial(2);
+&gt; H := HypergeometricData(f,g); H; assert(Weight(H)) eq 0;
+Hypergeometric data given by [ 6 ] and [ 1, 2 ]
+&gt; A := ArtinRepresentation(H,-4/5);
+&gt; K := OptimisedRepresentation(Field(A));
+&gt; DefiningPolynomial(K);
+y^6 - 3*y^5 + 3*y^4 - y^3 + 3*y^2 - 3*y + 1
+&gt; T := Twist(H); T;
+Hypergeometric data given by [ 3 ] and [ 1, 2 ]
+&gt; A := ArtinRepresentation(T,-4/5);
+&gt; L := OptimisedRepresentation(Field(A));
+&gt; IsSubfield(L,K), DefiningPolynomial(L);
+true Mapping from: L to K,  y^3 + 3*y - 1
+</PRE>
+<P>
+The same can be said for twisting for (hyper)elliptic curves.
+<P>
+<P>
+<PRE>
+&gt; H := HypergeometricData([2,2],[3]); // Phi_2^2 and Phi_3
+&gt; E := EllipticCurve(H,3);
+&gt; T := EllipticCurve(Twist(H),3);
+&gt; IsQuadraticTwist(E,T);
+true -4/9
+&gt; //
+&gt; H := HypergeometricData([5],[8]); // Phi_5 and Phi_8
+&gt; C := HyperellipticCurve(H);
+&gt; t := 7;
+&gt; S := Specialization(C,t);
+&gt; T := HyperellipticCurve(Twist(H),t);
+&gt; Q := QuadraticTwist(T,5*t); // get right parameter
+&gt; assert IsIsomorphic(Q,S);
+</PRE>
+<HR>
+<H3><A NAME = "17130">Example <TT>HypGeomMot_imprimitivity (H132E3)</TT></A></H3>
+This example exercises the primitivity functionality.
+<P>
+<P>
+<PRE>
+&gt; H := HypergeometricData([3],[4]); // Phi_3 and Phi_4
+&gt; GammaList(H);
+[* -1, 2, 3, -4 *]
+&gt; H2 := HypergeometricData([* -2, 4, 6, -8 *]);
+&gt; IsPrimitive(H2);
+false 2
+&gt; PrimitiveData(H2) eq H;
+true
+&gt; H3 := HypergeometricData([* -3, 6, 9, -12 *]);
+&gt; IsPrimitive(H3);
+false 3
+&gt; PrimitiveData(H3) eq H;
+true
+&gt; aInvariants(EllipticCurve(H));
+[ 0, 0, -64/27/u, -64/27/u, 0 ] where u is FunctionField(Q).1
+&gt; aInvariants(EllipticCurve(H2));
+[ 0, 0, -s, -s, 0 ] where s^2=(-64/27)^2/u
+&gt; aInvariants(EllipticCurve(H3));
+[ 0, 0, -s, -s, 0 ] where s^3=(-64/27)^3/u
+</PRE>
+<HR>
+<H3><A NAME = "17131">Example <TT>HypGeomMot_canonical-schemes-and-curves (H132E4)</TT></A></H3>
+Here is an example with the canonical schemes and curves associated
+to various hypergeometric data.
+<P>
+<P>
+<P>
+<PRE>
+&gt; _&lt;u&gt; := FunctionField(Rationals());
+&gt; H := HypergeometricData([* -2, 3, 4, -5 *]); // degree 4
+&gt; C := CanonicalScheme(H);
+&gt; _&lt;[X]&gt; := Ambient(C); C;
+Scheme over Univariate rational function field over Q defined by
+X[1] + X[2] - 1, X[3] + X[4] - 1,
+X[1]^2*X[2]^5 - 3125/1728/u*X[3]^3*X[4]^4
+&gt; Dimension(C), Genus(Curve(C)); // genus 2 curve
+1 2
+&gt; assert IsHyperelliptic(Curve(C));
+&gt; CC := CanonicalCurve(H);
+&gt; _&lt;x,y&gt; := Ambient(CC); CC;
+Curve over Univariate rational function field over Q defined by
+x^7 - 2*x^6 + x^5 + 3125/1728/u*y^7 - 3125/576/u*y^6 +
+ 3125/576/u*y^5 - 3125/1728/u*y^4
+&gt; b, C2 := IsHyperelliptic(CC); assert b;
+&gt; HyperellipticCurve(H); // in the degree 4 catalogue
+Hyperelliptic Curve defined over Univariate function field
+ over Q by y^2 = 4*x^5 - 3125/432/u*x^3 + 9765625/2985984/u^2
+&gt; assert IsIsomorphic(HyperellipticCurve(H),C2);
+&gt; // and an example where the curve is reducible
+&gt; H := HypergeometricData([* 6,6,-8,-4 *]); // weight 1
+&gt; C := CanonicalCurve(H);
+&gt; A := AlgorithmicFunctionField(FunctionField(C));
+&gt; E&lt;s&gt; := ExactConstantField(A);
+&gt; CE := BaseChange(C,E);
+&gt; I := IrreducibleComponents(CE); assert #I eq 2;
+&gt; _&lt;x,y&gt; := Ambient(I[1]); I[1];
+Scheme over E defined by [ where s^2 = 1048576/531441/u ]
+ x^6 - 2*x^5 + x^4 - s*y^6 + 3*s*y^5 - 3*s*y^4 + s*y^3
+&gt; b, C2 := IsHyperelliptic(Curve(I[1])); assert b;
+</PRE>
+<HR>
+<H3><A NAME = "17132">Example <TT>HypGeomMot_hg-siegel-modular-form (H132E5)</TT></A></H3>
+Here is an example in degree 4 and weight 3.
+It turns out that the motive from t= - 1 has complex multiplication,
+and the L-series appears to be the same as that of a Siegel modular form
+given by <A  HREF = "text1503.htm#bib_geemen-straten">[vGvS93, S8.7]</A>.
+(This was found by Cohen and Rodriguez-Villegas).
+This L-series also appears in Example <A  HREF = "text1522.htm#17267">H133E27</A>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; H := HypergeometricData([1/2,1/2,1/2,1/2],[0,0,0,0]);
+&gt; L := LSeries(H,-1 : BadPrimes:=[&lt;2,9,1&gt;]); // guessed
+&gt; CFENew(L);
+-5.91645678915758854058796423962E-31
+&gt; LGetCoefficients(L,100);
+[* 1, 0, 0, 0, -4, 0, 0, 0, -6, 0, 0, 0, -84, 0, 0, 0, 36, 0, 0, 0, 0,
+   0, 0, 0, 146, 0, 0, 0, 140, 0, 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, -140,
+   0, 0, 0, 24, 0, 0, 0, -238, 0, 0, 0, 924, 0, 0, 0, 0, 0, 0, 0, -820,
+   0, 0, 0, 336, 0, 0, 0, 0, 0, 0, 0, -396, 0, 0, 0, 0, 0, 0, 0, -693,
+   0, 0, 0, -144, 0, 0, 0, -300, 0, 0, 0, 0, 0, 0, 0, -252, 0, 0, 0 *]
+&gt; // compare to the Tensor product way of getting this example
+&gt; E := EllipticCurve("32a");
+&gt; NF := Newforms(ModularForms(DirichletGroup(32).1,3)); // wt 3 w/char
+&gt; L1 := LSeries(E); L2 := LSeries(ComplexEmbeddings(NF[1][1])[1][1]);
+&gt; TP := TensorProduct(L1, L2, [ &lt;2, 9&gt; ]); // conductor 2^9 (guessed)
+&gt; [Round(Real(x)) : x in LGetCoefficients(TP,100)];
+[ 1, 0, 0, 0, -4, 0, 0, 0, -6, 0, 0, 0, -84, 0, 0, 0, 36, 0, 0, 0, 0,
+  0, 0, 0, 146, 0, 0, 0, 140, 0, 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, -140,
+  0, 0, 0, 24, 0, 0, 0, -238, 0, 0, 0, 924, 0, 0, 0, 0, 0, 0, 0, -820,
+  0, 0, 0, 336, 0, 0, 0, 0, 0, 0, 0, -396, 0, 0, 0, 0, 0, 0, 0, -693,
+  0, 0, 0, -144, 0, 0, 0, -300, 0, 0, 0, 0, 0, 0, 0, -252, 0, 0, 0 ]
+</PRE>
+<HR>
+<H3><A NAME = "17133">Example <TT>HypGeomMot_hg-bad-reduction (H132E6)</TT></A></H3>
+Here is an example showing how to handle bad primes in some cases.
+The Euler factors at {3, 5, 17} [where p|(t - 1)]
+were determined via a recipe from deformation theory
+by Rodriguez-Villegas, while at p=2, Roberts suggested a t-value
+that would trivialise the conductor (from a number field analogy),
+and Tornar&iacute;a then computed the full degree 4 factor (at p=2) for t=2<sup>8</sup>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; H := HypergeometricData([1/2,1/2,1/2,1/2],[0,0,0,0]);
+&gt; Lf := LSeries(Newforms(ModularForms(8,4))[1][1]);
+&gt; T := PolynomialRing(Integers()).1; // dummy variable
+&gt; f3 := EulerFactor(Lf,3 : Integral)*(1-3*T); // make it a poly
+&gt; f5 := EulerFactor(Lf,5 : Integral)*(1-5*T); // via Integral
+&gt; f17 := EulerFactor(Lf,17 : Integral)*(1-17*T);
+&gt; f2 := 1+T+6*T^2+8*T^3+64*T^4; // determined by Tornaria
+&gt; BP := [&lt;2,0,f2&gt;,&lt;3,1,f3&gt;,&lt;5,1,f5&gt;,&lt;17,1,f17&gt;];
+&gt; L := LSeries(H,256 : BadPrimes:=BP);
+&gt; Conductor(L);
+255
+&gt; assert Abs(CFENew(L)) lt 10^(-28);
+</PRE>
+<P>
+One need not specify all the bad prime information as in the above example.
+Here is a variation on it, with t=1/2<sup>8</sup>
+(note that this actually gives the same L-series,
+as the data is a self-twist, with the character induced
+by twisting being trivial for this choice of t).
+Note that only the information at 2 is given to <TT>LSeries</TT>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; H := HypergeometricData([1/2,1/2,1/2,1/2],[0,0,0,0]);
+&gt; MValue(H);
+256
+&gt; t := 1/2^8; // makes v_2(Mt)=0
+&gt; f2 := EulerFactor(H,t,2 : Fake);
+&gt; f2;
+64*T^4 + 8*T^3 + 6*T^2 + T + 1
+&gt; L := LSeries(H,t : BadPrimes:=[&lt;2,0,f2&gt;]);
+&gt; Conductor(L);
+255
+&gt; assert Abs(CFENew(L)) lt 10^(-28);
+</PRE>
+<HR>
+<H3><A NAME = "17134">Example <TT>HypGeomMot_hg-quintic-3fold (H132E7)</TT></A></H3>
+Here is an example with the quintic 3-fold.
+The deformation theory at p=11 here is related to the
+<P>
+Gr&ouml;ssencharacter example over (Q)(&zeta;<sub>5</sub>) given in
+Example <A  HREF = "text418.htm#4364">H41E10</A>.
+The action on inertia at p=11 involves &zeta;<sub>5</sub> when 11|t,
+and here it is raised to the 5th power, thus trivialising it.
+As with previous example, the deformation theory also involves
+a weight 4 modular form, here of level 25.
+<P>
+<P>
+<P>
+<PRE>
+&gt; f := CyclotomicPolynomial(5); g := CyclotomicPolynomial(1)^4;
+&gt; H := HypergeometricData(f,g : Print:="alpha_beta");
+&gt; H, Weight(H); // weight 3
+Hypergeometric data given by [1/5,2/5,3/5,4/5] and [0,0,0,0]
+3
+&gt; t := 11^5; // 11 is now good, as is raised to 5th power
+&gt; T := PolynomialRing(Rationals()).1;
+&gt; f2 := (1-T+8*T^2)*(1+2*T); // could have Magma compute these
+&gt; f3221 := (1-76362*T+3221^3*T^2)*(1-3221*T); // wt 4 lev 25
+&gt; // degree 4 factor at 11 comes from Grossencharacter
+&gt; // in fact, this is the t=0 deformation: sum_i x_i^5 = 0
+&gt; K&lt;z5&gt; := CyclotomicField(5);
+&gt; p5 := Factorization(5*Integers(K))[1][1]; // ramified
+&gt; G := HeckeCharacterGroup(p5^2);
+&gt; psi := Grossencharacter(G.0,[[3,0],[1,2]]);
+&gt; f11 := EulerFactor(LSeries(psi),11 : Integral); f11;
+1771561*x^4 - 118459*x^3 + 3861*x^2 - 89*x + 1
+&gt; BP := [&lt;2,1,f2&gt;,&lt;5,4,1&gt;,&lt;11,0,f11&gt;,&lt;3221,1,f3221&gt;];
+&gt; L := LSeries(H,t : BadPrimes:=BP);
+&gt; Conductor(L); // 2*5^4*3221, 5^4 is somewhat guessed
+4026250
+&gt; LSetPrecision(L,5);
+&gt; LCfRequired(L); // approx with old CheckFunctionalEquation
+12775             //
+&gt; time CFENew(L); // actually needs much fewer now
+1.5259E-5
+Time: 4.290
+</PRE>
+<P>
+Again one need not specify all the bad prime information,
+as Magma can automatically compute it at multiplicative and tame primes
+(however, the local conductor at 5 must be specified).
+<P>
+<P>
+<P>
+<PRE>
+&gt; EulerFactor(H,t,11); // tame
+1771561*T^4 - 118459*T^3 + 3861*T^2 - 89*T + 1
+&gt; EulerFactor(H,t,2); // multiplicative
+16*T^3 + 6*T^2 + T + 1
+&gt; EulerFactor(H,t,3221); // multiplicative
+-107637325775281*T^3 + 33663324863*T^2 - 79583*T + 1
+</PRE>
+<P>
+One can also choose t so as to trivialise the wild prime 5.
+<P>
+<P>
+<P>
+<PRE>
+&gt; MValue(H); // 5^5;
+3125
+&gt; t := 11^5/5^5;
+&gt; f5 := EulerFactor(H,t,5 : Fake); // v_5(Mt)=0
+&gt; f5;
+15625*T^4 - 125*T^3 - 45*T^2 - T + 1
+&gt; L := LSeries(H,t : BadPrimes:=[&lt;5,0,f5&gt;]);
+&gt; Conductor(L); // 2*3*26321, Magma computes Euler factors
+157926
+&gt; LSetPrecision(L,9); // about 4000 terms
+&gt; CFENew(L);
+-2.32830644E-10
+&gt; t := -11^5/5^5; // another choice with v_5(Mt)=0
+&gt; f5 := EulerFactor(H,t,5 : Fake); // v_5(Mt)=0
+&gt; f5; // four possible Euler factors, one for each Mt mod 5
+15625*T^4 + 1750*T^3 + 230*T^2 + 14*T + 1
+&gt; L := LSeries(H,t : BadPrimes:=[&lt;5,0,f5&gt;]);
+&gt; Conductor(L); // 2*31*331, Magma computes Euler factors
+20522
+&gt; LSetPrecision(L,9); // about 1300 terms
+&gt; CFENew(L);
+4.65661287E-10
+</PRE>
+<HR>
+<H3><A NAME = "17135">Example <TT>HypGeomMot_tame-primes (H132E8)</TT></A></H3>
+Here is an example with tame primes. This derives from comments
+of Rodriguez-Villegas. The idea is to take hypergeometric data that
+has weight 0 or 1, and compare it to Artin representations or
+hyperelliptic curves.
+<P>
+<P>
+<P>
+<PRE>
+&gt; T := PolynomialRing(Rationals()).1; // dummy variable
+&gt; H := HypergeometricData([3,4,6,12],[1,1,5,5]); // degree 10
+&gt; b, HC := IsHyperelliptic(CanonicalCurve(H)); // genus 5
+&gt; assert b; Genus(HC);
+5
+&gt; EulerFactor(Specialization(HC,13^12),13); // 13 becomes good
+371293*T^10 - 285610*T^9 + 125229*T^8 - 31096*T^7 + 4810*T^6
+ - 540*T^5 + 370*T^4 - 184*T^3 + 57*T^2 - 10*T + 1
+&gt; EulerFactor(H,13^12,13); // use hypergeometric methods
+371293*T^10 - 285610*T^9 + 125229*T^8 - 31096*T^7 + 4810*T^6
+ - 540*T^5 + 370*T^4 - 184*T^3 + 57*T^2 - 10*T + 1
+&gt; assert &amp;and[EulerFactor(Specialization(HC,p^12),p)
+&gt;             eq EulerFactor(H,p^12,p) : p in [11,13,17,19]];
+&gt; assert &amp;and[EulerFactor(Specialization(HC,t0*13^12),13)
+&gt;             eq EulerFactor(H,t0*13^12,13) : t0 in [1..12]];
+</PRE>
+<P>
+One can take a smaller power than the 12th, but then the curve will
+not become completely good at the prime. However, the hypergeometric
+calculations will still be possible.
+<P>
+<P>
+<P>
+<PRE>
+&gt; EulerFactor(H,17^4,17);
+17*T^2 + 2*T + 1
+&gt; EulerFactor(H,19^9,19); // takes the Phi_3 term
+19*T^2 + 7*T + 1
+&gt; EulerFactor(H,19^6,19);
+361*T^4 + 114*T^3 + 31*T^2 + 6*T + 1
+&gt; EulerFactor(H,1/11^5,11); // degree is phi(1)+phi(5)
+-T^5 + 1
+&gt; EulerFactor(H,4/11^5,11); // degree is phi(1)+phi(5)
+-T^5 + 5*T^4 - 10*T^3 + 10*T^2 - 5*T + 1
+</PRE>
+<P>
+A similar exploration is possible with a weight 0 example.
+Here the Artin representation machinery is better able to cope
+with partially good primes.
+<P>
+<P>
+<P>
+<PRE>
+&gt; H := HypergeometricData([2,3,6],[1,5]); // degree 5
+&gt; Q := Rationals();
+&gt; EulerFactor(ArtinRepresentation(H,7^6),7 : R:=Q);
+-T^5 - T^4 - T^3 + T^2 + T + 1
+&gt; EulerFactor(ArtinRepresentation(H,7^3),7 : R:=Q);
+T^2 + T + 1
+&gt; EulerFactor(ArtinRepresentation(H,7^2),7 : R:=Q);
+-T + 1
+&gt; EulerFactor(ArtinRepresentation(H,2/11^5),11 : R:=Q);
+-T^5 + 5*T^4 - 10*T^3 + 10*T^2 - 5*T + 1
+&gt; EulerFactor(H,7^6,7); // compute it directly from H
+-T^5 - T^4 - T^3 + T^2 + T + 1
+&gt; EulerFactor(H,7^3,7);
+T^2 + T + 1
+&gt; EulerFactor(H,7^2,7);
+-T + 1
+&gt; EulerFactor(H,2/11^5,11);
+-T^5 + 5*T^4 - 10*T^3 + 10*T^2 - 5*T + 1
+</PRE>
+<HR>
+<H3><A NAME = "17136">Example <TT>HypGeomMot_more-tame-primes (H132E9)</TT></A></H3>
+In general one should be able to relate the tame Euler factors
+to Gr&ouml;ssencharacters. This is partially considered
+(in a different guise) in <A  HREF = "text1503.htm#bib_weil-sommes">[Wei74]</A> and <A  HREF = "text1503.htm#bib_weil-periods">[Wei76]</A>.
+In particular, for primes p that are 3 mod 4, we can take the
+hypergeometric data given by the squares modulo p, and find that at
+a prime l that is 1 mod p with a suitably normalised t-value 
+whose valuation v<sub>l</sub>(t) at l is p, the Euler factor is a power
+(and Tate twist) of that for the canonical Gr&ouml;ssencharacter
+of (Q)(Sqrt( - p)).
+<P>
+<P>
+<P>
+<PRE>
+&gt; p := 11; assert p mod 4 eq 3 and p ne 3 and IsPrime(p);
+&gt; SQ := [-Integers()!x : x in GF(p) | IsSquare(x) and x ne 0];
+&gt; H := HypergeometricData([* x : x in [-&amp;+SQ] cat SQ *]);
+&gt; GammaList(H);
+[* -1, -3, -4, -5, -9, 22 *]
+&gt; Weight(H); assert Weight(H) eq (p-5)/2;
+3
+&gt; K := QuadraticField(-p);
+&gt; I := Factorization(p*Integers(K))[1][1];
+&gt; G := HeckeCharacterGroup(I); // get Tate twist of canonical GR
+&gt; u := (Weight(H)+ClassNumber(K)) div 2;
+&gt; v := (Weight(H)-ClassNumber(K)) div 2; //u+v=wt, u-v=classno
+&gt; u,v;
+2 1
+&gt; GR := Grossencharacter(G.0,[[u,v]]); // [6,3] for sqrt(-23)
+&gt; for l in [l : l in PrimesUpTo(1000) | l mod p eq 1] do
+&gt;   ef := EulerFactor(H,l^p/MValue(H),l);
+&gt;   F := Factorization(ef);
+&gt;   assert #F eq 1 and F[1][2] eq (p-1)/2;
+&gt;   assert F[1][1] eq EulerFactor(GR,l : Integral);
+&gt;   printf "%o %o n",l,F[1][1];
+&gt;   end for;
+23 12167*x^2 + 207*x + 1
+67 300763*x^2 - 871*x + 1
+89 704969*x^2 + 801*x + 1
+199 7880599*x^2 + 3980*x + 1
+</PRE>
+<HR>
+<H3><A NAME = "17137">Example <TT>HypGeomMot_hgm-speed-test (H132E10)</TT></A></H3>
+Here is an example of the use of <TT>PossibleHypergeometricData</TT>,
+enumerating the number of possibilities in small degree.
+A speed test is also done for the save-limit code.
+<P>
+<P>
+<P>
+<PRE>
+&gt; for d in [1..8] do
+&gt;    [#PossibleHypergeometricData(d : Weight:=w) : w in [0..d-1]];
+&gt;    end for;
+[ 1 ]
+[ 3, 10 ]
+[ 3, 0, 10 ]
+[ 11, 74, 30, 47 ]
+[ 7, 0, 93, 0, 47 ]
+[ 23, 287, 234, 487, 84, 142 ]
+[ 21, 0, 426, 0, 414, 0, 142 ]
+[ 51, 1001, 1234, 3247, 894, 1450, 204, 363 ]
+&gt; D4w1 := PossibleHypergeometricData(4 : Weight:=1);
+&gt; D := [HypergeometricData(x) : x in D4w1]; // 12 are self-twists
+&gt; #[x : x in D | Twist(x) eq x or Twist(x) eq SwapAlphaBeta(x)];
+12
+&gt; #PossibleHypergeometricData(4 : Weight:=1,TwistMinimal);
+43
+&gt; #PossibleHypergeometricData(4 : Weight:=1,Primitive);
+64
+&gt; // speed test for SaveLimit
+&gt; H := HypergeometricData([1/2,1/2,1/2,1/2],[0,0,0,0]);
+&gt; HypergeometricMotiveSaveLimit(2000);
+&gt; time _:=LGetCoefficients(LSeries(H,-1),2000);
+Time: 1.040
+&gt; time _:=LGetCoefficients(LSeries(H,-1),2000);
+Time: 0.540
+&gt; HypergeometricMotiveClearTable();
+&gt; time _:=LGetCoefficients(LSeries(H,-1),2000);
+Time: 1.030
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1508.htm">[Next]</A><A  HREF = "text1506.htm">[Prev]</A> <A  HREF = "text1508.htm">[Right]</A> <A  HREF = "text1506.htm">[Left]</A> <A  HREF = "text1504.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

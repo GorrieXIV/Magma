@@ -1,0 +1,594 @@
+/*
+Integer test.
+AKS 17/02/97.
+*/
+
+
+rand := Random;
+rand0 := func<n | rand(0, n)>;
+rand1 := func<n | rand(1, n)>;
+randn := func<n | rand(0, n) * (1 - 2 * rand(0, 1))>;
+
+function Composited(Q)
+    P := [NextPrime(Random(10^(d-1), 10^d): Proof := false): d in Q];
+    return &*P, P;
+end function;
+
+function Composite(Q)
+    P := [NextPrime(rand1(r)): r in Q];
+    return &*P, P;
+end function;
+
+procedure test_integer(range, count)
+    s, i := GetSeed();
+    printf "General test: range: %o digits, count: %o, seed: %o\n",
+	Round(Log(range) / Log(10.0)), count, s, i;
+
+    if range le 10^50 then
+	p1 := Composite([range]);
+	p2 := Composite([range]);
+    else
+	p1 := Composite([10^50]);
+	p2 := Composite([10^50]);
+    end if;
+
+    /*
+    Construct "Marsaglia" number mars = 2^i - 2^j + 1 to test Modexp mod
+    this type of number.
+    */
+
+    rlog := Ilog2(range);
+    j := Max(Random(rlog div 2, rlog), 1);
+    i := Random(j + 1, rlog + 1);
+    mars := 2^i - 2^j + 1;
+    mars_erange := Max(2^(i div 5), 3 * i);
+
+    assert IsPrime(p1);
+    assert IsProbablePrime(p1);
+    assert IsPrime(p2);
+    assert IsProbablePrime(p2);
+
+    assert NextPrime(p1 - 1) eq p1;
+    assert PreviousPrime(p1 + 1) eq p1;
+
+    assert IsOne(1);
+    assert IsMinusOne(-1);
+    assert IsZero(0);
+
+    for c := 1 to count do
+	x := randn(range);
+	repeat
+	    y := randn(range);
+	until y ne 0;
+	ax := Abs(x);
+	ay := Abs(y);
+
+	xy := x * y;
+
+	assert x + y eq y + x;
+	assert xy eq y * x;
+        assert x * (x + y) eq x^2 + y*x;
+        assert x^2 - y^2 eq (x - y)*(x + y);
+        assert (x + y)^2 eq x^2 + y^2 + 2*xy;
+        assert x + 0 eq x;
+        assert x * 0 eq 0;
+        assert x - x eq 0;
+        assert x - y eq -(y - x);
+        assert x^0 eq 1;
+
+	q, r := Quotrem(x, y);
+	assert x eq q * y + r;
+	assert q eq x div y;
+	assert r eq x mod y;
+
+	assert Abs(x) le 2 or not IsDivisibleBy(x, x + 1);
+	l, q := IsDivisibleBy(x * y, y);
+	assert l and q eq x;
+
+	assert Modexp(x, p1 - 1, p1) eq 1 or IsDivisibleBy(x, p1);
+	assert Modexp(x, p2 - 1, p2) eq 1 or IsDivisibleBy(x, p2);
+
+	me1 := Random(1, mars_erange);
+	me2 := Random(1, mars_erange);
+	assert (Modexp(x, me1, mars) * Modexp(x, me2, mars)) mod mars eq 
+	       Modexp(x, me1 + me2, mars);
+
+	assert Isqrt(x^2) eq ax;
+	assert x eq 0 or Isqrt(x^2+1) eq ax;
+
+	assert x eq 0 or not IsSquare(x^2 + 1);
+	l, s := IsSquare(x^2);
+	assert l and s eq ax;
+
+	if x ne 0 then
+	    l := Ilog2(ax);
+	    assert 2^l le ax and ax lt 2^(l + 1);
+	end if;
+
+	assert Sign(x) eq -Sign(-x);
+
+	assert IsEven(2 * x);
+	assert IsOdd(2 * x + 1);
+
+	assert GCD(xy, xy + x) eq ax;
+	assert LCM(xy, xy + x) eq Abs(xy * (y + 1));
+
+	g, a, b := XGCD(x, y);
+	assert g eq GCD(x, y);
+	assert a*x + b*y eq g;
+
+	g, a, b := XGCD(xy, xy + x);
+	assert g eq ax;
+	assert a*xy + b*(xy + x) eq ax;
+
+	assert GCD([x, 2*x, 3*x, 5*x, 7*x, 0]) eq ax;
+	assert LCM([x, 2*x, 3*x, 5*x, 7*x, 1]) eq ax * 2*3*5*7;
+
+	Q := [2*3*5*x, 3*5*7*x, 3*5*11*x, 3*5*13*x, 5*7*11*x, 7*11*13*x];
+	g, A := XGCD(Q);
+	assert g eq GCD(Q);
+	assert g eq ax;
+	assert &+[A[i]*Q[i]: i in [1 .. #Q]] eq g;
+
+	assert x ge x and x + 1 gt x;
+	assert x le x and x - 1 lt x;
+
+	baser := 2^(Ilog2(range) div 10);
+	base := rand(baser, 2 * baser) + 2;
+	Q := IntegerToSequence(ax, base);
+	assert SequenceToInteger(Q, base) eq ax;
+    end for;
+end procedure;
+
+/*******************************************************************************
+			    Special functions    
+*******************************************************************************/
+
+assert NthPrime(10) eq 29;
+assert NthPrime(100000) eq 1299709;
+assert NthPrime(99999) eq 1299689;
+assert NthPrime(200000) eq 2750159;
+
+"EulerianNumber, Binomial";
+time for n := 1 to 10 do
+    for m := 1 to 10 do
+	assert EulerianNumber(n, m) eq
+	    &+[(-1)^k * Binomial(n + 1, k) * (m + 1 - k)^n: k in [0 .. m]];
+    end for;
+end for;
+// Num perms, Num partitions?
+
+test_phi := procedure(n)
+    f := Factorization(n);
+    phif := FactoredEulerPhi(f);
+    phi := EulerPhi(n);
+    assert Factorization(phi) eq phif;
+    phi1 := phi - 1;
+    lambda := CarmichaelLambda(n);
+    lambdaf := FactoredCarmichaelLambda(f);
+    assert Factorization(lambda) eq lambdaf;
+ 
+    for i := 1 to 10 do
+	repeat
+	    x := rand(1, n - 1);
+	until GCD(x, n) eq 1;
+        assert Modexp(x, phi, n) eq 1;
+        assert Modexp(x, lambda, n) eq 1;
+	if n le 1000 then
+	    assert IsPrimitive(x, n) eq (Order(x, n) eq phi);
+	end if;
+    end for;
+end procedure;
+
+"Small Phi";
+time for n in [40 .. 50] do
+    test_phi(n);
+end for;
+
+C := [Composited([i, j, k]): i, j, k in [4 .. 6]];
+"Big Phi";
+time for n in C do
+    test_phi(n);
+end for;
+
+"Divisor Sigma";
+DS := 
+[ 1, 3, 4, 7, 6, 12, 8, 15, 13, 18, 1, 5, 10, 21, 26, 50, 50, 85, 91, 130, 1, 9,
+28, 73, 126, 252, 344, 585, 757, 1134, 1, 17, 82, 273, 626, 1394, 2402, 4369, 
+6643, 10642, 1, 33, 244, 1057, 3126, 8052, 16808, 33825, 59293, 103158, 1, 65, 
+730, 4161, 15626, 47450, 117650, 266305, 532171, 1015690, 1, 129, 2188, 16513, 
+78126, 282252, 823544, 2113665, 4785157, 10078254, 1, 257, 6562, 65793, 390626, 
+1686434, 5764802, 16843009, 43053283, 100390882, 1, 513, 19684, 262657, 1953126,
+10097892, 40353608, 134480385, 387440173, 1001953638, 1, 1025, 59050, 1049601, 
+9765626, 60526250, 282475250, 1074791425, 3486843451, 10009766650 ];
+k := 1;
+time for i, j in [1 .. 10] do
+    d := DivisorSigma(i, j);
+    assert d eq DS[k];
+    assert DivisorSigma(i, Factorization(j)) eq d;
+    k +:= 1;
+end for;
+
+"Jacobi";
+time for m in [3 .. 103 by 2] cat C do
+    for i := 1 to 10 do
+	x := rand(m);
+	if GCD(x, m) eq 1 then
+	    assert JacobiSymbol((x^2) mod m, m) eq 1;
+	else
+	    assert JacobiSymbol((x^2) mod m, m) eq 0;
+	end if;
+    end for;
+    if IsPrime(m) then
+	x := rand(m);
+	assert LegendreSymbol(x, m) eq JacobiSymbol(x, m);
+	x := rand(m);
+	assert LegendreSymbol(x, m) eq JacobiSymbol(x, m);
+    end if;
+end for;
+// Kronecker?
+
+"Mu";
+MU :=
+[ 1, -1, -1, 0, -1, 1, -1, 0, 0, 1, -1, 0, -1, 1, 1, 0, -1, 0, -1, 0, 1, 1, -1, 
+0, 0, 1, 0, 0, -1, -1, -1, 0, 1, 1, 1, 0, -1, 1, 1, 0, -1, -1, -1, 0, 0, 1, -1, 
+0, 0, 0, 1, 0, -1, 0, 1, 0, 1, 1, -1, 0, -1, 1, 0, 0, 1, -1, -1, 0, 1, -1, -1, 
+0, -1, 1, 0, 0, 1, -1, -1, 0, 0, 1, -1, 0, 1, 1, 1, 0, -1, 0, 1, 0, 1, 1, 1, 0, 
+-1, 0, 0, 0, -1, -1, -1, 0, -1, 1, -1, 0, -1, -1, 1, 0, -1, -1, 1, 0, 0, 1, 1, 
+0, 0, 1, 1, 0, 0, 0, -1, 0, 1, -1, -1, 0, 1, 1, 0, 0, -1, -1, -1, 0, 1, 1, 1, 0,
+1, 1, 0, 0, -1, 0, -1, 0, 0, -1, 1, 0, -1, 1, 1, 0, 1, 0, -1, 0, -1, 1, -1, 0, 
+0, -1, 0, 0, -1, -1, 0, 0, 1, 1, -1, 0, -1, -1, 1, 0, 1, -1, 1, 0, 0, -1, -1, 0,
+-1, 1, -1, 0, -1, 0, -1, 0 ];
+time for n in [1 .. 200] do
+    m := MoebiusMu(n);
+    assert m eq MU[n];
+    assert MoebiusMu(Factorization(n)) eq m;
+end for;
+
+"Primitive Root";
+P :=
+[ 0,
+1, 2, 3, 2, 5, 3, 0, 2, 3, 2, 0, 2, 3, 0, 0, 3, 5, 2, 0, 0, 7, 5, 0, 2, 7, 2, 
+0, 2, 0, 3, 0, 0, 3, 0, 0, 2, 3, 0, 0, 6, 0, 3, 0, 0, 5, 5, 0, 3, 3, 0, 0, 2, 5,
+0, 0, 0, 3, 2, 0, 2, 3, 0, 0, 0, 0, 2, 0, 0, 0, 7, 0, 5, 5, 0, 0, 0, 0, 3, 0, 2,
+7, 2, 0, 0, 3, 0, 0, 3, 0, 0, 0, 0, 5, 0, 0, 5, 3, 0, 0, 2, 0, 5, 0, 0, 3, 2, 0,
+6, 0, 0, 0, 3, 0, 0, 0, 0, 11, 0, 0, 2, 7, 0, 0, 2, 0, 3, 0, 0, 0, 2, 0, 0, 7, 
+0, 0, 3, 0, 2, 0, 0, 7, 0, 0, 0, 5, 0, 0, 2, 0, 6, 0, 0, 0, 0, 0, 5, 3, 0, 0, 0,
+5, 2, 0, 0, 5, 5, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 3, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 19, 0, 5, 5, 0, 0, 2, 0, 3, 0 ];
+time for n in [2 .. 200] do
+    assert PrimitiveRoot(n) eq P[n];
+end for;
+
+"Stirling First";
+S :=
+[ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 2, -3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -6, 11, -6, 1, 0, 0, 
+0, 0, 0, 0, 0, 0, 0, 0, 0, 24, -50, 35, -10, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+-120, 274, -225, 85, -15, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 720, -1764, 1624, -735, 
+175, -21, 1, 0, 0, 0, 0, 0, 0, 0, 0, -5040, 13068, -13132, 6769, -1960, 322, 
+-28, 1, 0, 0, 0, 0, 0, 0, 0, 40320, -109584, 118124, -67284, 22449, -4536, 546, 
+-36, 1, 0, 0, 0, 0, 0, 0, -362880, 1026576, -1172700, 723680, -269325, 63273, 
+-9450, 870, -45, 1, 0, 0, 0, 0, 0, 3628800, -10628640, 12753576, -8409500, 
+3416930, -902055, 157773, -18150, 1320, -55, 1, 0, 0, 0, 0, -39916800, 
+120543840, -150917976, 105258076, -45995730, 13339535, -2637558, 357423, -32670,
+1925, -66, 1, 0, 0, 0, 479001600, -1486442880, 1931559552, -1414014888, 
+657206836, -206070150, 44990231, -6926634, 749463, -55770, 2717, -78, 1, 0, 0, 
+-6227020800, 19802759040, -26596717056, 20313753096, -9957703756, 3336118786, 
+-790943153, 135036473, -16669653, 1474473, -91091, 3731, -91, 1, 0, 87178291200,
+-283465647360, 392156797824, -310989260400, 159721605680, -56663366760, 
+14409322928, -2681453775, 368411615, -37312275, 2749747, -143325, 5005, -105, 1 
+];
+k := 1;
+time for i, j in [1 .. 15] do
+    assert StirlingFirst(i, j) eq S[k];
+    k +:= 1;
+end for;
+
+"Stirling Second";
+S :=
+[ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+0, 0, 0, 0, 1, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 7, 6, 1, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 1, 15, 25, 10, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 31, 90, 
+65, 15, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 63, 301, 350, 140, 21, 1, 0, 0, 0, 0, 
+0, 0, 0, 0, 1, 127, 966, 1701, 1050, 266, 28, 1, 0, 0, 0, 0, 0, 0, 0, 1, 255, 
+3025, 7770, 6951, 2646, 462, 36, 1, 0, 0, 0, 0, 0, 0, 1, 511, 9330, 34105, 
+42525, 22827, 5880, 750, 45, 1, 0, 0, 0, 0, 0, 1, 1023, 28501, 145750, 246730, 
+179487, 63987, 11880, 1155, 55, 1, 0, 0, 0, 0, 1, 2047, 86526, 611501, 1379400, 
+1323652, 627396, 159027, 22275, 1705, 66, 1, 0, 0, 0, 1, 4095, 261625, 2532530, 
+7508501, 9321312, 5715424, 1899612, 359502, 39325, 2431, 78, 1, 0, 0, 1, 8191, 
+788970, 10391745, 40075035, 63436373, 49329280, 20912320, 5135130, 752752, 
+66066, 3367, 91, 1, 0, 1, 16383, 2375101, 42355950, 210766920, 420693273, 
+408741333, 216627840, 67128490, 12662650, 1479478, 106470, 4550, 105, 1 ];
+k := 1;
+time for i, j in [1 .. 15] do
+    assert StirlingSecond(i, j) eq S[k];
+    k +:= 1;
+end for;
+
+"Squarefree factorization";
+time for c in [1 .. 10] do
+    x := 1000*rand(10^10);
+    y, z := SquarefreeFactorization(x);
+    assert y * z^2 eq x;
+    assert IsSquarefree(y);
+end for;
+
+"Solution";
+time for c := 1 to 10 do
+    M := [];
+    A := [];
+    for i := 1 to 10 do
+	repeat
+	    m := RandomConsecutiveBits(100*c, 0, 100*c);
+	until forall{y: y in M | GCD(m, y) eq 1};
+	repeat
+	    a := RandomConsecutiveBits(100*c, 0, 100*c);
+	until GCD(a, m) eq 1;
+	Append(~M, m);
+	Append(~A, a);
+    end for;
+
+    P := &* M;
+    lp := Ilog2(P);
+    for cx := 1 to 10 do
+	repeat
+	    x := RandomConsecutiveBits(lp, 0, lp);
+	until x lt P;
+	B := [A[i] * x mod M[i]: i in [1 .. #M]];
+	y := Solution(A, B, M);
+	if x ne y then
+	    print "M:", M;
+	    print "A:", A;
+	    print "B:", B;
+	    print "x:", x;
+	    print "y:", y;
+	    error "WRONG!";
+	end if;
+    end for;
+    m := M[1];
+    repeat
+	x := rand1(m - 1);
+    until GCD(x, m) eq 1;
+    y := Solution(A[1], A[1] * x mod m, m);
+    assert x eq y;
+    assert (x * Modinv(x, m)) mod m eq 1;
+end for;
+
+"Divisors";
+time for n := 1 to 100 do
+    D := Divisors(n);
+    assert D eq [d: d in [1 .. n] | IsDivisibleBy(n, d)];
+    assert Divisors(Factorization(n)) eq D;
+    assert SumOfDivisors(n) eq &+D;
+end for;
+
+"Multinomial";
+time for n := 1 to 20 do
+    assert &+[
+	Multinomial(n, [i, j, n - i - j]): j in [0 .. n - i], i in [0 .. n]
+    ] eq 3^n;
+end for;
+
+"Small Norm Equation";
+time for c := 1 to 20 do
+    x := rand1(10^9);
+    y := rand1(10^3);
+    d := rand1(10^3);
+    m := x^2 + d*y^2;
+    l, xx, yy := NormEquation(d, m);
+    assert l and xx^2 + d*yy^2 eq m;
+end for;
+
+"Big Norm Equation";
+time for c := 1 to 5 do
+    x := rand1(10^15);
+    y := rand1(10^10);
+    d := rand1(10^10);
+    m := x^2 + d*y^2;
+    l, xx, yy := NormEquation(d, m);
+    assert l and xx^2 + d*yy^2 eq m;
+end for;
+
+"Factorial";
+
+p := NextPrime(10^20);
+assert [Factorial(10^i) mod p: i in [1 .. 5]] eq
+    [ 3628800, 20062613111551063528, 62839908755675838208,
+    62314810046167082659, 26028458340319495212 ];
+assert [Factorial(2^i) mod p: i in [1 .. 17]] eq
+    [ 2, 24, 40320, 20922789888000, 30064596985755859535, 77775466995294672616, 
+    30927682637498163815, 6292398276274476228, 62610661750947489964, 
+    9379041781395103800, 84823553382725963615, 68006496309631832885, 
+    40386049800875337343, 33563632005376002514, 77594730070184854171, 
+    64158446134913289812, 38405980961003069803 ];
+
+"CoprimeBasis";
+assert CoprimeBasis([Factorial(i): i in [1..10]]) eq
+    [ <2, 38>, <3, 17>, <5, 7>, <7, 4> ];
+assert CoprimeBasis([(2^i-1): i in [1..15 by 1]]) eq
+    [ <3, 9>, <5, 3>, <7, 5>, <11, 1>, <13, 1>, <17, 1>, <31, 3>,
+    <43, 1>, <73, 1>, <127, 2>, <151, 1>, <2047, 1>, <8191, 1> ];
+assert CoprimeBasis([2^2, 2^3]) eq [ <2, 5> ];
+assert CoprimeBasis([2^3, 2^2]) eq [ <2, 5> ];
+assert CoprimeBasis([ 6, 30, 2 ]) eq [ <2, 3>, <3, 2>, <5, 1> ] ;
+for i := 1 to 20 do
+    Q := [Random(1, 1000): i in [1 .. 10]];
+    C := CoprimeBasis(Q);
+    assert &*[t[1]^t[2]: t in C] eq &*Q;
+end for;
+
+function make_fact(l, u, s, e, n)
+    f := [];
+    p := NextPrime(rand(l, u));
+    for c := 1 to n do
+	Append(~f, <p, rand1(e)>);
+	p := NextPrime(rand(p, Floor(s * p)));
+    end for;
+    return f;
+end function;
+
+procedure test_fact(name, alg, l, u, s, e, n, count)
+    print name;
+    time for cc := 1 to count do
+	f := make_fact(l, u, s, e, n);
+//print f;
+	x := &*[t[1]^t[2]: t in f];
+//print x;
+	p, c := alg(x);
+//print "Result:", p,c;
+	assert FactorizationToInteger(p) * &*c eq x;
+	assert c ne [] or p eq f;
+//print "here";
+    end for;
+end procedure;
+
+test_fact("Trial Division Small", TrialDivision, 2, 2, 1.3, 2, 20, 5);
+test_fact("Trial Division Big", TrialDivision, 1000, 5000, 1.05, 1, 20, 5);
+test_fact("Trial Division Arg", func<x|TrialDivision(x, 100)>, 2,5,1.5,2,10,5);
+
+test_fact("Pollard Rho Small", PollardRho, 10^5, 10^6, 1.5, 1, 10, 3);
+test_fact("Pollard Rho Big", PollardRho, 10^7, 10^8, 1.5, 1, 3, 3);
+test_fact(
+    "Pollard Rho Arg",
+    func<x|PollardRho(x,-1,1,20000)>, 10^6, 10^8, 1.5, 1, 3, 3
+);
+
+test_fact("SQUFOF", SQUFOF, 10^5, 2*10^5, 1.5, 1, 3, 5);
+test_fact(
+    "SQUFOF Arg",
+    func<x|SQUFOF(x,400000)>, 10^5, 2*10^5, 1.5, 1, 3, 5
+);
+
+test_fact("MPQS", MPQS, 10^10, 10^13, 100, 1, 3, 2);
+
+procedure test_fact_number(n)
+    n := Abs(n);
+    F := Factorization(n);
+    // F;
+    assert FactorizationToInteger(F) eq n;
+    assert forall{t: t in F | IsPrime(t[1])};
+end procedure;
+
+test_fact_number(
+    10582992769634836749654234734219541105011117631542584566294\
+    64437598111071380287090130990469160323646514462987944112040\
+    89717183957992768185159944225792
+);
+
+test_fact_number(
+    29540428425906266877928349279076084204001379805460438639013186265625
+);
+
+B := 6;
+M := 6;
+for i := 1 to 20 do
+    n := &*[Random(10^B)^Random(1, M): j in [1 .. 10]];
+    test_fact_number(n);
+    n := &*[NextPrime(Random(10^B))^Random(1, M): j in [1 .. 10]];
+    test_fact_number(n);
+end for;
+
+///////////////////
+
+procedure test_ecm(n, B1, sigma, f)
+    assert ECM(n, B1: Sigma := sigma) eq f;
+end procedure;
+
+procedure test_ppm1(func, n, B1, sigma, f)
+    assert func(n, B1: Sigma := sigma) eq f;
+end procedure;
+//test_pm1 := procedure<n, B1, sigma, f | test_ppm1(pMinus1, n, B1, sigma, f)>;
+//test_pp1 := procedure<n, B1, sigma, f | test_ppm1(pPlus1, n, B1, sigma, f)>;
+
+test_ecm(119022509020530997071050296109, 1000, 2889701011, 5312042039);
+//test_pm1(
+
+procedure check_p1(D, B1, B2, d, func)
+    repeat
+	n, L := Composite(D);
+    until exists{
+	p: p in L |
+	    #pL ge 2 and pL[#pL, 1] le B2 and pL[#pL - 1, 1] le B1
+	    where pL := Factorization(p + d)
+    };
+
+    count := d gt 0 select 10 else 1;
+    for i := 1 to count do
+	f := func(n, B1: B2 := B2);
+	if f ne 0 then
+	    break;
+	end if;
+    end for;
+    if false and f eq 0 then
+	"Didn't find ppm1 factor!";
+	"n:", n;
+	"L:", L;
+	"d:", d;
+	"B1:", B1;
+	"B2:", B2;
+    else
+//n, f;
+	assert f in L;
+    end if;
+end procedure;
+
+/*
+for i := 1 to 5 do
+    time check_p1([10, 35], 20000, 100000, -1, pMinus1);
+    time check_p1([10, 35], 20000, 100000, +1, pPlus1);
+end for;
+time check_p1([15, 35], 20000, 100000, -1, pMinus1);
+time check_p1([15, 35], 20000, 100000, +1, pPlus1);
+*/
+
+
+/////////////////
+
+fcount := 10;
+printf "Factorization (%o numbers)\n", fcount;
+time for c := 1 to fcount do
+    f := [];
+    p := rand(2, 3);
+    for cc := 1 to 20 do
+	Append(~f, <p, rand1(3)>);
+	p := NextPrime(rand(p, Floor(1.3 * p)));
+    end for;
+    p := 10^5;
+    for cc := 1 to 2 do
+	p := NextPrime(rand(p, Floor(1.5 * p)));
+	Append(~f, <p, 1>);
+    end for;
+    p := 10^12;
+    for cc := 1 to 3 do
+	p := NextPrime(rand(p, Floor(1.5 * p)));
+	Append(~f, <p, 1>);
+    end for;
+    n := &*[t[1]^t[2]: t in f];
+
+    printf "    Factorization %o; ", c;
+    time ff := Factorization(n);
+    assert ff eq f;
+end for;
+// PrimeBasis
+ 
+"Itest";
+time for i in [3 .. 1000 by 23] do
+    for j in [3 .. 1000 by 53] do
+	m := Min(i, j);
+	Itest(i, j, 0, 1, 3);
+	Itest(i, j, m div 3, m div 3, 3);
+	Itest(i, j, 0, m, 3);
+    end for;
+end for;
+
+time test_integer(10, 1000);
+time test_integer(100, 10000);
+time test_integer(100000, 10000);
+time test_integer(10^10, 10000);
+time test_integer(10^100, 500);
+time test_integer(10^1000, 50);
+time test_integer(10^10000, 1);
+
+//Rather too slow:
+//time test_integer(10^100000, 1);

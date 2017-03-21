@@ -1,0 +1,105 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Conversion between Categories</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text836.htm">[Next]</A><A  HREF = "text834.htm">[Prev]</A> <A  HREF = "text836.htm">[Right]</A> <A  HREF = "text834.htm">[Left]</A> <A  HREF = "text831.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "9636">Conversion between Categories</A></H3>
+
+<P>
+<P>
+This section describes category transfers from polycyclic groups to other
+Magma categories of groups. For category transfers to permutation groups
+(cf. Chapter <A  HREF = "text629.htm#6871">PERMUTATION GROUPS</A>) the functions <A  HREF = "text838.htm#GrpGPC:CosetAction">CosetAction</A> and
+<A  HREF = "text838.htm#GrpGPC:CosetImage">CosetImage</A> can be used. For category transfers to matrix groups
+(cf. Chapter <A  HREF = "text653.htm#7392">MATRIX GROUPS OVER GENERAL RINGS</A>) we refer to Section <A  HREF = "text843.htm#9732">Representation Theory</A>.
+
+
+<H5><A NAME = "9637">AbelianGroup(G) : GrpGPC -&gt; GrpAb, Map</A></H5>
+<BLOCKQUOTE>
+A <TT>GrpAb</TT> (cf. Chapter <A  HREF = "text786.htm#8898">ABELIAN GROUPS</A>) representation A of the 
+abelian polycyclic group G and the isomorphism from G to A.
+</BLOCKQUOTE>
+<H5><A NAME = "9638"></A><A NAME = "GrpGPC:FPGroup">FPGroup</A>(G) : GrpGPC -&gt; GrpFP, Map</H5>
+<BLOCKQUOTE>
+A <TT>GrpFP</TT> (cf. Chapter <A  HREF = "text808.htm#9089">FINITELY PRESENTED GROUPS</A>) representation F of G 
+and the isomorphism from F to G.
+This category transfer is currently only possible provided that all exponents 
+occurring in the presentation of G are small integers. This can be checked 
+by means of the function <A  HREF = "text833.htm#GrpGPC:PresentationIsSmall">PresentationIsSmall</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "9639"></A><A NAME = "GrpGPC:PCGroup">PCGroup</A>(G) : GrpGPC -&gt; GrpPC, Map</H5>
+<BLOCKQUOTE>
+A <TT>GrpPC</TT> (cf. Chapter <A  HREF = "text706.htm#7978">FINITE SOLUBLE GROUPS</A>) representation F of the 
+finite polycyclic group G and the isomorphism from G to F.
+<P>
+<P>
+This category transfer is currently only possible provided that all exponents 
+occurring in the presentation of G are small integers. This can be checked 
+by means of the function <A  HREF = "text833.htm#GrpGPC:PresentationIsSmall">PresentationIsSmall</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "9640">GPCGroup(G) : GrpPerm -&gt; GrpGPC, Map</A></H5>
+<H5>GPCGroup(G) : GrpMat -&gt; GrpGPC, Map</H5>
+<H5>GPCGroup(G) : GrpAb -&gt; GrpGPC, Map</H5>
+<H5>GPCGroup(G) : GrpPC -&gt; GrpGPC, Map</H5>
+<BLOCKQUOTE>
+A <TT>GrpGPC</TT> representation P of the solvable group G and the
+ isomorphism from  G to P. The group G can be of one of the following
+ types:
+<TT>GrpPerm</TT> (cf. Chapter <A  HREF = "text629.htm#6871">PERMUTATION GROUPS</A>),
+<TT>GrpMat</TT> (cf. Chapter <A  HREF = "text653.htm#7392">MATRIX GROUPS OVER GENERAL RINGS</A>), 
+<TT>GrpAb</TT> (cf. Chapter <A  HREF = "text786.htm#8898">ABELIAN GROUPS</A>),
+<TT>GrpPC</TT> (cf. Chapter <A  HREF = "text706.htm#7978">FINITE SOLUBLE GROUPS</A>).
+Currently G must be finite, if it  is of type <TT>GrpMat</TT>.  
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9641">Example <TT>GrpGPC_SubgroupsQuotientsTransfer (H77E6)</TT></A></H3>
+We define a finite, solvable matrix group and convert it to a (general) polycyclic group G.
+<P>
+<P>
+<PRE>
+&gt; a := GL(2,3) ! [1,1,0,1];
+&gt; b := GL(2,3) ! [0,1,1,0];
+&gt; M := sub&lt;Parent(a)|a,b&gt;;
+&gt; IsSolvable(M);
+true
+&gt; IsFinite(M);
+true
+&gt; G, f := GPCGroup(M);
+</PRE>
+We now compute the direct product D of G and the infinite dihedral group H, define a subgroup S of D, its normal closure N and construct the quotient Q of D by N.
+<P>
+<P>
+<PRE>
+&gt; H&lt;u,v&gt; := DihedralGroup(GrpGPC, 0);
+&gt; D, incl, proj := DirectProduct(G, H);
+&gt; S := sub&lt;D | incl[1](f(a*b)), incl[2]((u,v)^2)&gt;;
+&gt; N := ncl&lt;D|S&gt;;
+&gt; Q := D/N;
+&gt; Q;
+GrpGPC : Q of order 2^3 on 2 PC-generators
+PC-Relations:
+    Q.1^2 = Id(Q), 
+    Q.2^4 = Id(Q), 
+    Q.2^Q.1 = Q.2^3
+</PRE>
+Since Q is finite, it can be transformed into a group of type <TT>GrpPC</TT> using the function <A  HREF = "text835.htm#GrpGPC:PCGroup">PCGroup</A>. This should (in non-trivial examples) be done, if further computations with it are intended.
+<P>
+<P>
+<PRE>
+&gt; Q_ := PCGroup(Q);
+&gt; Q_;
+GrpPC : Q_ of order 8 = 2^3
+PC-Relations:
+    Q_.2^2 = Q_.3, 
+    Q_.2^Q_.1 = Q_.2 * Q_.3
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text836.htm">[Next]</A><A  HREF = "text834.htm">[Prev]</A> <A  HREF = "text836.htm">[Right]</A> <A  HREF = "text834.htm">[Left]</A> <A  HREF = "text831.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

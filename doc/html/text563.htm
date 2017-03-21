@@ -1,0 +1,830 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Creating Galois Representations</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text564.htm">[Next]</A><A  HREF = "text562.htm">[Prev]</A> <A  HREF = "text564.htm">[Right]</A> <A  HREF = "text562.htm">[Left]</A> <A  HREF = "text561.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "5959">Creating Galois Representations</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text563.htm#5976">Representations from Finite Extensions</A>
+<LI> <A  HREF = "text563.htm#5985">Local Representations of Global Objects</A>
+</UL>
+<H5><A NAME = "5960">ZeroRepresentation(K) : FldPad -&gt; GalRep</A></H5>
+<BLOCKQUOTE>
+Galois representation 0 over a p-adic field K. It is 0-dimensional, and 
+0 + A=A, 0 tensor A=0 for every Galois representation A.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5961">Example <TT>GalRep_galrep-zerorepresentation (H56E2)</TT></A></H3>
+<P>
+<P>
+<PRE>
+
+&gt; K:=pAdicField(3,20);
+&gt; zero:=ZeroRepresentation(K);
+&gt; zero;
+Galois representation 0 with G=C1, I=C1 over Q3[20]
+&gt; zero + CyclotomicCharacter(K) eq CyclotomicCharacter(K);
+true
+&gt; zero*CyclotomicCharacter(K) eq zero; 
+true
+</PRE>
+<P>
+<HR>
+<H5><A NAME = "5962">PrincipalCharacter(K) : FldPad -&gt; GalRep</A></H5>
+<BLOCKQUOTE>
+Principal character 1 of the absolute Galois group of K, as a Galois 
+representation.
+It is a 1-dimensional unramified representation, same as 
+<TT>UnramifiedCharacter(K,1)</TT>. Thus 1 tensor A=1 for every 
+Galois representation A.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5963">Example <TT>GalRep_galrep-principalcharacter (H56E3)</TT></A></H3>
+Take K=Q<sub>3</sub>, and F/K the unramified extension of degree 4, so that 
+G=Gal(F/K) isomorphic to C<sub>4</sub>. The 4 irreducible representations of G can be 
+viewed as Galois representations, and the first one of these is the 
+principal character (for any group).
+<P>
+<P>
+<PRE>
+
+&gt; K:=pAdicField(3,20);
+&gt; one:=PrincipalCharacter(K);
+&gt; one;
+1-dim trivial Galois representation 1 over Q3[20]
+&gt; F:=ext&lt;K|4&gt;;            
+&gt; A1,A2,A3,A4:=Explode(GaloisRepresentations(F,K));
+&gt; A1 eq one;
+true
+</PRE>
+<P>
+<HR>
+<H5><A NAME = "5964">CyclotomicCharacter(K) : FldPad -&gt; GalRep</A></H5>
+<BLOCKQUOTE>
+Cyclotomic character over K. It is an unramified character (trivial on inertia)
+and takes the value q, the size of the residue field of K,
+on any Frobenius element. 
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5965">Example <TT>GalRep_galrep-cyclotomiccharacter (H56E4)</TT></A></H3>
+<P>
+<P>
+<PRE>
+
+&gt; K:=pAdicField(3,20);
+&gt; chi:=CyclotomicCharacter(K);
+&gt; chi,EulerFactor(chi);
+1-dim unramified Galois representation Unr(1/3) over Q3[20]
+-1/3*x + 1
+&gt; chi^3,EulerFactor(chi^3);
+1-dim unramified Galois representation Unr(1/27) over Q3[20]
+-1/27*x + 1
+</PRE>
+<P>
+<HR>
+<H5><A NAME = "5966">UnramifiedCharacter(K,c) : FldPad, Any -&gt; GalRep</A></H5>
+<BLOCKQUOTE>
+Galois representation over K given by an unramified character that sends 
+the arithmetic Frobenius element Frob<sub>K</sub> |-&gt; c<sup> - 1</sup> 
+(and, so, the geometric Frobenius element Frob<sub>K</sub><sup> - 1</sup> |-&gt; c.)
+The parameter c must be a non-zero complex number.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5967">Example <TT>GalRep_galrep-unramifiedcharacter (H56E5)</TT></A></H3>
+<P>
+<P>
+<PRE>
+
+&gt; K:=pAdicField(3,20);
+&gt; assert UnramifiedCharacter(K,1) eq PrincipalCharacter(K);
+&gt; assert UnramifiedCharacter(K,1/3) eq CyclotomicCharacter(K);
+&gt; C&lt;i&gt;:=ComplexField();
+&gt; UnramifiedCharacter(K,2+i);
+1-dim unramified Galois representation Unr(2+i) over Q3[20]
+</PRE>
+<P>
+<HR>
+<H5><A NAME = "5968">UnramifiedRepresentation(K,CharPoly) : FldPad,RngUPolElt -&gt; GalRep</A></H5>
+<BLOCKQUOTE>
+Unique unramified Galois representation &rho; over K with 
+Euler factor det(1 - Frob<sub>K</sub><sup> - 1</sup>|&rho;)=(CharPoly).
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5969">Example <TT>GalRep_galrep-unramifiedrepresentation (H56E6)</TT></A></H3>
+<P>
+<P>
+<PRE>
+
+&gt; K:=pAdicField(37,20);
+&gt; R&lt;x&gt;:=PolynomialRing(Rationals());
+&gt; rho:=UnramifiedRepresentation(K,(1-37*x)*(1-3*x));
+&gt; rho;
+2-dim unramified Galois representation Unr(1-40*x+111*x^2) over Q37[20]
+&gt; rho eq CyclotomicCharacter(K)^(-1)+UnramifiedCharacter(K,3);
+true
+</PRE>
+<P>
+<HR>
+<H5><A NAME = "5970">UnramifiedRepresentation(K,dim,dimcomputed,CharPoly) : FldPad,RngIntElt,RngIntElt,RngUPolElt -&gt; GalRep</A></H5>
+<BLOCKQUOTE>
+Unramified Galois representation over K of dimension <I>dim</I>, with Euler factor 
+<I>CharPoly</I> computed up to and inclusive degree <I>dimcomputed</I>.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5971">Example <TT>GalRep_galrep-notfullycomputed (H56E7)</TT></A></H3>
+<P>
+Consider the hyperelliptic curve C: y<sup>2</sup>=x<sup>5</sup> + x + 1 over the p-adic field 
+Q<sub>10007</sub>. 
+<P>
+<P>
+<PRE>
+
+&gt; _&lt;x&gt;:=PolynomialRing(Rationals());
+&gt; p:=10007;
+&gt; K:=pAdicField(p,20);
+&gt; _&lt;X&gt;:=PolynomialRing(K);
+&gt; C:=HyperellipticCurve(X^5+X+1); C;
+Hyperelliptic Curve defined by y^2 = x^5 + O(10007^20)*x^4 + O(10007^20)*x^3 +
+   O(10007^20)*x^2 + x + 1 + O(10007^20) over pAdicField(10007, 20)
+</PRE>
+<P>
+The Galois representation A associated to H<sup>1</sup>(C) is unramified, of dimension 4,
+and could be defined by
+<P>
+hfil<TT>UnramifiedRepresentation(K,1-ap*x+bp*x^2-p*ap+p^2);</TT>hfil hfil
+<P>
+<P>
+if we find a<sub>p</sub> and b<sub>p</sub> by counting points of C over F<sub>p</sub> and F<sub>p<sup>2</sup></sub>.
+The coefficient a<sub>p</sub> can be computed very quickly:
+<P>
+<P>
+<PRE>
+
+&gt; k:=ResidueClassField(Integers(K));
+&gt; _&lt;X&gt;:=PolynomialRing(k);
+&gt; Ck:=HyperellipticCurve(X^5+X+1); 
+&gt; ap:=p+1-#Ck; ap;
+-21
+</PRE>
+<P>
+However, b<sub>p</sub> would take a long time. If we are only interested in working 
+with A up to degree 1 (e.g. to compute L-series of C/Q with &lt;10<sup>8</sup> terms),
+there is no reason to compute it. Instead, we can define an unramified 
+Galois representation of degree 4, which is known to be computed only 
+up to degree 1:
+<P>
+<P>
+<PRE>
+
+&gt; A:=UnramifiedRepresentation(K,4,1,1-ap*x);
+&gt; A;
+4-dim unramified Galois representation Unr(1+21*x+O(x^2)) over Q10007[20]
+</PRE>
+<P>
+One can still take direct sums, and tensor products of such representations
+with (possibly ramified) Galois representations, and the Euler factors 
+will still be correct up to degree 1:
+<P>
+<P>
+<PRE>
+
+&gt; A*A;
+16-dim unramified Galois representation Unr(1-441*x+O(x^2)) over Q10007[20]
+&gt; EulerFactor(A*A+1/CyclotomicCharacter(K));
+-10448*x + 1
+</PRE>
+<P>
+<P>
+<HR>
+<H5><A NAME = "5972">SP(K,n) : FldPad,RngIntElt -&gt; GalRep</A></H5>
+<BLOCKQUOTE>
+The n-dimensional indecomposable Galois representation 
+<TT>SP(n)</TT> over a p-adic field K; see Para<A  HREF = "text562.htm#5955">Notation and Printing</A> for its description.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5973">Example <TT>GalRep_galrep-sp (H56E8)</TT></A></H3>
+<P>
+<P>
+<PRE>
+
+&gt; K:=pAdicField(3,20);
+&gt; SP(K,1) eq PrincipalCharacter(K);
+true
+&gt; rho:=SP(K,2); rho;
+2-dim Galois representation SP(2) over Q3[20]
+&gt; Degree(rho);
+2
+&gt; Semisimplification(rho);
+2-dim unramified Galois representation Unr(1-4/3*x+1/3*x^2) over Q3[20]
+&gt; $1 eq PrincipalCharacter(K)+CyclotomicCharacter(K);
+true
+&gt; InertiaInvariants(rho);
+1-dim unramified Galois representation Unr(1/3) over Q3[20]
+&gt; EulerFactor(rho);
+-1/3*x + 1
+</PRE>
+<P>
+<HR>
+<H5><A NAME = "5974">SP(K,f,n) : FldPad,RngUPolElt,RngIntElt -&gt; GalRep</A></H5>
+<BLOCKQUOTE>
+Unramified twist &psi; tensor (SP(n)) over a p-adic field K, 
+with &psi; specified by its Euler factor f.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5975">Example <TT>GalRep_galrep-sp-1 (H56E9)</TT></A></H3>
+<P>
+<P>
+<PRE>
+
+&gt; K:=pAdicField(2,20);
+&gt; R&lt;x&gt;:=PolynomialRing(Rationals());
+&gt; SP(K,1-x^2,2);
+4-dim Galois representation Unr(1-x^2)*SP(2) over Q2[20]
+&gt; $1*$1;     // Tensor product with itself
+16-dim Galois representation Unr(1-1/2*x^2+1/16*x^4) + Unr(1-2*x^2+x^4)*SP(3)
+   over Q2[20]
+</PRE>
+<P>
+<HR>
+<H4><A NAME = "5976">Representations from Finite Extensions</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<H5><A NAME = "5977">GaloisRepresentations(F,K) : FldPad,FldPad -&gt; SeqEnum[GalRep]</A></H5>
+<BLOCKQUOTE>
+For a p-adic extension F/K, compute all irreducible Galois representations 
+that
+factor through the (Galois closure of) F/K.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5978">Example <TT>GalRep_galrep-galoisrepresentations-1 (H56E10)</TT></A></H3>
+We take F to be a degree 16 dihedral extension of K=Q<sub>2</sub>, and compute the
+irreducible characters of Gal(F/K), viewed as Galois representations over K.
+<P>
+<P>
+<PRE>
+
+&gt; K:=pAdicField(2,20);
+&gt; R&lt;x&gt;:=PolynomialRing(K);
+&gt; F:=ext&lt;K|x^8+2&gt;;
+&gt; list:=GaloisRepresentations(F,K);
+&gt; list;
+[
+1-dim trivial Galois representation 1 over Q2[20],
+1-dim Galois representation (1,1,-1,-1,1,1,1) with G=D8, I=D8, conductor 2^2
+   over Q2[20],
+1-dim Galois representation (1,1,-1,1,1,-1,-1) with G=D8, I=D8, conductor 2^3
+   over Q2[20],
+1-dim Galois representation (1,1,1,-1,1,-1,-1) with G=D8, I=D8, conductor 2^3
+   over Q2[20],
+2-dim Galois representation (2,2,0,0,-2,0,0) with G=D8, I=D8, conductor 2^8
+   over Q2[20],
+2-dim Galois representation (2,-2,0,0,0,-zeta(8)_8^3+zeta(8)_8,
+   zeta(8)_8^3-zeta(8)_8) with G=D8, I=D8, conductor 2^10 over Q2[20],
+2-dim Galois representation (2,-2,0,0,0,zeta(8)_8^3-zeta(8)_8,
+   -zeta(8)_8^3+zeta(8)_8) with G=D8, I=D8, conductor 2^10 over Q2[20]
+]
+</PRE>
+<P>
+The first 5 characters are not faithful, and we can descend them to smaller 
+quotients of Gal(F/K). 
+<P>
+<P>
+<PRE>
+
+&gt; min:=[Minimize(rho): rho in list | not IsFaithful(Character(rho))];
+&gt; min;
+[
+1-dim trivial Galois representation 1 over Q2[20],
+1-dim Galois representation (1,-1) with G=C2, I=C2, conductor 2^2 over Q2[20],
+1-dim Galois representation (1,-1) with G=C2, I=C2, conductor 2^3 over Q2[20],
+1-dim Galois representation (1,-1) with G=C2, I=C2, conductor 2^3 over Q2[20],
+2-dim Galois representation (2,-2,0,0,0) with G=D4, I=D4, conductor 2^8
+   over Q2[20]
+]
+</PRE>
+<P>
+<HR>
+<H5><A NAME = "5979">GaloisRepresentations(f) : RngUPolEltFldPad -&gt; SeqEnum[GalRep]</A></H5>
+<BLOCKQUOTE>
+For a polynomial f over a p-adic field K and splitting field F, returns 
+irreducible representations of Gal(F/K).
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5980">Example <TT>GalRep_galrep-galoisrepresentations (H56E11)</TT></A></H3>
+We construct 4 one-dimensional characters of Q<sub>2</sub>(&zeta;<sub>8</sub>)/Q<sub>2</sub>. 
+<P>
+<P>
+<PRE>
+
+&gt; K:=pAdicField(2,20);
+&gt; R:=PolynomialRing(K);
+&gt; GaloisRepresentations(R!CyclotomicPolynomial(8));
+[
+1-dim trivial Galois representation 1 over Q2[20],
+1-dim Galois representation (1,-1,1,-1) with G=C2^2, I=C2^2, conductor 2^3
+   over Q2[20],
+1-dim Galois representation (1,1,-1,-1) with G=C2^2, I=C2^2, conductor 2^2
+   over Q2[20],
+1-dim Galois representation (1,-1,-1,1) with G=C2^2, I=C2^2, conductor 2^3
+   over Q2[20]
+]
+</PRE>
+<P>
+<HR>
+<H5><A NAME = "5981">PermutationCharacter(F,K) : FldPad,FldPad -&gt; GalRep</A></H5>
+<BLOCKQUOTE>
+For a p-adic extension F/K, compute C[Gal(bar(K)/K)/Gal(bar(K)/F)] 
+as a Galois representation over K of degree [F:K].
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5982">Example <TT>GalRep_galrep-permutationcharacter (H56E12)</TT></A></H3>
+Take K=Q<sub>2</sub> and F=Q<sub>2</sub>(root 3 of 2). Then <TT>PermutationCharacter(F,K)</TT>
+is a 3-dimensional representation which is the trivial representation plus
+a 2-dimensional irreducible one.
+<P>
+<P>
+<PRE>
+
+&gt; K:=pAdicField(2,20);
+&gt; R&lt;x&gt;:=PolynomialRing(K);
+&gt; F:=ext&lt;K|x^3-2&gt;;
+&gt; PermutationCharacter(F,K);
+3-dim Galois representation (3,1,0) with G=S3, I=C3, conductor 2^2 over Q2[20]
+&gt; $1 - PrincipalCharacter(K);
+2-dim Galois representation (2,0,-1) with G=S3, I=C3, conductor 2^2 over Q2[20]
+</PRE>
+<P>
+<HR>
+<H5><A NAME = "5983">A !! chi : GalRep, AlgChtrElt -&gt; GalRep</A></H5>
+<H5>A !! chi : GalRep, SeqEnum -&gt; GalRep</H5>
+<BLOCKQUOTE>
+Change a Galois representation by a finite representation with character &chi;,
+which must be a character of <TT>Group(A)</TT>, or a list of values that 
+determine such a character.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5984">Example <TT>GalRep_galrep-smash (H56E13)</TT></A></H3>
+Take K=Q<sub>2</sub> and F=Q<sub>2</sub>(root 3 of 2), so that G=Gal(F/K) isomorphic to S<sub>3</sub>.
+Using <TT>!!</TT> we can start with any Galois representation whose finite part
+comes from this Galois group, and replace it by any other character of G.
+<P>
+<P>
+<PRE>
+
+&gt; K:=pAdicField(2,20);
+&gt; R&lt;x&gt;:=PolynomialRing(K);
+&gt; F:=ext&lt;K|x^3-2&gt;;
+&gt; rho:=PermutationCharacter(F,K);
+&gt; rho!![1,1,1];
+1-dim trivial Galois representation 1 over Q2[20]
+&gt; rho!![6,0,0];
+6-dim Galois representation (6,0,0) with G=S3, I=C3, conductor 2^4 over Q2[20]
+&gt; rho!![0,0,0];   // but not [-1,0,0] - may not be virtual
+Galois representation 0 with G=S3, I=C3 over Q2[20]
+</PRE>
+<P>
+<HR>
+<H4><A NAME = "5985">Local Representations of Global Objects</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<H5><A NAME = "5986">GaloisRepresentation(chi,p) : GrpDrchElt,RngIntElt -&gt; GalRep</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: 40</PRE>
+<BLOCKQUOTE>
+Local Galois representation at p of a Dirichlet character &chi;.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5987">Example <TT>GalRep_galrep-dirichlet (H56E14)</TT></A></H3>
+<P>
+Local components of a Dirichet character &chi; of order 6 at p=2, 3, 7. 
+<P>
+<P>
+<PRE>
+
+&gt; G&lt;chi&gt;:=FullDirichletGroup(7);
+&gt; GaloisRepresentation(chi,2);
+1-dim unramified Galois representation (1,-zeta(3)_3-1,zeta(3)_3)
+   with G=C3, I=C1 over Q2[40]
+&gt; GaloisRepresentation(chi,3);
+1-dim unramified Galois representation (1,-1,-zeta(3)_3-1,zeta(3)_3,-zeta(3)_3,
+   zeta(3)_3+1) with G=C6, I=C1 over Q3[40]
+&gt; GaloisRepresentation(chi,7);
+1-dim Galois representation (1,-1,-zeta(3)_3-1,zeta(3)_3,-zeta(3)_3,zeta(3)_3+1)
+   with G=C6, I=C6, conductor 7^1 over Q7[40]
+</PRE>
+<P>
+By our convention, the character &chi;, the associated Artin representation,
+and the Galois representations associated to them all have the same Euler
+factors.
+<P>
+<P>
+<PRE>
+
+&gt; loc1:=EulerFactor(chi,2);
+&gt; loc2:=EulerFactor(ArtinRepresentation(chi),2);
+&gt; loc3:=EulerFactor(GaloisRepresentation(chi,2));
+&gt; loc4:=EulerFactor(GaloisRepresentation(ArtinRepresentation(chi),2));
+&gt; [PolynomialRing(ComplexField(5))| loc1,loc2,loc3,loc4];
+[
+(0.50000 - 0.86603*$.1)*$.1 + 1.0000,
+(0.50000 - 0.86603*$.1)*$.1 + 1.0000,
+(0.50000 - 0.86603*$.1)*$.1 + 1.0000,
+(0.50000 - 0.86603*$.1)*$.1 + 1.0000
+]
+</PRE>
+<P>
+<HR>
+<H5><A NAME = "5988">GaloisRepresentation(A,p) : ArtRep,RngIntElt -&gt; GalRep</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: 40</PRE>
+
+<PRE>    Minimize: BoolElt                   Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Local Galois representation at p of an Artin representation A.
+This is the representation of a decomposition group at p of Gal(bar Q/Q)
+on the <I>dual</I> vector space of A. 
+(The reason for the dual is that, by our convention, the global and the 
+local Euler factors agree; see Para<A  HREF = "text562.htm#5957">Conventions</A> 
+and Example <A  HREF = "text563.htm#5987">H56E14</A>.)
+If <TT>Minimize</TT> is <TT>true</TT>, choose the field through which it factors 
+to be as small as possible (automatic for faithful representations).
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5989">Example <TT>GalRep_galrep-artin (H56E15)</TT></A></H3>
+Local components of an Artin representation. We take the Trinks' polynomial 
+x<sup>7</sup> - 7x - 3 with Galois group PSL(2, 7) over Q, one of its 7-dimensional 
+representations A of conductor 3<sup>8</sup>7<sup>8</sup>, and compute its local components over Q<sub>2</sub>, Q<sub>3</sub>, 
+Q<sub>5</sub> and Q<sub>7</sub>. 
+<P>
+<P>
+<P>
+<PRE>
+
+&gt; R&lt;x&gt;:=PolynomialRing(Rationals());
+&gt; K:=NumberField(x^7-7*x-3);
+&gt; GroupName(GaloisGroup(K));
+PSL(2,7)
+&gt; A:=ArtinRepresentations(K)[5]; 
+&gt; GaloisRepresentation(A,2);
+7-dim unramified Galois representation (7,0,0,0,0,0,0) with G=C7, I=C1
+   over Q2[40]
+&gt; GaloisRepresentation(A,3);
+7-dim Galois representation (7,-1,1) with G=S3, I=S3, conductor 3^8 over Q3[40]
+&gt; GaloisRepresentation(A,5);
+7-dim unramified Galois representation (7,0,0,0,0,0,0) with G=C7, I=C1
+   over Q5[40]
+&gt; GaloisRepresentation(A,7);
+7-dim Galois representation (7,1,1,0,0) with G=C7:C3, I=C7:C3, conductor 7^8
+   over Q7[40]
+&gt; Conductor(A) eq 3^8*7^8;
+true
+</PRE>
+<P>
+<HR>
+<H5><A NAME = "5990">GaloisRepresentation(E) : CrvEll -&gt; GalRep</A></H5>
+
+<PRE>    Minimize: BoolElt                   Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Local Galois representation of (the first l-adic &eacute;tale cohomology group of)
+an elliptic curve over a p-adic field.
+If <TT>Minimize</TT> is <TT>true</TT> (default), 
+choose the field through which it factors to be as small as possible.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5991">Example <TT>GalRep_galrep-E (H56E16)</TT></A></H3>
+Take an elliptic curve E/Q<sub>5</sub>, with additive (potentially good) 
+reduction of type II.
+<P>
+<P>
+<PRE>
+
+&gt; K:=pAdicField(5,20);
+&gt; E:=EllipticCurve([K|0,5]);
+&gt; E;
+Elliptic Curve defined by y^2 = x^3 + O(5^20)*x + (5 + O(5^21))
+   over pAdicField(5, 20)
+&gt; loc:=LocalInformation(E); loc;
+&lt;5 + O(5^21), 2, 2, 1, II, true&gt;
+</PRE>
+<P>
+Its Galois representation is an unramified twist of a representation with finite
+image that factors through the dihedral extension Q<sub>5</sub>(&zeta;<sub>6</sub>, (root 6of 5)) 
+of Q<sub>5</sub>.
+<P>
+<P>
+<PRE>
+
+&gt; A:=GaloisRepresentation(E); A;
+2-dim Galois representation Unr(sqrt(5)*i)*(2,-2,0,0,-1,1) with G=D6, I=C6,
+   conductor 5^2 over Q5[20]
+&gt; Field(A);
+Totally ramified extension defined by the polynomial x^6 - 5
+ over Unramified extension defined by the polynomial x^2 + 4*x + 2
+ over 5-adic field mod 5^20
+</PRE>
+<P>
+<HR>
+<H5><A NAME = "5992">GaloisRepresentation(E,p) : CrvEll,RngIntElt -&gt; GalRep</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: 40</PRE>
+
+<PRE>    Minimize: BoolElt                   Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Local Galois representation of (the first l-adic &eacute;tale cohomology group of)
+an elliptic curve over Q at p. 
+If <TT>Minimize</TT> is <TT>true</TT> (default), 
+choose the field through which it factors to be as small as possible.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5993">Example <TT>GalRep_galrep-E-p (H56E17)</TT></A></H3>
+We take the elliptic curve 20a1 over Q and compute its local Galois 
+representation at a prime p=3 of good reduction, p=5 of (non-split) 
+multiplicative reduction and p=2 of additive reduction.
+<P>
+<P>
+<PRE>
+
+&gt; E:=EllipticCurve("20a1");
+&gt; GaloisRepresentation(E,3);
+2-dim unramified Galois representation Unr(1+2*x+3*x^2) over Q3[40]
+&gt; GaloisRepresentation(E,5);
+2-dim Galois representation Unr(-5)*SP(2) over Q5[40]
+&gt; GaloisRepresentation(E,2);
+2-dim Galois representation Unr(sqrt(2)*i)*(2,0,-1) with G=S3, I=C3, conductor
+   2^2 over Q2[40]
+&gt; EulerFactor($3),EulerFactor($2),EulerFactor($1);
+3*x^2 + 2*x + 1
+x + 1
+1
+</PRE>
+<P>
+<HR>
+<H5><A NAME = "5994">GaloisRepresentation(E,P) : CrvEll,RngOrdIdl -&gt; GalRep</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: 40</PRE>
+
+<PRE>    Minimize: BoolElt                   Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Local Galois representation of (the first l-adic &eacute;tale cohomology group of)
+an elliptic curve E over a number field F at a given prime ideal P.
+If <TT>Minimize</TT> is <TT>true</TT> (default), 
+choose the field through which it factors to be as small as possible.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5995">Example <TT>GalRep_galrep-E-P (H56E18)</TT></A></H3>
+<P>
+<P>
+<PRE>
+
+&gt; K:=CyclotomicField(5);
+&gt; E:=BaseChange(EllipticCurve("75a1"),K);
+&gt; P:=Ideal(Decomposition(K,5)[1,1]);
+&gt; GaloisRepresentation(E,P);
+2-dim Galois representation Unr(sqrt(5)*i)*(2,0,-1) with G=S3, I=C3, conductor
+   pi^2 over ext&lt;Q5[10]|x^4-15*x^3-40*x^2-90*x-45&gt;
+</PRE>
+<P>
+<HR>
+<H5><A NAME = "5996">GaloisRepresentation(C) : CrvHyp[FldPad] -&gt; GalRep</A></H5>
+
+<PRE>    Degree: RngIntElt                   Default: &infin;</PRE>
+
+<PRE>    Minimize: BoolElt                   Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Galois representation associated to (H<sup>1</sup> of) a hyperelliptic curve C over a p-adic field.
+<TT>Degree</TT> specifies that Euler factors of unramified pieces should only be 
+computed up to that degree. (See Example <A  HREF = "text563.htm#5971">H56E7</A>.)
+Setting <TT>Minimize:=true</TT> forces the representation to be minimized. 
+(See <A  HREF = "text567.htm#Minimize">Minimize</A>.)
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5997">Example <TT>GalRep_galrep-crvhyp-Qp (H56E19)</TT></A></H3>
+We take a curve C over K=Q<sub>23</sub> of conductor 23<sup>2</sup> and compute its
+Galois representation.
+<P>
+<P>
+<PRE>
+
+&gt; K:=pAdicField(23,20);
+&gt; R&lt;x&gt;:=PolynomialRing(K);
+&gt; C:=HyperellipticCurve(-x,x^3+x^2+1);    // genus 2, conductor 23^2
+&gt; A:=GaloisRepresentation(C); A;
+4-dim Galois representation Unr(1-46*x+529*x^2)*SP(2) over Q23[20]
+</PRE>
+<P>
+If F/K is a finite extension, then the base change of A to F is the same 
+as the Galois representation of C/F:
+<P>
+<P>
+<PRE>
+
+&gt; F:=ext&lt;K|2&gt;;
+&gt; BaseChange(A,F);
+4-dim Galois representation Unr(1-1058*x+279841*x^2)*SP(2) over ext&lt;Q23[20]|2&gt;
+&gt; GaloisRepresentation(BaseChange(C,F));
+4-dim Galois representation Unr(1-1058*x+279841*x^2)*SP(2) over ext&lt;Q23[20]|2&gt;
+</PRE>
+<P>
+<HR>
+<H5><A NAME = "5998">GaloisRepresentation(C,p) : CrvHyp[FldRat], RngIntElt -&gt; GalRep</A></H5>
+
+<PRE>    Degree: RngIntElt                   Default: &infin;</PRE>
+
+<PRE>    Minimize: BoolElt                   Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Galois representation associated to (H<sup>1</sup> of) a hyperelliptic curve C/Q at p.
+<TT>Degree</TT> specifies that Euler factors of unramified pieces should only be 
+computed up to that degree. (See Example <A  HREF = "text563.htm#5971">H56E7</A>.)
+Setting <TT>Minimize:=true</TT> forces the representation to be minimized. 
+(See <A  HREF = "text567.htm#Minimize">Minimize</A>.)
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5999">Example <TT>GalRep_galrep-crvhyp-Q (H56E20)</TT></A></H3>
+<P>
+<P>
+<PRE>
+
+&gt; R&lt;x&gt;:=PolynomialRing(Rationals());
+&gt; C:=HyperellipticCurve((x^2+5)*(x+1)*(x+2)*(x+3));
+&gt; GaloisRepresentation(C,5);   // bad reduction
+4-dim Galois representation Unr(1+2*x+5*x^2) + Unr(5)*SP(2) over Q5[20]
+&gt; GaloisRepresentation(C,11);  // good reduction
+4-dim unramified Galois representation Unr(1-2*x+6*x^2-22*x^3+121*x^4)
+   over Q11[5]
+&gt; GaloisRepresentation(C,997: Degree:=1);  // don't count pts over GF(997^2)
+4-dim unramified Galois representation Unr(1+26*x+O(x^2)) over Q997[5]
+</PRE>
+<P>
+<HR>
+<H5><A NAME = "6000">GaloisRepresentation(C,P) : CrvHyp[FldNum],RngOrdIdl -&gt; GalRep</A></H5>
+
+<PRE>    Degree: RngIntElt                   Default: &infin;</PRE>
+
+<PRE>    Minimize: BoolElt                   Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Galois representation associated to (H<sup>1</sup> of) a hyperelliptic curve C 
+over a number field at a prime ideal P.
+<TT>Degree</TT> specifies that Euler factors of unramified pieces should only be 
+computed up to that degree. (See Example <A  HREF = "text563.htm#5971">H56E7</A>.)
+Setting <TT>Minimize:=true</TT> forces the representation to be minimized. 
+(See <A  HREF = "text567.htm#Minimize">Minimize</A>.)
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6001">Example <TT>GalRep_galrep-crvhyp-nf (H56E21)</TT></A></H3>
+We take a curve of genus 4 over Q(&zeta;<sub>11</sub>) and compute its 
+Galois representation at a unique prime P above 11.
+<P>
+<P>
+<PRE>
+
+&gt; K&lt;zeta&gt;:=CyclotomicField(11);
+&gt; R&lt;x&gt;:=PolynomialRing(K);
+&gt; C:=HyperellipticCurve(x^9+x^2+(zeta-1));    
+&gt; P:=Ideal(Decomposition(K,11)[1,1]);
+&gt; GaloisRepresentation(C,P);
+8-dim Galois representation Unr(1-44*x^3+1331*x^6) + Unr(11)*SP(2)
+   over ext&lt;Q11[2]|x^10+22*x^9+55*x^8+44*x^7-33*x^6-22*x^5-22*x^4-33*x^3+44*x^2+
+   55*x+11&gt;
+</PRE>
+<P>
+<HR>
+<H5><A NAME = "6002">GaloisRepresentation(f,p) : ModFrmElt,RngIntElt -&gt; GalRep</A></H5>
+
+<PRE>    Precision: RngIntElt                Default: 40</PRE>
+<BLOCKQUOTE>
+Local Galois representation at p of a modular form f. Currently only 
+implemented when p<sup>2</sup> does not divide the level.
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6003">Example <TT>GalRep_galrep-f-p (H56E22)</TT></A></H3>
+We take a rational modular form of weight 4 and level 5, and compute its 
+Galois representations at p=3 (unramified principal series) 
+and p=5 (Steinberg).
+<P>
+<P>
+<PRE>
+
+&gt; f:=Newforms("5k4")[1,1]; 
+&gt; GaloisRepresentation(f,3);
+2-dim unramified Galois representation Unr(1-2*x+27*x^2) over Q3[40]
+&gt; GaloisRepresentation(f,5);
+2-dim Galois representation Unr(-25)*SP(2) over Q5[40]
+</PRE>
+<P>
+<HR>
+<PRE></PRE> <A  HREF = "text564.htm">[Next]</A><A  HREF = "text562.htm">[Prev]</A> <A  HREF = "text564.htm">[Right]</A> <A  HREF = "text562.htm">[Left]</A> <A  HREF = "text561.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

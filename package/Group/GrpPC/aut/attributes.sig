@@ -1,0 +1,6 @@
+174,1
+A,GrpAuto,1,PCRepData
+V,AutomorphismGroupSolubleGroup,3
+V,AutomorphismGroupSolubleGroupComputeAutK,1
+V,AutomorphismGroupSolubleGroupDoNotComputeAutSKN,1
+V,AutomorphismGroupSolubleGroupAutSKNIgnoreOrbitLimit,1

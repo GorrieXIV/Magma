@@ -1,0 +1,31 @@
+{
+    analytic.m
+    arith.m
+    boundary.m
+    calc.m
+    charpolyhecke.m
+    core.m    
+    cusps.m
+    compgrp.m
+    decomp.m
+    derivative.m
+    dims.m
+    dirichlet.m
+    eisenstein.m
+    elliptic.m
+    inner_twists.m
+    intersection_pairing.m
+    linalg.m
+    maps.m
+    mestre.m
+    modsym.m
+    multichar.m
+    operators.m          
+    pAdicLfunc.m
+    period.m
+    qexpansion.m
+    representation.m
+    subspace.m
+    twist.m
+    verbose.m
+}

@@ -1,0 +1,3 @@
+174,1
+S,IsIsomorphicSolubleGroup,"Performs an isomorphism test between the soluble groups G1 and G2, with the optional parameter 'p' which should be a prime dividing the order of G (the calculation relies on IsIsomorphic(Syl_p(G_i)) and Aut(Syl_p(G_i)) for i = 1,2. Default value of p is taken to be one which defines the largest Sylow p-subgroup",0,2,0,0,0,0,0,0,0,129,,0,0,129,,36,175,-38,-38,-38,-38
+S,IsIsomorphicSolubleGroupNoMap,"Performs an isomorphism test between two soluble groups G1 and G2. Returns true if the groups are isomorphic, false otherwise",0,2,0,0,0,0,0,0,0,129,,0,0,129,,36,-38,-38,-38,-38,-38

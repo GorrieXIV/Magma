@@ -1,0 +1,4 @@
+174,1
+S,ConstructionX3u,"Given two chains of codes C1=[n,k1] > C2=[n,k2] > C3=[n,k3] and D1=[n',k1-k3] > D2=[n',k2-k3], construct codes C=[n+n',k1] > C'=[n+n',k2] using Construction X with C1, C3, and D1 resp. C2, C3, and D2",0,5,0,0,0,0,0,0,0,42,,0,0,42,,0,0,42,,0,0,42,,0,0,42,,42,42,-38,-38,-38,-38
+S,ConstructionXChain,"Given a sequence of codes S where all codes are subcodes of the first one, apply Construction X to S[1],S[2], and C. Then compute the resulting subcodes",1,0,1,82,0,42,2,0,0,0,0,0,0,0,42,,0,0,82,,82,-38,-38,-38,-38,-38
+S,ConstructionXXu,"C2 and C3 must be subcodes of C1, while the dimensions of D2 and D3 must add with the dimensions to C2 and C3 to give the dimension of C1. The returned code is constructed via the modified construction XX for UEP codes of Bierbrauer et al",0,6,0,0,0,0,0,0,0,-1,,0,0,42,,0,0,42,,0,0,42,,0,0,42,,0,0,42,,42,-38,-38,-38,-38,-38

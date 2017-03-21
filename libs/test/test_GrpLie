@@ -1,0 +1,84 @@
+/* Tests for groups of Lie type
+   DET 2010-07-05
+*/
+
+
+isClosed := function(S, RD)
+  W := CoxeterGroup(RD);
+  incl := OrbitClosure( sub<W|[Reflection(W,r):r in S]>, S );
+  flag := true;
+  for i,j in incl do
+    r := RootPosition(RD, Root(RD,i) + Root(RD,j));
+    if r ne 0 and r notin incl then flag := false; break; end if;
+  end for;
+  return flag;
+end function;
+
+procedure test_SubsystemSubgroup(tp,fld)
+  print "Type:", tp, "over", fld;
+  G := GroupOfLieType(tp,fld : Isogeny := "SC");
+  RD := RootDatum(G);
+  g := #G;
+  R := PositiveRoots(G);
+  r := Rank(G);
+  gen := Generators(G);
+  rho := StandardRepresentation(G);
+  print rho;
+  d := Nrows(rho(gen[1]));
+  ambient := GL(d,fld);
+  print G;
+//  ga := #sub<ambient|[rho(x) : x in Generators(G)]>;
+  for X in Subsets({1 .. #R}, r-1) do
+    if isClosed(X,RD) then
+      H := SubsystemSubgroup(G,X);
+      print X,H;
+      imH := sub< ambient | [rho(x) : x in Generators(H)] >;
+      assert #imH le #H;
+    end if;
+  end for;
+end procedure;
+
+G := GroupOfLieType("A2",5);
+assert Type(#G) eq RngIntElt;
+
+procedure test_StandardRepresentation(tp, fld);
+  G := GroupOfLieType(tp,fld : Isogeny := "SC"); // universal type
+  rho := StandardRepresentation(G);
+  rhoG, rhoInc := Image(rho);
+  genG := [rho(x) : x in Generators(G)];
+  efld := CoefficientRing(rhoG);
+  ffld := sub<efld | { e : e in ElementToSequence(x), x in genG }>;
+  assert efld eq ffld;
+end procedure;
+
+
+for tp in ["A3","B3","C3","D4"] do
+  for fld in [GF(3),GF(5)] do
+    test_SubsystemSubgroup(tp,fld);
+    test_StandardRepresentation(tp,fld);
+  end for;
+end for;
+
+procedure test_HighWtRep(tp,fld,wt)
+  G := GroupOfLieType(tp,fld : Isogeny := "SC"); // universal type
+  rho := HighestWeightRepresentation(G,wt);
+  wts, wtsp := HighestWeights(rho);
+  print "    dimension =", Dimension(Codomain(rho));
+  assert wt in [Eltseq(w) : w in wts ];
+end procedure;
+
+for tp in ["A2","B2","C3"] do
+  print "Highest weight test for",tp;
+  n := StringToInteger(tp[2]);
+  for q in [3,4] do
+    fld := GF(q);
+    for m := 0 to q-1 do
+      wt := [0 : i in [1..n]];
+      wt[1] := m;
+      wt[2] := 1;
+      print "  q =",q,"weight =",wt;
+      test_HighWtRep(tp,fld,wt);
+    end for;
+  end for;
+end for;
+

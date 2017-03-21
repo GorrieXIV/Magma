@@ -1,0 +1,34 @@
+/* test rewriting for non-natural irreducible repns of OmegaPlus */
+
+import  "../recognition/standard.m": PlusChosenElements;
+SetEchoInput (true);
+// SetSeed (1);
+
+NmrElements := 30;
+fct := SymmetricPower;
+fct := ExteriorPower;
+power := 2;
+for d in [2..10 by 2] do
+for q in [2,3,4,5,7,8,9,11,13,16,25,27] do 
+G := OmegaPlus(d, q);
+MA := MatrixAlgebra (GF(q), d);
+QQ := PlusChosenElements(G);
+Q := [fct(MA!QQ[i], power): i in [1..#QQ]];
+n := Nrows(Q[1]);
+if n eq 0 then continue; end if;
+Q := [GL(n, q) ! x : x in Q];
+A := Random(GL(n, q));
+Q := Q^A;
+E := sub<GL(n, q)|Q>;
+qq := q;
+if IsIrreducible (E) and IsTrivial (E) eq false then 
+   for i in [1..NmrElements] do
+      d, q, i;
+       g:=Random (E);
+      f,w:= int_OmegaPlusAltRepWordInGen (E, Q, g,d, qq);
+     x:=Evaluate (w, Q);
+    assert x eq g;
+   end for;
+end if;
+end for;
+end for;

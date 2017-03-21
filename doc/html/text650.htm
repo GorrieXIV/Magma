@@ -1,0 +1,233 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Ordered Partition Stacks</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text628.htm">[Next]</A><A  HREF = "text649.htm">[Prev]</A> <A  HREF = "text628.htm">[Right]</A> <A  HREF = "text649.htm">[Left]</A> <A  HREF = "text629.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "7369">Ordered Partition Stacks</A></H3>
+
+<P>
+<P>
+Ordered partition stacks have been implemented with their own
+type and Magma intrinsics. They implement the data structure
+described very briefly in section 2 of Jeff Leon's 1997 paper <A  HREF = "text628.htm#bib_Leon2">[Leo97]</A>.
+They can be used as an aid to implementing various backtrack searches
+in the Magma language.
+<P>
+The domain set of the partitions is always {1..n}, where n is called
+the degree of the stack. The basic "push" operation for these stacks 
+involves refining an ordered partition, and the precise definition of 
+refinement used in the Magma implementation is Definition 2 of <A  HREF = "text628.htm#bib_Leon2">[Leo97]</A>.
+This differs from the definition in Chapter 9 of <A  HREF = "text628.htm#bib_Seress2003">[Ser03]</A>, for
+instance. 
+<P>
+The word "ordered" refers to the cells of the partition being in
+a fixed order. The order of points in a cell is not significant, and may
+vary as the data structure is manipulated.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text650.htm#7370">Construction of Ordered Partition Stacks</A>
+<LI> <A  HREF = "text650.htm#7373">Properties of Ordered Partition  Stacks</A>
+<LI> <A  HREF = "text650.htm#7383">Operations on Ordered Partition Stacks</A>
+</UL>
+<H4><A NAME = "7370">Construction of Ordered Partition Stacks</A></H4>
+
+
+
+<H5><A NAME = "7371">OrderedPartitionStack(n) : RngIntElt -&gt; StkPtnOrd</A></H5>
+<BLOCKQUOTE>
+Create a data structure representing a complete ordered partition stack
+of degree n. Initially the stack has one partition on it, which is
+the partition having a single block. 
+</BLOCKQUOTE>
+<H5><A NAME = "7372">OrderedPartitionStackZero(n, h) : RngIntElt, RngIntElt -&gt; StkPtnOrd</A></H5>
+<BLOCKQUOTE>
+Create a data structure representing a zero-based ordered partition stack
+of degree n with height limited to h. Initially the stack has one
+partition on it, which is the partition having a single block, and has height
+0.
+</BLOCKQUOTE>
+<H4><A NAME = "7373">Properties of Ordered Partition  Stacks</A></H4>
+
+
+
+<H5><A NAME = "7374">Degree(P) : StkPtnOrd -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The degree of the ordered partition stack P.
+</BLOCKQUOTE>
+<H5><A NAME = "7375">Height(P) : StkPtnOrd -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The height of the ordered partition stack P. For a complete stack, this
+equals the number of cells of the finest partition on the stack.
+</BLOCKQUOTE>
+<H5><A NAME = "7376">NumberOfCells(P, h) : StkPtnOrd, RngIntElt -&gt; RngIntElt</A></H5>
+<H5>NumberOfCells(P) : StkPtnOrd -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The number of cells in the partition on stack P at height h.
+If h is omitted it is taken to be the height of P, so giving the number
+of cells in the finest partition on the stack P.
+</BLOCKQUOTE>
+<H5><A NAME = "7377">CellNumber(P, h, x) : StkPtnOrd, RngIntElt, RngIntElt -&gt; RngIntElt</A></H5>
+<H5>CellNumber(P, x) : StkPtnOrd, RngIntElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The number of the cell of the partition at height h in P that contains
+the element x. If h is omitted it is taken to be the height of P.
+</BLOCKQUOTE>
+<H5><A NAME = "7378">CellSize(P, h, i) : StkPtnOrd, RngIntElt, RngIntElt -&gt; RngIntElt</A></H5>
+<H5>CellSize(P, i) : StkPtnOrd, RngIntElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The size of cell i of the partition at height h in P. 
+If h is omitted it is taken to be the height of P.
+</BLOCKQUOTE>
+<H5><A NAME = "7379">Cell(P, h, i):  StkPtnOrd, RngIntElt, RngIntElt -&gt; SeqEnum</A></H5>
+<H5>Cell(P, i) : StkPtnOrd, RngIntElt -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+The contents of cell i of the partition at height h in P as a sequence
+of integers. If h is omitted it is taken to be the height of P. Note that
+the order of the points in the returned sequence may vary, as the order of
+points in a cell of an ordered partition is not fixed.
+</BLOCKQUOTE>
+<H5><A NAME = "7380">Random(P, i) : StkPtnOrd, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+A random element of cell i of the finest partition on P.
+</BLOCKQUOTE>
+<H5><A NAME = "7381">Representative(P, i) : StkPtnOrd, RngIntElt -&gt; RngIntElt</A></H5>
+<H5>Rep(P, i) : StkPtnOrd, RngIntElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+An element of cell i of the finest partition on P.
+</BLOCKQUOTE>
+<H5><A NAME = "7382">ParentCell(P, i) : StkPtnOrd, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The number of the cell that was split to first create cell number i.
+</BLOCKQUOTE>
+<H4><A NAME = "7383">Operations on Ordered Partition Stacks</A></H4>
+
+<P>
+<P>
+Here are listed the basic operations provided for pushing a finer
+partition onto an ordered partition stack, called splitting, and
+for popping ordered partitions off the stack.
+<P>
+If the top partition on the stack has k cells, and one of these cells is
+split to form a finer partition, then the new cell will have number k + 1, and
+the residue of the split cell will have the same number as the cell that was
+split. This agrees with the definition of refinement given in <A  HREF = "text628.htm#bib_Leon2">[Leo97]</A>,
+Definition 2, but disagrees with <A  HREF = "text628.htm#bib_Seress2003">[Ser03]</A>, Chapter 9.2, and 
+<A  HREF = "text628.htm#bib_bdm_nauty_paper">[McK81]</A>.
+
+
+<H5><A NAME = "7384">SplitCell(P, i, x) : StkPtnOrd, RngIntElt, RngIntElt -&gt; BoolElt</A></H5>
+<H5>SplitCell(P, i, Q) : StkPtnOrd, RngIntElt, SeqEnum[RngIntElt] -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Attempt to refine the top partition on stack P by splitting cell i.
+The new cell created will be {x} if x is in cell i, or will be
+the intersection of Q with cell i (in the second form), if this is
+not empty and not all of cell i. The new partition, if any, is pushed
+onto the stack. The return value is true when P is changed, false
+otherwise. This implements the operation in Definition 6 of <A  HREF = "text628.htm#bib_Leon2">[Leo97]</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "7385">SplitAllByValues(P, V) : StkPtnOrd, SeqEnum[RngIntElt] -&gt; BoolElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Refine the top partition on stack P by splitting all possible cells
+using the values in V. This implements the operation given in
+Definition 15 of <A  HREF = "text628.htm#bib_Leon2">[Leo97]</A>. Cells are split in increasing order of cell
+number, and the resulting new cells are in the curious order given in the cited
+definition. 
+<P>
+The first return value is <TT>true</TT> when P is changed, <TT>false</TT> otherwise. The
+second is a hash value based on which cells are split, the values from V
+used in the split, and the sizes of the resulting cells. It is suitable for
+use as an indicator function, as defined in 2-16 of <A  HREF = "text628.htm#bib_bdm_nauty_paper">[McK81]</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "7386">SplitCellsByValues(P, C, V) : StkPtnOrd, SeqEnum[RngIntElt], SeqEnum[RngIntElt] -&gt; BoolElt, RngIntElt</A></H5>
+<H5>SplitCellsByValues(P, i, V) : StkPtnOrd, RngIntElt, SeqEnum[RngIntElt] -&gt; BoolElt, RngIntElt</H5>
+<BLOCKQUOTE>
+Refine the top partition on stack P by splitting all cells given in C,
+or cell i, using the values in V. Splitting and return values are
+as for <TT>SplitAllByValues</TT>, with an important difference: cells will be
+split in the order given in C, and, if some cell in C does not split,
+the operation will be terminated there, and <TT>false</TT> returned.
+</BLOCKQUOTE>
+<H5><A NAME = "7387">Pop(P) : StkPtnOrd -&gt;</A></H5>
+<H5>Pop(P, h) : StkPtnOrd, RngIntElt -&gt;</H5>
+<BLOCKQUOTE>
+Reduce the height of the partition stack P to height h, or by one
+if h is not given. The method used is the "retract" algorithm of
+<A  HREF = "text628.htm#bib_Leon2">[Leo97]</A>, Fig. 7.
+</BLOCKQUOTE>
+<H5><A NAME = "7388">Advance(X, L, P, h) : StkPtnOrd, seqEnum[RngIntElt], StkPtnOrd, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+This implements the "advance" algorithm of <A  HREF = "text628.htm#bib_Leon2">[Leo97]</A>, Fig. 7: X is a zero-based stack of degree d say, L is a sequence of length n taking values
+in {1..d}, representing an unordered partition of {1..n} into d
+blocks, P is a complete stack of degree n, and h is a positive integer
+which is at most the height of P. This is a fundamental operation in
+Leon's unordered partition stabilizer algorithm.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7389">Example <TT>GrpPerm_OrderedPartitionStack (H63E44)</TT></A></H3>
+We set up an ordered partition stack of degree 12, and try out
+a few basic operations on it. The printing of a stack shows the top
+partition of the stack.
+<P>
+<P>
+<PRE>
+&gt; P := OrderedPartitionStack(12);
+&gt; P;       
+Partn stack, degree 12, height 1
+[ 1 2 3 4 5 6 7 8 9 10 11 12]
+&gt; SplitCell(P, 1, 4);
+true
+&gt; P;
+Partn stack, degree 12, height 2
+[ 1 2 3 12 5 6 7 8 9 10 11 | 4]
+</PRE>
+Note that the order of the points in cell 1 is not significant. Now we will
+split on the values in a vector V.
+<P>
+<P>
+<PRE>
+&gt; V := [i mod 5 + 1: i in [0..11]];
+&gt; V;
+[ 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2 ]
+&gt; SplitAllByValues(P, V);
+true 119375796
+&gt; P;
+Partn stack, degree 12, height 6
+[ 1 6 11 | 4 | 10 5 | 9 | 8 3 | 12 2 7]
+</PRE>
+Only cell 1 has been split.
+The points corresponding to the minimum value in V remain in cell 1.
+The new cells are cells 2 to 6. They correspond to the higher values in V,
+in descending order. Now pop the stack back to height 4 and try the effect
+of a different split by values.
+<P>
+<P>
+<PRE>
+&gt; Pop(P, 4);
+&gt; P;
+Partn stack, degree 12, height 4
+[ 1 6 11 12 2 7 8 3 | 4 | 10 5 | 9]
+&gt; V := [i mod 4 + 1: i in [0..11]];
+&gt; V;
+[ 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4 ]
+&gt; SplitAllByValues(P, V);
+true 985543242
+&gt; P;
+Partn stack, degree 12, height 8
+[ 1 | 4 | 5 | 9 | 8 12 | 11 7 3 | 6 2 | 10]
+&gt; Pop(P, 3);
+&gt; P;
+Partn stack, degree 12, height 3
+[ 1 6 2 11 7 3 8 12 9 | 4 | 5 10]
+</PRE>
+<PRE></PRE> <A  HREF = "text628.htm">[Next]</A><A  HREF = "text649.htm">[Prev]</A> <A  HREF = "text628.htm">[Right]</A> <A  HREF = "text649.htm">[Left]</A> <A  HREF = "text629.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

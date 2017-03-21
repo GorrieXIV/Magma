@@ -1,0 +1,60 @@
+"Source: Text/Group/GrpBrd.text";
+"Line: 2906";
+"Date: Wed Jun  8 13:46:39 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Group/GrpBrd.text, line: 2906
+// Example: H78E8 ()
+print "Example: H78E8";
+ei := GetEchoInput();
+SetEchoInput(true);
+function MyIsConjugate(u, v)
+
+ // check obvious invariants
+ infu := SuperSummitInfimum(u);
+ infv := SuperSummitInfimum(v);
+ supu := SuperSummitSupremum(u);
+ supv := SuperSummitSupremum(v);
+ if infu ne infv or supu ne supv then
+    return false, _;
+ end if;
+
+ // compute an ultra summit element for v
+ sv, cv := UltraSummitRepresentative(v);
+
+ // set up a process for computing the ultra summit set of u
+ P := UltraSummitProcess(u);
+
+ // compute ultra summit elements of u until sv is found
+ //    or sv is seen not to be in the ultra summit set of u
+ while sv notin P and not IsEmpty(P) do
+    NextElement(~P);
+ end while;
+
+ print #P, "elements computed";
+ isconj, c := sv in P;
+ if isconj then
+    // return true and an element conjugating u to v
+    return true, c*cv^-1;
+ else
+    return false, _;
+ end if;
+
+end function;
+B := BraidGroup(4);
+u := B.2 * B.1 * B.2^2 * B.1 * B.2;
+v := B.2^2 * B.1 * B.3 * B.1 * B.3;
+MyIsConjugate(u,v);
+#UltraSummitSet(u);
+assert $1 eq 2;
+r := B.3*B.2*B.3*B.2^2*B.1*B.3*B.1*B.2;
+s := B.3^-1*B.2^-1*B.3*B.2*B.3*B.2^2*B.1*B.3*B.1*B.2^2*B.3;
+isconj, c := MyIsConjugate(r,s);
+isconj;
+assert $1;
+r^c eq s;
+assert $1;
+#UltraSummitSet(r);
+assert $1 eq 6;
+ #SuperSummitSet(r);
+assert $1 eq 22;
+SetEchoInput(ei);

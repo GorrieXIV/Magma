@@ -1,0 +1,239 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Planar Graphs</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1804.htm">[Next]</A><A  HREF = "text1802.htm">[Prev]</A> <A  HREF = "text1804.htm">[Right]</A> <A  HREF = "text1802.htm">[Left]</A> <A  HREF = "text1782.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "19960">Planar Graphs</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+A linear-time algorithm due to Boyer and Myrvold <A  HREF = "text1781.htm#bib_BW01">[BM01]</A>
+  has been implemented to test if a graph is planar, and to 
+  identify a Kuratowski subgraph if the graph is non-planar.
+This algorithm requires that the graph has a sparse 
+  representation.
+<P>
+The interest of this new algorithm is that it is very easy to 
+  implement when compared to previous linear-time   planarity testers.
+In addition, the algorithm also isolates a Kuratowski subgraph, if any,
+  in linear-time.
+<P>
+The concept underlying the tester is deceptively simple: 
+  the idea is to perform a depth first search of the graph 
+  and then to try to embed (by post-order 
+  traversal of the tree) the back edges from a vertex v 
+  to its descendants in such a way that they do not cross 
+  and such that vertices with connections to ancestors of v 
+  remain along the external face. 
+<P>
+To decide the order in which to embed back edges 
+  from v to its descendants, the external faces of components rooted 
+  by children of v are explored top-down,
+  avoiding paths containing vertices with ancestor connections.  
+To decide whether a vertex u has ancestor connections and 
+  must therefore be kept on the external face, one only needs 
+  the least ancestor directly adjacent to u and the lowpoint 
+  information for the children of u that are separable from the 
+  parent of u in the partial embedding.
+<P>
+Each back edge [w, v] is added as soon as the descendant 
+  endpoint w is encountered.  
+If w is not in the same biconnected component as v, then the 
+  biconnected components encountered during the traversal 
+  are merged at their respective cut vertices since 
+  the new edge [w, v] biconnects them.  
+The merge is performed such that vertices with 
+  ancestor connections remain on the external face
+  of the newly formed biconnected component.
+<P>
+Traversal is terminated when all back edges from v to 
+  its descendants are added or when the external face traversal 
+  is prevented from reaching the descendant endpoint of a back edge.  
+This occurs when both external face paths extending from 
+  the least numbered vertex in a biconnected component contain 
+  vertices with ancestor connections that block further traversal 
+  to a vertex that is the descendant 
+  endpoint w of a back edge [w, v].
+In this  case, a Kuratowski subgraph is isolated based
+   primarily on ancestor connections, external face paths 
+   and depth first search tree paths.
+<P>
+Magma is deeply 
+  grateful for the valuable help and collaboration from the authors
+  of <A  HREF = "text1781.htm#bib_BW01">[BM01]</A>, in particular John Boyer.
+<P>
+
+
+<H5><A NAME = "19961">IsPlanar(G) : GrphUnd -&gt; BoolElt, GrphUnd</A></H5>
+<BLOCKQUOTE>
+Tests whether the (undirected) graph G is planar. 
+The graph may be disconnected.
+If the graph is non-planar then a Kuratowski subgraph of G is 
+  returned: 
+That is, a subgraph of G homeomorphic to K<sub>5</sub> or 
+  K<sub>3, 3</sub>.
+The support and vertex/edge decorations of G are <I>not</I> retained 
+  in this (structural) subgraph.
+</BLOCKQUOTE>
+<H5><A NAME = "19962">Obstruction(G) : GrphUnd -&gt; GrphUnd</A></H5>
+<BLOCKQUOTE>
+Returns a Kuratoswki obstruction if the graph is non-planar,
+or the empty graph if the graph is planar.
+The Kuratoswki is a (structural) subgraph of G;
+  the support and vertex/edge decorations of G are not transferred
+  to it.
+</BLOCKQUOTE>
+<H5><A NAME = "19963">IsHomeomorphic(G : parameters) : GrphUnd -&gt; BoolElt</A></H5>
+
+<PRE>    Graph: MonStgElt                    Default: </PRE>
+<BLOCKQUOTE>
+Tests if a graph is homeomorphic to either K<sub>5</sub> or K<sub>3, 3</sub>.
+The parameter <TT>Graph</TT> must be set to either "K5" or "K33";
+it has no default setting.
+</BLOCKQUOTE>
+<H5><A NAME = "19964">Faces(G) : GrphUnd -&gt; SeqEnum[GrphVert]</A></H5>
+<BLOCKQUOTE>
+Returns the faces of the planar graph G as sequences of the edges 
+   bordering the faces of G.
+If G is disconnected, then the face defined by an isolated vertex
+  v is given as [ v ].
+</BLOCKQUOTE>
+<H5><A NAME = "19965">Face(u, v) : GrphVert, GrphVert -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Returns the face of the planar graph G
+  bordered by the directed edge [u, v] as an ordered list 
+  of edges of G.
+<P>
+Note that a directed edge and an orientation determine a face
+  uniquely:
+We can assume without loss of generality that
+  the plane is given a clockwise orientation.
+Then given a directed edge e = [u<sub>1</sub>, v<sub>1</sub>],  
+  the face defined by e is the ordered set of 
+  edges [u<sub>1</sub>, v<sub>1</sub>], [u<sub>2</sub>, v<sub>2</sub>], ..., [u<sub>m</sub>, v<sub>m</sub>]
+  such that v<sub>i</sub> = u<sub>i + 1</sub> for all i, 1 &le;i &lt; m,
+  v<sub>m</sub> = u<sub>1</sub>, and for each v<sub>i</sub> = u<sub>i + 1</sub>, the neighbours of v<sub>i</sub>,
+  u<sub>i</sub> and v<sub>i + 1</sub>, are <I>consecutive</I> vertices in v<sub>i</sub>'s adjacency  
+  list whose order is <I>anti-clockwise</I>.
+</BLOCKQUOTE>
+<H5><A NAME = "19966">Face(e) : GrphEdge -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Let e be the edge  (u, v) of the planar graph 
+  G  (recall that G is undirected).
+Then <TT>Face(</TT>(u, v)<TT>)</TT> returns the  
+  face bordered by the directed edge [u, v] as a 
+  sequence of edges of G.
+</BLOCKQUOTE>
+<H5><A NAME = "19967">NFaces(G) : GrphUnd -&gt; RngIntElt</A></H5>
+<H5>NumberOfFaces(G) : GrphUnd -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Returns the number of faces of the planar graph G.
+In the case of a disconnected graph, an isolated vertex counts for one face.
+</BLOCKQUOTE>
+<H5><A NAME = "19968">Embedding(G) : GrphUnd -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Returns the graph G's planar embedding as a sequence S where 
+  S[i] is a sequence of edges incident from vertex i.
+</BLOCKQUOTE>
+<H5><A NAME = "19969">Embedding(v) : GrphVert -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Returns the ordered list of edges (in clockwise order say) incident 
+  from vertex v.
+</BLOCKQUOTE>
+<H5><A NAME = "19970">PlanarDual(G) : GrphUnd -&gt; GrphUnd</A></H5>
+<BLOCKQUOTE>
+Constructs the dual G' of a planar graph G. 
+The numbering of the vertices of G' corresponds to the order of the faces as returned by 
+<TT>Faces(G)</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19971">Example <TT>Graph_Planarity (H155E17)</TT></A></H3>
+We start with a small disconnected planar graph G:
+  Notice how one of the faces of G is defined by the isolated 
+  vertex 4.
+<P>
+<P>
+<PRE>
+&gt; G := Graph&lt; 5 | [ {2, 3, 5}, {1, 5}, {1}, , {1, 2} ] &gt;;
+&gt; G;
+Graph
+Vertex  Neighbours
+
+1       2 3 5 ;
+2       1 5 ;
+3       1 ;
+4       ;
+5       1 2 ;
+
+&gt; IsConnected(G);
+false
+&gt; IsPlanar(G);
+true
+&gt; Faces(G);
+[
+  [ {1, 2}, {2, 5}, {5, 1} ],
+  [ {1, 5}, {5, 2}, {2, 1}, {1, 3}, {3, 1} ],
+  [ 4 ]
+]
+&gt; Embedding(G);
+[
+  [ {1, 2}, {1, 5}, {1, 3} ],
+  [ {2, 5}, {2, 1} ],
+  [ {3, 1} ],
+  [],
+  [ {5, 1}, {5, 2} ]
+]
+&gt; Embedding(VertexSet(G)!1);
+[ {1, 2}, {1, 5}, {1, 3} ]
+</PRE>
+Now let's turn to a simple non-planar graph whose obstruction is 
+  K<sub>3, 3</sub>:
+<P>
+<P>
+<PRE>
+&gt; G := Graph&lt; 6 | [ {3, 4, 5}, {3, 4, 5, 6}, {1, 2, 5, 6},
+&gt; {1, 2, 5, 6}, {1, 2, 3, 4, 6}, {2, 3, 4, 5} ] &gt;;
+&gt; G;
+Graph
+Vertex  Neighbours
+
+1       3 4 5 ;
+2       3 4 5 6 ;
+3       1 2 5 6 ;
+4       1 2 5 6 ;
+5       1 2 3 4 6 ;
+6       2 3 4 5 ;
+
+&gt; IsPlanar(G);
+false
+&gt; b, O := IsPlanar(G);
+&gt; IsSubgraph(G, O);
+true
+&gt; O;
+Graph
+Vertex  Neighbours
+
+1       4 5 3 ;
+2       3 5 4 ;
+3       1 6 2 ;
+4       2 6 1 ;
+5       6 1 2 ;
+6       5 4 3 ;
+
+&gt; IsHomeomorphic(O : Graph := "K33");
+true
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1804.htm">[Next]</A><A  HREF = "text1802.htm">[Prev]</A> <A  HREF = "text1804.htm">[Right]</A> <A  HREF = "text1802.htm">[Left]</A> <A  HREF = "text1782.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Pipes</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text36.htm">[Next]</A><A  HREF = "text34.htm">[Prev]</A> <A  HREF = "text36.htm">[Right]</A> <A  HREF = "text34.htm">[Left]</A> <A  HREF = "text29.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "311">Pipes</A></H3>
+
+<P>
+<P>
+Pipes are used to communicate with newly-created processes.
+Currently pipes are only available on UNIX systems.
+<P>
+The Magma I/O module is currently undergoing revision, and the
+current pipe facilities are a mix of the old and new methods.
+A more uniform model will be available in future releases.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text35.htm#312">Pipe Creation</A>
+<LI> <A  HREF = "text35.htm#316">Operations on Pipes</A>
+</UL>
+<H4><A NAME = "312">Pipe Creation</A></H4>
+
+
+
+<H5><A NAME = "313">POpen(C, T) : MonStgElt, MonStgElt -&gt; File</A></H5>
+<BLOCKQUOTE>
+Given a shell command line C, together with a type indicator T,
+open a pipe between the Magma process and the command to be executed.
+The standard C library function <TT>popen()</TT> is used, so
+the possible characters allowed in T are the same as those allowed
+for that function in the current operating system, and have the
+same interpretation.  Thus one should give the value <TT>"r"</TT> for T
+so that Magma can read the output from the command, and give the value
+<TT>"w"</TT> for T so that Magma can write into the input of the command.
+See the <TT>Pipe</TT> intrinsic for a method for sending input to, and
+receiving output from, a single command.
+<P>
+Important: this function returns a <TT>File</TT> object, and the I/O
+functions for files described previously must be used rather then
+those described in the following.
+</BLOCKQUOTE>
+<H5><A NAME = "314">Pipe(C, S) : MonStgElt, MonStgElt -&gt; MonStgElt</A></H5>
+<BLOCKQUOTE>
+Given a shell command C and an input string S, create a pipe to
+the command C, send S into the standard input of C, and return
+the output of C as a string.  Note that for many commands, S
+should finish with a new line character if it consists of only one line.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "315">Example <TT>IO_GetTime (H3E11)</TT></A></H3>
+We write a function which returns the current time as 3 values:
+hour, minutes, seconds.  The function opens a pipe to the UNIX
+command "date" and applies regular expression matching to the
+output to extract the relevant fields.
+<P>
+<P>
+<PRE>
+&gt; function GetTime()
+&gt;     D := POpen("date", "r");
+&gt;     date := Gets(D);
+&gt;     _, _, f := Regexp("([0-9][0-9]):([0-9][0-9]):([0-9][0-9])", date);
+&gt;     h, m, s := Explode(f);
+&gt;     return h, m, s;
+&gt; end function;
+&gt; h, m, s := GetTime();
+&gt; h, m, s;
+14 30 01
+&gt; h, m, s := GetTime();
+&gt; h, m, s;
+14 30 04
+</PRE>
+<HR>
+<H4><A NAME = "316">Operations on Pipes</A></H4>
+
+<P>
+<P>
+When a read request is made on a pipe, the available data is returned.
+If no data is currently available, then the process waits until some
+does becomes available, and returns that.  (It will also return if the
+pipe has been closed and hence no more data can be transmitted.)
+It does not continue trying to read more data, as it cannot tell whether
+or not there is some "on the way".
+<P>
+The upshot of all this is that care must be exercised as reads may
+return less data than is expected.
+
+
+<H5><A NAME = "317">Read(P : parameters) : IO -&gt; MonStgElt</A></H5>
+
+<PRE>    Max: RngIntElt                      Default: 0</PRE>
+<BLOCKQUOTE>
+Waits for data to become available for reading from P and then returns
+it as a string.  If the parameter <TT>Max</TT> is set to a positive value
+then at most that many characters will be read.  Note that fewer than
+<TT>Max</TT> characters may be returned, depending on the amount of
+currently available data.
+<P>
+If the pipe has been closed then the special EOF marker string is
+returned.
+</BLOCKQUOTE>
+<H5><A NAME = "318">ReadBytes(P : parameters) : IO -&gt; SeqEnum</A></H5>
+
+<PRE>    Max: RngIntElt                      Default: 0</PRE>
+<BLOCKQUOTE>
+Waits for data to become available for reading from P and then returns
+it as a sequence of bytes (integers in the range 0 ... 255).
+If the parameter <TT>Max</TT> is set to a positive value then at most that
+many bytes will be read.  Note that fewer than <TT>Max</TT> bytes may be
+returned, depending on the amount of currently available data.
+<P>
+If the pipe has been closed then the empty sequence is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "319">ReadBytes(P, n) : IO, RngIntElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Keeps reading from P, waiting for data as necessary, until either n
+bytes have been read or an end of file condition is encountered.  The data
+read is returned as a sequence of bytes (integers in the range 0 ... 255).
+Note that fewer than n bytes may be returned if the end of file
+condition is encountered.
+</BLOCKQUOTE>
+<H5><A NAME = "320">Write(P, s) : IO, MonStgElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Writes the characters of the string s to the pipe P.
+</BLOCKQUOTE>
+<H5><A NAME = "321">WriteBytes(P, Q) : IO, SeqEnum -&gt;</A></H5>
+<BLOCKQUOTE>
+Writes the bytes in the byte sequence Q to the pipe P.  Each
+byte must be an integer in the range 0 ... 255.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text36.htm">[Next]</A><A  HREF = "text34.htm">[Prev]</A> <A  HREF = "text36.htm">[Right]</A> <A  HREF = "text34.htm">[Left]</A> <A  HREF = "text29.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

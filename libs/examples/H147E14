@@ -1,0 +1,29 @@
+"Source: Text/Incidence/Plane.text";
+"Line: 2484";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Incidence/Plane.text, line: 2484
+// Example: H147E14 ()
+print "Example: H147E14";
+ei := GetEchoInput();
+SetEchoInput(true);
+BaerDerivation := function(q)
+//---------------------------
+// Construct an affine plane by the technique of derivation using 
+// Baer subplanes
+   Fq2< w > := FiniteField(q^2);
+   V := VectorSpace(Fq2, 3);
+   Plane, Pts, Lns := FiniteProjectivePlane(V);
+   G, Y := CollineationGroup(Plane);
+   Subplane := SubfieldSubplane(Plane, GF(q));
+   LineInf := Lns![1, 0, 0];
+
+   BaerSeg := Points(Subplane) meet LineInf;
+   StabSeg := Stabilizer(G, Y, BaerSeg);
+   BaerLines := Orbit(StabSeg, Y, Points(Subplane) diff BaerSeg);
+   AffLines := BaerLines join { Set(l) diff LineInf : l in Lns | 
+                               (BaerSeg meet l) eq {} };
+   return FiniteAffinePlane< SetToIndexedSet(&join(AffLines)) | Setseq(AffLines) 
+                                            : Check := false >;
+end function; /*BaerDerivation*/
+SetEchoInput(ei);

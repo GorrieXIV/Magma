@@ -1,0 +1,1163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Permutation Group Actions</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text640.htm">[Next]</A><A  HREF = "text638.htm">[Prev]</A> <A  HREF = "text640.htm">[Right]</A> <A  HREF = "text638.htm">[Left]</A> <A  HREF = "text629.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "7073">Permutation Group Actions</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text639.htm#7074">G-Sets</A>
+<LI> <A  HREF = "text639.htm#7075">Creating a G-Set</A>
+<LI> <A  HREF = "text639.htm#7088">Images, Orbits and Stabilizers</A>
+<LI> <A  HREF = "text639.htm#7112">Action on a G-Space</A>
+<LI> <A  HREF = "text639.htm#7118">Action on Orbits</A>
+<LI> <A  HREF = "text639.htm#7124">Action on a G-invariant Partition</A>
+<LI> <A  HREF = "text639.htm#7137">Action on a Coset Space</A>
+<LI> <A  HREF = "text639.htm#7141">Reduced Permutation Actions</A>
+<LI> <A  HREF = "text639.htm#7145">The Jellyfish Algorithm</A>
+</UL>
+<H4><A NAME = "7074">G-Sets</A></H4>
+
+<P>
+<P>
+Let G be a group. A <I>G-set</I> is a pair (Y, f), where Y is a set 
+and f : Y x G -&gt; Y is a mapping such that
+(a) f(f(y, g), h) = f(y, gh), for all g, h &isin;G
+and
+(b) f(y, 1) = y, for all y &isin;Y.
+The mapping f defines the <I>action</I> of G on the set Y.
+<P>
+If G is defined as a permutation group acting on the set X and Y
+is another G-set then there is a homomorphism of G<sup>X</sup> into G<sup>Y</sup>.
+<P>
+We distinguish three types of G-set for a permutation group G. The set
+on which G is defined will be referred to as the <I>natural G-set</I>
+and the action of G on X as the <I>natural action</I> of G.
+<P>
+Let A be a set. A <I>derived set</I> of A is defined (recursively) 
+as follows:
+<P>
+<P>
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>A subset of A is a derived set;
+<DT>(ii)</DT><DD>A set of k-subsets of A is a derived set;
+<DT>(iii)</DT><DD>A set of k-sequences of A is a derived set;
+<DT>(iv)</DT><DD>A set of ordered partitions of A is a derived set;
+<DT>(v)</DT><DD>A subset of a cartesian product of derived sets of A
+is a derived set.
+<P>
+<P>
+<P>
+</DL>
+The natural action of G on X induces a natural action on the
+G-closure Y of any derived set of X. Such a set Y is
+also a G-set. For example, a subset of X is a G-set for G if 
+and only if it is a union of orbits for G.
+<P>
+Finally, a <I>general G-set</I> is an arbitrary set Y with an action
+f satisfying the conditions (a) and (b).
+<P>
+The notion of a G-set enables the user to work with several different
+actions of G. Rather than having to always work with the image 
+of G with respect to an action on a set Y, the user may specify
+the required operation in terms of G.
+
+
+<H4><A NAME = "7075">Creating a G-Set</A></H4>
+
+
+
+<H5><A NAME = "7076">GSetFromIndexed(G, Y) : GrpPerm, SetIndx -&gt; GSet</A></H5>
+<BLOCKQUOTE>
+Given a group G and an indexed set Y with the same cardinality
+as the natural G-set, return a G-set corresponding to the natural
+bijection between the labelling L (= (Labelling(G))) of G and Y.  
+Explicitly,
+the bijection is &phi;: L -&gt; Y: l |-&gt; Y[(Position)(L, l)].
+Then the returned G-set is the set Y endowed with the action
+f: Y x G -&gt; Y: (y, p) |-&gt; &phi;(p(&phi;<sup> - 1</sup>(y))).
+</BLOCKQUOTE>
+<H5><A NAME = "7077">GSet(G, X, Y) : GrpPerm, GSet, SetEnum -&gt; GSet</A></H5>
+<H5>GSet(G, Y) : GrpPerm, Set -&gt; GSet</H5>
+<BLOCKQUOTE>
+Return the smallest derived G-set containing Y as a subset under the 
+action of G on X.
+If X is omitted, then the natural action will be assumed.
+In practice, the set Y is expanded
+until for each element y of the expanded Y, the image of y under
+each generator of G under the action described by X is also in Y.
+The action of G on Y is then the action induced by the action of G
+on X.
+</BLOCKQUOTE>
+<H5><A NAME = "7078">GSet(G) : GrpPerm -&gt; GSet</A></H5>
+<BLOCKQUOTE>
+Given a permutation group G, return the G-set corresponding to the
+natural action of G.
+</BLOCKQUOTE>
+<H5><A NAME = "7079">GSet(G, Y, f) : GrpPerm, Set, Map -&gt; GSet</A></H5>
+<BLOCKQUOTE>
+Construct the smallest G-set containing Y as a subset with the given 
+action f.
+The map f must satisfy the requirements of a G-set action.
+In particular, the domain of f must be a superset of Y x G,
+the codomain a superset of Y and the two conditions listed at the
+beginning of this section must be met.
+</BLOCKQUOTE>
+<H5><A NAME = "7080">Action(Y) : GSet -&gt; Map</A></H5>
+<BLOCKQUOTE>
+The map giving the action of the group on the G-set Y.
+</BLOCKQUOTE>
+<H5><A NAME = "7081">Group(Y) : GSet -&gt; GrpPerm</A></H5>
+<BLOCKQUOTE>
+The group associated with the G-set Y.
+</BLOCKQUOTE>
+<H5><A NAME = "7082">Labelling(G) : GrpPerm -&gt; SetIndx</A></H5>
+<BLOCKQUOTE>
+Given a permutation group G of degree n, return an indexed set 
+giving the internal mapping of the natural G-set of G onto the 
+set { 1, ..., n }, where n is the degree of G.
+</BLOCKQUOTE>
+<H5><A NAME = "7083">Degree(g, Y) : GrpPermElt, GSet -&gt; RngIntElt</A></H5>
+<H5>Degree(g) : GrpPermElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Given an element g of a permutation group G and a G-set Y, 
+return the  cardinality of the subset of Y consisting of points 
+that are moved by g.  If Y is omitted, the natural G-set X 
+is assumed.    
+</BLOCKQUOTE>
+<H5><A NAME = "7084">Degree(G, Y) : GrpPerm, GSet -&gt; RngIntElt</A></H5>
+<H5>Degree(G) : GrpPerm -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Given a G-set Y, return the cardinality of Y. If Y is omitted, 
+the natural G-set X is assumed.    
+</BLOCKQUOTE>
+<H5><A NAME = "7085">Support(g, Y) : GrpPermElt, GSet -&gt; { Elt }</A></H5>
+<H5>Support(g) : GrpPermElt -&gt; { Elt }</H5>
+<BLOCKQUOTE>
+Given an element g of a permutation group G and a G-set Y, 
+return the subset of Y consisting of points that are moved by g.
+If Y is omitted, the natural G-set X is assumed.    
+</BLOCKQUOTE>
+<H5><A NAME = "7086">Support(G, Y) : GrpPerm, GSet -&gt; { Elt }</A></H5>
+<H5>Support(G) : GrpPerm -&gt; { Elt }</H5>
+<BLOCKQUOTE>
+Given a permutation group G and a G-set Y, return the subset of 
+Y consisting of points that are moved by at least one element of G.
+If Y is omitted the natural G-set for G is assumed.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7087">Example <TT>GrpPerm_GSets (H63E23)</TT></A></H3>
+We construct a G-set with a user defined action.
+Our example will take a group G and a normal subgroup N of index 4.
+The G-set will be the irreducible characters of N, with the usual
+G action obtained from permuting the elements of N by conjugation.
+As this is not a derived set we will define the action via a map.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := PGammaL(2, 9);
+&gt; N := PSL(2, 9);
+&gt; CT := CharacterTable(N);
+&gt; X := SequenceToSet(CT);
+&gt; XxG := CartesianProduct(X, G);
+&gt; f := map&lt; XxG -&gt; X | x :-&gt; x[1]^x[2] &gt;;
+&gt; Y := GSet(G, X, f);
+</PRE>
+<P>
+This defines our G-set <TT>Y</TT>. The inertia group of a character is its 
+stabilizer in this action. Let us compute an inertia group.
+<P>
+<P>
+<P>
+<PRE>
+&gt; chi := CT[2];
+&gt; I := Stabilizer(G, Y, chi);
+&gt; Index(G, I);
+2
+&gt; [#o : o in Orbits(G, Y)];
+[ 1, 1, 1, 2, 2 ]
+</PRE>
+<P>
+We find that two of the characters have inertia groups 
+of index 2 in G, while three are G-invariant.
+<HR>
+<H4><A NAME = "7088">Images, Orbits and Stabilizers</A></H4>
+
+
+
+<H5><A NAME = "7089">x ^ g : Elt, GrpPermElt -&gt; Elt</A></H5>
+<BLOCKQUOTE>
+Given a permutation group G with natural G-set X and an object x 
+which is an element of some derived G-set of X, find the image of x 
+under G.
+</BLOCKQUOTE>
+<H5><A NAME = "7090">Image(g, Y, y) : GrpPermElt, GSet, Elt -&gt; Elt</A></H5>
+<H5>Image(g, y) : GrpPermElt, Elt -&gt; Elt</H5>
+<BLOCKQUOTE>
+Given a permutation g belonging to a group G, a G-set Y, 
+and an element y of Y, find the image of y under g.  
+If y is an element of
+some derived G-set of G, the set Y may be omitted.
+</BLOCKQUOTE>
+<H5><A NAME = "7091">Fix(g, Y): GrpPermElt, GSet -&gt; { Elt }</A></H5>
+<H5>Fix(g): GrpPermElt -&gt; { Elt }</H5>
+<BLOCKQUOTE>
+Given a permutation g belonging to a group G and a G-set Y, 
+construct the fixed-point set of g in its action on Y. In the 
+case in which Y is the natural G-set, Y may be omitted.  
+The fixed-point set is returned as a subset of points of Y.
+</BLOCKQUOTE>
+<H5><A NAME = "7092">Fix(G, Y) : GrpPerm, GSet -&gt; { Elt }</A></H5>
+<H5>Fix(G) : GrpPerm -&gt; { Elt }</H5>
+<BLOCKQUOTE>
+The fixed-point set of the permutation group G in its action on the
+G-set Y (or the natural G-set for G if Y is omitted).
+</BLOCKQUOTE>
+<H5><A NAME = "7093">x ^ G : Elt, GrpPerm -&gt; GSet</A></H5>
+<BLOCKQUOTE>
+Given a permutation group G with natural G-set X and an 
+element x belonging to some derived G-set of X, construct
+the orbit of x under G. The orbit is returned as a G-set.
+</BLOCKQUOTE>
+<H5><A NAME = "7094">Cycle(e, x) : GrpPermElt, Elt -&gt; SetIndx</A></H5>
+<BLOCKQUOTE>
+Let e be an element of a permutation group defined as acting on 
+a set containing x. Returns the set of images of x under repeated 
+application of e as an indexed set with x the first element. This 
+gives the cycle containing x in the disjoint cycle representation of e.
+</BLOCKQUOTE>
+<H5><A NAME = "7095">CycleDecomposition(e) : GrpPermElt -&gt; SeqEnum[SetIndx]</A></H5>
+<BLOCKQUOTE>
+Let e be an element of a permutation group defined as acting on 
+a set X. Returns a sequence of indexed sets partitioning X,
+each of which is a cycle of e. This gives the full disjoint cycle
+representation of e.
+</BLOCKQUOTE>
+<H5><A NAME = "7096">Orbit(G, Y, y) : GrpPerm, GSet, Elt -&gt; GSet</A></H5>
+<H5>Orbit(G, y) : GrpPerm, Elt -&gt; GSet</H5>
+<BLOCKQUOTE>
+Given a permutation group G, a G-set Y, and an element 
+y belonging to Y, construct the orbit of y under G. The orbit 
+is returned as a G-set. If y is an element of some derived G-set
+of G, the set Y may be omitted.
+</BLOCKQUOTE>
+<H5><A NAME = "7097">Orbits(G, Y) : GrpPerm, GSet -&gt; [ GSet ]</A></H5>
+<H5>Orbits(G) : GrpPerm -&gt; [ GSet ]</H5>
+<BLOCKQUOTE>
+Given a permutation group G and a G-set Y, construct the orbits 
+of G on Y. If the set Y is omitted, the orbits of G on its 
+natural G-set are constructed. The orbits are returned as a sequence 
+of G-sets.
+</BLOCKQUOTE>
+<H5><A NAME = "7098">OrbitRepresentatives(G) : GrpPerm -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a permutation group G, construct the orbits 
+of G on its natural G-set. The orbit descriptions are 
+returned as a sequence of tuples &lt; l, r &gt; giving the 
+length l and a representative r of each orbit of G on its support.
+<P>
+This function stores <I>only</I> the orbit representatives and so
+is more space-efficient than <TT>Orbits</TT>. However, 
+it should be used only if the user wants to determine just 
+the orbit representatives;  queries about the orbits
+containing other elements of the support will cause
+further computation.
+</BLOCKQUOTE>
+<H5><A NAME = "7099">OrbitClosure(G, Y, S) : GrpPerm, GSet, { Elt } -&gt; GSet</A></H5>
+<H5>OrbitClosure(G, S) : GrpPerm, { Elt } -&gt; GSet</H5>
+<BLOCKQUOTE>
+Given a subset S of the G-set Y, construct the
+smallest G-invariant subset of Y that contains S.
+If Y is the natural G-set for G it may be omitted.
+</BLOCKQUOTE>
+<H5><A NAME = "7100">IsConjugate(G, Y, y, z) : GrpPerm, GSet, Elt, Elt -&gt; BoolElt, GrpPermElt</A></H5>
+<H5>IsConjugate(G, y, z) : GrpPerm, Elt, Elt -&gt; BoolElt, GrpPermElt</H5>
+<BLOCKQUOTE>
+Given elements y and z belonging either to a G-set Y or to
+a (restricted) derived set of Y, return the value <TT>true</TT> if there 
+exists an element g &isin;G such that y<sup>g</sup> = z. Otherwise, return
+<TT>false</TT>.  If such an element exists, then it is returned as the second 
+value of the function. If y and z belong to the natural G-set,
+then Y may be omitted. Currently, y and z are restricted to
+being elements, sets of elements, multisets of elements,
+sequences of elements, ordered partitions, or unordered partitions of Y.
+</BLOCKQUOTE>
+<H5><A NAME = "7101">Stabilizer(G, Y, y) : GrpPerm, GSet, Elt -&gt; GrpPerm</A></H5>
+<H5>Stabiliser(G, Y, y) : GrpPerm, GSet, Elt -&gt; GrpPerm</H5>
+<H5>Stabilizer(G, y) : GrpPerm, Elt -&gt; GrpPerm</H5>
+<H5>Stabiliser(G, y) : GrpPerm, Elt -&gt; GrpPerm</H5>
+<BLOCKQUOTE>
+Given a permutation group G and a G-set Y, and an object y
+which is either an element, a sequence of elements, a set of elements,
+an ordered or unordered partition, or a tuple over the G-set Y, 
+find the stabilizer of y in G. 
+The stabilizer is returned as a subgroup of G. If Y is the
+natural G-set, it may be omitted.
+</BLOCKQUOTE>
+<H5><A NAME = "7102">IsPrimitive(G, Y) : GrpPerm, GSet -&gt; BoolElt</A></H5>
+<H5>IsPrimitive(G) : GrpPerm -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if G acts primitively on the G-set Y. If Y is the natural
+G-set, the set Y may be omitted.
+</BLOCKQUOTE>
+<H5><A NAME = "7103">IsTransitive(G, Y) : GrpPerm, GSet -&gt; BoolElt</A></H5>
+<H5>IsTransitive(G) : GrpPerm -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if G acts transitively on the G-set Y. If Y is the natural
+G-set, the set Y may be omitted.
+</BLOCKQUOTE>
+<H5><A NAME = "7104">IsTransitive(G, Y, k) : GrpPerm, GSet, RngIntElt -&gt; BoolElt</A></H5>
+<H5>IsTransitive(G, k) : GrpPerm, RngIntElt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if G acts k-transitively on the G-set Y. If Y is 
+the natural G-set, the set Y may be omitted.
+</BLOCKQUOTE>
+<H5><A NAME = "7105">IsSharplyTransitive(G, Y, k) : GrpPerm, GSet, RngIntElt -&gt; BoolElt</A></H5>
+<H5>IsSharplyTransitive(G, k) : GrpPerm, RngIntElt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if G acts sharply k-transitively on the G-set Y. If Y 
+is the natural G-set, the set Y may be omitted.
+</BLOCKQUOTE>
+<H5><A NAME = "7106">Transitivity(G, Y) : GrpPerm, GSet -&gt; RngIntElt</A></H5>
+<H5>Transitivity(G) : GrpPerm -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The degree of transitivity of G acting on the G-set Y. 
+The set Y may be omitted if it is the same as the natural G-set.
+</BLOCKQUOTE>
+<H5><A NAME = "7107">IsRegular(G, Y) : GrpPerm, GSet -&gt; BoolElt</A></H5>
+<H5>IsRegular(G) : GrpPerm -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if G acts regularly on the G-set Y. If Y is 
+the natural G-set, the set Y may be omitted. The algorithm used
+is that of Sims, see <A  HREF = "text628.htm#bib_struct-gps">[CB92]</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "7108">IsSemiregular(G, Y) : GrpPerm, GSet -&gt; BoolElt</A></H5>
+<H5>IsSemiregular(G) : GrpPerm -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if G acts semiregularly on the G-set Y. If Y is 
+the natural G-set, the set Y may be omitted. The algorithm used 
+is a variation of Sims' regularity test, see <A  HREF = "text628.htm#bib_struct-gps">[CB92]</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "7109">IsSemiregular(G, Y, S) : GrpPerm, GSet, SetEnum -&gt; BoolElt</A></H5>
+<H5>IsSemiregular(G, S) : GrpPerm, SetEnum -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Given a permutation group G, a G-set Y for G, and a union
+of orbits S for G in its action on Y, return <TT>true</TT> if G acts 
+semiregularly on S. If Y is the natural G-set, then Y may be 
+omitted.
+</BLOCKQUOTE>
+<H5><A NAME = "7110">IsFrobenius(G) : GrpPerm -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the permutation group G is a Frobenius group with respect
+to its natural action, <TT>false</TT> otherwise. (A group G defined as acting 
+on X is Frobenius if it acts transitively but non-regularly on X 
+and if the pointwise stabilizer of any two distinct points of X is the 
+trivial group.)
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7111">Example <TT>GrpPerm_Stabilizers (H63E24)</TT></A></H3>
+We apply some of these functions to the Mathieu group M<sub>24</sub>, taking
+as generators the following three permutations:
+<PRE>
+(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,24),
+(2,16,9,6,8)(3,12,13,18,4)(7,17,10,11,22)(14,19,21,20,15),
+(1,22)(2,11)(3,15)(4,17)(5,9)(6,19)(7,13)(8,20)(10,16)(12,21)(14,18)(23,24).
+</PRE>
+<P>
+<PRE>
+&gt; M24 := sub&lt; Sym(24) |
+&gt;  (1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,24),
+&gt;  (2,16,9,6,8)(3,12,13,18,4)(7,17,10,11,22)(14,19,21,20,15),
+&gt;  (1,22)(2,11)(3,15)(4,17)(5,9)(6,19)(7,13)(8,20)(10,16)(12,21)(14,18)(23,24)&gt;;
+&gt; M24;
+Permutation group M24 acting on a set of cardinality 24
+    (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+       21, 22, 24)
+    (2, 16, 9, 6, 8)(3, 12, 13, 18, 4)(7, 17, 10, 11, 22)(14, 19, 21, 20, 15)
+    (1, 22)(2, 11)(3, 15)(4, 17)(5, 9)(6, 19)(7, 13)(8, 20)(10, 16)(12, 21)
+       (14, 18)(23, 24)
+</PRE>
+<P>
+Choosing a random element x of M<sub>24</sub>, we use it to compute some images.
+<P>
+<P>
+<P>
+<PRE>
+&gt; x := Random(M24);
+&gt; 1^x;
+7
+&gt; [1,2,3,4]^x;
+[ 7, 9, 8, 17 ]
+&gt; { 1,2,3,4 }^x;
+{ 17, 7, 8, 9 }
+</PRE>
+<P>
+We find the stabilizer of the point 1, which is the group M<sub>23</sub>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; S1 := Stabilizer(M24, 1);
+&gt; S1;
+Permutation group S1 acting on a set of cardinality 24
+Order = 10200960 = 2^7 * 3^2 * 5 * 7 * 11 * 23
+    (2, 16, 9, 6, 8)(3, 12, 13, 18, 4)(7, 17, 10, 11, 22)(14, 19, 21, 20, 15)
+    (7, 17, 22)(8, 11, 13)(9, 14, 12)(10, 20, 19)(15, 23, 18)(16, 21, 24)
+    (3, 6, 18)(5, 16, 14)(7, 21, 22)(8, 19, 17)(9, 20, 24)(11, 12, 13)
+    (6, 18, 15)(7, 19, 16)(8, 13, 11)(9, 10, 22)(12, 21, 20)(14, 17, 24)
+    (4, 12, 6, 19)(5, 22, 24, 8)(7, 17, 20, 14)(9, 15, 13, 18)(10, 21)(11, 16)
+    (6, 22, 7)(8, 13, 11)(9, 20, 16)(10, 18, 21)(12, 15, 19)(14, 24, 23)
+    (5, 12, 21)(6, 15, 18)(7, 22, 8)(9, 16, 17)(10, 14, 13)(11, 24, 19)
+</PRE>
+<P>
+We next compute the stabilizer of the sequence [1, 2, 3, 4, 5].
+<P>
+<P>
+<P>
+<PRE>
+&gt; SQ := Stabilizer(M24, [1,2,3,4,5]);
+&gt; SQ;
+Permutation group SQ acting on a set of cardinality 24
+Order = 48 = 2^4 * 3
+    (6, 18, 15)(7, 19, 16)(8, 13, 11)(9, 10, 22)(12, 21, 20)(14, 17, 24)
+    (7, 17, 22)(8, 11, 13)(9, 14, 12)(10, 20, 19)(15, 23, 18)(16, 21, 24)
+    (6, 22, 7)(8, 13, 11)(9, 20, 16)(10, 18, 21)(12, 15, 19)(14, 24, 23)
+&gt; Orbits(SQ);
+[
+    GSet{ at 1 atbrace,
+    GSet{ at 2 atbrace,
+    GSet{ at 3 atbrace,
+    GSet{ at 4 atbrace,
+    GSet{ at 5 atbrace,
+    GSet{ at 6,18, 22, 15, 21, 9, 7, 23, 19, 20, 24, 10,
+    14, 17, 16 12 atbrace,
+    GSet{ at 8, 13, 11 atbrace
+]
+</PRE>
+<P>
+The five fixed points together with the orbit of length 3 form a block of
+a 5 - (24, 8, 1) design. By computing the orbit of this block under M<sub>24</sub>,  
+we obtain all the blocks of the design.
+<P>
+<P>
+<P>
+<PRE>
+&gt; B := { 1,2,3,4,5,8,11,13 };
+&gt; D := B^M24;
+&gt; #D;
+759
+</PRE>
+<P>
+Finally, we check that the set stabilizer of the block 
+{ 1, 2, 3, 4, 5, 8, 11, 13 } has index 759 in M<sub>24</sub>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Index(M24, Stabilizer(M24, { 1,2,3,4,5,8,11,13 }));
+759
+</PRE>
+<HR>
+<H4><A NAME = "7112">Action on a G-Space</A></H4>
+
+
+
+<H5><A NAME = "7113">Action(G, Y) : GrpPerm, GSet -&gt; Hom(Grp), GrpPerm, GrpPerm</A></H5>
+<BLOCKQUOTE>
+Given a permutation group G defined to be acting on X and a set
+Y, construct the homomorphism &phi;: G -&gt; L, where the
+permutation group L gives the action of G on the set Y.
+The function returns:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>The natural homomorphism &phi;: G -&gt; L;
+<DT>(b)</DT><DD>The induced group L;
+<DT>(c)</DT><DD>The kernel of the action (a subgroup of G).</DL>
+</BLOCKQUOTE>
+<H5><A NAME = "7114">ActionImage(G, Y) : GrpPerm, GSet -&gt; GrpPerm</A></H5>
+<BLOCKQUOTE>
+Given a permutation group G defined to be acting on X and a set
+Y, construct the permutation group L giving the action of G on
+the set Y.
+</BLOCKQUOTE>
+<H5><A NAME = "7115">ActionKernel(G, Y) : GrpPerm, GSet -&gt; GrpPerm</A></H5>
+<BLOCKQUOTE>
+Construct the kernel of the homomorphism &phi; : G -&gt; L,
+where the permutation group L gives the action of G on the G-set Y.
+</BLOCKQUOTE>
+<H5><A NAME = "7116">IsFaithful(G, Y) : GrpPerm, GSet -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the action of G on the G-set Y is faithful.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7117">Example <TT>GrpPerm_Actions (H63E25)</TT></A></H3>
+We take the group PSL(3, 4) acting on projective points and 
+construct its representation on flags (point-line pairs). In order to 
+construct the flags, we need to find a line. If H is the stabilizer of a 
+point &alpha; in PSL(3, 4) in its action on projective points, then a
+line consists of &alpha; together with the points in any non-trivial 
+orbit of O<sub>2</sub>(G).
+<P>
+<P>
+<PRE>
+&gt; G := ProjectiveSpecialLinearGroup(3, 4);
+&gt; O2 := pCore( Stabilizer(G, 1), 2 );
+&gt; O2;
+Permutation group O2 acting on a set of cardinality 21
+Order = 16 = 2^4
+       (3, 4)(5, 7)(9, 16)(10, 17)(11, 15)(13, 18)(14, 19)(20, 21)
+       (3, 20)(4, 21)(5, 15)(7, 11)(9, 10)(13, 19)(14, 18)(16, 17)
+       (2, 8)(5, 15)(6, 12)(7, 11)(9, 17)(10, 16)(13, 18)(14, 19)
+       (2, 12)(5, 11)(6, 8)(7, 15)(9, 16)(10, 17)(13, 19)(14, 18)
+&gt; flag := &lt; 1, Orbit(O2, 2) &gt;;
+&gt; flag;
+&lt;1, GSet{ at 2, 6, 8, 12 atbrace&gt;
+&gt; flags := GSet(G, Orbit(G, flag));
+&gt; #flags;
+105
+&gt; GOnFlags := ActionImage(G, flags);
+&gt; GOnFlags;
+Permutation group GOnFlags acting on a set of 
+cardinality 105
+Order = 20160 = 2^6 * 3^2 * 5 * 7
+&gt; Stabilizer(GOnFlags, Rep(flags));
+Permutation group acting on a set of cardinality 105
+Order = 192 = 2^6 * 3
+</PRE>
+<HR>
+<H4><A NAME = "7118">Action on Orbits</A></H4>
+
+<P>
+<P>
+The operations described here are concerned with the class of G-sets
+consisting of G-invariant subsets of the natural G-set. Because of 
+the special nature of such G-sets, more efficient algorithms are 
+available for computing with homomorphisms of G induced by the action
+of G on such a G-set. See Butler <A  HREF = "text628.htm#bib_butler-homs">[But85]</A> for more 
+details.
+
+
+<H5><A NAME = "7119">OrbitAction(G, T) : GrpPerm, GSet -&gt; Hom(Grp), GrpPerm, GrpPerm</A></H5>
+<BLOCKQUOTE>
+The homomorphism f : G -&gt; L induced by the action of
+G on the G-invariant subset T of X (a union of orbits).
+</BLOCKQUOTE>
+<H5><A NAME = "7120">OrbitImage(G, T) : GrpPerm, GSet -&gt; GrpPerm</A></H5>
+<BLOCKQUOTE>
+The group L defined by the action of G on the
+G-invariant subset T of X (a union of orbits).
+</BLOCKQUOTE>
+<H5><A NAME = "7121">OrbitKernel(G, T) : GrpPerm, GSet -&gt; GrpPerm</A></H5>
+<BLOCKQUOTE>
+The kernel of the homomorphism f : G -&gt; L, where the group L
+gives the action of G on the G-invariant subset T of X (a union of
+orbits).
+</BLOCKQUOTE>
+<H5><A NAME = "7122">IsOrbit(G, S) : GrpPerm, { Elt } -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the subset S of Support(G) is invariant under G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7123">Example <TT>GrpPerm_OrbitActions (H63E26)</TT></A></H3>
+We study an intransitive group of degree 36 generated by the
+permutations
+<PRE>
+(3, 17, 26)(4, 16, 25)(5, 18, 27)(8, 15, 24),
+(1, 32, 10)(2, 31, 11)(3, 35, 12)(6, 30, 15),
+(12, 33, 24)(13, 29, 20)(14, 28, 19)(17, 30, 21),
+(6, 26, 33)(7, 22, 34)(8, 21, 35)(9, 23, 36).
+</PRE>
+<P>
+<PRE>
+&gt; G := PermutationGroup&lt; 36 | (3, 17, 26)(4, 16, 25)(5, 18, 27)(8, 15, 24),
+&gt;                             (1, 32, 10)(2, 31, 11)(3, 35, 12)(6, 30, 15),
+&gt;                             (12, 33, 24)(13, 29, 20)(14, 28, 19)(17, 30, 21),
+&gt;                             (6, 26, 33)(7, 22, 34)(8, 21, 35)(9, 23, 36) &gt;;
+&gt; IsTransitive(G);
+false
+&gt; Orbit(G, 1);
+GSet{ at 1, 32, 10 atbrace
+&gt; O := Orbits(G);
+&gt; O;
+[
+    GSet{ at 1, 32, 10 atbrace,
+    GSet{ at 2, 31, 11 atbrace,
+    GSet{ at 4, 16, 25 atbrace,
+    GSet{ at 5, 18, 27 atbrace,
+    GSet{ at 7, 22, 34 atbrace,
+    GSet{ at 9, 23, 36 atbrace,
+    GSet{ at 13, 29, 20 atbrace,
+    GSet{ at 14, 28, 19 atbrace
+    GSet{ at 3, 17, 35, 26, 30, 12, 8, 33, 15, 21, 24, 6 atbrace,
+]
+&gt; Order(G);
+933120
+</PRE>
+<P>
+We see that the group is intransitive having eight orbits of size 3 and one
+orbit of size 12. We consider the action of G on the orbit of size 12.
+<P>
+<P>
+<P>
+<PRE>
+&gt; f := OrbitAction(G, O[9]);
+&gt; f;
+Mapping from: GrpPerm: G to GrpPerm: $
+&gt; Im := Image(f);
+&gt; Im;
+Permutation group acting on a set of cardinality 12
+Order = 11520 = 2^8 * 3^2 * 5
+    (1, 6, 9)(3, 5, 8)
+    (4, 11, 8)(6, 10, 7)
+    (6, 8)(7, 11)
+    (2, 8, 10)(4, 12, 6)
+    (3, 10, 8)(4, 6, 9)
+&gt; Ker := Kernel(f);
+&gt; Ker;
+Permutation group acting on a set of cardinality 36
+Order = 81 = 3^4
+    (4, 16, 25)(5, 18, 27)
+    (7, 22, 34)(9, 23, 36)
+    (13, 29, 20)(14, 28, 19)
+    (1, 32, 10)(2, 31, 11)(4, 25, 16)(5, 27, 18)
+&gt; IsElementaryAbelian(Ker);
+true
+</PRE>
+<P>
+Thus G has an elementary abelian normal subgroup of order 81
+which is the kernel of the restriction of G to the orbit of size 12. 
+<HR>
+<H4><A NAME = "7124">Action on a G-invariant Partition</A></H4>
+
+<P>
+<P>
+This section describes the functions supplied by Magma for computing
+with block systems for a permutation group. 
+
+
+<H5><A NAME = "7125">IsBlock(G, S) : GrpPerm, { Elt } -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a transitive permutation group G with natural G-set X, and
+a subset S of X, return <TT>true</TT> if S is a block for G in its action 
+on X.
+</BLOCKQUOTE>
+<H5><A NAME = "7126">IsPrimitive(G) : GrpPerm -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the transitive permutation group G is primitive.
+</BLOCKQUOTE>
+<H5><A NAME = "7127">MaximalPartition(G) : GrpPerm -&gt; GSet</A></H5>
+<BLOCKQUOTE>
+Construct a G-invariant partition P for the transitive permutation
+group G with natural G-set X. The partition P is maximal in the
+sense that there is no G-invariant partition P' of X such that
+some block of P' properly contains a block of the partition P.
+The block system is returned as a partition of X.
+If G is primitive, the partition with one block is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "7128">MinimalPartition(G: parameters) : GrpPerm -&gt; GSet</A></H5>
+<BLOCKQUOTE>
+Construct a non-trivial G-invariant partition P of the natural
+G-set X of the transitive permutation group G. The partition 
+P is minimal in the sense that there is no G-invariant partition 
+P' of X such that some block of P' is properly contained 
+in some block of the partition P. The block system is returned as 
+a partition of X.  If G is primitive, or if no partition satisfying 
+the side-condition (see below) is found, then the empty set is returned.
+The algorithm used is based on Sch&ouml;nert &amp; Seress 
+<A  HREF = "text628.htm#bib_blocks-schonert-seress">[SS94]</A>.
+<P>
+<P>
+<PRE>
+     Block = S: { Elt }                  Default: []
+</PRE>
+If S is non-empty, then the partition P must possess a block
+B such that S is a subset of B. In this case the algorithm used
+is that of Atkinson, <A  HREF = "text628.htm#bib_blocks-atkinson">[Atk75]</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "7129">MinimalPartitions(G: parameters) : GrpPerm -&gt; [ GSet ]</A></H5>
+<BLOCKQUOTE>
+Construct all non-trivial minimal G-invariant partitions of the
+natural G-set X of the transitive permutation group G. A partition
+P is minimal in the sense that there is no G-invariant partition
+P' of X such that some block of P' is properly contained in
+some block of the partition P.
+<P>
+<P>
+The minimal block systems are returned as a sequence of sets
+of sets. If G is primitive, the function returns the empty
+sequence.
+<P>
+<P>
+The algorithm used is based on Sch&ouml;nert &amp; Seress 
+<A  HREF = "text628.htm#bib_blocks-schonert-seress">[SS94]</A>.
+<P>
+<P>
+<PRE>
+     Limit = n: RngIntElt                Default: &infin;
+</PRE>
+The function will return after creating at most n block systems.
+This option is useful in situations where, say, two distinct
+minimal blocks systems are required for a reduction algorithm.
+</BLOCKQUOTE>
+<H5><A NAME = "7130">MinimalBlocks(G: parameters) : GrpPerm -&gt; [ SetEnum ]</A></H5>
+<BLOCKQUOTE>
+A variant of texttt{MinimalPartitions} where a sequence of non-trivial
+blocks, one from each minimal partition, is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "7131">AllPartitions(G) : GrpPerm -&gt; SetEnum</A></H5>
+<BLOCKQUOTE>
+Construct all non-trivial G-invariant partitions of the
+natural G-set X of the transitive permutation group G.
+The structure returned is a set containing one block from each
+such partition. The block chosen is the block containing the
+first element of <TT>Labelling(G)</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "7132">BlocksAction(G, P) : GrpPerm, Any -&gt; Hom(GrpPerm), GrpPerm, GrpPerm</A></H5>
+<H5>BlocksAction(G, P) : GrpPerm, GSet -&gt; Hom(GrpPerm), GrpPerm, GrpPerm</H5>
+<H5>BlocksAction(G, P) : GrpPerm, SeqEnum -&gt; Hom(GrpPerm), GrpPerm, GrpPerm</H5>
+<H5>BlocksAction(G, P) : GrpPerm, SetIndx -&gt; Hom(GrpPerm), GrpPerm, GrpPerm</H5>
+<H5>BlocksAction(G, P) : GrpPerm, SetEnum -&gt; Hom(GrpPerm), GrpPerm, GrpPerm</H5>
+<BLOCKQUOTE>
+Given a transitive permutation group G with natural G-set X and a
+G-invariant partition P of X, construct the group L induced
+by the action of G on the blocks of P. In the second form, 
+P is specified by giving a single block of the partition. 
+The function returns 
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>The natural homomorphism f: G -&gt; L;
+<DT>(b)</DT><DD>The induced group;
+<DT>(c)</DT><DD>The kernel of the action (a subgroup of G).
+<P>
+<P>
+</DL>
+The relationship between the supports of G and L is given by the
+returned mapping, which may also be used as a map from
+<TT>Labelling(G)</TT> to <TT>Labelling(L)</TT>. In the forward direction
+this takes each element in the support of G to its block number in
+the support of L, while in the reverse direction this takes a block
+number to a representative of the block. 
+</BLOCKQUOTE>
+<H5><A NAME = "7133">BlocksImage(G, P) : GrpPerm, Any -&gt; GrpPerm</A></H5>
+<H5>BlocksImage(G, P) : GrpPerm, GSet -&gt; GrpPerm</H5>
+<H5>BlocksImage(G, P) : GrpPerm, SetIndx -&gt; GrpPerm</H5>
+<H5>BlocksImage(G, P) : GrpPerm, SeqEnum -&gt; GrpPerm</H5>
+<H5>BlocksImage(G, P) : GrpPerm, SetEnum -&gt; GrpPerm</H5>
+<BLOCKQUOTE>
+Given a transitive permutation group G with natural G-set X and a
+G-invariant partition P of X, construct the group induced by the 
+action of G on the blocks of P. In the second form, P is specified by
+giving a single block of the partition.
+</BLOCKQUOTE>
+<H5><A NAME = "7134">BlocksKernel(G, P) : GrpPerm, Any -&gt; GrpPerm</A></H5>
+<H5>BlocksKernel(G, P) : GrpPerm, GSet -&gt; GrpPerm</H5>
+<H5>BlocksKernel(G, P) : GrpPerm, SetIndx -&gt; GrpPerm</H5>
+<H5>BlocksKernel(G, P) : GrpPerm, SeqEnum -&gt; GrpPerm</H5>
+<H5>BlocksKernel(G, P) : GrpPerm, SetEnum -&gt; GrpPerm</H5>
+<BLOCKQUOTE>
+Given a transitive permutation group G with natural G-set X and a
+G-invariant partition P of X, construct the kernel of the action 
+of G on the blocks of P. In the second form, P is specified by
+giving a single block of the partition.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7135">Example <TT>GrpPerm_BlocksActions (H63E27)</TT></A></H3>
+An imprimitive group of degree 100 constructed by Capel
+ has several different block systems.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := sub&lt; Sym(100) |
+&gt;   (1,21,41,61,81)(2,82,62,42,22)(3,23,43,63,83)(4,84,64,44,24)
+&gt;     (5,25,45,65,85)(6,86,66,46,26)(7,27,47,67,87)(8,88,68,48,28)
+&gt;     (9,29,49,69,89)(10,90,70,50,30)(11,31,51,71,91)(12,92,72,52,32)
+&gt;     (13,33,53,73,93)(14,94,74,54,34)(15,35,55,75,95)(16,96,76,56,36)
+&gt;     (17,37,57,77,97)(18,98,78,58,38)(19,39,59,79,99)(20,100,80,60,40),
+&gt;   (1,4,6,7,10)(2,3,5,8,9)(11,19,17,15,14)(12,20,18,16,13)(21,24,26,27,30)
+&gt;      (22,23,25,28,29)(31,39,37,35,34)(32,40,38,36,33)(41,44,46,47,50)
+&gt;      (42,43,45,48,49)(51,59,57,55,54)(52,60,58,56,53)(61,64,66,67,70)
+&gt;      (62,63,65,68,69)(71,79,77,75,74)(72,80,78,76,73)(81,84,86,87,90)
+&gt;      (82,83,85,88,89)(91,99,97,95,94)(92,100,98,96,93),
+&gt;   (1,11,2,12)(3,13,4,14)(5,16,6,15)(7,17,8,18)(9,20,10,19)(21,31,22,32)
+&gt;      (23,33,24,34)(25,36,26,35)(27,37,28,38)(29,40,30,39)(41,51,42,52)
+&gt;      (43,53,44,54)(45,56,46,55)(47,57,48,58)(49,60,50,59)(61,71,62,72)
+&gt;      (63,73,64,74)(65,76,66,75)(67,77,68,78)(69,80,70,79)(81,91,82,92)
+&gt;      (83,93,84,94)(85,96,86,95)(87,97,88,98)(89,100,90,99) &gt;;
+&gt; MaxPart := MaximalPartition(G);
+&gt; #MaxPart;
+2
+&gt; MaxPart;
+GSet{ at
+    { 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 31, 32, 33, 34, 35, 
+    36, 37, 38, 39, 40, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 71, 
+    72, 73, 74, 75, 76, 77, 78, 79, 80, 91, 92, 93, 94, 95, 96, 97, 
+    98, 99, 100 },
+    { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 21, 22, 23, 24, 25, 26, 27, 28,
+    29, 30, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 61, 62, 63, 64, 
+    65, 66, 67, 68, 69, 70, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90 }
+atbrace
+&gt; MinPart := MinimalPartition(G);
+&gt; #MinPart;
+50
+</PRE>
+<P>
+We see that the group has a (maximal) system of imprimitivity consisting of
+2 blocks of size 50 and a (minimal) system of imprimitivity consisting
+of 50 blocks of size 2.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Parts := MinimalPartitions(G);
+&gt; [ #p : p in Parts ];
+[ 50, 50, 50, 50, 20, 50 ]
+</PRE>
+<P>
+Thus the group has six distinct minimal G-invariant partitions.
+Of these five have 50 blocks of size two while the remaining one
+has 20 blocks of size 5. We examine the action of G on one of the
+partitions into 50 blocks of size 2.
+<P>
+<P>
+<P>
+<PRE>
+&gt; f, Im, Ker := BlocksAction(G, Parts[1]);
+&gt; f;
+Mapping from: GrpPerm: G to GrpPerm: Im
+&gt; Im;
+Permutation group Im acting on a set of cardinality 50
+Order = 7812500 = 2^2 * 5^9
+    (1, 11, 31, 32, 12)(2, 13, 33, 34, 14)(3, 15, 35, 36, 16)
+         (4, 17, 37, 38, 18) (5, 19, 39, 40, 20)(6, 21, 41, 42, 22)
+         (7, 23, 43, 44, 24)(8, 25, 45, 46, 26)(9, 27, 47, 48, 28)
+         (10, 29, 49, 50, 30)
+    (1, 2, 3, 4, 5)(6, 10, 9, 8, 7)(11, 14, 16, 17, 20)(12, 13, 15, 18, 19)
+         (21, 29, 27, 25, 24)(22, 30, 28, 26, 23)(31, 34, 36, 37, 40)
+         (32, 33, 35, 38, 39)(41, 49, 47, 45, 44)(42, 50, 48, 46, 43)
+    (1, 6)(2, 7)(3, 8)(4, 9)(5, 10)(11, 21, 12, 22)(13, 23, 14, 24)
+        (15, 26, 16, 25)(17, 27, 18, 28)(19, 30, 20, 29)(31, 41, 32, 42)
+        (33, 43, 34, 44)(35, 46, 36, 45)(37, 47, 38, 48)(39, 50, 40, 49)
+&gt; Ker;
+Permutation group Ker acting on a set of cardinality 100
+Order = 1
+</PRE>
+<P>
+Thus, G acts faithfully on this block system.
+<HR>
+<H3><A NAME = "7136">Example <TT>GrpPerm_BlocksActions-2 (H63E28)</TT></A></H3>
+When analyzing a permutation group, it is sometimes necessary to
+reduce it to its primitive components.  This can be done by using the
+constituent homomorphism and blocks homomorphism functions.  We illustrate
+their use by analyzing the group of Rubik's cube, represented as a permutation
+group on 48 letters:
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := sub&lt;Sym(48) |
+&gt;     (1,3,8,6)(2,5,7,4)(9,48,15,12)(10,47,16,13)(11,46,17,14),
+&gt;     (6,15,35,26)(7,22,34,19)(8,30,33,11)(12,14,29,27)(13,21,28,20),
+&gt;     (1,12,33,41)(4,20,36,44)(6,27,38,46)(9,11,26,24)(10,19,25,18),
+&gt;     (1,24,40,17)(2,18,39,23)(3,9,38,32)(41,43,48,46)(42,45,47,44),
+&gt;     (3,43,35,14)(5,45,37,21)(8,48,40,29)(15,17,32,30)(16,23,31,22),
+&gt;     (24,27,30,43)(25,28,31,42)(26,29,32,41)(33,35,40,38)(34,37,39,36) &gt;;
+&gt; O1 := Orbits(G);
+&gt; O1;
+[
+    GSet{ at 1, 3, 6, 8, 9, 11, 12, 14, 15, 17, 24, 26, 27, 29,
+     30, 32, 33, 35, 38, 40, 41, 43, 46, 48 atbrace,
+    GSet{ at 2, 4, 5, 7, 10, 13, 16, 18, 19, 20, 21, 22, 23, 25, 28,
+     31, 34, 36, 37, 39, 42, 44, 45, 47 atbrace
+]
+</PRE>
+<P>
+Thus, G has two orbits, each of size 24. We consider the restriction of 
+the action of G to the first of these orbits.
+<P>
+<P>
+<P>
+<PRE>
+&gt; f1, Im1, Ker1 := OrbitAction(G, O1[1]);
+&gt; FactoredOrder(Im1);
+[ &lt;2, 7&gt;, &lt;3, 9&gt;, &lt;5, 1&gt;, &lt;7, 1&gt; ]
+&gt; IsPrimitive(Im1);
+false
+&gt; P1 := MinimalPartition(Im1);
+&gt; #P1;
+8
+&gt; f2, Im2, Ker2 := BlocksAction(Im1, P1);
+&gt; FactoredOrder(Im2);
+[ &lt;2, 7&gt;, &lt;3, 2&gt;, &lt;5, 1&gt;, &lt;7, 1&gt; ]
+&gt; IsPrimitive(Im2);
+true
+&gt; IsSymmetric(Im2);
+true
+&gt; FactoredOrder(Ker2);
+[ &lt;3, 7&gt; ]
+&gt; IsElementaryAbelian(Ker2);
+true
+</PRE>
+<P>
+Hence the group obtained by restricting G to its first orbit is isomorphic
+to Sym(8) acting on an elementary abelian normal subgroup of order 3<sup>7</sup>.
+We next investigate the kernel Ker1 of the restriction of G to the first 
+orbit of length 24. We know that Ker1 must fix all the points in the first
+orbit of G so we first take its restriction to the second orbit.
+<P>
+<P>
+<P>
+<PRE>
+&gt; f3, Im3, Ker3 := OrbitAction(Ker1, O1[2]);
+&gt; IsTransitive(Im3);
+true
+&gt; FactoredOrder(Im3);
+[ &lt;2, 20&gt;, &lt;3, 5&gt;, &lt;5, 2&gt;, &lt;7, 1&gt;, &lt;11, 1&gt; ]
+&gt; FactoredOrder(Ker3);
+[]
+&gt; IsPrimitive(Im3);
+false
+</PRE>
+<P>
+The kernel acts transitively and faithfully on the second orbit. As it
+is imprimitive, we look at its action on a system of imprimitivity.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P := MinimalPartition(Im3);
+&gt; f4, Im4, Ker4 := BlocksAction(Im3, P);
+&gt; Im4;
+Permutation group Im4 acting on a set of cardinality 12
+Order = 239500800 = 2^9 * 3^5 * 5^2 * 7 * 11
+    (10, 12, 11)
+    (9, 12, 11)
+    (8, 12, 9)
+    (7, 9)(8, 12)
+    (6, 9, 10)
+    (5, 6, 9)
+    (4, 6, 9)
+    (3, 6, 9)
+    (2, 6, 9, 5)(4, 10)
+    (1, 9, 6, 5)(4, 10)
+&gt; IsPrimitive(Im4);
+true
+&gt; IsAlternating(Im4);
+true
+&gt; FactoredOrder(Ker4);
+[ &lt;2, 11&gt; ]
+&gt; IsElementaryAbelian(Ker4);
+true
+</PRE>
+<P>
+The kernel of the restriction of G to the first orbit is isomorphic
+to Alt(12) acting on an elementary abelian group of order 2<sup>11</sup>. So
+we now know the composition factors of G together with an indication
+of how they fit together.
+<HR>
+<H4><A NAME = "7137">Action on a Coset Space</A></H4>
+
+
+
+<H5><A NAME = "7138">CosetAction(G, H: parameters) : Grp, Grp -&gt; Hom(Grp), GrpPerm, GrpPerm</A></H5>
+<H5>RegularRepresentation(G, H: parameters) : Grp, Grp -&gt; Hom(Grp), GrpPerm, GrpPerm</H5>
+<BLOCKQUOTE>
+Given a subgroup H of the group G, construct the permutation
+representation of G given by the action of G on the set of (right)
+cosets of H in G. The function returns:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>The natural homomorphism f: G -&gt; L;
+<DT>(b)</DT><DD>The induced group L;
+<DT>(c)</DT><DD>The kernel K of the action (a subgroup of G).
+<P>
+<P>
+</DL>
+Note that G may be any type of group. If G is a finitely presented
+group, then K may be returned undefined.
+<P>
+<P>
+<PRE>
+     Al: MonStgElt                       Default: em "Default"
+</PRE>
+<TT>Al := "Wang"</TT>: Construct the coset action using Wang da Fang's
+algorithm which builds the action up the stabilizer chains of G and
+H, using a sequence of induction and block image operations.
+This algorithm is particularly efficient when H has fixed points
+that are not fixed points of G, and is the default choice when H
+is trivial.
+<P>
+<TT>Al := "Canonical"</TT>: Compute the cosets using an orbit algorithm,
+which describes each coset found by computing a canonical element
+of that coset. The canonical element is one with the minimal base image
+in the group G. The algorithm is due to Richardson, <A  HREF = "text628.htm#bib_jimr-msc">[Ric73]</A>.
+<P>
+<TT>Al := "Default"</TT>: Choose one of the above to use.
+</BLOCKQUOTE>
+<H5><A NAME = "7139">CosetImage(G, H: parameters) : Grp, Grp -&gt; GrpPerm</A></H5>
+<BLOCKQUOTE>
+Given a subgroup H of the group G, construct the image L of G
+given by the action of G on the set of (right) cosets of H in G.
+L is returned as a permutation group.
+Possible parameters are as for the previous function.
+</BLOCKQUOTE>
+<H5><A NAME = "7140">CosetKernel(G, H) : Grp, Grp -&gt; Grp</A></H5>
+<BLOCKQUOTE>
+Given a subgroup H of the group G, construct the kernel of the
+action of G on the set of (right) cosets of H in G.
+</BLOCKQUOTE>
+<H4><A NAME = "7141">Reduced Permutation Actions</A></H4>
+
+<P>
+<P>
+If a permutation group is intransitive or imprimitive, then orbit actions
+and blocks actions provide natural permutation representations of lower
+degree.
+
+
+<H5><A NAME = "7142">TransitiveQuotient(G) : GrpPerm -&gt; GrpPerm, Hom, GrpPerm</A></H5>
+<BLOCKQUOTE>
+Returns the transitive constituent of G acting on its longest orbit, 
+together with the action homomorphism and the kernel of the action.
+If G is transitive then the return values are G, the identity map
+on G, and the trivial subgroup of G.
+</BLOCKQUOTE>
+<H5><A NAME = "7143">PrimitiveQuotient(G) : GrpPerm -&gt; GrpPerm, Hom, GrpPerm</A></H5>
+<BLOCKQUOTE>
+For a transitive group G,
+returns the blocks image of G acting on a maximal block system, 
+together with the action homomorphism and the kernel of the action.
+If G is primitive then the return values are G, the identity map
+on G, and the trivial subgroup of G.
+</BLOCKQUOTE>
+<H5><A NAME = "7144">DegreeReduction(G) : GrpPerm -&gt; GrpPerm, Hom</A></H5>
+<BLOCKQUOTE>
+Use a combination of orbit images and blocks images to attempt to find
+a faithful permutation representation of G with lower degree than G.
+The second return value is the isomorphism from G to the representation
+found. If no lower degree faithful representation is found then G and
+the identity map on G is returned.
+</BLOCKQUOTE>
+<H4><A NAME = "7145">The Jellyfish Algorithm</A></H4>
+
+<P>
+<P>
+The Jellyfish reduction algorithm was introduced in <A  HREF = "text628.htm#bib_LNPS-jellyfish">[LNPS06]</A>.
+See this article for an explanation of the name "Jellyfish".
+It attempts to find faithful low degree permutation representations
+for a family of large-base primitive permutation groups.
+We now define the target family as given in <A  HREF = "text628.htm#bib_LNPS-jellyfish">[LNPS06]</A>.
+Consider the group W = S<sub>n</sub> wreath S<sub>r</sub>, as a permutation group in its
+primitive action on the set of r-tuples of k-subsets of the
+chosen n-set (see <A  HREF = "text634.htm#permg:PrimitiveWreathProduct">PrimitiveWreathProduct</A>). Let M be
+the socle of W, M = A<sub>n</sub><sup>r</sup>. Let G be any subgroup of W, with M&le;G,
+such that the conjugation action of G on the r copies
+of A<sub>n</sub> in M is transitive. A group T is in the target family of the
+algorithm if T is permutation isomorphic to some such G, having
+n &gt; 2rk<sup>2</sup>, and  rk &gt; 1. The degree of such a T is (n choose k)<sup>r</sup>,
+and any such T is primitive. The image sought by the algorithm has
+degree nk. The utility of the algorithm is that any primitive group
+not in the target family is either alternating, symmetric, or has a short
+base.
+<P>
+The algorithm is one-sided Monte-Carlo in that, if it reports success,
+then it has found a faithful representation of the group. There is a small
+probability that the algorithm will find no faithful representation, even
+when the group given is in the target family.
+<P>
+Note that the Jellyfish algorithm implemented in Magma may
+succeed even when the input group is not in the target family.
+In all cases, success of the algorithm guarantees a faithful
+representation of the group.
+<P>
+The Magma implementation offers functions for testing the group for
+applicability of the Jellyfish algorithm. If successful, this test constructs 
+data structures as in the cited article for quick evaluation of the
+homomorphism to the low-degree representation found and stores these with
+the group. There are also functions to compute the image and preimage of
+elements under the representation map. The preimage function is an addition
+to the algorithms given in <A  HREF = "text628.htm#bib_LNPS-jellyfish">[LNPS06]</A>, using an extension of their
+data structure. The preimage algorithm is nearly linear in the degree of the
+large degree primitive group.
+
+
+<H5><A NAME = "7146">JellyfishConstruction(G: parameters) : GrpPerm -&gt; BoolElt</A></H5>
+
+<PRE>    Limit: RngIntElt                    Default: </PRE>
+<BLOCKQUOTE>
+Attempt to construct a set of jellyfish for G. If unsuccessful, return false.
+Otherwise, construct data structures corresponding to T1 and T5 of 
+<A  HREF = "text628.htm#bib_LNPS-jellyfish">[LNPS06]</A>, attach them to G, and return <TT>true</TT>.
+The parameter <TT>Limit</TT> controls how many attempts are
+made to find the orbits of the point stabilizer of G, which is the initial
+step in constructing a jellyfish. This construction phase terminates after
+a sequence of <TT>Limit</TT> random elements of G fails to change the orbits
+found. If the orbits found so far are not the orbits of a point stabilizer
+in G, the algorithm may fail. The same limit is used in the next phase,
+constructing the first jellyfish. The current default is the maximum
+of 15 and 2&lfloor;log<sub>2</sub> d&rfloor;, where d is the degree of G.
+</BLOCKQUOTE>
+<H5><A NAME = "7147">JellyfishImage(G) : GrpPerm -&gt; GrpPerm</A></H5>
+<BLOCKQUOTE>
+If the <TT>JellyfishConstruction</TT> function applied to G has returned <TT>true</TT>,
+return the faithful image of G found by the jellyfish algorithm. Otherwise
+an error results. If the <TT>JellyfishConstruction</TT> has not yet been applied
+to G, then it is applied first with default parameters. A failure here
+results in an error.
+</BLOCKQUOTE>
+<H5><A NAME = "7148">JellyfishImage(G, x: parameters) : GrpPerm, GrpPermElt -&gt; GrpPermElt</A></H5>
+<H5>JellyfishImage(G, H: parameters) : GrpPerm, GrpPerm -&gt; GrpPermElt</H5>
+
+<PRE>    KnownInGroup: BoolElt               Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+If the <TT>JellyfishConstruction</TT> function applied to G has returned <TT>true</TT>,
+return the image of x as a permutation of the jellyfish, or the image
+of H as a permutation group acting on the jellyfish. The function will
+attempt this for any x in the same symmetric group as G and any subgroup
+of this symmetric group. The algorithm
+may fail when x&notin;G or H is not a subgroup of G,
+in which cases an error results.
+It is possible for this map to succeed when x is
+not in G or H is not a subset of G.
+In recognition of this, the parent of the result will be a symmetric group.
+This can be varied by setting the texttt{KnownInGroup} parameter to be true,
+which should only be done when it is known that x&isin;G or H&le;G,
+which will dispense with checking the validity of the operation, and give
+an element (or group) that is flagged as contained in the jellyfish image
+of G.
+If the <TT>JellyfishConstruction</TT> has not yet been applied
+to G, then it is applied first with default parameters. A failure here
+results in an error.
+</BLOCKQUOTE>
+<H5><A NAME = "7149">JellyfishPreimage(G, x: parameters) : GrpPerm, GrpPermElt -&gt; GrpPermElt</A></H5>
+<H5>JellyfishPreimage(G, I: parameters) : GrpPerm, GrpPerm -&gt; GrpPermElt</H5>
+
+<PRE>    KnownInGroup: BoolElt               Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+If the <TT>JellyfishConstruction</TT> function applied to G has returned <TT>true</TT>,
+return the preimage of x as a permutation in the symmetric group of G.
+The element x is assumed to be a permutation of the jellyfish for G.
+The function will attempt this for any x in the same symmetric group as 
+the <TT>JellyfishImage</TT> of G. The algorithm
+may fail when x is not in the image group, in which case an error results.
+It is possible for this map to succeed when x is not in the image group.
+In recognition of this, the parent of the result will be a symmetric group.
+The function may also gbe applied to a subgroup, I of the jellyfish image
+group of G. If the texttt{KnownInGroup} parameter is set to true then
+it will be assumed that taking the preimage of x (or I) will be valid
+and that the result will lie in G.
+If the <TT>JellyfishConstruction</TT> has not yet been applied
+to G, then it is applied first with default parameters. A failure here
+results in an error.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text640.htm">[Next]</A><A  HREF = "text638.htm">[Prev]</A> <A  HREF = "text640.htm">[Right]</A> <A  HREF = "text638.htm">[Left]</A> <A  HREF = "text629.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

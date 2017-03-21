@@ -1,0 +1,355 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Creation of a Matrix Group</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text656.htm">[Next]</A><A  HREF = "text654.htm">[Prev]</A> <A  HREF = "text656.htm">[Right]</A> <A  HREF = "text654.htm">[Left]</A> <A  HREF = "text653.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "7398">Creation of a Matrix Group</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text655.htm#7399">Construction of the General Linear Group</A>
+<LI> <A  HREF = "text655.htm#7402">Construction of a Matrix Group Element</A>
+<LI> <A  HREF = "text655.htm#7408">Construction of a General Matrix  Group</A>
+<LI> <A  HREF = "text655.htm#7412">Changing Rings</A>
+<LI> <A  HREF = "text655.htm#7417">Coercion between Matrix Structures</A>
+<LI> <A  HREF = "text655.htm#7422">Accessing Associated Structures</A>
+</UL>
+<H4><A NAME = "7399">Construction of the General Linear Group</A></H4>
+
+
+
+<H5><A NAME = "7400">GeneralLinearGroup(n, R) : RngIntElt, Rng -&gt; GrpMat</A></H5>
+<H5>GL(n, R) : RngIntElt, Rng -&gt; GrpMat</H5>
+<BLOCKQUOTE>
+Given an integer n &ge;1 and a ring R, create the generic matrix group, i.e. the general 
+linear group GL(n, R). Initially, only a structure table is created for 
+GL(n, R), so that, in particular, generators are not defined. This function 
+is normally used to provide a context for the creation of elements and 
+subgroups of GL(n, R). If structural computation is attempted with the group 
+created by <TT>GeneralLinearGroup(n, R)</TT>, then generators will be created where
+possible. At present, this is only permitted in the cases in which R is a
+finite field.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7401">Example <TT>GrpMatGen_Create (H64E1)</TT></A></H3>
+We define the general linear group GL(3, K), where K is the
+finite field GF(4).
+<P>
+<P>
+<PRE>
+&gt; K&lt;w&gt; := FiniteField(4);
+&gt; GL34 := GeneralLinearGroup(3, K);
+&gt; GL34;
+GL(3, GF(2, 2))
+</PRE>
+<HR>
+<H4><A NAME = "7402">Construction of a Matrix Group Element</A></H4>
+
+<P>
+<P>
+Throughout this subsection we shall assume that the matrix group G
+is defined over the ring R.
+
+
+<H5><A NAME = "7403">elt&lt; G | L &gt; : GrpMat, List(RngElt) -&gt; GrpMatElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined as a subgroup of GL(n, R), and
+the list L of expressions a<sub>ij</sub> (1 &le;i, j &le;n), 
+defining elements of the ring R, construct the n x n matrix
+<PRE>
+
+   [ a_{11} a_{12} ... a_{1n} ]
+   [ a_{21} a_{22} ... a_{2n} ]
+   [           ...            ]
+   [ a_{n1} a_{n2} ... a_{nn} ]
+</PRE>
+Unless G is known to be the generic matrix group of degree n, 
+the matrix will be tested for membership of G, and if g is not 
+an element of G, the function will fail. If g does lie in G, g
+will have G as its parent. Since the membership test may
+involve constructing a base and strong generating set for G,
+this constructor may occasionally be very costly. Hence a
+matrix g should be defined as an element of a subgroup
+of the generic group only when membership of G is required by
+subsequent operations involving g.
+</BLOCKQUOTE>
+<H5><A NAME = "7404">G ! Q : GrpMat, [ RngElt ] -&gt; GrpMatElt</A></H5>
+<BLOCKQUOTE>
+Given the sequence Q of expressions a<sub>ij</sub> (1 &le;i, j &le;n), 
+defining elements of the ring R, construct the n x n matrix
+<PRE>
+
+   [ a_{11} a_{12} ... a_{1n} ]
+   [ a_{21} a_{22} ... a_{2n} ]
+   [           ...            ]
+   [ a_{n1} a_{n2} ... a_{nn} ]
+</PRE>
+This matrix will have G as its parent structure. As in the case of the 
+<TT>elt</TT>-constructor, the operation will fail if g is not an element 
+of G, and the same observations concerning the cost of membership testing 
+apply.
+</BLOCKQUOTE>
+<H5><A NAME = "7405">ElementToSequence(g) : GrpMatElt -&gt; [ RngElt ]</A></H5>
+<H5>Eltseq(g) : GrpMatElt -&gt; [ RngElt ]</H5>
+<BLOCKQUOTE>
+Given an n x n matrix g = (a<sub>ij</sub>), 1 &le;i, j &le;n, where 
+a<sub>ij</sub> is an element of the ring R, construct the sequence 
+<P>
+[ a<sub>11</sub>, ..., a<sub>1n</sub>, a<sub>21</sub>, ..., a<sub>2n</sub>, ... a<sub>n1</sub>, ..., a<sub>nn</sub>]
+<P>
+<P>
+of n<sup>2</sup> elements of the ring R.
+</BLOCKQUOTE>
+<H5><A NAME = "7406">Identity(G) : GrpMat -&gt; GrpMatElt</A></H5>
+<H5>Id(G) : GrpMat -&gt; GrpMatElt</H5>
+<H5>G ! 1 : GrpMat, RngIntElt -&gt; GrpMatElt</H5>
+<BLOCKQUOTE>
+Construct the identity matrix in the matrix group G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7407">Example <TT>GrpMatGen_Matrices (H64E2)</TT></A></H3>
+The different constructions are illustrated by the following
+code, which assigns to each of the variables x and y an element of
+GL(3, 4).
+<P>
+<P>
+<P>
+<PRE>
+&gt; K&lt;w&gt; := FiniteField(4);
+&gt; GL34 := GeneralLinearGroup(3, K);
+&gt; x := elt&lt;GL34 | w,0,1, 0,1,0, 1,0,1 &gt;;
+&gt; x;
+[w 0 1]
+[0 1 0]
+[1 0 1]
+&gt; y := GL34 ! [w,0,1, 0,1,0, 1,0,1];
+&gt; y;
+[w 0 1]
+[0 1 0]
+[1 0 1]
+&gt; GL34 ! 1;
+[1 0 0]
+[0 1 0]
+[0 0 1]
+</PRE>
+<HR>
+<H4><A NAME = "7408">Construction of a General Matrix  Group</A></H4>
+
+
+
+<H5><A NAME = "7409">MatrixGroup&lt; n, R | L &gt; : RngIntElt, Rng, List -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Construct the matrix group G of degree n over the ring R generated 
+by the matrices defined by the list L.  A term of the list L must be 
+an object of one of the following types:
+<P>
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>A sequence of n<sup>2</sup> elements of R defining a matrix of GL(n, R);
+<DT>(b)</DT><DD>A set or sequence of sequences of type (a);
+<DT>(c)</DT><DD>An element of GL(n, R);
+<DT>(d)</DT><DD>A set or sequence of elements of GL(n, R);
+<DT>(e)</DT><DD>A subgroup of GL(n, R);
+<DT>(f)</DT><DD>A set or sequence of subgroups of GL(n, R).
+<P>
+<P>
+<P>
+</DL>
+Each element or group specified by the list must belong to the
+<I>same</I> generic matrix group. The group G will
+be constructed as a subgroup of some group which contains each
+of the elements and groups specified in the list.
+<P>
+The generators of G consist of the elements specified by the
+terms of the list L together with the stored generators for
+groups specified by terms of the list.  Repetitions of an element
+and occurrences of the identity element are removed.
+<P>
+<P>
+The <TT>MatrixGroup</TT> constructor is shorthand for the two statements:
+<P>
+<TT>GL := GeneralLinearGroup(n, R);
+<P>
+G := sub&lt; GL | L &gt;;
+<P>
+</TT>
+where <TT>sub&lt; ... &gt;</TT> is the subgroup constructor described in
+the next subsection.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7410">Example <TT>GrpMatGen_Constructor (H64E3)</TT></A></H3>
+We use the <TT>MatrixGroup</TT> constructor to define a small
+subgroup of GL(3, 4).
+<P>
+<P>
+<P>
+<PRE>
+&gt; K&lt;w&gt; := FiniteField(4);
+&gt; H := MatrixGroup&lt; 3, K | [1,w,0, 0,1,0, 1,w^2,1], [w,0,0, 0,1,0, 0,0,w] &gt;;
+&gt; H;
+MatrixGroup(3, GF(2, 2))
+Generators:
+[  1   w   0]
+[  0   1   0]
+[  1 w^2   1]
+
+
+[w 0 0]
+[0 1 0]
+[0 0 w]
+&gt; Order(H);
+96
+</PRE>
+<HR>
+<H3><A NAME = "7411">Example <TT>GrpMatGen_GLSylow (H64E4)</TT></A></H3>
+We present a function which will construct the Sylow p-subgroup
+of GL(n, K), where K is a finite field of characteristic p.
+<P>
+<P>
+<P>
+<PRE>
+&gt; GLSyl := function(n, K)
+&gt;    R := MatrixRing(K, n);
+&gt;    e := func&lt; i, j | MatrixUnit(R, i, j) &gt;;
+&gt;    return MatrixGroup&lt; n, K | { R!1 + a*e(i,j) : a in K, j in [i+1], 
+&gt;          i in [1 .. n - 1] | a ne 0 } &gt;;
+&gt; end function;
+&gt; T := GLSyl(3, GF(8));
+&gt; FactoredOrder(T);
+[ &lt;2, 9&gt; ]
+&gt; FactoredOrder(GL(3, GF(8)));
+[ &lt;2, 9&gt;, &lt;3, 2&gt;, &lt;7, 3&gt;, &lt;73, 1&gt; ]
+</PRE>
+<HR>
+<H4><A NAME = "7412">Changing Rings</A></H4>
+
+
+
+<H5><A NAME = "7413">ChangeRing(G, S) : GrpMat, Rng -&gt; GrpMat, Map</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G with base ring R, construct a new matrix group
+H with base ring S derived from G by coercing entries of the
+generators of G from R into S.
+</BLOCKQUOTE>
+<H5><A NAME = "7414">ChangeRing(G, S, f) : GrpMat, Rng, Map -&gt; GrpMat, Map</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G with base ring R, construct a new matrix group H
+with base ring S derived from G by applying f to the entries of the
+generators of G.
+</BLOCKQUOTE>
+<H5><A NAME = "7415">RestrictField(G, S) : GrpMat, FldFin -&gt; GrpMat, Map</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G with base ring K, a finite field, and S a 
+subfield of K, construct the matrix group H with base ring S obtained
+by restricting the scalars of the components of elements of G into S, 
+together with the restriction map from G onto H.
+</BLOCKQUOTE>
+<H5><A NAME = "7416">ExtendField(G, L) : GrpMat, FldFin -&gt; GrpMat, Map</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G with base ring K, a finite field, and L an 
+extension of K, construct the matrix group H with base ring L obtained 
+by lifting the components of elements of G into L, together with the 
+inclusion homomorphism from G into H.
+</BLOCKQUOTE>
+<H4><A NAME = "7417">Coercion between Matrix Structures</A></H4>
+
+<P>
+<P>
+A square non-singular matrix may be defined as an element of any of the
+following structures:
+<DL COMPACT class='compact'>
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>A subring of the complete matrix ring M<sub>n</sub>(R);
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>A subgroup of the general linear group GL(n, R);
+<DT><IMG SRC="closed.gif" ALT="" WIDTH=7 HEIGHT=7></DT><DD>A submodule of the matrix module M<sup>(m x n)</sup>(R).
+<P>
+<P>
+</DL>
+The coercion operator may be used to transfer matrices between any two
+of these three structures.
+
+
+<H5><A NAME = "7418">R ! g : AlgMat, GrpMatElt -&gt; RngMatElt</A></H5>
+<BLOCKQUOTE>
+Transfer the matrix g from a group into a matrix ring R.
+</BLOCKQUOTE>
+<H5><A NAME = "7419">G ! r : GrpMat, AlgMatElt -&gt; GrpMatElt</A></H5>
+<BLOCKQUOTE>
+Transfer the matrix r from a ring into a matrix group G.
+</BLOCKQUOTE>
+<H5><A NAME = "7420">M ! g : ModMatRng, GrpMatElt -&gt; ModMatRngElt</A></H5>
+<BLOCKQUOTE>
+Transfer the matrix g from a group into a matrix module M.
+</BLOCKQUOTE>
+<H5><A NAME = "7421">G ! m : GrpMat, ModMatRngElt -&gt; GrpMatElt</A></H5>
+<BLOCKQUOTE>
+Transfer the matrix m from a module into a matrix group G.
+</BLOCKQUOTE>
+<H4><A NAME = "7422">Accessing Associated Structures</A></H4>
+
+<P>
+<P>
+The functions in this group provide access to basic information stored for a
+matrix group G.
+
+
+<H5><A NAME = "7423">G . i : GrpMat, RngIntElt -&gt; GrpMatElt</A></H5>
+<BLOCKQUOTE>
+The i-th defining generator for the matrix group G. A negative subscript indicates
+that the inverse of the generator is to be created. 
+The 0th generator <TT>G.0</TT> is <TT>Identity(G)</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "7424">Degree(G) : GrpMat -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The degree of the matrix group G.
+</BLOCKQUOTE>
+<H5><A NAME = "7425">Generators(G) : GrpMat -&gt; { GrpMatElt }</A></H5>
+<BLOCKQUOTE>
+A set containing the defining generators for the matrix group G.
+</BLOCKQUOTE>
+<H5><A NAME = "7426">NumberOfGenerators(G) : GrpMat -&gt; RngIntElt</A></H5>
+<H5>Ngens(G) : GrpMat -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The number of defining generators for the matrix group G.
+</BLOCKQUOTE>
+<H5><A NAME = "7427">CoefficientRing(G) : GrpMat -&gt; Rng</A></H5>
+<H5>BaseRing(G) : GrpMat -&gt; Rng</H5>
+<BLOCKQUOTE>
+The coefficient ring for the matrix group G.
+</BLOCKQUOTE>
+<H5><A NAME = "7428">RSpace(G) : GrpMat -&gt; ModTupRng</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G of degree n defined over a ring R,
+return the space R<sup>(n)</sup>, where the action is multiplication
+by elements of R, i.e. scalar action.
+</BLOCKQUOTE>
+<H5><A NAME = "7429">VectorSpace(G) : GrpMat -&gt; ModTupFld</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G of degree n defined over a field K,
+return the space K<sup>(n)</sup>, where the action is multiplication
+by elements of K, i.e. scalar action.
+</BLOCKQUOTE>
+<H5><A NAME = "7430">GModule(G) : GrpMat -&gt; ModGrp</A></H5>
+<BLOCKQUOTE>
+The natural R[G]-module for the matrix group G.
+</BLOCKQUOTE>
+<H5><A NAME = "7431">Generic(G) : GrpMat -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+The generic group containing the matrix group G, i.e. the general linear group in 
+which G is naturally embedded.
+</BLOCKQUOTE>
+<H5><A NAME = "7432">Parent(G) : GrpMatElt -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+The power structure for the group G (the set consisting
+of all matrix groups).
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text656.htm">[Next]</A><A  HREF = "text654.htm">[Prev]</A> <A  HREF = "text656.htm">[Right]</A> <A  HREF = "text654.htm">[Left]</A> <A  HREF = "text653.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

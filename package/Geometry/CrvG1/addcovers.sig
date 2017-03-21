@@ -1,0 +1,6 @@
+174,1
+V,AddCovers,1
+S,AddCubics,The sum of two genus one models of degree 3 in the Weil-Chatelet group,0,2,0,0,0,0,0,0,0,493,,0,0,493,,493,-38,-38,-38,-38,-38
+S,AddCubics,"The sum of the two ternary cubics as elements of H^1(Q,E[3]). The ternary cubics must have the same invariants, and if their sum is not representable as a cubic an error will result",0,2,0,0,0,0,0,0,0,63,,0,0,63,,63,-38,-38,-38,-38,-38
+S,AddCovers,"A genus one model of degree n representing the composition in H^1(Q,E[n]) of the two give models of degrees m and n where (m,n) = (2,2), (3,3) or (2,4). Note that if (m,n) = (3,3) then there is an ambiguity coming from the fact a ternary cubic only determines a 3-covering up to sign. If ReturnBoth is true then both possible answers are returned",0,2,0,0,0,0,0,0,0,493,,0,0,493,,493,-38,-38,-38,-38,-38
+S,*,"A genus one model of degree n representing the composition in H^1(Q,E[n]) of the two give models of degrees m and n where (m,n) = (2,2), (3,3) or (2,4). Note that if (m,n) = (3,3) then there is an ambiguity coming from the fact a ternary cubic only determines a 3-covering up to sign. If ReturnBoth is true then both possible answers are returned",0,2,0,0,0,0,0,0,0,493,,0,0,493,,493,-38,-38,-38,-38,-38

@@ -1,0 +1,3 @@
+174,1
+S,AssignPCRepresentation,Attach attributes to A necessary for assigning a pc presentation,1,1,1,151,0,33,5,0,0,1,0,0,0,0,129,,0,0,175,,0,0,175,,0,0,151,,0,0,118,,-38,-38,-38,-38,-38,-38
+S,CheckPCRepresentation,"Tests that the PC rep attached to the automorphism group A is valid. If the optional flag FullCheck is true then each element of A`RepGroup is put through A`RepMap, otherwise random elements from A`RepGroup are chosen to verify the representation. The number of such random checks can be set using the RandomCheckCount flag which defaults to 10",0,1,0,0,0,0,0,0,0,118,,36,-38,-38,-38,-38,-38

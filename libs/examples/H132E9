@@ -1,0 +1,29 @@
+"Source: Text/Geometry/HypGeomMot.text";
+"Line: 1006";
+"Date: Wed Jun  8 14:02:19 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/HypGeomMot.text, line: 1006
+// Example: H132E9 ()
+print "Example: H132E9";
+ei := GetEchoInput();
+SetEchoInput(true);
+p := 11; assert p mod 4 eq 3 and p ne 3 and IsPrime(p);
+SQ := [-Integers()!x : x in GF(p) | IsSquare(x) and x ne 0];
+H := HypergeometricData([* x : x in [-&+SQ] cat SQ *]);
+GammaList(H);
+Weight(H); assert Weight(H) eq (p-5)/2;
+K := QuadraticField(-p);
+I := Factorization(p*Integers(K))[1][1];
+G := HeckeCharacterGroup(I); // get Tate twist of canonical GR
+u := (Weight(H)+ClassNumber(K)) div 2;
+v := (Weight(H)-ClassNumber(K)) div 2; //u+v=wt, u-v=classno
+u,v;
+GR := Grossencharacter(G.0,[[u,v]]); // [6,3] for sqrt(-23)
+for l in [l : l in PrimesUpTo(1000) | l mod p eq 1] do
+  ef := EulerFactor(H,l^p/MValue(H),l);
+  F := Factorization(ef);
+  assert #F eq 1 and F[1][2] eq (p-1)/2;
+  assert F[1][1] eq EulerFactor(GR,l : Integral);
+  printf "%o %o\n",l,F[1][1];
+  end for;
+SetEchoInput(ei);

@@ -1,0 +1,63 @@
+
+// This tests several routines 
+// (ClassGroup, TorsionUnitGroup, SUnitGroup, 
+//  pSelmerGroup and the maps it returns, ...)
+
+// SRD, Feb 2011
+
+// Note: I expect that the time for pSelmer group 
+// depends linearly on the size of the factor base.
+
+// TO DO: assert that S is the group it should be
+
+_<x> := PolynomialRing(Rationals());
+
+for d in [-500 .. -480] cat [10,79,82,130,226,399,427] do 
+  if IsSquarefree(d) then
+    "d =", d;
+    "SEED:", GetSeed();
+    F<w> := NumberField(x^2 - d);
+    u := r + s - 1 where r, s is Signature(F);
+    Cl, mCl := ClassGroup(F); 
+    "Cl(F) =", AbelianInvariants(Cl);
+    primes := PrimesUpTo(20, F);
+    for p in {2,3} do
+      "p =", p;
+      for P in primes, nice in {true,false} do
+        S, mS := pSelmerGroup(p, {P} : Nice:=nice);
+        cP := P@@mCl;
+        Order(cP), AbelianInvariants(S);
+        T := TorsionUnitGroup(Integers(F),p);
+        assert #S eq p^(u+1)*#(T/(p*T))*#(Cl/sub<Cl|p*Cl,cP>);
+        for i := 1 to Ngens(S) do 
+          assert S.i eq S.i @@mS @mS;
+        end for; 
+      end for; 
+    end for; 
+    p := 4;
+    "p =", 4;
+    for P in primes do 
+      S, mS := pSelmerGroup(p, {P});
+      cP := P@@mCl;
+      Order(cP), AbelianInvariants(S);
+      T := TorsionUnitGroup(Integers(F),p);
+      assert #S eq p^(u+1)*#(T/(p*T))*#(Cl/sub<Cl|p*Cl,cP>);
+    end for;
+  end if; 
+end for;
+
+
+// Example of bad argument to map
+
+_<x>:=PolynomialRing(Rationals());
+K<s>:=NumberField(x^2-362*x-7);
+P:=[2,7];
+S:=&join{{F[1] : F in Factorization(p*IntegerRing(K))} : p in P};
+G,m:=pSelmerGroup(2,S);
+try
+  m(Domain(m)![-181,-128]);
+catch E
+  E`Object;
+  assert E`Object[1..12] eq "Bad argument";
+end try;
+

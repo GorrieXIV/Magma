@@ -1,0 +1,250 @@
+/*
+Matrices test.
+AKS, Nov 05.
+*/
+
+ClearVerbose();
+
+pp := func<q |
+    l and e gt 1 select Sprintf("%o^%o", p, e) else q
+    where l, p, e := IsPrimePower(q)>;
+
+
+///////////////
+
+procedure test_field(K)
+    q := #K;
+
+    printf "\n*******\ntest_field; q: %o\n", pp(q);
+    ZEIT := Cputime();
+    IndentPush();
+
+    if q le (IsPrime(q) select 2^23.5 else 2^20) then
+	L := [
+	    <10, 1000>, <17, 500>, <37, 500>, <101, 10>, <503, 1>
+	];
+//L cat:= [<i, 1> : i in [10 .. 200 by 10]];
+//L cat:= [<i, 1> : i in [1024 .. 1030]];
+//L cat:= [<i, 1> : i in [1100 .. 2000 by 100]];
+	if q le 16 then
+	    L cat:= [<677, 1>, <1173, 1>];
+	    //L cat:= [<i, 1> : i in [2000..5000 by 1000]];
+	end if;
+    else
+	L := [
+	    <10, 100>, <17, 10>, <37, 5>, <50, 3>, <101, 2>, <157, 1>
+	];
+    end if;
+
+    for t in L do
+	n, count := Explode(t);
+
+	printf "q = %o, n = %o, count = %o, Seed: ", pp(q), n, count;
+	GetSeed();
+	verb := false;
+
+	if count eq 1 then
+	    SetVerbose("User1", 1);
+	    IndentPush();
+	else
+	    SetVerbose("User1", 0);
+	end if;
+
+	M := MatrixRing(K, n);
+	time for ci := 1 to count do
+	    X := Random(M);
+	    Y := Random(M);
+	    vprint User1: "Product";
+	    vtime User1: P1 := X*Y;
+	    vprint User1: "Expansion";
+	    vtime User1: P1 := (X + Y)^2;
+	    vtime User1: P2 := (X^2 + Y^2 + X*Y + Y*X);
+	    assert P1 eq P2;
+	    vprint User1: "Rank";
+	    vtime User1: r := Rank(X);
+	    if r eq n then
+		vprint User1: "Inverse";
+		vtime User1: I := X^-1;
+		vprint User1: "Inv prod";
+//X: Magma;
+		vtime User1: P1 := X*I;
+P2 := I*X;
+if P2 ne P1 then
+    d := P2 - P1;
+    "BAD";
+    //Sort(Setseq(Support(d)));
+IsOne(P1);
+IsOne(P2);
+end if;
+		assert IsOne(P1);
+	    end if;
+
+	    a := Random(1, n);
+	    b := Random(1, n);
+	    c := Random(1, n);
+/*
+K<w> := K;
+a := 1;
+b := 30;
+c := 1;
+*/
+//GetSeed();
+//a,b,c;
+	    A := Random(RMatrixSpace(K, a, b));
+	    B := Random(RMatrixSpace(K, a, b));
+	    C := Random(RMatrixSpace(K, b, c));
+	    D := Random(RMatrixSpace(K, b, c));
+/*
+printf "A := %m;\n", A;
+printf "B := %m;\n", B;
+printf "C := %m;\n", C;
+printf "D := %m;\n", D;
+*/
+	    vprint User1: "Product (A - B)*(C - D)";
+	    vtime User1: P1 := (A - B)*(C - D);
+	    vprint User1: "Expansion A*C - A*D - B*C + B*D";
+/*
+"A*C:", A*C;
+"A*D:", A*D;
+"B*C:", B*C;
+"B*D:", B*D;
+*/
+	    vtime User1: P2 := A*C - A*D - B*C + B*D;
+/*
+"P1:", P1;
+"P2:", P2;
+"P1-P2:", P1-P2;
+*/
+	    assert P1 eq P2;
+	end for;
+
+	if count eq 1 then
+	    IndentPop();
+	end if;
+
+    end for;
+    IndentPop();
+    printf "Total field test time: %o\n", Cputime(ZEIT);
+end procedure;
+
+///////////////
+
+procedure test_mult(q, n, count)
+
+    SCL := 0.9;
+    SCH := 1.1;
+
+    K := GF(q);
+    printf "\n*******\ntest_mult; q: %o, n: %o, count: %o\n", pp(q), n, count;
+    time for i := 1 to count do
+
+	if i eq 1 then
+	    a := n; b := n; c := n;
+	else
+	    a := Random(Round(SCL * n), Round(SCH * n));
+	    b := Random(Round(SCL * n), Round(SCH * n));
+	    c := Random(Round(SCL * n), Round(SCH * n));
+	end if;
+
+	X := Random(RMatrixSpace(K, a, b));
+	Y := Random(RMatrixSpace(K, b, c));
+
+	p := X*Y;
+	for j := 1 to 5 do
+	    r := Random(1, Nrows(X));
+	    assert X[r]*Y eq p[r];
+	end for;
+	Xs := Parent(X[1])!0;
+	ps := Parent(p[1])!0;
+	for r := 1 to Nrows(X) do
+	    Xs +:= X[r];
+	    ps +:= p[r];
+	end for;
+	assert Xs*Y eq ps;
+
+	X := Transpose(X);
+	Y := Transpose(Y);
+	p := Transpose(p); // Now p = Y*X
+	for j := 1 to 5 do
+	    r := Random(1, Nrows(Y));
+	    assert Y[r]*X eq p[r];
+	end for;
+	Ys := Parent(Y[1])!0;
+	ps := Parent(p[1])!0;
+	for r := 1 to Nrows(Y) do
+	    Ys +:= Y[r];
+	    ps +:= p[r];
+	end for;
+	assert Ys*X eq ps;
+
+    end for;
+
+end procedure;
+
+test_mult(2, 1000, 50);
+test_mult(2, 5000, 10);
+test_mult(2, 10000, 3);
+//test_mult(2, 20000, 1);
+
+test_mult(3, 1000, 10);
+test_mult(3, 5000, 2);
+test_mult(3, 8000, 1);
+
+test_mult(4, 1000, 10);
+test_mult(4, 5000, 3);
+
+test_mult(5, 500, 10);
+test_mult(5, 1000, 3);
+test_mult(5, 5000, 1);
+
+test_mult(7, 500, 5);
+test_mult(7, 1000, 3);
+test_mult(7, 3000, 1);
+
+for d := 2 to 10 do
+    test_mult(3^d, 100, 10);
+    test_mult(3^d, 500, 2);
+    test_mult(3^d, 800, 1);
+end for;
+
+for p in [23, 257, 32003, 11863279] do
+
+    test_mult(p, 500, 5);
+    test_mult(p, 1000, 3);
+    test_mult(p, 3000, 1);
+    //test_mult(p, 5000, 1);
+
+end for;
+
+///////////////
+
+//test_field(GF(3));
+
+test_field(GF(257, 6));
+test_field(GF(NextPrime(2^20), 2));
+test_field(GF(2965819, 5));
+
+///////////////
+
+test_field(ExtensionField<GF(2), x | x^3 + x^2 + 1>);
+test_field(ExtensionField<GF(2), x | x^4 + x^3 + 1>);
+test_field(ExtensionField<GF(2), x | x^4 + x^3 + x^2 + x + 1>);
+
+///////////////
+
+QLIST :=
+[q: q in [2 .. 32] | IsPrimePower(q)] cat
+[
+    5^3, 13^2, 257, 509, 521,
+    65537, 2965819, 11863279,
+    33554393,
+    PreviousPrime(2^30), NextPrime(2^30), NextPrime(10^10), NextPrime(10^50),
+    3^14, 43^4, 23^5, 19^8
+];
+
+
+for q in QLIST do
+    test_field(GF(q));
+end for;
+
+///////////////

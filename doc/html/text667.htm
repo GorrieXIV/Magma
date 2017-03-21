@@ -1,0 +1,210 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Automorphism Groups</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text668.htm">[Next]</A><A  HREF = "text666.htm">[Prev]</A> <A  HREF = "text668.htm">[Right]</A> <A  HREF = "text666.htm">[Left]</A> <A  HREF = "text653.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "7682">Automorphism Groups</A></H3>
+
+<P>
+<P>
+<P>
+The automorphism group of a finite matrix group may be computed in 
+Magma, subject to the same restrictions on the group as when computing 
+maximal subgroups.  (That is, all of the non-abelian composition factors 
+of the group must appear in a certain database.) The methods used are 
+those described in Cannon and Holt <A  HREF = "text652.htm#bib_autos-permg">[CH03]</A>. The existence 
+of an isomorphism between a given matrix group and any other type of
+finite group (<TT>GrpPerm</TT> or <TT>GrpPC</TT>) may also be determined 
+using similar methods. 
+
+
+<H5><A NAME = "7683">AutomorphismGroup(G: parameters) : GrpMat -&gt; GrpAuto</A></H5>
+<BLOCKQUOTE>
+Given a finite matrix group G, construct the full automorphism group 
+F of G. The function returns the full automorphism group of G as 
+a group of mappings (i.e., as a group of type <TT>GrpAuto</TT>).  The 
+automorphism group F is also computed as a finitely presented group 
+and can be accessed via the function <TT>FPGroup(F)</TT>.  A function 
+<TT>PermutationRepresentation</TT> is provided that when applied to F, 
+attempts to construct a faithful permutation representation of reasonable 
+degree.  The algorithm described in Cannon and Holt <A  HREF = "text652.htm#bib_autos-permg">[CH03]</A> 
+is used.
+<P>
+<P>
+<PRE>
+     SmallOuterAutGroup: RngIntElt       Default: 20000
+</PRE>
+<TT>SmallOuterAutGroup := <I>t</TT></I>: Specify the strategy for the backtrack 
+search when testing an automorphism for lifting to the next layer. If the 
+outer automorphism group O at the previous level has order at most t, 
+then the regular representation of O is used, otherwise the program tries 
+to find a smaller degree permutation representation of O. 
+<P>
+<P>
+<PRE>
+     Print: RngIntElt                    Default: 0
+</PRE>
+The level of verbose printing. The possible values are 0, 1, 2 or 3.
+<P>
+<P>
+<PRE>
+     PrintSearchCount: RngIntElt         Default: 1000
+</PRE>
+<TT>PrintSearchCount := <I>s</TT></I>: If <TT>Print := <I>3</TT></I>, then a message 
+is printed at each s-th iteration during the backtrack search for lifting 
+automorphisms.
+<P>
+Further information about the construction of the automorphism group and
+a description of machinery for computing with group automorphisms may be 
+found in Chapter <A  HREF = "text762.htm#8759">AUTOMORPHISM GROUPS</A>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7684">Example <TT>GrpMatGen_Automorphisms (H64E28)</TT></A></H3>
+We construct a 3-dimensional matrix group over GF(4) and determine the 
+order of its automorphism group.
+<P>
+<P>
+<P>
+<PRE>
+&gt; k&lt;w&gt; := GF(4);
+&gt; G := MatrixGroup&lt; 3, k | 
+&gt; [w^2, 0, 0, 0, w^2, 0, 0, 0, w^2],
+&gt; [w^2, 0, w^2, 0, w^2, w^2, 0, 0, w^2],
+&gt; [1, 0, 0, 1, 0, w, w^2, w^2, 0],
+&gt; [w, 0, 0, w^2, 1, w^2, w, w, 0],
+&gt; [w, 0, 0, 0, w, 0, 0, 0, w] &gt;;
+&gt; G;
+MatrixGroup(3, GF(2^2))
+Generators:
+    [w^2   0   0]
+    [  0 w^2   0]
+    [  0   0 w^2]
+
+
+    [w^2   0 w^2]
+    [  0 w^2 w^2]
+    [  0   0 w^2]
+
+
+    [  1   0   0]
+    [  1   0   w]
+    [w^2 w^2   0]
+
+
+    [  w   0   0]
+    [w^2   1 w^2]
+    [  w   w   0]
+
+
+    [  w   0   0]
+    [  0   w   0]
+    [  0   0   w]
+&gt; #G;
+576
+&gt; A := AutomorphismGroup(G);
+&gt; #A;
+3456
+&gt; OuterOrder(A);
+72
+&gt; F := FPGroup(A);
+&gt; P := DegreeReduction(CosetImage(F, sub&lt;F|&gt;));
+&gt; P;
+Permutation group P acting on a set of cardinality 48
+</PRE>
+<P>
+Thus, we see that G has an automorphism group of order 3456 and the quotient
+group of A consisting of outer automorphisms, has order 72. The automorphism
+group may be realised as a permutation group of degree 48.
+<HR>
+<H5><A NAME = "7685">IsIsomorphic(G, H: parameters) : GrpMat, GrpMat -&gt; BoolElt, Hom(Grp)</A></H5>
+<H5>IsIsomorphic(G, H: parameters) : GrpMat, GrpPerm -&gt; BoolElt, Hom(Grp)</H5>
+<H5>IsIsomorphic(G, H: parameters) : GrpPerm, GrpMat -&gt; BoolElt, Hom(Grp)</H5>
+<BLOCKQUOTE>
+Test whether or not the two finite groups G and H are isomorphic as 
+abstract groups. If so, both the result <TT>true</TT> and an isomorphism 
+from G to H is returned. If not, the result <TT>false</TT> is returned.
+The algorithm described in Cannon and Holt <A  HREF = "text652.htm#bib_autos-permg">[CH03]</A> is used.
+<P>
+<P>
+<PRE>
+     SmallOuterAutGroup: RngIntElt       Default: 20000
+</PRE>
+<TT>SmallOuterAutGroup := <I>t</TT></I>: Specify the strategy for the backtrack
+search when testing an automorphism for lifting to the next layer. If the
+outer automorphism group O at the previous level has order at most t,
+then the regular representation of O is used, otherwise the program tries
+to find a smaller degree permutation representation of O.
+<P>
+<P>
+<PRE>
+     Print: RngIntElt                    Default: 0
+</PRE>
+The level of verbose printing. The possible values are 0, 1, 2 or 3.
+<P>
+<P>
+<PRE>
+     PrintSearchCount: RngIntElt         Default: 1000
+</PRE>
+<TT>PrintSearchCount := <I>s</TT></I>: If <TT>Print := <I>3</TT></I>, then a message
+is printed at each s-th iteration during the backtrack search for lifting
+automorphisms.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7686">Example <TT>GrpMatGen_Isomorphism (H64E29)</TT></A></H3>
+We construct a 3-dimensional point group of order 8 and test it for 
+isomorphism with the dihedral group of order 8 given as a permutation group.
+<P>
+<P>
+<P>
+<PRE>
+&gt; n := 4;
+&gt; N := 4*n;
+&gt; K&lt;z&gt; := CyclotomicField(N);
+&gt; zz := z^4;
+&gt; i := z^n;
+&gt; cos := (zz+ComplexConjugate(zz))/2;
+&gt; sin := (zz-ComplexConjugate(zz))/(2*i);
+&gt; GL := GeneralLinearGroup(3, K);
+&gt; G := sub&lt; GL | [ cos, sin, 0,  
+&gt;                 -sin, cos, 0,  
+&gt;                    0,   0, 1 ], 
+&gt;
+&gt;                [  -1,   0, 0,  
+&gt;                    0,   1, 0,  
+&gt;                    0,   0, 1 ] &gt;;
+&gt;
+&gt;  #G;
+8
+&gt; D8 := DihedralGroup(4);
+&gt; D8;
+Permutation group G acting on a set of cardinality 4
+Order = 8 = 2^3
+    (1, 2, 3, 4)
+    (1, 4)(2, 3)
+&gt; #D8;
+8
+&gt; bool, iso := IsIsomorphic(G, D8);
+&gt; bool;
+true
+&gt; iso;
+Homomorphism of MatrixGroup(3, K) of order 2^3 into
+GrpPerm: D8, Degree 4, Order 2^3 induced by
+    [ 0  1  0]
+    [-1  0  0]
+    [ 0  0  1] |--&gt; (1, 2, 3, 4)
+
+
+    [-1  0  0]
+    [ 0  1  0]
+    [ 0  0  1] |--&gt; (1, 3)
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text668.htm">[Next]</A><A  HREF = "text666.htm">[Prev]</A> <A  HREF = "text668.htm">[Right]</A> <A  HREF = "text666.htm">[Left]</A> <A  HREF = "text653.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

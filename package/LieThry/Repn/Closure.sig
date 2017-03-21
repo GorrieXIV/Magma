@@ -1,0 +1,5 @@
+174,1
+S,FundamentalClosure,"as in the fundam function in LiE if roots are given as tuples, returns tuples; if roots are given as indices, returns indices",0,2,0,0,0,0,0,0,0,83,,0,0,489,,83,-38,-38,-38,-38,-38
+S,ClosureLiE,"closure, as in LiE if roots are given as tuples, returns tuples; if roots are given as indices, returns indices. We implement the algorithm described on page 60 of the LiE manual",0,2,0,0,0,0,0,0,0,83,,0,0,489,,83,-38,-38,-38,-38,-38
+S,RestrictionMatrix,"For a simply connected root datum R and a sequence of roots Q forming a fundamental basis for a closed subdatum S of R, this function computes a restriction matrix for the fundamental Lie subgroup of type S of the Lie group corresponding to R",0,2,0,0,0,0,0,0,0,82,,0,0,489,,177,-38,-38,-38,-38,-38
+S,RestrictionMatrix,"A matrix M which maps fundamental weights from R (in the standard basis) to fundamental weights of S (in the standard basis as well). The dimensions of R and S must be equal, and the rank of R must be at least the rank of S. Moreover, R must be semisimple. Note that M is not unique",0,2,0,0,0,0,0,0,0,489,,0,0,489,,177,-38,-38,-38,-38,-38

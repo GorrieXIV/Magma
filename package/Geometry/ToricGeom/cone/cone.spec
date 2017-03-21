@@ -1,0 +1,13 @@
+{
+    cone.m
+    generators.m
+    properties.m
+    attributes.m
+    faces.m
+    triangulation.m
+    latticepoints.m
+    singularities.m
+    barvinok.m
+    map.m
+    pointprocess.m
+}

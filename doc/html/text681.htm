@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Unipotent Matrix Groups</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text672.htm">[Next]</A><A  HREF = "text680.htm">[Prev]</A> <A  HREF = "text672.htm">[Right]</A> <A  HREF = "text680.htm">[Left]</A> <A  HREF = "text673.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "7885">Unipotent Matrix Groups</A></H3>
+
+<P>
+<P>
+<P>
+The <I>power-conjugate presentation</I> is a very efficient way of representing
+a unipotent group; see Chapter <A  HREF = "text706.htm#7978">FINITE SOLUBLE GROUPS</A> for more information.
+In this section we describe a number of functions for finding such a 
+<I>PC-presentation</I> for a unipotent matrix group defined over a finite field.
+<P>
+The algorithm used is a straightforward echelonisation-like procedure.
+
+
+<H5><A NAME = "7886">UnipotentMatrixGroup(G) : GrpMat -&gt; GrpMatUnip</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic 
+constructs a known unipotent matrix group from G. Note that 
+Magma does not at this stage check that G is in fact unipotent.
+</BLOCKQUOTE>
+<H5><A NAME = "7887">WordMap(G) : GrpMatUnip -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Given a unipotent matrix group G defined over a finite field, the 
+intrinsic constructs the <I>word map</I> for G. The word map is
+a map from G to the group of straight-line programs on n 
+generators, where n is the number of generators of G. 
+More information on SLP-groups may be found in Chapter <A  HREF = "text875.htm#10040">GROUPS OF STRAIGHT-LINE PROGRAMS</A>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7888">Example <TT>GrpMatFF_UnipPCWordMap (H65E19)</TT></A></H3>
+We construct a unipotent matrix group, and use the word map.
+<P>
+<P>
+<PRE>
+&gt; G := MatrixGroup&lt;4, GF(5) | [1,1,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1],  
+&gt;       [1,-1,0,0, 0,1,1,0, 0,0,1,0, 0,0,0,1]&gt;;
+&gt; G;
+MatrixGroup(4, GF(5))
+Generators:
+    [1 1 0 0]
+    [0 1 0 0]
+    [0 0 1 0]
+    [0 0 0 1]
+
+
+    [1 4 0 0]
+    [0 1 1 0]
+    [0 0 1 0]
+    [0 0 0 1]
+&gt; IsUnipotent(G);
+true
+&gt; 
+&gt; G := UnipotentMatrixGroup(G);
+&gt; g := GL(4,5)![1,4,4,0, 0,1,3,0, 0,0,1,0, 0,0,0,1]; 
+&gt; g in G;
+true
+&gt; phi := WordMap(G);
+&gt; phi;
+Mapping from: GL(4, GF(5)) to SLPGroup(2) given by a rule [no inverse]
+&gt; 
+&gt; assert g in G;
+&gt; wg := phi(g); wg;
+function(G)
+    w6 := G.1^4; w1 := G.1^-4; w2 := G.2 * w1; w7 := w2^3; w8 := w6 * 
+    w7; w3 := G.1^-1; w4 := G.1^w2; w5 := w3 * w4; w9 := w5^2; w10 := 
+    w8 * w9; return w10;
+end function
+&gt; Evaluate(wg, G);
+[1 4 4 0]
+[0 1 3 0]
+[0 0 1 0]
+[0 0 0 1]
+&gt; Evaluate(wg, G) eq g;
+true
+</PRE>
+<HR>
+<H5><A NAME = "7889">PCPresentation(G) : GrpMatUnip -&gt; GrpPC, Map, Map</A></H5>
+<BLOCKQUOTE>
+Given a unipotent matrix group G defined over a finite field, the intrinsic
+constructs a PC-presentation for G. It returns a finite soluble group H 
+as first return value, a map from G to H as the second value, and a map 
+from H to G as the third.
+</BLOCKQUOTE>
+<H5><A NAME = "7890">Order(G) : GrpMatUnip -&gt; RngIntElt</A></H5>
+<H5># G : GrpMatUnip -&gt; RngIntElt</H5>
+<H5>FactoredOrder(G) : GrpMatUnip -&gt; [ &lt;RngIntElt, RngIntElt&gt; ]</H5>
+<BLOCKQUOTE>
+Given a unipotent matrix group G defined over a finite field, this 
+intrinsic returns the order of G as an integer or as a factored 
+integer (depending upon the choice of intrinsic).  It is faster than 
+the standard matrix group order intrinsic because of the use of the 
+PC-presentation of G.
+</BLOCKQUOTE>
+<H5><A NAME = "7891">g in G : GrpMatElt, GrpMatUnip -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix g and a unipotent matrix group G defined over a finite 
+field, the intrinsic returns <TT>true</TT> if g is an element of G, and
+<TT>false</TT> otherwise.  It is faster than the standard matrix group 
+membership intrinsic because of the use of the PC-presentation of G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7892">Example <TT>GrpMatFF_UnipPCPres (H65E20)</TT></A></H3>
+We construct the PC-presentation of some Sylow subgroup and demonstrate the use of
+the <TT>FactoredOrder</TT> function.
+<P>
+<P>
+<PRE>
+&gt; G := UnipotentMatrixGroup(ClassicalSylow(GL(9,7), 7));            
+&gt; H,phi,psi := PCPresentation(G);
+&gt; phi;
+Mapping from: GrpMatUnip: G to GrpPC: H given by a rule [no inverse]
+&gt; psi;
+Mapping from: GrpPC: H to GrpMatUnip: G
+&gt; phi(G.2);
+H.9
+&gt; psi(H.3);
+[1 0 0 0 0 0 0 0 0]
+[0 1 0 0 0 0 0 0 0]
+[0 0 1 1 0 0 0 0 0]
+[0 0 0 1 0 0 0 0 0]
+[0 0 0 0 1 0 0 0 0]
+[0 0 0 0 0 1 0 0 0]
+[0 0 0 0 0 0 1 0 0]
+[0 0 0 0 0 0 0 1 0]
+[0 0 0 0 0 0 0 0 1]
+&gt; FactoredOrder(G);
+[ &lt;7, 36&gt; ]
+</PRE>
+<PRE></PRE> <A  HREF = "text672.htm">[Next]</A><A  HREF = "text680.htm">[Prev]</A> <A  HREF = "text672.htm">[Right]</A> <A  HREF = "text680.htm">[Left]</A> <A  HREF = "text673.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

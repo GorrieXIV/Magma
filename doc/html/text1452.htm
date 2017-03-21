@@ -1,0 +1,2304 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Mordell-Weil Groups and Descent Methods</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1446.htm">[Next]</A><A  HREF = "text1451.htm">[Prev]</A> <A  HREF = "text1446.htm">[Right]</A> <A  HREF = "text1451.htm">[Left]</A> <A  HREF = "text1447.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16497">Mordell-Weil Groups and Descent Methods</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+The remainder of the chapter describes the functions and methods 
+for determining the Mordell-Weil group (the group of rational points)
+for a curve defined over Q or a number field.
+<P>
+The Mordell--Weil theorem states that for an elliptic curve E 
+defined over a global field F (such as Q or a number field),
+the set E(F) of points on E with F-rational 
+coordinates forms a finitely generated abelian group.
+This is called the <I>Mordell--Weil group</I>, and the Z-rank of the
+free part is called the <I>Mordell--Weil rank</I> of E.
+<P>
+It is an open problem to give an explicit algorithm which can determine
+the Mordell-Weil group of any elliptic curve over Q (or any number field).
+The general approach is to use the method of n-descent, for one or more
+suitable integers n.  There are two main problems with this.  Firstly, 
+n-descent cannot determine the rank of E if the Tate-Shafarevich group
+Sha(E) has elements of order n.  It is an open conjecture that, for
+fixed E, this occurs for only finitely many values of n.  The second
+problem is more practical: one cannot implement n-descent for general n.
+<P>
+Magma has implementations of descent over Q for n = 2, 4, 8, 3, 9, 5
+as well as for isogenies of various degrees.  It is the only software that has
+a <I>complete</I> implementation of 2-descent over number fields (in the sense
+that 2-coverings are reduced and therefore can be used to search for points). 
+In addition, the Cassels-Tate pairing on the 2-Selmer group is implemented
+over all global fields, and also on the 4-Selmer group over Q.  All these
+techniques (and some others) are combined in the main functions to determine
+ranks and generators.  Each of the main functions returns a result together
+with the status of the result, i.e. whether the rank has been proven, or
+the group returned is known to be the full Mordell-Weil group.
+<P>
+Prior to version 2.21, the commands <TT>MordellWeilGroup</TT>, <TT>Rank</TT>,
+<TT>Generators</TT>, etc, did not use all available techniques.  Furthermore
+they did not return the status of their results, but instead a warning was
+printed in the event of an unproven result; no such warnings are printed now.
+<P>
+Magma provides several ways to ask for information about ranks and
+Mordell-Weil groups.
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>The main commands are <TT>Rank</TT>, <TT>RankBounds</TT>, <TT>MordellWeilGroup</TT>, 
+<TT>Generators</TT>.  These apply the available techniques in a suitable order.
+<DT>(ii)</DT><DD>At a slightly lower level, the routine <TT>MordellWeilShaInformation</TT>
+follows the same procedure, and also prints a summary of what is known 
+about the rank, generators and sha after applying each technique.  The
+information about sha is also returned at the end.
+<DT>(iii)</DT><DD>The techniques may be called individually.  This is often necessary to 
+get the best results in hard examples -- the automated procedure used
+by the higher level routines cannot always make the best choices.
+All the descent techniques are described later in this chapter; the
+other main techniques are <TT>AnalyticRank</TT> and <TT>HeegnerPoint</TT>.</DL>
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1452.htm#16498">Torsion</A>
+<LI> <A  HREF = "text1452.htm#16503">Mordell-Weil Group and Rank</A>
+<LI> <A  HREF = "text1452.htm#16515">Two-Descent</A>
+<LI> <A  HREF = "text1452.htm#16529">Selmer Groups</A>
+<LI> <A  HREF = "text1452.htm#16537">The Cassels-Tate Pairing</A>
+<LI> <A  HREF = "text1452.htm#16541">Four-Descent</A>
+<LI> <A  HREF = "text1452.htm#16552">Eight-Descent</A>
+<LI> <A  HREF = "text1452.htm#16554">Three-Descent and Five-Descent</A>
+<LI> <A  HREF = "text1452.htm#16570">Six and Twelve Descent</A>
+<LI> <A  HREF = "text1452.htm#16573">Nine-Descent</A>
+<LI> <A  HREF = "text1452.htm#16576">Higher 2-power Isogeny Descents</A>
+<LI> <A  HREF = "text1452.htm#16578">p-Isogeny Descent</A>
+</UL>
+<H4><A NAME = "16498">Torsion</A></H4>
+
+
+
+<H5><A NAME = "16499">TorsionSubgroup(E) : CrvEll -&gt; GrpAb, Map</A></H5>
+<H5>TorsionSubgroup(H) : SetPtEll -&gt; GrpAb, Map</H5>
+<BLOCKQUOTE>
+Given an elliptic curve E defined over Q or a number field, this
+returns an abelian group A isomorphic to the torsion subgroup of
+the Mordell--Weil group, and a map from this abstract group A to the
+elliptic curve providing the isomorphism.
+<P>
+For a curve over Q, by a theorem of Mazur, A is either C<sub>k</sub>
+(for k in {1..10} or 12) or C<sub>2</sub> x C<sub>2k</sub> (for k in {1..4}).
+When there are two generators, they are chosen in such a way that the
+first generator has order 2.
+<P>
+The algorithm (for curves over number fields) is based on the
+<TT>TorsionBound</TT> described in this section.  (For curves over Q
+a similar method is used.)
+</BLOCKQUOTE>
+<H5><A NAME = "16500">TwoTorsionSubgroup(E) : CrvEll -&gt; GrpAb, Map</A></H5>
+<BLOCKQUOTE>
+This returns the group of 2-torsion points on the elliptic curve E
+(returned in the same way as the <TT>TorsionSubgroup</TT>).
+Note that this is a very cheap computation.
+</BLOCKQUOTE>
+<H5><A NAME = "16501">TorsionBound(E, n) : CrvEll, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E defined over a number field, returns a bound
+on the size of the torsion subgroup of E.  This is done by considering
+at least n primes of good reduction (with early exit in some cases,
+such as when the torsion is shown to be only two-torsion).
+</BLOCKQUOTE>
+<H5><A NAME = "16502">pPowerTorsion(E, p) : CrvEll, RngIntElt -&gt; GrpAb, Map</A></H5>
+
+<PRE>    Bound: RngIntElt                    Default: </PRE>
+<BLOCKQUOTE>
+Given an elliptic curve E defined over Q or a number field, this 
+returns the p-power torsion subgroup of E over its base field
+(returned in the same way as the <TT>TorsionSubgroup</TT>).
+A bound on the size of the p-power torsion subgroup may be given,
+as the parameter <TT>Bound</TT>, to cut short the computation in hard cases.
+</BLOCKQUOTE>
+<H4><A NAME = "16503">Mordell-Weil Group and Rank</A></H4>
+
+
+
+<H5><A NAME = "16504">RankBounds(H: parameters) : SetPtEll -&gt; RngIntElt, RngIntElt</A></H5>
+<H5>RankBounds(E: parameters) : CrvEll -&gt; RngIntElt, RngIntElt</H5>
+<H5>MordellWeilRankBounds(H: parameters) : SetPtEll -&gt; RngIntElt, RngIntElt</H5>
+<H5>MordellWeilRankBounds(E: parameters) : CrvEll -&gt; RngIntElt, RngIntElt</H5>
+
+<PRE>    Effort: RngIntElt                   Default: 1</PRE>
+<BLOCKQUOTE>
+Given an elliptic curve E defined over Q or a number field, this returns
+lower and upper bounds on the rank of the Mordell--Weil group of E.
+<P>
+The parameter <TT>Effort</TT> must be an integer at least 1 (the default).
+Its usage is explained under <A  HREF = "text1452.htm#MWSIref">MordellWeilShaInformation</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "16505">Rank(H: parameters) : SetPtEll -&gt; RngIntElt, BoolElt</A></H5>
+<H5>Rank(E: parameters) : CrvEll -&gt; RngIntElt, BoolElt</H5>
+<H5>RankBound(E) : CrvEll -&gt; RngIntElt, BoolElt</H5>
+<H5>MordellWeilRank(H: parameters) : SetPtEll -&gt; RngIntElt, BoolElt</H5>
+<H5>MordellWeilRank(E: parameters) : CrvEll -&gt; RngIntElt, BoolElt</H5>
+
+<PRE>    Effort: RngIntElt                   Default: 1</PRE>
+<BLOCKQUOTE>
+Given an elliptic curve E defined over Q or a number field, this returns
+a lower bound r for the Mordell--Weil group of E.  The second value returned
+is a boolean, which is <TT>true</TT> iff it is known that the rank is exactly r.
+<P>
+The parameter <TT>Effort</TT> must be an integer at least 1 (the default).
+Its usage is explained under <A  HREF = "text1452.htm#MWSIref">MordellWeilShaInformation</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "16506">MordellWeilGroup(H: parameters) : SetPtEll -&gt; GrpAb, Map, BoolElt, BoolElt</A></H5>
+<H5>MordellWeilGroup(E: parameters) : CrvEll -&gt; GrpAb, Map, BoolElt, BoolElt</H5>
+<H5>AbelianGroup(H: parameters) : SetPtEll -&gt; GrpAb, Map, BoolElt, BoolElt</H5>
+<H5>AbelianGroup(E: parameters) : CrvEll -&gt; GrpAb, Map, BoolElt, BoolElt</H5>
+
+<PRE>    Effort: RngIntElt                   Default: 1</PRE>
+
+<PRE>    HeightBound: RngIntElt              Default: 15</PRE>
+<BLOCKQUOTE>
+The Mordell--Weil group of an elliptic curve E defined over Q.
+The first two values returned are an abelian group A and a map m
+from A to E.  The map m provides an isomorphism between the
+abstract group A and the Mordell--Weil group.
+<P>
+Additionally the function returns two booleans.  The first boolean is 
+<TT>true</TT> iff the rank of the group returned is known to be the rank
+of the curve.  The second boolean is <TT>true</TT> iff the group returned
+is known to be the full Mordell-Weil group.
+<P>
+The parameter <TT>Effort</TT> must be an integer at least 1 (the default).
+Its usage is explained under <A  HREF = "text1452.htm#MWSIref">MordellWeilShaInformation</A>.
+<P>
+The parameter <TT>HeightBound</TT> limits the search for points directly on E
+to the given naive height.  (Note: this affects only saturation of the group,
+not determination of the rank.)
+</BLOCKQUOTE>
+<H5><A NAME = "16507">Generators(H) : SetPtEll -&gt; [ PtEll ]</A></H5>
+<H5>Generators(E) : CrvEll -&gt; [ PtEll ]</H5>
+<BLOCKQUOTE>
+This function returns the generators of the <TT>MordellWeilGroup</TT>
+of the elliptic curve E (listed in the same order).
+</BLOCKQUOTE>
+<H5><A NAME = "16508">NumberOfGenerators(H) : SetPtEll -&gt; RngIntElt</A></H5>
+<H5>NumberOfGenerators(E) : CrvEll -&gt; RngIntElt</H5>
+<H5>Ngens(H) : SetPtEll -&gt; RngIntElt</H5>
+<H5>Ngens(E) : CrvEll -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+This is equivalent to <TT>NumberOfGenerators(MordellWeilGroup(E))</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "16509"></A><A NAME = "Satref">Saturation</A>(points, n) : [ PtEll ], RngIntElt -&gt; [ PtEll ]</H5>
+
+<PRE>    TorsionFree: BoolElt                Default: <TT>false</TT></PRE>
+
+<PRE>    OmitPrimes: [ RngIntElt ]           Default: []</PRE>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a sequence of points on an elliptic curve E over the rationals
+or a number field, and an integer n,
+this function returns a sequence of points generating a subgroup 
+of E(Q) which contains the given points and which is <I>p-saturated</I> 
+for all primes p up to n. (A subgroup S is p-saturated in a 
+group G if there is no intermediate subgroup H for which the
+index [H:S] is finite and divisible by p.) 
+<P>
+If <TT>OmitPrimes</TT> is set to be a sequence of primes, then the group
+is not checked to be p-saturated for those primes. 
+If <TT>TorsionFree</TT> is set to {tt true}, torsion points are omitted 
+from the result (that is, the result contains independent generators 
+modulo torsion).
+If <TT>Check</TT> is set to <TT>false</TT>, the input sequence of points 
+are assumed to be independent modulo torsion.
+</BLOCKQUOTE>
+<H5><A NAME = "16510">Saturation(points) : [ PtEll ] -&gt; [ PtEll ]</A></H5>
+
+<PRE>    TorsionFree: BoolElt                Default: <TT>false</TT></PRE>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a sequence of points on an elliptic curve E over the rationals
+or a number field, returns generators of the saturation of the given points
+in the Mordell-Weil group of E.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16511">Example <TT>CrvEllQNF_MordellWeil (H128E26)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([73, 0]);
+&gt; E;
+Elliptic Curve defined by y^2 = x^3 + 73*x over Rational Field
+&gt; Factorization(Integers() ! Discriminant(E));
+[ &lt;2, 6&gt;, &lt;73, 3&gt; ]
+&gt; BadPrimes(E);
+[ 2, 73 ]
+&gt; LocalInformation(E);
+[ &lt;2, 6, 6, 1, II, true&gt;, &lt;73, 3, 2, 2, III, true&gt; ]
+&gt; G, m := MordellWeilGroup(E);
+&gt; G;
+Abelian Group isomorphic to Z/2 + Z + Z
+Defined on 3 generators
+Relations:
+    2*G.1 = 0
+&gt; Generators(E);
+[ (0 : 0 : 1), (36 : -222 : 1), (4/9 : 154/27 : 1) ]
+&gt; 2*m(G.1);
+(0 : 1 : 0)
+</PRE>
+<HR>
+<H3><A NAME = "16512">Example <TT>CrvEllQNF_Rank (H128E27)</TT></A></H3>
+Here is a curve with moderately large rank; we do not attempt to compute
+the full group since that would be quite time-consuming.
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([0, 0, 0, -9217, 300985]);
+&gt; T, h := TorsionSubgroup(E);
+&gt; T;
+Abelian Group of order 1
+&gt; time RankBounds(E);
+7 7
+Time: 0.070
+</PRE>
+This curve was well-behaved in that the computed lower and upper bounds
+on the rank are the same, and so we know that we have computed the rank
+exactly.  Here is a curve where that is not the case:
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([0, -1, 0, -140, -587]);
+&gt; time G, h := MordellWeilGroup(E);
+Warning: rank computed (2) is only a lower bound
+(It may still be correct, though)
+Time: 0.250
+&gt; RankBounds(E);
+2 3
+</PRE>
+The difficulty here is that the Tate--Shafarevich group of E is not
+trivial, and this blocks the 2-descent process used to compute the
+rank.
+We can compute the <TT>AnalyticRank</TT> of the curve to be 2, but this
+is only conjecturally equal to the rank.
+In cases like this, higher level descents may provide a more
+definitive answer;
+the machinery for two- and four-descents described in the next two
+sections can be used to confirm that the rank is indeed 2.
+In any case, we can certainly get the group with rank
+equal to the lower bound.
+<P>
+<P>
+<PRE>
+&gt; G;
+Abelian Group isomorphic to Z + Z
+Defined on 2 generators (free)
+&gt; S := Generators(E);
+&gt; S;
+[ (-6 : -1 : 1), (-7 : 1 : 1) ]
+&gt; [ Order(P) : P in S ];
+[ 0, 0 ]
+&gt; h(G.1) eq S[1];
+true
+&gt; h(G.2) eq S[2];
+true
+&gt; h(2*G.1 + 3*G.2);
+(-359741403/57729604 : 940675899883/438629531192 : 1)
+&gt; 2*S[1] + 3*S[2];
+(-359741403/57729604 : 940675899883/438629531192 : 1)
+</PRE>
+As mentioned above, the rank of this curve is actually 2, so we have
+computed generators for the full group of E.
+<HR>
+<H5><A NAME = "16513"></A><A NAME = "MWSIref">MordellWeilShaInformation</A>(E: parameters) : CrvEll -&gt; [RngIntElt], [PtEll], [Tup]</H5>
+<H5>DescentInformation(E: parameters) : CrvEll -&gt; [RngIntElt], [PtEll], [Tup]</H5>
+
+<PRE>    RankOnly: BoolElt                   Default: <TT>false</TT></PRE>
+
+<PRE>    ShaInfo: BoolElt                    Default: <TT>false</TT></PRE>
+
+<PRE>    Silent: BoolElt                     Default: <TT>false</TT></PRE>
+
+<PRE>    Effort: RngIntElt                   Default: 1</PRE>
+<BLOCKQUOTE>
+This is a special function which uses all relevant Magma machinery
+to obtain as much information as possible about the Mordell-Weil group 
+and the Tate-Shafarevich group of the given elliptic curve E over Q
+or a number field.
+The tools used include 2-descent, 4-descent, Cassels-Tate pairings, 
+8-descent, 3-descent.  
+When the conductor is not too large, analytic methods (analytic rank and
+Heegner points) are also used.  The information is progressively refined
+as the tools are applied (in order of their estimated cost), and a summary
+is printed at each stage.  At the end, all information obtained is returned
+in three sequences. 
+<P>
+The first sequence returned contains lower and upper bounds on the Mordell-Weil 
+rank of E(Q), and the second is the sequence of independent generators 
+of the Mordell-Weil group (modulo the torsion subgroup) that have been found. 
+The third sequence returned contains the information obtained about the 
+Tate-Shafarevich group Sha(E): letting r<sub>n</sub> denote the largest integer
+such that Z/nZ is contained in Sha(E), the tuple <TT>&lt;n, [l,u]&gt;</TT>
+would indicate that the computations prove l &le;r<sub>n</sub> &le;u.
+<P>
+By default, the routine attempts to determine the rank and generators, and 
+returns whenever it succeeds in determining them.  When <TT>RankOnly</TT> is 
+set to true, it returns as soon as the Mordell-Weil rank has been determined.
+When <TT>ShaInfo </TT> is set to true, it additionally probes the structure of
+Sha(E) using all available tools.
+<P>
+The parameter <TT>Effort</TT> must be an integer at least 1 (the default).
+Currently it has the following effect.
+For curves over Q: when the effort is 1, the algorithm terminates
+before attempting the hardest methods (<TT>FourDescent</TT> is used but not
+<TT>EightDescent</TT> or <TT>ThreeDescent</TT>), otherwise all methods are used.
+For curves over number fields: all available methods are always used, and
+the <TT>Effort</TT> is a linear multiplier that controls the time spent in
+searching for points in some of the methods.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16514">Example <TT>CrvEllQNF_mwsha-example (H128E28)</TT></A></H3>
+Conductor 389 is the smallest conductor of a curve with rank 2:
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve("389a1");
+&gt; time rank, gens, sha := MordellWeilShaInformation(E);
+
+Torsion Subgroup is trivial
+Analytic rank = 2
+The 2-Selmer group has rank 2
+Found a point of infinite order.
+Found 2 independent points.
+After 2-descent: 
+    2 &lt;= Rank(E) &lt;= 2
+    Sha(E)[2] is trivial
+(Searched up to height 100 on the 2-coverings.)
+
+Time: 0.280
+</PRE>
+We now take a curve of conductor 571, which has rank 0 and 
+nontrivial Tate-Shafarevich group:
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve("571a1");
+&gt; time rank, gens, sha :=MordellWeilShaInformation(E);
+
+Torsion Subgroup is trivial
+Analytic rank = 0
+     ==&gt; Rank(E) = 0
+
+Time: 0.010
+</PRE>
+We must specify that we want information about the Tate-Shafarevich group:
+<P>
+<P>
+<PRE>
+&gt; time rank, gens, sha :=MordellWeilShaInformation(E : ShaInfo);
+
+Torsion Subgroup is trivial
+Analytic rank = 0
+     ==&gt; Rank(E) = 0
+The 2-Selmer group has rank 2
+After 2-descent: 
+    0 &lt;= Rank(E) &lt;= 0
+    (Z/2)^2 &lt;= Sha(E)[2] &lt;= (Z/2)^2
+(Searched up to height 10000 on the 2-coverings.)
+The Cassels-Tate pairing on Sel(2,E)/E[2] is
+[0 1]
+[1 0]
+After using Cassels-Tate: 
+    0 &lt;= Rank(E) &lt;= 0
+    (Z/2)^2 &lt;= Sha(E)[4] &lt;= (Z/2)^2
+The 3-Selmer group has rank 0
+After 3-descent: 
+    0 &lt;= Rank(E) &lt;= 0
+    (Z/2)^2 &lt;= Sha(E)[12] &lt;= (Z/2)^2
+
+Time: 0.840
+</PRE>
+<HR>
+<H4><A NAME = "16515">Two-Descent</A></H4>
+
+<P>
+<P>
+This section describes the main implementations of two-descent
+(by the "algebraic" algorithm) in Magma, for curves over Q
+and for curves over number fields.
+<P>
+The two-descent process determines the locally soluble 2-coverings
+of a given elliptic curve, returning them as hyperelliptic curves
+C:y<sup>2</sup> = f(x) of degree four.  The process breaks into two main parts:
+first to compute the 2-Selmer group, then to construct 2-covering 
+curves corresponding to its elements.  To obtain nice models of the 
+coverings, minimisation and reduction techniques are used.  This is done
+over (general) number fields using algorithms developed by Donnelly and
+Fisher.
+<P>
+A separate implementation is available for the case where E admits a
+2-isogeny: this involves first computing the 2-coverings for the isogeny
+and its dual (in this case the covering maps have degree 2 instead of
+degree 4), and then lifting these to the level of a "full 2-descent".
+<P>
+This section also describes functions for dealing with 2-covering curves 
+as binary quartic forms: invariant theory, and minimisation and reduction.
+This functionality overlaps with the package for genus one models 
+(see <A  HREF = "text1468.htm#16653">MODELS OF GENUS ONE CURVES</A>).  There is also a straightforward interface to the 
+2-Selmer group machinery.
+
+
+<H5><A NAME = "16516">TwoDescent(E: parameters) : CrvEll -&gt; [CrvHyp] , [Map], Map</A></H5>
+
+<PRE>    RemoveTorsion: BoolElt              Default: <TT>false</TT></PRE>
+
+<PRE>    RemoveGens: { PtEll }               Default: { }</PRE>
+
+<PRE>    WithMaps: BoolElt                   Default: <TT>true</TT></PRE>
+
+<PRE>    MinRed: BoolElt                     Default: </PRE>
+
+<PRE>    SetVerbose("TwoDescent", n):        Maximum: 1</PRE>
+<BLOCKQUOTE>
+Given an elliptic curve E over the rationals or a number field,
+this performs 2-descent on E producing 2-covering curves that
+represent the elements of the 2-Selmer group of E.
+The function returns these as a sequence of hyperelliptic curves, 
+and also returns a corresponding list of maps (unless the parameter
+<TT>WithMaps</TT> is set to <TT>false</TT>).
+<P>
+If <TT>RemoveTorsion</TT> is <TT>true</TT>, the generators of the 
+torsion subgroup are factored out from the group.  If <TT>RemoveGens</TT> 
+is given, the group spanned by the specified points is factored out.
+<P>
+For curves over number fields: a third item is returned which specifies
+the group structure on the set of 2-coverings.  This is a map (with inverse)
+from an abstract group to the sequence of 2-coverings; the abstract group
+is either <TT>TwoSelmerGroup(E)</TT>, or the appropriate quotient in the case
+where <TT>RemoveTorsion</TT> or <TT>RemoveGens</TT> were specified.
+<P>
+Currently, for curves over number fields: the parameter <TT>MinRed</TT>
+controls whether the coverings are to be minimised and reduced.
+(This may be expensive for various reasons, especially when the
+field discriminant is not small: in particular, a large integer
+may need to be factored.)
+</BLOCKQUOTE>
+<H5><A NAME = "16517">AssociatedEllipticCurve(f) : RngUPolElt -&gt; CrvEll, Map</A></H5>
+<H5>AssociatedEllipticCurve(C) : CrvHyp -&gt; CrvEll, Map</H5>
+
+<PRE>    E: CrvEll                           Default: </PRE>
+<BLOCKQUOTE>
+Gives the minimal model of the elliptic curve associated with a 
+two-covering given as a polynomial f or a hyperelliptic curve C, 
+along with a map from points [x, y] on the two-covering
+to the curve. 
+<P>
+If an elliptic curve is given as <TT>E</TT>, this must be isomorphic to the 
+Jacobian of C, and then the map returned will be a map to the given <TT>E</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "16518">TwoCover(e) : FldNumElt -&gt; CrvHyp,  Map</A></H5>
+<H5>TwoCover(e) : RngUPolResElt -&gt; CrvHyp,  Map</H5>
+<BLOCKQUOTE>
+The purpose of this function is to calculate the 2-covers that are
+returned by <TT>TwoDescent</TT> individually rather than all together.
+<P>
+The argument e is an element of a cubic extension A/F, where
+F is a number field, and where A may be either a number field
+over F or an affine algebra over F.
+The element e determines a 2-cover of some elliptic curve over F
+(by the construction given in the description of <TT>DescentMaps</TT>).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16519">Example <TT>CrvEllQNF_twodescent (H128E29)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; SetSeed(1); // results may depend slightly on the seed
+&gt; E := EllipticCurve([0, 1, 0, -7, 6]);
+&gt; S := TwoDescent(E);
+&gt; S;
+[
+    Hyperelliptic Curve defined by y^2 = x^4 + 4*x^3 - 2*x^2 - 20*x + 9 over 
+    Rational Field,
+    Hyperelliptic Curve defined by y^2 = x^4 - x^3 - 2*x^2 + 2*x + 1 over 
+    Rational Field,
+    Hyperelliptic Curve defined by y^2 = 2*x^4 - 4*x^3 - 8*x^2 + 4*x + 10 over 
+    Rational Field
+]
+</PRE>
+The curve E has three non-trivial two-descendants, hence its rank is at most 2.
+The first two curves yield obvious rational points, so we can find
+two independent points on E (and it has exact rank 2).
+<P>
+<P>
+<PRE>
+&gt; pt_on_S1 := Points(S[1] : Bound:=10 )[1];
+&gt; pt_on_S1;
+// We obtain the map from S[1] to E by
+&gt; _, phi := AssociatedEllipticCurve(S[1] : E:=E );
+&gt; phi( pt_on_S1 );
+(1 : -1 : 1)
+// Now do the same for the second curve.
+&gt; pt_on_S2 := Points(S[2] : Bound:=10 )[1];
+&gt; _, phi := AssociatedEllipticCurve(S[2] : E:=E );
+&gt; phi( pt_on_S2 );
+(-3 : 3 : 1)
+</PRE>
+<HR>
+<H5><A NAME = "16520">Two Descent Using Isogenies</A></H5>
+
+
+
+<H5><A NAME = "16521">TwoIsogenyDescent(E : parameters) : CrvEll -&gt; SeqEnum[CrvHyp], List, SeqEnum[CrvHyp], List, MapSch, MapSch</A></H5>
+
+<PRE>    Isogeny: MapSch                     Default: </PRE>
+
+<PRE>    TwoTorsionPoint: PtEll              Default: </PRE>
+<BLOCKQUOTE>
+Given an elliptic curve E over Q
+admitting a 2-isogeny &phi; : E' -&gt; E, 
+this function computes 2-coverings representing
+the nontrivial elements of the 
+Selmer groups of &phi; and of the dual isogeny &phi;' : E -&gt; E'.
+These coverings are given as hyperelliptic curves C : y<sup>2</sup>=quartic(x).
+Six objects are returned:
+(i) the sequence of coverings C of E for &phi;;
+(ii) the corresponding list of maps C -&gt; E;
+(iii) and (iv) the coverings C' and maps C' -&gt; E' for &phi;'; 
+(v) and (vi) the isogenies &phi; and &phi;' that were used. 
+</BLOCKQUOTE>
+<H5><A NAME = "16522">LiftDescendant(C) : CrvHyp -&gt; SeqEnum[ CrvHyp ], List, MapSch</A></H5>
+<H5>TwoDescendantsOverTwoIsogenyDescendant(C) : CrvHyp -&gt; SeqEnum[ CrvHyp ], List, MapSch</H5>
+<BLOCKQUOTE>
+This routine performs a higher descent on curves arising in
+<TT>TwoIsogenyDescent(E)</TT> on an elliptic curve E over Q.
+The curves obtained are 2-coverings of E in the sense
+of ordinary (full) <TT>TwoDescent</TT>; more precisely, they are exactly the 
+set of 2-coverings D for which the covering map D -&gt; E factors
+through C.  
+Up to isomorphism,
+they are a subset of the 2-coverings returned by <TT>TwoDescent(E)</TT>.
+The advantage of this approach is that it works entirely over the base field
+of E, whereas <TT>TwoDescent</TT> will in general compute
+a class group over a quadratic extension of the base field.
+The example below explains how to recover all coverings
+produced by <TT>TwoDescent(E)</TT> using the 2-isogeny approach.
+<P>
+This function accepts any curve C in the first sequence of curves
+returned by <TT>TwoIsogenyDescent(E)</TT>
+(these are the 2-isogeny-coverings of E).
+More generally it accepts any hyperelliptic curve of the form
+y<sup>2</sup> = d<sub>1</sub>x<sup>4</sup> + cx<sup>2</sup> + d<sub>2</sub>.
+A model for the associated elliptic curve E
+is then y<sup>2</sup> = x(x<sup>2</sup> + cx + d<sub>1</sub> d<sub>2</sub>). 
+<P>
+The function returns three objects:
+a sequence containing the covering curves D,
+a list containing the corresponding maps D -&gt; C,
+and lastly the covering map C -&gt; E from the given curve
+to some model of its associated elliptic curve.
+</BLOCKQUOTE>
+<H5><A NAME = "16523">Invariants</A></H5>
+
+
+
+<H5><A NAME = "16524">QuarticIInvariant(q) : RngUPolElt -&gt; RngIntElt</A></H5>
+<H5>QuarticG4Covariant(q) : RngUPolElt -&gt; RngUPolElt</H5>
+<H5>QuarticHSeminvariant(q) : RngUPolElt -&gt; RngIntElt</H5>
+<H5>QuarticPSeminvariant(q) : RngUPolElt -&gt; RngIntElt</H5>
+<H5>QuarticQSeminvariant(q) : RngUPolElt -&gt; RngIntElt</H5>
+<H5>QuarticRSeminvariant(q) : RngUPolElt -&gt; RngIntElt
+</H5>
+<BLOCKQUOTE>
+Compute invariants, semivariants, and covariants, as in paper
+<A  HREF = "text1446.htm#bib_crem_2_desc">[Cre01]</A>, of a given quartic polynomial q.
+The G4 and G6 covariants are polynomials of degrees four and six
+respectively;
+the I and J invariants are integers that generate the ring of integer
+invariants of the polynomial and satisfy J<sup>2</sup> - 4I<sup>3</sup> = 27 &Delta;(f).
+The names H and P have been used for essentially the same
+seminvariant in different papers; they are related by H= - P.
+</BLOCKQUOTE>
+<H5><A NAME = "16525">QuarticNumberOfRealRoots(q) : RngUPolElt -&gt; RngUPolElt</A></H5>
+<BLOCKQUOTE>
+Using invariant theory, compute the number of real roots of a real
+quartic polynomial q.
+</BLOCKQUOTE>
+<H5><A NAME = "16526">QuarticMinimise(q) : RngUPolElt -&gt; RngUPolElt, AlgMatElt</A></H5>
+<BLOCKQUOTE>
+This computes a minimal model of the quartic polynomial q
+over the rationals or a univariate rational function field.  
+<P>
+Three objects are returned: the minimised quartic, the 
+transformation matrix, and the scaling factor.
+<P>
+For further explanation see Chapter <A  HREF = "text1468.htm#16653">MODELS OF GENUS ONE CURVES</A>. The algorithm
+can be found in <A  HREF = "text1446.htm#bib_cremona-fisher-stoll">[CFS10]</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "16527">QuarticReduce(q) : RngUPolElt -&gt; RngUPolElt, AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Given a quartic q, the algorithm of <A  HREF = "text1446.htm#bib_crem_forms">[Cre99]</A> is
+applied to find the reduced quartic and the matrix that 
+reduced it.
+</BLOCKQUOTE>
+<H5><A NAME = "16528">IsEquivalent(f,g) : RngUPolElt, RngUPolElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Determines if the quartics f and g are equivalent.
+</BLOCKQUOTE>
+<H4><A NAME = "16529">Selmer Groups</A></H4>
+
+<P>
+<P>
+<P>
+First we give a short overview of the theory of Selmer groups. This enables us
+to fix the notation that is used in the naming of the Magma functions. For a
+more complete account, see <A  HREF = "text1446.htm#bib_silverman-arith">[Sil86]</A>. 
+The actual algorithms to compute the Selmer groups
+are closer to the description in <A  HREF = "text1446.htm#bib_Cassels66">[Cas66]</A>.
+<P>
+Let E', E be elliptic curves over a number field K and let
+&phi;:E' -&gt; E be an isogeny. The only cases currently implemented are where
+&phi; is a 2-isogeny, i.e., an isogeny of degree 2, and where E'=E and
+&phi; is multiplication by 2.
+<P>
+Let E'[&phi;] be the kernel subscheme of &phi;.
+By taking Galois cohomology of the short exact sequence of
+schemes over K,
+0 -&gt; E'[&phi;] -&gt; E' -&gt; E -&gt; 0,
+we obtain
+E'(K) -&gt; E(K) -&gt; H<sup>1</sup>(K, E'[&phi;]) -&gt; H<sup>1</sup>(K, E').
+For the middle map, we write &mu;:E(K) -&gt; H<sup>1</sup>(K, E'[&phi;]).
+Thus, E(K)/&phi;(E'(K)) injects in H<sup>1</sup>(K, E'[&phi;]) and the image 
+consists exactly of
+the cocycles that vanish in H<sup>1</sup>(K, E').
+<P>
+As an approximation to this image,
+we define the &phi;-Selmer group of E over
+K to consist of those cocycles H<sup>1</sup>(K, E'[&phi;]) that vanish in all
+restrictions H<sup>1</sup>(K<sub>p</sub>, E'), where p runs though all places of K.
+It fits in the exact sequence
+<P>
+0 -&gt; S<sup>(&phi;)</sup>(E/K) -&gt; H<sup>1</sup>(K, E'[&phi;]) -&gt; &prod;<sub>p</sub> H<sup>1</sup>(K<sub>p</sub>, E')
+<P>
+The main application of Selmer groups is that they provide the bound:
+#E(K)/&phi; E'(K)&le;# S<sup>(&phi;)</sup>(E/K). If &phi;<sup> * </sup>:E -&gt; E' is the
+isogeny dual to &phi;, then &phi;<IMG SRC="open.gif" ALT="" WIDTH=7 HEIGHT=7>&phi;<sup> * </sup>:E -&gt; E is multiplication by
+d=(Deg)(&phi;). Thus, one can use the &phi; and &phi;<sup> * </sup> Selmer groups to
+provide a bound on #E(K)/dE(K) and thus on the Mordell--Weil rank of E(K).
+<P>
+<P>
+<P>
+<P>
+<B>Representation of H<sup>1</sup>(K, E'[&phi;])</B>:
+<P>
+If &phi; is a 2-isogeny, then H<sup>1</sup>(K, E'[&phi;])~K<sup> * </sup>/K<sup> * 2</sup>. Thus, we can
+represent elements by &delta;&isin;K<sup> * </sup>. In Magma, the map &mu; corresponds
+to a representation of the map E(K) -&gt; K<sup> * </sup>. The map &mu; also accepts just
+x-coordinates.
+<P>
+If &phi; is multiplication-by-2 and E : y<sup>2</sup>=f(x), we write 
+A=K[x]/(f(x)) then
+H<sup>1</sup>(K, E[2])~{&delta;&isin;A<sup> * </sup>/A<sup> * 2</sup>| N<sub>A/K</sub>(&delta;)&isin;K<sup> * 2</sup>}.
+In fact, the full set A<sup> * </sup>/A<sup> * 2</sup> corresponds to H<sup>1</sup>(K, E[2] x {&#8723; 1}).
+<P>
+The set H<sup>1</sup>(K, E'[&phi;]) also corresponds to the set of 
+covers &tau;<sub>&delta;</sub>:T<sub>&delta;</sub> -&gt; E over K, modulo isomorphy over K, that are isomorphic to &phi;:E' -&gt; E
+over the algebraic closure of K (see <A  HREF = "text1446.htm#bib_silverman-arith">[Sil86]</A>, Theorem X.2.2). 
+In this section, we write <TT>tor</TT> for the map
+&delta; |-&gt; &tau;<sub>&delta;</sub>.
+
+
+<H5><A NAME = "16530">DescentMaps(phi) : Map -&gt; Map, Map</A></H5>
+<H5>CasselsMap(phi) : Map -&gt; Map, Map</H5>
+
+<PRE>    Fields: SetEnum                     Default: { }</PRE>
+<BLOCKQUOTE>
+Given an isogeny &phi; : E -&gt; E<sub>1</sub> of elliptic curves over a number field K
+(or Q), the function returns the connecting homomorphism 
+&mu; : E<sub>1</sub>(K) -&gt; H<sup>1</sup>(K, E[&phi;]), 
+and a map &tau;
+sending an element of H<sup>1</sup>(K, E[&phi;]) to the corresponding homogeneous space.
+Here elements of H<sup>1</sup>(K, E[&phi;]) are represented as elements of A<sup> * </sup>/(A<sup> * </sup>)<sup>2</sup>
+(as described above). 
+The maps are actually given as maps to,
+and from, A (rather than A<sup> * </sup>/(A<sup> * </sup>)<sup>2</sup>).
+<P>
+The isogeny &phi; must be either a 2-isogeny or multiplication--by--2.
+<P>
+When &phi; is multiplication--by--two, then the computation of &mu;
+involves a call to <TT>AbsoluteAlgebra</TT>.
+The optional parameter <TT>Fields</TT> is passed on to that.
+If the fields mentioned in this set are found to be of any use,
+then these will be used and whatever class group and unit data stored on the
+fields will be used in subsequent computations.
+<P>
+When &phi; is multiplication--by--two, 
+the second map &tau; accepts all elements &delta; &isin;A<sup> * </sup>.
+An element &delta; &isin;A<sup> * </sup> 
+represents an element of  H<sup>1</sup>(K, E[2]) if and only if 
+&delta; must have square norm. In general, &delta; &isin;A<sup> * </sup> represents 
+an element of H<sup>1</sup>(K, E[2] x {&#8723; 1}), in which case &tau;(&delta;) is the
+corresponding covering T<sub>&delta;</sub> -&gt; (P)<sup>1</sup>. 
+(This covering is a twist of the covering E -&gt; E -&gt; (P)<sup>1</sup>
+given by P |-&gt; 2P |-&gt; x(2P).) 
+</BLOCKQUOTE>
+<H5><A NAME = "16531">SelmerGroup(phi) : Map -&gt; GrpAb, Map, Map, SeqEnum, SetEnum</A></H5>
+
+<PRE>    Hints: SetEnum                      Default: { }</PRE>
+
+<PRE>    Raw: BoolElt                        Default: <TT>false</TT></PRE>
+
+<PRE>    Bound: RngIntElt                    Default: -1</PRE>
+
+<PRE>    SetVerbose("Selmer", n):            Maximum: 2</PRE>
+<BLOCKQUOTE>
+<P>
+Given an isogeny &phi; : E -&gt; E<sub>1</sub> defined over a number field K,
+computes the associated Selmer group Sel(&phi;) := Sel<sup>&phi;</sup>(E/K).
+<P>
+The Selmer group is returned as a finite abelian group S,
+together with a map AtoS : A -&gt; S, where A is as in the introduction.
+This is a map only in the Magma sense; it is defined only on a finite 
+subset of A. Its "inverse" S -&gt; A provides the mathematically 
+meaningful injection S -&gt; A<sup> * </sup>/(A<sup> * </sup>)<sup>2</sup>.
+The standard map
+E<sub>1</sub>(K) -&gt; E<sub>1</sub>(K)/&phi; E(K) -&gt; Sel(&phi;)
+is given by the composition of &mu; with AtoS, 
+where &mu; : E<sub>1</sub>(K) -&gt; H<sup>1</sup>(K, E[&phi;])
+is the first map returned by <TT>DescentMaps</TT>.
+<P>
+If the optional parameter <TT>Hints</TT> is given, it is used as 
+a list of x-coordinates to try first when determining local images. 
+Supplying <TT>Hints</TT> does not change the outcome, but may speed up
+the computation.
+<P>
+The calculation of the Selmer group involves possibly  expensive class group
+and unit group computations. If no such data has been precomputed,
+<TT>SelmerGroup</TT>
+will attempt to obtain this information unconditionally, unless <TT>Bound</TT> is
+positive. This bound is then passed on to any called <TT>ClassGroup</TT>. However,
+if such data is already stored, it will be used and subsequent results will be
+conditional on whatever assumptions were made while computing this information.
+If conditional results are desired (for instance, assuming GRH), 
+one should precompute class group information on the codomain of
+<TT>CasselsMap(phi)</TT> prior to calling <TT>SelmerGroup(phi)</TT>.
+<P>
+If <TT>Raw</TT> is <TT>true</TT>, then three technical items are also returned.
+The first two of these, toVec and FB,
+enable one to represent elements of the Selmer
+group in terms of a "factor base" FB consisting of elements of A
+that generate a relevant subgroup of A<sup> * </sup>/(A<sup> * </sup>)<sup>2</sup>.
+The map toVec sends an element of S to an exponent vector
+relative to FB.
+The map from S to A obtained by multiplying
+out the results is inverse to AtoS.
+<P>
+The final returned value (when <TT>Raw</TT> is <TT>true</TT>) is a set of <TT>Hints</TT>
+(just as in the optional parameter).
+</BLOCKQUOTE>
+<H5><A NAME = "16532">TwoSelmerGroup(E) : CrvEll -&gt; GrpAb, Map, SetEnum, Map, SeqEnum</A></H5>
+
+<PRE>    Hints: SetEnum                      Default: { }</PRE>
+
+<PRE>    Raw: BoolElt                        Default: <TT>false</TT></PRE>
+
+<PRE>    Bound: RngIntElt                    Default: -1</PRE>
+
+<PRE>    SetVerbose("EllSelmer", n):         Maximum: 2</PRE>
+<BLOCKQUOTE>
+The 2-Selmer group of an elliptic curve defined over Q or a number field. 
+The function simply calls <TT>SelmerGroup</TT> for the 
+multiplication--by--two isogeny. 
+The given model for E should be integral.
+The options and return values are the same as for <TT>SelmerGroup</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16533">Example <TT>CrvEllQNF_selmer (H128E30)</TT></A></H3>
+In this example, we determine the rank of y<sup>2</sup> = x<sup>3</sup> + 9x<sup>2</sup> - 10x + 1 
+by computing the 2-Selmer group.
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([0,9,0,-10,1]);
+&gt; two := MultiplicationByMMap(E,2);
+&gt; mu, tor := DescentMaps(two);
+</PRE>
+The hard work: computing the Selmer group.
+<P>
+<P>
+<PRE>
+&gt; S, AtoS := SelmerGroup(two);
+&gt; #S;
+8
+</PRE>
+So the Selmer rank is 3. We deduce the following upper bound on the rank
+of E(Q), taking into account any 2-torsion. 
+<P>
+<P>
+<PRE>
+&gt; RankBound(E : Isogeny := two);
+3
+</PRE>
+In fact, there are 3 points: (0, 1), (1, 1) and (2, 5).
+<P>
+<P>
+<PRE>
+&gt; g1 := E![ 0, 1 ];
+&gt; g2 := E![ 1, 1 ];
+&gt; g3 := E![ 2, 5 ];
+</PRE>
+We now test these points for linear independence.
+It will follow that the points generate E(K)/2E(K), which means they are 
+independent nontorsion points in E(K)
+(since we know there is no 2-torsion).
+<P>
+<P>
+<PRE>
+&gt; IsLinearlyIndependent ([g1, g2, g3]);
+true
+</PRE>
+Next we compute the homogeneous space associated to the point g1 + g2.
+It must have a rational point mapping to g1 + g2.
+Note that @@ always denotes "preimage" in Magma.
+The algebra for <TT>AtoS</TT> is not the same as the original cubic,
+so we must translate before applying the requisite map.
+<P>
+<P>
+<PRE>
+&gt; K := NumberField(Modulus(Domain(AtoS)));
+&gt; L := NumberField(Polynomial([1,-10,9,1]));
+&gt; b, m := IsIsomorphic (K, L); assert b;
+&gt; theta := (Rationals()! (L.1 - m(K.1))) + Domain(AtoS).1;
+&gt; H, mp := TwoCover((g1+g2)[1] - theta : E:=E); H;
+Hyperelliptic Curve defined by y^2 = 9*x^4 - 4*x^3 - 18*x^2 + 4*x + 13
+</PRE>
+The next command finds all Q-rational points in the preimage of
+the point g1 + g2 on E.
+(In Magma the preimage is constructed as a scheme.)
+<P>
+<P>
+<PRE>
+&gt; RationalPoints( (g1+g2) @@ mp);
+{@ (-1 : -2 : 1) @}
+</PRE>
+<HR>
+<H3><A NAME = "16534">Example <TT>CrvEllQNF_selmer2 (H128E31)</TT></A></H3>
+We consider the elliptic curve E : y<sup>2</sup> = dx(x + 1)(x + 3) 
+where d is the product of the primes less than 50.
+Since E has full 2-torsion, we can carry out 2-isogeny descent
+in three non-equivalent ways, resulting in three different rank bounds.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x&gt; := PolynomialRing(Integers());
+&gt; d := &amp;*[ p : p in [1..50] | IsPrime(p) ];
+&gt; E := EllipticCurve(HyperellipticCurve(d*x*(x + 1)*(x + 3)));
+</PRE>
+The nontrivial 2-torsion points in E(Q):
+<P>
+<P>
+<PRE>
+&gt; A, mp := TorsionSubgroup(E);
+&gt; T := [ t : a in A | t ne E!0 where t := mp(a) ];
+</PRE>
+The corresponding 2-isogenies:
+<P>
+<P>
+<PRE>
+&gt; phis := [ TwoIsogeny(t) : t in T ];
+</PRE>
+The rank bounds obtained from these isogenies: 
+<P>
+<P>
+<PRE>
+&gt; [ RankBound(E : Isogeny := phi) : phi in phis ];
+[ 9, 5, 7 ]
+</PRE>
+We find [9, 5, 7]! Each descent gives a different rank bound.
+However, a full 2-descent gives:
+<P>
+<P>
+<PRE>
+&gt; two := MultiplicationByMMap(E,2);
+&gt; RankBound(E : Isogeny := two);
+1
+</PRE>
+Now doing full 2-descent on the three isogenous curves, 
+we see where the obstacle for sharp rank bounds comes from.
+<P>
+<P>
+<PRE>
+&gt; OtherTwos := [ MultiplicationByMMap(Codomain(phi), 2) : phi in phis ];
+&gt; [ RankBound(Domain(two) : Isogeny := two) : two in OtherTwos ];
+[ 9, 5, 7 ]
+</PRE>
+We find [9, 5, 7] again.
+<HR>
+<H3><A NAME = "16535">Example <TT>CrvEllQNF_selmer3 (H128E32)</TT></A></H3>
+The next example is a classic one from <A  HREF = "text1446.htm#bib_Kramer">[Kra81]</A>.
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([0, 977, 0, 976, 0]);
+&gt; #TwoTorsionSubgroup(E);
+4
+&gt; RankBound(E);
+&gt; ptsE := [E| [-4, 108], [4, 140]];
+&gt; IsLinearlyIndependent(ptsE); // they are non-torsion points
+true
+&gt; // So E is really of rank 2
+&gt; d := 109;
+&gt; Ed := QuadraticTwist(E, d);
+&gt; Points(Ed, -976);
+[ (-976 : 298656 : 1), (-976 : -298656 : 1) ]
+</PRE>
+Since Ed has a nontorsion point, its rank is at least 1.
+We will show that its rank is exactly 1, by comparing
+2-descent on E and on its base change.
+<P>
+<P>
+<PRE>
+&gt; _&lt;x&gt; := PolynomialRing(Rationals());
+&gt; K := NumberField(x^2 - d);
+&gt; EK := BaseChange(E, K);
+&gt; Ngens(TwoSelmerGroup(EK));
+5
+</PRE>
+Note that the Selmer group contains the 2-torsion subgroup,
+so this tells us that the rank of E(K) is at most 3, hence
+it is exactly 3 because we know 3 independent points.
+The rank of E<sub>d</sub>(Q) must equal the rank of E(K) minus the 
+rank of E(Q), therefore E<sub>d</sub>(Q) has rank 1.
+This is smaller than the bound of 3 we get from a 2-descent
+on E<sub>d</sub> alone:
+<P>
+<P>
+<PRE>
+&gt; Ngens(TwoSelmerGroup(Ed));
+5
+</PRE>
+We may confirm the result as follows (this performs higher descents).
+<P>
+<P>
+<PRE>
+&gt; RankBound(Ed);
+1 true
+</PRE>
+<HR>
+<H3><A NAME = "16536">Example <TT>CrvEllQNF_selmer4 (H128E33)</TT></A></H3>
+Here we give some examples of using <TT>TwoDescent</TT>,
+<TT>TwoSelmerGroup</TT>, and <TT>TwoCover</TT>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve( [ 0, 0, 1, -7, 6] ); // rank 3 curve
+&gt; T := TwoDescent(E);
+&gt; T[6];
+Hyperelliptic Curve defined by y^2 = 3*x^4 - 10*x^3 + 10*x + 1 over
+Rational Field
+&gt; G, m := TwoSelmerGroup(E);
+&gt; G.1 @@ m;
+theta^2 - 12*theta + 33
+&gt; Parent($1); // Modulus has y^2 = modulus isomorphic to E
+Univariate Quotient Polynomial Algebra in theta over Rational Field
+with modulus theta^3 - 112*theta + 400
+&gt; TwoCover( (G.1 + G.2) @@ m);
+Hyperelliptic Curve defined by y^2 = 3*x^4 - 10*x^3 + 10*x + 1 over
+Rational Field
+&gt; TwoCover( Domain(m) ! 1 );
+Hyperelliptic Curve defined by y^2 = 2*x^3 - 12*x^2 - 32*x + 196 over
+Rational Field
+</PRE>
+<HR>
+<H4><A NAME = "16537">The Cassels-Tate Pairing</A></H4>
+
+<P>
+<P>
+<P>
+The Tate--Shafarevich group of any elliptic curve E admits an alternating
+bilinear form on Sha()(E) with values in Q/Z,
+known as the Cassels-Tate pairing.  
+The key property is that if Sha()(E) is finite (as conjectured), 
+the Cassels-Tate pairing is non-degenerate.  
+When restricted to the 2-torsion subgroup,
+one obtains a non-degenerate alternating 
+bilinear form on Sha()(E)[2]/2Sha()(E)[4],
+or equivalently on Sel<sup>2</sup>(E) modulo 
+the image of Sel<sup>4</sup>(E), with values in Z/2Z.
+<P>
+This means that if C and D are 2-coverings
+of E and the pairing (C, D) has value 1,
+then both C and D represent elements of order 2 in Sha()(E),
+and moreover there are no locally solvable
+4-coverings of E lying above them 
+(in other words, <TT>FourDescent(C)</TT> and <TT>FourDescent(D)</TT>
+would both return an empty sequence).
+In this sense the Cassels-Tate pairing provides the same information 
+as 4-descent, but is much easier to compute.
+<P>
+Similarly, for an element in Sha()(E)[4]/2Sha()(E)[8], the values of the pairing 
+between this element and all elements in Sha()(E)[2]/2Sha()(E)[4] provides the 
+same information as performing an 8-descent on C.
+These elements may be represented by a 4-covering C -&gt; E and a 2-covering 
+D -&gt; E respectively.
+<P>
+In Magma the pairing between 2-coverings is implemented over Q
+number fields, and rational function fields F(t) for F finite of odd characteristic. 
+The pairing between a 2-covering and a 4-covering is implemented over Q.
+A new, very efficient implementation of pairing on 2-coverings over Q 
+was released in Magma V2.15.
+<P>
+The algorithms are due to Steve Donnelly and will be described in a forthcoming
+paper, a draft of which is available on request.
+For the pairing between 2-coverings, the only nontrivial computation is to solve 
+a conic over the base field of E, so over Q the pairing is easy to compute.
+For the pairing between 2- and 4-coverings, the key step is to solve a conic defined 
+over a degree 4 field; this is also the case for performing 8-descent on the 4-covering, 
+however the advantage here is that there is considerable freedom to choose the field to have 
+small discriminant.  Consequently it is more efficient to use the pairing than to apply
+<TT>EightDescent</TT>.
+<P>
+To have information about the computation printed while it is running, one may use
+<TT>SetVerbose("CasselsTate",n);</TT> with n = 1 (for fairly concise information) or n = 2.
+
+
+<H5><A NAME = "16538">CasselsTatePairing(C, D) : CrvHyp, CrvHyp -&gt; RngIntElt</A></H5>
+
+<PRE>    SetVerbose("CasselsTate", n):       Maximum: 2</PRE>
+<BLOCKQUOTE>
+This evaluates the Cassels-Tate pairing on 2-coverings of an elliptic curve over 
+Q, a number field, or a function field F(t) where F is a finite field of odd 
+characteristic.  
+The given curves C and D must be hyperelliptic curves of the form y<sup>2</sup> = q(x) 
+where q(x) has degree 4, and they must admit 2-covering maps to the same 
+elliptic curve.  In addition, they must both be locally solvable over all completions 
+of their base field (otherwise the pairing is not defined).
+<P>
+Typically the input curves C and D would be obtained using <TT>TwoDescent(E)</TT>.
+<P>
+The pairing takes values in Z/2Z (returned as elements of Z).
+</BLOCKQUOTE>
+<H5><A NAME = "16539">CasselsTatePairing(C, D) : Crv, CrvHyp -&gt; RngIntElt</A></H5>
+
+<PRE>    SetVerbose("CasselsTate", n):       Maximum: 2</PRE>
+<BLOCKQUOTE>
+This evaluates the Cassels-Tate pairing between a 4-covering C and a 2-covering 
+D of the same elliptic curve over Q.  The arguments must be curves over Q, 
+with C an intersection of two quadrics in P<sup>3</sup> (for instance, a curve obtained 
+from <TT>FourDescent</TT>), and D a hyperelliptic curve of the form y<sup>2</sup> = q(x).  
+In addition, they must both be locally solvable over all completions of Q
+(otherwise the pairing is not defined).
+<P>
+The pairing takes values in Z/2Z (returned as elements of Z).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16540">Example <TT>CrvEllQNF_cassels-tate-example (H128E34)</TT></A></H3>
+We consider the first elliptic curve with trivial 2-torsion and nontrivial 
+Tate-Shafarevich group.
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve("571a1"); E;
+Elliptic Curve defined by y^2 + y = x^3 - x^2 - 929*x - 10595 over Rational Field
+&gt; #TorsionSubgroup(E);
+1
+&gt; time covers := TwoDescent(E); covers;
+Time: 0.270
+[
+    Hyperelliptic Curve defined by y^2 = -11*x^4 - 68*x^3 - 52*x^2 + 164*x - 64 
+    over Rational Field,
+    Hyperelliptic Curve defined by y^2 = -19*x^4 + 112*x^3 - 142*x^2 - 68*x - 7 
+    over Rational Field,
+    Hyperelliptic Curve defined by y^2 = -4*x^4 + 60*x^3 - 232*x^2 + 52*x - 3 
+    over Rational Field
+]
+&gt; time CasselsTatePairing(covers[1], covers[2]);
+1
+Time: 0.130
+</PRE>
+This proves that these two coverings both represent nontrivial elements in the 
+Tate-Shafarevich group; in fact our computations show that the 2-primary part 
+of Sha()(E) is precisely Z/2 x Z/2.
+We could have reached the same conclusion using 4-descent:
+<P>
+<P>
+<PRE>
+&gt; time FourDescent(covers[1]);
+[]
+Time: 0.460
+</PRE>
+<HR>
+<H4><A NAME = "16541">Four-Descent</A></H4>
+
+<P>
+<P>
+<P>
+This section describes an implementation of the algorithm for higher descent
+given in a 1996 paper <A  HREF = "text1446.htm#bib_merriss">[MSS96]</A> by Merriman, Siksek and Smart, for 
+elliptic curves over Q.  
+Four-descent is performed as a higher descent on a given two-cover, that is
+a hyperelliptic curve defined by a polynomial of degree four, as returned by 
+<TT>TwoDescent</TT>.  (The trivial case where the quartic has a rational root
+is excluded: such a quartic can be transformed to an elliptic curve by a
+linear transformation, and four-descent then becomes standard two-descent.)
+<P>
+Note: for curves over number fields, the same algorithm is partly implemented
+by the function <TT>TwoCoverDescent</TT>.  However in that case we lack techniques
+for reducing the coverings, so this can not be used to find points but only 
+to bound the rank.
+<P>
+A <I>four-covering</I> F is a pair of symmetric 4 x 4 matrices,
+defining an intersection of two quadrics in P<sup>3</sup>.
+Associated to F is an elliptic curve E;
+there is a rational map from F to E of degree 16.
+The four-descent process takes a two-covering curve C (something of
+the shape y<sup>2</sup> = f(x) with f quartic, and possessing points over
+Q<sub>p</sub> for all p), and returns a set of four-coverings that arise
+from C.
+<P>
+In particular, if C represents an element of order two in the
+Tate--Shafarevich group of E, then the four-descent process will
+return the empty set.
+If C represents an element of the Mordell--Weil group, at least one of
+the four-coverings arising from C will have a rational point --- all
+of them will do so if the Tate--Shafarevich group of E is trivial --- and
+once found this point can be lifted to a point on E.
+
+
+<H5><A NAME = "16542">FourDescent(C : parameters) : CrvHyp -&gt; [Crv]</A></H5>
+<H5>FourDescent(f : parameters) : RngUPolElt -&gt; [Crv]</H5>
+<H5>FourDescent(S : parameters) : SeqEnum -&gt; [Crv]</H5>
+<H5>FourDescent(C : parameters) : ModelG1 -&gt; [Crv]</H5>
+
+<PRE>    RemoveTorsion: BoolElt              Default: <TT>false</TT></PRE>
+
+<PRE>    IgnoreRealSolubility: BoolElt       Default: <TT>false</TT></PRE>
+
+<PRE>    RemoveTorsion: BoolElt              Default: <TT>false</TT></PRE>
+
+<PRE>    RemoveGensEC: { PtEll }             Default: { }</PRE>
+
+<PRE>    RemoveGensHC: { PtHyp }             Default: { }</PRE>
+
+<PRE>    SetVerbose("FourDescent", n):       Maximum: 3</PRE>
+
+<PRE>    SetVerbose("LocalQuartic", n):      Maximum: 2</PRE>
+
+<PRE>    SetVerbose("MinimiseFD", n):        Maximum: 2</PRE>
+
+<PRE>    SetVerbose("QISearch", n):          Maximum: 1</PRE>
+
+<PRE>    SetVerbose("ReduceFD", n):          Maximum: 2</PRE>
+
+<PRE>    SetVerbose("QuotientFD", n):        Maximum: 2</PRE>
+<BLOCKQUOTE>
+Performs a four-descent on the curve y<sup>2</sup> = f(x), where f is a quartic.
+Returns a set of four-coverings of size 2<sup>s - 1</sup>, 
+where s is the Selmer 2-rank of the curve.
+If the verbose level of the main function is set to 3,
+then the auxiliary verbose levels are all set to at least 1.
+If <TT>RemoveTorsion</TT> is <TT>true</TT>, the generators of the 
+torsion subgroup are factored out from the set.  
+The optional argument <TT>RemoveGensHC</TT> performs a quotient by the
+images of given points that are on the input quartic to <TT>FourDescent</TT>.
+The optional argument <TT>RemoveGensEC</TT> forms a quotient by the
+images of given points; these can be on any elliptic curve that is
+isomorphic to the <TT>AssociatedEllipticCurve</TT> of the quartic
+(though all given points must be on the same elliptic curve).
+These options can be used together. It can be non-trivial to remove
+torsion and generators, as points on the elliptic curve need not pull-back
+to the given y<sup>2</sup> = f(x) curve. The algorithm used exploits various primes
+of good reduction, and attempts to determine whether the images under the
+&mu;<sub>p</sub> are the same. This in turn can be tricky, due to the Cassels
+kernel, and even more so when there are extra automorphisms
+(that is, when j=0, 1728 over (F)<sub>p</sub>).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16543">Example <TT>CrvEllQNF_simplefourdesc (H128E35)</TT></A></H3>
+This example shows that a well-known curve has rank 0 and that the
+2-torsion subgroup of its Tate--Shafarevich group is isomorphic
+to (Z/2Z)<sup>2</sup>.
+<P>
+<P>
+<PRE>
+&gt; D := CremonaDatabase();
+&gt; E := EllipticCurve(D, 571, 1, 1);
+&gt; time td := TwoDescent(E);
+Time: 2.500
+&gt; #td;
+3
+</PRE>
+There are three 2-covers, so the 2-Selmer group has order four
+(since <TT>TwoDescent</TT> elides the trivial element). 
+<P>
+<P>
+<P>
+<PRE>
+&gt; time [ FourDescent(t) : t in td ];
+[
+    [],
+    [],
+    []
+]
+Time: 3.290
+</PRE>
+So none of the two-covers have four-covers lying over them;
+hence they all represent elements of Sha, and the Mordell--Weil rank
+must be zero.
+<HR>
+<H5><A NAME = "16544">AssociatedEllipticCurve(qi) : Crv -&gt; CrvEll, Map</A></H5>
+<H5>AssociatedHyperellipticCurve(qi) : Crv -&gt; CrvHyp, Map</H5>
+
+<PRE>    E: CrvEll                           Default: </PRE>
+<BLOCKQUOTE>
+Given an intersection of quadrics qi, return the associated elliptic
+and hyperelliptic curves, respectively, together with maps to them.
+<P>
+If an elliptic curve is given as E, this must be isomorphic to the 
+Jacobian of the curve qi, and then the map returned will be a map
+to the given E.
+</BLOCKQUOTE>
+<H5><A NAME = "16545">QuadricIntersection(F) : [AlgMatElt] -&gt; Crv</A></H5>
+<H5>QuadricIntersection(P, F) : Prj, [AlgMatElt] -&gt; Crv</H5>
+<BLOCKQUOTE>
+Given a pair of symmetric 4 x 4 matrices F, this function returns 
+the associated quadric intersection in P = P<sup>3</sup>.
+</BLOCKQUOTE>
+<H5><A NAME = "16546">QuadricIntersection(E) : CrvEll -&gt; Crv, MapIsoSch</A></H5>
+<H5>QuadricIntersection(C) : CrvHyp -&gt; Crv, MapIsoSch</H5>
+<BLOCKQUOTE>
+Given an elliptic curve E or a hyperelliptic curve C, write it 
+as an intersection of quadrics. The inverse map for the hyperelliptic 
+curve has problems due to difficulties with weighted projective space.
+</BLOCKQUOTE>
+<H5><A NAME = "16547">IsQuadricIntersection(C) : Crv -&gt; BoolElt, [AlgMatElt]</A></H5>
+<BLOCKQUOTE>
+Given a curve C, determines if C is in P<sup>3</sup> and has two defining 
+equations, both of which involve only quadrics. In the case where C
+is a quadric intersection, the associated pair of matrices are also
+returned.
+</BLOCKQUOTE>
+<H5><A NAME = "16548">PointsQI(C, B : parameters) : Crv, RngIntElt -&gt; [Pt]</A></H5>
+
+<PRE>    OnlyOne: BoolElt                    Default: <TT>false</TT></PRE>
+
+<PRE>    ExactBound: BoolElt                 Default: <TT>false</TT></PRE>
+
+<PRE>    SetVerbose("QISearch", n):          Maximum: 1</PRE>
+<BLOCKQUOTE>
+Given a quadric intersection C, this function searches,
+by a reasonably efficient method due to Elkies <A  HREF = "text1446.htm#bib_Elk2000">[Elk00]</A>,
+for a point on C of na{"{char"10}}ve height up to B;
+the asymptotic running time is O(B<sup>2/3</sup>).
+<P>
+If <TT>OnlyOne</TT> is set to <TT>true</TT>, the search stops as soon as it finds
+one point; however, the algorithm is p-adic and there is no guarantee
+that points with small coordinates in Z will be found first.
+If <TT>ExactBound</TT> is set to <TT>true</TT>, then points that are found with
+height larger than B will be ignored.
+</BLOCKQUOTE>
+<H5><A NAME = "16549">TwoCoverPullback(H, pt) : CrvHyp[FldRat], PtEll[FldRat] -&gt; [PtHyp]</A></H5>
+<H5>TwoCoverPullback(f, pt) : RngUPolElt[FldRat], PtEll[FldRat] -&gt; [PtHyp]</H5>
+<BLOCKQUOTE>
+Given a two-covering of a rational elliptic curve (as either a
+hyperelliptic curve or a quartic) and a point on the elliptic curve,
+compute the pre-images on the two-covering. This is faster than using
+the generic machinery.
+</BLOCKQUOTE>
+<H5><A NAME = "16550">FourCoverPullback(C, pt) : Crv[FldRat], PtEll[FldRat] -&gt; [Pt]</A></H5>
+<H5>FourCoverPullback(C, pt) : Crv[FldRat], PtHyp[FldRat] -&gt; [Pt]</H5>
+<BLOCKQUOTE>
+Given a four-covering of a rational elliptic curve as an intersection
+of quadrics and a point either on the associated elliptic curve or the
+associated hyperelliptic curve, this function computes the pre-images 
+on the covering.  This is faster than using the generic machinery.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16551">Example <TT>CrvEllQNF_fourdescent (H128E36)</TT></A></H3>
+<P>
+This example exhibits a four-descent computation, and manipulation of
+points once they have been found, by mapping from the curve to its 
+two- and four-covers.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P&lt;x&gt; := PolynomialRing(Integers());
+&gt; E := EllipticCurve([0, -1, 0, 203, -93]);
+&gt; f := P!Reverse([-7, 12, 20, -120, 172]);
+&gt; f;
+-7*x^4 + 12*x^3 + 20*x^2 - 120*x + 172
+</PRE>
+The quartic given was obtained with <TT>mwrank</TT>;
+the two-descent routine could have been used instead, although it
+provides a different (but equivalent) quartic.
+<P>
+<P>
+<PRE>
+&gt; time S := FourDescent(f);
+Time: 4.280
+&gt; #S;
+1
+</PRE>
+<P>
+The single cover indicates that the curve E has Selmer rank 1,
+though this was already known from the calculation that constructed f.
+<P>
+<P>
+<P>
+<PRE>
+&gt; _,m := AssociatedEllipticCurve(S[1] : E:=E );
+&gt; pts := PointsQI(S[1], 10^4);
+&gt; pts;
+[ (-5/3 : 13/3 : -34/3 : 1) ]
+</PRE>
+We now map this point back to E.
+<P>
+<P>
+<PRE>
+&gt; m(pts[1]);
+(2346223045599488598/1033322524668523441 : 
+20326609223460937753264735467/1050397899358266605692672489 : 1)
+&gt; Height($1);
+44.19679596739622477261983370
+</PRE>
+<HR>
+<H4><A NAME = "16552">Eight-Descent</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+One may perform 8-descent (ie a further 2-descent) on curves 
+of the kind produced by a 4-descent on an elliptic curve E
+over Q.  These are nonsingular intersections of two quadrics 
+in P<sup>3</sup> that are locally soluble.  The 8-descent determines
+whether such a curve has any 2-coverings (in the sense of 
+2-descent) that are locally soluble everywhere.
+<P>
+The routine can therefore be used to prove, in many cases, that 
+a given 4-covering of E is in fact an element of order 4 in 
+the Tate--Shafarevich group of E.  It can also be used to find 
+8-coverings of E, and to verify these are elements of the 
+8-Selmer group. 
+<P>
+The 8-coverings are given as genus one normal curves of degree 8 
+in P<sup>8</sup>.  They are minimised and reduced, so are useful in searching
+for points on E.
+<P>
+The algorithm and implementation (from Magma 2.17) are due to Tom Fisher; 
+this implementation partly incorporates and partly replaces an earlier one 
+by Sebastian Stamminger.
+
+
+<H5><A NAME = "16553">EightDescent(C : parameters) : Crv -&gt; [ Crv ], [ MapSch ]</A></H5>
+
+<PRE>    BadPrimesHypothesis: BoolElt        Default: <TT>false</TT></PRE>
+
+<PRE>    DontTestLocalSolvabilityAt: { RngIntElt } Default: { }</PRE>
+
+<PRE>    StopWhenFoundPoint: BoolElt         Default: <TT>false</TT></PRE>
+
+<PRE>    SetVerbose("EightDescent", n):      Maximum: 4</PRE>
+<BLOCKQUOTE>
+For a curve C obtained from <TT>FourDescent</TT> on some elliptic
+curve E over Q, this performs a further 2-descent on C.  
+It returns a sequence of curves D, together with a sequence 
+containing maps D -&gt; C from each of these curves to C.  The curves
+returned are precisely the 8-descendants of E that lie above C 
+and are locally soluble at all places.
+<P>
+When the optional argument <TT>StopWhenFoundPoint</TT> is set to <TT>true</TT>, 
+the computation will stop if it happens to find a rational point 
+on C, and immediately return the point instead of continuing 
+to computing the 8-coverings.
+<P>
+In some cases local solubility testing (at large primes which may arise due
+to choices made in the algorithm) can be time-consuming.  
+Testing at specified primes may be skipped by setting the optional argument 
+<TT>DontTestLocalSolvabilityAt</TT> to the desired set of prime integers, 
+or by setting <TT>BadPrimesHypothesis</TT> to be true. 
+In that case, certain primes are omitted from the set of bad primes (namely 
+those primes at which the intersection of C with an auxiliary third quadric
+has bad reduction, and which are not bad primes for any other reason).
+<P>
+The algorithm involves class group and unit computations in a number field 
+of degree 4 (and sometimes also 8).  It is recommended to set the bounds 
+to be used in all such computations before calling EightDescent, via 
+<TT>SetClassGroupBounds</TT>.
+<P>
+<I>Verbose output:</I> For a readable summary of the computation, set the
+verbose level to 1 by entering <TT>SetVerbose("EightDescent",1).</TT> 
+For full information about all the time-consuming steps in the process, set
+the verbose level to 3.  For additional information about solving the conic, 
+set the verbose level for <TT>"Conic"</TT> to 1.
+</BLOCKQUOTE>
+<H4><A NAME = "16554">Three-Descent and Five-Descent</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+Three descent is implemented for elliptic curves over the rationals. 
+This involves computing the 3-Selmer group of the curve, 
+and then representing the elements as plane cubics.  The functions 
+related to 5-descent take a very similar form to those for 3-descent,
+although they are not listed in the handbook.
+<P>
+There is also a separate implementation of "descent by three isogenies",
+for elliptic curves over the rationals which admit a Q-rational isogeny
+of degree 3.
+<P>
+The main application of full three-descent is in studying elements of order 3
+in Tate--Shafarevich groups. For the problem of determining the Mordell--Weil
+group, three-descent has no advantage over four descent except in special
+cases: the cost is greater (three-descent
+requires computing the class group and S-units in a degree 8 number field,
+compared with degree 4 for four-descent),
+and the reward is smaller (a point on a 3-coverings has height
+1/6 as large as its image on the elliptic curve,
+while with four-descent the ratio is 1/8). 
+However three-descent can be useful when
+there are elements of order 4 in the Tate--Shafarevich group,
+which four-descent cannot deal with.
+<P>
+On the other hand, for a curve with a Q-rational isogeny of degree 3,
+descent by 3-isogenies is likely to be the most efficient way to
+bound the Mordell--Weil rank, because it only
+requires class group and S-unit computations  in quadratic fields.
+<P>
+There are two steps to the 3-descent process: firstly, computing the
+3-Selmer group as a subgroup of H<sup>1</sup>(Q, E[3]) (explicitly, as a subgroup
+of A<sup> x </sup>/(A<sup> x </sup>)<sup>3</sup> for a suitable algebra A), and secondly, 
+expressing the elements as genus one curves with covering maps to E.
+The elements of the 3-Selmer group are given as plane cubics, and the process
+of obtaining these cubics is far from trivial.
+(Note that in general, an element of H<sup>1</sup>(Q, E[3])
+can only be given as a curve of degree 9 rather than degree 3).
+The main commands are <TT>ThreeSelmerGroup(E)</TT>, which performs the first step,
+and <TT>ThreeDescent(E)</TT>, which performs both steps together,
+while <TT>ThreeDescentCubic</TT> performs the second step
+for a given element of 3-Selmer group.
+<P>
+The algorithm for the first step is presented in
+<A  HREF = "text1446.htm#bib_schaefer-stoll">[SS04]</A>, while the theory and algorithms for the second step
+are developed in the forthcoming series of papers <A  HREF = "text1446.htm#bib_five-authors-descentI">[CFO+08]</A>,
+<A  HREF = "text1446.htm#bib_five-authors-descentII">[CFO+09]</A>,  <A  HREF = "text1446.htm#bib_five-authors-descentIII">[CFO+]</A>.
+The bulk of the code was written by Michael Stoll and Tom Fisher 
+(however, responsibility for the final version rests with Steve Donnelly).
+<P>
+The following verbose flags provide information about various stages
+of the three descent process: <TT>Selmer, ThreeDescent, CSAMaximalOrder, 
+Minimise</TT> and <TT>Reduce</TT>. For instance, to see what 
+<TT>ThreeSelmerGroup</TT> is doing while it is running, first enter 
+<TT>SetVerbose("Selmer",2);</TT>. The verbose levels range from 0 to 3.
+
+
+<H5><A NAME = "16555">ThreeDescent(E : parameters) : CrvEll -&gt; [ Crv ], List</A></H5>
+
+<PRE>    Method: MonStgElt                   Default: "HessePencil"</PRE>
+
+<PRE>    SetVerbose("Selmer", n):            Maximum: 3</PRE>
+
+<PRE>    SetVerbose("ThreeDescent", n):      Maximum: 3</PRE>
+<BLOCKQUOTE>
+Given an elliptic curve over the rationals, this function
+returns the elements of the 3-Selmer group as projective
+plane cubic curves C, together with covering maps C -&gt; E.
+Two objects are returned: a sequence containing one curve for each 
+inverse pair of nontrivial elements in the 3-Selmer group, 
+and a corresponding list of maps from these curves to E.
+(Note that a pair of inverse elements in the 3-Selmer group both 
+correspond to the same cubic curve C, and their covering 
+maps C -&gt; E differ by composition with the negation map E -&gt; E.)
+<P>
+The function is equivalent to calling <TT>ThreeSelmerGroup(E)</TT>,
+and then calling <TT>ThreeDescentCubic</TT> on each of the Selmer elements.
+<P>
+For more information see the description of <TT>ThreeDescentCubic</TT> below.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16556">Example <TT>CrvEllQNF_selmer-famous-example (H128E37)</TT></A></H3>
+<P>
+Here is Selmer's famous example 3x<sup>3</sup> + 4y<sup>3</sup> + 5z<sup>3</sup> = 0,
+which is an element of order 3 in the Tate--Shafarevich group
+of its Jacobian, the elliptic curve x<sup>3</sup> + y<sup>3</sup> + 60z<sup>3</sup> = 0.
+<P>
+<P>
+<PRE>
+&gt; Pr2&lt;x,y,z&gt; := ProjectiveSpace(Rationals(),2);
+&gt; J := x^3 + y^3 + 60*z^3;
+&gt; E := MinimalModel(EllipticCurve(Curve(Pr2,J)));
+&gt; cubics, mapstoE := ThreeDescent(E);
+&gt; cubics;
+[
+    Curve over Rational Field defined by 2*x^3 + 30*y^3 - z^3,
+    Curve over Rational Field defined by x^3 + 5*y^3 - 12*z^3,
+    Curve over Rational Field defined by 6*x^3 + 5*y^3 - 2*z^3,
+    Curve over Rational Field defined by 3*x^3 + 5*y^3 - 4*z^3
+]
+</PRE>
+The 3-Selmer group of E is isomorphic to Z/(3Z) direct-sum Z/(3Z),
+and one element for each (nontrivial) inverse pair is returned.
+(Note: 3x<sup>3</sup> + 4y<sup>3</sup> + 5z<sup>3</sup> will not necessarily appear; due to 
+random choices in the program, an equivalent model may appear instead.)
+<P>
+The covering maps from these curves to E have degree 9, 
+and are given by forms of degree 9 in x, y, z. For example, 
+the map from the first curve 2x<sup>3</sup> - 3y<sup>3</sup> + 10z<sup>3</sup> to E is given by:
+<P>
+<P>
+<PRE>
+&gt; DefiningEquations(mapstoE[1]);
+[
+    -1377495072000*x*y^7*z + 4591650240000*x*y^4*z^4 - 15305500800000*x*y*z^7,
+    24794911296000*y^9 - 123974556480000*y^6*z^3 - 413248521600000*y^3*z^6 +
+    918330048000000*z^9,
+    -4251528000*x^3*y^3*z^3
+]
+</PRE>
+Since E has trivial Mordell--Weil group, we should not find any
+rational points on these curves! (In fact they are all nontrivial
+in the Tate--Shafarevich group.) Here we search for rational points
+on the first cubic, up to height roughly 10<sup>4</sup>:
+<P>
+<P>
+<PRE>
+&gt; time PointSearch( cubics[1], 10^4);
+[]
+Time: 0.490
+</PRE>
+<P>
+An extended example, concerning "visible" 3-torsion in a
+Tate--Shafarevich group, can be found at the end of Chapter <A  HREF = "text1468.htm#16653">MODELS OF GENUS ONE CURVES</A>.
+<HR>
+<H5><A NAME = "16557">ThreeSelmerGroup(E : parameters) : CrvEll -&gt; GrpAb, Map</A></H5>
+
+<PRE>    ThreeTorsPts: Tup                   Default: </PRE>
+
+<PRE>    SetVerbose("Selmer", n):            Maximum: 3</PRE>
+<BLOCKQUOTE>
+Given an elliptic curve E over the rationals, this function returns 
+the 3-Selmer group as an abelian group, together with a map to the 
+natural affine algebra.
+<P>
+When the optional parameter <TT>ThreeTorsPts</TT> is given, this determines
+the number fields used in the computation, and also the affine algebra.
+<P>
+Typically much of the computation time is spent on class group and 
+unit group computations.  In many instances it will not be feasible
+to do these calculations rigorously -- in this situation the user
+must request a heuristic class group computation.  The recommended
+way to do this is (in advance): <TT>SetClassGroupBounds("GRH")</TT>.
+See Section <A  HREF = "text391.htm#3890">Setting the Class Group Bounds</A> for details.  An alternative way 
+is to precompute class groups (and possibly units) for the fields of
+the <TT>ThreeTorsPts</TT>.
+<P>
+The algorithm is described in <A  HREF = "text1446.htm#bib_schaefer-stoll">[SS04]</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "16558">ThreeDescentCubic(E, &alpha; : parameters) : CrvEll, Tup -&gt; Crv, MapSch</A></H5>
+
+<PRE>    ThreeTorsPts: Tup                   Default: </PRE>
+
+<PRE>    Method: MonStgElt                   Default: "HessePencil"</PRE>
+
+<PRE>    SetVerbose("ThreeDescent", n):      Maximum: 3</PRE>
+<BLOCKQUOTE>
+Given an elliptic curve E over the rationals, and an element
+&alpha; in the 3-Selmer group of E, the function returns a 
+projective plane cubic curve C, together with a map of schemes C -&gt; E.
+The cubic is a principal homogeneous space for E, and the
+covering map C -&gt; E represents the same Selmer element as either
+&alpha; or 1/&alpha;
+(and &alpha; can be recovered, up to inverse,
+by calling <TT>ThreeSelmerElement</TT> of the cubic).
+<P>
+The 3-Selmer element &alpha; is given as an element of 
+the algebra associated to the 3-Selmer group (the algebra
+is the codomain of the map returned by 
+<TT>ThreeSelmerGroup</TT>, as in <TT>S3, S3toA := ThreeSelmerGroup(E)</TT>).
+In this situation,
+where &alpha; is <TT>S3toA(s)</TT> for some <TT>s</TT>, 
+there is no need to specify the optional parameter <TT>ThreeTorsPts</TT>.
+<P>
+The algorithm comes from the series of papers cited in the introduction.
+There are three alternative ways to perform the final step of computing
+a ternary cubic. All three ways are implemented, and the optional parameter 
+<TT>Method</TT> may be "HessePencil" (default), "FlexAlgebra" or
+"SegreEmbedding". However, the choice of <TT>Method</TT> is not
+expected to make a big difference to the running time.
+<P>
+The optional parameter <TT>ThreeTorsPts</TT> is a tuple containing
+one representative from each Galois orbit of E[3] - O.
+Its purpose is to
+fix an embedding of the 3-Selmer group in A<sup> x </sup>/(A<sup> x </sup>)<sup>3</sup> 
+(otherwise there is ambiguity when the fields involved
+have nontrivial automorphisms, or occur more than once). 
+When <TT>ThreeTorsPts</TT> is not specified,
+<TT>ThreeTorsionPoints(E)</TT> is called (its value
+is stored internally and used throughout the Magma session).
+</BLOCKQUOTE>
+<H5><A NAME = "16559">ThreeIsogenyDescent(E : parameters) : CrvEll -&gt; [ Crv ], List, [ Crv ], List, MapSch</A></H5>
+
+<PRE>    Isog: MapSch                        Default: </PRE>
+
+<PRE>    SetVerbose("Selmer", n):            Maximum: 3</PRE>
+
+<PRE>    SetVerbose("ThreeDescent", n):      Maximum: 3</PRE>
+<BLOCKQUOTE>
+Given an elliptic curve E over Q that admits a Q-rational isogeny
+E -&gt; E<sub>1</sub> of degree 3,
+the function performs "descent by 3-isogenies" on E. This involves
+computing the Selmer groups attached to the isogeny and its dual,
+and representing the elements of both Selmer groups as plane cubics,
+with covering maps of degree 3 to E<sub>1</sub> or E respectively.
+One cubic is given for each nontrivial pair of inverse Selmer elements,
+and one covering map is given for each cubic (the other covering map,
+which can be obtained by composing with the negation map on
+the elliptic curve, would correspond to the inverse Selmer element.)
+<P>
+There are five returned values, in the following order:
+a list of curves for Sel(E -&gt; E<sub>1</sub>), a corresponding list
+of covering maps to E<sub>1</sub>, a list of curves for the dual isogeny 
+Selmer group Sel(E<sub>1</sub> -&gt; E), a corresponding list
+of covering maps to E, and finally the isogeny E -&gt; E<sub>1</sub>.
+<P>
+This function works simply by calling <TT>ThreeIsogenySelmerGroups(E)</TT>,
+and then calling <TT>ThreeIsogenyDescentCubic</TT> for each Selmer element. 
+<P>
+The isogeny E -&gt; E<sub>1</sub> may be passed in as <TT>Isog</TT>. If <TT>Isog</TT>
+is not specified, and E admits more than one such isogeny,
+then this is chosen at random.
+</BLOCKQUOTE>
+<H5><A NAME = "16560">ThreeIsogenySelmerGroups(E : parameters) : CrvEll -&gt; GrpAb, Map, GrpAb, Map, MapSch</A></H5>
+
+<PRE>    Isog: MapSch                        Default: </PRE>
+
+<PRE>    SetVerbose("Selmer", n):            Maximum: 3</PRE>
+<BLOCKQUOTE>
+Given an elliptic curve E over the rationals that admits a Q-rational
+isogeny E -&gt; E<sub>1</sub> of degree 3, the function computes the Selmer groups
+associated to the isogeny, and to its dual isogeny E<sub>1</sub> -&gt; E. The Selmer
+groups are returned as abstract groups, together with maps to the relevant
+algebra. There are five returned values, in the following order: the group, 
+and the map, for E -&gt; E<sub>1</sub>, the group, and the map, for E<sub>1</sub> -&gt; E,
+and finally the isogeny E -&gt; E<sub>1</sub>.
+<P>
+A bound for the rank of E(Q) can be deduced, by taking the 
+sum of the ranks of the Selmer groups for the two isogenies, and subtracting 
+1 if the kernel of one of the isogenies consists of rational points. 
+<P>
+The isogeny E -&gt; E<sub>1</sub> may be passed in as <TT>Isog</TT>. If <TT>Isog</TT>
+is not specified, and E admits more than one such isogeny, 
+then this is chosen at random. 
+<P>
+The algebra in which the Selmer group of a particular
+isogeny is exhibited is the etale algebra corresponding to the nontrivial
+points in the kernel of the dual isogeny; it is either a quadratic field,
+or a Cartesian product of two copies of Q.
+</BLOCKQUOTE>
+<H5><A NAME = "16561">ThreeIsogenyDescentCubic(&phi;, &alpha;) : MapSch, Any -&gt; Crv, MapSch</A></H5>
+
+<PRE>    SetVerbose("ThreeDescent", n):      Maximum: 3</PRE>
+<BLOCKQUOTE>
+Given an isogeny &phi; of degree 3 between elliptic curves over Q, 
+and any element &alpha; of H<sup>1</sup>(Q, E[&phi;]),
+this function returns a plane cubic curve C
+representing &alpha;, together with a covering map C -&gt; E of degree 3. 
+<P>
+The element &alpha; is given as an element in the algebra A associated to 
+the Selmer group of &phi;; the algebra can be obtained from
+<TT>ThreeIsogenySelmerGroups</TT>. H<sup>1</sup>(Q, E[&phi;]) is represented as the
+subgroup of A<sup> x </sup>/(A<sup> x </sup>)<sup>3</sup>
+consisting of elements whose norm is a cube. 
+</BLOCKQUOTE>
+<H5><A NAME = "16562">ThreeDescentByIsogeny(E) : CrvEll -&gt; [ Crv ], [ Map ]</A></H5>
+
+<PRE>    SetVerbose("Selmer", n):            Maximum: 3</PRE>
+<BLOCKQUOTE>
+This performs a full 3-descent, returning models for the
+nontrivial inverse pairs in the 3-Selmer group and maps to E making
+them into 3-coverings. The only difference with <TT>ThreeDescent</TT> is
+that the computation is by first and second 3-isogeny descents. This 
+restricts the number fields used to cubic extensions, rather than the 
+sextic fields which may be needed for the generic <TT>ThreeDescent</TT> routine.
+The advantage is noticeable for larger examples.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16563">Example <TT>CrvEllQNF_ThreeDescentByIsogeny (H128E38)</TT></A></H3>
+<P>
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([0,0,0,0,131241]);
+&gt; G,m := TorsionSubgroup(E);
+&gt; #G;
+1
+&gt; Rank(E);
+2
+&gt; S1,_,S2 := ThreeIsogenyDescent(E);
+&gt; #S1,#S2;
+0 4
+</PRE>
+<P>
+This shows that there is nontrivial 3-torsion in Sha on some isogenous
+curve. Without computing the full 3-Selmer group of E it is impossible
+to tell if there is any nontrivial 3-torsion in Sha(E/Q).
+<P>
+<P>
+<P>
+<PRE>
+&gt; time Sel3 := ThreeDescentByIsogeny(E);
+Time: 5.280
+</PRE>
+<P>
+This shows that Sha(E/Q)[3] = 0 (since we know the rank is 2). Alternatively 
+one could get the same by calling <TT>ThreeDescent</TT>. This requires computing the
+class group and unit group information in the sextic field shown below.
+<P>
+<P>
+<P>
+<PRE>
+&gt; E3reps := ThreeTorsionPoints(E);
+&gt; Parent(E3reps[2,1]);
+Number Field with defining polynomial x^6 + 14174028 over the Rational Field
+&gt; SetClassGroupBounds("GRH");
+&gt; time Sel3 := ThreeDescent(E);
+Time: 14.700
+</PRE>
+<HR>
+<H5><A NAME = "16564">Jacobian(C) : RngMPolElt -&gt; CrvEll</A></H5>
+<BLOCKQUOTE>
+Given the equation of a nonsingular projective plane cubic curve C 
+over the rationals, this function returns the Jacobian of C
+as an elliptic curve.
+</BLOCKQUOTE>
+<H5><A NAME = "16565">ThreeSelmerElement(E, C) : CrvEll, RngMPolElt -&gt; Tup</A></H5>
+<H5>ThreeSelmerElement(E, C) : CrvEll, Crv -&gt; Tup</H5>
+<H5>ThreeSelmerElement(C) : RngMPolElt -&gt; Tup</H5>
+<H5>ThreeSelmerElement(C) : Crv -&gt; Tup</H5>
+<BLOCKQUOTE>
+Given an elliptic curve E over the rationals, 
+and a plane cubic C with the same invariants as E 
+(for instance, with E equal to <TT>Jacobian(C)</TT>)
+the function returns an element &alpha; in the
+algebra A associated to the 3-Selmer group of E.
+This &alpha; represents the same element of H<sup>1</sup>(Q, E[3])
+that is represented by a covering C -&gt; E that takes the flex points
+of C to O. Note that &alpha; is only determined up to 
+inverse in H<sup>1</sup>(Q, E[3]).
+<P>
+In particular, if we have computed <TT>S3, S3toA := ThreeSelmerGroup(E)</TT>, 
+and if C is an everywhere locally soluble covering corresponding to the 
+element <TT>s</TT> in <TT>S3</TT>, then &alpha; equals either <TT>S3toA(s)</TT>
+or <TT>S3toA(-s)</TT> in A<sup> x </sup>/(A<sup> x </sup>)<sup>3</sup>.
+</BLOCKQUOTE>
+<H5><A NAME = "16566">AddCubics(cubic1, cubic2 : parameters) : RngMPolElt, RngMPolElt -&gt; RngMPolElt</A></H5>
+
+<PRE>    E: CrvEll                           Default: </PRE>
+
+<PRE>    ReturnBoth: BoolElt                 Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given equations of two plane cubics over the rationals 
+with the same invariants
+(in other words, they are homogeneous spaces for the same 
+elliptic curve E, which is their Jacobian, over the rationals),
+the function computes the sum of the corresponding elements 
+of H<sup>1</sup>(Q, E[3]). The sum is returned as another
+plane cubic, if possible (and otherwise an error results).
+<P>
+An element of H<sup>1</sup>(Q, E[3]) may be expressed as a plane cubic 
+when it has index 3, equivalently when the so-called "obstruction"
+is trivial. 
+This is always the case for elements that are everywhere locally soluble.
+In particular, the function will always succeed when the two given
+cubics are everywhere locally soluble (in other words, 
+when they belong to the 3-Selmer group). 
+The computation is done by converting the cubics to elements 
+of H<sup>1</sup>(Q, E[3]) as given by <TT>ThreeSelmerElement</TT>, 
+adding the cocycles, and then converting the result to a cubic.
+<P>
+Note that a cubic only determines an element of H<sup>1</sup>(Q, E[3]) 
+up to taking inverse, so the sum is not well defined; if 
+the function is called with <TT>ReturnBoth := true</TT>,
+it returns both of the possible cubics.
+</BLOCKQUOTE>
+<H5><A NAME = "16567">ThreeTorsionType(E) : CrvEll -&gt; MonStgElt</A></H5>
+<BLOCKQUOTE>
+For an elliptic curve E over the rationals,
+this function classifies the Galois action on E[3].
+The possibilities are "Generic", "2Sylow", "Dihedral", 
+"Generic3Isogeny", "Z/3Z-nonsplit", "mu3-nonsplit", 
+"Diagonal" and "mu3+Z/3Z".
+</BLOCKQUOTE>
+<H5><A NAME = "16568">ThreeTorsionPoints(E : parameters) : CrvEll -&gt; Tup</A></H5>
+
+<PRE>    OptimisedRep: BoolElt               Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+For an elliptic curve E over the rationals,
+this function returns a tuple containing one 
+representative point from each set of Galois
+conjugates in E[3] - O.
+<P>
+Each point belongs to a point set E(L),
+where L is the field generated by the 
+coordinates of that point.
+<P>
+If <TT>OptimisedRep</TT> is set to <TT>false</TT>, then
+optimised representations of the fields will not
+be computed, in general.
+</BLOCKQUOTE>
+<H5><A NAME = "16569">ThreeTorsionMatrices(E, C) : CrvEll, RngMPolElt -&gt; Tup</A></H5>
+<BLOCKQUOTE>
+Given an elliptic curve E over the rationals, 
+and a plane cubic with the same invariants as E
+(in other words, a principal homogeneous space for E of index 3),
+the function returns a tuple of matrices.
+The matrices M<sub>i</sub> correspond to the points T<sub>i</sub> in 
+<TT>ThreeTorsionPoints(E)</TT>, and have the corresponding base fields.
+Each matrix describes the action-by-translation on C
+of the corresponding point: the action of P<sub>i</sub> on C is the
+restriction to C of the
+automorphism of the ambient projective space P<sup>2</sup>
+given by the image of M<sub>i</sub> in PGL<sub>3</sub>.
+<P>
+Note that only the images in PGL<sub>3</sub> of the matrices are 
+well-determined.
+</BLOCKQUOTE>
+<H4><A NAME = "16570">Six and Twelve Descent</A></H4>
+
+<P>
+<P>
+If a 3-descent has been performed, the results can be used in 
+conjunction with a 2-descent or a 4-descent to obtain coverings
+of degree 6 or 12 respectively.  These "combined" coverings
+can be useful for finding Mordell-Weil generators of large height
+on the underlying elliptic curve.
+<P>
+The coverings are given as genus one normal curves (of degree 6
+in P<sup>5</sup>, and of degree 12 in P<sup>1</sup>1, respectively).
+<P>
+The algorithms are described in <A  HREF = "text1446.htm#bib_Fisher6and12">[Fis08]</A>.
+
+
+<H5><A NAME = "16571">SixDescent(C2, C3) : CrvHyp, Crv -&gt; Crv, MapSch</A></H5>
+<H5>SixDescent(model2, model3) : ModelG1, ModelG1 -&gt; Crv, MapSch</H5>
+<BLOCKQUOTE>
+Given a 2-covering and a 3-covering of an elliptic curve E
+(either as curves or as genus one models), this returns the 
+6-covering that represents their sum in the 6-Selmer group.
+The covering map C6 -&gt; C3 is also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "16572">TwelveDescent(C3, C4) : Crv, Crv -&gt; SeqEnum, MapSch</A></H5>
+<H5>TwelveDescent(model3, model4) : ModelG1, ModelG1 -&gt; SeqEnum, MapSch</H5>
+<BLOCKQUOTE>
+Given a 3-covering and a 4-covering of an elliptic curve E
+(either as curves or as genus one models), this returns the two
+12-coverings that represent their sum and difference in the
+12-Selmer group.  The covering maps to C12 -&gt; C4 are also returned.
+</BLOCKQUOTE>
+<H4><A NAME = "16573">Nine-Descent</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+A nine-descent is performed on an everywhere locally solvable plane cubic curve. 
+The cubic represents a class in the 3-Selmer group of its Jacobian (up to sign).
+A nine-descent computes the fibre above this class under the map from the
+9-Selmer group to the 3-Selmer group induced by multiplication by 3. This
+fibre is the set of everywhere locally solvable 3-coverings of the cubic. These
+coverings are given as intersections of 27 quadrics in P<sup>8</sup>. As with four-descents
+the terminology "nine-descent" is slightly incorrect, as Magma performs a second 
+3-descent on a specific 3-covering and does not try to combine
+such information from all 3-coverings to form the 9-Selmer group. 
+<P>
+The algorithm was developed in the PhD thesis of Brendan Creutz <A  HREF = "text1446.htm#bib_CreutzPhD">[Cre10]</A>.
+Typically most of the computation time is spent on class group and unit group 
+computations in the constituent fields of the degree 9 etale algebra associated 
+to the flex points on the cubic. The primary use is to obtain information 
+on the 3-primary part of the Shafarevich--Tate group. It is only in very rare
+circumstances that a nine descent is required (in addition to the other descent
+machinery) to determine the Mordell--Weil rank (e.g. if there were elements of order 
+24 in Sha).
+
+
+<H5><A NAME = "16574">NineDescent(C : parameters) : Crv -&gt; SeqEnum, List</A></H5>
+
+<PRE>    ExtraReduction: RngIntElt           Default: 10</PRE>
+
+<PRE>    SetVerbose("NineDescent", n):       Maximum: 3</PRE>
+<BLOCKQUOTE>
+Given a plane cubic curve C over Q this returns a sequence of curves in P<sup>8</sup> 
+defined by 27 quadrics and a list of degree 9 maps making these curves into 
+3-coverings of C. This is the 3-Selmer set of C (i.e. the set of everywhere 
+locally solvable 3-coverings of C). If there are no coverings, then
+C(Q) = emptyset and the class of C in the Shafarevich-Tate group of its Jacobian 
+is not divisible by 3. Otherwise the coverings returned are lifts of C to the 9-Selmer
+group.
+<P>
+The coverings returned are minimised and reduced in an ad hoc fashion. If 
+<TT>ExtraReduction</TT> is set to a larger value, more time will be spent reducing
+possibly resulting in smaller models. The current implementation requires that Galois 
+act transitively on the flex points. If this is not the case, then one can use 
+<TT>pIsogenyDescent</TT> instead.
+</BLOCKQUOTE>
+<H5><A NAME = "16575">NineSelmerSet(C) : Crv -&gt; RngIntElt</A></H5>
+
+<PRE>    SetVerbose("NineDescent", n):       Maximum: 3</PRE>
+<BLOCKQUOTE>
+Computes the 3-rank of the 3-Selmer set of plane cubic curve C defined over Q.
+The value -1 is returned when the 3-Selmer set is empty. In this case C(Q) = emptyset 
+and the class of C in the Shafarevich-Tate group of its Jacobian is not divisible by 3. 
+If the 3-Selmer set is nonempty, its 3-rank is the same as that of the 3-Selmer group
+of the Jacobian. In this case the class of C in the Shafarevich-Tate group of the Jacobian
+is divisible by 3.
+</BLOCKQUOTE>
+<H4><A NAME = "16576">Higher 2-power Isogeny Descents</A></H4>
+
+<P>
+<P>
+<P>
+Given an elliptic curve E/Q with a rational 2-torsion point
+T &isin;E(Q)[2], there is an degree-2 isogeny &phi; : E to E' with
+kernel {0, T}. Computing the Selmer groups attached to &phi; and
+the dual isogeny widehat(&phi;) : E' to E gives an upper bound for
+the rank of E(Q). In many cases this upper bound may be improved by
+performing higher descents. These higher descents can also help find
+generators of E(Q) of large height. See for example the paper of
+Bremner and Cassels <A  HREF = "text1446.htm#bib_BremnerCassels">[BC84]</A> on the elliptic curves 
+Y<sup>2</sup> = X(X<sup>2</sup> + p) where p is a prime with p &equiv; 5 mod (8).
+<P>
+<P>
+The function below applies these methods, together with use of the
+Cassels-Tate pairing and other refinements.  The algorithm is fully
+described in <A  HREF = "text1446.htm#bib_FisherHigherDescent">[Fis]</A>.
+No class group and unit calculations are required; instead the global parts
+of the calculation involve solving quadratic forms of ranks 3 and 4 over Q.
+<P>
+The same information is obtained by calling this for (E, T) and for 
+the isogenous (E', T').  In fact, the output and the verbose printing 
+will be the same, but in the opposite order, for the two computations.
+
+
+<H5><A NAME = "16577">TwoPowerIsogenyDescentRankBound(E, T  : parameters) : CrvEll[FldRat], PtEll[FldRat] ) -&gt; RngIntElt, SeqEnum, SeqEnum</A></H5>
+<H5>TwoPowerIsogenyDescentRankBound(E : parameters) : CrvEll[FldRat], PtEll[FldRat] ) -&gt; RngIntElt, SeqEnum, SeqEnum</H5>
+
+<PRE>    Cutoff: RngIntElt                   Default: 2</PRE>
+
+<PRE>    MaxSteps: RngIntElt                 Default: 5</PRE>
+
+<PRE>    ReturnFourCoverings: BoolElt        Default: <TT>false</TT></PRE>
+
+<PRE>    SetVerbose("cbrank", n):            Maximum: 3</PRE>
+<BLOCKQUOTE>
+This calculates an upper bound on the Mordell-Weil rank of the
+elliptic curve E/Q.  The second argument T must be a Q-rational
+2-torsion point on E, specifying which 2-isogeny is to be used.
+When there is only one 2-torsion point, the second argument can be omitted.
+<P>
+Let &phi; : E to E' be the isogeny with kernel generated by T, and
+widehat(&phi;) : E' to E the dual isogeny, with kernel generated
+by T'. Let &phi;<sub>m</sub> and
+widehat(&phi;)<sub>m</sub> be the isogenies of degree 2<sup>m</sup> obtained by
+composing &phi; and widehat(&phi;) a total of m times. Then 
+the rank bound
+after m steps is that obtained by computing the images of the Selmer
+groups attached to &phi;<sub>m</sub> and widehat(&phi;)<sub>m</sub> in the Selmer 
+groups attached to &phi; and widehat(&phi;).
+The dimensions of these images are also returned.
+At each step, the rank bound improves by an even integer (or stays the same).
+<P>
+A summary table is printed after each step, if the verbose flag <TT>cbrank</TT>
+is set to 1, which displays the rank bounds obtained so far.
+<P>
+If the current rank bound is strictly less than the <TT>Cutoff</TT>, then
+the program returns immediately without performing any further descents.
+By default the <TT>Cutoff</TT> is 2, so the program ends if a bound of
+0 or 1 is obtained (since no stronger bound can then be obtained).
+<P>
+The maximum number of descent steps carried out can be controlled by
+specifying <TT>MaxSteps</TT> (5 by default).  For example, if <TT>MaxSteps</TT> is 1,
+then the program carries out a descent by 2-isogeny.  If <TT>MaxSteps</TT> is 2,
+then the upper bound on the rank is at least as good as that obtained
+by carrying out a 2-descent on either of the curves E or E'.
+In cases where E or E' has full rational 2-torsion, 
+a 6th step, corresponding to 8-descent, is also possible.  Note that
+this is not done by default, but only when <TT>MaxSteps</TT> is set to 6.
+<P>
+If <TT>ReturnFourCoverings</TT> is <TT>true</TT>, then the function also returns
+a list of quadric intersections (i.e. genus one models of degree 4).
+These may be used in the same way as those returned by <TT>FourDescent</TT>,
+to search for rational points of large height on E.
+A total of 2<sup>d</sup> quadric intersections are
+returned, where d is the dimension of the image of the 4-Selmer
+group of E in the 2-Selmer group of E. To obtain from these 
+a complete list of quadric intersections (i.e. one for each element 
+of the 4-Selmer group) the functions <TT>TwoDescent</TT> and 
+<TT>AddCovers</TT> should be used.  
+If <TT>ReturnFourCoverings</TT> is <TT>true</TT>, the descent steps done
+are the minimum necessary to get this set of 4-coverings (that is,
+4 steps for E and 3 steps for E'),
+and the values of <TT>Cutoff</TT> and <TT>MaxSteps</TT> are ignored.
+</BLOCKQUOTE>
+<H4><A NAME = "16578">p-Isogeny Descent</A></H4>
+
+<P>
+<P>
+<P>
+Given an isogeny &phi;: E<sub>1</sub> -&gt; E<sub>2</sub> of elliptic curves, one
+may define the &phi;-Selmer group of E<sub>2</sub> to be the set of everywhere 
+locally solvable &phi;-coverings of E<sub>2</sub>. Given a genus one curve C 
+with Jacobian E<sub>2</sub>, one may define its &phi;-Selmer set to be the set
+of everywhere locally solvable &phi;-coverings of C. A &phi;-isogeny
+descent computes the &phi;-Selmer group (or &phi;-Selmer
+set). 
+<P>
+We denote the dual isogeny by &phi;<sup>v</sup>. In the case of elliptic curves, 
+performing &phi;- and &phi;<sup>v</sup>-descents can be used to bound the 
+Mordell-Weil rank and get information on Sha. For general genus one curves
+descent by isogeny can be used to rule out divisibility in Sha and consequently
+prove that there are no rational points.
+<P>
+In practice it is often easier to compute a `fake' Selmer set. This is a set
+parameterising everywhere locally solvable unions of &phi;-coverings, with 
+the property that every &phi;-covering lies in exactly one such union. Any
+locally soluble &phi;-covering gives rise to a locally soluble union, hence
+there is a map from the Selmer set to the fake Selmer set. In general this map
+may be neither surjective nor injective. However, if the fake Selmer set is 
+empty, then this is also true of the Selmer set.
+<P>
+Current functionality allows one to compute &phi;-Selmer groups for an isogeny
+&phi; of prime degree in a number of situations. For isogenies of degree 
+2 or 3, they may be computed using <TT>TwoIsogenyDescent</TT> and 
+<TT>ThreeIsogenyDescent</TT>. When &phi; is the quotient by a subgroup generated 
+by a Q-rational point of order p &isin;{5, 7} the dimensions of the 
+&phi;- and &phi;<sup>v</sup>-Selmer groups can be computed using an algorithm 
+of Fisher <A  HREF = "text1446.htm#bib_FisherPhD">[Fis00]</A> and <A  HREF = "text1446.htm#bib_FisherJEMS">[Fis01]</A>. This method also produces 
+models for the everywhere locally solvable &phi;<sup>v</sup>-coverings of E.
+<P>
+Given a genus one normal curve C of prime degree p produced by a &phi;-isogeny
+descent on an elliptic curve, the &phi;<sup>v</sup>-Selmer set of C can be computed
+using an algorithm of Creutz described in <A  HREF = "text1446.htm#bib_CreutzPhD">[Cre10]</A> and <A  HREF = "text1446.htm#bib_CreutzMiller">[CM12]</A>.
+Computing the &phi;<sup>v</sup>-Selmer sets of all elements in the &phi;-Selmer group
+yields information that is equivalent to that given by the &phi;<sup>v</sup><IMG SRC="open.gif" ALT="" WIDTH=7 HEIGHT=7>&phi;-Selmer 
+group. 
+<P>
+Current functionality allows one to perform these second isogeny descents when
+&phi; has degree p = 3 or when p &isin;{ 5, 7} and the flex points of C lie 
+on the coordinate hyperplanes in P<sup>p - 1</sup>. If the kernel of the isogeny is 
+generated by a Q-rational point of order p, then such a model always exists.
+Moreover, the models returned by the algorithm of Fisher have this property. 
+For p = 7, computation of the coverings is not practical and only a 
+`fake'-Selmer set can be computed (see <A  HREF = "text1446.htm#bib_CreutzMiller">[CM12]</A>).
+
+
+<H5><A NAME = "16579">pIsogenyDescent(E,P) : CrvEll, PtEll -&gt; RngIntElt, RngIntElt, SeqEnum, CrvEll</A></H5>
+<H5>pIsogneyDescent(E,p) : CrvEll, RngIntElt -&gt; RngIntElt, RngIntElt, SeqEnum, CrvEll</H5>
+<H5>pIsogenyDescent(lambda,p) : FldRatElt, RngIntElt -&gt; RngIntElt, RngIntElt, SeqEnum, CrvEll, CrvEll</H5>
+<BLOCKQUOTE>
+This performs a &phi;-descent on an elliptic curve over Q using the algorithm 
+of Fisher. The descent requires an isogeny &phi; whose kernel is generated by a 
+Q-rational point of order p &isin;{5, 7}.
+<P>
+The input can be specified in one of three ways: (1) by giving an elliptic curve
+and a point of order p on the curve; (2) by giving an elliptic curve containing
+a point of order p and specifying p; or (3) by specifying p and a Q-rational
+point on the modular curve X<sub>1</sub>(p ). In the final case the choice for the coordinate 
+&lambda; on X<sub>1</sub>(p )(Q) is as described in <A  HREF = "text1446.htm#bib_FisherPhD">[Fis00]</A>.
+<P>
+The return values are the p-ranks of the &phi;- and &phi;<sup>v</sup>-Selmer
+groups, a sequence of genus one normal curves of degree p representing the
+inverse pairs of nontrivial elements of the &phi;<sup>v</sup>-Selmer group modulo
+the image of the subgroup generated by the p-torsion point, and the isogenous
+elliptic curve. If the input is a coordinate on X<sub>1</sub>(p ), the curve E is also
+returned.
+</BLOCKQUOTE>
+<H5><A NAME = "16580">pIsogenyDescent(C,phi) : Crv, MapSch -&gt; SeqEnum, List</A></H5>
+<H5>pIsogenyDescent(C,E1,E2) : Crv, CrvEll, CrvEll -&gt; SeqEnum, List</H5>
+<H5>pIsogenyDescent(C,P) : Crv, PtEll -&gt; SeqEnum, List</H5>
+
+<PRE>    SetVerbose("Selmer", n):            Maximum: 3</PRE>
+<BLOCKQUOTE>
+This performs an isogeny descent on a genus one normal curve C over Q of degree
+p &isin;{3, 5}, as described in <A  HREF = "text1446.htm#bib_CreutzMiller">[CM12]</A>. The curve C must be a projective plane cubic 
+(in case p = 3) or an intersection of 5 quadrics in P<sup>4</sup>, with the additional 
+requirement that the flex points of C lie on the coordinate hyperplanes. For the 
+descent one must specify: (1) the isogeny &phi;; (2) the domain E1 and
+the codomain E2 of the isogeny; or (3) a Q-rational point P
+of order p on an elliptic curve E which generates the kernel of the isogeny.
+<P>
+The return values are a sequence consisting of genus one normal curves of degree p
+representing the elements of the &phi;-Selmer set and a list of maps making these
+into &phi;-coverings of C.
+</BLOCKQUOTE>
+<H5><A NAME = "16581">FakeIsogenySelmerSet(C,phi) : Crv, MapSch -&gt; RngIntElt</A></H5>
+<H5>FakeIsogenySelmerSet(C,E1,E2) : Crv, CrvEll, CrvEll -&gt; RngIntElt</H5>
+<H5>FakeIsogenySelmerSet(C,P) : Crv, PtEll -&gt; RngIntElt</H5>
+
+<PRE>    SetVerbose("Selmer", n):            Maximum: 3</PRE>
+<BLOCKQUOTE>
+This determines the F<sub>p</sub>-dimension of the `fake'-&phi;-Selmer set of the genus one normal
+curve C of degree p &isin;{3, 5, 7} (see <A  HREF = "text1446.htm#bib_CreutzMiller">[CM12]</A> for the definition). 
+By convention the empty set has dimension -1. The input is exactly as for 
+<TT>pIsogenyDescent</TT>, however coverings are not produced. This makes the computations 
+feasible as well for p = 7.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "16582">Example <TT>CrvEllQNF_pIsogenyDesent (H128E39)</TT></A></H3>
+We use a 5-isogeny descent to show that the elliptic curve with Cremona reference
+570l3 has rank 0 and that there are nontrivial elements of order 5 in its
+Shafarevich-Tate group.
+<P>
+<P>
+<P>
+<PRE>
+&gt; lambda := 48/5;
+&gt; r_phiSel,r_phidualSel,Sha,E1,E2 := pIsogenyDescent(lambda,5);
+&gt; CremonaReference(E1);
+570l1
+&gt; CremonaReference(E2);
+570l3
+&gt; TorsionSubgroup(E1);
+Abelian Group isomorphic to Z/10
+Defined on 1 generator
+Relations:
+    10*$.1 = 0
+&gt; r_phiSel;
+0
+&gt; r_phidualSel;
+3
+</PRE>
+<P>
+This shows that E<sub>2</sub>(Q)/&phi;(E<sub>1</sub>(Q)) simeq 0, while the &phi;<sup>v</sup>-Selmer
+group gives an exact sequence: 0 -&gt; E<sub>2</sub>(Q)/&phi;<sup>v</sup>(E<sub>1</sub>(Q)) &sub;(Z/5Z)<sup>3</sup> -&gt; Sha(E<sub>2</sub>/Q)[&phi;<sup>v</sup>] -&gt; 0. From this we conclude
+that the rank (for both curves) is 0, and so Sha(E<sub>2</sub>/Q)[&phi;<sup>v</sup>] has 
+F<sub>5</sub>-dimension 2. Representatives for the inverse pairs of nontrivial elements 
+are given by the third return value.
+<P>
+<P>
+<P>
+<PRE>
+&gt; #Sha*2 + 1;
+25
+&gt; C := Sha[1];
+&gt; CremonaReference(Jacobian(GenusOneModel(C)));
+570l3
+</PRE>
+<P>
+The above computation does not conclusively show that Sha(E<sub>1</sub>/Q) has no
+nontrivial 5-torsion. For this we need a second isogeny descent. 
+Namely we show that the C is not divisible by &phi; in Sha. 
+<P>
+<P>
+<P>
+<PRE>
+&gt; time DimSelC := FakeIsogenySelmerSet(C,E1,E2);
+Time: 2.950
+&gt; DimSelC;
+-1
+</PRE>
+<HR>
+<H3><A NAME = "16583">Example <TT>CrvEllQNF_pIsogenyDescent2 (H128E40)</TT></A></H3>
+Now we use a full 5-descent to find a large generator.
+<P>
+<P>
+<P>
+<PRE>
+&gt; r1,r2,SelModTors,E,EE := pIsogenyDescent(326/467,5);
+&gt; r1,r2;
+0 2
+&gt; E5,m := TorsionSubgroup(E);
+&gt; E5;
+Abelian Group isomorphic to Z/5
+Defined on 1 generator
+Relations:
+    5*E5.1 = 0
+&gt; time ConjecturalRegulator(E);
+242.013813460415708000138268958 1
+Time: 70.180
+&gt; Conductor(E);
+271976526950
+&gt; ThreeTorsionType(E);
+Generic
+</PRE>
+This shows that E(Q) simeq Z x Z/5Z and that (assuming 
+Sha(E/Q) is trivial) that the regulator is 242.01... This means
+one probably needs more than a 4-descent to find the generator. The
+conductor is too large for Heegner point techniques and the 3-torsion 
+on E is generic, meaning 6- or 12-descent will be very slow (even
+if they are performed nonrigorously). We can do a further isogeny 
+descent to obtain a full 5-covering.
+<P>
+<P>
+<PRE>
+&gt; P := m(E5.1);
+&gt; C := Curve(Minimize(GenusOneModel(SelModTors[2])));
+&gt; time Ds,Pis := pIsogenyDescent(C,P);
+7.880
+&gt; D := Ds[1];
+&gt; pi := Pis[1];
+&gt; time rp := PointSearch(D,10^10 : 
+&gt;     Dimension := 1, OnlyOne := true, Nonsingular := true);
+Time: 39.410
+&gt; Q := rp[1];
+&gt; Q;
+(-11610740223/2573365369 : 1350220049/2573365369 : 
+-110993809/2573365369 : -3970329088/2573365369 : 1)
+&gt; piQ := pi(Q); // gives the point on C
+&gt; Dnew,Enew,FiveCovering := nCovering(GenusOneModel(D));
+&gt; Qnew := Dnew(Rationals())!Eltseq(Q);
+&gt; Ecan,EnewtoEcan := MinimalModel(Enew);
+&gt; P2 := EnewtoEcan(FiveCovering(Qnew));
+&gt; P2;
+(18742046893875394386310714878805837118945751672332464430219783625592
+23533610794664163106345898123969229661/991466716729115905824131485387
+000945412007497180441812893340644055454270710030810641619997008843128
+1 : 71245662543288432230853647434377610311616709098508077082874898143
+715069493690489458124709392518651254352942841744887961253603235705564
+184725054480767436761578/98722742040021206194215985208166099089985806
+405143789926209543140373470096170812446567353837866650186446834616709
+6101096776119973657047069330277618071 : 1)
+&gt; CanonicalHeight(P2);
+242.013813460415708000138268957
+</PRE>
+<HR>
+<H3><A NAME = "16584">Example <TT>CrvEllQNF_pIsogenyDescent3 (H128E41)</TT></A></H3>
+Finally we give an example which shows that the map from the genuine
+Selmer set to the fake Selmer set need not be surjective.
+<P>
+<P>
+<P>
+<PRE>
+&gt; E1 := EllipticCurve("254a1");
+&gt; E2 := EllipticCurve("254a2");
+&gt; bool, phi := IsIsogenous(E1,E2);
+&gt; phicoveringsofE2,_,phidualcoveringsofE1,_,phi := ThreeIsogenyDescent(E1);
+&gt; C := phicoveringsofE2[1];
+&gt; C;
+x^3 - x^2*y - x^2*z - 2*x*y^2 + 3*x*y*z - 2*x*z^2 + 2*y^2*z
+&gt; phidual := DualIsogeny(phi);
+&gt; MinimalModel(Codomain(phidual)) eq MinimalModel(Jacobian(C));
+true
+&gt; time FakeIsogenySelmerSet(C,phidual);
+2
+Time: 0.620
+&gt; time SelC := pIsogenyDescent(C,phidual);
+Time: 1.160
+&gt; Ilog(3,#SelC);
+1
+</PRE>
+<PRE></PRE> <A  HREF = "text1446.htm">[Next]</A><A  HREF = "text1451.htm">[Prev]</A> <A  HREF = "text1446.htm">[Right]</A> <A  HREF = "text1451.htm">[Left]</A> <A  HREF = "text1447.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

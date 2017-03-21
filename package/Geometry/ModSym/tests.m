@@ -1,0 +1,354 @@
+freeze;
+
+ 
+/****-*-magma-* EXPORT DATE: 2004-03-08 ************************************
+                                                                          
+                  HECKE:  Modular Symbols in Magma                       
+                           William A. Stein                                
+                                                                         
+  FILE: tests.m  (Some code to test the functionality.)                   
+
+  $Header: /home/was/magma/packages/modsym/code/RCS/tests.m,v 1.3 2001/05/30 19:18:00 was Exp was $
+
+  $Log: tests.m,v $
+  Revision 1.3  2001/05/30 19:18:00  was
+  ?
+
+  Revision 1.2  2001/05/14 04:59:44  was
+  nothing..
+
+  Revision 1.1  2001/04/20 04:47:02  was
+  Initial revision
+
+  Revision 1.7  2000/08/01 21:40:25  was
+  Fixed the "Random lies!!!"
+
+  Revision 1.6  2000/08/01 04:23:31  was
+  Don't know... left out.
+
+  Revision 1.5  2000/06/03 04:30:23  was
+  ...
+
+  Revision 1.4  2000/06/03 04:18:02  was
+  fine tune
+
+  Revision 1.3  2000/06/03 04:13:00  was
+  got rid of imports.
+
+  Revision 1.2  2000/06/03 04:11:03  was
+  Round
+
+  Revision 1.1  2000/05/02 08:11:07  was
+  Initial revision
+  
+                                                                         
+ ***************************************************************************/
+
+
+
+function my_idxG0(n)
+   return 
+      &*[Integers()| t[1]^t[2] + t[1]^(t[2]-1) : t in Factorization(n)];
+end function;
+
+function my_Round(x)   // this function disappeared from MAGMA!!!!!!!!!!
+   n := Floor(x);
+   return (x-n) ge 0.5 select n+1 else n;
+end function;
+
+
+
+print "This program runs a series of tests on the Modular Symbols";
+print "package.  If any of the tests fail or the program produces an";
+print "error message while executing, then something is wrong.";
+print "The tests are randomized, so running them multiple times";
+print "could be wise.\n";
+print "--------------------------------------------------------------\n";
+
+
+maxN := 15;
+maxk := 6;
+base := Rationals();
+//base := GF(5);
+
+function RandomSpace()
+      N      := Random([1..maxN]);
+      k      := Random([2..maxk]);
+      if N eq 0 then
+         N := 1;
+         "WEIRD! - BUG IN RANDOM!!";
+      end if;
+      G      := DirichletGroup(N,Rationals());
+      eps    := Random(G);
+      printf "\n\n\n\t\t=>>>> k = %o, N = %o, eps = %o <<<<=\n", k, N, eps;
+      return ModularSymbols(eps,k), N, k, eps;
+end function;
+
+
+function RandomRationalSpace()
+      N := Random(1,maxN);
+      if N eq 0 then
+         N := 1;
+         "WEIRD! - BUG IN RANDOM!!";
+      end if;
+      k := Random(2,maxk);
+      G := DirichletGroup(N);
+      eps := Random(G);
+      printf "\n\n\n\t\t=>>>> k = %o, N = %o, eps = %o <<<<=\n", k, N, eps;
+      return ModularSymbols(eps,k), N, k, eps;
+end function;
+
+
+
+function RandomSpaceWithTrivialCharacter()
+      N      := Random(maxN) + 1;
+      k      := Random(2,Max(2,maxk - (N div 10)));
+      printf " k = %o, N = %o ...\n", 
+                  k, N;
+      return ModularSymbols(N, k), N, k;
+end function;
+
+
+/* Compute several random spaces of modular symbols, and verify
+   that their dimensions agree with the dimensions computed using
+   the standard dimension formulas. */
+procedure Test_DimensionConsistency(numchecks)
+   print "** Dimension of cuspidal subspace test **";
+   if Characteristic(base) ne 0 then
+      return;
+   end if;
+
+   for i in [1..numchecks] do
+      M,N,k,eps := RandomSpace();
+      t := Cputime();
+      d := DimensionCuspForms(eps,k);
+      assert 2*d eq Dimension(CuspidalSubspace(M));
+      printf " \tdim  = %o,    \t%os\n",Dimension(CuspidalSubspace(M)),Cputime(t);
+   end for;
+end procedure;
+
+
+/* Compute two random Hecke operators on a random space, and
+   verify that they commute. */
+procedure Test_HeckeOperatorsCommute(numcheck)
+   print "** Hecke operators commute test **";
+   for i in [1..numcheck] do
+      M := RandomSpace();
+      t := Cputime();
+      n := Random(2,17);
+      m := Random(2,17);
+      T1:= HeckeOperator(M,n);
+      T2:= HeckeOperator(M,m);
+      printf "n = %o, m = %o\n", n, m;
+      assert T1*T2 eq T2*T1;
+      printf " time = %os\n", Cputime(t);
+   end for;
+end procedure;
+
+
+procedure Test_DegeneracyMaps(numcheck)
+   print "** Degeneracy maps test **";
+   print "This tests conversion between Manin and modular symbols.";
+   for i in [1..numcheck] do
+      t := Cputime();
+      M,N,k,eps := RandomSpace();
+      if N gt 1 then
+         divs := [d : d in Divisors(N) | d mod Conductor(eps) eq 0 ];
+         NN   := Random(divs);
+      else
+         continue;
+      end if;
+
+      oldM := ModularSymbols(M,NN);
+      print "  Lower level space has level ",NN;
+
+      beta_1  := DegeneracyMatrix(oldM,M,1);
+      alpha_1 := DegeneracyMatrix(M,oldM,1);
+      d := N div NN;
+      beta_d  := DegeneracyMatrix(oldM,M,d);
+      alpha_d := DegeneracyMatrix(M,oldM,d);
+ 
+      if Dimension(M) eq 0 or Dimension(oldM) eq 0 then
+         continue;
+      end if;
+
+      ba_1:= beta_1*alpha_1; 
+      X   := Parent(ba_1)!0;
+      idx := my_idxG0(N) div my_idxG0(NN);
+      for i in [1..NumberOfRows(X)] do 
+         X[i,i] := idx;
+      end for;
+      assert ba_1 eq X;
+      ba_d := beta_d*alpha_d;
+      assert ba_d eq X*(d^(k-2));
+      printf " time = %os\n", Cputime(t);
+   end for;
+
+end procedure;
+
+
+
+/* Compute several random spaces of modular symbols with trivial
+   character, and verify that the dimensions of their cuspidal new 
+   subspaces agree with the dimensions computed using the standard 
+   dimension formulas. */
+
+procedure Test_DimensionNewSubspace(numcheck)
+   if Characteristic(base) ne 0 then
+      return;
+   end if;
+   print "** Dimension of new subspace check **";
+   for i in [1..numcheck] do
+      M,N,k := RandomSpaceWithTrivialCharacter();
+      t := Cputime();
+      d := DimensionNewCuspFormsGamma0(N,k);
+      assert 2*d eq Dimension(NewSubspace(CuspidalSubspace(M)));
+      printf " \tdim  = %o,    \t%os\n",
+              Dimension(NewSubspace(CuspidalSubspace(M))),Cputime(t);
+   end for;
+end procedure;
+
+
+procedure Test_NewformDecomposition(numchecks)
+   if Characteristic(base) ne 0 then
+      return;
+   end if;
+
+   print "** Compute a bunch of NEWFORM decompositions ** ";
+   print "The only check is that the program doesn't bomb.";
+   print "For decomposition to work at all, things must be working well.\n";
+
+   for i in [1..numchecks] do
+      M := RandomSpace();
+      t := Cputime();
+      D := NewformDecomposition(CuspidalSubspace(M));
+      D;
+      printf " \ttime  = %os\n\n",Cputime(t);
+   end for;
+end procedure;
+
+
+procedure Test_Decomposition(numchecks)
+   print "** Compute a bunch of decompositions ** ";
+   print "The only check is that the program doesn't bomb.";
+   print "For decomposition to work at all, things must be working well.\n";
+
+   for i in [1..numchecks] do
+      M := RandomSpace();
+      t := Cputime();
+      D := Decomposition(M,13);
+      D;
+      for A in D do
+         VectorSpace(A);
+      end for;
+      printf " \ttime  = %os\n\n",Cputime(t);
+   end for;
+
+end procedure;
+
+procedure Test_Eigenforms(numchecks)
+   print "** Compute a bunch of eigenforms ** ";
+   print "The only check is that the program doesn't bomb.";
+   for i in [1..numchecks] do
+      M := RandomSpace();
+      t := Cputime();
+      D := Decomposition(NewSubspace(CuspidalSubspace(M)),23);
+      D;
+      for i in [1..#D] do
+         if IsIrreducible(D[i]) and IsCuspidal(D[i]) then
+            qEigenform(D[i],7);
+         end if;
+      end for;
+      printf " \ttime  = %os\n\n",Cputime(t);
+   end for;
+end procedure;
+
+
+procedure Test_EllipticCurve()
+   if Characteristic(base) ne 0 then
+      return;
+   end if;
+
+   print "** Computing c_4 and c_6 for elliptic curve 37A...";
+   M := ModularSymbols(37,2);
+   A := SortDecomposition(NewformDecomposition(CuspidalSubspace(M)))[1];
+   time E := EllipticCurve(A : Database:=false);
+   print "Testing Tamagawa number computation...";
+   assert TamagawaNumber(A,37) eq TamagawaNumber(E,37);
+   print "success.";
+
+   print "** Computing c_4 and c_6 for elliptic curve 65A...";
+   M := ModularSymbols(65,2);
+   A := SortDecomposition(NewformDecomposition(CuspidalSubspace(M)))[1];
+   time E := EllipticCurve(A : Database := false);
+   print "Testing Tamagawa number computation...";
+   assert TamagawaNumber(A,5) eq TamagawaNumber(E,5);
+   print "success.";
+
+   print "** Testing database...";
+   D := EllipticCurveDatabase();
+   repeat 
+      N := Random(11,300);
+      n := NumberOfIsogenyClasses(D, N);
+   until n gt 0;
+   r := Random(1,n);
+   E := EllipticCurve(D,N,r,1);
+   printf "Curve %o at level %o.\n", r, N;
+   M := ModularSymbols(E);
+   printf "Found in space of modular symbols = %o.\n",M;
+   printf "Trying to recover curve...";
+   F := EllipticCurve(M);
+   if E eq F then
+      print "Recovered elliptic curve.";
+   else
+      assert false;
+   end if;
+end procedure;
+
+
+procedure Test_qExpansionBasis(numchecks)
+   print "** Integral Basis Tests ** ";
+   for i in [1..numchecks] do
+      M := CuspidalSubspace(RandomRationalSpace());
+      t := Cputime();
+      bnd := my_Round(HeckeBound(M));
+      delete M`qintbasis;
+      Quniv := qExpansionBasis(M, bnd : Al := "Universal");
+      Quniv;
+      delete M`qintbasis;
+      Qnf   := qExpansionBasis(M, bnd : Al := "Newform");
+      Qnf;
+      if Quniv ne Qnf then
+         error "Test_qExpansionBasis failed on ",M;
+      end if;
+      printf "\t\t\tTEST PASSED!!!\n";
+      printf " \ttime  = %os\n\n",Cputime(t);
+   end for;
+end procedure;
+
+
+procedure Test_AtkinLehner(numchecks)
+   for i in [1..numchecks] do
+      N := Random(maxN)+1;
+      k := 2*Random(1,Max(1,maxk-(N div 10)));
+      printf " k = %o, N = %o ...\n", k, N;
+      S := CuspidalSubspace(ModularSymbols(N,k,+1));
+      t := Cputime();
+      print "S = ", S;
+      [qExpansionBasis(A,25) : A in AtkinLehnerDecomposition(S)]; 
+      print "time = ", Cputime(t);
+   end for;
+end procedure;
+
+procedure DoTests(numchecks)
+   Test_Eigenforms(numchecks);
+   Test_NewformDecomposition(numchecks);
+   Test_Decomposition(numchecks);
+   Test_HeckeOperatorsCommute(numchecks);
+   Test_DegeneracyMaps(numchecks);
+   Test_DimensionNewSubspace(numchecks);
+   Test_DimensionConsistency(numchecks);
+ //  Test_EllipticCurve();
+   Test_qExpansionBasis(numchecks);
+end procedure;
+

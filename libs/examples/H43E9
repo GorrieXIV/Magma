@@ -1,0 +1,26 @@
+"Source: Text/Ring/FldFunRat.text";
+"Line: 1006";
+"Date: Tue Jun  7 22:27:15 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Ring/FldFunRat.text, line: 1006
+// Example: H43E9 ()
+print "Example: H43E9";
+ei := GetEchoInput();
+SetEchoInput(true);
+S<u> := PowerSeriesRing(Rationals());
+f :=  [1+u-7*u^2, 6-3*u+1/2*u^2-u^3, 5-u+u^2];
+seq := MinimalVectorSequence(f, 5);
+ [&+([Q[i]*f[i]: i in [1..#f]]) : Q in seq];
+seq := MinimalVectorSequence(f, 5:Distortion:=[2,0,1]);
+[&+([Q[i]*f[i]: i in [1..#f]]) : Q in seq];
+p:=2;
+seq := MinimalVectorSequence(f, 5:Distortion:=[2,0,1], Power:=p);
+sums := [&+([Q[i]*f[i]: i in [1..#f]]) : Q in seq];
+sums;
+mp:= map<S->S|  x :-> (IsWeaklyZero(x) select 0 
+    else  &+([Coefficient(x,i)*(S.1)^(p*i) :  i in Exponents(x)]))
+      + (ISA(Type(v),RngIntElt) select O((S.1)^(p*v)) 
+  else S!0 where v := AbsolutePrecision(x))>;
+sums := [&+([mp(Q[i])*f[i]: i in [1..#f]]) : Q in seq];
+sums;
+SetEchoInput(ei);

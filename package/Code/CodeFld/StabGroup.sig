@@ -1,0 +1,8 @@
+174,1
+S,QuantumErrorGroup,Return the abelian group representing all possible errors on the quantum system corrected by the quantum code Q,0,1,0,0,0,0,0,0,0,317,,129,-38,-38,-38,-38,-38
+S,QuantumBinaryErrorGroup,Return the abelian group of all possible errors on a length n binary qbit system,0,1,0,0,0,0,0,0,0,148,,129,-38,-38,-38,-38,-38
+S,QuantumErrorGroup,"Return the abelian group representing all possible errors on a length n p-ary qbit system, which is an extra special group with 2^n + 1 generators. The generators correspond to the qubit-flip operators X(i), the phase-flip operators Z(i), and an overall phase multiplication W by the p-th root of unity. The generators appear in the order X(1),Z(1),...,X(n),Z(n),W",0,2,0,0,0,0,0,0,0,148,,0,0,148,,129,-38,-38,-38,-38,-38
+S,StabilizerGroup,"Return the abelian group of errors that defines the quantum code Q, which is a subgroup of QuantumErrorGroup(Q)",0,1,0,0,0,0,0,0,0,317,,129,-38,-38,-38,-38,-38
+S,StabiliserGroup,"Return the abelian group of errors that defines the quantum code Q, which is a subgroup of QuantumErrorGroup(Q)",0,1,0,0,0,0,0,0,0,317,,129,-38,-38,-38,-38,-38
+S,StabilizerGroup,"Return the abelian group of errors, a subgroup of G, that defines the quantum code Q. G should be an instance of the extraspecial group, G = QuantumErrorGroup(Q)",0,2,0,0,0,0,0,0,0,129,,0,0,317,,129,-38,-38,-38,-38,-38
+S,StabiliserGroup,"Return the abelian group of errors, a subgroup of G, that defines the quantum code Q. G should be an instance of the extraspecial group, G = QuantumErrorGroup(Q)",0,2,0,0,0,0,0,0,0,129,,0,0,317,,129,-38,-38,-38,-38,-38

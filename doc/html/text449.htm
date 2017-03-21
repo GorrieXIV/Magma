@@ -1,0 +1,486 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Automorphism Group</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text450.htm">[Next]</A><A  HREF = "text448.htm">[Prev]</A> <A  HREF = "text450.htm">[Right]</A> <A  HREF = "text448.htm">[Left]</A> <A  HREF = "text442.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "4614">Automorphism Group</A></H3>
+
+<P>
+<P>
+Let K be a finite extension of the rational function field over
+a finite field, the rationals or a number field.
+In contrast to the number field situation, there are two different
+natural notions of automorphisms here: we distinguish between
+automorphisms that fix the base field and arbitrary automorphisms that
+can also induce non-trivial maps of the constant field.
+<P>
+The first case, automorphisms fixing the base field of K, is analogous
+to the number field case and was implemented by J&uuml;rgen Kl&uuml;ners.
+<P>
+The second case of more general automorphisms has been implemented by
+Florian He&szlig; along the lines of his paper <A  HREF = "text441.htm#bib_antshessautiso">[He&szlig;04]</A>.
+Here the constant field of K can, in fact, be any exact perfect field
+in Magma with a few provisos.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text449.htm#4615">Automorphisms over the Base Field</A>
+<LI> <A  HREF = "text449.htm#4622">General Automorphisms</A>
+<LI> <A  HREF = "text449.htm#4629">Field Morphisms</A>
+</UL>
+<H4><A NAME = "4615">Automorphisms over the Base Field</A></H4>
+
+
+
+<H5><A NAME = "4616">Automorphisms(K, k) : FldFun, FldFunG -&gt; [Map]</A></H5>
+<BLOCKQUOTE>
+Computes all Q(t) automorphisms of the absolute finite extension
+K that fix k. The field k has to be Q(t) for this function.
+</BLOCKQUOTE>
+<H5><A NAME = "4617">AutomorphismGroup(K, k) : FldFun, FldFunG -&gt; GrpFP, Map</A></H5>
+<BLOCKQUOTE>
+Return the group of k-automorphisms of the algebraic function 
+field K together with the map from the group to the sequence of 
+automorphisms of K.  The field k has to be Q(t).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "4618">Example <TT>FldFunG_Automorphisms (H44E16)</TT></A></H3>
+We define an extension of degree 7 over Q(t) and compute the
+automorphisms.
+<P>
+<P>
+<PRE>
+&gt; Q:=Rationals();
+&gt; Qt&lt;t&gt;:=PolynomialRing(Q);
+&gt; Qtx&lt;x&gt;:=PolynomialRing(Qt);
+&gt; f := x^7 + (t^3 + 2*t^2 - t + 13)*x^6 + (3*t^5 - 3*t^4 
+&gt;     + 9*t^3 + 24*t^2 - 21*t + 54)*x^5 + (3*t^7 - 
+&gt;     9*t^6 + 27*t^5 - 22*t^4 + 6*t^3 + 84*t^2 - 
+&gt;     121*t + 75)*x^4 + (t^9 - 6*t^8 + 22*t^7 - 
+&gt;     57*t^6 + 82*t^5 - 70*t^4 - 87*t^3 + 140*t^2 - 
+&gt;     225*t - 2)*x^3 + (-t^10 + 5*t^9 - 25*t^8 + 
+&gt;     61*t^7 - 126*t^6 + 117*t^5 - 58*t^4 - 155*t^3 
+&gt;     + 168*t^2 - 80*t - 44)*x^2 + (-t^10 + 8*t^9 - 
+&gt;     30*t^8 + 75*t^7 - 102*t^6 + 89*t^5 + 34*t^4 - 
+&gt;     56*t^3 + 113*t^2 + 42*t - 17)*x + t^9 - 7*t^8 
+&gt;     + 23*t^7 - 42*t^6 + 28*t^5 + 19*t^4 - 60*t^3 -
+&gt;     2*t^2 + 16*t - 1;
+&gt; K:=FunctionField(f);
+&gt; A:=Automorphisms(K, BaseField(K));
+&gt; #A;
+7
+</PRE>
+Now we transform this list into a group to see that it is really cyclic. 
+We pass in special functions for equality testing and multiplication
+to speed the algorithm up.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := GenericGroup(A: Eq := func&lt;a,b | a`Images eq b`Images&gt;,
+&gt;                    Mult := func&lt;a,b | hom&lt;K -&gt; K | a`Images @ b&gt;&gt;);
+&gt; G;
+Finitely presented group G on 2 generators
+Relations
+    G.1 = Id(G)
+    G.1 * G.2 = G.2 * G.1
+    G.1 * G.2^2 = G.2^2 * G.1
+    G.1 * G.2^3 = G.2^3 * G.1
+    G.1 * G.2^4 = G.2^4 * G.1
+    G.1 * G.2^5 = G.2^5 * G.1
+    G.1 * G.2^6 = G.2^6 * G.1
+    G.1 = G.2^7
+</PRE>
+<P>
+Finally, we verify that this gives the same result as 
+<TT>AutomorphismGroup</TT>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; AutomorphismGroup(K, BaseField(K));
+Finitely presented group on 2 generators
+Relations
+    $.1 = Id($)
+    $.1 * $.2 = $.2 * $.1
+    $.1 * $.2^2 = $.2^2 * $.1
+    $.1 * $.2^3 = $.2^3 * $.1
+    $.1 * $.2^4 = $.2^4 * $.1
+    $.1 * $.2^5 = $.2^5 * $.1
+    $.1 * $.2^6 = $.2^6 * $.1
+    $.1 = $.2^7
+Mapping from: GrpFP to [
+    Mapping from: FldFun: K to FldFun: K,
+    Mapping from: FldFun: K to FldFun: K,
+    Mapping from: FldFun: K to FldFun: K,
+    Mapping from: FldFun: K to FldFun: K,
+    Mapping from: FldFun: K to FldFun: K,
+    Mapping from: FldFun: K to FldFun: K,
+    Mapping from: FldFun: K to FldFun: K
+] given by a rule
+</PRE>
+<HR>
+<H5><A NAME = "4619">IsSubfield(K, L) : FldFun, FldFun -&gt; BoolElt, Map</A></H5>
+<BLOCKQUOTE>
+Given two absolute finite extensions K and L of Q(t), decide
+if L is an extension of K. If this is the case, return an embedding
+map from K into L.
+</BLOCKQUOTE>
+<H5><A NAME = "4620">IsIsomorphicOverQt(K, L) : FldFun, FldFun -&gt; BoolElt, Map</A></H5>
+<BLOCKQUOTE>
+Given two absolute finite extensions K and L of Q(t), decide
+if L is Q(t)-isomorphic to K. If this is the case, return a 
+map from K onto L.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "4621">Example <TT>FldFunG_IsSubfield (H44E17)</TT></A></H3>
+<TT>Subfields</TT> and <TT>IsIsomorphic</TT> are illustrated below.
+<P>
+<P>
+<PRE>
+&gt; Q:=Rationals();
+&gt; Qt&lt;t&gt;:=PolynomialRing(Q);
+&gt; Qtx&lt;x&gt;:=PolynomialRing(Qt);
+&gt; K:=FunctionField(x^4-t^3);
+&gt; L:=Subfields(K);
+&gt; #L;
+2
+&gt; L:=L[2][1]; L;
+Algebraic function field defined over Univariate
+rational function field over Rational Field
+Variables: t by
+x^2 - t^3
+</PRE>
+Now we will check if L is indeed a subfield of K:
+<P>
+<P>
+<PRE>
+&gt; IsSubfield(L,K);
+true Mapping from: FldFun: L to FldFun: K
+</PRE>
+Obviously, L can be defined using a simpler polynomial:
+<P>
+<P>
+<PRE>
+&gt; LL:=FunctionField(x^2-t);
+&gt; IsIsomorphicOverQt(LL,L); 
+true Mapping from: FldFun: LL to FldFun: L
+</PRE>
+<HR>
+<H4><A NAME = "4622">General Automorphisms</A></H4>
+
+
+
+<H5><A NAME = "4623">Isomorphisms(K, E) : FldFunG, FldFunG -&gt; [Map]</A></H5>
+
+<PRE>    BaseMorphism: Map                   Default: <TT>false</TT></PRE>
+
+<PRE>    Bound: RngIntElt                    Default: &infin;</PRE>
+
+<PRE>    Strategy: MonStgElt                 Default: "None"</PRE>
+<BLOCKQUOTE>
+Given two function fields K and E, this function computes a list
+of at most <TT>Bound</TT> field isomorphisms from K to E. 
+<P>
+If <TT>BaseMorphism</TT> is given it should be an isomorphism f between 
+the constant fields of K and E. In this case only isomorphisms extending 
+f are considered.
+<P>
+The default behaviour is for all isomorphisms from K to E which
+extend SOME isomorphism of the constant field of K to that of E
+considered. In this case (no base morphism is specified), the constant
+fields must be finite, the rationals or a number field. If the
+base morphism f is specified then the constant fields can be any
+exact perfect fields ( finite or characteristic 0 ).
+<P>
+If the base morphism f is specified, it can be defined in the natural
+way for most constant field types. For example, for finite fields and
+number fields, the usual <TT>hom&lt;k-&gt;l|x&gt;</TT>, where <TT>x</TT> gives the image
+of k.1, can be used. A common situation is where the constant fields
+of K and E are equal to k and f is the identity. This can be 
+defined very simply for any k by <TT>IdentityFieldMorphism(k) </TT>.
+Several more intrinsics related to field morphisms are described
+in the following subsection.
+<P>
+The possible choices of <TT>Strategy</TT> are <TT>"None"</TT>, <TT>"Weierstrass"</TT> 
+or <TT>"DegOne"</TT>. If <TT>Strategy</TT> is different to <TT>"None"</TT>, this 
+determines the places that are used as the basis of the construction of 
+the maps. In all cases, a finite set of places of E and K which
+must correspond under any isomorphism are used. All isomorphisms
+are found between the canonical affine models (as defined by He&szlig;)
+obtained by omitting one of these places from each of E and K.
+<P>
+<TT>DegOne</TT> can only be used with finite constant fields. In this case,
+isomorphisms are determined which map a fixed degree one place of K
+to any one of the finite number of degree one places of E.
+This function can fail in rare situations if the constant field of K
+is too small and no degree one place exists. In this case an appropriate
+error message is displayed.
+<P>
+<TT>Weierstrass</TT> uses the Weierstrass places of the fields. Isomorphisms
+are determined which map a fixed Weierstrass place of K to any of
+those of E with the same degree and Riemann-Roch data. This strategy
+can be very fast if the residue field and Riemann-Roch data of a
+particular place of K match those of only a few (or no!) Weierstrass
+places of E.
+<P>
+In case of fields of genus &lt;2, the constant field must be finite.
+</BLOCKQUOTE>
+<H5><A NAME = "4624">IsIsomorphic(K, E) : FldFunG, FldFunG -&gt; BoolElt, Map</A></H5>
+
+<PRE>    BaseMorphism: Map                   Default: <TT>false</TT></PRE>
+
+<PRE>    Strategy: MonStgElt                 Default: "None"</PRE>
+<BLOCKQUOTE>
+As above, except the function only computes a single isomorphism
+if one exists.
+</BLOCKQUOTE>
+<H5><A NAME = "4625">Automorphisms(K) : FldFunG -&gt; [Map]</A></H5>
+
+<PRE>    BaseMorphism: Map                   Default: <TT>false</TT></PRE>
+
+<PRE>    Bound: RngIntElt                    Default: &infin;</PRE>
+
+<PRE>    Strategy: MonStgElt                 Default: "None"</PRE>
+<BLOCKQUOTE>
+This function computes a list of at most <TT>Bound</TT> 
+automorphisms of the function field K. This is an 
+abbreviation for <TT>Isomorphisms(K, K)</TT> and the parameters
+are as described above.
+<P>
+An important difference is that the BaseMorphism, if specified,
+must be of field morphism type. <TT>IdentityFieldMorphism</TT> may be
+used, but basic constructors for non-trivial constant field maps f
+will usually cause an error if used directly. The way around this
+is to use the conversion
+<TT>f := FieldMorphism(f)</TT>
+(see the following subsection).
+</BLOCKQUOTE>
+<H5><A NAME = "4626">Isomorphisms(K,E,p1,p2) : FldFunG, FldFunG, PlcFunElt, PlcFunElt -&gt; [Map]</A></H5>
+<H5>Automorphisms(K,p1,p2) : FldFunG, PlcFunElt, PlcFunElt -&gt; [Map]</H5>
+
+<PRE>    Bound: RngIntElt                    Default: &infin;</PRE>
+<BLOCKQUOTE>
+As above except that the constant field morphism is taken as 
+the identity and only iso/automorphisms which take function field place
+p1 to p2 are computed.
+</BLOCKQUOTE>
+<H5><A NAME = "4627">AutomorphismGroup(K) : FldFunG -&gt; GrpFP, Map</A></H5>
+
+<PRE>    BaseMorphism: Map                   Default: <TT>false</TT></PRE>
+
+<PRE>    Strategy: MonStgElt                 Default: "None"</PRE>
+<BLOCKQUOTE>
+Given a function field K, this function computes that group of 
+automorphisms satisfying the conditions specified by the parameters
+and returns it as a finitely-presented group.
+The map also returned is invertible and takes a group element to the
+function field isomorphism that it represents.
+</BLOCKQUOTE>
+<H5><A NAME = "4628">AutomorphismGroup(K,f) : FldFunG, Map -&gt; Grp, Map, SeqEnum</A></H5>
+
+<PRE>    Strategy: MonStgElt                 Default: "None"</PRE>
+<BLOCKQUOTE>
+In this variation, the automorphism group of the function field
+K is computed in
+its permutation representation on a set of places or divisors
+or in its linear representation on a space of differentials or
+subspace of K.
+<P>
+The return values consist of the representing group G, a map
+(with inverse) from G to the maps of K giving the actual
+isomorphisms, and a sequence of isomorphisms of K which
+consist of the kernel of the representation.
+<P>
+Only automorphisms fixing the constant field are considered here.
+If the set/space on which the representation is to be defined
+is not invariant by the automorphism group, a run-time error
+will result.
+<P>
+The argument f should be a map defining the representation.
+<P>
+Its domain must be an enumerated sequence for a permutation representation
+or a vector space for a linear representation.
+<P>
+Its codomain should be K or a space or enumerated sequence of
+elements of K, places of K, divisors of K or differentials
+of K. The examples below show some common ways of producing f
+by using functions like <TT>DifferentialSpace</TT> and 
+<TT>RiemannRochSpace</TT>.
+</BLOCKQUOTE>
+<H4><A NAME = "4629">Field Morphisms</A></H4>
+
+<P>
+<P>
+The isomorphisms returned by the functions in the last subsection are of
+general <TT>Map</TT> type but contain some extra internal structure. The same
+is true of the maps used to specify <TT>BaseMorphism</TT>. These objects come
+in two flavours: <I>field morphisms</I>, that represent maps between general
+fields, and the more specialised <I>function field morphisms</I>, representing
+maps between algebraic function fields. This subsection contains
+several related functions that are very useful when working with (function) 
+field morphisms.
+
+
+<H5><A NAME = "4630">IsMorphism(f) : Map -&gt; Bool</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT>, if the map is a field or function field morphism;
+<TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "4631">FieldMorphism(f) : Map -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Converts a homomorphism between fields into a field morphism.
+</BLOCKQUOTE>
+<H5><A NAME = "4632">IdentityFieldMorphism(F) : Fld -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Returns the identity automorphism of field F as a field morphism.
+</BLOCKQUOTE>
+<H5><A NAME = "4633">IsIdentity(f) : Map -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if f is the identity morphism; <TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "4634">Equality(f, g) : Map, Map -&gt; Bool</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT>, if the two maps are both field morphisms or function field 
+morphisms and are equal; <TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "4635">HasInverse(f) : Map -&gt; MonStgElt, Map</A></H5>
+<BLOCKQUOTE>
+Either returns <TT>"true"</TT> and the inverse morphism for (function) field morphism
+f, or <TT>"false"</TT> if inverse does not exist, or <TT>"unknown"</TT> if it cannot be computed.
+</BLOCKQUOTE>
+<H5><A NAME = "4636">Composition(f, g) : Map, Map -&gt; Map</A></H5>
+<BLOCKQUOTE>
+The composition of the field morphisms f and g.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "4637">Example <TT>FldFunG_Isomorphisms (H44E18)</TT></A></H3>
+We illustrate the use of the general isomorphism functions
+with some examples. 
+In the first, we have a rational function field of characteristic 5:
+<P>
+<P>
+<P>
+<PRE>
+&gt; k&lt;w&gt; := GF(5);
+&gt; kxf&lt;x&gt; := RationalFunctionField(k);
+&gt; kxfy&lt;y&gt; := PolynomialRing(kxf);
+&gt; F&lt;a&gt; := FunctionField(x^2+y^2-1);
+&gt; L := Isomorphisms(kxf, F);
+&gt; #L eq #PGL(2, k);
+</PRE>
+<P>
+In the next example we consider the function field of a hyperelliptic
+curve defined over Q(i) [i<sup>2</sup> = - 1] and a Galois twist of it. 
+The fields are not isomorphic over Q(i) but they are over Q: 
+<P>
+<P>
+<P>
+<PRE>
+&gt; k&lt;i&gt; := QuadraticField(-1);
+&gt; kxf&lt;x&gt; := RationalFunctionField(k);
+&gt; kxfy&lt;y&gt; := PolynomialRing(kxf);
+&gt; F1&lt;a&gt; := FunctionField(y^2-x^5-x^2-i);
+&gt; F2&lt;b&gt; := FunctionField(i*y^2-x^5-i*x^2+1);
+&gt; c := IdentityFieldMorphism(k);
+&gt; IsIsomorphic(F1,F2 : BaseMorphism := c);
+false
+&gt; IsIsomorphic(F1,F2);
+true Mapping from: FldFun: F1 to FldFun: F2 given by a rule
+&gt; L := Isomorphisms(F1, F2);
+&gt; [&lt;f(a), f(x), f(i)&gt; : f in L];
+[
+    &lt;-i*b, i*x, -i&gt;,
+    &lt;i*b, i*x, -i&gt;
+]
+</PRE>
+<P>
+In the next example we consider the function field of the genus 3
+plane curve x<sup>3</sup> * y + y<sup>3</sup> * z + z<sup>3</sup> * x=0, which has full automorphism group
+PGL<sub>2</sub>(F<sub>7</sub>). We compute automorphisms over different finite fields
+and also compute the automorphisms group as an FP group.
+<P>
+<P>
+<P>
+<PRE>
+&gt; k := GF(11);
+&gt; kxf&lt;x&gt; := RationalFunctionField(k);
+&gt; kxfy&lt;y&gt; := PolynomialRing(kxf);
+&gt; K&lt;y&gt; := FunctionField(x^3*y+y^3+x);
+&gt; L := Automorphisms(K);
+&gt; #L;
+3
+&gt; // Extend base field to get all autos
+&gt; k := GF(11^3);
+&gt; kxf&lt;x&gt; := RationalFunctionField(k);
+&gt; kxfy&lt;y&gt; := PolynomialRing(kxf);
+&gt; K&lt;y&gt; := FunctionField(x^3*y+y^3+x);
+&gt; L := Automorphisms(K);
+&gt; #L;
+504
+&gt; // restrict to just "geometric" autos, which fix the base
+&gt; c := IdentityFieldMorphism(k);
+&gt; L := Automorphisms(K : BaseMorphism := c);
+&gt; #L;
+168
+&gt; // get the automorphism group instead as an FP group
+&gt; G,mp := AutomorphismGroup(K : BaseMorphism := c);
+&gt; G;
+Finitely presented group G on 2 generators
+Relations
+    G.2^3 = Id(G)
+    (G.1^-1 * G.2)^3 = Id(G)
+    G.1^7 = Id(G)
+    (G.2^-1 * G.1^-3)^2 = Id(G)
+    (G.2^-1 * G.1^-1)^4 = Id(G)
+&gt; #G;
+168
+&gt; IdentifyGroup(G); // find in small group database
+&lt;168, 42&gt;
+</PRE>
+<P>
+Finally, we give an example of a genus 1 function field over 
+F<sub>5</sub> where the group of automorphisms is computed acting
+on various spaces of functions and differentials.
+<P>
+<P>
+<P>
+<PRE>
+&gt; k&lt;w&gt; := GF(5);
+&gt; kxf&lt;x&gt; := RationalFunctionField(k);
+&gt; kxfy&lt;y&gt; := PolynomialRing(kxf);
+&gt; f := x^3 + y^3 + 1;
+&gt; F&lt;a&gt; := FunctionField(f);
+&gt; f := Numeration(Set(Places(F, 1)));
+&gt; G, h, K := AutomorphismGroup(F, f);
+&gt; #G; Type(G);
+12
+GrpPerm
+&gt; V, f := SpaceOfDifferentialsFirstKind(F);
+&gt; G, h, K := AutomorphismGroup(F, f);
+&gt; #G; Type(G);
+2
+GrpMat
+&gt; D := &amp;+ Places(F, 1);  
+&gt; V, f := DifferentialSpace( -D );
+&gt; G, h := AutomorphismGroup(F, f);
+&gt; #G;
+12
+&gt; V, f := RiemannRochSpace( D );
+&gt; G, h, ker := AutomorphismGroup(F, f);
+&gt; #G; #ker;
+12
+1
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text450.htm">[Next]</A><A  HREF = "text448.htm">[Prev]</A> <A  HREF = "text450.htm">[Right]</A> <A  HREF = "text448.htm">[Left]</A> <A  HREF = "text442.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

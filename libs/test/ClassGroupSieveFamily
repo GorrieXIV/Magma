@@ -1,0 +1,108 @@
+function RandomPrimeIdeal(R) 
+    if Type(R) in {RngOrd, RngQuad, RngCyc, RngFunOrd} then
+        p := RandomPrimeIdeal(CoefficientRing(R));
+        ps := Decomposition(R, p);
+        if Type(R) in {RngOrd, RngQuad, RngCyc} then
+            return ps[i][1] where i is Random([1 .. #ps]);
+        else
+            return ps[i] where i is Random([1 .. #ps]);
+        end if;
+    elif Type(R) eq  RngInt then
+        return RandomPrime(10);
+    elif Type(R) eq RngUPol then
+        if Characteristic(R) eq 0 then
+            return R!ChangeUniverse(Eltseq(RandomPrimePolynomial(PolynomialRing(GF(NextPrime(100))), 3)), Integers());
+        else
+            return RandomPrimePolynomial(R, 3);
+        end if;
+    elif Type(R) eq RngVal then
+        return R!(1/FieldOfFractions(R).1);
+    end if;
+
+end function;
+
+function RandomIdeal(R)
+//{Returns an ideal which is a random product of some random prime ideals}
+
+    if Type(R) notin {RngOrd, RngQuad, RngCyc, RngFunOrd} then
+	error "Ring must be an order of a number field or a function field";
+    end if;
+
+    r := Random(1, 3);
+
+    I := 1*R;
+    for i in [1 .. r] do
+        I := I*RandomPrimeIdeal(R)^Random(1, 3);
+    end for;
+
+    return I;
+
+end function;
+
+SetVerbose("ClassGroup", 3);
+SetVerbose("ClassGroupSieve", 3);
+// SetKantVerbose("ORDER_ELT_POWER_PRODUCT", 4); // Not in exp
+
+n := 3;		// 0.77s 10/11	1.9s 3/11	0.53s 1/11 		0.47s 28/10 		
+n := 4;		// 3.72s 10/11	39.5s 3/11	1.85s 1/11		17.85s 28/10
+n := 5;		// 3.37s 10/11	999.71s 3/11	581s 1/11		50s 28/10
+n := 6;		// 9.35s 11/11	18.8s 10/11 	371.27s 1/11		133s 28/10
+n := 7;		// 51.92s 11/11	152s 10/11	2307.1s 1/11		17s 28/10
+n := 8;		// 219s 11/11	353.77s 10/11	427s 1/11		89s 28/10
+n := 9;		// 258s 11/11	124s 28/10
+n := 10;		// 5249s 28/10
+n := 11;		// 69082s 1/11
+n := 12;		// 220960s 1/11
+n := 13;		//
+n := 15;
+_<x> := PolynomialRing(Integers());
+for n in [3 .. 7] do
+    t := Cputime();
+    K := NumberField(x^3-a*x^2+a*x-a) where a := NextPrime(10^n);
+    O := MaximalOrder(K);
+    Basis(O, K);
+    O := Simplify(LLL(O));
+    Basis(O, K);
+    ShowMemoryUsage();
+    if n gt 3 then
+	time G, m := ClassGroup(O : Al := "Sieve", Proof := "GRH");
+    else
+	time G, m := ClassGroup(O : Al := "Sieve");
+    end if;
+    print G;
+    ShowMemoryUsage();
+
+    for i in [1 .. Ngens(G)] do
+	fi := m(G.i);
+	time assert fi @@ m eq G.i;
+	time assert not IsPrincipal(fi);
+	if Order(G.i) lt 10000 then
+	    fi := fi^Order(G.i);
+	    assert IsPrincipal(fi);
+	    _, g := IsPrincipal(fi);
+	    "Got generator";
+	    p, e := ProductRepresentation(g);
+	    if #p lt 10000 and Maximum(e) lt 1000000 then
+		assert g*O eq fi;
+	    end if;
+	end if;
+    end for;
+    if Ngens(G) eq 0 then
+	I := RandomIdeal(O);
+	assert IsPrincipal(I);
+	_, g := IsPrincipal(I);
+	"Got generator";
+	p, e := ProductRepresentation(g);
+	if #p lt 10000 and Maximum(e) lt 1000000 then
+	    assert g*O eq I;
+	end if;
+    end if;
+    if assigned p then
+	#p, Maximum(e);
+    end if;
+    "TIME ", n, " = ", Cputime(t);
+    delete K, O, G, m;
+    ShowMemoryUsage();
+end for;
+
+

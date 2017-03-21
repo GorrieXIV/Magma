@@ -1,0 +1,296 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Advanced Examples</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1368.htm">[Next]</A><A  HREF = "text1366.htm">[Prev]</A> <A  HREF = "text1368.htm">[Right]</A> <A  HREF = "text1366.htm">[Left]</A> <A  HREF = "text1356.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "15264">Advanced Examples</A></H3>
+
+<P>
+<P>
+These examples are intended to demonstrate basic programming in Magma
+using the functions of this chapter together with a few from
+Chapter <A  HREF = "text1321.htm#14366">SCHEMES</A>.
+There is little or no explanation of the geometry behind the
+examples. We assume here that you are familiar with that and are
+really interested in the problem of realising it in Magma.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1367.htm#15265">Trigonal Curves</A>
+<LI> <A  HREF = "text1367.htm#15267">Algebraic Geometric Codes</A>
+</UL>
+<H4><A NAME = "15265">Trigonal Curves</A></H4>
+
+<P>
+<P>
+We discuss a particular example covered by Petri's theorem.
+In fact, we write down a curve C of genus 8 which is trigonal.
+We discover this easily since its canonical embedding is not cut out
+by quadrics. It would be nice to have automatic functions to recognise
+the equations of the surface scroll cut out by the quadrics, but at
+the moment they don't exist so we have to make that calculation by hand.
+
+
+<HR>
+<H3><A NAME = "15266">Example <TT>Crv_trigonal-curve (H120E38)</TT></A></H3>
+First we make the curve and compute its canonical model.
+<P>
+<P>
+<PRE>
+&gt; k := Rationals();
+&gt; P&lt;X,Y,Z&gt; := ProjectiveSpace(k,2);
+&gt; C := Curve(P,X^8 + X^4*Y^3*Z + Z^8);
+&gt; Genus(C);
+8
+&gt; phi := CanonicalMap(C);
+&gt; P7&lt;a,b,c,d,e,f,g,h&gt; := Codomain(phi);
+&gt; CC := phi(C);
+&gt; CC;
+a^3*e + d^4 + d^2*h^2
+a^3*f + d^3*e + d*e*h^2
+a^3*g + d^3*f + d*f*h^2
+a^3*h + d^3*g + d*g*h^2
+a^2*b + d^3 + d*h^2
+a^2*c + d^2*e + e*h^2
+a*b*c + d^2*f + f*h^2
+a*c^2 + d^2*g + g*h^2
+b*c^2 + d^2*h + h^3
+-a*c + b^2  -a*e + b*d  -a*f + c*d  -a*f + b*e
+-a*g + c*e  -d*f + e^2  -a*g + b*f  -a*h + c*f
+-d*g + e*f  -d*h + f^2  -a*h + b*g  -b*h + c*g
+-d*h + e*g  -e*h + f*g  -f*h + g^2
+</PRE>
+In this example, we can see all the quadrics which cut out the canonical
+model CC. But even if we could not, or if computing the full canonical
+ideal was too difficult, we can compute the conics in the canonical ideal
+separately using only linear algebra.
+<P>
+<P>
+<PRE>
+&gt; SC := Image(phi,C,2);
+&gt; SC;
+a*c - b^2  a*e - b*d  a*f - c*d  a*g - c*e
+a*h - c*f  b*e - c*d  b*f - c*e  b*g - c*f
+b*h - c*g  d*f - e^2  d*g - e*f  d*h - f^2
+e*g - f^2  e*h - f*g  f*h - g^2
+&gt; Dimension(SC);
+2
+</PRE>
+We would like to identify the scroll SC.
+Even better, we would like to find a map from a ruled surface to
+this scroll and pull the image curve CC back to this ruled surface.
+Then the fibres of the ruling will cut out the g<sup>1</sup><sub>3</sub> on C giving
+its trigonal structure.
+We will also see the Maroni invariant of C directly.
+In this case one immediately recognises the equations of the scroll
+so can write down the ruled surface and choose the bidegree of linear
+system which gives the map to the scroll.
+<P>
+<P>
+<PRE>
+&gt; F&lt;r,s,u,v&gt; := RuledSurface(k,2,4);
+&gt; psi := map&lt; F -&gt; P7 | 
+&gt;	[r^2*u, r*s*u, s^2*u, r^4*v, r^3*s*v, r^2*s^2*v, r*s^3*v, s^4*v] &gt;;
+&gt; SF := psi(F);
+&gt; DefiningIdeal(SF) eq DefiningIdeal(SC);
+true
+</PRE>
+To realise the curve's trigonal structure, we need to create a divisor
+by intersecting it with a fibre of the ruling.
+The natural way would be to pull the curve back to F via psi and
+work there. However, Magma currently cannot create divisors that lie 
+on curves on scrolls.
+<P>
+Luckily, we <I>can</I> work with the image <TT>CC</TT> in <TT>P7</TT> and obtain 
+the divisor <TT>D</TT> of the image of a fibre under <TT>psi</TT> intersected
+with <TT>CC</TT> for our
+g<sup>1</sup><sub>3</sub>. This is then
+used to define a 3 - 1 map to the projective line. 
+<P>
+<P>
+<PRE>
+&gt; fib := psi(Scheme(F,r));
+&gt; Dimension(fib);
+1
+&gt; D := Divisor(CC,fib);
+&gt; Degree(D);
+3
+&gt; #Basis(D);
+2
+</PRE>
+So <TT>D</TT> really does give us a g<sup>1</sup><sub>3</sub>. To get the map to P<sup>1</sup>, we can 
+pull it back to <TT>C</TT>, but it is faster to compose the divisor map on 
+<TT>CC</TT> with <TT>phi</TT>. Proceeding this way, it is then a good idea to 
+use the function field of <TT>C</TT> to simplify the map description.
+<P>
+<P>
+<PRE>
+&gt; phiD := DivisorMap(D);
+&gt; mpD := Expand(Restriction(phi,C,CC)*phiD);
+&gt; FC := FunctionField(C);
+&gt; rat := FC!(p1/p2) where p1,p2 := Explode(DefiningPolynomials(mpD));
+&gt; P1 := Curve(Codomain(mpD));  // get P1 as a curve
+&gt; mpD := map&lt;C-&gt;P1|[rat,1]&gt;; mpD;
+Mapping from: CrvPln: C to Crv: P1
+with equations : 
+X
+Z
+</PRE>
+<HR>
+<H4><A NAME = "15267">Algebraic Geometric Codes</A></H4>
+
+<P>
+<P>
+Magma includes functions for working with codes which arise from
+algebraic geometry.
+Discussion of these functions is left to the chapter on error-correcting
+linear codes, Chapter <A  HREF = "text1831.htm#20301">LINEAR CODES OVER FINITE FIELDS</A>.
+As is well known, these codes are often created
+using Riemann--Roch spaces of divisors on curves.
+Here we demonstrate the creation of such a code taken from the
+book of van Lint and van der Geer <A  HREF = "text1355.htm#bib_lintgeer">[vLvdG88]</A>.
+This is a famous example which arises many times in that book,
+as Example II (3.12) for instance.
+
+
+<HR>
+<H3><A NAME = "15268">Example <TT>Crv_klein-quartic-code (H120E39)</TT></A></H3>
+This code is based on the Klein quartic over the finite field F8
+of 8 elements,
+a curve that we define immediately. Notice that we start by defining
+a curve C over the field of 2 elements. This is so that we can investigate
+C over small fields while still being able to work over F8 later.
+<P>
+<P>
+<PRE>
+&gt; F2 := FiniteField(2);
+&gt; F4&lt;t4&gt; := FiniteField(4);
+&gt; F8&lt;t8&gt; := FiniteField(8);
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(F2,2);
+&gt; C := Curve(P,x^3*y + y^3*z + z^3*x);
+&gt; C8&lt;a,b,c&gt; := BaseChange(C,F8);
+&gt; C8;
+Curve over GF(2^3) defined by
+a^3*b + a*c^3 + b^3*c
+</PRE>
+The code will have length 24, corresponding to the 24 rational points
+of C.
+<P>
+<P>
+<PRE>
+&gt; #RationalPoints(C8);
+24
+</PRE>
+In constructing such codes, one must have a collection of points, in this
+case the 24 rational points we have just found, and a divisor whose support
+is disjoint from these points.
+As the divisor, we take some multiple of a conjugate pair of points
+defined over the finite field of 4 elements.
+In Magma, it is convenient to use the function field machinery to
+describe this as a place of degree 2.
+It is constructed as the intersection of C with one of its bitangents.
+<P>
+<P>
+<PRE>
+&gt; L := Curve(P,x+y+z); 
+&gt; IntersectionPoints(C,L);
+{@ @}
+&gt; C4 := BaseChange(C,FiniteField(4));
+&gt; P4 := Ambient(C4);
+&gt; L4 := BaseChange(L,P4);
+&gt; IntersectionPoints(C4,L4);
+{@ (t4 : t4^2 : 1), (t4^2 : t4 : 1) @}
+&gt; [ IntersectionNumber(C4,L4,p) : p in $1 ];
+[ 2, 2 ]
+</PRE>
+So we see that L is indeed a bitangent of C and that the two points
+of intersection are defined properly over the finite field of 4 elements.
+In order to be able to compute the Riemann-Roch space of a divisor,
+we compute this intersection as a place on C8.
+Notice how the support of the divisor D is not used in its display until
+it has been explicitly computed.
+<P>
+<P>
+<PRE>
+&gt; FP8&lt;X,Y&gt; := FunctionField(Ambient(C8));
+&gt; Div := DivisorGroup(C8);
+&gt; D := Divisor(Div,X + Y + 1);
+&gt; D;
+Divisor on Curve over GF(2^3) defined by
+a^3*b + a*c^3 + b^3*c
+&gt; Decomposition(D);
+[
+    &lt;Place at (0 : 1 : 0), -3&gt;,
+    &lt;Place at (1 : 0 : 0), -1&gt;,
+    &lt;Place at ($.1 + 1 : $.1 : 1), 2&gt;
+]
+&gt; D;
+Divisor -3*Place at (0 : 1 : 0) + 2*Place at ($.1 + 1 : $.1 : 1) - 
+1*Place at (1 : 0 : 0) 
+</PRE>
+This divisor contains the place we require with multiplicity 2
+and some negative contributions at infinity.
+We extract the degree 2 place we need.
+<P>
+<P>
+<PRE>
+&gt; p := Support(D)[2];
+&gt; Degree(p);
+2
+</PRE>
+Now we can make the code.
+Rather than using the rational points of C8, the code creation intrinsic
+takes a sequence of degree 1 places. But they are also easily
+retrieved.
+The divisor we use will be 3p.
+<P>
+<P>
+<PRE>
+&gt; G := 3*p;
+&gt; S := Places(C8,1);
+&gt; #S;
+24
+&gt; AGC := AlgebraicGeometricCode(S,G);
+&gt; Dimension(AGC);
+4
+</PRE>
+In fact, it is the dual code that is really wanted, but this is easy.
+<P>
+<P>
+<PRE>
+&gt; Dual(AGC);
+[24, 20] Linear Code over GF(2^3)
+Generator matrix:
+[1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 t8^5 t8 t8^5 t8^3]
+[0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 t8^5 t8^2 t8^6 t8^5]
+[0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 t8^3 t8^6 t8^5]
+[0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 t8^6 t8^3 t8^4]
+[0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 t8^2 t8^3 t8 t8^2]
+[0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 t8^6 t8^6 t8^2 t8^6]
+[0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 t8^2 t8^4 t8^4 t8^6]
+[0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 t8^6 t8^3 t8^3 t8^2]
+[0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 t8^4 0 t8^4]
+[0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 t8^4 t8^3 t8^6 1]
+[0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 t8 t8^2 t8^2 t8^3]
+[0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 t8^6 t8^6 0 1]
+[0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 t8^2 t8^4 t8^3 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 t8^6 t8 t8^2 t8]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 1 t8^5 t8 t8^6]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 t8 1 1 t8^3]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 t8^3 1 t8^5 t8^2]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 t8^2 t8^2 1 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 t8^3 t8 t8^5 t8^5]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 t8^4 t8^3 t8 t8^4]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1368.htm">[Next]</A><A  HREF = "text1366.htm">[Prev]</A> <A  HREF = "text1368.htm">[Right]</A> <A  HREF = "text1366.htm">[Left]</A> <A  HREF = "text1356.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

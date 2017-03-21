@@ -1,0 +1,10 @@
+{
+   brandt_modules.m
+   brandt_ideals.m
+   decomposition.m
+   dimensions.m
+   monodromy.m
+   qexpansion.m
+   brandt_new.m
+   p1.m
+}

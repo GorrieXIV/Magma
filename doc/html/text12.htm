@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Error Handling Statements</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text13.htm">[Next]</A><A  HREF = "text11.htm">[Prev]</A> <A  HREF = "text13.htm">[Right]</A> <A  HREF = "text11.htm">[Left]</A> <A  HREF = "text3.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "68">Error Handling Statements</A></H3>
+
+<P>
+<P>
+Magma has facilities for both reporting and handling errors.  Errors can
+arise in a variety of circumstances within Magma's internal code (due to,
+for instance, incorrect usage of a function, or the unexpected failure of an
+algorithm).  Magma allows the user to raise errors in their own code, as
+well as catch many kinds of errors.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text12.htm#69">The Error Objects</A>
+<LI> <A  HREF = "text12.htm#75">Error Checking and Assertions</A>
+<LI> <A  HREF = "text12.htm#79">Catching Errors</A>
+</UL>
+<H4><A NAME = "69">The Error Objects</A></H4>
+
+<P>
+<P>
+All errors in Magma are of type <A NAME = "Err"><TT>Err</TT></A>.  Error objects not only
+include a description of the error, but also information relating to the
+location at which the error was raised, and whether the error was a user error,
+or a system error.
+
+
+<H5><A NAME = "70">Error(x) : Any -&gt; Err</A></H5>
+<BLOCKQUOTE>
+Constructs an error object with user information given by x, which can be of
+any type.  The object x is stored in the <TT>Object</TT> attributed of the
+constructed error object, and the <TT>Type</TT> attribute of the object is set to
+"ErrUser".  The remaining attributes are uninitialized until the error is
+raised by an <TT>error</TT> statement; at that point they are initialized with the
+appropriate positional information.
+</BLOCKQUOTE>
+<H5><A NAME = "71">e`Position : Err -&gt; MonStgElt</A></H5>
+<BLOCKQUOTE>
+Stores the position at which the error object e was raised.  If the error
+object has not yet been raised, the attribute is undefined.
+</BLOCKQUOTE>
+<H5><A NAME = "72">e`Traceback : Err -&gt; MonStgElt</A></H5>
+<BLOCKQUOTE>
+Stores the stack traceback giving the position at which the error object e
+was raised.  If the error object has not yet been raised, the attribute is
+undefined.
+</BLOCKQUOTE>
+<H5><A NAME = "73">e`Object : Err -&gt; Any</A></H5>
+<BLOCKQUOTE>
+Stores the user defined error information for the error.  If the error is a
+system error, then this will be a string giving a textual description of the
+error.
+</BLOCKQUOTE>
+<H5><A NAME = "74">e`Type : Err -&gt; MonStgElt</A></H5>
+<BLOCKQUOTE>
+Stores the type of the error.  Currently, there are only two types of errors
+in Magma:  "Err" denotes a system error, and "ErrUser" denotes an error
+raised by the user.
+</BLOCKQUOTE>
+<H4><A NAME = "75">Error Checking and Assertions</A></H4>
+
+
+
+<H5><A NAME = "76">error expression, ..., expression;</A></H5>
+<BLOCKQUOTE>
+Raises an error, with the error information being the printed value of the
+expressions.  This statement is useful, for example, when an illegal value of
+an argument is passed to a function.
+</BLOCKQUOTE>
+<H5><A NAME = "77">error if boolexpr, expression, ..., expression;</A></H5>
+<BLOCKQUOTE>
+If the given boolean expression evaluates to <TT>true</TT>, then raises an error,
+with the error information being the printed value of the expressions.  This
+statement is designed for checking that certain conditions must be met, etc.
+</BLOCKQUOTE>
+<H5><A NAME = "78">assert boolexpr;</A></H5>
+<H5>assert2 boolexpr;</H5>
+<H5>assert3 boolexpr;</H5>
+<BLOCKQUOTE>
+These assertion statements are useful to check that certain conditions 
+are satisfied.  There is an underlying <TT>Assertions</TT> flag, which is
+set to 1 by default.
+<P>
+For each statement, if the <TT>Assertions</TT> flag is less than
+the level specified by the statement (respectively 1, 2, 3 for the
+above statements), then nothing is done.  Otherwise, the given boolean
+expression is evaluated and if the result is <TT>false</TT>, an error is raised,
+with the error information being an appropriate message.
+<P>
+It is recommended that when developing package code, <TT>assert</TT> is used
+for important tests (always to be tested in any mode), while <TT>assert2</TT>
+is used for more expensive tests, only to be checked in the debug mode,
+while <TT>assert3</TT> is be used for extremely stringent tests which are
+very expensive.
+<P>
+Thus the <TT>Assertions</TT> flag can be set to 0 for no checking at all,
+1 for normal checks, 2 for debug checks and 3 for extremely stringent
+checking.
+</BLOCKQUOTE>
+<H4><A NAME = "79">Catching Errors</A></H4>
+
+
+
+<H5><A NAME = "80">try statements catch e statements end try : -&gt;</A></H5>
+<BLOCKQUOTE>
+The <TT>try</TT>/<TT>catch</TT> statement lets users handle raised errors.  The
+semantics of a <TT>try</TT>/<TT>catch</TT> statement are as follows:  the block of
+statements statements<sub>1</sub> is executed.  If no error is raised during its
+execution, then the block of statements statements<sub>2</sub> is not executed; if
+an error is raised at any point in statements<sub>1</sub>, execution <I>immediately</I>
+transfers to statements<sub>2</sub> (the remainder of statements<sub>1</sub> is not executed).
+When transfer is controlled to the <TT>catch</TT> block, the variable named e is
+initialized to the error that was raised by statements<sub>1</sub>; this variable
+remains in scope until the end of the <TT>catch</TT> block, and can be both read
+from and written to.  The catch block can, if necessary, reraise e, or any
+other error object, using an <TT>error</TT> statement.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "81">Example <TT>State_while (H1E13)</TT></A></H3>
+The following example demonstrates the use of error objects, and <TT>try</TT>/<TT>catch</TT> statements.
+<P>
+<P>
+<PRE>
+&gt; procedure always_fails(x)
+&gt;     error Error(x);
+&gt; end procedure;
+&gt;
+&gt; try
+&gt;     always_fails(1);
+&gt;     always_fails(2);  // we never get here
+&gt; catch e
+&gt;     print "In catch handler";
+&gt;     error "Error calling procedure with parameter: ", e`Object;
+&gt; end try;
+In catch handler
+Error calling procedure with parameter:  1
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text13.htm">[Next]</A><A  HREF = "text11.htm">[Prev]</A> <A  HREF = "text13.htm">[Right]</A> <A  HREF = "text11.htm">[Left]</A> <A  HREF = "text3.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

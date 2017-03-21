@@ -1,0 +1,469 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Standard Constructions for  Graphs</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1789.htm">[Next]</A><A  HREF = "text1787.htm">[Prev]</A> <A  HREF = "text1789.htm">[Right]</A> <A  HREF = "text1787.htm">[Left]</A> <A  HREF = "text1782.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "19752">Standard Constructions for  Graphs</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+The two main ways in which to construct a new graph from an old one
+  are either by taking a subgraph of or by modifying the original graph.
+Another method is to take the quotient graph.
+When the first two methods are employed, the support set and vertex and
+  edge decorations are retained in the resulting graph.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1788.htm#19753">Subgraphs and Quotient Graphs</A>
+<LI> <A  HREF = "text1788.htm#19758">Incremental Construction of  Graphs</A>
+<LI> <A  HREF = "text1788.htm#19781">Constructing Complements, Line Graphs; Contraction, Switching</A>
+</UL>
+<H4><A NAME = "19753">Subgraphs and Quotient Graphs</A></H4>
+
+
+
+<H5><A NAME = "19754">sub&lt; G | list &gt; : Grph, List -&gt; Grph, GrphVertSet, GrphEdgeSet</A></H5>
+<BLOCKQUOTE>
+Construct the graph H as a subgraph of G.
+The function returns three values: The graph H, 
+  the vertex-set V of H; and the edge-set E of H.
+If G has a support set and/or if G has vertex/edge decorations,
+  then these attributes are transferred to the subgraph H.
+<P>
+The elements of V and of E are specified by the list list
+  whose items can be objects  of the following types:
+<P>
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>A vertex of G.
+  The resulting subgraph will be the subgraph induced on the subset 
+   of <TT>VertexSet(G)</TT> defined by the vertices  in list.
+<P>
+<DT>(b)</DT><DD>An edge of G.
+  The resulting subgraph will be the subgraph with vertex-set 
+    <TT>VertexSet(G)</TT>
+    whose edge-set consists of the edges in list.
+<P>
+<DT>(c)</DT><DD>A set of 
+<P>
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>Vertices of G.
+<DT>(ii)</DT><DD>Edges of G.
+<P>
+<P>
+</DL>
+</DL>
+It is easy to recover the map that maps the vertices of the subgraph
+  to the vertices of the supergraph and vice-versa. 
+We give an example below.
+</BLOCKQUOTE>
+<H5><A NAME = "19755">quo&lt; G | P &gt; : Grph, { { GrphVert } } -&gt; Grph, GrphVertSet, GrphEdgeSet</A></H5>
+<BLOCKQUOTE>
+Given a graph G and a partition P of the vertex-set V(G) of G,
+construct the quotient graph Q of G defined by P. The partition
+is given as a set of subsets of V(G). Suppose the cells of the partition 
+P are P<sub>1</sub>, ..., P<sub>r</sub>. The vertices of Q correspond to the cells 
+P<sub>i</sub>. Vertices v<sub>i</sub> and v<sub>j</sub> of Q are adjacent if and only if there 
+is an edge in G joining a vertex in P<sub>i</sub> with a vertex in P<sub>j</sub>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19756">Example <TT>Graph_Subgraph (H155E9)</TT></A></H3>
+We start with a simple example which demonstrates how to map 
+  the vertices of a subgraph onto the vertices of the supergraph
+  and vice-versa: This is achieved by simple coercion 
+  into the appropriate vertex-set.
+<P>
+<P>
+<PRE>
+&gt; K5, V := CompleteGraph(5);
+&gt; K3, V1 := sub&lt; K5 | { V | 3, 4, 5 } &gt;;
+&gt; IsSubgraph(K5, K3);
+true
+&gt; 
+&gt; V!V1!1;
+3
+&gt; 
+&gt; V1!V!4;
+2
+&gt; 
+&gt; V1!V!1;
+
+&gt;&gt; V1!V!1;
+     ^
+Runtime error in '!': Illegal coercion
+LHS: GrphVertSet
+RHS: GrphVert
+</PRE>
+<P>
+A 1-factor of a graph G is a set of disjoint edges which form a
+spanning forest for G. In the following example, we construct the
+graph that corresponds to K<sub>6</sub> with a 1-factor removed.
+<P>
+<P>
+<PRE>
+&gt; K6, V, E := CompleteGraph(6);
+&gt; K6;
+Graph
+Vertex  Neighbours
+
+
+1       2 3 4 5 6 ;
+2       1 3 4 5 6 ;
+3       1 2 4 5 6 ;
+4       1 2 3 5 6 ;
+5       1 2 3 4 6 ;
+6       1 2 3 4 5 ;
+&gt; F1 := { E | {1,2}, {3, 4}, {5, 6} };
+&gt; G1, V1, E1 := K6 - F1;
+&gt; G1;
+Graph
+Vertex  Neighbours
+
+
+1       3 4 5 6 ;
+2       3 4 5 6 ;
+3       1 2 5 6 ;
+4       1 2 5 6 ;
+5       1 2 3 4 ;
+6       1 2 3 4 ;
+</PRE>
+<HR>
+<H3><A NAME = "19757">Example <TT>Graph_Quotient (H155E10)</TT></A></H3>
+Taking the complete graph K<sub>9</sub>, we form its quotient with respect
+to the partition of the vertex-set into three 3-sets.
+<P>
+<P>
+<PRE>
+&gt; K9, V, E := CompleteGraph(9);
+&gt; P := { { V | 1, 2, 3}, { V | 4, 5, 6}, { V | 7, 8, 9} };
+&gt; Q := quo&lt; K9 | P &gt;;
+&gt; Q;
+Graph
+Vertex  Neighbours
+
+
+1       2 3 ;
+2       1 3 ;
+3       1 2 ;
+</PRE>
+<HR>
+<H4><A NAME = "19758">Incremental Construction of  Graphs</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+Unless otherwise specified, each 
+  of the functions described in this section returns three values:
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>The graph G;
+<DT>(ii)</DT><DD>The vertex-set V of G;
+<DT>(iii)</DT><DD>The edge-set E of G.</DL>
+
+
+<H5><A NAME = "19759">Adding Vertices</A></H5>
+
+
+
+<H5><A NAME = "19760">G + n : Grph, RngIntElt -&gt; Grph</A></H5>
+<BLOCKQUOTE>
+Given a graph G and a non-negative integer n, adds
+  n new vertices to G. 
+The existing vertex and edge decorations are retained, 
+   but the support will become the standard support. 
+</BLOCKQUOTE>
+<H5><A NAME = "19761">G +:= n : Grph, RngIntElt -&gt;</A></H5>
+<H5>AddVertex(~G) : Grph -&gt;</H5>
+<H5>AddVertices(~G, n) : Grph, RngIntElt -&gt;</H5>
+<BLOCKQUOTE>
+The procedural version of the previous function. 
+<TT>AddVertex</TT> adds one vertex only to G.
+</BLOCKQUOTE>
+<H5><A NAME = "19762">AddVertex(~G, l) : Grph, . -&gt;</A></H5>
+<BLOCKQUOTE>
+Given a graph G and a label l, adds
+  a new vertex with label l  to  G.
+The existing vertex and edge decorations are retained, 
+   but the support will become the standard support. 
+</BLOCKQUOTE>
+<H5><A NAME = "19763">AddVertices(~G, n, L) : Grph, RngIntElt, SeqEnum -&gt;</A></H5>
+<BLOCKQUOTE>
+Given a graph G and a non-negative integer n, and a 
+  sequence of n labels, adds
+  n new vertices to G with labels from  L.
+The existing vertex and edge decorations are retained, but the support
+  will become the standard support.
+</BLOCKQUOTE>
+<H5><A NAME = "19764">Removing Vertices</A></H5>
+
+
+
+<H5><A NAME = "19765">G - v : Grph, GrphVert -&gt; Grph</A></H5>
+<H5>G - U : Grph, { GrphVert } -&gt; Grph</H5>
+<BLOCKQUOTE>
+Given a graph G and a vertex v or a set of vertices U of G,
+  removes v or the vertices in U from G.
+The support and  vertex and edge decorations are retained.
+</BLOCKQUOTE>
+<H5><A NAME = "19766">G -:= v : Grph, GrphVert -&gt;</A></H5>
+<H5>G -:= U : Grph, { GrphVert } -&gt;</H5>
+<H5>RemoveVertex(~G, v) : Grph, GrphVert -&gt;</H5>
+<H5>RemoveVertices(~G, U) : Grph, { GrphVert } -&gt;</H5>
+<BLOCKQUOTE>
+The procedural versions of the previous functions. 
+</BLOCKQUOTE>
+<H5><A NAME = "19767">Adding Edges</A></H5>
+
+
+
+<H5><A NAME = "19768">G + { u, v } : GrphUnd, { GrphVert, GrphVert }-&gt; GrphUnd, GrphEdge</A></H5>
+<H5>G + [ u, v ] : GrphDir, [ GrphVert, GrphVert ] -&gt; GrphDir, GrphEdge</H5>
+<BLOCKQUOTE>
+Given a graph G and a pair of vertices of G,
+  add the edge  to G described by this pair.
+If G is undirected then the edge must
+  be given as a set of (two) vertices, if G is directed the 
+  edge is given as a sequence of (two) vertices.
+The support and  existing vertex and  edge decorations are retained.
+This set of functions has two return values: The first is the modified
+  graph and the second is the newly created edge.
+</BLOCKQUOTE>
+<H5><A NAME = "19769">G + { { u, v } } : GrphUnd, { { GrphVert, GrphVert } } -&gt; GrphUnd</A></H5>
+<H5>G + { [ u, v ] } : GrphDir, { [ GrphVert, GrphVert ] } -&gt; GrphDir</H5>
+<BLOCKQUOTE>
+Given a graph G and a  set of pairs
+  of vertices of G, add the edges to G described by these 
+  pairs.
+If G is undirected then edges must
+  be given as a set of (two) vertices, if G is directed 
+  edges are given as a sequence of (two) vertices.
+The support and  existing vertex and  edge decorations are retained.
+</BLOCKQUOTE>
+<H5><A NAME = "19770">G +:= { u, v } : GrphUnd, { GrphVert, GrphVert } -&gt;</A></H5>
+<H5>G +:= [ u, v ] : GrphDir, [ GrphVert, GrphVert ] -&gt;</H5>
+<H5>G +:= { { u, v } }: GrphUnd, { { GrphVert, GrphVert } }-&gt;</H5>
+<H5>G +:= { [ u, v ] } : GrphDir, { [ GrphVert, GrphVert] } -&gt;</H5>
+<BLOCKQUOTE>
+The procedural versions of the previous four functions. 
+</BLOCKQUOTE>
+<H5><A NAME = "19771">AddEdge(G, u, v) : Grph, GrphVert, GrphVert  -&gt;  Grph, GrphEdge</A></H5>
+<BLOCKQUOTE>
+Given a graph G, two vertices of G u and v,
+  returns a new edge  between u and v.
+The support and existing vertex and edge decorations are retained.
+This function has two return values: The first is the modified
+  graph and the second is the newly created edge.
+</BLOCKQUOTE>
+<H5><A NAME = "19772">AddEdge(G, u, v, l) : Grph, GrphVert, GrphVert, . -&gt; Grph, GrphEdge</A></H5>
+<BLOCKQUOTE>
+Given a graph G, two vertices of G u and v, and a label l,
+  adds a new edge with label l between u and v.
+The support and existing vertex and edge decorations are retained.
+This function has two return values: The first is the modified
+  graph and the second is the newly created edge.
+</BLOCKQUOTE>
+<H5><A NAME = "19773">AddEdge(~G, u, v) : Grph, GrphVert, GrphVert  -&gt;</A></H5>
+<H5>AddEdge(~G, u, v, l) : Grph, GrphVert, GrphVert, . -&gt;</H5>
+<BLOCKQUOTE>
+Procedural versions of previous functions adding edges to a   graph.
+</BLOCKQUOTE>
+<H5><A NAME = "19774">AddEdges(G, S) : GrphUnd, { { GrphVert, GrphVert } } -&gt; GrphUnd</A></H5>
+<H5>AddEdges(G, S) : GrphDir, { [  GrphVert, GrphVert ] } -&gt; GrphDir</H5>
+<BLOCKQUOTE>
+Given a graph G, a set S of pairs of vertices of G, 
+ adds the edges specified in S.
+The elements of S must be sets or sequences of two vertices of G, 
+  depending on whether G is undirected or directed respectively. 
+The support and existing vertex and edge  decorations are retained.
+</BLOCKQUOTE>
+<H5><A NAME = "19775">AddEdges(G, S, L) : Grph, SeqEnum, SeqEnum -&gt; Grph</A></H5>
+<BLOCKQUOTE>
+Given a graph G, a sequence S of pairs of vertices of G, and 
+  a sequence L of labels of same length,
+ adds the edges specified in S with its corresponding label in L.
+The 
+elements of S must be sets or sequences of two vertices of G, depending
+on whether G is undirected or directed respectively. 
+The support and existing vertex and edge  decorations are retained.
+</BLOCKQUOTE>
+<H5><A NAME = "19776">AddEdges(~G, S) : GrphUnd, { { GrphVert, GrphVert } } -&gt;</A></H5>
+<H5>AddEdges(~G, S) : GrphDir, { [  GrphVert, GrphVert ] } -&gt;</H5>
+<H5>AddEdges(~G, S, L) : Grph, SeqEnum, SeqEnum -&gt;</H5>
+<BLOCKQUOTE>
+Procedural versions of previous functions adding edges to a   graph.
+</BLOCKQUOTE>
+<H5><A NAME = "19777">Removing Edges</A></H5>
+
+
+
+<H5><A NAME = "19778">G - e : Grph, GrphEdge -&gt; Grph</A></H5>
+<H5>G - { e } : Grph, { GrphEdge } -&gt; Grph</H5>
+<BLOCKQUOTE>
+Given a graph G and an edge e or a set S of edges of G, 
+  removes e or the edges in S from G.
+The resulting graph will have
+  vertex-set V(G) and edge-set E(G) - { e }   
+  or E(G) - S.
+The support and  existing vertex and edge decorations are retained.
+</BLOCKQUOTE>
+<H5><A NAME = "19779">G - { { u, v } } : GrphUnd, { { GrphVert, GrphVert rbrace } -&gt; GrphUnd</A></H5>
+<H5>G - { [u, v] } : GrphDir, { [ GrphVert, GrphVert ] } -&gt; GrphDir</H5>
+<BLOCKQUOTE>
+Given a graph G and a set S of pairs { u, v } or [u, v],
+  u, v vertices of G, form the graph having
+  vertex-set V(G) and edge-set E(G) minus the edges 
+  from u to v       for all pairs in S.  
+An edge is represented as a set if G is undirected, as a set
+   otherwise.
+The support and  existing vertex and edge decorations are retained.
+</BLOCKQUOTE>
+<H5><A NAME = "19780">G -:= e : Grph, GrphEdge -&gt;</A></H5>
+<H5>G -:= { e } : Grph, { GrphEdge } -&gt;</H5>
+<H5>G -:= { { u, v } } : GrphUnd, { { GrphVert, GrphVert rbrace } -&gt;</H5>
+<H5>G -:= { [u, v] } : GrphDir, { [ GrphVert, GrphVert ] } -&gt;</H5>
+<H5>RemoveEdge(~G, e) : Grph, GrphEdge  -&gt;</H5>
+<H5>RemoveEdges(~G, S) : Grph, { GrphEdge } -&gt;</H5>
+<H5>RemoveEdge(~G, u, v) : Grph, GrphVert, GrphVert -&gt;</H5>
+<H5>RemoveEdges(~G, S) : GrphDir, { { GrphVert, GrphVert } } -&gt;</H5>
+<H5>RemoveEdges(~G, S) : GrphDir, { [  GrphVert, GrphVert ] } -&gt;</H5>
+<BLOCKQUOTE>
+The procedural versions of the previous functions. 
+</BLOCKQUOTE>
+<H4><A NAME = "19781">Constructing Complements, Line Graphs; Contraction, Switching</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+Unless otherwise stated, each of the functions described here apply to both
+graphs and digraphs. Further, each of the functions returns three values:
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>The graph G;
+<DT>(ii)</DT><DD>The vertex-set V of G;
+<DT>(iii)</DT><DD>The edge-set E of G.</DL>
+
+
+<H5><A NAME = "19782">Complement(G) : Grph -&gt; Grph</A></H5>
+<BLOCKQUOTE>
+The complement of the graph G.
+</BLOCKQUOTE>
+<H5><A NAME = "19783">Contract(e) : GrphEdge -&gt; Grph</A></H5>
+<BLOCKQUOTE>
+Given an edge e = {u, v} of the graph G, form the graph obtained
+by identifying the vertices u and v, and removing any multiple
+edges (and loops if the graph is undirected) from the resulting graph.
+The graph's 
+  support and vertex/edges decorations are retained.
+</BLOCKQUOTE>
+<H5><A NAME = "19784">Contract(u, v) : GrphVert, GrphVert -&gt; Grph</A></H5>
+<BLOCKQUOTE>
+Given vertices u and v belonging to the graph G, return
+the graph obtained by identifying the vertices u and v, and
+removing any multiple edges (and loops if the graph is undirected)
+from the resulting graph.
+The graph's 
+  support and vertex/edges decorations are retained.
+</BLOCKQUOTE>
+<H5><A NAME = "19785">Contract(S) : { GrphVert }  -&gt; Grph</A></H5>
+<BLOCKQUOTE>
+Given a set S of vertices belonging to the graph G, return the
+graph obtained by identifying all of the vertices in S, and
+removing any multiple edges (and loops if the graph is undirected)
+from the resulting graph.
+The graph's 
+  support and vertex/edges decorations are retained.
+</BLOCKQUOTE>
+<H5><A NAME = "19786">InsertVertex(e) : GrphEdge -&gt; Grph</A></H5>
+<BLOCKQUOTE>
+Given an edge e in the graph G, insert a new vertex of degree 2
+in e.
+If applicable, the two new edges thus created that replace e
+   will have the same
+  capacity and weight as e.
+  They will be unlabelled.
+The vertex labels and the edge decorations  of G
+  are retained, but the resulting graph will have standard support.
+</BLOCKQUOTE>
+<H5><A NAME = "19787">InsertVertex(T) : { GrphEdge } -&gt; Grph</A></H5>
+<BLOCKQUOTE>
+Given an a set T of edges belonging to the graph G, insert a
+vertex of degree 2 in each edge belonging to the set T.
+Vertex and edge decorations are handled as in the single edge case.
+</BLOCKQUOTE>
+<H5><A NAME = "19788">LineGraph(G) : Grph -&gt; Grph</A></H5>
+<BLOCKQUOTE>
+The line graph of the non-empty graph G. 
+</BLOCKQUOTE>
+<H5><A NAME = "19789">Switch(u) : GrphVert -&gt; GrphUnd</A></H5>
+<BLOCKQUOTE>
+Given a vertex u in an undirected graph G, construct an undirected
+graph H from G,
+where H has the same vertex-set as G and the same edge-set, except
+that the vertices that were the neighbours of u in G become the
+non-neighbours of u in H, and the vertices that were non-neighbours
+of u in G become the neighbours of u in H.
+The support and vertex labels are <I>not</I> retained in the resulting
+  graph.
+</BLOCKQUOTE>
+<H5><A NAME = "19790">Switch(S) : { GrphVert } -&gt; Grph</A></H5>
+<BLOCKQUOTE>
+Given a set S of vertices belonging to the undirected graph G, apply
+the function <TT>Switch(u)</TT>, to each vertex of S in turn.
+The support and vertex labels are <I>not</I> retained in the resulting
+  graph.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "19791">Example <TT>Graph_Grotzch (H155E11)</TT></A></H3>
+We illustrate the use of some of these operations by using them
+to construct the Gr&ouml;tzch graph. This graph may be built by taking the
+complete graph K5, choosing a cycle of length 5 (say, 1-3-5-2-4), inserting
+a vertex of degree two on each edge of this cycle and finally connecting
+each of these vertices to a new vertex.
+<P>
+<P>
+<PRE>
+&gt; G := CompleteGraph(5);
+&gt; E := EdgeSet(G);
+&gt; H := InsertVertex({ E | { 1, 3 }, { 1, 4 }, { 2, 4 }, { 2, 5 }, { 3, 5 } } );
+&gt; L := Union(H, CompleteGraph(1));
+&gt; V := VertexSet(L);
+&gt; L := L + { { V.11, V.6 }, { V.11, V.7 }, { V.11, V.8 }, { V.11, V.9 },
+&gt;            { V.11, V.10 } };
+&gt; L;
+Graph
+Vertex  Neighbours
+
+
+1       2 5 6 7 ;
+2       1 3 8 10 ;
+3       2 4 6 9 ;
+4       3 5 7 8 ;
+5       1 4 9 10 ;
+6       1 3 11 ;
+7       1 4 11 ;
+8       2 4 11 ;
+9       3 5 11 ;
+10      2 5 11 ;
+11      6 7 8 9 10 ;
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1789.htm">[Next]</A><A  HREF = "text1787.htm">[Prev]</A> <A  HREF = "text1789.htm">[Right]</A> <A  HREF = "text1787.htm">[Left]</A> <A  HREF = "text1782.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

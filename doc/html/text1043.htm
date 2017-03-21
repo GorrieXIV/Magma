@@ -1,0 +1,320 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Database of Character Tables</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1038.htm">[Next]</A><A  HREF = "text1042.htm">[Prev]</A> <A  HREF = "text1038.htm">[Right]</A> <A  HREF = "text1042.htm">[Left]</A> <A  HREF = "text1039.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "11825">Database of Character Tables</A></H3>
+
+<P>
+<P>
+Magma contains character tables of many of the groups available as
+an <A  HREF = "text758.htm#ATLASGroup">ATLASGroup</A>. These tables have been computed using the
+<A  HREF = "text1040.htm#CharacterTable:Grp">CharacterTable</A> function, and are examples of character tables
+without a group.
+Characters are returned with parent character ring having a power map assigned.
+and with Frobenius-Schur indicator of each character pre-computed.
+<P>
+The available character tables are named using the name of the corresponding
+<A  HREF = "text758.htm#ATLASGroup">ATLASGroup</A>.
+<P>
+This facility is currently under expansion, and more tables and facilities
+will be available with future releases.
+
+
+<H5><A NAME = "11826">CharacterTable(N) : MonStgElt -&gt; SeqEnum[AlgChtrElt]</A></H5>
+<H5>CharacterTable(A) : GrpAtlas -&gt; SeqEnum[AlgChtrElt]</H5>
+<BLOCKQUOTE>
+Return the character table of the group A, or the group named by the string
+N, as a sequence of characters without a group.
+If there is no stored character table corresponding to the name given,
+a runtime error will result.
+</BLOCKQUOTE>
+<H5><A NAME = "11827">HasCharacterTable(A) : GrpAtlas -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return true if the ATLAS group A has character table stored by Magma.
+</BLOCKQUOTE>
+<H5><A NAME = "11828">CharacterTableNames() : -&gt; SetIndx[MonStElt]</A></H5>
+<BLOCKQUOTE>
+Return the set of strings that are valid character table names in the database.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11829">Example <TT>Chtr_CharacterTableData (H97E10)</TT></A></H3>
+We use the texttt{CharacterTable} function to examine some aspects of
+the simple group E<sub>6</sub>(2). We start by showing that this is a (2, 3, 7) group.
+<P>
+<P>
+<PRE>
+&gt; "E62" in CharacterTableNames();
+true
+&gt; X := CharacterTable("E62");
+&gt; #X;
+180
+&gt; R := Universe(X);
+&gt; assigned R`Group;
+false
+&gt; cd := ClassesData(R);
+&gt; c2 := [i: i in [1..#cd] | cd[i,1] eq 2];
+&gt; c3 := [i: i in [1..#cd] | cd[i,1] eq 3];
+&gt; c7 := [i: i in [1..#cd] | cd[i,1] eq 7];
+&gt; c2, c3, c7;
+[ 2, 3, 4 ]
+[ 5, 6, 7 ]
+[ 29, 30, 31, 32 ]
+&gt; exists(t){&lt;i,j,k&gt;: i in c2, j in c3, k in c7 |
+&gt;    not IsZero(StructureConstant(R, i, j, k))};
+true
+&gt; t;
+&lt;3, 6, 29&gt;
+</PRE>
+We have that elements of class 3 (having element order 2) multiplied
+by a suitable element of class 6 (element order 3), give a result in class 29
+(element order 7). 
+<P>
+In the proof of Ore's conjecture by Liebeck, O'Brien, Shalev &amp; Tiep,
+E<sub>6</sub>(2) was a case where the conjecture was checked directly using
+Frobenius' character table criterion for an element to be a commutator.
+We can easily repeat this calculation.
+The function texttt{test} computes a value for a given conjugacy
+class such that this value is non-zero if and only if the class consists of
+commutators.
+<P>
+<P>
+<PRE>
+&gt; test := func&lt; k | &amp;+[ x[k]/x[1] : x in X ] &gt;;
+&gt; forall{ k : k in [1..#cd] | not IsZero(test(k)) };
+true
+</PRE>
+This shows that all conjugacy classes of E<sub>6</sub>(2) consist of commutators,
+verifying the conjecture for this group.
+<P>
+We now move on to finding characters of rational representations of 
+E<sub>6</sub>(2).
+It can be shown, using no more than the character table data, that
+the second and third characters in this table are afforded by rational
+representations of the group.
+Given this, we can find other characters of rational representations
+in the character table. We verify enough facts to show that
+the 2nd and 3rd characters are from rational representations,
+and then find others.
+<P>
+<P>
+<PRE>
+&gt; Degree(X[2]), Degree(X[3]);
+2482 137020
+&gt; Indicator(X[2]), Indicator(X[3]);
+1 1
+&gt; DegreeOfCharacterField(X[2]);
+1
+&gt; DegreeOfCharacterField(X[3]);
+1
+&gt; pm := PowerMap(R);
+&gt; is_integral := func&lt;i|forall{j:j in [1..n] |
+&gt;  GCD(i,n) ne 1 or pm(i,j) eq i} where n := cd[i,1]&gt;;
+&gt; [i : i in [1..#X] | X[2,i] eq 1 and is_integral(i)]; 
+[ 52, 56, 66, 75, 82, 84, 93, 104, 105, 106, 126, 147, 150 ]
+&gt; GCD([cd[i,1]: i in $1]);
+1
+&gt; [i : i in [1..#X] | X[3,i] eq 1 and is_integral(i)];
+[ 62, 87, 90, 91, 93, 94, 96, 102, 105, 106, 108, 111, 112,
+114, 123, 124, 126, 161, 162 ]
+&gt; GCD([cd[i,1]: i in $1]);
+1
+</PRE>
+We first established that the two characters are both rational valued
+with indicators 1.
+They both take the value 1 on integral classes such that the orders of
+the elements in these classes are coprime.
+This is enough to conclude that the Schur index over the rational field
+of both these characters is 1, see <A  HREF = "text1038.htm#bib_Feit-Schur-indices">[Fei83]</A>.
+It follows that these are characters of rational representations of E<sub>6</sub>(2).
+We now consider products of these characters.
+<P>
+<P>
+<PRE>
+&gt; x := X[2]*X[3];
+&gt; [ i : i in [1..#X] | InnerProduct(X[i], x) eq 1];
+[ 2, 5, 8, 17, 21 ]
+&gt; x := X[2]^2;
+&gt; [ i : i in [1..#X] | InnerProduct(X[i], x) eq 1];
+[ 1, 2, 3, 5, 6, 8 ]
+&gt; x := X[3]^2;                                     
+&gt; [ i : i in [1..#X] | InnerProduct(X[i], x) eq 1];
+[ 1, 6, 7, 12, 20, 30, 33, 36, 40 ]
+</PRE>
+This shows that the characters numbered 2, 3, 5, 6, 7, 8, 12, 17, 20, 21, 30, 33, 36, 40 
+all have Schur index 1 over the rational numbers.
+In fact, all these characters are rational valued, so they are characters of
+rational representations. Further products give more information.
+<P>
+<P>
+<PRE>
+&gt; J := [2,3,5,6,7,8,12,17,20,21,30,33,36,40];
+&gt; forall{i: i in J | DegreeOfCharacterField(X[i]) eq 1};               
+true
+&gt; x := X[5]^2;
+&gt; [ i : i in [1..#X] | InnerProduct(X[i], x) eq 1];
+[ 1, 2, 7, 12, 25, 29, 36, 49, 54, 55, 82, 96, 97, 100,
+102, 151, 152, 154, 178, 180 ]
+&gt; DegreeOfCharacterField(X[151]);
+2
+</PRE>
+The characters found above all have Schur index 1. We see that this 
+includes some irrational characters.
+<P>
+As the power map is stored with the character table, we can use 
+symmetrized powers to improve the above results.
+<P>
+<P>
+<PRE>
+&gt; assigned R`PowerMap;
+true
+&gt; x := Symmetrization(X[5], [1,1]);
+&gt; [ i : i in [1..#X] | InnerProduct(X[i], x) eq 1];
+[ 13, 25, 30, 35, 36, 37, 52, 54, 66, 67, 70, 77, 82, 97,
+98, 101, 131, 133, 134, 148, 149, 150, 151, 152, 178 ]
+&gt; x := Symmetrization(X[5], [2]);
+&gt; [ i : i in [1..#X] | InnerProduct(X[i], x) eq 1];
+[ 1, 2, 5, 7, 12, 20, 29, 34, 35, 37, 49, 52, 55, 66, 67,
+70, 96, 98, 100, 101, 102, 131, 134, 148, 149, 150, 154,
+180 ]
+</PRE>
+<HR>
+<H3><A NAME = "11830">Example <TT>Chtr_Lyons-schur-index (H97E11)</TT></A></H3>
+We consider the characters of Lyons' sporadic simple group, and compute
+Schur indices using character table information.
+We will use the methods described in <A  HREF = "text1038.htm#bib_Feit-Schur-indices">[Fei83]</A>, and check the
+assertion of <I>op. cit.</I> that all characters of Lyons' group have
+Schur index 1. Theorems referenced here refer to this article.
+<P>
+In general we cannot deduce all local Schur indices from character table
+information, but here we are fortunate and can do so.
+<P>
+We begin by finding the integral classes of the group, and setting up a
+texttt{test} function that, when it returns true, implies that the character
+has Schur index 1 over the rationals.
+We are using Theorem A, Theorem 2.7, and Theorem 2.15.
+<P>
+<P>
+<PRE>
+&gt; X := CharacterTable("Ly");
+&gt; #X;
+53
+&gt; Z := Integers();
+&gt; int_cl := {i : i in [1..#X] |
+&gt;     CanChangeUniverse([x[i]: x in X], Z)};
+&gt; R := Universe(X);
+&gt; d := ClassesData(R);
+&gt; test := function(x)                            
+&gt;    if Indicator(x) eq -1 then return false; end if;
+&gt;    c := [i : i in int_cl | x[i] in {1,-1}];
+&gt;    return #c gt 0 and GCD([d[i,1]: i in c]) eq 1;
+&gt; end function;
+&gt; schur_1 := {i : i in [1..#X] | test(X[i]) };  
+&gt; #schur_1;
+28
+&gt; rat := {i:i in schur_1|DegreeOfCharacterField(X[i]) eq 1};
+&gt; #rat;
+20
+</PRE>
+We have found 28 characters with Schur index 1. Of these, 20 are rational
+valued, hence are characters of rational representation of Ly.
+We now consider inner products with products of our 20 rational characters
+in pairs, to find more characters having Schur index 1.
+Here we are using Theorem 2.1 and Corollary 2.4.
+<P>
+<P>
+<PRE>
+&gt; unknown := {1..#X} diff schur_1;
+&gt; #unknown;
+25
+&gt; new_1 := {i : i in unknown | exists{j : j,k in rat | j le k
+&gt; and ip eq 1 or (Indicator(X[i]) ne 0 and IsOdd(ip))
+&gt; where ip := Z!InnerProduct(X[i], X[j]*X[k]) } };
+&gt; schur_1 := schur_1 join new_1;    
+&gt; unknown := {1..#X} diff schur_1;
+&gt; unknown;
+{ 37 }
+&gt; Degree(X[37]), Indicator(X[37]);
+36887520 1
+&gt; DegreeOfCharacterField(X[37]);
+1
+&gt; PrimeDivisors(GroupOrder(R) div 36887520);
+[ 2, 3, 5, 7, 11 ]
+</PRE>
+We have shown that all but one character (&chi; = &chi;<sub>37</sub>) have
+Schur index one.
+The character &chi; has degree 36 887 520, indicator 1
+(hence Schur index 1 over the real numbers), and is rational valued.
+Furthermore, for primes p not&isin;{2, 3, 5, 7, 11} this character has
+p-adic Schur index m<sub>p</sub>(&chi;) = 1 (Theorem 2.10).
+<P>
+We now compute the Schur indices
+of &chi; over the remaining p-adic fields. We start with values of
+&chi; on group elements of order 11 (class 17).
+This may give us information on
+the cases p&isin;{2, 3, 5, 7}. We test if characters in the same
+p-block as &chi; take values on class 17 that lie in the
+p-adic field Q<sub>p</sub>. We use a test for this based on the Galois group
+of Q<sub>p</sub>(&zeta;<sub>11</sub>) over Q<sub>p</sub>. This group is cyclic, generated by the
+pth conjugacy operation: &zeta;<sub>11</sub> |-&gt; &zeta;<sub>11</sub><sup>p</sup>.
+<P>
+<P>
+<PRE>
+&gt; d[17,1];
+11
+&gt; X[37,17];
+-1
+&gt; for p in [2,3,5,7] do
+&gt;    bl := Block(X, 37, p);
+&gt;    p, forall{i:i in bl|X[i,17] eq Conjugate(X[i,17],p)};
+&gt; end for;
+2 false
+3 true
+5 true
+7 false
+&gt; GroupFactoredOrder(R);
+[ &lt;2, 8&gt;, &lt;3, 7&gt;, &lt;5, 6&gt;, &lt;7, 1&gt;, &lt;11, 1&gt;, &lt;31, 1&gt;,
+&lt;37, 1&gt;, &lt;67, 1&gt; ]
+</PRE>
+We find that m<sub>3</sub>(&chi;) and m<sub>5</sub>(&chi;)
+are divisors of the character value -1, hence are both 1 (Corollary 3.2).
+When p=2, 7 we see that characters in the p-block of &chi; take values
+outside Q<sub>p</sub>. Noting that the Sylow 7-subgroups of Ly are cyclic,
+we get m<sub>7</sub>(&chi;) &gt; 1 (Theorem 2.12).
+As real valued characters have all Schur indices 1 or 2,
+we have m<sub>7</sub>(&chi;) = 2.
+<P>
+It remains to decide m<sub>2</sub>(&chi;) and m<sub>11</sub>(&chi;). We must have 
+one of these equal to 1 and the other equal to 2 (Theorem 2.15).
+We consider group elements of order 21 (class 27) in the same manner as
+above.
+<P>
+<P>
+<PRE>
+&gt; d[27,1];
+21
+&gt; X[37,27];
+1
+&gt; for p in [2,11] do
+&gt;    bl := Block(X, 37, p);
+&gt;    p, forall{i:i in bl|X[i,27] eq Conjugate(X[i,27],p)};
+&gt; end for;
+2 false
+11 true
+</PRE>
+From this information we conclude that m<sub>11</sub>(&chi;) = 1 (Corollary 3.2),
+and so m<sub>2</sub>(&chi;) = 2. 
+<P>
+We see that the statement in S7 of <A  HREF = "text1038.htm#bib_Feit-Schur-indices">[Fei83]</A>, that all
+characters of Lyons' group have Schur index 1, is not quite correct.
+The character of degree 36 887 520 has 2-adic and 7-adic local
+Schur indices equal to 2. All other characters of Ly have Schur index 1.
+<PRE></PRE> <A  HREF = "text1038.htm">[Next]</A><A  HREF = "text1042.htm">[Prev]</A> <A  HREF = "text1038.htm">[Right]</A> <A  HREF = "text1042.htm">[Left]</A> <A  HREF = "text1039.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

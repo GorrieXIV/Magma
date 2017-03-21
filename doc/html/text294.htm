@@ -1,0 +1,197 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Inner Products</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text295.htm">[Next]</A><A  HREF = "text293.htm">[Prev]</A> <A  HREF = "text295.htm">[Right]</A> <A  HREF = "text293.htm">[Left]</A> <A  HREF = "text291.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "2699">Inner Products</A></H3>
+
+<P>
+<P>
+<P>
+Every vector space V in Magma created via the <TT>VectorSpace</TT> 
+intrinsic (or its synonym <TT>KSpace</TT>) has an associated bilinear form which 
+is represented by a matrix and which can be accessed via 
+<TT>InnerProductMatrix(V)</TT> or via the attribute <TT>ip_form</TT>.  By default the 
+inner product matrix is the identity.  If the dimension of V is n, 
+then any n x n matrix defined over the base field of V can serve as 
+the inner product matrix by passing it to <TT>VectorSpace</TT> as an additional 
+parameter.
+<P>
+If e<sub>1</sub>, e<sub>2</sub>, ..., e<sub>n</sub> is a basis for V, the matrix of the form
+&beta; with respect to this basis is J := big(&beta;(e<sub>i</sub>, e<sub>j</sub>)big).
+
+
+<P>
+A vector space may also have an associated quadratic form. This can be
+assigned via the function <TT>QuadraticSpace</TT> described in Section 
+<A  HREF = "text297.htm#2752">Quadratic Spaces</A> and, if assigned, it can be accessed as the return value of 
+<TT>QuadraticFormMatrix</TT>.
+<P>
+If e<sub>1</sub>, e<sub>2</sub>, ..., e<sub>n</sub> is a basis for V, the matrix of the quadratic 
+form q with polar form &beta; with respect to this basis is the upper 
+triangular matrix Q whose ith diagonal entry is q(e<sub>i</sub>) and whose
+(i, j)th entry for i &lt; j is &beta;(e<sub>i</sub>, e<sub>j</sub>).
+<P>
+In addition, in order to accommodate hermitian forms, a vector space of type 
+<TT>ModTupFld</TT> has an attribute <TT>Involution</TT>. This attribute is intended 
+to hold an automorphism (of order two) of the base field. 
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text294.htm#2707">Orthogonality</A>
+</UL>
+<HR>
+<H3><A NAME = "2700">Example <TT>FldForms_generalform (H29E1)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; K := GF(11);
+&gt; J := Matrix(K,3,3,[1,2,3, 4,5,6, 7,8,9]);
+&gt; V := VectorSpace(K,3,J);
+&gt; InnerProductMatrix(V);
+[ 1  2  3]
+[ 4  5  6]
+[ 7  8  9]
+</PRE>
+<HR>
+<H5><A NAME = "2701">DotProduct(u, v) : ModTupFldElt, ModTupFldElt -&gt; FldElt</A></H5>
+<BLOCKQUOTE>
+If V is the generic space of the parent of u and v, let &sigma; be the 
+field automorphism <TT>V`Involution</TT> if this attribute is assigned or the
+identity automorphism if <TT>V`Involution</TT> is not assigned. If J is the 
+inner product matrix of V, the expression <TT>DotProduct(u,v)</TT> evaluates to 
+uJ&sigma;(v<sup>tr</sup>).  That is, it returns &beta;(u, v), where &beta; is a 
+bilinear or sesquilinear form on V.
+</BLOCKQUOTE>
+<H5><A NAME = "2702">DotProductMatrix(W) : SeqEnum[ModTupFldElt] -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+The matrix of inner products of the vectors in the sequence W.  The inner 
+products are calculated using <TT>DotProduct</TT> and therefore take into account 
+any field automorphism attached to the <TT>Involution</TT> attribute of the 
+generic space of the universe of S.
+</BLOCKQUOTE>
+<H5><A NAME = "2703">GramMatrix(V) : ModTupRng -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+If B is the basis matrix of V and if J is the inner product
+matrix, this function returns BJB^(tr).  In this case the
+<TT>Involution</TT> attribute is ignored.
+</BLOCKQUOTE>
+<H5><A NAME = "2704">InnerProductMatrix(V) : ModTupRng -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+The inner product matrix attached to the generic space of V.  This is
+the attribute <TT>V`ip_form</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2705">Example <TT>FldForms_grammatrix (H29E2)</TT></A></H3>
+This example illustrates the difference between <TT>GramMatrix</TT> and <TT>InnerProductMatrix</TT>.  The function <TT>GramMatrix</TT> uses the echelonised
+basis of the subspace W.  To obtain the matrix of inner products between
+a given list of vectors, use <TT>DotProductMatrix</TT>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; K&lt;a&gt; := QuadraticField(-2);
+&gt; J := Matrix(K,3,3,[1,2,1, 2,1,0, 1,0,2]);    
+&gt; V := VectorSpace(K,3,J);
+&gt; W := sub&lt;V| [a,a,a], [1,2,3]&gt;;
+&gt; InnerProductMatrix(W);
+[1 2 1]
+[2 1 0]
+[1 0 2]
+&gt; GramMatrix(W);
+[1 0]
+[0 9]
+&gt; DotProductMatrix([W.1,W.2]);
+[ -20 19*a]
+[19*a   37]
+</PRE>
+<HR>
+<H3><A NAME = "2706">Example <TT>FldForms_innerprod (H29E3)</TT></A></H3>
+Continuing the previous example, the vector space V does not have the
+attribute <TT>Involution</TT> assigned and therefore <TT>DotProduct</TT> uses the 
+<I>symmetric</I> bilinear form represented by the inner product matrix J.  
+However, the field K has a well-defined operation of complex conjugation 
+and so <TT>InnerProduct</TT> uses the <I>hermitian</I> form represented by J.
+<P>
+<P>
+<P>
+<PRE>
+&gt; u := W.1+W.2;  
+&gt; DotProduct(u,u);
+38*a + 17
+&gt; InnerProduct(u,u);
+57
+</PRE>
+<HR>
+<H4><A NAME = "2707">Orthogonality</A></H4>
+
+<P>
+<P>
+<P>
+If &beta; is any bilinear or sesquilinear form, the
+vectors u and v are <I>orthogonal</I> if &beta;(u, v) = 0.
+The <I>left orthogonal complement</I> of a subset X of V is the subspace
+<P>
+  ()<sup>perp</sup> X := { u &isin;V | &beta;(u, x) = 0 for all x&isin;X }
+<P>
+and the <I>right orthogonal complement</I> of W is
+<P>
+  X<sup>perp</sup> := { u &isin;V | &beta;(x, u) = 0 for all x&isin;X }.
+<P>
+If &beta; is reflexive, then ()<sup>perp</sup> X = X<sup>perp</sup>.
+
+
+<H5><A NAME = "2708">OrthogonalComplement(V, X : parameters) : ModTupFld, ModTupFld -&gt; ModTupFld</A></H5>
+
+<PRE>    Right: BoolElt                      Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The default value is the left orthogonal complement of X in V.  To obtain 
+the right orthogonal complement set <TT>Right</TT> to <TT>true</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "2709">Radical(V : parameters) : ModTupFld -&gt; ModTupFld</A></H5>
+
+<PRE>    Right: BoolElt                      Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The left radical of the inner product space V, namely ()<sup>perp</sup> V. To obtain 
+the right radical set <TT>Right</TT> to <TT>true</TT>.
+</BLOCKQUOTE>
+<P>
+<P>
+<P>
+<P>
+A bilinear or sesquilinear form &beta; is <I>non-degenerate</I> if 
+rad(V) = 0, where V is the polar space of &beta;.  
+<H5><A NAME = "2710">IsNondegenerate(V) : ModTupFld -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if the determinant of the matrix of inner products of the basis
+vectors of V is non-zero, otherwise <TT>false</TT>.  This function takes into account 
+the field automorphism, if any, attached to the <TT>Involution</TT> attribute of 
+the generic space of V.
+</BLOCKQUOTE>
+<P>
+<P>
+<P>
+<P>
+If V is a quadratic space over a perfect field of  characteristic 2,
+the restriction of the quadratic form Q to the radical is a semilinear
+functional (with respect to x |-&gt; x<sup>2</sup>) whose kernel is the <I>singular
+radical</I> of V.  A quadratic space is <I>non-singular</I> if its singular
+radical is zero.
+<H5><A NAME = "2711">SingularRadical(V) : ModTupFld -&gt; ModTupFld</A></H5>
+<BLOCKQUOTE>
+The kernel of the restriction of the quadratic form of the quadratic 
+space V to the radical of V.
+</BLOCKQUOTE>
+<H5><A NAME = "2712">IsNonsingular(V) : ModTupFld -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if V is a non-singular quadratic space, otherwise <TT>false</TT>.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text295.htm">[Next]</A><A  HREF = "text293.htm">[Prev]</A> <A  HREF = "text295.htm">[Right]</A> <A  HREF = "text293.htm">[Left]</A> <A  HREF = "text291.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

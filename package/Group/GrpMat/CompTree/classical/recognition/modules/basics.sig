@@ -1,0 +1,5 @@
+174,1
+S,RecogniseSmallDegree,"if G is a defining characteristic absolutely irreducible representation of a classical group H of degree d and G has degree in [d + 1..d^2], then return true and H, otherwise false",0,1,0,0,0,0,0,0,0,178,,36,178,-38,-38,-38,-38
+S,RecogniseSmallDegree,"if G is a defining characteristic absolutely irreducible representation of a classical group H of type <type>, degree d, and defining field GF (q), and G has degree in [d + 1..d^2], then return true and H, otherwise false; the string <type> is one of SL, Sp, SU, Omega, Omega+, Omega-",0,4,0,0,0,0,0,0,0,148,,0,0,148,,0,0,298,,0,0,178,,36,178,-38,-38,-38,-38
+S,SmallDegreePreimage,"if RecogniseSmallDegree has been applied to G and g is in G, then return true and the preimage of g; otherwise return false. Limit controls the number of attempts to construct the preimage",0,2,0,0,0,0,0,0,0,180,,0,0,178,,36,180,-38,-38,-38,-38
+S,SmallDegreeImage,"if RecogniseSmallDegree has been applied to G and h is in the preimage of G, then return true and the image of h in G; otherwise return false",0,2,0,0,0,0,0,0,0,180,,0,0,178,,36,180,-38,-38,-38,-38

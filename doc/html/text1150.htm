@@ -1,0 +1,198 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Nilpotent Orbits in Simple Lie Algebras</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1129.htm">[Next]</A><A  HREF = "text1149.htm">[Prev]</A> <A  HREF = "text1129.htm">[Right]</A> <A  HREF = "text1149.htm">[Left]</A> <A  HREF = "text1130.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "12951">Nilpotent Orbits in Simple Lie Algebras</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+Take a simple Lie algebra over the complex numbers, and consider the
+connected component of its automorphism group that contains the identity.
+This group acts on the Lie algebra, and there is interest in understanding 
+the nature of its orbits.  The nilpotent orbits for simple Lie algebras 
+have been classified. We refer to the book by Collingwood and McGovern
+<A  HREF = "text1129.htm#bib_colmcgov">[CM93]</A> for the details of this classification.
+<P>
+The main technical tools used for the classification are the weighted
+Dynkin diagram and the sl<sub>2</sub>-triple. The weighted Dynkin diagram is
+the Dynkin diagram of the root system of the Lie algebra, with labels
+that can be 0, 1, 2. A nilpotent orbit is uniquely determined by its 
+weighted Dynkin diagram. By the Jacobson-Morozov theorem a nilpotent 
+element of a semisimple Lie algebra can be embedded (as nilpositive 
+element) in an sl<sub>2</sub>-triple. Now two nilpotent elements are conjugate 
+(under the group) if and only if the corresponding sl<sub>2</sub>-triples are
+conjugate. This yields a bijection between nilpotent orbits and 
+conjugacy classes of simple subalgebras isomorphic to sl<sub>2</sub>.
+<P>
+This section describes functions for working with the classification
+of nilpotent orbits in simple Lie algebras. One of the main invariants
+of a nilpotent orbit is its weighted Dynkin diagram. We represent 
+such a diagram by a sequence of its labels; they are mapped to the
+nodes of the Dynkin diagram in the order determined by the Cartan matrix
+of the root datum. Also, an sl<sub>2</sub>-triple is represented by a sequence
+[f, h, e] of three elements of a Lie algebra; these satisfy the
+commutation relations [h, e]=2e, [h, f]= - 2f, [e, f]=h.
+<P>
+Throughout this section we consider orbits that are not the zero orbit. 
+
+
+<H5><A NAME = "12952">IsGenuineWeightedDynkinDiagram( L, wd ) : AlgLie, SeqEnum -&gt; BoolElt, SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a simple Lie algebra L, and a sequence wd consisting of integers
+that are 0, 1, or 2, this function returns <TT>true</TT> if wd corresponds to 
+a nilpotent orbit (in other words, if it is the weighted Dynkin diagram 
+of a nilpotent orbit). If wd does corresponds to a nilpotent orbit, an
+sl<sub>2</sub>-triple in L, such that the third element lies in the nilpotent 
+orbit corresponding to the weighted Dynkin diagram is returned. If wd 
+does not correspond to a nilpotent orbit. the second return value is a
+sequence consisting of three zeros of L.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "12953">Example <TT>AlgLie_NilpOrbGenuine (H106E59)</TT></A></H3>
+We can use this function to find the classification of the nilpotent orbits 
+of a given Lie algebra. First we construct all possible weighted Dynkin 
+diagrams, and then we remove those that do not correspond to an orbit.
+<P>
+<P>
+<PRE>
+&gt; L:= LieAlgebra( RootDatum("D4"), Rationals() );
+&gt; [ w : i,j,k,l in [0,1,2] | IsGenuineWeightedDynkinDiagram(L, w) 
+&gt;     where w := [i,j,k,l] ];
+[
+    [ 0, 0, 0, 2 ],
+    [ 0, 0, 2, 0 ],
+    [ 0, 1, 0, 0 ],
+    [ 0, 2, 0, 0 ],
+    [ 0, 2, 0, 2 ],
+    [ 0, 2, 2, 0 ],
+    [ 1, 0, 1, 1 ],
+    [ 2, 0, 0, 0 ],
+    [ 2, 0, 2, 2 ],
+    [ 2, 2, 0, 0 ],
+    [ 2, 2, 2, 2 ]
+]
+</PRE>
+<HR>
+<H5><A NAME = "12954">NilpotentOrbit( L, wd ) : AlgLie, SeqEnum -&gt; NilpOrbAlgLie</A></H5>
+<BLOCKQUOTE>
+This returns the nilpotent orbit in the simple Lie algebra L with
+weighted Dynkin diagram given by the sequence wd. It is <I>not</I>
+checked whether the weighted Dynkin diagram really corresponds to a 
+nilpotent orbit. 
+</BLOCKQUOTE>
+<H5><A NAME = "12955">NilpotentOrbit( L, e ) : AlgLie, AlgLieElt -&gt; NilpOrbAlgLie</A></H5>
+<BLOCKQUOTE>
+This returns the nilpotent orbit in the simple Lie algebra L having
+representative e. Here e has to be a nilpotent element of 
+the Lie algebra. This condition is not checked by the function.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "12956">Example <TT>AlgLie_NoByRep (H106E60)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; L:= LieAlgebra( RootDatum("A2"), Rationals() );
+&gt; NilpotentOrbit( L, [2,2] );    
+Nilpotent orbit in Lie algebra of type A2
+&gt; NilpotentOrbit( L, L.1 );      
+Nilpotent orbit in Lie algebra of type A2
+</PRE>
+<HR>
+<H5><A NAME = "12957">NilpotentOrbits( L ) : AlgLie -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a simple Lie algebra L, this function returns the sequence 
+of all nilpotent orbits in the simple Lie algebra L.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "12958">Example <TT>AlgLie_NOD4 (H106E61)</TT></A></H3>
+We compute the nilpotent orbits of the Lie algebra of type D<sub>4</sub>, and 
+observe that they are the same as those found in Example <A  HREF = "text1.htm#">H106E59</A>.
+<P>
+<P>
+<PRE>
+&gt; L:= LieAlgebra( RootDatum("D4"), Rationals() );
+&gt; o:= NilpotentOrbits(L);
+&gt; [ WeightedDynkinDiagram(orb) : orb in o ];
+[
+    [ 2, 2, 2, 2 ],
+    [ 2, 0, 2, 2 ],
+    [ 2, 2, 0, 0 ],
+    [ 0, 2, 0, 2 ],
+    [ 0, 2, 2, 0 ],
+    [ 0, 2, 0, 0 ],
+    [ 1, 0, 1, 1 ],
+    [ 2, 0, 0, 0 ],
+    [ 0, 0, 0, 2 ],
+    [ 0, 0, 2, 0 ],
+    [ 0, 1, 0, 0 ]
+]
+</PRE>
+<HR>
+<H5><A NAME = "12959">Partition( o ) : NilpOrbAlgLie -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Here o is a nilpotent orbit in a simple Lie algebra of classical type
+(i.e., of type A<sub>n</sub>, B<sub>n</sub>, C<sub>n</sub> or D<sub>n</sub>). The nilpotent orbits 
+for the Lie algebras of these types have been classified in terms of 
+partitions.  This function returns the partition corresponding to the orbit.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "12960">Example <TT>AlgLie_PartEx (H106E62)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; L:= LieAlgebra( RootDatum("D4"), Rationals() );
+&gt; orbs:= NilpotentOrbits( L ); 
+&gt; Partition( orbs[5] );
+[ 4, 4 ]
+&gt; Partition( orbs[6] );
+[ 3, 3, 1, 1 ]
+</PRE>
+<HR>
+<H5><A NAME = "12961">SL2Triple( o ) : NilpOrbAlgLie -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a nilpotent orbit o in a simple Lie algebra L, this function
+returns an sl<sub>2</sub>-triple, [f, h, e] of elements of L, such that e
+lies in the nilpotent orbit.
+</BLOCKQUOTE>
+<H5><A NAME = "12962">SL2Triple( L, e ) : AlgLie, AlgLieElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a semisimple Lie algebra L of characteristic 0, and a nilpotent 
+element e of L, this function returns an sl<sub>2</sub>-triple [f, h, e] of 
+elements of L. It may also work for other Lie algebras, and in other 
+characteristics, but this is not guaranteed.
+</BLOCKQUOTE>
+<H5><A NAME = "12963">Representative( o ) : NilpOrbAlgLie  -&gt; AlgLieElt</A></H5>
+<BLOCKQUOTE>
+Given a nilpotent orbit o for a simple Lie algebra L, this function
+returns an e&isin;L lying in the orbit.
+</BLOCKQUOTE>
+<H5><A NAME = "12964">WeightedDynkinDiagram( o ) : NilpOrbAlgLie -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a nilpotent orbit o for a simple Lie algebra L, this function
+returns its weighted Dynkin diagram.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "12965">Example <TT>AlgLie_WDD (H106E63)</TT></A></H3>
+We take some nilpotent element in the Lie algebra of type E<sub>8</sub> and we
+find the weighted Dynkin diagram of the orbit it lies in.
+<P>
+<P>
+<PRE>
+&gt; L:= LieAlgebra( RootDatum("E8"), Rationals() );
+&gt; x,_,_:= ChevalleyBasis(L);
+&gt; orb:= NilpotentOrbit( L, x[1]+x[10]-x[30]+3*x[50]-2*x[100] );
+&gt; WeightedDynkinDiagram( orb );
+[ 1, 0, 0, 0, 0, 0, 0, 1 ]
+</PRE>
+<PRE></PRE> <A  HREF = "text1129.htm">[Next]</A><A  HREF = "text1149.htm">[Prev]</A> <A  HREF = "text1129.htm">[Right]</A> <A  HREF = "text1149.htm">[Left]</A> <A  HREF = "text1130.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

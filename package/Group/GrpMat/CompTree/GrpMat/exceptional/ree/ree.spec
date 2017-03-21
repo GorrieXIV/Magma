@@ -1,0 +1,18 @@
+{
+ 	magma
+	{
+	 	ree.m
+		standard.m
+		involution.m
+		stab.m
+		tensor.m
+		membership.m
+		symsquare.m
+		sylow.m
+		conjugacy.m
+		crosschar.m
+		maximals.m
+		elements.m
+		bn.m
+	}
+}

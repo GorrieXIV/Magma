@@ -1,0 +1,165 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Conversion to Number Fields</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text410.htm">[Next]</A><A  HREF = "text408.htm">[Prev]</A> <A  HREF = "text410.htm">[Right]</A> <A  HREF = "text408.htm">[Left]</A> <A  HREF = "text405.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "4241">Conversion to Number Fields</A></H3>
+
+<P>
+<P>
+Although in theory an abelian extension "uniquely" defines a number field
+and therefore all its properties, not all of them are directly accessible
+(in Magma at least). The functions listed here perform the conversion 
+to a number field, the most important being of course the function that
+computes defining equations.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text409.htm#4247">Character Theory</A>
+</UL>
+<H5><A NAME = "4242">EquationOrder(A) : FldAb -&gt; RngOrd</A></H5>
+
+<PRE>    SetVerbose("ClassField", n):        Maximum: 5</PRE>
+<BLOCKQUOTE>
+Given an abelian extension A of a number field,
+using the algorithm of Fieker (<A  HREF = "text404.htm#bib_fiekerArtin">[Fie00]</A>, <A  HREF = "text404.htm#bib_cohen2">[Coh00]</A>) defining equations 
+for A are computed. For each cyclic factor of prime power degree,
+one polynomial will be constructed.
+Depending on the size of the cyclic factors encountered, this 
+may be a very lengthy process.
+</BLOCKQUOTE>
+<H5><A NAME = "4243">NumberField(A) : FldAb -&gt; FldNum</A></H5>
+<BLOCKQUOTE>
+Converts the abelian extension A into a number field. This is equivalent
+to <TT>NumberField(EquationOrder(A))</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "4244">MaximalOrder(A) : FldAb -&gt; RngOrd</A></H5>
+
+<PRE>    Al: MonStgElt                       Default: "Kummer"</PRE>
+
+<PRE>    Partial: BoolElt                    Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Computes the maximal order of the abelian extension A. The result
+is the same as that given by
+<TT>Maximal-Order(-Equation-Order(A))</TT>
+but this functions uses the special 
+structure of A and should be much faster in general.
+<P>
+The first step involves computing the maximal orders of each component.
+<P>
+If <TT>Al eq "Kummer"</TT> the maximal order computation uses Kummer theory
+to compute maximal orders of kummer extensions known to each component then
+intersects these with the component to gain the maximal order of that component
+<A  HREF = "text404.htm#bib_suth-max-kummer">[Sut12]</A>.
+<P>
+If <TT>Al eq "Round2"</TT>, the ordinary round 2 
+maximal order function is used on the
+components.
+<P>
+If <TT>Al eq "Discriminant"</TT>, the discriminant of the components is passed into the
+maximal order computation.
+<P>
+In the second step, the components are combined into an approximation
+of the full maximal order of A.
+<P>
+If <TT>Partial</TT> is <TT>true</TT>, the computations stop at this point, otherwise
+<TT>Maximal-Order</TT> is again called and the discriminant of A is passed in.
+</BLOCKQUOTE>
+<H5><A NAME = "4245"></A><A NAME = "FldAb:Components">Components</A>(A) : FldAb -&gt; [RngOrd]</H5>
+
+<PRE>    SetVerbose("ClassField", n):        Maximum: 5</PRE>
+<BLOCKQUOTE>
+A list of relative extensions is determined. One extension per cyclic
+factor is computed.
+</BLOCKQUOTE>
+<H5><A NAME = "4246">Generators(A) : FldAb -&gt; [ ], [ ], [ ]</A></H5>
+<BLOCKQUOTE>
+The first return value is a sequence of generating elements for 
+<TT>NumberField(A)</TT>, the second contains the same elements but viewed as 
+elements of the Kummer extension used in the construction.
+The third list contains the images of the second list under the action
+of a generator of the automorphism group corresponding to this cyclic factor.
+</BLOCKQUOTE>
+<H4><A NAME = "4247">Character Theory</A></H4>
+
+<P>
+<P>
+<P>
+Given a Hecke character &psi; of a number field K, one can compute
+an associated abelian extension L/K, and vice-versa. The same is true
+for Dirichlet characters over the rationals. The number field K
+must be given as an absolute field. See Chapter <A  HREF = "text417.htm#4306">DIRICHLET AND HECKE CHARACTERS</A> for more
+about Dirichlet and Hecke characters.
+
+
+<H5><A NAME = "4248">AbelianExtension(psi) : GrpHecke -&gt; FldAb</A></H5>
+<H5>AbelianExtension(psi) : GrpHeckeElt -&gt; FldAb</H5>
+<H5>AbelianExtension(chi) : GrpDrchNFElt -&gt; FldAb</H5>
+<H5>AbelianExtension(chi) : GrpDrchElt -&gt; FldAb</H5>
+<BLOCKQUOTE>
+Given a Hecke character group (or a generator if cyclic)
+over a number field K, or a Dirichlet character over the rationals
+(possibly represented as a number field), compute
+the corresponding Abelian field.
+</BLOCKQUOTE>
+<H5><A NAME = "4249">HeckeCharacterGroup(L) : FldNum -&gt; GrpHecke</A></H5>
+<BLOCKQUOTE>
+Given an abelian relative extension L/K where K is absolute,
+compute the corresponding Hecke character group over K.
+</BLOCKQUOTE>
+<H5><A NAME = "4250">HeckeCharacterGroup(A) : FldAb -&gt; GrpHecke</A></H5>
+<BLOCKQUOTE>
+Given an abelian field, compute the corresponding Hecke character group.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "4251">Example <TT>FldAb_classfield-characters (H40E7)</TT></A></H3>
+<P>
+We construct a cyclic cubic extension of a quartic field
+(of class number 2, it happens), and compute the corresponding Hecke character
+group, then check that the process inverts correctly. Finally we check the
+L-series of a Hecke character that generates this character group.
+<P>
+<P>
+<P>
+<PRE>
+&gt; _&lt;x&gt; := PolynomialRing(Integers());
+&gt; K := NumberField(x^4+4*x^3+7*x^2+2*x+1);
+&gt; f := Polynomial([1, 1-K.1, 1+K.1+K.1^2, 1]);
+&gt; E := ext&lt;K|f&gt;; // E/K is cyclic of deg 3
+&gt; G := HeckeCharacterGroup(E); psi:=G.1;
+&gt; A := AbelianExtension(psi); // either psi or G
+&gt; assert IsIsomorphic(E,NumberField(A));
+&gt; L := LSeries(psi);
+&gt; CFENew(L);
+-2.36658271566303541623518569585E-30
+</PRE>
+<P>
+Here is an example that is not cyclic, namely the Hilbert class field
+of (Q)(Sqrt( - 4027)).
+<P>
+<P>
+<P>
+<PRE>
+&gt; K := QuadraticField(-4027);
+&gt; ClassGroup(K);
+Abelian Group isomorphic to Z/3 + Z/3
+&gt; G := HeckeCharacterGroup(1*Integers(K));
+&gt; L := AbelianExtension(G);
+&gt; assert G eq HeckeCharacterGroup(L);
+&gt; assert IsIsomorphic(HilbertClassField(K),NumberField(L));
+&gt; L1 := AbelianExtension(G.1); // L1/K cyclic deg 3
+&gt; L2 := AbelianExtension(G.2); // L2/K cyclic deg 3
+&gt; assert L1*L2 eq L;
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text410.htm">[Next]</A><A  HREF = "text408.htm">[Prev]</A> <A  HREF = "text410.htm">[Right]</A> <A  HREF = "text408.htm">[Left]</A> <A  HREF = "text405.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

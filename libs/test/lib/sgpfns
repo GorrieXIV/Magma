@@ -1,0 +1,392 @@
+/*
+Independent procedures for testing subgroup functions (table 12.7).
+*/
+
+bEltCntlr := function(g, x)
+    return not(IsCentral(Centralizer(g,x), sub<g | x>));
+end function;
+
+bSgpCntlr := function(g, h)
+/*
+Check that every generator commutes with the centraliser.
+*/
+    cnt := Centralizer(g, h);
+    for e in Generators(h) do
+	for c in Generators(cnt) do
+	    if e*c ne c*e then
+		return true;
+	    end if;
+	end for;
+    end for;
+    return false;
+end function;
+
+cEltCntlr := function(g, x)
+    return Centralizer(g, x) ne Centralizer(g, sub<g | x>);
+end function;
+
+dSgpCntlr := function(g, h)
+/*
+Ensure centralizer by checking it is at least correct up to conjugation.
+*/
+    L := SubgroupLattice(g);
+    return L!Centralizer(g, h) ne Centralizer(L!g, L!h);
+end function;
+
+bNmlLatt := function(G)
+    return not IsNormal(G, NormalLattice(G)[2]);
+end function;
+
+bNorm := function(g, h) 
+    return not IsNormal(Normalizer(g, h), h);
+end function;
+
+cNorm := function(G, H)
+/*
+Calculate and compare normaliser (small group).
+*/
+    K := H;
+    T := Transversal(G, H);
+    for x in T do
+	if H^x eq H then
+	    K := sub<G | K, x>;
+	end if;
+    end for;
+    return K ne Normalizer(G, H);
+end function;
+
+dNorm := function(g, h)
+/*
+Ensure normalizer by checking it is at least correct up to conjugation.
+*/
+    L := SubgroupLattice(g);
+    return L!Normalizer(g, h) ne Normalizer(L!g, L!h);
+end function;
+
+bZent := function(g, h) 
+    return IsCentral(g, h) and not IsAbelian(h);
+end function;
+
+dZent := function(g, h) 
+    return IsCentral(g, h) ne (h subset Centre(g));
+end function;
+
+bCent := function(g)
+/*
+Ensure generators commute with those of the centre.
+*/
+    z := Centre(g);
+    for i := 1 to NumberOfGenerators(g) do
+	for j := 1 to NumberOfGenerators(z) do
+	    if g.i^z.j ne g.i then 
+		return true;
+	    end if;
+	end for;
+    end for;
+    return g ne Centralizer(g, Centre(g));
+end function;
+
+eCent := function(G)
+/*
+Ensure CENTRE = intersection over x in G, CENTRALISER(G,x).
+*/
+    Z := Centralizer(G, G.1);
+    for i := 2 to NumberOfGenerators(G) do
+	Z := Z meet Centralizer(G, G.i);
+    end for;
+    return Z ne Centre(G) or Z ne Centralizer(G, G);
+end function;
+
+bNmlCl := function(G, H)
+    return not(IsNormal(G, NormalClosure(G, H)))
+	or not(H subset NormalClosure(G, H));
+end function;
+
+eNmlCl := function(g, h)
+/*
+Calculate and compare normal closure.
+*/
+    if IsNormal(g, h) then
+	return h ne NormalClosure(g, h);
+    else
+	return $$(g, sub<g | h, {x^y: x in Generators(h), y in Generators(g)}>);
+    end if;
+end function;
+
+eCore := function(g, h)
+/*
+Calculate and compare core.
+*/
+    k := h;
+    i := 1;
+    m := NumberOfGenerators(g);
+    while i le m do
+	k1 := k^g.i;
+	if k eq k1 then
+	    i +:= 1;
+	    continue;
+	end if;
+	k := k meet k1;
+	i := 1;
+    end while;
+    return k ne Core(g, h);
+end function;
+
+cInvar := function(g,h) 
+    return IsNormal(g,h) ne (h eq h^g);
+end function;
+
+cAbel := function(g) 
+    return IsAbelian(g) ne (g eq Centre(g));
+end function;
+
+cElAbel := function(g) 
+    return IsElementaryAbelian(g) ne (IsAbelian(g) and IsPrime(Exponent(g)));
+end function;
+
+dDerSgp := function(g)
+/*
+Calculate and compare derived subgroup.
+*/
+    gg := Generators(g);
+    gc := {(x, y) : x, y in gg};
+    gn := NormalClosure(g, sub<g | gc>);
+    return gn ne DerivedSubgroup(g);
+end function;
+
+eDerSer := function(g)
+/*
+Calculate and compare derived series.
+*/
+    d := [];
+    l := g;
+    repeat
+	Append(~d, l);
+	l := DerivedSubgroup(l);
+    until d[#d] eq l;
+    return not CmpSeqs(d, DerivedSeries(g));
+end function;
+
+eLCS := function(G)
+/*
+Calculate and compare lower central series.
+*/
+    H := G;
+    l := [];
+    repeat
+	Append(~l, H);
+	H := ncl<G | {(x, y): x in Generators(H), y in Generators(G)}>;
+    until l[#l] eq H;
+    return not CmpSeqs(l, LowerCentralSeries(G));
+end function;
+
+eUCS := function(G)
+/*
+Calculate and compare upper central series.
+*/
+    Z := sub<G | Id(G)>;
+    Q := [Z];
+    K := G;
+    while FactoredOrder(Z) ne FactoredOrder(K) do
+	K := Z;
+	H, f := quo<G | Z>;
+	Z1 := Centre(H);
+	if Z1 eq sub<H | Id(H)> then
+	    break;
+	end if;
+	Z := Z1 @@ f;
+	Append(~Q, Z);
+    end while;
+    return not CmpSeqs(Q, UpperCentralSeries(G));
+end function;    
+
+// WARNING: p-groups only.
+cSpec := function(G)
+    return IsSpecial(G) ne
+	(IsElementaryAbelian(G) or
+	    (FrattiniSubgroup(G) eq Centre(G)
+		and DerivedSubgroup(G) eq Centre(G)
+		and IsElementaryAbelian(Centre(G))
+	    )
+	);
+end function;
+
+// WARNING: p-groups only.
+cExSp := function(G)
+    return IsExtraSpecial(G) ne
+	(IsSpecial(G) and not IsAbelian(G)
+	    and FactoredOrder(Centre(G))[1][2] eq 1
+	);
+end function;
+
+dCyclic := func<G | IsCyclic(G) ne (G eq sub<G | G.1>)>;
+
+bMinNmls := function(G)
+/*
+Check some conditions on the minimal normals.
+*/
+    for N in MinimalNormalSubgroups(G) do
+	if N*N ne {x : x in N} then
+	    return true;
+	elif not IsNormal(G, N) then
+	    return true;
+	end if;
+    end for;
+    return false;
+end function;
+
+cNilpotent := function(G)
+    return IsNilpotent(G) ne (DerivedSubgroup(G) subset FrattiniSubgroup(G));
+end function;
+
+cNilCl := function(G)
+    return (NilpotencyClass(G) ne -1 and not IsNilpotent(G))
+	or (IsNilpotent(G) and NilpotencyClass(G) ne #LowerCentralSeries(G)-1);
+end function;
+
+cSoluble := function(G)
+    return (Order(DerivedSeries(G)[#DerivedSeries(G)]) eq 1) ne IsSoluble(G);
+end function;
+
+bSylow := function(G)
+    fq := FactoredOrder(G);
+    for i := 1 to #fq do
+	if FactoredOrder(SylowSubgroup(G, fq[i][1])) ne [<fq[i][1], fq[i][2]>]
+	    or not (SylowSubgroup(G, fq[i][1]) subset G) then
+		return true;
+	end if;
+    end for;
+    return false;
+end function;
+
+einfach := function(G)
+/*
+If the group g is simple, return true; otherwise false.
+*/
+
+    N := FactoredOrder(G);
+
+    // Is g cyclic of prime order? 
+    if (#N eq 0) then
+	return true;
+    end if;
+
+    if (#N eq 1) and (N[1][2] eq 1) then
+	return true;
+    end if;
+
+    // Now apply various numerical criteria to the order of g
+    // in an attempt to prove that g is not simple.
+
+    // If N is of the form p^a or p^a * q^b, p and q primes,
+    // then G is not simple
+
+    k := #N;
+    if k le 2 then
+	return false;
+    end if;
+
+    // If N is not divisible by 8 or 12, then G is not simple"
+
+    if not ((N[1][1] eq 2 and N[1][2] ge 3)
+	    or (N[1][1] eq 2 and N[1][2] ge 2 and N[2][1] eq 3)) then
+	return false;
+    end if;
+
+    // Since G has passed the elementary numerical tests, it is
+    // necessary to look for proper normal subgroups.  first check
+    // if the derived subgroup of G is a proper subgroup. While
+    // this is logically unnecessary, it may save time.
+
+    if G ne DerivedSubgroup(G) then
+	return false;
+    end if;
+
+    // Check whether G contains an abelian normal subgroup: if
+    // it does, then O(p, G), for some odd prime p, must be non-trivial
+
+    for i := k to 1 by -1 do
+	if Core(G, SylowSubgroup(G, N[i][1])) ne sub<G | Id(G)> then
+	    return false;
+	end if;
+    end for;
+
+    // Use Theorem 3 to determine if the socle of G is a proper subgroup.
+
+    Z2 := SylowSubgroup(G, 2);
+    N := NormalClosure(G, Z2);
+    if DerivedSubgroup(N) ne G then
+	return false;
+    end if;
+
+    // The socle is all of G, so check whether G is a direct product.
+
+    for x in Z2 do
+	if Order(x) eq 2 then
+	    if NormalClosure(G, sub<Z2 | x>) ne G then
+		return false;
+	    end if;
+	end if;
+    end for;
+
+    return true;
+end function; // einfach
+
+eSimple := function(G);
+    return einfach(G) ne IsSimple(G);
+end function;
+
+cSubNorm := function(G, H)
+    return IsSubnormal(G, H) ne (SubnormalSeries(G, H) ne []);
+end function;
+
+eSubNorm := function(G, H)
+/*
+Calculate and compare subnormal series.
+*/
+    K := G;
+    i := 1;
+    S := SubnormalSeries(G, H);
+    while (i le #S) and (H subset K) and (H ne K) do
+	if K ne S[i] then
+	    return true;
+	end if;
+	i +:= 1;
+	K := NormalClosure(K, H);
+    end while;
+    if IsSubnormal(G, H) then
+	return H ne K or S[#S] ne H;
+    end if;
+    return H eq K;
+end function;
+
+eFrattini := function(G)
+/* for small groups */
+    L := SubgroupLattice(G);
+    K := G;
+    for x in MaximalSubgroups(Top(L)) do
+	K := K meet Group(x);
+    end for;
+    return K ne FrattiniSubgroup(G);
+end function;
+
+eCommut := function(G, H, K)
+/*
+Calculate and compare subgroup commutator.
+*/
+    gg := sub<G | {(x, y): x in Generators(H), y in Generators(K)}>;
+    p := NormalClosure(G, gg);
+    return p ne CommutatorSubgroup(G, H, K);
+end function;
+
+cSgpConj := function(H,x)
+    return H^x ne sub<Generic(H) | {h^x : h in Generators(H)}>;
+end function;
+
+eSelfNorm := function(G,H) 
+    return IsSelfNormalizing(G, H) ne (H eq Normalizer(G,H));
+end function;
+
+ePerfect := function(G) 
+    return IsPerfect(G) ne (G eq DerivedSubgroup(G));
+end function;

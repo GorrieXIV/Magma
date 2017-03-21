@@ -1,0 +1,1312 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>General Surfaces</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1383.htm">[Next]</A><A  HREF = "text1381.htm">[Prev]</A> <A  HREF = "text1383.htm">[Right]</A> <A  HREF = "text1381.htm">[Left]</A> <A  HREF = "text1379.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "15389">General Surfaces</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1382.htm#15390">Introduction</A>
+<LI> <A  HREF = "text1382.htm#15391">Creation Functions</A>
+<LI> <A  HREF = "text1382.htm#15397">Invariants</A>
+<LI> <A  HREF = "text1382.htm#15406">Singularity Properties</A>
+<LI> <A  HREF = "text1382.htm#15411">Kodaira-Enriques Classification</A>
+<LI> <A  HREF = "text1382.htm#15415">Minimal Models</A>
+<LI> <A  HREF = "text1382.htm#15427">Special Surfaces in Projective 4-space</A>
+</UL>
+<H4><A NAME = "15390">Introduction</A></H4>
+
+<P>
+<P>
+<P>
+We describe here the newer functionality for surfaces (two-dimensional, geometrically
+integral schemes over a field) in arbitrary dimensional ambients. However, the reader 
+should be aware that there are major restrictions for many of the intrinsics.
+<P>
+The biggest problems are the singularity assumptions (either non-singular or
+with at worst simple singularities) and restrictions
+to ordinary projective space which means that large dimensional ambients
+are unavoidable at times. The latter restriction is a consequence of the reliance
+on the coherent sheaf machinery for some key operations. These are the general issues most in need of
+address in future development. Since the time (and memory) for singularity checks
+can often vastly outweigh the time for the main processing, singularity checks are
+usually <I>only</I> performed when the user explicitly asks for them by setting a parameter
+value to <TT>true</TT>.
+<P>
+The main functionality is for the computation of fundamental invariants
+(irregularity, geometric genus etc.), checks for different type of `non-singularity'
+(e.g. Gorenstein, only simple singularities), Kodaira-Enriques classification,
+computation of minimal models (including the full canonical model for a surface of
+general type) and construction of random surfaces from certain families in Prj<sup>4</sup>.
+
+
+<H4><A NAME = "15391">Creation Functions</A></H4>
+
+<P>
+<P>
+As for general schemes and curves, surfaces may be created in any of Magma's
+ambient spaces. However, nearly all of the current specialised surface 
+functionality only applies to surfaces in ordinary projective space.
+<P>
+The requirement for a scheme to be a surface is that it is defined over a field,
+is of dimension 2 and is geometrically integral (reduced and irreducible when base
+extended to the algebraic closure of the ground field). Due to the difficulty in
+checking for <I>geometric</I> integrality, at present we only test for integrality
+(reduced and irreducible over the base field).
+<P>
+See Section <A  HREF = "text1385.htm#15496">Creation of General Del Pezzos</A> for some specific creation intrinsics for Del Pezzo
+surfaces and Section <A  HREF = "text1385.htm#15500">Parametrization of Del Pezzo  Surfaces</A> for some additional degree 6 Del Pezzo constructors.
+Additionally, see Section <A  HREF = "text1382.htm#15427">Special Surfaces in Projective 4-space</A> for intrinsics to create
+a range of surfaces in Prj<sup>4</sup> belonging to special families.
+
+
+<H5><A NAME = "15392">Surface(A,I) : Sch, ModMPol -&gt; Srfc</A></H5>
+<H5>Surface(A,f) : Sch, RngMPolElt -&gt; Srfc</H5>
+<H5>Surface(A,S) : Sch, SeqEnum -&gt; Srfc</H5>
+
+<PRE>    Nonsingular: BoolElt                Default: <TT>false</TT></PRE>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Saturated: BoolElt                  Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Let A be an ambient or a scheme which already has some defining equations.
+The function returns the surface defined by the ideal I, the single polynomial 
+f or the sequence of polynomials S within the scheme A. 
+<P>
+<P>
+<P>
+If I or the set of new defining equations added to those of A generate an 
+ideal that is known to be saturated (<I>c.f.</I> Section <A  HREF = "text1324.htm#14418">Constructing Schemes</A>), 
+<TT>Saturated</TT> can be set to <TT>true</TT>. If the surface is known to be non-singular 
+or singular, much subsequent calculation can be avoided by setting <TT>Nonsingular</TT> 
+to <TT>true</TT> or <TT>false</TT>. The parameter <TT>Check</TT> is <TT>true</TT> by default and forces 
+the function to check that the surface is integral (reduced and irreducible) by testing
+primality of the (saturated) defining ideal.  This can be an expensive computation in
+high-dimensional 
+ambients, so it is best to set <TT>Check</TT> to <TT>false</TT> if it is known in advance
+that the surface is integral. As stated above, our actual requirement is that 
+surfaces are geometrically integral (equivalently, the surface is integral and the
+base field is integrally closed in the coordinate ring) because many of the surface
+intrinsics only really 
+make sense for such varieties. However, this is a more difficult property to test. 
+In practice, integrality should usually imply geometric integrality.
+</BLOCKQUOTE>
+<H5><A NAME = "15393">RationalRuledSurface(P,n) : Prj, RngIntElt -&gt; Srfc, MapSch</A></H5>
+<BLOCKQUOTE>
+Returns a rational, ruled surface X in the ordinary, projective ambient P = Prj<sup>m</sup>
+with parameters n, m - 1 - n where n is the second argument. Such a surface is a rational
+scroll that can be defined in a number of equivalent ways (see Appendix A2H, <A  HREF = "text1378.htm#bib_Eis05">[Eis05]</A>).
+<P>
+Let Prj<sup>n</sup> and Prj<sup>m - 1 - n</sup> be the linear subspaces of P corresponding to the
+first n + 1 coordinates and the last m - n coordinates respectively. Then X
+is given geometrically as the union of the lines L<sub>QR</sub> joining a point Q on a rational normal
+curve in Prj<sup>n</sup> to a point R on a rational normal curve in Prj<sup>m - 1 - n</sup>, where Q and R
+correspond under a fixed isomorphism of the first rational normal curve to the second.
+In the cases n=0 and n=m - 1, the first or second rational normal curve degenerates to a
+single point and X is the cone of all lines from a rational normal curve in a hyperplane
+of P to a point (the apex) outside of the hyperplane. The apex is the only singular point
+of the surface X (and is not a simple singularity in general). In the non-degenerate cases,
+X is non-singular. n must always be between 0 and m - 1 (inclusive).
+<P>
+Following the notation of Section 2, Chapter 5 of <A  HREF = "text1378.htm#bib_hartshorne">[Har77]</A>, the rational ruled surface
+with parameters r, s can also be defined as follows. If e is Max(r, s)-Min(r, s) and
+v is Max(r, s), then X is the Hirzebruch surface X<sub>e</sub> (Thm. 2.17, <I>ibid</I>) mapped into 
+P via the linear system |C<sub>0</sub> + v * f|, which gives an embedding precisely in the non-degenerate 
+cases.
+<P>
+The second return value is a scheme map f from X to Prj<sup>1</sup> which defines the ruling on X:
+the fibres of f are all lines in P.
+</BLOCKQUOTE>
+<H5><A NAME = "15394">RandomCompleteIntersection(P,ds) : Prj, SeqEnum[RngIntElt] -&gt; Sch</A></H5>
+
+<PRE>    Nonsingular: BoolElt                Default: <TT>true</TT></PRE>
+
+<PRE>    RndP: RngIntElt                     Default: 1</PRE>
+<BLOCKQUOTE>
+This is the same as the general scheme intrinsic to generate a random complete
+intersection scheme in ordinary projective space P = Prj<sup>m</sup> over a finite field
+or the rationals. ds should be a sequence of positive integers of length m - 2.
+The intrinsic will generate random homogeneous polynomials F<sub>1</sub>, ..., F<sub>m - 2</sub> of degrees
+ds[1], ..., ds[m - 2] in the coordinate ring of P and return the subscheme X of P
+with the F<sub>i</sub> as defining equations. It is checked that X has dimension 2 (in which case
+all irreducible components have dimension 2). If parameter <TT>Nonsingular</TT> is set to the
+default value of <TT>true</TT>, the non-singularity (actually smoothness) is also checked. This
+guarantees that X is geometrically integral and the result is returned as a surface
+type <TT>Srfc</TT>. If the check is not performed, X is constructed as a plain <TT>Sch</TT>.
+If X fails the dimension or non-singularity check, a new set of random polynomials
+is generated.
+<P>
+If the rationals are the base field, the 
+parameter <TT>RndP</TT> is a positive integer used as an upper absolute bound 
+for random coefficients of polynomials. That is, the algorithm uses random
+integers between -RndP and +RndP inclusive. The default value here
+is 1.
+</BLOCKQUOTE>
+<H5><A NAME = "15395">KummerSurfaceScheme(C) : CrvHyp -&gt; Srfc</A></H5>
+<BLOCKQUOTE>
+Returns the Kummer surface of the Jacobian J of the genus 2 hyperelliptic curve C.
+This is a singular model of the surface: a quartic hypersurface in Prj<sup>3</sup> with
+16 simple "A1" singularities corresponding to the 16 points of order 1 or 2 on J.
+Its desingularisation is a K3 surface.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15396">Example <TT>AlgSrf_srfcs-creation (H122E1)</TT></A></H3>
+We illustrate the basic creation functions with some simple examples.
+Firstly, we create a degree 3 (Del Pezzo) and a degree 4 (K3) surface in
+Prj<sup>3</sup> directly by giving a defining equation.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P3&lt;x,y,z,t&gt; := ProjectiveSpace(Rationals(),3);
+&gt; X := Surface(P3,x^3+y^3+z^3+t^3);
+&gt; X;
+Surface over Rational Field defined by
+x^3 + y^3 + z^3 + t^3
+&gt; X := Surface(P3,x^4+y^4+z^4+t^4);
+&gt; X;
+Surface over Rational Field defined by
+x^4 + y^4 + z^4 + t^4
+</PRE>
+<P>
+We can create a degree 5 Del Pezzo surface in Prj<sup>5</sup> by specifying it
+as the projective plane blown up in 4 points (and anti-canonically embedded).
+<P>
+<P>
+<P>
+<PRE>
+&gt; P2&lt;x,y,z&gt; := ProjectiveSpace(Rationals(),2);
+&gt; pts := [* P2![1,0,0],P2![0,1,0],P2![0,0,1],P2![1,1,1] *];
+&gt; X := DelPezzoSurface(P2,pts);
+&gt; P5&lt;x,y,z,s,t,u&gt; := Ambient(X);
+&gt; X;
+Del Pezzo Surface of degree 5 over Rational Field defined by
+-y*z + x*s + s^2 - s*t - s*u + t*u,
+-y*s + s^2 + x*t - s*t,
+-z*s + s^2 + x*u - s*u,
+-s^2 + s*t + y*u - t*u,
+-s^2 + z*t + s*u - t*u
+</PRE>
+<P>
+The next example is a random surface in Prj<sup>5</sup> which is the complete
+intersection of hypersurfaces of degrees 2, 2 and 3
+<P>
+<P>
+<P>
+<PRE>
+&gt; P5&lt;x,y,z,s,t,u&gt; := ProjectiveSpace(Rationals(),5);
+&gt; X := RandomCompleteIntersection(P5,[2,2,3]);
+&gt; X;
+Surface over Rational Field defined by
+-y*z-z^2-x*s+y*s+z*s-s^2-x*t-y*t-z*t+s*t+t^2-x*u-y*u-z*u-t*u,
+-x^2+z^2-y*s+s^2+x*t+y*t-z*t+s*t+z*u-s*u+t*u-u^2,
+-x^3-x^2*y+y^2*z-x*z^2+y*z^2-x^2*s+x*z*s+y*z*s+z^2*s+x*s^2-y*s^2+z*s^2+s^3-x^2*t+
+x*z*t-z^2*t-x*s*t-x*t^2+y*t^2+z*t^2+s*t^2-t^3+x*y*u-y^2*u+x*z*u+y*z*u+y*s*u+z*s*u
+-s^2*u-x*t*u+y*t*u-z*t*u+s*t*u+t^2*u+x*u^2-y*u^2+t*u^2-u^3
+</PRE>
+<P>
+The next example is a rational ruled surface in Prj<sup>4</sup> with parameters 2, 1.
+This is a nonsingular surface scroll that is abstractly isomorphic to the
+Hirzebruch surface X<sub>1</sub> (the plane blown up at one point).
+<P>
+<P>
+<P>
+<PRE>
+&gt; P4&lt;x,y,z,s,t&gt; := ProjectiveSpace(Rationals(),4);
+&gt; X := RationalRuledSurface(P4,2);
+&gt; X;
+Surface over Rational Field defined by
+-z*s + y*t,
+-y*s + x*t,
+-y^2 + x*z
+</PRE>
+<P>
+Finally, we call one of the intrinsics from the section on surfaces in Prj<sup>4</sup>
+to get an Abelian surface (2-dimensional Abelian variety) which is the zero
+locus of a random global section of the famous Horrocks-Mumford vector bundle.
+There are 18 defining equations of degrees 5 and 6 that we do not list.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P4&lt;x,y,z,s,t&gt; := ProjectiveSpace(Rationals(),4);
+&gt; X := RandomAbelianSurface_d10g6(P4);
+&gt; #DefiningPolynomials(X);
+18
+&gt; [TotalDegree(f) : f in DefiningPolynomials(X)];
+[ 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6 ]
+</PRE>
+<HR>
+<H4><A NAME = "15397">Invariants</A></H4>
+
+<P>
+<P>
+<P>
+The following functions give standard invariants for projective surfaces with 
+only A-D-E singularities (or slightly weaker assumptions). Due to the current 
+limitations of the cohomology and sheaf machinery, most are only available for 
+ordinary projective surfaces. For corresponding functions that give invariants 
+of the desingularization of hypersurfaces with more general singularities, see 
+Section <A  HREF = "text1384.htm#15471">Adjoint Systems and Birational Invariants</A>. Key invariants are stored when computed.
+
+
+<H5><A NAME = "15398">GeometricGenus(S) : Srfc -&gt; RngIntElt</A></H5>
+
+<PRE>    CheckGor: BoolElt                   Default: <TT>false</TT></PRE>
+
+<PRE>    UseCohom: BoolElt                   Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The surface S should be an ordinary projective surface which is Gorenstein 
+(this guarantees that a canonical sheaf K exists as a dualising sheaf and 
+is invertible). Returns the geometric genus of S, defined as the dimension 
+of the space of global sections of K, h<sup>0</sup>(K). 
+<P>
+The boolean parameter <TT>CheckGor</TT> (default <TT>false</TT>) can be set to true to 
+force a check that S is Gorenstein if this isn't already known and stored. 
+By default, the computation computes (and stores) K and then does a direct 
+computation of its global sections.  The alternative method is to compute the 
+genus via cohomology since the dimension of H<sup>2</sup> of the structure sheaf is 
+equal to the genus. Set <TT>UseCohom</TT> to <TT>true</TT> to apply the second method. 
+The advantage of the first method is that it is currently faster (in general) 
+and also that K is used in many other intrinsics.
+Note that unless S is non-singular or has only A-D-E singularities, the 
+genus computed here will generally be larger than the geometric genus of a 
+desingularization of S.
+</BLOCKQUOTE>
+<H5><A NAME = "15399">Plurigenus(S,n) : Srfc, RngIntElt -&gt; RngIntElt</A></H5>
+
+<PRE>    CheckGor: BoolElt                   Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The surface S and parameter <TT>CheckGor</TT> are as in <TT>GeometricGenus</TT> 
+above. The integer n should be non-negative.  Returns the dimension of the 
+space of global sections of the nth tensor power of the canonical sheaf 
+K of S. Again this will generally be larger than the nth plurigenus of
+a desingularization of S unless S has at worst simple singularities.
+</BLOCKQUOTE>
+<H5><A NAME = "15400">ArithmeticGenus(S) : Srfc -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a scheme S, this function returns the arithmetic genus. It is,
+in fact,  the general scheme intrinsic.
+</BLOCKQUOTE>
+<H5><A NAME = "15401">Irregularity(S) : Srfc -&gt; RngIntElt</A></H5>
+
+<PRE>    CheckGor: BoolElt                   Default: <TT>false</TT></PRE>
+
+<PRE>    UseCohom: BoolElt                   Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The irregularity q of S, an ordinary projective surface, defined as the 
+dimension of the cohomology group H<sup>1</sup>(S, O<sub>S</sub>), where O<sub>S</sub> is the structure 
+sheaf of S.
+<P>
+If S is known to be Gorenstein or the geometric genus has already been 
+computed and stored, this is computed from the geometric genus p<sub>g</sub> and 
+arithmetic genus p<sub>a</sub> using the formula q = p<sub>g</sub> - p<sub>a</sub>. Note that S will 
+be known Gorenstein if it is known to be non-singular or to only have 
+simple singularities (All of these properties will have been stored if 
+already tested for. See next section.).
+<P>
+If <TT>CheckGor</TT> is set to <TT>true</TT> (the default is <TT>false</TT>), and the above 
+conditions arent satisfied, Gorensteinness will be checked and, if S 
+is Gorenstein, the above procedure will be followed.  Otherwise, the 
+cohomology machinery is used directly. Setting <TT>UseCohom</TT> to <TT>true</TT> 
+(the default is again <TT>false</TT>) will force the cohomology machinery to 
+be used, unless the value of q has already been computed and stored.
+</BLOCKQUOTE>
+<H5><A NAME = "15402">ChernNumber(S,n) : Srfc, RngIntElt -&gt; RngIntElt</A></H5>
+
+<PRE>    CheckADE: BoolElt                   Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The surface S should be ordinary projective with at most simple (A-D-E) 
+singularities. The integer n should be 1 or 2.  The singularity 
+condition, if not already known, will only be tested for if <TT>CheckADE</TT> 
+is set to <TT>true</TT> (default is <TT>false</TT>). 
+The function returns the nth Chern number of S<sub>1</sub>, the <I>minimal</I> 
+desingularization of S. For n=1, this is just the intersection product 
+K.K, where K is the canonical sheaf of S<sub>1</sub>. Thanks to the 
+singularity condition, this can just be computed on S. For n=2, the 
+Chern number c<sub>2</sub>(S) is computed from the relation 
+c<sub>2</sub>(S) + K.K = 12 * (1 + p<sub>a</sub>), where p<sub>a</sub> is the arithmetic genus of S.
+</BLOCKQUOTE>
+<H5><A NAME = "15403">MinimalChernNumber(S,n) : Srfc, RngIntElt -&gt; RngIntElt</A></H5>
+
+<PRE>    CheckADE: BoolElt                   Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The surface S should be ordinary projective with at most simple (A-D-E) 
+singularities. The integer n should be 1 or 2.  The singularity 
+condition, if not already known, will only be tested for if <TT>CheckADE</TT> 
+is set to <TT>true</TT> (default is <TT>false</TT>). The function computes and returns 
+the relevant Chern number for a minimal model S<sub>2</sub> of a desingularisation 
+S<sub>1</sub> of S.
+As above, these numbers follow from knowing K<sub>m</sub>.K<sub>m</sub> where K<sub>m</sub>
+is the canonical sheaf of S<sub>2</sub>. If k is the base-field and S is not
+rational or birationally ruled (i.e. of Kodaira dimension -1), then
+S<sub>2</sub> is defined over k and is unique up to k-isomorphism. In these
+cases, K<sub>m</sub>.K<sub>m</sub> is known from the Kodaira dimension and the
+second plurigenus in the Kodaira dimension 2 (general type) case.
+For rational and ruled surfaces, the minimal model is not unique up to
+isomorphism and a geometrically minimal model may not be defined over k.
+In these cases, we conventionally take for the invariants a minimal model over
+the algebraic closure of k with maximal K<sub>m</sub>.K<sub>m</sub>, which is 
+therefore 9 for rational S and 8 for non-rational, ruled S.
+</BLOCKQUOTE>
+<H5><A NAME = "15404">HodgeNumber(S,i,j) : Srfc, RngIntElt, RngIntElt -&gt; RngIntElt</A></H5>
+
+<PRE>    CheckADE: BoolElt                   Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The surface S should be an ordinary projective with at most simple 
+(A-D-E) singularities.  The singularity condition, if not already 
+known, will only be tested for if <TT>CheckADE</TT> is set to <TT>true</TT> 
+(default is <TT>false</TT>).
+<P>
+The integers i, j should be such that 0 &le;i, j &le;2. 
+The function returns the Hodge number h<sup>i, j</sup> of the minimal 
+desingularization S<sub>1</sub> of S which is the dimension of the cohomology
+group H<sup>j</sup>(S<sub>1</sub>, D<sup>i</sup>) where D<sup>i</sup> is the ith alternating power of 
+the sheaf of differentials of S<sub>1</sub>.  These are computed by formula 
+from the fundamental invariants which are the geometric
+genus, the irregularity and the first Chern number of S (or S<sub>1</sub>).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15405">Example <TT>AlgSrf_srfcs-invs (H122E2)</TT></A></H3>
+We take an easy example: the Kummer surface of the Jacobian of a genus 2
+hyperelliptic curve, embedded in Prj<sup>3</sup> as a degree 4 surface with
+16 A<sub>1</sub> singularities lying beneath the 16 points of order 2 on the
+Jacobian. A nonsingular quartic in Prj<sup>3</sup> is a K3 surface and simple
+singularities don't affect the quartic being K3. We verify this here
+for the Kummer surface, finding that the invariants are the standard
+invariants for a K3 surface.
+<P>
+<P>
+<P>
+<PRE>
+&gt; f := PolynomialRing(Rationals())![-1,0,0,0,0,0,1]; //t^6-1
+&gt; X := KummerSurfaceScheme(HyperellipticCurve(f));
+&gt; IsSingular(X);
+true
+&gt; HasOnlySimpleSingularities(X);
+true
+&gt; GeometricGenus(X);
+1
+&gt; ArithmeticGenus(X);
+1
+&gt; Irregularity(X);
+0
+&gt; [ChernNumber(X,i) : i in [1,2]];
+[ 0, 24 ]
+&gt; for i in [0..2], j in [0..2] do
+&gt;  printf "%o,%o : %o n",i,j,HodgeNumber(X,i,j);
+&gt; end for;
+0,0 : 1
+0,1 : 0
+0,2 : 1
+1,0 : 0
+1,1 : 20
+1,2 : 0
+2,0 : 1
+2,1 : 0
+2,2 : 1
+</PRE>
+<HR>
+<H4><A NAME = "15406">Singularity Properties</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+This section contains intrinsics for testing for various levels of `singularity'
+of a surface. There are further intrinsics applying to more general schemes
+in Chapter <A  HREF = "text1321.htm#14366">SCHEMES</A> for basic singularity/non-singularity as well as tests
+for whether a scheme is locally/arithmetically Cohen-Macaulay or locally/arithmetically
+Gorenstein. The tests here that are currently specific to surfaces are for
+normality and for having only simple (A-D-E) singularities. All of these properties
+are stored when computed for a surface/scheme and the various implications between
+them are used to shortcut tests. The intrinsics below rely on being able to
+compute the singular subscheme of the surface and having each singular point
+lying in a constructible affine patch, so they apply to surfaces lying in a wide
+range of ambients.
+
+
+<H5><A NAME = "15407">IsNormal(S) : Srfc -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns whether the surface S is a normal variety. The normality test used 
+here consists of checking that the singular subscheme of S is empty or has
+dimension zero and applying a local normality test at each singular point p
+(over a splitting field). The local test used is simply whether the depth
+of the local ring is 2. Taking an affine patch at p and translating to
+the origin, we simply consider the quotient of the coordinate ring by a 
+non-vanishing coordinate variable and check that the maximal homogeneous ideal
+is not an associated prime by a straightforward saturation computation. We
+could have also chosen to use our test for being Cohen-Macaulay once it is 
+known that the singular subscheme of S is zero dimensional.
+</BLOCKQUOTE>
+<H5><A NAME = "15408">IsSimpleSurfaceSingularity(p) : Pt -&gt; BoolElt, MonStr, RngIntElt</A></H5>
+<BLOCKQUOTE>
+The point p should be a point in the pointset of a surface S. It is
+referred to as a simple or A-D-E singularity if it is an isolated
+singularity on S which is analytically of the type A<sub>n</sub>, n &ge;1,
+D<sub>n</sub>, n &ge;4, E<sub>6</sub>, E<sub>7</sub> or E<sub>8</sub> as described in Chapter III,
+Section 7 of <A  HREF = "text1378.htm#bib_BHPV_04">[BHPdV04]</A>. For convenience, if p is non-singular
+on S, we class it as a simple singularity of type A<sub>0</sub>. These are all
+Gorenstein (even l.c.i) singularities. Their significance is that they
+are the surface singularities that impose no 'adjunction' condition
+on the canonical sheaf with respect to computing the canonical sheaf of the
+minimal desingularization S<sub>1</sub> of S. They all resolve to a collection of
+(-2)-curves on S<sub>1</sub> whose intersection pairing matrix is the negative
+of that of the root system with which they share a label.
+<P>
+This intrinsic tests whether p is a simple singularity and, if so,
+returns the type as a string ("A", "D" or "E") along with the index n
+(e.g. 6, 7 or 8 for type "E"). It requires that the characteristic of the
+base field of S is not 2. Also, the E<sub>n</sub> types can be a little awkward
+to analyse in characteristic 3. Therefore in char. 3, the intrinsic always returns
+<TT>false</TT> if p is a possible E type singularity.
+<P>
+The intrinsic first uses <TT>IsHypersurfaceSingularity</TT> to determine
+whether p is analytically isomorphic to a hypersurface singularity
+(which is the case for all simple singularities) and then tests for 
+A-D-E type by examining the expansion of the equation that defines 
+the analytically equivalent singularity.
+<P>
+<B>NB:</B> The intrinsic doesn't fully check that p is an isolated 
+singularity (i.e., that it doesn't lie on a curve in the singular locus of 
+S). It may crash or hang in some cases where p is not isolated.
+</BLOCKQUOTE>
+<H5><A NAME = "15409">HasOnlySimpleSingularities(S) : Srfc -&gt; BoolElt, List</A></H5>
+
+<PRE>    ReturnList: BoolElt                 Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+This intrinsic determines whether the surface S has no singularities worse 
+than isolated simple singularities as described in the previous intrinsic. 
+Again, the characteristic of the base field of S should not be 2. If S 
+has only simple singularities and <TT>ReturnList</TT> is <TT>true</TT> (the default 
+is <TT>false</TT>),  a list is also returned containing triples that consist of
+each singular point of S (in a pointset over an extension of the base field)
+along with its type, given as a string and index number as described previously.
+In some cases, it may be already known (and recorded internally) that there are
+only simple singularities without their precise type having been computed. For
+example, if S is a minimal or weighted canonical
+model of a surface of general type.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15410">Example <TT>AlgSrf_srfc_simp_sings (H122E3)</TT></A></H3>
+Anticanonically-embedded <I>degenerate</I> Del Pezzo surfaces of degree &ge;3
+are singular but have only simple singularities. We verify this for a 
+degree 4 Del Pezzo which has 2 conjugate (over a quadratic extension)
+A<sub>1</sub> singularities.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z,t,u&gt; := ProjectiveSpace(Rationals(),4);
+&gt; X := Surface(P,[x*z-y^2, t^2-2*u^2+x^2-2*z^2]);
+&gt; HasOnlySimpleSingularities(X : ReturnList := true);
+true [* &lt;(0 : 0 : 0 : r1 : 1), "A", 1&gt;, &lt;(0 : 0 : 0 : r2 : 1), "A", 1&gt; *]
+&gt; _,lst := $1;
+&gt; Ring(Parent(lst[1][1]));
+Algebraically closed field with 2 variables over Rational Field
+Defining relations:
+[
+    r2^2 - 2,
+    r1^2 - 2
+]
+</PRE>
+<P>
+As a second example, we consider a singular rational ruled surface (scroll)
+that is the cone over a rational normal curve. The intrinsics tell us that
+the surface is normal and Cohen-Macaulay (i.e., the local ring at the singular
+point at the apex of the cone satisfies these properties) but that it
+satisfies none of the stronger "non-singularity" properties.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P4&lt;x,y,z,t,u&gt; := ProjectiveSpace(Rationals(),4);
+&gt; X := RationalRuledSurface(P4,0);
+&gt; // one singular point
+&gt; Degree(ReducedSubscheme(SingularSubscheme(X)));
+1
+&gt; Support(SingularSubscheme(X));
+{ (1 : 0 : 0 : 0 : 0) }
+&gt; HasOnlySimpleSingularities(X);
+false
+&gt; IsArithmeticallyGorenstein(X);
+false
+&gt; IsGorenstein(X);
+false
+&gt; IsCohenMacaulay(X);
+true
+&gt; IsNormal(X);
+true
+</PRE>
+<HR>
+<H4><A NAME = "15411">Kodaira-Enriques Classification</A></H4>
+
+
+
+<H5><A NAME = "15412"></A><A NAME = "srfc-ket">KodairaEnriquesType</A>(S) : Srfc -&gt; RngIntElt, RngIntElt, MonStr</H5>
+
+<PRE>    CheckADE: BoolElt                   Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The argument S is a surface in ordinary projective space having at most
+simple (A-D-E) singularities. As it may be a very heavy computation, the 
+latter is only checked if the user sets the
+<TT>CheckADE</TT> parameter is set to <TT>true</TT> (the default is <TT>false</TT>).
+<P>
+The function computes the type of S (or rather, of the non-singular projective
+surfaces in its birational equivalence class) according to the classification
+of Kodaira and Enriques.
+<P>
+The first number returned is the <I>Kodaira dimension</I> of S, which is
+-1, 0, 1, or 2. We use -1 here rather than -&infin;. A second return value
+further specifies the type within the Kodaira dimension -1 or 0 cases (and
+is irrelevant in the other two cases).
+<P>
+Kodaira dimension -1 corresponds to birationally ruled surfaces. The second
+number returned in this case is the irregularity q &ge;0 of S. So S 
+is birationally equivalent to a ruled surface over a smooth curve of genus
+q and is a <I>rational</I> surface if and only if q is zero.
+<P>
+Kodaira dimension 0 corresponds to surfaces which are birationally equivalent
+to a K3 surface, an Enriques surface, a torus or a bi-elliptic surface. In the
+final case, there is a partial subclassification in that the canonical sheaf
+of the minimal model is a torsion sheaf of order r, where r is 2, 3, 4, or 6.
+The second integer return value in the Kodaira dimension zero case codes the 
+subtypes as follows:-
+<P>
+<P>
+<P>
+<DL COMPACT class='compact'>
+<DT>    -3</DT><DD>Enriques surface
+<DT>    -2</DT><DD>K3 surface
+<DT>    -1</DT><DD>Torus
+<DT>     r</DT><DD>r = 2, 3, 4 or 6. Bielliptic surface of subtype r
+<P>
+<P>
+<P>
+</DL>
+A third return value is a string that gives a verbal description of
+the surface type (e.g. "Rational" or "Bi-elliptic (type 3)"). Kodaira
+dimension 1 surfaces are labelled as "Elliptic fibration" (which they
+all are -- though there are also surfaces of Kodaira dimension less than 
+1 which have elliptic fibrations) and Kodaira dimension 2 surfaces
+are labelled as "General type", as is traditional.
+<P>
+There are no built-in restrictions on the characteristic of the base field, 
+but there are some special cases for surfaces of Kodaira dimension 0
+in characteristics 2 and 3 that may not be dealt with properly.
+<P>
+The function works by computing a number of the invariants of S and sometimes
+also considering the dimension of the image of appropriate pluri-canonical
+maps. We try to compute the least number of invariants to fully determine
+the type. A useful by-product is that, after calling this function, a number
+of the surface invariants (always including the geometric genus and irregularity)
+will have been computed and stored for later use. The type information is also
+stored.
+</BLOCKQUOTE>
+<H5><A NAME = "15413">KodairaEnriquesDimension(S) : Srfc -&gt; RngIntElt</A></H5>
+
+<PRE>    CheckADE: BoolElt                   Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The argument S is a surface in ordinary projective space having at most
+simple (A-D-E) singularities. The later condition will only be checked
+if the parameter <TT>CheckADE</TT> is set to <TT>true</TT>.  The function simply returns
+the Kodaira dimension (-1,0,1,2) without further type information. In most
+cases it does the same amount of work as to compute the full Kodaira-Enriques
+type, unless the result has already been determined and stored.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15414">Example <TT>AlgSrf_srfc-kod-enr-ex (H122E4)</TT></A></H3>
+We will present further cases of Kodaira-Enriques typing in our minimal model
+examples. For now, we just give two simple examples: a Veronese surface in 
+Prj<sup>5</sup> and the Kummer surface in Prj<sup>3</sup> with simple singularities from 
+our earlier example.
+<P>
+<P>
+<P>
+The scheme X is a Veronese surface, isomorphic to P<sup>2</sup>:
+<P>
+<P>
+<P>
+<PRE>
+&gt; P&lt;a,b,c,d,e,f&gt; := ProjectiveSpace(Rationals(),5);
+&gt; X := Surface(P,[b^2-a*c, a*d-b*f, b*d-c*f, d^2-c*e, a*e-f^2, b*e-d*f]);
+&gt; // X is a Veronese surface, isomorphic to P^2
+&gt; KodairaEnriquesType(X);
+-1 0 Rational 
+</PRE>
+<P>
+The scheme X is a singular K3 surface:
+<P>
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z,t&gt; := ProjectiveSpace(Rationals(),3);
+&gt; X := Surface(P,x^3*t+x^2*z^2-8*x*y^2*z-x*z*t^2+16*y^4+y^2*t^2-z^3*t);
+&gt; KodairaEnriquesType(X);
+0 -2 K3
+</PRE>
+<HR>
+<H4><A NAME = "15415">Minimal Models</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+In contrast to the curve case, a birational equivalence class of surfaces
+contains an infinite number of non-isomorphic projective, non-singular
+surfaces. Any two such surfaces are linked by a birational map that
+consists of a sequence of blowing up points and blowing down exceptional
+curves (rational (-1)-curves). For any non-singular, projective surface, a
+sequence of blow downs of exceptional curves will result in a surface
+with no more exceptional curves after a finite number of steps. Such a
+surface is referred to as a <I>minimal model</I>. It is also possible to
+further contract connected cycles of rational (-2)-curves to simple
+singularities. Sometimes minimal model also refers to a surface
+on which these contractions have been performed. This is particularly
+true for surfaces of general type where the pluri-canonical models
+are minimal in this second sense.
+<P>
+For surfaces of Kodaira dimension greater than or equal to zero, there
+is a unique minimal model (up to isomorphism) within the birational
+equivalence class. That is, the minimisation procedure of blowing
+down exceptional curves will always lead to the same thing starting with any
+non-singular projective surface within that class. This can be carried out
+over an arbitrary base field and the minimal model
+is a unique representative of the class, which partly explains
+its importance.
+<P>
+For rational or ruled surfaces, there is not
+a unique minimal model. Over an algebraically closed field, the minimal
+models in these cases are the projective plane and the
+<I>geometrically ruled surfaces</I> which are
+fibrations over a non-singular, projective base curve C, all of whose
+fibres are irreducible curves isomorphic to the projective line. The
+rational surfaces are those with C rational (in this case, one of
+the ruled surfaces is not minimal but is the plane blown up in one
+point). Over a non-algebraically closed base field k, it may not be
+possible to blow down all exceptional curves working over k and so
+there are k-minimal surfaces (certain Del Pezzo surfaces, for example) that
+are not minimal over the algebraic closure. Models like Del Pezzo surfaces that
+are close to minimal but may not strictly even be minimal over k are
+still very important for rational and ruled surfaces because they allow the
+reduction to a small class of standard isomorphism types. We can think of these
+as quasi-minimal.
+<P>
+This section describes functions which are designed to construct minimal 
+models or quasi-minimal models of ordinary projective surfaces. The  
+precise meaning of this varies a little depending on the Kodaira 
+dimension of S, so there are distinct functions for the different 
+dimensions. The Kodaira dimension, if unknown, can be determined by use 
+of the intrinsics in the previous section.
+<P>
+More of these intrinsics really should work for surfaces with simple singularities -
+at least, if the user is happy with a result that also has simple singularities.
+For the moment, except for surfaces of general type (Kodaira dimension 2),
+we require S to be non-singular.
+<P>
+The output minimal models are all non-singular except for surfaces of general type
+where all (-2)-curves are contracted to simple singularities, as is
+traditional. There is also an intrinsic to compute the full canonical model
+(which lies in weighted projective space in general) and the canonical
+coordinate ring of a surface of general type. With the Kodaira dimension 1
+minimal models, the user can optionally ask for a map to a smooth projective
+curve C that presents the minimal model M as an elliptic fibration over C.
+In this case, M is the global arithmetic minimal model of its generic fibre.
+
+
+<H5><A NAME = "15416"></A><A NAME = "srfc-mm-rat">MinimalModelRationalSurface</A>(S) : Srfc -&gt; Map</H5>
+
+<PRE>    CheckSing: BoolElt                  Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Let S should be a non-singular ordinary projective rational (Kodaira dimension
+-1 and irregularity 0) surface. Non-singularity is not checked by default so
+to force a check, set <TT>CheckSing</TT> to <TT>true</TT>. It is also left to the
+user to check that S is rational (using Section <A  HREF = "text1382.htm#srfc-ket">KodairaEnriquesType</A> for example).
+<P>
+The intrinsic does not strictly compute a minimal model M (there may be
+(-1)-curves that can still be blown down over the base field), but instead
+it produces a standard model that is terminal for the adjunction process.
+<P>
+This means that M will be a member of a small family of special rational
+surfaces: the projective plane or its Veronese embedding in Prj<sup>5</sup>,
+an anticanonically embedded Del Pezzo surface, a rational scroll or
+a conic bundle. Other functions for special surfaces may then be applied
+to M -- to parametrize it, for example.
+<P>
+The return value is a rational map f from S onto M (M may be recovered
+as the codomain of f) which will be of type <TT>MapSchGrph</TT> or <TT>MapSch</TT>.
+The implementation proceeds by simply iterating the adjunction map until simple
+termination criteria are recognised.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15417">Example <TT>AlgSrf_min-mod-rat (H122E5)</TT></A></H3>
+We take one of the family of non-singular rational surfaces in Prj<sup>4</sup>
+that can be generated by the <TT>RandomRationalSurface_d10g9</TT> intrinsic
+to be described later. These surfaces are very far from minimal. They
+have exceptional curves of degrees 3, 2 and 1 in the Prj<sup>4</sup> embedding
+and the theory tells us that we need 2 adjunction maps to reduce the
+surface to a degree 5 Del Pezzo in Prj<sup>5</sup>, which is terminal.  The 
+degree of non-minimality is measured by the first Chern number K.K, 
+with 9 - K.K or 8 - K.K telling us how many point blowups it 
+takes to get from a geometric minimal model (over bar(k)) to the 
+surface, depending on whether the geometric minimal model is Prj<sup>2</sup> 
+or a rational ruled surface. Here, we start at -9 and get to 5 for 
+the Del Pezzo, which is Prj<sup>2</sup> blown up at 4 points over the algebraic
+closure of the base field. We choose to work over a finite field so
+that the example completes quickly.
+<P>
+<P>
+<P>
+<PRE>
+&gt; k := GF(37);
+&gt; P := ProjectiveSpace(k,4);
+&gt; X := RandomRationalSurface_d10g9(P);
+&gt; #DefiningPolynomials(X);
+11
+&gt; [TotalDegree(f): f in DefiningPolynomials(X)];
+[ 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 ]
+&gt; // X is defined by a quartic and 10 quintics
+&gt; ChernNumber(X,1);
+-9
+&gt; mp := MinimalModelRationalSurface(X);
+&gt; Y := Codomain(mp);
+&gt; Y;
+Surface over GF(37) defined by
+y[2]*y[3]+23*y[3]^2+4*y[1]*y[4]+29*y[2]*y[4]+34*y[3]*y[4]+36*y[4]^2+
+ 18*y[1]*y[5]+22*y[2]*y[5]+y[3]*y[5]+31*y[4]*y[5]+3*y[5]^2+33*y[1]*y[6]+
+ 6*y[2]*y[6]+31*y[3]*y[6]+20*y[4]*y[6]+28*y[5]*y[6]+33*y[6]^2,
+y[1]*y[3]+27*y[3]^2+25*y[1]*y[4]+y[2]*y[4]+19*y[3]*y[4]+34*y[4]^2+13*y[1]*y[5]+
+ 15*y[2]*y[5]+14*y[3]*y[5]+15*y[4]*y[5]+17*y[5]^2+21*y[1]*y[6]+18*y[2]*y[6]+
+ 33*y[3]*y[6]+9*y[4]*y[6]+27*y[5]*y[6]+12*y[6]^2,
+y[2]^2+13*y[1]*y[4]+10*y[2]*y[4]+9*y[3]*y[4]+26*y[4]^2+32*y[1]*y[5]+27*y[2]*y[5]+
+ 18*y[4]*y[5]+33*y[5]^2+27*y[1]*y[6]+16*y[2]*y[6]+31*y[3]*y[6]+35*y[4]*y[6]+
+ 24*y[5]*y[6]+21*y[6]^2,
+y[1]*y[2]+26*y[3]^2+16*y[1]*y[4]+23*y[2]*y[4]+24*y[3]*y[4]+32*y[4]^2+27*y[1]*y[5]+
+ 14*y[2]*y[5]+10*y[3]*y[5]+12*y[4]*y[5]+33*y[5]^2+16*y[1]*y[6]+26*y[2]*y[6]+
+ 7*y[3]*y[6]+13*y[4]*y[6]+11*y[5]*y[6]+y[6]^2,
+y[1]^2+5*y[3]^2+19*y[1]*y[4]+35*y[2]*y[4]+2*y[3]*y[4]+20*y[4]^2+29*y[1]*y[5]+
+ 27*y[2]*y[5]+22*y[3]*y[5]+14*y[4]*y[5]+6*y[5]^2+32*y[1]*y[6]+31*y[2]*y[6]+
+ 2*y[3]*y[6]+36*y[5]*y[6]+33*y[6]^2
+&gt; Ambient(Y); Degree(Y);
+Projective Space of dimension 5 over Finite field of size 37
+Variables: y[1], y[2], y[3], y[4], y[5], y[6]
+5
+&gt; ChernNumber(Y,1);
+5
+</PRE>
+<HR>
+<H5><A NAME = "15418">MinimalModelRuledSurface(S) : Srfc -&gt; Map</A></H5>
+
+<PRE>    CheckSing: BoolElt                  Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The surface S should be non-singular ordinary projective of Kodaira dimension
+-1. Non-singularity is not checked by default so to force a check, set 
+<TT>CheckSing</TT> to <TT>true</TT>. It is also left to the user to check that S is of 
+the correct Kodaira dimension (using <A  HREF = "text1382.htm#srfc-ket">KodairaEnriquesType</A> for example).
+<P>
+If S is rational, the intrinsic <TT>MinimalModelRationalSurface</TT> is applied. 
+For non-rational ruled surfaces, the same adjunction procedure is applied to 
+lead to a terminal model M, which is either a non-rational scroll and 
+genuinely minimal, a conic bundle over a non-rational curve that may not
+be strictly minimal (it may have degenerate fibres that are the intersecting
+unions of two (-1)-curves) or a non-split minimal ruled surface over a genus
+one curve embedded as a degree 9 surface in Prj<sup>6</sup> in such a way that
+the fibres of the ruling have degree 3.
+<P>
+The return value is a rational map f from S onto M (M may be recovered
+as the codomain of f) and will be of type <TT>MapSchGrph</TT> or <TT>MapSch</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "15419">MinimalModelKodairaDimensionZero(S) : Srfc -&gt; Map</A></H5>
+
+<PRE>    CheckSing: BoolElt                  Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The surface S should be non-singular ordinary projective of Kodaira dimension
+0. Non-singularity is not checked by default so to force a check, set 
+<TT>CheckSing</TT> to <TT>true</TT>. It is also left to the user to check that S is 
+of the correct Kodaira dimension (using <A  HREF = "text1382.htm#srfc-ket">KodairaEnriquesType</A> for example).
+<P>
+The function computes a minimal model M of S, again by repeatedly applying
+the adjunction map until minimality occurs (the first Chern number is zero).
+<P>
+The return value is a rational map f from S onto M (M may be recovered
+as the codomain of f) and will be of type <TT>MapSchGrph</TT> or <TT>MapSch</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15420">Example <TT>AlgSrf_srfcs_kod_dim_0_min_mods1 (H122E6)</TT></A></H3>
+We start with an example of a non-minimal surface X that is a torus T blown up in
+one point. Such examples naturally occur when T is the Jacobian J of a genus
+2 curve C. The product of the C with itself quotiented by an appropriate
+involution is such an X. It has a natural embedding in Prj<sup>7</sup>. This turns
+out to be the projection from the zero point of J embedded in
+Prj<sup>8</sup> (by three times the theta divisor).
+<P>
+We work over a finite field for speed (although the example doesn't take
+too long over the rationals). Our example corresponds to the curve C
+with Weierstrass equation y<sup>2</sup>=x<sup>5</sup> - 1. The minimal model routine
+has the effect of <I>unprojecting</I> here: it recovers the torus J
+in its Prj<sup>8</sup> embedding.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P7&lt;z1,z2,z3,z4,z5,z6,z7,z8&gt; := ProjectiveSpace(GF(37),7);
+&gt; X := Surface(P7,
+&gt; [
+&gt; z3*z4-z2*z5+z1*z6,
+&gt; 1/2*z3^2-1/2*z2*z7+z1*z8,
+&gt; z1^2+z5^2-z4*z6-2*z3*z7+z2*z8,
+&gt; -z3*z5*z6+z2*z6^2+z5^2*z7-z4*z6*z7-z3*z7^2-1/2*z3^2*z8+1/2*z2*z7*z8,
+&gt; z3*z4*z6+1/2*z3^2*z7-z4*z5*z7+1/2*z2*z7^2+z2*z3*z8,
+&gt; -z4^2*z5+z2^2*z6+z6^3+z2*z4*z7+z6*z7*z8-z5*z8^2,
+&gt; -1/2*z3^2*z5-z4*z5^2+z2*z3*z6+z4^2*z6+z3*z4*z7+1/2*z2*z5*z7-z2*z4*z8,
+&gt; z1*z2*z5+z5^2*z6-z4*z6^2-z3*z6*z7-z5*z7^2+z3*z5*z8-z2*z6*z8+z4*z7*z8,
+&gt; -z4^3+z2^2*z5+z5*z6^2-z6*z7^2+2*z5*z7*z8-z4*z8^2,
+&gt; -z3*z4^2+z2^2*z7+z6^2*z7-z3*z8^2,
+&gt; -z2*z4^2+z1*z2*z7+z5*z6*z7+z3*z7*z8-z2*z8^2,
+&gt; -z2*z4^2+z1*z4*z5+z3*z6^2+z5^2*z8-z4*z6*z8,
+&gt; z1*z4^2-z3*z7^2-1/2*z3^2*z8+1/2*z2*z7*z8,
+&gt; 1/2*z3^2*z4-z2*z3*z5+z4^2*z5-z6^3-3/2*z2*z4*z7+z1*z5*z7-z6*z7*z8+z5*z8^2,
+&gt; -z2*z3*z4+z1*z4*z7+z6*z7^2+z3*z6*z8-z5*z7*z8,
+&gt; z2^2*z4-z5*z7^2-z2*z6*z8+z4*z7*z8,
+&gt; z1*z2*z4+1/2*z3^2*z6-z3*z5*z7+1/2*z2*z6*z7,
+&gt; -1/2*z3^3-z3*z4*z5+2*z2*z4*z6+3/2*z2*z3*z7-z4^2*z7+z1*z7^2,
+&gt; 1/2*z3^3+z3*z4*z5-z2*z4*z6-3/2*z2*z3*z7+z2^2*z8,
+&gt; -1/2*z2*z3^2-3/2*z3*z4^2+z2*z4*z5+z1*z3*z7+1/2*z6^2*z7-1/2*z3*z8^2,
+&gt; z2^2*z3-z2*z4^2+z3*z6^2+2*z3*z7*z8-z2*z8^2,
+&gt; z1*z2*z3+z3*z5*z6-z4*z6*z7-z3*z7^2+z3^2*z8+z2*z7*z8,
+&gt; z2^3+z3*z5*z6-z5^2*z7+1/2*z3^2*z8+1/2*z2*z7*z8,
+&gt; z1*z2^2-z3*z4*z6+z2*z5*z6-z3^2*z7
+&gt; ] : Check:= false);
+&gt; KodairaEnriquesType(X);
+0 -1 Torus
+&gt; mp := MinimalModelKodairaDimensionZero(X);
+&gt; Y := Codomain(mp);
+&gt; Ambient(Y);
+Projective Space of dimension 8 over Rational Field
+Variables: y[1], y[2], y[3], y[4], y[5], y[6], y[7], y[8], y[9]
+&gt; Y;
+Surface over Rational Field defined by
+y[4]*y[5] - y[3]*y[6] + y[2]*y[7],
+y[4]^2 - y[3]*y[8] + 2*y[2]*y[9],
+y[3]*y[4] + y[5]^2 + y[1]*y[7] - 2*y[2]*y[8] + y[9]^2,
+y[1]*y[4] + 2*y[2]*y[5] + y[7]*y[8],
+y[3]^2 - 1/3*y[2]*y[4] + 1/3*y[1]*y[6] + 1/3*y[7]^2 + 1/3*y[8]*y[9],
+y[2]*y[3] + y[1]*y[5] + y[6]*y[7] + y[8]^2 + 2*y[4]*y[9],
+y[1]*y[3] - y[4]*y[7] + 2*y[6]*y[8],
+y[2]^2 + y[6]^2 - y[5]*y[7] - 2*y[4]*y[8] + y[3]*y[9],
+y[1]*y[2] + y[4]*y[6] - 2*y[3]*y[7] + y[5]*y[8],
+y[3]*y[5]*y[7] - y[5]^2*y[8] + y[2]*y[8]^2 + 1/3*y[2]*y[4]*y[9] -
+  1/3*y[1]*y[6]*y[9] - 1/3*y[7]^2*y[9] - 1/3*y[8]*y[9]^2,
+y[2]*y[5]*y[7] + 2/3*y[2]*y[4]*y[8] + 1/3*y[1]*y[6]*y[8] +
+  1/3*y[7]^2*y[8] - y[1]*y[5]*y[9] - y[6]*y[7]*y[9] - 2/3*y[8]^2*y[9] - 
+  2*y[4]*y[9]^2,
+y[2]*y[5]*y[6] + y[4]*y[7]^2 + y[1]*y[5]*y[8] + y[8]^3 + y[6]^2*y[9] -
+  y[5]*y[7]*y[9] + y[4]*y[8]*y[9] + y[3]*y[9]^2
+&gt; MinimalChernNumber(X,1)-ChernNumber(X,1);
+1
+&gt; ChernNumber(Y,1);
+0
+</PRE>
+<P>
+So we have one exceptional line blown down and Y is now minimal.
+<HR>
+<H3><A NAME = "15421">Example <TT>AlgSrf_srfcs_kod_dim_0_min_mods2 (H122E7)</TT></A></H3>
+For our second example, we take a surface of Enriques type in Prj<sup>4</sup>
+which comes from one of the special families of Prj<sup>4</sup> surfaces
+to be described later. Such surfaces are non-minimal, but isomorphic
+to an Enriques surface blown up at one point. As we are choosing a
+random surface from a family which will be defined by many non-sparse
+equations, we work over a finite field for speed.
+<P>
+<P>
+<P>
+<PRE>
+&gt; k := GF(37);
+&gt; P := ProjectiveSpace(k,4);
+&gt; X := RandomEnriquesSurface_d9g6(P);
+&gt; #DefiningPolynomials(X);
+15
+&gt; [TotalDegree(f): f in DefiningPolynomials(X)];
+[ 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 ]
+&gt; //surface defined by 15 quintics
+&gt; ChernNumber(X,1);
+-1
+&gt; mp := MinimalModelKodairaDimensionZero(X);
+&gt; Y := Codomain(mp);
+&gt; #DefiningPolynomials(Y);
+10
+&gt; [TotalDegree(f): f in DefiningPolynomials(Y)];
+[ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 ]
+&gt; // minimal model Y defined by 10 cubics
+&gt; Ambient(Y); Degree(Y);
+Projective Space of dimension 5 over Finite field of size 37
+Variables: y[1], y[2], y[3], y[4], y[5], y[6]
+10
+&gt; ChernNumber(Y,1);
+0
+</PRE>
+<HR>
+<H5><A NAME = "15422">MinimalModelKodairaDimensionOne(S) : Srfc -&gt; Map, Map</A></H5>
+
+<PRE>    CheckSing: BoolElt                  Default: <TT>false</TT></PRE>
+
+<PRE>    Fibration: BoolElt                  Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Let S be a non-singular ordinary projective surface of Kodaira dimension
+1. Non-singularity is not checked by default and to force a check, set 
+<TT>CheckSing</TT> to <TT>true</TT>. It is also left to the user to check that S 
+is of the correct Kodaira dimension (using <A  HREF = "text1382.htm#srfc-ket">KodairaEnriquesType</A> for example).
+<P>
+The function computes a minimal model M of S. Such a model always has
+a connected elliptic fibration to a smooth projective curve C (i.e.
+there is a morphism g from M onto C such that the general fibre of
+g is a smooth curve of genus 1). If <TT>Fibration</TT> is set to <TT>true</TT> 
+(the default is <TT>false</TT>), the function also computes g and returns it
+as a second return value.
+<P>
+The first return value is a rational map f from S onto M (M may 
+be recovered as the codomain of f) and will be of type <TT>MapSchGrph</TT> 
+or <TT>MapSch</TT>.
+<P>
+The computation of f again proceeds by repeating adjunction until the 
+first Chern number is zero. There is a slight speed-up here, though, that 
+we apply when S has positive geometric genus. We use the appropriate 
+modification of the image of an effective canonical divisor to compute 
+a new canonical divisor at each stage of adjunction.  Although this doesn't 
+usually speed up the computation of the next adjunction map, it can 
+greatly increase the speed of computation of the new first Chern number,
+which speeds up testing of the termination criterion.
+<P>
+If required, g may be computed by using an appropriate small multiple 
+of the pluricanonical map on M.
+</BLOCKQUOTE>
+<H5><A NAME = "15423">MinimalModelGeneralType(S) : Srfc -&gt; Map, BoolElt</A></H5>
+<H5>CanonicalWeightedModel(S) : Srfc -&gt; Map, BoolElt</H5>
+
+<PRE>    CheckADE: BoolElt                   Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The surface S should be ordinary projective of general type (Kodaira dimension
+2) with at worst simple (A-D-E) singularities.  The singularity condition is not
+checked by default and to force a check, set <TT>CheckADE</TT> to <TT>true</TT>. It is 
+also left to the user to check that S is of general type (using <A  HREF = "text1382.htm#srfc-ket">KodairaEnriquesType</A> 
+for example).
+<P>
+The intrinsics construct a minimal model M for S which is of the canonical 
+type: it has any (-2)-curves contracted to simple singularities.
+<P>
+The first intrinsic produces M as an ordinary projective surface as before,
+which is an m-canonical embedding with m equal to 3 generally but 4 or
+5 when S has certain small invariants. This is implemented simply by
+computing the m-canonical map on S (this map automatically factors through
+a non-singular minimal model). The drawback of this is that M is usually defined
+in a high-dimensional projective space. There is a very simple check to see whether
+the canonical sheaf or the bi-canonical sheaf is very ample, in which case M is
+just taken as S.
+<P>
+The second intrinsic actually computes the <I>full</I> canonical model of S.
+This is a (generally weighted) projective model of M equal to <I>Proj</I> of
+the canonical coordinate ring &sum;<sub>n = 0</sub><sup>&infin;</sup> H<sup>0</sup>(S, K<sub>S</sub><sup> tensor n</sup>),
+where K<sub>S</sub> is the canonical sheaf of K. This is more intrinsic and it
+generally gives a model in a much lower-dimensional space with the drawback
+that this space is now weighted.  The cases where the canonical or bicanonical
+image is actually isomorphic to M will show up in this version whereas it
+will produce an actual ordinary projective model in the first case. Currently, 
+this intrinsic has the small restriction that S cannot have geometric genus
+(and irregularity) zero.  The implementation involves calculating with 
+Riemann-Roch spaces for small multiples of an effective canonical divisor.
+<P>
+For either intrinsic, the first return value is a rational map f from S onto M
+(M may be recovered as the codomain of f) which will be of type <TT>MapSchGrph</TT>
+or <TT>MapSch</TT> for the first intrinsic and of type <TT>MapSch</TT> only for the
+second. A second return value is a boolean with value <TT>true</TT> if and only if the
+original model X is minimal in the sense of containing no (-1)-curves.
+</BLOCKQUOTE>
+<H5><A NAME = "15424"></A><A NAME = "srfc-can-coord-ideal">CanonicalCoordinateIdeal</A>(S) : Srfc -&gt; RngMPol</H5>
+
+<PRE>    CheckADE: BoolElt                   Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The surface S should be ordinary projective of general type (Kodaira dimension
+2) with at worst simple (A-D-E) singularities.  The singularity condition is not
+checked by default and to force a check, set <TT>CheckADE</TT> to <TT>true</TT>. It is
+also left to the user to check that S is of general type (using <A  HREF = "text1382.htm#srfc-ket">KodairaEnriquesType</A>
+for example).
+<P>
+This intrinsic constructs the full canonical coordinate ring of S as described 
+for <TT>CanonicalWeightedModel</TT>. What is returned is a homogeneous ideal I in 
+a polynomial ring R with variable weightings over the base field of S such 
+that the canonical coordinate ring is isomorphic to the quotient R/I as a graded 
+ring.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15425">Example <TT>AlgSrf_srfcs_gen_typ_min_mods1 (H122E8)</TT></A></H3>
+We give two examples of computing minimal models for some surfaces of general
+type. We begin with a non-singular type I Horikawa surface with first Chern number K<sup>2</sup>
+equal to 3. It is already minimal and the bi-canonical map gives an
+embedding into Prj<sup>6</sup>. We start with a bicanonical model. The first intrinsic 
+luckily recognises that the surface is bi-canonical and just returns it as a minimal model.
+The second intrinsic finds the well-known weighted-projective embedding for
+such surfaces as a sextic hypersurface in a Prj(1, 1, 1, 2) weighted projective space.
+(see Section 9, Chapter VII, <A  HREF = "text1378.htm#bib_BHPV_04">[BHPdV04]</A> or <A  HREF = "text1378.htm#bib_Hor2_76">[Hor76]</A>).
+<P>
+<P>
+<P>
+<PRE>
+&gt; P&lt;x1,x2,x3,x4,x5,x6,x7&gt; := ProjectiveSpace(Rationals(),6);
+&gt; X := Surface(P,[
+&gt;  -x4*x5 + x2*x6, x1*x5 - x4*x6,
+&gt;   x3*x4 - x5*x6, x2*x3 - x5^2,
+&gt;   x1*x3 - x6^2, x1*x2 - x4^2,
+&gt;   x1^3+x1*x2^2+x2^2*x3-x2*x3^2+x3^3+x2^2*x4+x1*x3*x4-x2*x3*x4+x1*x4^2-
+&gt;    x2*x4^2-x3*x4^2-x1*x2*x5-x1*x3*x5+x2*x3*x5+x1*x4*x5-x2*x4*x5+x4^2*x5-
+&gt;    x1*x5^2+x2*x5^2-x3*x5^2-x5^3-x1^2*x6+x1*x2*x6-x2*x3*x6-x2*x4*x6+
+&gt;    x1*x5*x6-x3*x5*x6-x4*x5*x6+x5^2*x6+x1*x6^2+x2*x6^2-x3*x6^2+x5*x6^2-
+&gt;    x1*x2*x7+x1*x3*x7+x2*x3*x7-x3^2*x7+x1*x4*x7-x2*x4*x7-x4^2*x7+x5^2*x7+
+&gt;    x2*x6*x7+x3*x6*x7-x4*x6*x7+x5*x6*x7-x6^2*x7+x3*x7^2+x4*x7^2+x5*x7^2-
+&gt;    x6*x7^2-x7^3 ]);
+&gt; IsSingular(X);
+false
+&gt; KodairaEnriquesType(X);
+2 0 General type
+&gt; mp := MinimalModelGeneralType(X);
+&gt; X1 := Codomain(mp); //the minimal model
+&gt; X1 eq X;
+true
+&gt; mp1 := CanonicalWeightedModel(X);
+&gt; Y := Codomain(mp1);
+&gt; PW&lt;a,b,c,d&gt; := Ambient(Y);
+&gt; PW;
+Projective Space of dimension 3 over Rational Field
+Variables: a, b, c, d
+The grading is:
+    1, 1, 1, 2
+</PRE>
+The fact that the full weighted canonical model has only weights 1 and 2 also 
+shows that the bi-canonical map is an embedding.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Y;
+Surface over Rational Field defined by
+a^6 + a^4*b^2 + a*b^5 - a^5*c + 2*a^3*b^2*c - a^2*b^3*c - a*b^4*c + a^4*c^2 +
+ 2*a^3*b*c^2 - 2*a^2*b^2*c^2 - a*b^3*c^2 + 2*b^4*c^2 - a^2*c^4 - a*b*c^4 - 
+ 2*b^2*c^4 + c^6 + a^3*b*d - 2*a^2*b^2*d - a*b^3*d - a^2*b*c*d + a*b^2*c*d +
+ a*b*c^2*d + 2*b^2*c^2*d + a*c^3*d - c^4*d + a*b*d^2 - a*c*d^2 + b*c*d^2 +
+ c^2*d^2 - d^3
+</PRE>
+<P>
+We can also ask for the canonical coordinate ideal that defines the canonical coordinate ring
+which is the coordinate ring of Y. The call takes no time as the canonical weighted model
+Y and map <TT>mp1</TT> from X to Y have been stored internally.
+<P>
+<P>
+<P>
+<PRE>
+&gt; time CanonicalCoordinateIdeal(X);
+Ideal of Graded Polynomial ring of rank 4 over Rational Field
+Order: Grevlex with weights [1, 1, 1, 2]
+Variables: a, b, c, d
+Variable weights: [1, 1, 1, 2]
+Homogeneous, Dimension &gt;0
+Groebner basis:
+[
+a^6 + a^4*b^2 + a*b^5 - a^5*c + 2*a^3*b^2*c - a^2*b^3*c - a*b^4*c + a^4*c^2 +
+ 2*a^3*b*c^2 - 2*a^2*b^2*c^2 - a*b^3*c^2 + 2*b^4*c^2 - a^2*c^4 - a*b*c^4 - 
+ 2*b^2*c^4 + c^6 + a^3*b*d - 2*a^2*b^2*d - a*b^3*d - a^2*b*c*d + a*b^2*c*d +
+ a*b*c^2*d + 2*b^2*c^2*d + a*c^3*d - c^4*d + a*b*d^2 - a*c*d^2 + b*c*d^2 +
+ c^2*d^2 - d^3
+]
+Time: 0.000
+</PRE>
+<HR>
+<H3><A NAME = "15426">Example <TT>AlgSrf_srfcs_gen_typ_min_mods2 (H122E9)</TT></A></H3>
+This example is a non-singular but non-minimal surface. We start with a degree
+5 hypersurface in Prj<sup>3</sup> and then blow up a point using the standard
+intrinsic to give a model X of the blow-up as a surface in Prj<sup>8</sup>.
+The original hypersurface is a (simply-weighted) canonical model of X 
+and <TT>WeightedCanonicalModel</TT> does just return a slight
+linear transformation of it.
+The computation takes a little time.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P3&lt;x,y,z,t&gt; := ProjectiveSpace(Rationals(),3);
+&gt; Y := Surface(P3,x^5+y^5+z^5+t^5 : Nonsingular := true); //the hypersurface
+&gt; X := Blowup(Y,Y![0,0,-1,1]);
+&gt; P&lt;x1,x2,x3,x4,x5,x6,x7,x8,x9&gt; := Ambient(X);
+&gt; X;
+Surface over Rational Field defined by
+-x6*x8+x5*x9, -x3*x8+x2*x9, -x1*x8+x3*x9, -x6*x7+x4*x9, -x5*x7+x4*x8,
+-x3*x7+x5*x9+x8*x9, -x2*x7+x5*x8+x8^2, -x1*x7+x6*x9+x9^2,
+-x3*x5+x2*x6, -x1*x5+x3*x6, -x3*x4+x5*x6+x6*x8, -x2*x4+x5^2+x5*x8,
+-x1*x4+x6^2+x6*x9, -x1*x2+x3^2,
+x1^4+x2*x3^3+x4*x6^3-x4*x6^2*x9+x4*x6*x9^2-x4*x9^3+x7*x9^3,
+x1^3*x3+x2^2*x3^2+x4*x5*x6^2-x4*x5*x6*x9+x4*x5*x9^2-x4*x8*x9^2+x7*x8*x9^2,
+x2*x3^2*x5+x1^3*x6+x4^2*x6^2+x2*x3^2*x8+x1^3*x9-x4^2*x6*x9+x4^2*x9^2-
+x4*x7*x9^2+x7^2*x9^2,
+x2^3*x3+x1^2*x3^2+x4*x5^2*x6-x4*x5^2*x9+x4*x5*x8*x9-x4*x8^2*x9+x7*x8^2*x9,
+x2^2*x3*x5+x1^2*x3*x6+x4^2*x5*x6+x2^2*x3*x8+x1^2*x3*x9-x4^2*x5*x9+x4^2*x8*x9-
+x4*x7*x8*x9+x7^2*x8*x9,
+x2*x3*x5^2+x4^3*x6+x1^2*x6^2+2*x2*x3*x5*x8+x2*x3*x8^2-x4^3*x9+2*x1^2*x6*x9+
+x4^2*x7*x9-x4*x7^2*x9+x7^3*x9+x1^2*x9^2,
+x2^4+x1*x3^3+x4*x5^3-x4*x5^2*x8+x4*x5*x8^2-x4*x8^3+x7*x8^3,
+x2^3*x5+x4^2*x5^2+x1*x3^2*x6+x2^3*x8-x4^2*x5*x8+x4^2*x8^2-x4*x7*x8^2+
+x7^2*x8^2+x1*x3^2*x9,
+x4^3*x5+x2^2*x5^2+x1*x3*x6^2-x4^3*x8+2*x2^2*x5*x8+x4^2*x7*x8-x4*x7^2*x8+
+x7^3*x8+x2^2*x8^2+2*x1*x3*x6*x9+x1*x3*x9^2,
+x4^4+x2*x5^3+x1*x6^3-x4^3*x7+x4^2*x7^2-x4*x7^3+x7^4+3*x2*x5^2*x8+
+3*x2*x5*x8^2+x2*x8^3+3*x1*x6^2*x9+3*x1*x6*x9^2+x1*x9^3
+&gt; KodairaEnriquesType(X);
+2 0 General type
+&gt; mp, is_min := CanonicalWeightedModel(X);
+&gt; is_min;
+false
+&gt; X1 := Codomain(mp); //the canonical model
+&gt; P&lt;a,b,c,d&gt; := Ambient(X1);
+&gt; X1;
+Surface over Rational Field defined by
+a^5 + b^5 + c^5 + 5*c^4*d + 10*c^3*d^2 + 10*c^2*d^3 + 5*c*d^4 + 2*d^5
+&gt; MinimalChernNumber(X,1) - ChernNumber(X,1);
+1
+</PRE>
+<P>
+The last line confirms that there was one exceptional divisor blown down.
+<HR>
+<H4><A NAME = "15427">Special Surfaces in Projective 4-space</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+There has been much study of the families of nonsingular surfaces of non-general type
+that lie in Prj<sup>4</sup> (a complete intersection of two nonsingular hypersurfaces of degrees
+d and e -- the obvious construction -- leads to general-type surfaces unless
+d + e &le;5). These families are a very useful tool for generating random surfaces
+of a particular Kodaira-Enriques type with a non-singular ordinary projective model
+lying in a small-dimensional ambient.
+<P>
+Decker, Ein and Schreyer have given many such families in their paper
+<A  HREF = "text1378.htm#bib_decker_ein_schreyer_93">[DES93]</A>. Their constructions make use of the theory of codimension
+two schemes and the Beilinson spectral sequence for coherent sheaves. The result is
+that the defining ideal of a surface in the family is isomorphic as a graded module
+to the cokernel of a random map between two modules over k[x<sub>0</sub>, ..., x<sub>4</sub>] that
+are direct sums of twists of the modules representing alternating powers of the
+sheaf of differentials on Prj<sup>4</sup> (or something slightly more complex derived from
+these modules). The ideals constructed give Cohen-Macaulay surfaces and the surface
+is actually non-singular for a general map. The families are
+generally described by the degree, sectional genus (arithmetic genus of a hyperplane
+section) and Kodaira-Enriques type of the surfaces they contain. Given the type,
+knowing the degree and sectional genus is equivalent to knowing the Hilbert
+polynomial.
+<P>
+Intrinsics are provided to generate a random surface from a selection of the
+families described in the paper above, following the implementations in
+the Macaulay 2 computer algebra package.
+
+
+<H5><A NAME = "15428">RandomRationalSurface_d10g9(P) : Prj -&gt; Srfc</A></H5>
+
+<PRE>    RndP: RngIntElt                     Default: 2</PRE>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+The argument P should be a 4-dimensional ordinary projective space defined 
+over the rational numbers or a finite field. The intrinsic generates a random 
+(non-minimal) degree 10 rational surface with sectional genus 9 in P from 
+the family described by Ranestad. If the rationals are the base field, the 
+parameter <TT>RndP</TT> is a positive integer used as an upper absolute bound 
+for random coefficients of polynomials. That is, the algorithm uses random
+integers between -RndP and +RndPm, inclusive. The default value here
+is 2. Parameter <TT>Check</TT> being <TT>true</TT> (the default) means that the random
+prospective surfaces generated are tested for irreducibility and 
+non-singularity and rejected if they fail (the process tries 10 surfaces
+before giving up). The user can set this to
+<TT>false</TT> for a slight speed-up: it is rare that a singular surface 
+occurs. 
+</BLOCKQUOTE>
+<H5><A NAME = "15429">RandomEnriquesSurface_d9g6(P) : Prj -&gt; Srfc</A></H5>
+
+<PRE>    RndP: RngIntElt                     Default: 2</PRE>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+The argument P should be a 4-dimensional ordinary projective space defined over
+the rational numbers or a finite field. Generates a random (non-minimal) degree 9
+Enriques surface with sectional genus 6 in P. The parameters have the same meaning as
+for <TT>RandomRationalSurface_d10g9</TT> and the same defaults.
+</BLOCKQUOTE>
+<H5><A NAME = "15430">RandomAbelianSurface_d10g6(P) : Prj -&gt; Srfc</A></H5>
+
+<PRE>    RndP: RngIntElt                     Default: 5</PRE>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+The argument P should be a 4-dimensional ordinary projective space defined over
+the rational numbers or a finite field. Generates a random degree 10
+torus with sectional genus 6. This is just the zero section of an element of the
+Horrocks-Mumford bundle. The parameters have the same meaning as
+for <TT>RandomRationalSurface_d10g9</TT> although the default for <TT>RndP</TT> is now 5.
+</BLOCKQUOTE>
+<H5><A NAME = "15431">RandomEllipticFibration_d7g6(P) : Prj -&gt; Srfc</A></H5>
+
+<PRE>    RndP: RngIntElt                     Default: 2</PRE>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+The argument P should be a 4-dimensional ordinary projective space defined over
+the rational numbers or a finite field. Generates a random (minimal) degree 7
+elliptic surface with sectional genus 6 in P. These have Kodaira dimension 1,
+geometric genus 2 and irregularity 0. The parameters have the same meaning as
+for <TT>RandomRationalSurface_d10g9</TT> and the same defaults.
+</BLOCKQUOTE>
+<H5><A NAME = "15432">RandomEllipticFibration_d8g7(P) : Prj -&gt; Srfc</A></H5>
+
+<PRE>    RndP: RngIntElt                     Default: 2</PRE>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+The argument P should be a 4-dimensional ordinary projective space defined over
+the rational numbers or a finite field. Generates a random (minimal) degree 8
+elliptic surface with sectional genus 7 in P. These have Kodaira dimension 1,
+geometric genus 2 and irregularity 0. The parameters have the same meaning as
+for <TT>RandomRationalSurface_d10g9</TT> and the same defaults.
+</BLOCKQUOTE>
+<H5><A NAME = "15433">RandomEllipticFibration_d9g7(P) : Prj -&gt; Srfc</A></H5>
+
+<PRE>    RndP: RngIntElt                     Default: 2</PRE>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+The argument P should be a 4-dimensional ordinary projective space defined over
+the rational numbers or a finite field. Generates a random (minimal) degree 9
+elliptic surface with sectional genus 7 in P. These have Kodaira dimension 1,
+geometric genus 1 and irregularity 0. The parameters have the same meaning as
+for <TT>RandomRationalSurface_d10g9</TT> and the same defaults.
+</BLOCKQUOTE>
+<H5><A NAME = "15434">RandomEllipticFibration_d10g10(P) : Prj -&gt; Srfc</A></H5>
+
+<PRE>    RndP: RngIntElt                     Default: 2</PRE>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+The argument P should be a 4-dimensional ordinary projective space defined over
+the rational numbers or a finite field. Generates a random (non-minimal) degree 10
+elliptic surface with sectional genus 10 in P. These have Kodaira dimension 1,
+geometric genus 2 and irregularity 0. The parameters have the same meaning as
+for <TT>RandomRationalSurface_d10g9</TT> and the same defaults.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text1383.htm">[Next]</A><A  HREF = "text1381.htm">[Prev]</A> <A  HREF = "text1383.htm">[Right]</A> <A  HREF = "text1381.htm">[Left]</A> <A  HREF = "text1379.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,3 @@
+174,1
+S,MonomialsOfWeightedDegree,"All monomials of weighted degree S[i] with respect to the i-th grading of the ambient space of A. If there exists an infinite number of such monomials, the second return value will describe the generators of the kernel",1,1,1,82,0,148,2,0,0,0,0,0,0,0,82,,0,0,380,,151,151,-38,-38,-38,-38
+S,MonomialsOfWeightedDegree,"All vectors of weighted degree S[i] with respect to the i-th grading of the ambient space of A. If there exists an infinite number of such monomials, the second return value will describe the generators of the kernel",2,0,1,82,1,82,0,148,1,1,82,0,148,2,0,0,0,0,0,0,0,82,,0,0,82,,151,151,-38,-38,-38,-38

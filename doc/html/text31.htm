@@ -1,0 +1,452 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Character Strings</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text32.htm">[Next]</A><A  HREF = "text30.htm">[Prev]</A> <A  HREF = "text32.htm">[Right]</A> <A  HREF = "text30.htm">[Left]</A> <A  HREF = "text29.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "212">Character Strings</A></H3>
+
+<P>
+<P>
+<P>
+Strings of characters play a central role in input/output so that the
+operations provided for strings to some extent reflect this. However,
+if one wishes, a more general set of operations are available if the
+string is first converted into a sequence. We will give some examples 
+of this below.
+<P>
+Magma provides two kinds of strings:  normal character strings, and <I>binary strings</I>.  Character strings are an inappropriate choice for
+manipulating data that includes non-printable characters.  If this is required,
+a better choice is the binary string type.  This type is similar semantically
+to a sequence of integers, in which each character is represented by its ASCII
+value between 0 and 255.  The difference between a binary string and a sequence
+of integers is that a binary string is stored internally as an array of bytes,
+which is a more space-efficient representation.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text31.htm#213">Representation of Strings</A>
+<LI> <A  HREF = "text31.htm#214">Creation of Strings</A>
+<LI> <A  HREF = "text31.htm#226">Integer-Valued Functions</A>
+<LI> <A  HREF = "text31.htm#229">Character Conversion</A>
+<LI> <A  HREF = "text31.htm#237">Boolean Functions</A>
+<LI> <A  HREF = "text31.htm#247">Parsing Strings</A>
+</UL>
+<H4><A NAME = "213">Representation of Strings</A></H4>
+
+<P>
+<P>
+<P>
+Character strings may consist of all ordinary characters appearing on your
+keyboard, including the blank (space). Two symbols have a special meaning: the
+double-quote <TT>"</TT> and the backslash <TT> </TT>. The double-quote is used to
+delimit a character string, and hence cannot be used inside a string; to be
+able to use a double-quote in strings the backslash is designed to be an escape
+character and is used to indicate that the next symbol has to be taken
+literally; thus, by using <TT>\"</TT> inside a string one indicates that the
+symbol <TT>"</TT> has to be taken literally and is not to be interpreted as the
+end-of-string delimiter. Thus:
+<P>
+<P>
+<PRE>
+&gt; "\"Print this line in quotes\"";
+"Print this line in quotes"
+
+</PRE>To obtain a literal backslash, one simply types two backslashes;
+for characters other than double-quotes and backslash
+it does not make a difference when a backslash precedes them inside a string,
+with the exception of <TT>n</TT>, <TT>r</TT> and <TT>t</TT>. Any occurrence of
+<TT>\n</TT> or <TT>\r</TT> inside a string is converted into a <TT>&lt;new-line&gt;</TT>
+while <TT>\t</TT> is converted into a <TT>&lt;tab&gt;</TT>. For example:
+<P>
+<PRE>
+&gt; "The first line,\nthe second line, and then\ran\tindented line";
+The first line,
+the second line, and then
+an        indented line
+
+</PRE>Note that a backslash followed by a return allows one to conveniently
+continue the current construction on the next line; so <TT>\&lt;return&gt;</TT>
+inside a string will be ignored, except that input will continue on a new
+line on your screen.
+<P>
+Binary strings, on the hand, can consist of any character, whether printable or
+non-printable.  Binary strings cannot be constructed using literals, but must
+be constructed either from a character string, or during a read operation from
+a file.
+
+
+<H4><A NAME = "214">Creation of Strings</A></H4>
+
+
+
+<H5><A NAME = "215">"abc" : -&gt; MonStgElt</A></H5>
+<BLOCKQUOTE>
+Create a string from a succession of keyboard characters (a, b, c) enclosed
+in double quotes <TT>" "</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "216">BinaryString(s) : MonStgElt -&gt; BStgElt</A></H5>
+<H5>BString(s) : MonStgElt -&gt; BStgElt</H5>
+<BLOCKQUOTE>
+Create a binary string from the character string s.
+</BLOCKQUOTE>
+<H5><A NAME = "217">s cat t : MonStgElt, MonStgElt -&gt; MonStgElt</A></H5>
+<H5>s cat t : BStgElt, BStgElt -&gt; BStgElt</H5>
+<H5>s * t : MonStgElt, MonStgElt -&gt; MonStgElt</H5>
+<BLOCKQUOTE>
+Concatenate the strings s and t.
+</BLOCKQUOTE>
+<H5><A NAME = "218">s cat:= t : MonStgElt, MonStgElt -&gt; MonStgElt</A></H5>
+<H5>s cat:= t : BStgElt, BStgElt -&gt; BStgElt</H5>
+<H5>s *:= t : MonStgElt, MonStgElt -&gt; MonStgElt</H5>
+<BLOCKQUOTE>
+Modification-concatenation of the string s with t: concatenate
+s and t and put the result in s.
+</BLOCKQUOTE>
+<H5><A NAME = "219">&amp;cat s : [ MonStgElt ] -&gt; MonStgElt</A></H5>
+<H5>&amp;cat s : [ BStgElt ] -&gt; BStgElt</H5>
+<H5>&amp;* s : [ MonStgElt ] -&gt; MonStgElt</H5>
+<BLOCKQUOTE>
+Given an enumerated sequence s of strings, return the concatenation
+of these strings.
+</BLOCKQUOTE>
+<H5><A NAME = "220">s ^ n : MonStgElt, RngIntElt -&gt; MonStgElt</A></H5>
+<BLOCKQUOTE>
+Form the n-fold concatenation of the string s, for n&ge;0. If n=0 this is
+the empty string, if n=1 it equals s, etc.
+</BLOCKQUOTE>
+<H5><A NAME = "221">s[i] : MonStgElt, RngIntElt -&gt; MonStgElt</A></H5>
+<BLOCKQUOTE>
+Returns the substring of s consisting of the i-th character.
+</BLOCKQUOTE>
+<H5><A NAME = "222">s[i] : BStgElt, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the numeric value representing the i-th character of s.
+</BLOCKQUOTE>
+<H5><A NAME = "223">ElementToSequence(s) : MonStgElt -&gt; [ MonStgElt ]</A></H5>
+<H5>Eltseq(s) : MonStgElt -&gt; [ MonStgElt ]</H5>
+<BLOCKQUOTE>
+Returns the sequence of characters of s (as length 1 strings).
+</BLOCKQUOTE>
+<H5><A NAME = "224">ElementToSequence(s) : BStgElt -&gt; [ BStgElt ]</A></H5>
+<H5>Eltseq(s) : BStgElt -&gt; [ BStgElt ]</H5>
+<BLOCKQUOTE>
+Returns the sequence of numeric values representing the characters of s.
+</BLOCKQUOTE>
+<H5><A NAME = "225">Substring(s, n, k) : MonStgElt, RngIntElt, RngIntElt -&gt; MonStgElt</A></H5>
+<H5>Substring(s, n, k) : BStgElt, RngIntElt, RngIntElt -&gt; BStgElt</H5>
+<BLOCKQUOTE>
+Return the substring of s of length k starting at position n.
+</BLOCKQUOTE>
+<H4><A NAME = "226">Integer-Valued Functions</A></H4>
+
+
+
+<H5><A NAME = "227"># s : MonStgElt -&gt; RngIntElt</A></H5>
+<H5># s : BStgElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The length of the string s.
+</BLOCKQUOTE>
+<H5><A NAME = "228">Index(s, t) : MonStgElt, MonStgElt -&gt; RngIntElt</A></H5>
+<H5>Position(s, t) : MonStgElt, MonStgElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+This function returns the position (an integer p with 0 &lt; p&le;#s) in
+the string s where the beginning of a contiguous
+substring t occurs. It returns 0
+if t is not a substring of s. (If t is the empty string, position 1
+will always be returned, even if s is empty as well.)
+</BLOCKQUOTE>
+<H4><A NAME = "229">Character Conversion</A></H4>
+
+<P>
+<P>
+<P>
+To perform more sophisticated operations, one may convert
+the string into a sequence and use the extensive facilities for
+sequences described in the next part of this manual; see the examples
+at the end of this chapter for details.
+
+
+<H5><A NAME = "230">StringToCode(s) : MonStgElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the code number of the first character of string s.
+This code depends on the computer system that is used; it is ASCII
+on most UNIX machines.
+</BLOCKQUOTE>
+<H5><A NAME = "231">CodeToString(n) : RngIntElt -&gt; MonStgElt</A></H5>
+<BLOCKQUOTE>
+Returns a character (string of length 1) corresponding to the code number n,
+where the code is system dependent (see previous entry).
+</BLOCKQUOTE>
+<H5><A NAME = "232">StringToInteger(s) : MonStgElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the integer corresponding to the string of decimal digits s.
+All non-space characters in the string s must be digits (0, 1, ..., 9),
+except the first character, which is also allowed to be + or -.
+An error results if any other combination of characters occurs.
+Leading zeros are omitted.
+</BLOCKQUOTE>
+<H5><A NAME = "233">StringToInteger(s, b) : MonStgElt, MonStgElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Returns the integer corresponding to the string of digits s, all assumed to
+be written in base b.
+All non-space characters in the string s must be digits less than b (if
+b is greater than 10, `A' is used for 10, `B' for 11, etc.),
+except the first character, which is also allowed to be + or -.
+An error results if any other combination of characters occurs.
+</BLOCKQUOTE>
+<H5><A NAME = "234">StringToIntegerSequence(s) : MonStgElt -&gt; [ RngIntElt ]</A></H5>
+<BLOCKQUOTE>
+Returns the sequence of integers corresponding to the string s of
+space-separated decimal numbers.
+All non-space characters in the string s must be digits (0, 1, ..., 9),
+except the first character after each space, which is also allowed to be
++ or -.  An error results if any other combination of characters occurs.
+Leading zeros are omitted.  Each number can begin with a sign (+ or -)
+without a space.
+</BLOCKQUOTE>
+<H5><A NAME = "235">IntegerToString(n) : RngIntElt -&gt; MonStgElt</A></H5>
+<BLOCKQUOTE>
+Convert the integer n into a string of decimal digits; if n is negative the
+first character of the string will be -. (Note that leading zeros
+and a + sign are ignored when Magma builds an integer, so the resulting
+string will never begin with + or 0 characters.)
+</BLOCKQUOTE>
+<H5><A NAME = "236">IntegerToString(n, b) : RngIntElt, RngIntElt -&gt; MonStgElt</A></H5>
+<BLOCKQUOTE>
+Convert the integer n into a string of digits with the given base (which
+must be in the range [2 ... 36]); if n is negative the
+first character of the string will be -.
+</BLOCKQUOTE>
+<H4><A NAME = "237">Boolean Functions</A></H4>
+
+
+
+<H5><A NAME = "238">s eq t : MonStgElt, MonStgElt -&gt; BoolElt</A></H5>
+<H5>s eq t : BStgElt, BStgElt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the strings s and t are identical.
+Note that blanks are significant.
+</BLOCKQUOTE>
+<H5><A NAME = "239">s ne t : MonStgElt, MonStgElt -&gt; BoolElt</A></H5>
+<H5>s ne t : BStgElt, MonStgElt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the strings s and t are distinct.
+Note that blanks are significant.
+</BLOCKQUOTE>
+<H5><A NAME = "240">s in t : MonStgElt, MonStgElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if s appears as a contiguous substring of t.
+Note that the empty string is contained in every string.
+</BLOCKQUOTE>
+<H5><A NAME = "241">s notin t : MonStgElt, MonStgElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if s does not appear as a contiguous substring of t.
+Note that the empty string is contained in every string.
+</BLOCKQUOTE>
+<H5><A NAME = "242">s lt t : MonStgElt, MonStgElt -&gt; BoolElt</A></H5>
+<H5>s lt t : BStgElt, BStgElt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if s is lexicographically less than t, <TT>false</TT> otherwise. Here
+the ordering on characters imposed by their ASCII code number is used.
+</BLOCKQUOTE>
+<H5><A NAME = "243">s le t : MonStgElt, MonStgElt -&gt; BoolElt</A></H5>
+<H5>s le t : BStgElt, BStgElt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if s is lexicographically less than or equal to t, <TT>false</TT> otherwise. Here
+the ordering on characters imposed by their ASCII code number is used.
+</BLOCKQUOTE>
+<H5><A NAME = "244">s gt t : MonStgElt, MonStgElt -&gt; BoolElt</A></H5>
+<H5>s gt t : BStgElt, BStgElt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if s is lexicographically greater than t, <TT>false</TT> otherwise. Here
+the ordering on characters imposed by their ASCII code number is used.
+</BLOCKQUOTE>
+<H5><A NAME = "245">s ge t : MonStgElt, MonStgElt -&gt; BoolElt</A></H5>
+<H5>s ge t : BStgElt, BStgElt -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if s is lexicographically greater than or equal to t, false otherwise. Here
+the ordering on characters imposed by their ASCII code number is used.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "246">Example <TT>IO_Strings (H3E1)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; "Mag" cat "ma";
+Magma
+</PRE>
+Omitting double-quotes usually has undesired effects:
+<P>
+<P>
+<PRE>
+&gt; "Mag cat ma";
+Mag cat ma
+</PRE>
+And note that there are two different equalities involved in the following!
+<P>
+<P>
+<PRE>
+&gt; "73" * "9" * "42" eq "7" * "3942";
+true
+&gt; 73 * 9 * 42 eq 7 * 3942;
+true
+</PRE>
+The next line shows how strings can be concatenated quickly, and also
+that strings of blanks can be used for formatting:
+<P>
+<P>
+<PRE>
+&gt; s := ("Mag" cat "ma? ")^2;
+&gt; s, " "^30, s[4]^12, "!";  
+Magma? Magma?                            mmmmmmmmmmmm !
+</PRE>
+Here is a way to list (in a sequence) the first occurrence
+of each of the ten digits in the decimal expansion of &pi;, using
+<TT>IntegerToString</TT> and <TT>Position</TT>.
+<P>
+<P>
+<PRE>
+&gt; pi := Pi(RealField(1001));
+&gt; dec1000 := Round(10^1000*(pi-3));
+&gt; I := IntegerToString(dec1000);
+&gt; [ Position(I, IntegerToString(i)) : i in [0..9] ];
+[ 32, 1, 6, 9, 2, 4, 7, 13, 11, 5 ]
+</PRE>
+Using the length <TT>#</TT> and string indexing <TT>[ ]</TT>
+it is also easy to count the number
+of occurrences of each digit in the string containing the first 1000 digits.
+<P>
+<P>
+<PRE>
+&gt; [ #[i : i in [1..#I] | I[i] eq IntegerToString(j)] : j in [0..9] ];
+[ 93, 116, 103, 102, 93, 97, 94, 95, 101, 106 ]
+</PRE>
+We would like to test if the ASCII-encoding of the string `Magma' appears.
+This could be done as follows, using <TT>StringToCode</TT> and <TT>in</TT>,  or
+alternatively, <TT>Position</TT>.
+To reduce the typing, we first abbreviate <TT>IntegerToString</TT> to <TT>its</TT>
+and <TT>StringToCode</TT> to <TT>sc</TT>.
+<P>
+<P>
+<PRE>
+&gt; sc := StringToCode;
+&gt; its := IntegerToString;
+&gt; M := its(sc("M")) * its(sc("a")) * its(sc("g")) * its(sc("m")) * its(sc("a"));
+&gt; M;
+779710310997
+&gt; M in I;
+false
+&gt; Position(I, M);
+0
+</PRE>
+So `Magma' does not appear this way. However, we could be satisfied if the letters
+appear somewhere in the right order. To do more sophisticated operations (like this)
+on strings, it is necessary to convert the string into a sequence, because
+sequences constitute a more versatile data type, allowing many more advanced
+operations than strings.
+<P>
+<P>
+<PRE>
+&gt; Iseq := [ I[i] : i in [1..#I] ];
+&gt; Mseq := [ M[i] : i in [1..#M] ];
+&gt; IsSubsequence(Mseq, Iseq);
+false
+&gt; IsSubsequence(Mseq, Iseq: Kind := "Sequential");
+true
+</PRE>
+Finally, we find that the string `magma' lies in between
+`Pi' and `pi':
+<P>
+<P>
+<PRE>
+&gt; "Pi" le "magma";
+true
+&gt; "magma" lt "pi";
+true
+</PRE>
+<HR>
+<H4><A NAME = "247">Parsing Strings</A></H4>
+
+
+
+<H5><A NAME = "248">Split(S, D) : MonStgElt, MonStgElt -&gt; [ MonStgElt ]</A></H5>
+<H5>Split(S) : MonStgElt -&gt; [ MonStgElt ]</H5>
+<BLOCKQUOTE>
+Given a string S, together with a string D describing a list of separator
+characters, return the sequence of strings obtained by splitting S at
+any of the characters contained in D.  That is, S is considered as
+a sequence of fields, with any character in D taken to be a delimiter
+separating the fields.
+If D is omitted, it is taken to be the string consisting of the newline
+character alone (so S is split into the lines found in it).  If S
+is desired to be split into space-separated words, the argument
+<TT>" \t\n"</TT> should be given for D.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "249">Example <TT>IO_Split (H3E2)</TT></A></H3>
+We demonstrate elementary uses of <TT>Split</TT>.
+<P>
+<P>
+<PRE>
+&gt; Split("a b c d", " ");
+[ a, b, c, d ]
+&gt; // Note that an empty field is included if the
+&gt; // string starts with the separator:
+&gt; Split(" a b c d", " ");
+[ , a, b, c, d ]
+&gt; Split("abxcdyefzab", "xyz");
+[ ab, cd, ef, ab ]
+&gt; // Note that no splitting happens if the delimiter
+&gt; // is empty:
+&gt; Split("abcd", "");   
+[ abcd ]
+</PRE>
+<HR>
+<H5><A NAME = "250">Regexp(R, S) : MonStgElt, MonStgElt -&gt; BoolElt, MonStgElt, [ MonStgElt ]</A></H5>
+<BLOCKQUOTE>
+Given a string R specifying a regular expression, together with a string S,
+return whether S matches R.
+If so, return also the matched substring of S, together with the sequence of
+matched substrings of S corresponding to the parenthesized expressions
+of R.
+This function is based on the freely distributable reimplementation of the V8
+regexp package by Henry Spencer.  The syntax and interpretation of the
+characters <TT>|</TT>, <TT>*</TT>, <TT>+</TT>, <TT>?</TT>, <TT>^</TT>, <TT>$</TT>, <TT>[]</TT>,
+<TT> </TT> is the same as in the UNIX command <TT>egrep</TT>.  The
+parenthesized expressions are numbered in left-to-right order of their
+opening parentheses.   Note that the parentheses should not have an
+initial backslash before them as the UNIX commands <TT>grep</TT> and
+<TT>ed</TT> require.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "251">Example <TT>IO_Regexp (H3E3)</TT></A></H3>
+We demonstrate some elementary uses of <TT>Regexp</TT>.
+<P>
+<P>
+<PRE>
+&gt; Regexp("b.*d", "abcde");
+true bcd []
+&gt; Regexp("b(.*)d", "abcde");
+true bcd [ c ]
+&gt; Regexp("b.*d", "xyz");     
+false
+&gt; date := "Mon Jun 17 10:27:27 EST 1996";
+&gt; _, _, f := Regexp("([0-9][0-9]):([0-9][0-9]):([0-9][0-9])", date);
+&gt; f;
+[ 10, 27, 27 ]
+&gt; h, m, s := Explode(f);
+&gt; h, m, s;
+10 27 27
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text32.htm">[Next]</A><A  HREF = "text30.htm">[Prev]</A> <A  HREF = "text32.htm">[Right]</A> <A  HREF = "text30.htm">[Left]</A> <A  HREF = "text29.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,549 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Cyclic Covers of P1</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1499.htm">[Next]</A><A  HREF = "text1497.htm">[Prev]</A> <A  HREF = "text1499.htm">[Right]</A> <A  HREF = "text1497.htm">[Left]</A> <A  HREF = "text1483.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "17007">Cyclic Covers of P<sup>1</sup></A></H3>
+
+<P>
+<P>
+A q-cyclic cover of the projective line is a curve C which admits 
+a degree q morphism to P<sup>1</sup> such that the associated 
+extension of function fields is (geometrically) cyclic. By Kummer theory, 
+such a curve has an affine model of the form y<sup>q</sup> = f(x) (at least when
+the base field contains the q-th roots of unity). This class 
+of curve includes hyperelliptic curves. Current functionality for cyclic
+covers includes testing local solubility, searching for points and performing
+descents on curves and their Jacobians when they are defined over a number field.
+<P>
+Most functionality is implemented in the cases where f(x) is a separable 
+polynomial of arbitrary degree and q is prime. One notable exception is that
+the method of descent on the curve is available for any f(x) that is q-th
+power free.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1498.htm#17008">Points</A>
+<LI> <A  HREF = "text1498.htm#17012">Descent</A>
+<LI> <A  HREF = "text1498.htm#17015">Descent on the Jacobian</A>
+<LI> <A  HREF = "text1498.htm#17020">Partial Descent</A>
+</UL>
+<H4><A NAME = "17008">Points</A></H4>
+
+<P>
+<P>
+A point on a cyclic cover C : y<sup>q</sup> = f<sub>d</sub>x<sup>d</sup> + f<sub>d - 1</sub>x<sup>d - 1</sup> + ... + f<sub>0</sub>
+is specified by a triple representing a point in the appropriate 
+weighted projective plane. 
+<P>
+When d = Degree(f(x)) is divisible by q, we consider points the 
+weighted projective plane P<sup>2</sup>(1:d/q:1). In this case a 
+point is represented by a triple [X, Y, Z] satisfying
+ Y<sup>q</sup> = f<sub>d</sub>X<sup>d</sup> + f<sub>d - 1</sub>X<sup>d - 1</sup>Z + ... + f<sub>0</sub>Z<sup>d</sup>. 
+<P>
+When d = Degree(f(x)) is not divisible by q, we consider points 
+in the weighted projective plane P<sup>2</sup>(q:d:1). In this case a
+point is represented by a triple [X, Y, Z] satisfying
+ Y<sup>q</sup> = f<sub>d</sub>X<sup>d</sup> + f<sub>d - 1</sub>X<sup>d - 1</sup>Z<sup>q</sup> + ... + f<sub>0</sub>Z<sup>dq</sup>. 
+
+
+<H5><A NAME = "17009">RationalPoints(f,q) : RngUPolElt, RngIntElt -&gt; SetIndx</A></H5>
+<H5>Points(f,q) : RngUPolElt, RngIntElt -&gt; SetIndx</H5>
+
+<PRE>    Bound: RngIntElt                    Default: 0</PRE>
+
+<PRE>    DenominatorBound: RngIntElt         Default: 0</PRE>
+
+<PRE>    NPrimes: RngIntElt                  Default: 0</PRE>
+<BLOCKQUOTE>
+For a polynomial f defined over a number field (or Q), this searches 
+for rational points on the curve y<sup>q</sup> = f(x).  The search region is
+controlled by the parameters <TT>Bound</TT> (which must be specified) and 
+<TT>DenominatorBound</TT>.  The function returns a set of triples (x, y, z) 
+satisfying y<sup>q</sup> = F(x, z) where F(x, z) is the homogenisation of f(x) 
+taking x to have weight LCM(q,Degree(f(x)))/Degree(f(x)).
+<P>
+The algorithm, and the parameters, are the same as for
+<A  HREF = "text1489.htm#RationalPointsCrvHyplabel">RationalPoints</A> of a hyperelliptic curve.
+</BLOCKQUOTE>
+<H5><A NAME = "17010">HasPoint(f,q,v) : RngUPolElt, RngIntElt, RngIntElt -&gt; BoolElt, SeqEnum</A></H5>
+<H5>HasPoint(f,q,v) : RngUPolElt, RngIntElt, RngOrdIdl -&gt; BoolElt, SeqEnum</H5>
+<BLOCKQUOTE>
+For a polynomial f defined over a number field k, this checks if the
+curve defined by y<sup>q</sup>=f(x) has any points over the completion k<sub>v</sub>. 
+The second return value is a triple of elements in the completion
+of k at v giving a point on the curve. The triple (x, y, z) returned 
+satisfies y<sup>q</sup> = F(x, z) where F(x, z) is the homogenisation of f(x) taking
+x to have weight LCM(q,Degree(f(x)))/Degree(f(x)).
+<P>
+The current implementation for testing local solubility of
+cyclic covers is polynomial time in the cardinality of the residue field,
+making it somewhat impractical for larger primes.
+</BLOCKQUOTE>
+<H5><A NAME = "17011">HasPointsEverywhereLocally(f,q) : RngUPolElt, RngIntElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+For a polynomial f defined over a number field k, this returns true
+if and only if the curve y<sup>q</sup>=f(x) has points over all
+nonarchimedean completions of k.
+</BLOCKQUOTE>
+<H4><A NAME = "17012">Descent</A></H4>
+
+<P>
+<P>
+Let C be a curve with Jacobian J and suppose &psi;: A -&gt; J is an
+isogeny of abelian varieties. We say that a morphism of curves &pi; : D -&gt; C 
+is a &psi;-covering of C if, over an algebraic closure, &pi;
+is isomorphic as a cover to the pull-back of an embedding of C into J along &psi;.
+<P>
+Now suppose that C : y<sup>q</sup> = f(x) is a q-cyclic cover of the projective 
+line defined over a number field k. Any primitive q-th root of unity &zeta; 
+gives rise to an automorphism: &iota; sending a point (x, y) to (x, &zeta; y). This
+induces an automorphism of the Jacobian. Hence the endomorphism ring of the Jacobian 
+contains the cyclotomic ring Z[&zeta;], and in particular the endomorphism 
+&phi; = 1 - &zeta;. The &phi;-Selmer set of C classifies isomorphism classes of 
+&phi;-coverings of C which are everywhere locally soluble. There is an action of 
+&iota; on these coverings. The quotient by this action is known as the fake &phi;-Selmer set
+of C. If this set is empty, then C has no k-rational points. This can happen even if 
+C itself has points everywhere locally. Even when this set is non-empty, it gives 
+information about rational points on C. When q = 2, &phi; is multiplication by 2,
+in which case the &phi;-Selmer set is the same as the 2-Selmer set 
+described in <TT>TwoCoverDescent</TT>.
+
+
+<H5><A NAME = "17013">qCoverDescent(f,q) : RngUPolElt, RngIntElt -&gt; Set, Map</A></H5>
+
+<PRE>    PrimeBound: RngIntElt               Default: 0</PRE>
+
+<PRE>    PrimeCutOff: RngIntElt              Default: 0</PRE>
+
+<PRE>    KnownPoints: Set                    Default: </PRE>
+
+<PRE>    SetVerbose("CycCov", n):            Maximum: 3</PRE>
+<BLOCKQUOTE>
+Computes the fake &phi;-Selmer set of the cyclic cover C: y<sup>q</sup>=f(x)
+as an abstract set. The first return value is the fake &phi;-Selmer set given 
+as a subset of the cartesian product of number fields having defining polynomials 
+the irreducible factors of f. The map returned is from this cartesian product 
+into the abstract group A(S, q) involved in the computation (the 
+unramified outside S subgroup of the quotient of the etale algebra associated 
+to the ramification points of C by the subgroup generated by scalars and q-th powers).
+<P>
+The input <TT>f</TT> must be a q-th power free polynomial defined over 
+a number field k with class number 1.
+<P>
+The optional parameters <TT>PrimeBound</TT> and <TT>PrimeCutoff</TT> have the same 
+meaning as those used the <TT>TwoCoverDescent</TT> for hyperelliptic curves. 
+Only good primes up to <TT>PrimeBound</TT> and bad primes up to <TT>PrimeCutoff</TT> 
+will be considered in the local computations. If either of these parameters is 
+not set to default, the set returned might be strictly larger than the fake 
+&phi;-Selmer set.
+<P>
+One can obtain a lower bound for the size of the &phi;-Selmer set by considering 
+the images of known global points on C. This often speeds up the computation 
+considerably as the first few primes might be sufficient to show that the 
+&phi;-Selmer set is equal to the set of images of the known rational points. 
+A set of known points may be passed in using the parameter <TT>KnownPoints</TT>.
+These should be given as triples of the type returned by <TT>RationalPoints</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17014">Example <TT>CrvHyp_qcoverdescent (H131E42)</TT></A></H3>
+The following computation shows that the genus 15 curve defined by the 
+equation y<sup>7</sup>=2x<sup>7</sup> + 6 has no rational points even though it is everywhere locally solvable.
+<P>
+<P>
+<P>
+<PRE>
+&gt; _&lt;x&gt; := PolynomialRing(Rationals());
+&gt; RationalPoints(3*x^7+6,7 : Bound := 1000);
+{@ @}
+&gt; HasPointsEverywhereLocally(3*x^7+6,7);
+true
+&gt; time Sel := qCoverDescent(3*x^7+6,7 : PrimeBound := 1000);
+Time: 0.450
+&gt; Sel;
+
+</PRE>
+<HR>
+<H4><A NAME = "17015">Descent on the Jacobian</A></H4>
+
+<P>
+<P>
+<P>
+Suppose J is the Jacobian of the cyclic cover C defined by y<sup>q</sup>=f(x) 
+over a field k containing the q-th roots of unity. If k is a number
+field, then the &phi;-Selmer group of J is a finite group which 
+contains J(k)/&phi;(J(k)). Computing the &phi;-Selmer group can be
+used to give an upper bound for the rank of J(k). In the case q = 2,
+this reduces to the 2-Selmer group computed with <A  HREF = "text1495.htm#TwoSelmerGroup">TwoSelmerGroup</A>.
+<P>
+For q prime the &phi;-Selmer group may be computed using an algorithm 
+of Poonen-Schaefer <A  HREF = "text1482.htm#bib_poonen-schaefer">[PS97]</A>. Their algorithm actually 
+computes a fake Selmer group, which is a quotient of the true Selmer 
+group by a subgroup of order dividing q.
+<P>
+When the base field does not contain the q-th roots
+of unity, one still obtains information by computing the &phi;-Selmer group
+over the cyclotomic extension. For details see <A  HREF = "text1482.htm#bib_poonen-schaefer">[PS97]</A>,
+or consider the example below.
+
+
+<H5><A NAME = "17016">PhiSelmerGroup(f,q) : RngUPolElt, RngIntElt -&gt; GrpAb, Map</A></H5>
+
+<PRE>    ReturnRawData: BoolElt              Default: <TT>false</TT></PRE>
+
+<PRE>    SetVerbose("Selmer", n):            Maximum: 3</PRE>
+<BLOCKQUOTE>
+For a polynomial f over a number field k, this computes the 
+(fake) &phi;-Selmer group of the Jacobian of the curve
+y<sup>q</sup> = f(x) over the field k(&mu;<sub>q</sub>) obtained by adjoining the 
+q-th roots of unity to k. The polynomial f(x) must be separable 
+and q must be prime.
+<P>
+There are two steps in the algorithm which may require a significant
+amount of time: the first is the computation of class groups of the
+extensions of k(&mu;<sub>q</sub>) given by the irreducible factors of f(x); the
+second is the computation of the local images of the descent map at 
+the prime(s) above q.
+<P>
+The (fake) Selmer group is returned as a finite abelian group S, together 
+with a map from S to some affine algebra A, which represents the
+standard map from the Selmer group to A<sup> * </sup>/k<sup> * </sup>(A<sup> * </sup>)<sup>q</sup> or to A<sup> * </sup>/(A<sup> * </sup>)<sup>q</sup>
+correspondingly as the degree of f(x) is or is not divisible by q.
+<P>
+When called with <TT>ReturnRawData</TT> the program will yield three 
+additional return values, <TT>expvecs</TT>, <TT>factorbase</TT> and <TT>selpic1</TT>.
+The first two are used to specify the images in A<sup> * </sup>/k<sup> * </sup>(A<sup> * </sup>)<sup>q</sup> of the
+(fake) Selmer group generators (in unexpanded form). This is done exactly
+as for <A  HREF = "text1495.htm#TwoSelmerGroup">TwoSelmerGroup</A>. <TT>selpic1</TT> is an element of the supergroup
+containing the (fake) Selmer group, or it is the empty set. This specifies
+the coset of the (fake) Selmer group corresponding to the (fake) Selmer 
+set of the Pic<sup>1</sup> torsor as described in <A  HREF = "text1482.htm#bib_CreutzANTSX">[Cre12]</A>. When the 
+curve has points everywhere locally this determines whether or not the torsor
+is divisible by &phi; in Sha, which in turn yields more information on the
+rank.
+<P>
+Note: this function calls <TT>PicnDescent</TT> and repackages the information.
+</BLOCKQUOTE>
+<H5><A NAME = "17017">PicnDescent(f,q) : RngUPolElt, RngIntElt -&gt; RngIntElt, GrpAb, Tup, RngIntElt, Map, GrpAb, ., .</A></H5>
+
+<PRE>    Safety: RngIntElt                   Default: 0</PRE>
+
+<PRE>    Fields: SetEnum                     Default: {{ }}</PRE>
+
+<PRE>    SetVerbose("Selmer", n):            Maximum: 3</PRE>
+<BLOCKQUOTE>
+This function returns information at a slightly lower level than
+<TT>PhiSelmerGroup</TT>.  It returns eight values, which we will call
+<TT>dimSel</TT>, <TT>SelfakeJ</TT>, <TT>SelfakePic1</TT>, <TT>ranktorsglobal</TT>, <TT>ASqmodktoA</TT>, <TT>muJktors</TT>, <TT>toVec</TT>, <TT>FB</TT>.
+<P>
+The return value <TT>ASqmodktoA</TT> is a map m:G -&gt; A, where A = k[x]/f(x) and G is an elementary abelian q-group.
+The group G is isomorphic to the unramified outside S subgroup of A * modulo q-th powers and scalars.
+(Here S is the set of bad primes used for the computation.)
+The value <TT>dimSel</TT> is an upper bound for the rank of the &phi;-Selmer group of J/k. It is not always sharp.
+It tries to determine the kernel of the map from Selmer to fake Selmer but doesn't always succeed.
+<TT>SetVerbose("Selmer",1)</TT> should give some details about this.
+The group <TT>SelfakeJ</TT> is the subgroup of G corresponding to the fake-&phi;-Selmer group of J/k.
+The return value <TT>SelfakePic1</TT> is <TT>&lt;SelfakeJ,g&gt;</TT> with g in G such that the coset (g + (SelfakeJ)) in G
+corresponds to the fake-&phi;-Selmer set of Pic1/k.
+The value <TT>ranktorsglobal</TT> is a lower bound for rank of J(k)[&phi;]
+(just coming from factorization of f over k, so not sharp in all cases).
+The group <TT>muJktors</TT> is the subgroup of G corresponding to the image under the
+descent map of the part of J(k)[&phi;] computed above.
+The return values <TT>toVec</TT> and <TT>FB</TT> are similar to <TT>expvecs</TT> and <TT>factorbase</TT> returned by <A  HREF = "text1495.htm#TwoSelmerGroup">TwoSelmerGroup</A>.
+<P>
+There are optional parameters which have the following roles.
+The local images are determined by computing images of random points
+until they generate a group that is large enough.
+Setting <TT>Safety := N</TT> will force it to compute the images of N extra
+random points (and throw an error if they generate a larger group).
+The parameter <TT>Fields</TT> has the same role as in <A  HREF = "text1495.htm#TwoSelmerGroup">TwoSelmerGroup</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "17018">RankBound(f,q) : RngUPolElt, RngIntElt -&gt; RngIntElt</A></H5>
+<H5>RankBounds(f,q) : RngUPolElt, RngIntElt -&gt; RngIntElt, RngIntElt</H5>
+
+<PRE>    ReturnGenerators: BoolElt           Default: <TT>false</TT></PRE>
+
+<PRE>    SetVerbose("Selmer", n):            Maximum: 3</PRE>
+<BLOCKQUOTE>
+An upper (or a lower and upper) bound for the rank of the Jacobian
+of the cyclic cover defined by y<sup>q</sup> = f(x). The upper bound is obtained
+by performing a descent as described above and incorporates the information
+on the Pic<sup>1</sup> torsor thus obtained. The lower bound is obtained by 
+a naive (and rather inefficient) search for divisors on the curve.
+<P>
+If the optional parameter <TT>ReturnGenerators</TT> is set to <TT>true</TT>, then 
+a third value will be returned. This will be a list of univariate 
+polynomials defining divisors on P<sup>1</sup> that lift to divisors 
+on the curve. The images of these in the Mordell-Weil group generate 
+a subgroup of rank at least as large as the lower bound provided. 
+Independence of these points is determined by considering their 
+images in the (fake) Selmer group.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17019">Example <TT>CrvHyp_qcoverdescent (H131E43)</TT></A></H3>
+In this example we use descents to determine both the rank of the 
+Mordell-Weil group and the 3-primary part of Sha for the Jacobian
+J of a genus 4 curve C over the rationals. 
+<P>
+<P>
+<P>
+<PRE>
+&gt; _&lt;x&gt; := PolynomialRing(Rationals());
+&gt; f := 3*(x^6 + x^4 + 4*x^3 + 2*x^2 + 4*x + 3);
+&gt; k := CyclotomicField(3);
+&gt; IsIrreducible(PolynomialRing(k)!f);
+true
+&gt; SelJ,m,expvecs,fb,SelPic1 := PhiSelmerGroup(f,3 : ReturnRawData);
+&gt; Ilog(3,#SelJ); 
+2
+</PRE>
+In this example the map from the genuine Selmer group to the 
+fake Selmer group has a kernel of order 3. This is because 
+f has degree divisible by q = 3 and is irreducible. 
+Hence the &phi;-Selmer group has 3-rank 3. The fact that
+f is irreducible also implies that there is no nontrivial
+&phi;-torsion on J defined over k. Thus the 
+&phi;-Selmer group gives an upper bound of 2 * 3 = 6 for the
+rank of J over k and an upper bound of 3 for the
+rank over Q (see <A  HREF = "text1482.htm#bib_poonen-schaefer">[PS97]</A>). We can use the
+information about the Pic<sup>1</sup> torsor to get a better bound
+<P>
+<P>
+<PRE>
+&gt; HasPointsEverywhereLocally(f,3);
+true
+&gt; SelPic1;
+
+</PRE>
+This means that the Pic<sup>1</sup> torsor represents a &phi;-torsion
+class in the Shafarevich-Tate group of J that is not divisible
+by &phi;. In particular it is nontrivial, and because the 
+Cassels-Tate pairing is alternating this implies the &phi;-torsion
+subgroup of Sha contains a nontrivial subgroup with even 3-rank.
+Hence, we deduce that J(k)/&phi;(J(k)) has 3-rank 
+at most 3 - 2 = 1, and consequently that J(Q) has rank &le;1.
+Calling <TT>RankBounds</TT> will deduce these bounds, and 
+search for generators to obtain a lower bound.
+<P>
+<P>
+<PRE>
+&gt; r_l, r_u, gens := RankBounds(f,3 : ReturnGenerators);
+&gt; [r_l,r_u];
+[1,1]
+&gt; gens;
+[*
+    T^3 - T^2 + 4*T + 4
+*]
+</PRE>
+This polynomial defines a divisor on P<sup>1</sup> that lifts to
+a degree 3 divisor D on C : y<sup>3</sup> = f(x). One way to
+verify this is the following:
+<P>
+<P>
+<PRE>
+&gt; K := NumberField(gens[1]);
+&gt; IsPower(Evaluate(f,K.1),3);
+true 1/4*(-3*K.1^2 + 9*K.1 + 6)
+</PRE>
+Let D<sub>0</sub> denote the pullback of some point P &isin;P<sup>1</sup>
+under the degree 3 map C -&gt; P<sup>1</sup>. Then 
+D - D<sub>0</sub> is a degree 0 defined over the rationals.
+According to <TT>RankBounds</TT> its class has infinite order
+in J(Q). This was determined by considering its image 
+under the composition, 
+J(Q) -&gt; J(k) -&gt; Sel<sup>&phi;</sup>(J/k). Since
+there is no nontrivial &phi;-torsion, this amounts to 
+saying that the image is nontrivial. We can verify this
+with the following computations (carried out internally
+by <TT>RankBounds</TT>).
+<P>
+<P>
+<PRE>
+&gt; A&lt;theta&gt; := Domain(m); // the algebra representing Sel
+&gt; D := Evaluate(gens[1],theta);
+&gt; imD := m(D);
+&gt; assert imD ne SelJ!0;
+&gt; assert imD in SelJ;
+</PRE>
+Since the rank over Q has been computed unconditionally
+it follows that the &phi;-torsion subgroup of Sha is 
+isomorphic to (Z/3)<sup>2</sup>, and since it contains
+a element not divisible by &phi; in Sha one can deduce
+that the 3-primary part of Sha is also isomorphic to
+(Z/3)<sup>2</sup>.
+<HR>
+<H4><A NAME = "17020">Partial Descent</A></H4>
+
+<P>
+<P>
+The (fake) &phi;-Selmer set of the curve C : y<sup>q</sup> = f(x) defined over a number field
+k is computed using a map which sends a point (x, y) of C to x - &theta;, where &theta; 
+is a generic root of f. This map takes values in the product of the extensions of k
+defined by the irreducible factors of f(x). More generally one can specify 
+a partial descent map as follows. For each irreducible factor f<sub>i</sub>(x) of f(x), 
+fix an extension K<sub>i</sub>/k and an irreducible factor h<sub>i</sub>(x) &isin;K<sub>i</sub>[x] of f<sub>i</sub>(x). 
+The map sending (x, y) to (h<sub>1</sub>(x), ..., h<sub>n</sub>(x)) induces a well defined map from C(k) 
+to an appropriate quotient of the units in the product of the K<sub>i</sub>. A partial 
+descent computes the set of elements which restrict into the image of C(k<sub>v</sub>) 
+for every prime v of k. This set gives information on the set of rational 
+points of C. If it is empty, then the curve has no rational points.
+<P>
+Geometrically this set can be understood as follows. The coverings parameterised 
+by the &phi;-Selmer set are Galois covers of C with group isomorphic (as a Galois module) 
+to the &phi;-torsion subgroup of the Jacobian. By Galois theory, any Galois submodule 
+gives rise to intermediate coverings. A partial descent computes a set of everywhere 
+locally solvable intermediate coverings corresponding to some Galois submodule 
+of J[&phi;].
+
+
+<H5><A NAME = "17021">qCoverPartialDescent(f,factors,q) : RngUPolElt, [* RngUPolElt *], RngIntElt -&gt; Set, Map</A></H5>
+
+<PRE>    PrimeBound: RngIntElt               Default: 0</PRE>
+
+<PRE>    PrimeCutoff: RngIntElt              Default: 0</PRE>
+
+<PRE>    KnownPoints: Set                    Default: </PRE>
+
+<PRE>    SetVerbose("CycCov", n):            Maximum: 3</PRE>
+<BLOCKQUOTE>
+Performs a partial descent on the curve y<sup>q</sup> = f(x) with respect to the descent map
+given by <TT>factors</TT>. The map returned is from this cartesian product 
+into the abstract group A(S, q) involved in the computation (the 
+unramified outside S subgroup of the quotient of the etale algebra associated 
+to the orbits of ramification points of C determined by <TT>factors</TT> by the 
+subgroup generated by scalars and q-th powers).
+<P>
+The input <TT>f</TT> must be a separable polynomial defined over a number field k 
+with class number 1. For each irreducible factor h<sub>i</sub> &isin;k[x] of f, the 
+list <TT>factors</TT> must contain an irreducible factor of h<sub>i</sub> defined over some 
+(possibly trivial) extension of k. The optional parameters are the same 
+as for <TT>qCoverDescent</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17022">Example <TT>CrvHyp_qcoverpartialdescent (H131E44)</TT></A></H3>
+<P>
+Consider the cyclic cover D : y<sup>3</sup>=3(x<sup>2</sup> + 1)(x<sup>2</sup> + 17)(x<sup>2</sup> - 17).
+<P>
+<P>
+<P>
+<PRE>
+&gt; _&lt;x&gt;:=PolynomialRing(Rationals());
+&gt; f := 3*(x^2+1)*(x^2+17)*(x^2-17);
+&gt; pts := RationalPoints(f,3 : Bound:=100);
+&gt; pts;
+{@
+    [ -1, -12, 1 ],
+    [ 1, -12, 1 ]
+@}
+</PRE>
+<P>
+So this appears to have only two rational points. We now apply partial descent by only factorising the third factor as follows:
+<P>
+<P>
+<P>
+<PRE>
+&gt; K&lt;th&gt; := NumberField(x^2-17);
+&gt; factor := Factorisation(x^2-17,K)[1,1];
+&gt; time selmerset, algebra:=qCoverPartialDescent(
+&gt;  3*(x^2+1)*(x^2+17)*(x^2-17),[*x^2+1,x^2+17,factor*],3
+&gt; : KnownPoints := pts, PrimeBound := 1000 );
+Time: 0.530	
+&gt; selmerset;
+{
+    &lt;1, 9, $.1 + 9&gt;,
+    &lt;1, 9, 2*$.1 + 2&gt;
+}
+&gt; delta := &lt;1,9,2+2*th&gt;;
+</PRE>
+<P>
+Each element of <TT>selmerset</TT> corresponds to a covering of D and every rational point on D lifts to one of these two coverings. For example &delta;
+corresponds to a covering Y<sub>&delta;</sub> of D with defining equations 
+&lambda;<sup>2</sup>y<sub>1</sub><sup>3</sup>=x<sup>2</sup> + 1,
+9&lambda;<sup>2</sup>y<sub>2</sub><sup>3</sup>=x<sup>2</sup> + 17,
+(2&theta; + 2)&lambda; y<sub>3</sub><sup>3</sup>= x - &theta;, where &theta; is a square root of 17. This covering of D also evidently covers the genus one curve defined over Q(&theta;), C : (2&theta; + 2)v<sup>3</sup> = (x<sup>2</sup> + 1)(x - &theta;) . 
+One can now use the method of Elliptic Curve Chabauty to find all points of Y<sub>&delta;</sub>(K) which map to points of D(Q).
+Namely any such point gives rise to a point of C(K) with x-coordinate in Q. Provided we can obtain generators for C(K),
+such points can be determined using <TT>Chabauty</TT>.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P2&lt;x,v,w&gt;:=ProjectivePlane(K);
+&gt; C:=Curve(P2, -(delta[3])*v^3 + (x^2+w^2)*(x-th*w) );
+&gt; E,CtoE:=EllipticCurve(C);
+&gt; twotors := TorsionSubgroup(E);
+&gt; #twotors;
+1
+&gt; covers,coverstoE:=TwoDescent(E);
+&gt; #covers;
+1
+&gt; cover:=covers[1];
+&gt; covertoE:=coverstoE[1];
+&gt; pts:={@pt@covertoE : pt in RationalPoints(cover : Bound:=100)@};
+&gt; pts;
+{@ (1/128*(-153*th + 1377) : 1/1024*(-8109*th + 28917) : 1), 
+(1/128*(-153*th + 1377) : 1/1024*(6885*th - 17901) : 1), 
+(1/194688*(-171346689*th + 708942857) : 1/60742656*(-4566609746937*th 
+    + 18826158509345) : 1), (1/194688*(-171346689*th + 708942857) : 
+1/60742656*(4566537140481*th - 18825505051241) : 1) @}
+&gt; gen := pts[1];
+</PRE>
+<P>
+This shows that E(K) simeq Z, so <TT>gen</TT> generates a finite index subgroup.
+<P>
+<P>
+<P>
+<PRE>
+&gt; A:=FreeAbelianGroup(1);
+&gt; AtoE:=map&lt;A -&gt; E | elt :-&gt; Eltseq(elt)[1]*gen &gt;;
+</PRE>
+<P>
+To apply Chabauty, we want to use a map E -&gt; P<sup>1</sup> such that the composition
+C -&gt; E -&gt; P<sup>1</sup> sends (x, v, w) to x.
+<P>
+<P>
+<P>
+<PRE>
+&gt; P1:=ProjectiveSpace(Rationals(),1);
+&gt; CtoE;
+Mapping from: CrvPln: C to CrvEll: E
+with equations : 
+1/16*(9*th - 153)*v
+1/128*(-729*th + 1377)*x
+-1/17*th*x + w
+and inverse
+th*$.2
+1/16*(-9*th + 153)*$.1
+$.2 + 1/128*(1377*th - 12393)*$.3
+&gt; EtoP1:=map&lt;E -&gt; P1 | [th*E.2,E.2 + 1/128*(1377*th - 12393)*E.3]&gt;;
+&gt; Chabauty(AtoE,EtoP1);
+{
+    -A.1
+}
+126
+&gt; Chabauty(AtoE,EtoP1 : IndexBound:=126);
+{
+    -A.1
+}
+126
+&gt; pointC:= (-A.1)@AtoE@@CtoE;
+&gt; pointC;
+(-1 : -1 : 1)
+</PRE>
+<P>
+Any preimage of this point on Y<sub>&delta;</sub> has x = - 1, and as such
+must lie above ( - 1, - 12) &isin;D(Q). A similar argument proves that 
+the only rational point coming from the other element of the partial
+Selmer set is (1, - 12), proving D(Q) = { (1, 12), ( - 1, - 12)}.
+<HR>
+<PRE></PRE> <A  HREF = "text1499.htm">[Next]</A><A  HREF = "text1497.htm">[Prev]</A> <A  HREF = "text1499.htm">[Right]</A> <A  HREF = "text1497.htm">[Left]</A> <A  HREF = "text1483.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

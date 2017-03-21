@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Set-Theoretic Operations</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text874.htm">[Next]</A><A  HREF = "text881.htm">[Prev]</A> <A  HREF = "text874.htm">[Right]</A> <A  HREF = "text881.htm">[Left]</A> <A  HREF = "text875.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "10068">Set-Theoretic Operations</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text882.htm#10069">Membership and Equality</A>
+<LI> <A  HREF = "text882.htm#10074">Set Operations</A>
+<LI> <A  HREF = "text882.htm#10079">Coercions Between Related Groups</A>
+</UL>
+<H4><A NAME = "10069">Membership and Equality</A></H4>
+
+
+
+<H5><A NAME = "10070">g in G : GrpSLPElt, GrpSLP -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a straight-line program g and an SLP-group G, return <TT>true</TT>
+if g is an element of G, <TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "10071">g notin G : GrpSLPElt, GrpSLP -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given an straight-line program g and an SLP-group G, return <TT>true</TT>
+if g is not an element of G, <TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "10072">S subset G : { GrpSLPElt } , GrpSLP -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a group G and a set S of elements belonging to a group H,
+where G and H are related, return <TT>true</TT> if S is a subset of G,
+<TT>false</TT> otherwise.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "10073">S notsubset G : { GrpSLPElt } , GrpSLP -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a group G and a set S of elements belonging to a group H,
+where G and H are related, return <TT>true</TT> if S is
+not a subset of G, <TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<H4><A NAME = "10074">Set Operations</A></H4>
+
+
+
+<H5><A NAME = "10075">RandomProcess(G) : GrpSLP -&gt; Process</A></H5>
+
+<PRE>    Slots: RngIntElt                    Default: 10</PRE>
+
+<PRE>    Scramble: RngIntElt                 Default: 100</PRE>
+<BLOCKQUOTE>
+Create a process to generate randomly chosen elements from the 
+group G. The process is based on the product-replacement algorithm
+of <A  HREF = "text874.htm#bib_randomelements">[CLGM+95]</A>, modified by the use of an accumulator.
+At all times, N elements are stored where N is the maximum of
+the specified value for <TT>Slots</TT>
+and <TT>Ngens</TT>(G) + 1.
+Initially, these are just the generators of G.
+As well, one extra group element is stored, the accumulator. Initially,
+this is the identity.
+Random elements are now produced by successive calls to <TT>Random(P)</TT>,
+where P is the process created by this function.  Each such call
+chooses one of the elements in the slots and multiplies it into the
+accumulator.
+The element in that slot is replaced by the product of it and another
+randomly chosen slot. The random value returned is the new accumulator
+value.
+Setting <TT>Scramble := m</TT> causes m such operations to be performed
+before the process is returned.
+<P>
+It should be noted that this process is not suitable for infinite groups,
+since all elements produced are products of the generators only and not
+their inverses.  However, as long as the homomorphic image of G that
+is being worked with is finite, there is no problem.
+</BLOCKQUOTE>
+<H5><A NAME = "10076">Random(P) : Process -&gt; GrpSLPElt</A></H5>
+<BLOCKQUOTE>
+Given a random element process P created 
+by the function <TT>RandomProcess(G)</TT> for the SLP-group G,
+construct a random element of 
+G by forming a random product over the expanded generating set stored
+as part of the process. The expanded generating set stored with the 
+process is modified by replacing an existing generator by the element
+returned.
+</BLOCKQUOTE>
+<H5><A NAME = "10077">Rep(G) : GrpSLP -&gt; GrpSLPElt</A></H5>
+<BLOCKQUOTE>
+A representative element of G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "10078">Example <TT>GrpSLP_HomomorphismSpeed (H81E3)</TT></A></H3>
+As an illustration of the efficiency of computing homomorphisms
+from SLP-groups, we set up the same random expression as
+both a straight-line program and a linear word.
+<P>
+<P>
+<PRE>
+&gt; G := SLPGroup(3);
+&gt; F := FreeGroup(3);
+&gt; M := GeneralOrthogonalGroup(7, 3);
+&gt; gf := hom&lt;G -&gt; F | F.1, F.2, F.3&gt;;
+&gt; gm := hom&lt;G -&gt; M | M.1, M.2, M.3&gt;;
+&gt; fm := hom&lt;F -&gt; M | M.1, M.2, M.3&gt;;
+&gt; P := RandomProcess(G);
+&gt; x := Random(P);
+&gt; #x;
+85
+</PRE>
+The evaluation of the straight-line program will take 85 operations in M.
+<P>
+<P>
+<PRE>
+&gt; w := gf(x);
+&gt; #w;
+52307
+</PRE>
+The evaluation of the word will take 52306 multiplications in M.
+<P>
+<P>
+<PRE>
+&gt; time h1 := gm(x);
+Time: 0.020
+&gt; time h2 := fm(w);
+Time: 1.640
+&gt; h1 eq h2;
+true
+</PRE>
+<HR>
+<H4><A NAME = "10079">Coercions Between Related Groups</A></H4>
+
+
+
+<H5><A NAME = "10080">G ! g : GrpSLP, GrpSLPElt -&gt; GrpSLPElt</A></H5>
+<BLOCKQUOTE>
+Given an element g belonging to an SLP-group H related to the
+group G, rewrite g as an element of G.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text874.htm">[Next]</A><A  HREF = "text881.htm">[Prev]</A> <A  HREF = "text874.htm">[Right]</A> <A  HREF = "text881.htm">[Left]</A> <A  HREF = "text875.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

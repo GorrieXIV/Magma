@@ -1,0 +1,1115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Creation Functions</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text387.htm">[Next]</A><A  HREF = "text385.htm">[Prev]</A> <A  HREF = "text387.htm">[Right]</A> <A  HREF = "text385.htm">[Left]</A> <A  HREF = "text383.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "3644">Creation Functions</A></H3>
+
+<P>
+<P>
+<P>
+This section describes the main ways to construct number fields and orders,
+as well as creation of elements and homomorphisms.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text386.htm#3645">Creation of Algebraic Fields</A>
+<LI> <A  HREF = "text386.htm#3660">Creation of Orders and Fields from Orders</A>
+<LI> <A  HREF = "text386.htm#3683">Maximal Orders</A>
+<LI> <A  HREF = "text386.htm#3693">Creation of Elements</A>
+<LI> <A  HREF = "text386.htm#3701">Creation of Homomorphisms</A>
+</UL>
+<H4><A NAME = "3645">Creation of Algebraic Fields</A></H4>
+
+<P>
+<P>
+<P>
+A field may be created as an <I>absolute extension</I> (absolute field),
+i.e. an extension of Q by an irreducible polynomial,
+or as a <I>relative extension</I> (relative field),
+i.e. an extension of another field K by an irreducible polynomial over K.
+See also 
+Section <A  HREF = "text371.htm#3557">Creation of Structures</A> for quadratic fields
+and
+Section <A  HREF = "text378.htm#3610">Creation Functions</A> for cyclotomic fields
+(these are the special subtypes of number fields in Magma).
+Some other constructions (which involve nontrivial computations) are the
+composite formed by two or more given fields, and the splitting field of a
+given polynomial or field.
+
+
+<H5><A NAME = "3646">NumberField(f) : RngUPolElt -&gt; FldNum</A></H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    DoLinearExtension: BoolElt          Default: <TT>false</TT></PRE>
+
+<PRE>    Global: BoolElt                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given an irreducible polynomial f of degree n&ge;1 
+over K = Q or some number field K, create the number field
+L=K(&alpha;) obtained by adjoining a root &alpha; of f to K.
+For details see <A  HREF = "text359.htm#FldNum:NumberField">NumberField</A> in Section <A  HREF = "text359.htm#3372">Creation of Number Fields</A>.
+<P>
+The angle bracket notation may be used to assign the root &alpha; to
+an identifier e.g. <TT>L&lt;y&gt; := NumberField(f)</TT> where y will be a root of f.
+</BLOCKQUOTE>
+<H5><A NAME = "3647">RationalsAsNumberField() : -&gt; FldNum</A></H5>
+<H5>QNF() : -&gt; FldNum</H5>
+<BLOCKQUOTE>
+This creates a number field isomorphic to Q. It is equivalent to
+<TT>NumberField(x-1 : DoLinearExtension)</TT>, 
+where x is <TT>PolynomialRing(Rationals()).1</TT>.
+<P>
+The result is a field isomorphic to Q, but regarded by Magma as a number field 
+(while Q itself is not, since
+<TT>FldRat</TT> is not a subtype of <TT>FldNum</TT>). It therefore
+supports all of the number field functions, while the <TT>Rationals()</TT> do not.
+On the other hand, arithmetic will be slower.
+<P>
+Coercion can be used to convert to and from the <TT>Rationals()</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "3648">NumberField(s) : [ RngUPolElt ] -&gt; FldNum</A></H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    DoLinearExtension: BoolElt          Default: <TT>false</TT></PRE>
+
+<PRE>    Abs: BoolElt                        Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Let K be a possibly trivial algebraic extension of Q.
+Given a sequence s of nonconstant polynomials s<sub>1</sub>, ..., s<sub>m</sub>,
+that are irreducible over K,
+create the number field L=K(&alpha;<sub>1</sub>, ..., &alpha;<sub>m</sub>)
+obtained by adjoining a root &alpha;<sub>i</sub> of each s<sub>i</sub> to K.
+For details see <A  HREF = "text359.htm#FldNum:NumberField:seq">NumberField</A> in Section <A  HREF = "text359.htm#3372">Creation of Number Fields</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "3649">ext&lt; F | s1, ..., sn &gt; : FldAlg, RngUPolElt, ..., RngUPolElt -&gt; FldAlg</A></H5>
+<H5>ext&lt;F | s&gt; : FldAlg, [RngUPolElt] -&gt; FldAlg</H5>
+<H5>ext&lt; Q | s1, ..., sn &gt; : FldRat, RngUPolElt, ..., RngUPolElt -&gt; FldNum</H5>
+<H5>ext&lt; Q | s &gt; : FldRat, [RngUPolElt] -&gt; FldNum</H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Global: BoolElt                     Default: <TT>false</TT></PRE>
+
+<PRE>    Abs: BoolElt                        Default: <TT>false</TT></PRE>
+
+<PRE>    DoLinearExtension: BoolElt          Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Create the algebraic field defined by extending F by the polynomials 
+s<sub>i</sub> or the polynomials in the sequence s. Similar as  for
+<TT>NumberField(S)</TT>
+described above, F may be Q or a field of fractions.
+If F is a field of fractions a field of fractions will be returned otherwise
+a number field will be returned. A tower of fields similar to that of
+<A  HREF = "text359.htm#FldNum:NumberField:seq">NumberField</A> is created and the same restrictions 
+as for that function
+apply to the polynomials that can be used in the constructor.
+</BLOCKQUOTE>
+<H5><A NAME = "3650">RadicalExtension(F, d, a) : Rng, RngIntElt, RngElt -&gt; FldAlg</A></H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Let F be an algebraic field. Let a be an integral element of F chosen 
+such that a is not an n-th power for any n dividing d. Returns
+the algebraic field obtained by adjoining the d-th root of a to F.
+</BLOCKQUOTE>
+<H5><A NAME = "3651">SplittingField(F) : FldAlg -&gt; FldAlg, SeqEnum</A></H5>
+<H5>NormalClosure(F) : FldAlg -&gt; FldAlg, SeqEnum</H5>
+
+<PRE>    Abs: BoolElt                        Default: <TT>true</TT></PRE>
+
+<PRE>    Opt: BoolElt                        Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given an algebraic field F, return the splitting field of its defining
+polynomial. The roots of the defining polynomial in the splitting field
+are also returned.
+<P>
+If <TT>Abs</TT> is <TT>true</TT>, the resulting field will be an absolute extension,
+otherwise a tower is returned.
+<P>
+If <TT>Opt</TT> is <TT>true</TT>, an attempt of using 
+<A  HREF = "text386.htm#RngOrd:OptimizedRepresentation">OptimizedRepresentation</A> is done. If successful, 
+the resulting field will have a much nicer representation. On the other
+hand, computing the intermediate maximal orders can be extremely time
+consuming.
+</BLOCKQUOTE>
+<H5><A NAME = "3652">SplittingField(f) : RngUPolElt -&gt; FldAlg</A></H5>
+<BLOCKQUOTE>
+Given an irreducible polynomial f over Z, return its splitting field.
+</BLOCKQUOTE>
+<H5><A NAME = "3653">SplittingField(L) : [RngUPolElt] -&gt; FldNum, [FldNumElt]</A></H5>
+
+<PRE>    Abs: BoolElt                        Default: <TT>false</TT></PRE>
+
+<PRE>    Opt: BoolElt                        Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a sequence L of polynomials over a number field or the rational
+numbers, compute a common splitting field, i.e. a field K such
+that every polynomial in L splits into linear factors over K.
+The roots of the polynomials are returned as the second return value.
+<P>
+If the optional parameter <TT>Abs</TT> is <TT>true</TT>, then a primitive element
+for the splitting field is computed and the field returned will be generated 
+by this primitive element over Q. If in addition <TT>Opt</TT> is also <TT>true</TT>, 
+then an optimized representation of K is computed as well.
+</BLOCKQUOTE>
+<H5><A NAME = "3654">sub&lt; F | e<sub>1</sub>, ..., e<sub>n</sub> &gt; : FldAlg, FldAlgElt, ..., FldAlgElt -&gt; FldAlg, Map</A></H5>
+<H5>sub&lt; F | S &gt; : FldAlg, SeqEnum -&gt; FldAlg, Map</H5>
+<BLOCKQUOTE>
+Given an algebraic field F with ground field G and n elements e<sub>i</sub>&isin;F,
+return the algebraic field H=G(e<sub>1</sub>, ..., e<sub>n</sub>) generated by the e<sub>i</sub>
+(over G), as well as
+the embedding homomorphism from H to F. 
+</BLOCKQUOTE>
+<H5><A NAME = "3655">MergeFields(F, L) : FldAlg, FldAlg -&gt; SeqEnum</A></H5>
+<H5><A NAME = "RngOrd:CompositeFields">CompositeFields</A>(F, L) : FldAlg, FldAlg -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Let F and L be absolute algebraic fields.  Returns a sequence of fields 
+[M<sub>1</sub>, ..., M<sub>r</sub>] such that each field M<sub>i</sub> contains both
+a root of the generating polynomial of F and a root of the 
+generating polynomial of L.
+<P>
+In detail: Suppose that F is the smaller field (wrt. the degree).
+As a first step we factorise the defining polynomial of L over F.
+For each factor obtained, an extension of F is constructed and then 
+transformed into an absolute extension. The sequence of
+extension fields is returned to the user.
+</BLOCKQUOTE>
+<H5><A NAME = "3656">Compositum(K, L) : FldAlg, FldAlg -&gt; FldAlg</A></H5>
+<BLOCKQUOTE>
+For absolute number fields K and L, at least one of which must
+be normal, find a smallest common over field. Note that in contrast to
+<A  HREF = "text386.htm#RngOrd:CompositeFields">CompositeFields</A> above the result here is essentially
+unique since one field was normal.
+</BLOCKQUOTE>
+<H5><A NAME = "3657">Compositum(K, A) : FldAlg, FldAb -&gt; FldAlg</A></H5>
+<BLOCKQUOTE>
+For a normal number field K and abelian extension A of some subfield
+of K, find a smallest common over field. Note that in contrast to
+<A  HREF = "text386.htm#RngOrd:CompositeFields">CompositeFields</A> above the result here is essentially
+unique since K is normal.
+</BLOCKQUOTE>
+<H5><A NAME = "3658"></A><A NAME = "RngOrd:OptimizedRepresentation">OptimizedRepresentation</A>(F) : FldAlg -&gt; FldAlg, map</H5>
+<H5>OptimisedRepresentation(F) : FldAlg -&gt; FldAlg, map</H5>
+<H5>OptimizedRepresentation(F, d) : FldAlg, RngIntElt -&gt; FldAlg, map</H5>
+<H5>OptimisedRepresentation(F, d) : FldAlg, RngIntElt -&gt; FldAlg, map</H5>
+<BLOCKQUOTE>
+Given an algebraic field F with ground field Q, this function will attempt
+to find an isomorphic field L with a better defining polynomial (in the
+sense defined below) than the one used to define F.  If such a polynomial
+is found then L is returned; otherwise F will be returned.
+<P>
+If the argument d is not specified, a polynomial g with
+integer coefficients is defined to
+be better than f if it is monic, irreducible, defines a number field
+isomorphic to F and its discriminant is smaller (in absolute value)
+than that of f. If a second argument d is specified, then g is
+defined to be better if in addition to the previous requirements
+d is not an index divisor, that is, if d does not divide the
+index (defined in the Invariants sub--section) [O<sub>L</sub> : E<sub>L</sub>] of the 
+equation order E<sub>L</sub> of L in the maximal
+order O<sub>L</sub>, (which are defined in the next sub--section).
+<P>
+Note however, that as a first step this function will determine the 
+maximal order of F which may take some time if the field is large.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3659">Example <TT>RngOrd_opt-rep-ord (H38E1)</TT></A></H3>
+Some results of <TT>OptimizedRepresentation</TT> are shown.
+Note that <TT>OptimizedRepresentation</TT> is a random algorithm,
+and may return different results for the same input.
+<P>
+<P>
+<PRE>
+&gt; _&lt;x&gt; := PolynomialRing(Rationals());
+&gt; K := NumberField(x^4-420*x^2+40000);
+&gt; L := OptimizedRepresentation(K);
+&gt; L ne K;
+true
+&gt; L;
+Number Field with defining polynomial
+    x^4 - 4*x^3 - 17*x^2 + 42*x + 59
+    over the Rational Field
+&gt; L eq OptimizedRepresentation(L);
+true
+&gt; f := DefiningPolynomial(K);
+// f is an element of Q[x], so Discriminant(f) is in Q not Z
+&gt; Z := IntegerRing();
+&gt; Factorization(Z !  Discriminant(f));
+[ &lt;2, 18&gt;, &lt;5, 8&gt;, &lt;41, 2&gt; ]
+&gt; g := DefiningPolynomial(L);
+&gt; g;
+x^4 - 4*x^3 - 17*x^2 + 42*x + 59;
+&gt; Factorization(Z ! Discriminant(g));
+[ &lt;2, 4&gt;, &lt;3, 4&gt;, &lt;5, 2&gt;, &lt;41, 2&gt; ]
+&gt; OL := MaximalOrder(L);
+&gt; EL := EquationOrder(L);
+&gt; Index(OL, EL);
+36
+&gt; OptimizedRepresentation(L, 2) eq L;
+true
+</PRE>
+As we see from this computation, the prime
+5 (as well as 41) divides the discriminant of g twice.
+This means that, potentially, 5 would still divide the index
+of the equation order in
+the maximal order O<sub>L</sub> of L. However, in fact E<sub>L</sub> has only index
+36 in O<sub>L</sub>.
+<P>
+The optimized representation of L such that 2 does not divide the index
+of E<sub>L</sub> in O<sub>L</sub> is L so 2 does divide the index seemingly contrary to the 
+description above. However, if a more optimal representation cannot be 
+found then the field is returned which is what happens here.
+<HR>
+<H4><A NAME = "3660">Creation of Orders and Fields from Orders</A></H4>
+
+<P>
+<P>
+The maximal order (O)<sub>K</sub> of an algebraic field and the 
+equation order of a number field can be obtained from the field.
+Other orders of a field are unitary subrings of finite 
+index in the ring of integers; they contain a subset of the integral elements 
+in the field.
+The equation order (E)<sub>K</sub>=Z[&alpha;] of K=Q(&alpha;) isomorphic to Q[X]/f(X),
+where K is a number field defined by a monic integral polynomial, 
+has the same basis as K, a power basis.
+Obviously (E)<sub>K</sub>&sub;(O)<sub>K</sub>
+since the minimal polynomial of &alpha; is integral and monic.
+Once an order is created in Magma further orders can be created from it. 
+
+
+<H5><A NAME = "3661">EquationOrder(f) : RngUPolElt -&gt; RngOrd</A></H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given an irreducible non-constant monic integral polynomial f&isin;R[X],
+return the
+equation order E=R[X]/f(X) corresponding to f. If the optional parameter
+<TT>Check</TT> is set to <TT>false</TT> then the polynomial will not be checked for
+irreducibility.
+</BLOCKQUOTE>
+<H5><A NAME = "3662">EquationOrder(S) : [RngUPolElt] -&gt; RngOrd</A></H5>
+
+<PRE>    Abs: BoolElt                        Default: <TT>false</TT></PRE>
+
+<PRE>    DoLinearExtension: BoolElt          Default: <TT>false</TT></PRE>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Global: BoolElt                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The equation order of <A  HREF = "text359.htm#FldNum:NumberField:seq">NumberField</A><TT>(S)</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "3663">EquationOrder(K) : FldNum -&gt; RngOrd</A></H5>
+<BLOCKQUOTE>
+Return the equation order corresponding to the polynomial
+with which the number field K was defined. The field K must have been 
+defined by a monic integral polynomial. Thus this function
+returns the extension of the equation order of the ground field
+of K by the defining polynomial of K.
+</BLOCKQUOTE>
+<H5><A NAME = "3664">SubOrder(O) : RngOrd -&gt; RngOrd</A></H5>
+<BLOCKQUOTE>
+Provided the order O is not an equation order, O is a transformation of some
+order O'.  This function returns O'.
+</BLOCKQUOTE>
+<H5><A NAME = "3665">EquationOrder(O) : RngOrd -&gt; RngOrd</A></H5>
+<BLOCKQUOTE>
+A suborder of the order O which is defined by a polynomial. e.g. R[x] / f
+where R is a polynomial ring over the coefficient ring of O and f
+is in R. It will also be the final order of
+<TT>SubOrder(SubOrder( ... SubOrder(O)))</TT>.
+O must have a monic defining polynomial for the equation order to exist.
+</BLOCKQUOTE>
+<H5><A NAME = "3666">Integers(O) : RngOrd -&gt; RngOrd</A></H5>
+<H5>RingOfIntegers(O) : RngOrd -&gt; RngOrd</H5>
+<H5>IntegerRing(O) : RngOrd -&gt; RngOrd</H5>
+<BLOCKQUOTE>
+Returns the ring of integers in the order O, ie. O itself.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3667">Example <TT>RngOrd_Orders (H38E2)</TT></A></H3>
+Once a number field K=Q(&alpha;) has been created,
+one can obtain the equation order E=Z[&alpha;] and
+the ring of integers O<sub>K</sub> simply as follows.
+<P>
+<P>
+<PRE>
+&gt; R&lt;x&gt; := PolynomialRing(Integers());
+&gt; K := NumberField(x^4-420*x^2+40000);
+&gt; E := EquationOrder(K);
+&gt; O := MaximalOrder(K);
+&gt; Index(O, E);
+64000
+</PRE>
+Note that entirely different things happen here: for the equation
+order nothing has to be computed, but the determination of the maximal
+order involves the complicated Round 2 (or 4) algorithm. In our
+particular example above, E is a subring of index 2<sup>9</sup>.5<sup>3</sup>
+in O (see also the example for orders and ideals in the 
+subsection <A  HREF = "text386.htm#3688">Orders and Ideals</A>
+where a maximal order is created).
+<HR>
+<H5><A NAME = "3668">sub&lt; O | a<sub>1</sub>, ..., a<sub>r</sub> &gt; : RngOrd, RngOrdElt, ..., RngOrdElt -&gt; RngOrd</A></H5>
+<BLOCKQUOTE>
+Create the suborder of the order 
+O generated (as an algebra over Z) by the elements
+a<sub>1</sub>, ..., a<sub>r</sub>&isin;O, that is, create Z[a<sub>1</sub>, ..., a<sub>r</sub>]. If the
+algebra does not have full rank as a sub-module of O, an error
+results. Note, however, that it is currently <I>not</I> required that 1
+is in the sub-ring.
+</BLOCKQUOTE>
+<H5><A NAME = "3669"></A><A NAME = "RngOrd:ext:seq">ext</A>&lt; O | a<sub>1</sub>, ..., a<sub>r</sub> &gt; : RngOrd, RngOrdElt, ..., RngOrdElt -&gt; RngOrd</H5>
+<BLOCKQUOTE>
+Given an order O, and elements a<sub>1</sub>, ..., a<sub>r</sub>
+lying in the maximal order of O,
+create the
+order O[a<sub>1</sub>, ..., a<sub>r</sub>]. Note that using this constructor O
+can only be extended to be as large as the maximal order.
+This does not cause the maximal order to get computed.
+See also <A  HREF = "text386.htm#RngOrd:Order:seq">Order</A> for a different version that allows
+parameters to improve efficiency.
+</BLOCKQUOTE>
+<H5><A NAME = "3670">ext&lt; Z | f &gt; : RngInt, RngUPolElt -&gt; RngOrd</A></H5>
+<H5>ext&lt; O | f &gt; : RngOrd, RngUPolElt -&gt; RngOrd</H5>
+<BLOCKQUOTE>
+Given an order O and a polynomial f of degree n
+with coefficients in O, create the extension E of O by a root
+of f which forms a free module of rank n over O :
+E isomorphic to O[&alpha;]; it is necessary for f to be irreducible over O.
+</BLOCKQUOTE>
+<H5><A NAME = "3671"></A><A NAME = "RngOrd:FieldOfFractions">FieldOfFractions</A>(O) : RngOrd -&gt; FldOrd</H5>
+<BLOCKQUOTE>
+Return the field containing all fractions of elements of O.
+The angle bracket notation can be used to assign names to the basis elements
+of F and assign these elements to variables, 
+e.g. <TT>F&lt;x, y&gt; := FieldOfFractions(MaximalOrder(x^2 + 3))</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "3672">Order(F) : FldOrd -&gt; RngOrd</A></H5>
+<BLOCKQUOTE>
+The order of which F was created as its field of fractions.
+This function is an inverse to <TT>FieldOfFractions</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "3673">NumberField(O) : RngOrd -&gt; FldNum</A></H5>
+<BLOCKQUOTE>
+The number field of an order is recursively defined by:
+<DL COMPACT class='compact'>
+<DT>1.</DT><DD>the number field of <B>Z</B> is <B>Q</B>
+<DT>2.</DT><DD>the number field of O is the number field of the coefficient 
+ring of O, (i.e. the order over which O is defined), with an element
+&alpha; adjoined where &alpha; is a root of the defining polynomial of O.</DL>
+</BLOCKQUOTE>
+<H5><A NAME = "3674">NumberField(F) : FldOrd -&gt; FldNum</A></H5>
+<BLOCKQUOTE>
+The number field of <TT>Order(F)</TT> for a field of fractions F.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3675">Example <TT>RngOrd_fractions (H38E3)</TT></A></H3>
+The following illustrates the relationship between the bases of an order,
+its field of fractions and its number field.
+<P>
+<P>
+<PRE>
+&gt; R&lt;x&gt; := PolynomialRing(Integers());
+&gt; f := x^5 + 5*x^4 - 75*x^3 + 250*x^2 + 65625;
+&gt; M := MaximalOrder(f);
+&gt; M;
+Maximal Order of Equation Order with defining polynomial x^5 + 5*x^4 - 75*x^3 + 
+    250*x^2 + 65625 over its ground order
+&gt; Basis(FieldOfFractions(M));
+[
+    M.1,
+    M.2,
+    M.3,
+    M.4,
+    M.5
+]
+&gt; Basis(NumberField(M));
+[
+    1,
+    $.1,
+    $.1^2,
+    $.1^3,
+    $.1^4
+]
+&gt; Basis(M);
+[
+    M.1,
+    M.2,
+    M.3,
+    M.4,
+    M.5
+]
+&gt; M.1 eq 1;
+true
+&gt; M.2 eq NumberField(M).1;
+false
+&gt; E := EquationOrder(M);
+&gt; NumberField(M) eq NumberField(E);
+true
+&gt; Basis(FieldOfFractions(E), NumberField(M));
+[
+    1,
+    $.1,
+    $.1^2,
+    $.1^3,
+    $.1^4
+]
+&gt; M!Basis(FieldOfFractions(E))[1];
+[1, 0, 0, 0, 0]
+&gt; M!Basis(FieldOfFractions(E))[2];
+[0, 5, 0, 0, 0]
+&gt; M!NumberField(M).1;
+[0, 5, 0, 0, 0]
+</PRE>
+<HR>
+<H5><A NAME = "3676">OptimizedRepresentation(O) : RngOrd -&gt; BoolElt, RngOrd, Map</A></H5>
+<H5>OptimisedRepresentation(O) : RngOrd -&gt; BoolElt, RngOrd, Map</H5>
+<H5>OptimizedRepresentation(O, d) : RngOrd, RngIntElt -&gt; BoolElt, RngOrd, Map</H5>
+<H5>OptimisedRepresentation(O, d) : RngOrd, RngIntElt -&gt; BoolElt, RngOrd, Map</H5>
+<BLOCKQUOTE>
+Given an order O with ground ring Z, this function will attempt
+to find an isomorphic maximal order M with a better defining polynomial 
+than the one used to define O.  If such a polynomial
+is found then M is returned; otherwise O will be returned.
+<P>
+If the argument d is not specified, a polynomial g with
+integer coefficients is defined to
+be better than f if it is monic, irreducible, defines an order
+isomorphic to O and its discriminant is smaller in absolute value
+than that of f. If a second argument d is specified, then g is
+defined to be better if in addition to the previous requirements
+d is not an index divisor, that is, if d does not divide the
+index (defined in the Invariants sub--section) [M : E<sub>M</sub>] of the 
+equation order E<sub>M</sub> of M in M.
+</BLOCKQUOTE>
+<H5><A NAME = "3677">O + P : RngOrd, RngOrd -&gt; RngOrd</A></H5>
+<BLOCKQUOTE>
+Add two orders O and P having the same equation order. Computes the smallest
+common over order.
+</BLOCKQUOTE>
+<H5><A NAME = "3678">O meet P : RngOrd, RngOrd -&gt; RngOrd</A></H5>
+<BLOCKQUOTE>
+The intersection of two orders O and P having the same equation order.
+</BLOCKQUOTE>
+<H5><A NAME = "3679">AsExtensionOf(O, P) : RngOrd, RngOrd -&gt; RngOrd</A></H5>
+<BLOCKQUOTE>
+Return the order O as a transformation of the order P where O
+and P have the same coefficient ring.
+</BLOCKQUOTE>
+<H5><A NAME = "3680">Order(O, T, d) : RngOrd, AlgMatElt, RngIntElt -&gt; RngOrd</A></H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Let O be an absolute order with basis b<sub>1</sub>, ..., n<sub>n</sub>,
+T=(T<sub>i, j</sub>)&isin;GL(n, Q) &cap;Mat(n, Z)  and d&isin;N. 
+This function creates the order
+with basis (1/d&sum;<sub>j=1</sub><sup>n</sup> T<sub>i, j</sub>b<sub>j</sub>)<sub>i&le;i&le;n</sub>.
+The parameter <TT>Check</TT> can
+be set to <TT>false</TT> when the order is large to avoid checking that the
+result actually is an order. 
+Note that this can result in a non-order 
+being constructed which may cause errors later.
+</BLOCKQUOTE>
+<H5><A NAME = "3681">Order(O, M) : RngOrd, ModDed -&gt; RngOrd</A></H5>
+
+<PRE>    NFBasis: BoolElt                    Default: <TT>true</TT></PRE>
+<H5>Order(O, M) : RngOrd, PMat -&gt; RngOrd</H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Let O be an order with (pseudo) basis b<sub>1</sub>, ..., b<sub>n</sub> and
+M=&sum;<sub>i=1</sub><sup>n</sup> A<sub>i</sub>&alpha;<sub>i</sub> &sube;k<sup>n</sup> be an o<sub>k</sub>-module where
+o<sub>k</sub> is the coefficient ring of O.
+This function creates the order
+&sum;<sub>i=1</sub><sup>n</sup> A<sub>i</sub> c<sub>i</sub> where c<sub>i</sub> := &sum;<sub>j=1</sub><sup>n</sup>&alpha;<sub>i, j</sub>b<sub>j</sub>.
+If the parameter <TT>Check</TT> is set to <TT>false</TT>, then it will not be checked that the
+result actually is an order (potentially expensive).
+Note that this can result in a non-order 
+being constructed which may cause errors later.
+If the parameter <TT>NFBasis</TT> is set to <TT>false</TT> then the <TT>PseudoGenerators</TT> of the
+module M will be used rather than the <TT>PseudoBasis</TT>, however these
+pseudo generators must also be a pseudo basis.
+</BLOCKQUOTE>
+<H5><A NAME = "3682"></A><A NAME = "RngOrd:Order:seq">Order</A>( [ e<sub>1</sub>, ... e<sub>n</sub> ] ): [FldAlgElt] -&gt; RngOrd</H5>
+
+<PRE>    Verify: BoolElt                     Default: <TT>true</TT></PRE>
+
+<PRE>    Order: BoolElt                      Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given n elements e<sub>1</sub>, ..., e<sub>n</sub> in an algebraic extension field F 
+over Q create
+the minimal order O of F which contains all the e<sub>i</sub>. 
+If <TT>Verify</TT> is <TT>true</TT>, it is verified that the e<sub>i</sub> are 
+integral algebraic numbers. This can be a lengthy process if
+the field is of large degree.
+<P>
+Setting <TT>Order</TT> to <TT>true</TT> assumes that the given elements actually
+form a basis for the new order, thus it avoids testing for multiplicative
+closure. Without this parameter the order returned will have a canonical
+basis chosen with no direct relation to the input.
+Note that setting <TT>Order</TT> to <TT>true</TT> can result in a non-order 
+being constructed if the elements in the sequence are not a basis
+which may cause errors later.
+By default,
+products of the generators will be added until the module is closed
+under multiplication.
+<P>
+If <TT>Order</TT> is set to <TT>true</TT> to specify the basis of the resulting order
+rather than avoid the expense of the multiplicative closure computation, it can
+be checked that the result O is an order using
+<TT>Order(SubOrder(O), Matrix(CoefficientRing(O), M*d), d) where d is Denominator(M)
+where M is BasisMatrix(O);</TT>. If O is not an order this will cause an error.
+</BLOCKQUOTE>
+<H4><A NAME = "3683">Maximal Orders</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+The maximal order (O)<sub>K</sub> is the ring of integers of an algebraic field
+consisting of all integral elements of the field; that is, elements which 
+are roots of monic integer polynomials. It may also be called the number ring
+of a number field. 
+<P>
+There are a number of algorithms which Magma uses whilst computing 
+maximal orders. Each maximal order is a sum of p-maximal orders.
+The main algorithm used for p-maximal orders
+is a mixture of the Round--2 and Round--4 methods
+(<A  HREF = "text382.htm#bib_cohen1">[Coh93]</A>, <A  HREF = "text382.htm#bib_Bai1">[Bai96]</A>, <A  HREF = "text382.htm#bib_pohst2">[Poh93]</A>, <A  HREF = "text382.htm#bib_pohst1">[PZ89]</A>) for absolute extensions and
+a variant of the Round--2 for relative extensions (<A  HREF = "text382.htm#bib_cohen2">[Coh00]</A>, <A  HREF = "text382.htm#bib_Fr1">[Fri97]</A>).
+<P>
+However if the field is a radical (pure) extension, there is another algorithm available
+which is used to calculate each p-maximal order. 
+In this case we can compute a pseudo basis for the p-maximal orders knowing only
+the valuation of the constant coefficient of the defining polynomial at 
+p <A  HREF = "text382.htm#bib_suth-max-kummer">[Sut12]</A>.
+<P>
+The Round--2 and Round--4 algorithms can be selected by setting 
+the parameter <TT>Al</TT> to <TT>"Round2"</TT> and <TT>"Round4"</TT> respectively. 
+Another option for this parameter and for computation of p-maximal orders
+is the <TT>"Pauli"</TT> method. This method is only available for equation
+orders in simple relative extensions. It uses the factorization of the defining
+polynomial over the completion of the order.
+<P>
+Alternatively, if the discriminant of the maximal order is already known, the
+parameters <TT>Discriminant</TT> or <TT>Ramification</TT> can be used.
+If the input is an order O and the <TT>Discriminant</TT> or <TT>Ramification</TT> parameters are supplied an
+algorithm which can compute the maximal order given the discriminant of the
+maximal order will be used. <TT>Discriminant</TT> must be an integer if O
+is an absolute order and must be an ideal of the coefficient ring of O
+if O is a relative order. <TT>Ramification</TT>
+must contain integers if O is an absolute order and 
+must contain ideals of the coefficient ring of O if O is a relative order. 
+The ramification sequence is taken to contain prime 
+factors of the discriminant. Only one of these parameters can be specified, 
+and in this case <TT>Al</TT> cannot be specified.
+This algorithm is based on <A  HREF = "text382.htm#bib_buchman-lenstra">[BL94]</A>, Theorems 1.2 and 7.6.
+
+
+<H5><A NAME = "3684">MaximalOrder(O) : RngOrd -&gt; RngOrd</A></H5>
+
+<PRE>    Al: MonStgElt                       Default: "Auto"</PRE>
+<BLOCKQUOTE>
+</BLOCKQUOTE>
+<H5><A NAME = "3685"></A><A NAME = "RngOrd:MaximalOrder">MaximalOrder</A>(F) : FldAlg -&gt; RngOrd</H5>
+<H5>IntegerRing(F) : FldAlg -&gt; RngOrd</H5>
+<H5>Integers(F) : FldAlg -&gt; RngOrd</H5>
+<H5>RingOfIntegers(F) : FldAlg -&gt; RngOrd</H5>
+
+<PRE>    Discriminant: Any                   Default: </PRE>
+
+<PRE>    Ramification: SeqEnum               Default: </PRE>
+
+<PRE>    SetVerbose("MaximalOrder", n):      Maximum: 5</PRE>
+<BLOCKQUOTE>
+Return the maximal order or ring of integers of the number field F. When 
+the input is an order O or a field of fractions of an order O 
+return the order 
+containing O which is the largest order in the number field of O.
+<P>
+An integral basis 
+for F can be found as the basis of the maximal order.
+<P>
+For information on the parameters, see the introduction to this section above,
+<A  HREF = "text386.htm#3683">Maximal Orders</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "3686"></A><A NAME = "RngOrd:MaxOrd">MaximalOrder</A>(f) : RngUPolElt -&gt; RngOrd</H5>
+
+<PRE>    Check: BoolElt                      Default: <TT>true</TT></PRE>
+
+<PRE>    Al: MonStgElt                       Default: "Auto"</PRE>
+
+<PRE>    Discriminant: Any                   Default: </PRE>
+
+<PRE>    Ramification: SeqEnum               Default: </PRE>
+
+<PRE>    SetVerbose("MaximalOrder", n):      Maximum: 5</PRE>
+<BLOCKQUOTE>
+This is equivalent to <TT>MaximalOrder(NumberField(f))</TT>.
+<P>
+The <TT>Check</TT> parameter if set to <TT>false</TT> will prevent checking of 
+the polynomial for irreducibility.
+<P>
+For information on the other parameters, see the introduction to this section above.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3687">Example <TT>RngOrd_max_order (H38E4)</TT></A></H3>
+The following shows the advantage of the <TT>Ramification</TT> parameter
+to the <TT>MaximalOrder</TT> function.
+<P>
+<P>
+<PRE>
+&gt; R&lt;t&gt; := PolynomialRing(Integers());
+&gt; f1 := t^14 - 63*t^12 - 9555*t^11 + 118671*t^10 - 708246*t^9 - 17922660*t^8 + 
+&gt; 859373823*t^7 + 2085856500*t^6 - 117366985106*t^5 - 335941176396*t^4 +
+&gt; 4638317668005*t^3 + 17926524826973*t^2 + 7429846568445*t+ 91264986397629;
+&gt; d1 := [2, 3, 5, 7, 59];
+&gt; time MaximalOrder(f1:Ramification := d1);
+Maximal Order of Equation Order with defining polynomial x^14 - 63*x^12 - 
+    9555*x^11 + 118671*x^10 - 708246*x^9 - 17922660*x^8 + 859373823*x^7 + 
+    2085856500*x^6 - 117366985106*x^5 - 335941176396*x^4 + 4638317668005*x^3 + 
+    17926524826973*x^2 + 7429846568445*x + 91264986397629 over Z
+Time: 0.230
+&gt; time MaximalOrder(f1);
+Maximal Order of Equation Order with defining polynomial x^14 - 63*x^12 - 
+    9555*x^11 + 118671*x^10 - 708246*x^9 - 17922660*x^8 + 859373823*x^7 + 
+    2085856500*x^6 - 117366985106*x^5 - 335941176396*x^4 + 4638317668005*x^3 + 
+    17926524826973*x^2 + 7429846568445*x + 91264986397629 over Z
+Time: 0.590
+&gt; f2 := t^14 - 129864*t^12 - 517832*t^11 + 6567239322*t^10 + 33352434192*t^9 - 
+&gt; 166594899026864*t^8 - 752915315481312*t^7 + 2275891736459084940*t^6 +
+&gt; 7743078094604088768*t^5 - 16633213695413438344032*t^4 -
+&gt; 39871919309692447523616*t^3 + 60126791399546070679893112*t^2 +
+&gt; 77844118533852728698751040*t - 83173498199506854751458701376;
+&gt; d2 := [2,3,7,4145023];
+&gt;  
+&gt; time MaximalOrder(f2:Ramification := d2);
+Maximal Order of Equation Order with defining polynomial x^14 - 129864*x^12 - 
+    517832*x^11 + 6567239322*x^10 + 33352434192*x^9 - 166594899026864*x^8 - 
+    752915315481312*x^7 + 2275891736459084940*x^6 + 7743078094604088768*x^5 - 
+    16633213695413438344032*x^4 - 39871919309692447523616*x^3 + 
+    60126791399546070679893112*x^2 + 77844118533852728698751040*x - 
+    83173498199506854751458701376 over Z
+Time: 0.730
+&gt; time MaximalOrder(f2);
+Maximal Order of Equation Order with defining polynomial x^14 - 129864*x^12 - 
+    517832*x^11 + 6567239322*x^10 + 33352434192*x^9 - 166594899026864*x^8 - 
+    752915315481312*x^7 + 2275891736459084940*x^6 + 7743078094604088768*x^5 - 
+    16633213695413438344032*x^4 - 39871919309692447523616*x^3 + 
+    60126791399546070679893112*x^2 + 77844118533852728698751040*x - 
+    83173498199506854751458701376 over Z
+Time: 0.840
+&gt; f13 := t^15 - 114*t^14 + 282185319*t^13 + 1247857228852*t^12 - 
+&gt; 35114805704965233*t^11 - 141524337796433387826*t^10 +
+&gt; 2604584980442264028744009*t^9 + 14153948932132918272984150384*t^8 -
+&gt; 178273077248353369941327628479552*t^7 - 1142953506821390914419260564494304768
+&gt; *t^6 + 15975069142211276963134599495014990639616*t^5 +
+&gt; 335166844383030&equiv;8217308253251277376159744*t^4 -
+&gt; 617589777108203716232396372453619309554471256064*t^3 -
+&gt; 397561412445066919545461762354884631501806174863360*t^2 +
+&gt; 2266657182908547570648245464215192357802047101628186624*t
+&gt; - 1302222456532760256406916223259306960561657428777814196224;
+&gt; d13 := [2, 3, 3377890562461, 7623585272461];
+&gt; time MaximalOrder(f13: Ramification := d13);
+Maximal Order of Equation Order with defining polynomial x^15 - 114*x^14 + 
+    282185319*x^13 + 1247857228852*x^12 - 35114805704965233*x^11 - 
+    141524337796433387826*x^10 + 2604584980442264028744009*x^9 + 
+    14153948932132918272984150384*x^8 - 178273077248353369941327628479552*x^7 -
+    1142953506821390914419260564494304768*x^6 + 
+    15975069142211276963134599495014990639616*x^5 + 
+    335166844383030&equiv;8217308253251277376159744*x^4 - 
+    617589777108203716232396372453619309554471256064*x^3 - 
+    397561412445066919545461762354884631501806174863360*x^2 + 
+    2266657182908547570648245464215192357802047101628186624*x - 
+    1302222456532760256406916223259306960561657428777814196224 over Z
+Time: 0.270
+</PRE>
+<P>
+<P>
+<PRE>
+The following call will not terminate, because the discriminant of the
+polynomial has a 257-digit composite factor which cannot be factored.
+&gt; time MaximalOrder(f13);
+</PRE>
+<HR>
+<H5><A NAME = "3688">Orders and Ideals</A></H5>
+
+<P>
+<P>
+<P>
+<P>
+Orders may be created using ideals of another order. Ideals are discussed
+in Section <A  HREF = "text394.htm#3929">Ideals and Quotients</A>.
+The following intrinsics form part of the computation of maximal orders 
+as discussed above in Section <A  HREF = "text386.htm#3683">Maximal Orders</A>.
+
+
+<H5><A NAME = "3689">pMaximalOrder(O, p) : RngOrd, RngIntElt -&gt; RngOrd</A></H5>
+<H5>pMaximalOrder(O, p) : RngOrd, RngOrdIdl -&gt; RngOrd</H5>
+
+<PRE>    Al: MonStgElt                       Default: "Auto"</PRE>
+<BLOCKQUOTE>
+The p-maximal overorder of O (see also the example below). This is
+the largest overorder P such that the index (P:O) is a power of p,
+a prime in the coefficient ring of O.
+The options 
+for the <TT>Al</TT> parameter are the same as those for 
+<A  HREF = "text386.htm#RngOrd:MaxOrd">MaximalOrder</A>.
+<P>
+If O is a kummer extension then specific code is
+used to calculate each p-maximal order, rather than the Round 2 or Round 4
+methods. In this case we know 1 or 2 elements which generate the p-maximal
+order and can easily write the order down.
+</BLOCKQUOTE>
+<H5><A NAME = "3690">pRadical(O, p) : RngOrd, RngIntElt -&gt; RngOrdIdl</A></H5>
+<H5>pRadical(O, p) : RngOrd, RngOrdIdl -&gt; RngOrdIdl</H5>
+<BLOCKQUOTE>
+Returns the p-radical of an order O for a prime p in the coefficient ring
+of O, defined as
+the ideal consisting of elements of O for which some power lies in the
+ideal pO.
+<P>
+It is possible to call this function for p not prime 
+(so long as p is greater than the degree of O if it is an integer). 
+In this case the p-trace-radical will be computed, i.e.
+{ x&isin;F | Tr(xO)&sube;pZ}.
+If p is square free and all divisors are larger than the field
+degree, this is the intersection of the radicals for all l dividing
+p. In particular together with <TT>MultiplicatorRing</TT> this can 
+sometime be used
+to compute maximal orders without factoring the discriminant
+<A  HREF = "text382.htm#bib_buchman-lenstra">[BL94]</A>, <A  HREF = "text382.htm#bib_Fr2">[Fri00]</A> or at least "good" approximations.
+</BLOCKQUOTE>
+<H5><A NAME = "3691">MultiplicatorRing(I) : RngOrdFracIdl -&gt; Rng</A></H5>
+<BLOCKQUOTE>
+Returns the multiplicator ring M of the ideal I of the order O, that is,
+the subring of elements of the field of fractions K of O multiplying
+I into itself: M={ x &isin;F : xI&sub;I}.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3692">Example <TT>RngOrd_Round2 (H38E5)</TT></A></H3>
+<P>
+To illustrate how the Round 2 algorithm for the determination of the ring
+of integers works, we present an implementation of it in the Magma
+language. The key functions are <TT>MultiplicatorRing</TT> and <TT>pRadical</TT>,
+called by the following function <TT>pMaximalOverOrder</TT>;
+<P>
+<P>
+<PRE>
+&gt; pMaximalOverOrder := function(ord, p)
+&gt;        ovr := MultiplicatorRing(pRadical(ord, p));
+&gt;        print "index is", Index(ovr, ord);
+&gt;        return (Index(ovr, ord) eq 1) select ovr else $$(ovr, p);
+&gt; end function;
+</PRE>
+which finds the largest overorder in which the given order has
+p-power index. This function is now simply applied to the
+equation order, for each prime dividing the discriminant:
+<P>
+<P>
+<PRE>
+&gt; Round2 := function(E, K)
+&gt;        // E should be some order of a number field K
+&gt;        d := Discriminant(E);
+&gt;        fact := Factorization(Abs(d));
+&gt;        print fact;
+&gt;        M := E;
+&gt;        for x in fact do
+&gt;             M := M+pMaximalOverOrder(E, x[1]);
+&gt;        end for;
+&gt;        print "index of equation order in maximal order is:", Index(M, E);
+&gt;        return M;
+&gt; end function;
+</PRE>
+In our running example, this produces the following output:
+<P>
+<P>
+<PRE>
+&gt; R&lt;x&gt; := PolynomialRing(Integers());
+&gt; K := NumberField(x^4-420*x^2+40000);
+&gt; E := EquationOrder(K);
+&gt; Round2(E, K);
+[ &lt;2, 18&gt;, &lt;5, 8&gt;, &lt;41, 2&gt; ]
+index is 2
+index is 4
+index is 8
+index is 4
+index is 2
+index is 1
+index is 5
+index is 25
+index is 1
+index is 1
+index of equation order in maximal order is: 64000
+Transformation of E
+Transformation Matrix:
+[800   0   0   0]
+[  0 400   0   0]
+[  0 200  20   0]
+[400 180   0   1]
+Denominator: 800
+</PRE>
+<HR>
+<H4><A NAME = "3693">Creation of Elements</A></H4>
+
+<P>
+<P>
+<P>
+Elements of algebraic fields and of orders are displayed quite differently.
+Algebraic field elements are always printed as a linear combination 
+with rational coefficients 
+of the basis elements of the field. 
+For number fields which have a power basis this is also a
+polynomial in the primitive element of the field with rational coefficients; 
+that is, an element of G[x]/f,
+where f was the defining polynomial of the field over the ground field G. 
+Since in general G will be an algebraic field itself,
+elements in relative extensions, i.e. G strictly bigger than Q, will
+be printed as linear combinations with linear combinations as coefficients 
+and for number fields this will
+look like multivariate polynomials. In fact they are recursively defined
+univariate polynomials.
+<P>
+Elements of orders are displayed as sequences of integer coefficients,
+referring to the basis of the order. To convert this Z-basis
+representation to a polynomial expression in the primitive element
+of an associated number field, the element should be coerced into the
+number field (using <TT>!</TT>). To print the element as a linear 
+combination of the basis elements, coerce the element into the field of 
+fractions.
+
+
+<H5>One(K) : FldAlg -&gt; FldAlgElt</H5>
+
+<H5>One(O) : RngOrd -&gt; RngOrdElt</H5>
+
+<H5>Identity(K) : FldAlg -&gt; FldAlgElt</H5>
+
+<H5>Identity(O) : RngOrd -&gt; RngOrdElt</H5><P>
+
+<H5>Zero(K) : FldAlg -&gt; FldAlgElt</H5>
+
+<H5>Zero(O) : RngOrd -&gt; RngOrdElt</H5>
+
+
+<H5>Representative(K) : FldAlg -&gt; FldAlgElt</H5>
+
+<H5>Representative(O) : RngOrd -&gt; RngOrdElt</H5><P>
+
+
+<H5><A NAME = "3694">F ! a : FldAlg, RngElt -&gt; FldAlgElt</A></H5>
+<H5>elt&lt; F | a &gt; : FldAlg, RngElt -&gt; FldAlgElt</H5>
+<BLOCKQUOTE>
+Coerce a into the field F. Here a may be an integer or a rational
+field element, or an element from a subfield of F, or from an
+order in such.
+</BLOCKQUOTE>
+<H5><A NAME = "3695">F ! [a<sub>0</sub>, a<sub>1</sub>, ..., a<sub>m - 1</sub>] : FldAlg, [RngElt] -&gt; FldAlgElt</A></H5>
+<H5>elt&lt; F | [ a<sub>0</sub>, a<sub>1</sub>, ..., a<sub>m - 1</sub> ] &gt; : FldAlg, SeqEnum[RngElt] -&gt; FldAlgElt</H5>
+<H5>elt&lt; F | a<sub>0</sub>, a<sub>1</sub>, ..., a<sub>m - 1</sub>&gt; : FldAlg, RngElt , ..., RngElt -&gt; FldAlgElt</H5>
+<BLOCKQUOTE>
+Given the algebraic field, F of degree m over its ground field G and 
+a sequence 
+[a<sub>0</sub>, ..., a<sub>m - 1</sub>] of elements of G, construct the 
+element a<sub>0</sub>&alpha;<sub>0</sub> + a<sub>1</sub>&alpha;<sub>1</sub> + ... a<sub>m - 1</sub>&alpha;<sub>m - 1</sub> of F
+where the &alpha;<sub>i</sub> are the basis elements of F.
+</BLOCKQUOTE>
+<H5><A NAME = "3696">O ! a : RngOrd, RngElt -&gt; RngOrdElt</A></H5>
+<H5>elt&lt; O | a &gt; : RngOrd, RngElt -&gt; RngOrdElt</H5>
+<BLOCKQUOTE>
+Coerce a into the order O. Here a is allowed to be an integer, or
+an integral element of an associated algebraic field of O,
+or an element of a quotient order.
+</BLOCKQUOTE>
+<H5><A NAME = "3697">O ! [a<sub>0</sub>, a<sub>1</sub>, ..., a<sub>m - 1</sub>] : RngOrd, [ RngElt ] -&gt; RngOrdElt</A></H5>
+<H5>elt&lt; O | [ a<sub>0</sub>, a<sub>1</sub>, ..., a<sub>m</sub> - 1 ] &gt; : RngOrd, SeqEnum[RngElt] -&gt; RngOrdElt</H5>
+<H5>elt&lt; O | a<sub>0</sub>, a<sub>1</sub>, ..., a<sub>m</sub> - 1 &gt; : RngOrd, RngElt, ..., RngElt -&gt; RngOrdElt</H5>
+<BLOCKQUOTE>
+Given the order O of degree m and
+elements a<sub>0</sub>, a<sub>1</sub>, ..., a<sub>m - 1</sub> in the ground order of O,
+construct the
+element a<sub>0</sub>&alpha;<sub>0</sub> + a<sub>1</sub>  &alpha;<sub>1</sub> + ... + a<sub>m - 1</sub> &alpha;<sub>m - 1</sub> of O,
+where &alpha;<sub>0</sub>, ..., &alpha;<sub>m - 1</sub> is the basis for the order.
+</BLOCKQUOTE>
+<H5><A NAME = "3698">Random(F, m) : FldAlg, RngIntElt -&gt; FldAlgElt</A></H5>
+<H5>Random(O, m) : RngOrd, RngIntElt -&gt; RngOrdElt</H5>
+<BLOCKQUOTE>
+A random element of the algebraic field F or order O. The maximal size of 
+the coefficients is determined by m.
+</BLOCKQUOTE>
+<H5><A NAME = "3699">Random(I, m) : RngOrdFracIdl, RngIntElt -&gt; FldOrdElt</A></H5>
+<BLOCKQUOTE>
+A random element of the ideal I as an element of the field 
+of fractions of the associated order. The maximal size of 
+the coefficients with respect to the ideal basis is determined by m.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3700">Example <TT>RngOrd_Elements (H38E6)</TT></A></H3>
+Here are three ways of creating the same integral element in K
+as an element of the maximal order and its field of fractions.
+<P>
+<P>
+<PRE>
+&gt; R&lt;x&gt; := PolynomialRing(Integers());
+&gt; K&lt;y&gt; := NumberField(x^4-420*x^2+40000);
+&gt; O := MaximalOrder(K);
+&gt; e := O ! (y^2/40 + y/4);
+&gt; f := elt&lt; O | [0, 0, 1, 0]&gt;;
+&gt; f eq e;
+true
+&gt; F&lt;a, b, c, d&gt; := FieldOfFractions(O);
+&gt; g := F![0, 0, 1, 0]; 
+&gt; g eq e;
+true
+&gt; g;
+c
+</PRE>
+These constructions would have failed if the element was not in O.
+<HR>
+<H4><A NAME = "3701">Creation of Homomorphisms</A></H4>
+
+<P>
+<P>
+To specify homomorphisms from algebraic fields or orders in algebraic
+fields, it is necessary to specify the image of the generating elements,
+and possible to specify a map on the ground field.
+
+
+<H5><A NAME = "3702">hom&lt; F -&gt; R | r &gt; : FldAlg, Rng, RngElt -&gt; Map</A></H5>
+<H5>hom&lt; F -&gt; R | h, r &gt; : FldAlg, Rng, Map, RngElt -&gt; Map</H5>
+<BLOCKQUOTE>
+Given an algebraic field F, defined as an extension of the ground
+field G, as well as some ring R, build the homomorphism &phi;
+obtained by sending the defining primitive element &alpha; of 
+F to the element r&isin;R. 
+<P>
+If F is a field of fractions then r will be the image of the
+primitive element of the field of fractions of the equation order
+of <TT>Order(F)</TT>.
+<P>
+It is possible (if G=Q) and sometimes necessary (if G != Q)
+to specify a homomorphism &phi; on F
+by specifying its action on G by providing a homomorphism
+h with G as its domain and R its codomain together with the 
+image of &alpha;. If R does not cover G then the homomorphism h
+from G into R is necessary to ensure that the ground field can be 
+mapped into R.
+</BLOCKQUOTE>
+<H5><A NAME = "3703">hom&lt; O -&gt; R | r &gt; : RngOrd, Rng, RngElt -&gt; Map</A></H5>
+<H5>hom&lt; O -&gt; R | h, r &gt; : RngOrd, Rng, Map, RngElt -&gt; Map</H5>
+<BLOCKQUOTE>
+Given an order O, a ring R and an 
+element r&isin;R, construct a homomorphism &phi; by sending the 
+primitive element of the equation order of O to r.
+<P>
+To be more precise: Let K be the field of fractions of O,
+k be the base field of K i.e. the field of fractions of the
+base ring of O, and N := <TT>NumberField(O)</TT>.
+As a k--algebra K 
+is generated by x := K!N.1, 
+so x is zero of <TT>DefiningPolynomial(O)</TT>.
+The element r given in the
+map construction will be the image of x.
+<P>
+When O is an equation order e.g. if O was defined using
+a monic integral polynomial x will be <TT>O.2</TT>.
+<P>
+<P>
+As in the field case it is possible to specify a map on the coefficient ring
+of O (ring over which O is defined) with codomain R. This is necessary
+if R does not cover the coefficient ring of O.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3704">Example <TT>RngOrd_Homomorphisms (H38E7)</TT></A></H3>
+We show a way to embed the field Q(Sqrt(2)) in Q(Sqrt(2) + Sqrt(3)).
+The application of the homomorphism suggests how the image could have 
+been chosen.
+<P>
+<P>
+<PRE>
+&gt; R&lt;x&gt; := PolynomialRing(Integers());
+&gt; K&lt;y&gt; := NumberField(x^2-2);
+&gt; KL&lt;w&gt; := NumberField(x^4-10*x^2+1);
+&gt; H := hom&lt; K -&gt; KL | (9*w-w^3)/2 &gt;;
+&gt; H(y);
+1/2*(-w^3 + 9*w)
+&gt; H(y)^2;
+2
+</PRE>
+Homomorphisms can be created between any order or algebraic field and
+any ring. 
+<P>
+<P>
+<PRE>
+&gt; f := x^4 + 5*x^3 - 25*x^2 + 125*x + 625;
+&gt; M := MaximalOrder(f);
+&gt; F&lt;a, b, c, d&gt; := FieldOfFractions(M);
+&gt; FF := FiniteField(5, 3);
+&gt; F;
+Field of Fractions of M
+&gt; FF;
+Finite field of size 5^3
+&gt; h := hom&lt; F -&gt; FF | Coercion(Rationals(), FF), 3*FF.1&gt;;
+&gt; h;
+Mapping from: FldOrd: F to FldFin: FF
+&gt; h(a); h(b); 
+1
+
+&gt;&gt; h(a); h(b);
+          ^
+Runtime error in map application: Application of map failed
+&gt; h(5*b); h(5*5*c); h(5*5*5*d);
+FF.1^94
+FF.1^64
+FF.1^34
+</PRE>
+This unexpected behaviour occurs because when the basis of F is expressed 
+with respect to the power basis of the number field they have denominator 
+divisible by 5.
+A more well--behaved example is shown below.
+<P>
+<P>
+<PRE>
+&gt; FF := FiniteField(11, 5);
+&gt; h := hom&lt; F -&gt; FF | Coercion(Rationals(), FF), 7*FF.1&gt;;
+&gt; h(a);
+1
+&gt; h(b); h(c); h(d);
+FF.1^48316
+FF.1^96632
+FF.1^144948
+&gt; 7*FF.1;
+FF.1^112736
+&gt; 5*h(b);
+FF.1^112736
+&gt; PrimitiveElement(F);
+5/1*b
+</PRE>
+<HR>
+<H5><A NAME = "3705">hom&lt; O -&gt; R | b<sub>1</sub>, ..., b<sub>n</sub> &gt; : RngFunOrd, Rng, RngElt, ..., RngElt -&gt; Map</A></H5>
+<H5>hom&lt; O -&gt; R | m, b<sub>1</sub>, ..., b<sub>n</sub> &gt; : RngFunOrd, Rng, Map, RngElt, ..., RngElt -&gt; Map</H5>
+<BLOCKQUOTE>
+Return the map from the order O of an algebraic number field to the ring 
+R mapping the basis elements to b<sub>1</sub>, .., b<sub>n</sub>. If given, the map m should
+be from the coefficient ring of O to R and will be used to map the 
+coefficients of the basis elements. If not given the coefficient ring of O
+should by covered by R.
+</BLOCKQUOTE>
+<H5><A NAME = "3706">IsRingHomomorphism(m) : Map -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return whether the vector space homomorphism m is a homomorphism of rings.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text387.htm">[Next]</A><A  HREF = "text385.htm">[Prev]</A> <A  HREF = "text387.htm">[Right]</A> <A  HREF = "text385.htm">[Left]</A> <A  HREF = "text383.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

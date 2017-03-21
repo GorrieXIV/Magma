@@ -1,0 +1,7 @@
+174,1
+S,Random,"Chooses random homogeneous element of degree d in polynomial ring R. If the base ring of R is the integers or rationals, random means random integer coefficients between -N and N incl",0,3,0,0,0,0,0,0,0,148,,0,0,64,,0,0,148,,63,-38,-38,-38,-38,-38
+S,RandomPlanePoints,Returns the ideal defining N (not necessarily distinct) points in the projective plane with coordinate ring R,0,2,0,0,0,0,0,0,0,64,,0,0,148,,82,-38,-38,-38,-38,-38
+S,IsNodalCurve,Checks if plane curve C is a curve with only nodes as singularities,0,1,0,0,0,0,0,0,0,371,,36,-38,-38,-38,-38,-38
+S,RandomNodalCurve,Finds a random nodal plane curve of degree d and genus g in the ordinary projective plane P,0,3,0,0,0,0,0,0,0,379,,0,0,148,,0,0,148,,409,-38,-38,-38,-38,-38
+S,RandomPlaneCurve,"Finds a random plane curve in the proj plane P of degree d with prescribed ordinary singularities (sings[1] double points, sings[2] triple points etc.). If parameter Adjoint is true then, the adjoint ideal is also computed and returned returned. If parameter Proof is true then the produced curve is definitely tested to have no worse singularities than specified. Otherwise this may not be true",0,3,0,0,0,0,0,0,0,379,,0,0,82,,0,0,148,,409,64,-38,-38,-38,-38
+S,RandomCurveByGenus,Generates a random curve of genus g over the field K (which should be Q or finite). RandomBound controls the size of the coefficients of the result when K is Q,0,2,0,0,0,0,0,0,0,-24,,0,0,148,,371,-38,-38,-38,-38,-38

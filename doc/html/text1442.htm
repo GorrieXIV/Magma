@@ -1,0 +1,392 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Pairings on Elliptic Curves</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1443.htm">[Next]</A><A  HREF = "text1441.htm">[Prev]</A> <A  HREF = "text1443.htm">[Right]</A> <A  HREF = "text1441.htm">[Left]</A> <A  HREF = "text1437.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16310">Pairings on Elliptic Curves</A></H3>
+
+<P>
+<P>
+<P>
+Pairings on elliptic curves over finite fields have many uses,
+ranging from checking independence of torsion points to more practical
+applications in cryptography.  Both destructive applications (such as the
+MOV attack) and constructive applications (such as pairing-based
+cryptography) are worth mentioning.  Magma now contains an implementation
+of the most popular pairings on elliptic curves over finite fields, including
+the Weil pairing, the Tate pairing, and various versions of the Eta and Ate
+pairings.
+<P>
+ All pairings evaluate what is now called a Miller function, denoted
+by f<sub>n, P</sub> and defined as any function on E with divisor
+n(P) - ([n]P) - (n - 1) &infin;, where &infin; is the point at infinity
+of the curve.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1442.htm#16311">Weil Pairing</A>
+<LI> <A  HREF = "text1442.htm#16313">Tate Pairing</A>
+<LI> <A  HREF = "text1442.htm#16316">Eta Pairing</A>
+<LI> <A  HREF = "text1442.htm#16320">Ate Pairing</A>
+</UL>
+<H4><A NAME = "16311">Weil Pairing</A></H4>
+
+<P>
+<P>
+The Weil pairing is a non-degenerate bilinear map from E[n] x E[n] to
+&mu;<sub>n</sub>, the n-th roots of unity.  The Weil pairing w<sub>n</sub>(P, Q) is computed as
+( - 1)<sup>n</sup> f<sub>n, P</sub>(Q)/f<sub>n, Q</sub>(P).
+
+
+<H5><A NAME = "16312">WeilPairing(P, Q, n) : PtEll, PtEll, RngIntElt -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+Given n-torsion points P and Q on an elliptic curve E, this function computes the Weil pairing of P and Q.
+Both points need to be in the same point set.
+</BLOCKQUOTE>
+<H4><A NAME = "16313">Tate Pairing</A></H4>
+
+<P>
+<P>
+The Tate pairing (sometimes called the Tate--Lichtenbaum pairing) is a non-degenerate bilinear
+map from E[n] x E/ n E into K<sup> * </sup>/(K<sup> * </sup>)<sup>n</sup>, where K is a finite field containing
+the n-th roots of unity.  In practice one often works with the reduced version of the pairing
+by mapping into &mu;<sub>n</sub> using the final exponentiation; i.e., powering by #K<sup> * </sup>/n.
+The Tate pairing t<sub>n</sub>(P, Q) is computed as f<sub>n, P</sub>(Q).
+
+
+<H5><A NAME = "16314">TatePairing(P, Q, n) : PtEll, PtEll, RngIntElt -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+Given an n-torsion point P and a point Q on an elliptic curve,
+this function computes the Tate pairing t<sub>n</sub>(P, Q) by returning a random
+representative of the coset.  Both points need to be in the same point set;
+the field K is the field of definition of this point set.
+</BLOCKQUOTE>
+<H5><A NAME = "16315">ReducedTatePairing(P, Q, n) : PtEll, PtEll, RngIntElt -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+Given an n-torsion point P and a point Q on an elliptic curve, this function computes the reduced Tate
+pairing e<sub>n</sub>(P, Q) = t<sub>n</sub>(P, Q)<sup>(#K - 1)/n</sup>.  Both points need to be in the same point set;
+the field K is the field of definition of this point set and n should divide #K - 1.
+</BLOCKQUOTE>
+<H4><A NAME = "16316">Eta Pairing</A></H4>
+
+<P>
+<P>
+The Eta pairing is only defined on supersingular curves and can be considered as
+an optimised version of the Tate pairing. It works as follows.
+<P>
+Let E be a supersingular elliptic curve defined over F<sub>q</sub> and
+n | #E(F<sub>q</sub>).
+The security multiplier k is the smallest positive integer such that
+q<sup>k</sup> &equiv; 1 mod n. Here, in the supersingular case, k divides 6.
+Now, E[n] &sube;E(F<sub>q<sup>k</sup></sub>) is a free Z/nZ-module of rank 2
+which splits
+into the direct sum of 2 rank one eigenspaces under the action of
+q-Frobenius (denoted by F in the following), with eigenvalues 1
+and q (as long as (n, k)=1 and k &gt; 1).
+<P>
+The Eta pairing is defined on the subgroup of E[n] x E[n] given by
+the product of the two F-eigenspaces G<sub>1</sub> x G<sub>2</sub>,
+where P &isin;G<sub>1</sub> iff F(P) = P
+and Q &isin;G<sub>2</sub> iff F(Q) = [q] Q. G<sub>1</sub> is just E(F<sub>q</sub>)[n].
+If R is an arbitrary n-torsion point in E(F<sub>q<sup>k</sup></sub>), k times its
+G<sub>1</sub>-component is just the F-trace of R. This can be used to find
+non-trivial points in G<sub>2</sub> (see the example below).
+<P>
+There
+are three versions of the Eta pairing: one unreduced and two reduced versions.
+The Eta pairing e<sub>T</sub>(P, Q) is defined as f<sub>T, P</sub>(Q) where
+T = t - 1
+and #E(F<sub>q</sub>) = q + 1 - t or T = q.
+<P>
+As for the Tate pairing, the unreduced version takes values in K<sup> * </sup>/(K<sup> * </sup>)<sup>n</sup>
+and the reduced versions in &mu;<sub>n</sub>(K) where K is F<sub>q<sup>k</sup></sub>.
+
+
+<H5><A NAME = "16317">EtaTPairing(P, Q, n, q) : PtEll, PtEll, RngIntElt, RngIntElt -&gt; RngElt</A></H5>
+
+<PRE>    CheckCurve: BoolElt                 Default: <TT>false</TT></PRE>
+
+<PRE>    CheckPoints: BoolElt                Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a supersingular elliptic curve E/F<sub>q</sub> and two points P, Q in E[n] such that
+P = F(P) and F(Q) = [q]Q with F the q-power Frobenius, this function computes the
+Eta pairing with T=t - 1 where #E(F<sub>q</sub>) = q + 1 - t.  The result is non-reduced
+and thus a random representative of a whole coset.  Both points need to be in the same
+point set E(F<sub>q<sup>k</sup></sub>) and q should be the size of the base field.
+</BLOCKQUOTE>
+<H5><A NAME = "16318">ReducedEtaTPairing(P, Q, n, q) : PtEll, PtEll, RngIntElt, RngIntElt -&gt; RngElt</A></H5>
+
+<PRE>    CheckCurve: BoolElt                 Default: <TT>false</TT></PRE>
+
+<PRE>    CheckPoints: BoolElt                Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The reduced version of the <TT>EtaTPairing</TT> function.
+</BLOCKQUOTE>
+<H5><A NAME = "16319">EtaqPairing(P, Q, n, q) : PtEll, PtEll, RngIntElt, RngIntElt -&gt; RngElt</A></H5>
+
+<PRE>    CheckCurve: BoolElt                 Default: <TT>false</TT></PRE>
+
+<PRE>    CheckPoints: BoolElt                Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a supersingular elliptic curve E/F<sub>q</sub>, two points P, Q in E[n] such that
+P = F(P) and F(Q) = [q]Q with F the q-power Frobenius, this function computes the
+Eta pairing with T=q. This pairing is automatically reduced:
+It maps directly into n-th roots of unity.  Both points need to be in the same
+point set E(F<sub>q<sup>k</sup></sub>) and q should be the size of the base field.
+</BLOCKQUOTE>
+<P>
+<P>
+In the previous intrinsics one can explicitly check that the
+curve is supersingular by setting the parameter <TT>CheckCurve</TT> to <TT>true</TT>,
+and that the input points are indeed in the eigenspaces of Frobenius by
+setting the parameter <TT>CheckPoints</TT> to <TT>true</TT>.  By default Magma does
+not perform these checks for efficiency reasons.
+<H4><A NAME = "16320">Ate Pairing</A></H4>
+
+<P>
+<P>
+The Ate pairing generalises the Eta pairing to all elliptic curves, but
+is defined on G<sub>2</sub> x G<sub>1</sub>. i.e., the arguments are swapped
+with respect to the Eta pairing.  Like the Eta pairing there are three versions,
+one unreduced and two reduced.  The Ate pairing a<sub>T</sub>(Q, P)
+with Q &isin;G<sub>2</sub> and P &isin;G<sub>1</sub> is defined as f<sub>T, Q</sub>(P),
+where T = t - 1 and #E(F<sub>q</sub>) = q + 1 - t or T = q.
+
+
+<H5><A NAME = "16321">AteTPairing(Q, P, n, q) : PtEll, PtEll, RngIntElt, RngIntElt -&gt; RngElt</A></H5>
+
+<PRE>    CheckPoints: BoolElt                Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given two points Q, P in E[n] such that F(Q) = [q]Q and P = F(P)
+with F the q-power Frobenius, this function computes the
+Ate pairing with T=t - 1 where #E(F<sub>q</sub>) = q + 1 - t.  The result is non-reduced
+and thus a random representative of a whole coset.  Both points need to be in the same
+point set E(F<sub>q<sup>k</sup></sub>) and q should be the size of the base field.
+</BLOCKQUOTE>
+<H5><A NAME = "16322">ReducedAteTPairing(Q, P, n, q) : PtEll, PtEll, RngIntElt, RngIntElt -&gt; RngElt</A></H5>
+
+<PRE>    CheckPoints: BoolElt                Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+The reduced version of the <TT>AteTPairing</TT> function.
+</BLOCKQUOTE>
+<H5><A NAME = "16323">AteqPairing(P, Q, m, q) : PtEll, PtEll, RngIntElt, RngIntElt -&gt; RngElt</A></H5>
+
+<PRE>    CheckPoints: BoolElt                Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given two points Q, P in E[n] such that F(Q) = [q]Q and P = F(P)
+with F the q-power Frobenius, this function computes the
+Ate pairing with T=q. This pairing is automatically reduced: It
+maps directly into n-th roots of unity.  Both points need to be in the same
+point set E(F<sub>q<sup>k</sup></sub>) and q should be the size of the base field.
+</BLOCKQUOTE>
+<P>
+<P>
+In the previous intrinsics one can explicitly check that the
+input points are indeed in the eigenspaces of Frobenius by setting the
+parameter <TT>CheckPoints</TT> to <TT>true</TT>.
+By default Magma does not perform these checks for efficiency reasons.
+<HR>
+<H3><A NAME = "16324">Example <TT>CrvEllFldFin_PairingsFiniteFields (H127E7)</TT></A></H3>
+In this example, we first create a so-called BN-curve, which is an elliptic
+curve of the form y<sup>2</sup> = x<sup>3</sup> + b defined over F<sub>p</sub> of prime order n
+and embedding degree k=12. These curves can be found easily by testing
+for which s both p(s) = 36s<sup>4</sup> + 36s<sup>3</sup> + 24s<sup>2</sup> + 6s + 1 and
+n(s)=36s<sup>4</sup> + 36s<sup>3</sup> + 18s<sup>2</sup> + 6s + 1 are prime.  Finding the parameter
+b is equally easy by testing a few random values, since there
+are only 6 isogeny classes.  The point G = (1, y) can be used as
+base point.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Zs&lt;s&gt; := PolynomialRing(Integers());
+&gt; ps := 36*s^4 + 36*s^3 + 24*s^2 + 6*s + 1;
+&gt; ns := 36*s^4 + 36*s^3 + 18*s^2 + 6*s + 1;
+&gt; z := 513235038556;  // arbitrary initial value
+&gt; repeat
+&gt;   z := z+1;
+&gt;   p := Evaluate(ps, z);
+&gt;   n := Evaluate(ns, z);
+&gt; until IsProbablePrime(p) and IsProbablePrime(n);
+&gt; p;
+2497857711095780713403056606399151275099020724723
+&gt; n;
+2497857711095780713403055025937917618634473494829
+&gt; Fp := FiniteField(p);
+&gt; b := Fp!0;
+&gt; repeat
+&gt;   repeat b := b + 1; until IsSquare(b + 1);
+&gt;   y := SquareRoot(b + 1);
+&gt;   E := EllipticCurve([Fp!0, b]);
+&gt;   G := E![1, y];
+&gt; until IsZero(n*G);
+&gt; E;
+Elliptic Curve defined by y^2 = x^3 + 18 over
+  GF(2497857711095780713403056606399151275099020724723)
+&gt; #E eq n;  // just to verify
+true
+&gt; t := p + 1 - n;
+&gt; t;
+1580461233656464547229895
+&gt; k := 12; // security multiplier
+&gt; (p^k - 1) mod n; // check on p, n and k
+0
+&gt; Fpk := GF(p, k);
+&gt; N := Resultant(s^k - 1, s^2 - t*s + p);  // number of points over big field
+&gt; Cofac := N div n^2;
+&gt; P := E(Fpk)!G;
+&gt; Q := Cofac*Random(E(Fpk));  // Q has order n now
+</PRE>
+<P>
+Up to this point we have constructed a BN-curve and two points of order n.
+As such we can test, for instance, that P and 2 P are linearly dependent:
+<P>
+<P>
+<PRE>
+&gt; WeilPairing(P, 2*P, n) eq 1;
+true
+</PRE>
+and also that the Weil pairing can be obtained from 2 Tate pairing computations:
+<P>
+<P>
+<PRE>
+&gt; WeilPairing(P, Q, n) eq (-1)^n*TatePairing(P, Q, n)/TatePairing(Q, P, n);
+true
+</PRE>
+or test the bilinearity of the reduced Tate pairing
+<P>
+<P>
+<PRE>
+&gt; ReducedTatePairing(P, 2*Q, n) eq ReducedTatePairing(P, Q, n)^2;
+true
+</PRE>
+and that the corresponding test for the Tate pairing would fail
+since the result is a random representative of the coset:
+<P>
+<P>
+<PRE>
+&gt; TatePairing(P, 2*Q, n) eq TatePairing(P, Q, n)^2;
+false
+</PRE>
+<P>
+Since the curve is ordinary we cannot use the Eta pairing on this curve.  We can use
+the Ate pairing, but this is defined on G<sub>2</sub> x G<sub>1</sub> and up to this point
+we only have a generator of G<sub>1</sub>.  To find a generator of G<sub>2</sub> we need to remove
+the component in Q that lies in G<sub>1</sub>.  This can be done easily by using the trace
+of the point Q: (Tr)(Q) = &sum;<sub>i = 0</sub><sup>k - 1</sup> F(Q) with F the p-power Frobenius.
+The trace equals k times the component of Q in G<sub>1</sub>.
+<P>
+<P>
+<PRE>
+&gt; TrQ := &amp;+[ E(Fpk) ! [Frobenius(Q[1], Fp, i), Frobenius(Q[2], Fp, i)]  :
+&gt;                      i in [0..k-1]];
+&gt; Q := k*Q - TrQ;
+</PRE>
+<P>
+At this point Q is in G<sub>2</sub> and we can compute the Ate pairing of Q and P.  For instance,
+we can test compatibility of the reduced Ate pairing with the reduced Tate pairing:
+<P>
+<P>
+<PRE>
+&gt; T := t - 1;
+&gt; L := (T^k - 1) div n;
+&gt; c := &amp;+[ T^(k - 1 - i)*p^i : i in [0..k-1] ] mod n;
+&gt; ReducedAteTPairing(Q, P, n, p)^c eq ReducedTatePairing(Q, P, n)^L;
+true
+&gt; Frobenius(AteqPairing(Q, P, n, p)^k, Fp, k - 1) eq ReducedTatePairing(Q, P, n);
+true
+</PRE>
+<P>
+To test the Eta pairing computations we will use one of the supersingular
+elliptic curves y<sup>2</sup> + y = x<sup>3</sup> + x + b with b = 0 or 1
+over a finite field F<sub>2<sup>m</sup></sub> and m odd.  These curves have security
+parameter k = 4.
+<P>
+<P>
+<PRE>
+&gt; F2m := GF(2, 163);
+&gt; q := #F2m;
+&gt; E := EllipticCurve([F2m!0, 0, 1, 1, 1]);
+&gt; #E;
+11692013098647223345629483497433542615764159168513
+&gt; IsPrime($1);
+true
+&gt; n := #E;
+&gt; t := TraceOfFrobenius(E);
+&gt; P := Random(E);
+&gt; k := 4;
+&gt; F2m4 := ExtensionField&lt;F2m, X | X^4 + X + 1&gt;;
+&gt; N := Resultant(s^k - 1, s^2 - t*s + q);  // number of points over big field
+&gt; Cofac := N div n^2;
+&gt; P := E(F2m4) ! P;
+&gt; Q := Cofac*Random(E(F2m4));  // Q has order n now
+&gt; TrQ := &amp;+[ E(F2m4) ! [Frobenius(Q[1], F2m, i), Frobenius(Q[2], F2m, i)]  :
+&gt;                       i in [0..k-1]];
+&gt; Q := k*Q - TrQ;
+</PRE>
+<P>
+After this setup we can now compute the Eta pairing and test compatibility with
+the Tate pairing.
+<P>
+<P>
+<PRE>
+&gt; d := GCD(k, q^k - 1);
+&gt; Frobenius(EtaqPairing(P, Q, n, q)^(k div d), F2m, k - 1) eq
+&gt;                                       ReducedTatePairing(P, Q, n);
+true
+</PRE>
+<HR>
+<H3><A NAME = "16325">Example <TT>CrvEllFldFin_MOVWithWeilPairing (H127E8)</TT></A></H3>
+The following example demonstrates the
+Menezes, Okamoto, and Vanstone (MOV) reduction of the discrete logarithm
+on a supersingular elliptic curve to a discrete logarithm in a finite
+field using the Weil Pairing.  The group structure of a supersingular curve E over a
+finite prime field F<sub>p</sub> for p &gt; 3 can be Z/nZ or Z/2Z x Z/(n/2)Z, where n = p + 1, and the group structure over
+a degree 2 extension is Z/nZ x Z/nZ.  The nontrivial
+Weil pairing on this is the basis for this reduction.
+<P>
+<P>
+<PRE>
+&gt; p := NextPrime(2^131);
+&gt; n := p + 1;
+&gt; n;
+2722258935367507707706996859454145691688
+&gt; Factorization(n);
+[ &lt;2, 3&gt;, &lt;3, 2&gt;, &lt;37809151&equiv;04273718152734159085356829, 1&gt; ]
+&gt; E0 := SupersingularEllipticCurve(GF(p));
+&gt; G&lt;x&gt;, f := AbelianGroup(E0);
+&gt; G;
+Abelian Group isomorphic to Z/2722258935367507707706996859454145691688
+Defined on 1 generator
+Relations:
+    2722258935367507707706996859454145691688*x = 0
+&gt; n eq #G;
+true
+&gt; P0 := f(x);
+&gt; E1 := BaseExtend(E0, GF(p^2));
+&gt; P1 := E1!P0;
+&gt; repeat
+&gt;    Q1 := Random(E1);
+&gt;    z1 := WeilPairing(P1, Q1, n);
+&gt; until Order(z1) eq n;
+&gt; IsOrder(Q1, n);
+true
+&gt; r := 1234567;
+&gt; z2 := WeilPairing(r*P1, Q1, n);
+&gt; z1^r eq z2;
+true
+&gt; WeilPairing(P1, r*P1, n);
+1
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1443.htm">[Next]</A><A  HREF = "text1441.htm">[Prev]</A> <A  HREF = "text1443.htm">[Right]</A> <A  HREF = "text1441.htm">[Left]</A> <A  HREF = "text1437.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

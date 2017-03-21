@@ -1,0 +1,40 @@
+{
+  GlobalVars.m
+  Types.m
+  TensorCategory
+  {
+    TensorCat.m
+    TensorCatDef.m
+    TensorCatBasic.m
+    Hom.m
+    HomDef.m
+    HomBasic.m
+  }
+  TensorSpace
+  {
+    TensorSpc.m
+    TensorSpcDef.m
+    TensorSpcBasic.m
+    Densor.m
+  }
+  Tensor
+  {
+    Tensor.m
+    TensorDef.m
+    BimapDef.m
+    TensorBasic.m
+    Invariants.m
+  }
+  Exceptional
+  {
+  	General.m
+  	Octonion.m
+	Jordan.m
+  }
+  Util
+  {
+    ConjugateCyclic.m
+    Util.m
+  }
+}
+

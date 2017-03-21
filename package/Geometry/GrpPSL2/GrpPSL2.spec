@@ -1,0 +1,27 @@
+{
+        Graphics  
+        {
+                  +spec
+        }
+        GrpPSL2
+        {
+                  +spec
+        }
+        GrpPSL2Shim
+        {
+                  +spec
+        }
+        SpcHyd
+        {
+                  +spec
+        }
+        SpcHyp
+        {
+                  +spec
+        }
+        SymFry
+        {
+                  +spec
+        }
+}
+

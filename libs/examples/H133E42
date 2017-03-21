@@ -1,0 +1,32 @@
+"Source: Text/Geometry/Lseries.text";
+"Line: 3285";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/Lseries.text, line: 3285
+// Example: H133E42 ()
+print "Example: H133E42";
+ei := GetEchoInput();
+SetEchoInput(true);
+L := LSeries(2, [0,1], 11, 0 : Sign:=1);
+for a_2 := -2 to 2 do
+  LSetCoefficients(L,[1,a_2]);
+  print a_2, CFENew(L);
+end for;
+N := LCfRequired(L); N;
+V := [0 : k in [1..N] ];   // keep a_p in here
+P<x> := PolynomialRing(Integers());
+function Try(V,p,a_p)  // set V[p]=a_p and try functional equation
+  V[p] := a_p;
+  LSetCoefficients(L, func<p,d | 1-V[p]*x+(p eq 11 select 0 else p)*x^2 >);
+  return Abs(CFENew(L));
+end function;
+for p in PrimesUpTo(20) do  // try a_p in Hasse-Weil range and find best one
+  hasse := Floor(2*Sqrt(p));
+  _,V[p] := Min([Try(V,p, a_p): a_p in [-hasse..hasse]]);
+  V[p] -:= hasse+1;
+end for;
+LSetCoefficients(L, func<p,d | 1-V[p]*x+(p eq 11 select 0 else p)*x^2 >);
+LGetCoefficients(L,20);
+CFENew(L);
+qExpansion(Newforms("11A")[1],21);
+SetEchoInput(ei);

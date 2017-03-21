@@ -1,0 +1,269 @@
+/*
+Test primary decomposition, radical, etc.
+AKS 15/4/96.
+*/
+
+
+SetAssertions(true);
+VERB := false;
+
+procedure test_ideal(I)
+    if VERB then
+	"\nIDEAL";
+	"=====";
+	I;
+    else
+	"Primary Decomposition; Rank:", Rank(I), "Ring:", CoefficientRing(I);
+    end if;
+
+    IndentPush();
+
+    "Get GB"; time Groebner(I);
+    OI := Ideal(Basis(I));
+    MarkGroebner(OI);
+
+    time Q, P := PrimaryDecomposition(I);
+
+    if VERB then
+	"PRIMARY IDEALS";
+	"==============";
+	Q;
+	"ASSOCIATED PRIME IDEALS";
+	"=======================";
+	P;
+    end if;
+
+    n := #Q;
+
+// "HERE I:", I; "HERE Q:", Q;
+//gon();
+
+    assert &meet Q eq I;
+    assert forall{J: J in Q | IsPrimary(J)};
+    assert IsPrimary(I) eq (#Q eq 1);
+    assert not IsPrime(I) or (#P eq 1);
+    assert IsMaximal(I) eq (IsPrime(I) and IsZeroDimensional(I));
+
+    R := Radical(I);
+    assert IsRadical(I) eq (I eq R);
+
+    if not IsRadical(I) then
+	assert &meet P eq R;
+	assert forall{J: J in P | IsPrime(J)};
+	assert forall{Radical(Q[i]) eq P[i]: i in [1 .. n]};
+	assert IsPrime(R) eq (#RadicalDecomposition(I) eq 1);
+	assert IsMaximal(R) eq (#P eq 1 and IsZeroDimensional(I));
+
+	RP := RadicalDecomposition(I);
+	assert &meet RP eq R;
+    end if;
+
+    "Get RadicalDecomposition afresh";
+    time D2 := RadicalDecomposition(OI);
+    D := RadicalDecomposition(I);
+    //assert Set(D) eq Set(D2);
+    if Set(D) ne Set(D2) then
+	"BAD RadicalDecomposition";
+	"I:", I;
+	"D:", D;
+	"D2:", D2;
+	error "DIE";
+    end if;
+
+    IndentPop();
+end procedure;
+
+
+//////////////////////////////////////////
+//////////////////////////////////////////
+//////////////////////////////////////////
+//////////////////////////////////////////
+//SetDelCheck(true);
+//SetTrace(49488, true);
+//gon();
+//P<x,y,z> := PolynomialRing(Q, 3);
+//I := ideal<P | (x^3+y^3)*(x^3+z^3), (x+y)^2>;
+//test_ideal(I);
+//////////////////////////////////////////
+//////////////////////////////////////////
+//////////////////////////////////////////
+//////////////////////////////////////////
+//////////////////////////////////////////
+//////////////////////////////////////////
+//////////////////////////////////////////
+//////////////////////////////////////////
+//////////////////////////////////////////
+
+Q := RationalField();
+
+P<x,y,z> := PolynomialRing(Q, 3);
+I := ideal<P | (x+y+z)^3-1, x^4+y^4+z^4-(x+y+z)^2, x*y+y*z+x*z-x*y*z>;
+test_ideal(I);
+
+P<x,y,z> := PolynomialRing(Q, 3);
+I := ideal<P | (x+y+z)^3-x*y*z, (x*y+x*z+y*z)^3+x^6+y^6+z^6, (x*y+x*z+y*z)^2-1>;
+test_ideal(I);
+
+for R in [* Q, GF(2), GF(3), GF(5) *] do
+    P<x, y, z, t, u> := PolynomialRing(R, 5);
+    I := ideal<P |
+    x + y + z + t + u,
+    x*y + x*z + x*t + x*u + y*z + y*t + y*u + z*t + z*u + t*u,
+    x*y*z + x*y*t + x*y*u + x*z*t + x*z*u + x*t*u + y*z*t + y*z*u + y*t*u + 
+	z*t*u,
+    x*y*z*t + x*y*z*u + x*y*t*u + x*z*t*u + y*z*t*u,
+    x*y*z*t*u - 1>;
+    test_ideal(I);
+end for;
+
+SetEchoInput(true);
+
+P<x, y, z, t, u> := PolynomialRing(Q, 5);
+I := ideal<P |
+x + y + z + t + u,
+x*y + y*z + z*t + t*u + u*x,
+x*y*z + y*z*t + z*t*u + t*u*x + u*x*y,
+x*y*z*t + y*z*t*u + z*t*u*x + t*u*x*y + u*x*y*z,
+x*y*z*t*u>;
+test_ideal(I);
+
+// s6 from "Walking Faster":
+P<x6,x5,x4,x3,x2,x1> := PolynomialRing(Q, 6);
+I := ideal<P | 
+    2*x6*x2 + 2*x5*x3 + x4^2 + x1^2 + x1,
+    2*x6*x3 + 2*x5*x4 + 2*x2*x1 + x2,
+    2*x6*x4 + x5^2 + 2*x3*x1 + x3 + x2^2,
+    2*x6*x5 + 2*x4*x1 + x4 + 2*x3*x2,
+    x6^2 + 2*x5*x1 + x5 + 2*x4*x2 + x3^2,
+    2*x6*x1 + x6 + 2*x5*x2 + 2*x4*x3>;
+test_ideal(I);
+
+R<t> := PolynomialRing(Q, 1);
+P<x, y, z> := PolynomialRing(Q, 3);
+I := RelationIdeal([t^3, t^4, t^5], P);
+assert IsPrime(I);
+test_ideal(I);
+J := I^2;
+assert not IsPrimary(J);
+test_ideal(J);
+
+P<x, y, z> := PolynomialRing(GF(2), 3);
+I := ideal<P | x^2 + x + 1, y^2 + y + 1, z^2 + z + 1>;
+test_ideal(I);
+
+P<x,y,z> := PolynomialRing(Q, 3);
+I := ideal<P | (x^3+y^3)*(x^3+z^3), (x+y)^2>;
+test_ideal(I);
+
+
+n := 2;
+m := 2;
+R<x0,x1,x2,y0,y1,y2,A,B> := PolynomialRing(Q,8);
+L :=
+[
+    x1*y2 - x2*A,
+    x2*y1 - y1*B,
+    x0*x2 - x1^2,
+    y0*y2 - y1^2,
+    x1*x2*y0 - A*B^2,
+    x0*y1*y2 - A^2*B,
+    x0*y2^2 - A^2,
+    x2^2*y0 - B^2,
+    x1*y1 - A*B
+];
+I := ideal<R|L>;
+J := Radical(I);
+test_ideal(J);
+//q, p := PrimaryDecomposition(I);
+
+K<i> := QuadraticField(-1);
+R<x,y,z> := PolynomialRing(K, 3);
+test_ideal(Ideal([(x^2 + y^2)^2, (y^2-z^2)*z]));
+test_ideal(Ideal([(x^2 + y^2)^2, x*y^2-y*z^2]));
+
+K<z> := CyclotomicField(5);
+R<x,y,z> := PolynomialRing(K, 3);
+test_ideal(Ideal([(x^5 - y^5)^2, x*y^2-y*z^2]));
+test_ideal(Ideal([(x^5 - y^5)^2, z^5 - 1])); // slower than should be!
+
+R<a,b,c,d> := PolynomialRing(GF(5), 4);
+I := Ideal([a*d + 2*b, b*c + 3*b*d]);
+Q, P := PrimaryDecomposition(I);
+assert Q eq P;
+assert #Q eq 3;
+assert &meet Q eq I;
+
+// J Kraemer (Jul 09):
+P<z, y, x> := PolynomialRing(Rationals(), 3);
+I := ideal<P|x + y + x*y + z^5 + x*y^3 + 5, z^2 - x^3 + y>;
+assert IsPrime(I);
+
+// E Rains (Jan 13):
+P0<c0,c1,c2,a40,a41,a42,a43,a44,a30,a31,a32,a33,a20,a21,a22>
+    := PolynomialAlgebra(GF(3),15);
+I := Ideal(
+[
+a22, 2*a22*c2+a44, 2*a21*c2+2*a22*c1+a43, 
+a33^2+c2^3+a22*c2^2+a44*c2,
+a21*c2^2+a43*c2+a44*c1+2*a32*a33+2*a22*c1*c2,
+2*a21*c1*c2+a43*c1+a22*c1^2+a32^2+a20*c2^2+2*a31*a33+2*a22*c0*c2+
+    a42*c2+a44*c0
+]);
+R := Radical(I);
+assert I subset R;
+
+// Decomp over ANF (Mar 14)
+
+GetSeed();
+
+K<i> := QuadraticField(-1);
+R<x,y,z> := PolynomialRing(K, 3);
+I := Ideal([(x^2 + y^2)^2, y^2-z^2]);
+Q, P := PrimaryDecomposition(I);
+assert [GroebnerBasis(J): J in Q] eq 
+[
+    [ x^2 + 2*i*x*z - z^2, y + z ],
+    [ x^2 + 2*i*x*z - z^2, y - z ],
+    [ x^2 - 2*i*x*z - z^2, y + z ],
+    [ x^2 - 2*i*x*z - z^2, y - z ]
+];
+assert [GroebnerBasis(J): J in P] eq
+[
+    [ x + i*z, y + z ],
+    [ x + i*z, y - z ],
+    [ x - i*z, y + z ],
+    [ x - i*z, y - z ]
+];
+
+// Wrong IsPrime (Apr 14)
+R<[z]>:=PolynomialRing(Rationals(),7);
+I:=Ideal([
+    -z[1]*z[5] + z[2]*z[4] + z[3]*z[6],
+    z[1]^2*z[6] - z[2]*z[5] + z[3]*z[4],
+    -z[1]*z[3] + z[2]^2 - z[6]*z[7],
+    z[1]^3 - z[2]*z[3] - z[4]*z[7],
+    z[1]^2*z[2] - z[3]^2 - z[5]*z[7],
+    z[7]]);
+assert not IsPrime(I);
+q, p := PrimaryDecomposition(I);
+assert #q eq 2;
+assert &meet q eq I;
+assert &meet p eq Radical(I);
+assert Radical(I) eq Ideal([
+    z[1]^2*z[2] - z[3]^2,
+    z[1]^3 - z[2]*z[3],
+    z[2]^2 - z[1]*z[3],
+    z[1]^2*z[4] - z[3]*z[5] + z[1]*z[2]*z[6],
+    z[3]*z[4] - z[2]*z[5] + z[1]^2*z[6],
+    z[2]*z[4] - z[1]*z[5] + z[3]*z[6],
+    z[7]
+]);
+
+// Wrong IsPrime (Jan 15)
+k:=GF(50021);
+P<x,y,z,w>:=PolynomialRing(k,4);
+L:=[x^2 + 13871*z^2 + 36150*w^2,y^2 + 36151*z^2 + 13870*w^2];
+I:=Ideal(L);
+assert not IsPrime(I);
+q, p := PrimaryDecomposition(I);
+assert #q eq 2 and q[1] meet q[2] eq I;

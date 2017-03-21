@@ -1,0 +1,44 @@
+"Source: Text/Lat/LatNF.text";
+"Line: 927";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Lat/LatNF.text, line: 927
+// Example: H31E5 ()
+print "Example: H31E5";
+ei := GetEchoInput();
+SetEchoInput(true);
+K<s37> := QuadraticField(37);
+L := NumberFieldLattice(K,3); // standard lattice
+r := (1+s37)/2;
+v1 := Vector([1,2+3*r,-1+4*r]);
+v2 := Vector([1/2,1/3-3*r/2,1+r]);
+LAT := NumberFieldLattice([v1,v2]);
+Norm(Determinant(L+LAT));
+assert $1 eq 1/36^2;
+IP := DiagonalMatrix([(s37-1)/2,1,1]);
+LATG := NumberFieldLattice([v1,v2] : InnerProduct:=IP);
+R := Matrix(2,2, [s37,1, -1,(1+s37)/2]);
+NEW := R*LATG;
+BasisMatrix(NEW);
+InnerProductMatrix(NEW);
+Determinant(R)^2*Determinant(LATG) eq Determinant(R*LATG);
+assert $1;
+Y := Matrix(3,3,[1,0,0, (1+s37)/2,1,0, -s37,-1,1]);
+Z := Matrix(3,3,[1,0,0, (-1+s37)/2,1,0, 2,s37,1]);
+TYZ := Y*Transpose(Z); // TYZ has determinant 1
+L eq TYZ*L;
+assert $1;
+LYZ := NumberFieldLattice(K,3 : Gram:=TYZ*Transpose(TYZ));
+IsIsometric(TYZ*L,LYZ); // these have the same pseudoGram matrix
+assert $1;
+assert PseudoGramMatrix(TYZ*L) eq PseudoGramMatrix(LYZ);
+C := Matrix(3,3,[1,s37,s37^2/2, 0,1,1+s37, 0,0,1]);
+D := Matrix(3,3,[1,(1+s37)/3,-1, 0,1,2+3*s37/4, 0,0,1]);
+TCD := C*Transpose(D);
+IsIsometric(L,TCD*L); // TCD has determinant 1, but is not integral
+assert not $1;
+assert Determinant(TCD) eq 1;
+[Denominator(x) : x in Eltseq(TCD)];
+time IsIsometric(LAT,sub<LAT|[v1+v2,2*v1+v2]>); // nontrivial enum
+assert $1;
+SetEchoInput(ei);

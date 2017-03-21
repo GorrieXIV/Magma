@@ -1,0 +1,590 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Elements</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text526.htm">[Next]</A><A  HREF = "text522.htm">[Prev]</A> [_____] <A  HREF = "text522.htm">[Left]</A> <A  HREF = "text519.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "5655">Elements</A></H3>
+
+<P>
+<P>
+<P>
+Lazy series may be created in a number of ways. Arithmetic
+for ring elements is available as well as a few predicates. Coefficients
+of the monomials in the series can be calculated. 
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text523.htm#5656">Creation of Finite Lazy Series</A>
+<LI> <A  HREF = "text523.htm#5666">Arithmetic with Lazy Series</A>
+<LI> <A  HREF = "text523.htm#5676">Finding Coefficients of Lazy Series</A>
+<LI> <A  HREF = "text523.htm#5689">Predicates on Lazy Series</A>
+<LI> <A  HREF = "text523.htm#5697">Other Functions on Lazy Series</A>
+</UL>
+<H4><A NAME = "5656">Creation of Finite Lazy Series</A></H4>
+
+
+
+<H5><A NAME = "5657">R ! c : RngPowLaz, RngElt -&gt; RngPowLazElt</A></H5>
+<BLOCKQUOTE>
+Return the series in the lazy series ring R with constant term c 
+and every other coefficient 0
+where c is any ring element coercible into the coefficient ring of R.
+</BLOCKQUOTE>
+<H5><A NAME = "5658">R ! s : RngPowLaz, RngPowLazElt -&gt; RngPowLazElt</A></H5>
+<BLOCKQUOTE>
+Return the lazy series in the lazy series ring R whose coefficients are 
+those of the lazy series s coerced into the coefficient ring of R.
+</BLOCKQUOTE>
+<H5><A NAME = "5659">R ! S : RngPowLaz, [RngElt] -&gt; RngPowLazElt</A></H5>
+<BLOCKQUOTE>
+Return the series in the lazy series ring R whose coefficients are 
+the elements of S where S is a sequence of elements each coercible into 
+the coefficient ring of R. The coefficients are taken to be 
+given in the order which
+<A  HREF = "text523.htm#RngLaz:Coefficients">Coefficients</A> will return them and 
+<A  HREF = "text523.htm#RngLaz:PrintToPrecision">PrintToPrecision</A> will print
+the terms of the series. Any coefficient not given is assumed to be zero
+so that all coefficients are calculable. The resulting series can only have
+finitely many non zero terms and all such non zero coefficients must be 
+given in S.
+</BLOCKQUOTE>
+<H5><A NAME = "5660">LazySeries(R, f) : RngPowLaz, RngMPolElt -&gt; RngPowLazElt</A></H5>
+<H5>LazySeries(R, f) : RngPowLaz, FldFunRatElt -&gt; RngPowLazElt</H5>
+<H5>LazySeries(R, f) : RngPowLaz, RngUPolElt -&gt; RngPowLazElt</H5>
+<BLOCKQUOTE>
+Create the lazy series in the lazy series ring R with finitely many 
+non zero terms which are the terms of the polynomial f. 
+The number of variables of the parent ring of 
+f must be the same as the number of variables of R. 
+The coefficients of f must be coercible into the coefficient ring of R.
+<P>
+It is also possible for f to be a rational function, p/q. 
+The series created from f will be 
+<TT>LazySeries(R, p)*LazySeries(R, q)<sup> - 1</sup></TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5661">Example <TT>RngLaz_elt-create-fin (H50E3)</TT></A></H3>
+Creation of series using the above functions is shown here.
+<P>
+<P>
+<PRE>
+&gt; L := LazyPowerSeriesRing(AlgebraicClosure(), 3);
+&gt; LR := LazyPowerSeriesRing(Rationals(), 3);
+&gt; s := L!1;
+&gt; s;
+Lazy power series
+&gt; LR!s;
+Lazy power series
+&gt; P&lt;x, y, z&gt; := RationalFunctionField(Rationals(), 3);
+&gt; LazySeries(L, (x + y + 8*z)^7/(1 + 5*x*y*z + x^8)^3);
+Lazy power series
+</PRE>
+<HR>
+<H5><A NAME = "5662">Creation of Lazy Series from Maps</A></H5>
+
+<P>
+<P>
+<P>
+Creating a lazy series from a map simulates the existence of lazy series 
+as series for which coefficients are not known on creation of the series
+but calculated by some rule given when creating the series. 
+<P>
+This rule can be coded in a map where the input to the map is the exponents
+of the variables in a term and the output is the coefficient of the term
+described by the input. So for a lazy series ring with variables x, y
+and z, a general term of a series will look like c<sub>ijk</sub> * x<sub>i</sub><sup>r</sup> * y<sub>j</sub><sup>s</sup> * z<sub>k</sub><sup>t</sup>.
+The coefficient of this term, c<sub>ijk</sub>, in a series defined by a map m
+is the result of m(&lt; i, j, k &gt;).
+
+
+<H5><A NAME = "5663">elt&lt;R | m&gt; : RngPowLaz, Map -&gt; RngPowLazElt</A></H5>
+<BLOCKQUOTE>
+Creates a series in the lazy series ring R from the map m.
+The map m must take as input either an integer (when R is univariate only)
+or a tuple of integers
+(of length the number of variables of R) and return an element of the 
+coefficient ring of R. This element will be taken as the coefficient of the
+term of the series whose variables have the exponents given in the input tuple,
+as described above.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5664">Example <TT>RngLaz_maps-uni (H50E4)</TT></A></H3>
+We first illustrate the univariate case.
+<P>
+<P>
+<PRE>
+&gt; L&lt;x&gt; := LazyPowerSeriesRing(MaximalOrder(QuadraticField(5)), 1);
+&gt; Z := Integers();
+&gt; m := map&lt;Z -&gt; CoefficientRing(L) | t :-&gt; 2*t&gt;;
+&gt; s := elt&lt;L | m&gt;;
+&gt; PrintToPrecision(s, 10);
+2*x + 4*x^2 + 6*x^3 + 8*x^4 + 10*x^5 + 12*x^6 + 14*x^7 + 16*x^8 + 18*x^9 + 
+    20*x^10
+&gt; Coefficient(s, 34);
+68
+&gt; m(34);
+68
+&gt; Coefficient(s, 2^30 + 10);
+2147483668
+&gt; m(2^30 + 10);
+2147483668
+</PRE>
+<HR>
+<H3><A NAME = "5665">Example <TT>RngLaz_maps-multi (H50E5)</TT></A></H3>
+And now for the multivariate case.
+<P>
+<P>
+<PRE>
+&gt; L&lt;x, y, z&gt; := LazyPowerSeriesRing(AlgebraicClosure(), 3);
+&gt; Z := Integers();
+&gt; m := map&lt;car&lt;Z, Z, Z&gt; -&gt; CoefficientRing(L) | t :-&gt; t[1]*t[2]*t[3]&gt;;
+&gt; s := elt&lt;L | m&gt;;
+&gt; PrintToPrecision(s, 5);
+x*y*z + 2*x^2*y*z + 2*x*y^2*z + 2*x*y*z^2 + 3*x^3*y*z + 4*x^2*y^2*z +
+    4*x^2*y*z^2 + 3*x*y^3*z + 4*x*y^2*z^2 + 3*x*y*z^3
+&gt; Coefficient(s, [1, 1, 1]);
+1
+&gt; m(&lt;1, 1, 1&gt;);
+1
+&gt; Coefficient(s, [3, 1, 2]);
+6
+&gt; m(&lt;3, 1, 2&gt;);
+6
+</PRE>
+<HR>
+<H4><A NAME = "5666">Arithmetic with Lazy Series</A></H4>
+
+<P>
+<P>
+<P>
+All the usual arithmetic operations are possible for lazy series.
+
+
+<H5><A NAME = "5667">s + t : RngPowLazElt, RngPowLazElt -&gt; RngPowLazElt</A></H5>
+<BLOCKQUOTE>
+The sum of the two lazy series s and t.
+</BLOCKQUOTE>
+<H5><A NAME = "5668">- s : RngPowLazElt -&gt; RngPowLazElt</A></H5>
+<BLOCKQUOTE>
+The negation of the lazy series s.
+</BLOCKQUOTE>
+<H5><A NAME = "5669">s - t : RngPowLazElt, RngPowLazElt -&gt; RngPowLazElt</A></H5>
+<BLOCKQUOTE>
+The difference between lazy series s and t.
+</BLOCKQUOTE>
+<H5><A NAME = "5670">s * t : RngPowLazElt, RngPowLazElt -&gt; RngPowLazElt</A></H5>
+<BLOCKQUOTE>
+The product of the lazy series s and t.
+</BLOCKQUOTE>
+<H5><A NAME = "5671">s + r : RngPowLazElt, RngElt -&gt; RngPowLazElt</A></H5>
+<H5>r + s : RngElt, RngPowLazElt -&gt; RngPowLazElt</H5>
+<BLOCKQUOTE>
+The sum of the lazy series s and the element r of the coefficient ring
+of the parent ring of s.
+</BLOCKQUOTE>
+<H5><A NAME = "5672">c * s : RngElt, RngPowLazElt -&gt; RngPowLazElt</A></H5>
+<H5>s * c : RngPowLazElt, RngElt -&gt; RngPowLazElt</H5>
+<BLOCKQUOTE>
+The product of the lazy series s and the element c of the coefficient
+ring of the parent ring of s.
+</BLOCKQUOTE>
+<H5><A NAME = "5673">s * n : RngPowLazElt, [RngIntElt] -&gt; RngPowLazElt</A></H5>
+<BLOCKQUOTE>
+The product of the lazy series s and the monomial x<sup>n</sup>,
+where x<sup>n</sup> is 
+x<sub>1</sub><sup>n<sub>1</sub></sup> x ... x x<sub>r</sub><sup>n<sub>r</sub></sup> where r is the number of 
+variables of the parent ring of s, n is the sequence [n<sub>1</sub>, ..., n<sub>r</sub>] and
+x = x<sub>1</sub>, ..., x<sub>r</sub> are the series variables of the parent ring
+of s.
+</BLOCKQUOTE>
+<H5><A NAME = "5674">s ^ n : RngPowLazElt, RngIntElt -&gt; RngPowLazElt</A></H5>
+<BLOCKQUOTE>
+Given a lazy series s and an integer n, return the nth power of 
+s. It is allowed for n to be negative
+and inverses will be taken where possible.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5675">Example <TT>RngLaz_elt_arith (H50E6)</TT></A></H3>
+Here we demonstrate the above arithmetic operations.
+<P>
+<P>
+<PRE>
+&gt; L&lt;a, b, c, d&gt; := LazyPowerSeriesRing(Rationals(), 4);
+&gt; (a + 4*b + (-c)*[8, 9, 2^30 + 10, 2] - d*b + 5)^-8;
+Lazy power series
+</PRE>
+<HR>
+<H4><A NAME = "5676">Finding Coefficients of Lazy Series</A></H4>
+
+<P>
+<P>
+<P>
+In theory, all the coefficients of most series can be calculated. In practice 
+it is not possible to compute infinitely many.
+Some problems arise
+however when a series has been created using multiplication, inversion, 
+evaluation or by taking square roots. For
+such series the jth coefficient for all j &lt; i must be known for
+the ith coefficient to be calculated. In such cases the exponents specified 
+for each variable in the monomial whose coefficient is required
+must be small integers
+(&lt; 2<sup>30</sup>).
+<P>
+The default ordering of coefficients is by total degree of the corresponding
+monomials. This is the same order on multivariate polynomials by default.
+When drawn on paper or imagined in 3 or more dimensions this looks 
+like a spiral if the 
+coordinates representing the monomial exponents are joined. This is the same
+ordering which is used to compute the valuation of a series.
+<P>
+Once computed, coefficients are stored with the series so any 
+subsequent call to these functions
+will be faster in non--trivial cases than the first call.
+It is possible to interrupt any of these functions and return to the prompt.
+
+
+<H5><A NAME = "5677">Coefficient(s, i) : RngPowLazElt, RngIntElt -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+Returns the coefficient in the univariate lazy series s of x<sup>i</sup> where 
+x is the series variable of the parent of s and i is a non negative 
+integer.
+</BLOCKQUOTE>
+<H5><A NAME = "5678">Coefficient(s, T) : RngPowLazElt, SeqEnum -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+Returns the coefficient in the multivariate lazy series s 
+of the monomial x<sub>1</sub><sup>T<sub>1</sub></sup> * ... * x<sub>r</sub><sup>T<sub>r</sub></sup> where T is the sequence 
+[T<sub>1</sub>, ..., T<sub>r</sub>], x<sub>1</sub>, ..., x<sub>r</sub> are the variables of the parent 
+ring of s and r is the rank of the parent of s.
+</BLOCKQUOTE>
+<H5><A NAME = "5679"></A><A NAME = "RngLaz:Coefficients">Coefficients</A>(s, n) : RngPowLazElt, RngIntElt -&gt; [RngElt]</H5>
+<H5>Coefficients(s, l, n) : RngPowLazElt, RngIntElt, RngIntElt -&gt; [RngElt]</H5>
+<BLOCKQUOTE>
+The coefficients of the lazy series s whose monomials have total 
+degree at least l (0 if not given) and at most n 
+where the monomials are ordered using the default
+"spiral" degree order. The bounds l and n must be non negative integers.
+</BLOCKQUOTE>
+<H5><A NAME = "5680">Valuation(s) : RngPowLazElt -&gt; Any</A></H5>
+<BLOCKQUOTE>
+The valuation of the lazy series s. This is the exponent of the monomial with 
+the first non--zero coefficient as returned by <TT>Coefficients</TT> above. The
+return value will be either <TT>Infty</TT>, an integer (univariate case)
+or a sequence (multivariate case).
+</BLOCKQUOTE>
+<H5><A NAME = "5681"></A><A NAME = "RngLaz:PrintToPrecision">PrintToPrecision</A>(s, n) : RngPowLazElt, RngIntElt -&gt;</H5>
+<BLOCKQUOTE>
+Print the sum of all terms of the lazy series s whose degree is no more 
+than n where n is a non negative integer.
+The series is printed using the "spiral" ordering.
+</BLOCKQUOTE>
+<H5><A NAME = "5682">PrintTermsOfDegree(s, l, n) : RngPowLazElt, RngIntElt, RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Print the sum of the terms of the lazy series s whose degree is at 
+least l and at most n. The terms are printed using the spiral ordering.
+The bounds l and n must be non negative integers.
+</BLOCKQUOTE>
+<H5><A NAME = "5683">LeadingCoefficient(s) : RngPowLazElt -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+The coefficient in the lazy series s whose monomial exponent 
+is the valuation of s.
+That is, the first non--zero coefficient of s where the ordering
+which determines "first" is the "spiral" ordering used by <TT>Coefficients</TT>
+and <TT>Valuation</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "5684">LeadingTerm(s) : RngPowLazElt -&gt; RngPowLazElt</A></H5>
+<BLOCKQUOTE>
+The term in the lazy series s whose monomial exponent is the valuation of s.
+That is, the first non--zero term of s where the ordering
+which determines "first" is the "spiral" ordering used by <TT>Coefficients</TT>
+and <TT>Valuation</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5685">Example <TT>RngLaz_elt_coeffs_spiral (H50E7)</TT></A></H3>
+In this example we look at some coefficients of an infinite series.
+<P>
+<P>
+<PRE>
+&gt; L&lt;a, b, c, d&gt; := LazyPowerSeriesRing(Rationals(), 4);
+&gt; s := (1 + 2*a + 3*b + 4*d)^-5;
+</PRE>
+Find the coefficient of a * b * c * d.
+<P>
+<P>
+<PRE>
+&gt; Coefficient(s, [1, 1, 1, 1]);
+0
+</PRE>
+Find the coefficients of all monomials with total degree
+at most 6.
+<P>
+<P>
+<PRE>
+&gt; time Coefficients(s, 6);
+[ 1, -10, -15, 0, -20, 60, 180, 0, 240, 135, 0, 360, 0, 0, 240, -280, -1260, 0,
+-1680, -1890, 0, -5040, 0, 0, -3360, -945, 0, -3780, 0, 0, -5040, 0, 0, 0,
+-2240, 1120, 6720, 0, 8960, 15120, 0, 40320, 0, 0, 26880, 15120, 0, 60480, 0, 0,
+80640, 0, 0, 0, 35840, 5670, 0, 30240, 0, 0, 60480, 0, 0, 0, 53760, 0, 0, 0, 0,
+17920, -4032, -30240, 0, -40320, -90720, 0, -241920, 0, 0, -161280, -136080, 0,
+-544320, 0, 0, -725760, 0, 0, 0, -322560, -102060, 0, -544320, 0, 0, -1088640,
+0, 0, 0, -967680, 0, 0, 0, 0, -322560, -30618, 0, -204120, 0, 0, -544320, 0, 0,
+0, -725760, 0, 0, 0, 0, -483840, 0, 0, 0, 0, 0, -129024, 13440, 120960, 0,
+161280, 453600, 0, 1209600, 0, 0, 806400, 907200, 0, 3628800, 0, 0, 4838400, 0,
+0, 0, 2150400, 1020600, 0, 5443200, 0, 0, 10886400, 0, 0, 0, 9676800, 0, 0, 0,
+0, 3225600, 612360, 0, 4082400, 0, 0, 10886400, 0, 0, 0, 14515200, 0, 0, 0, 0,
+9676800, 0, 0, 0, 0, 0, 2580480, 153090, 0, 1224720, 0, 0, 4082400, 0, 0, 0,
+7257600, 0, 0, 0, 0, 7257600, 0, 0, 0, 0, 0, 3870720, 0, 0, 0, 0, 0, 0, 860160 ]
+Time: 0.140
+&gt; #$1;
+210
+</PRE>
+<TT>PrintToPrecision</TT> will display the monomials to which these coefficients
+correspond.
+<P>
+<P>
+<PRE>
+&gt; time PrintToPrecision(s, 6);
+1 - 10*a - 15*b - 20*d + 60*a^2 + 180*a*b + 240*a*d + 135*b^2 + 360*b*d +
+    240*d^2 - 280*a^3 - 1260*a^2*b - 1680*a^2*d - 1890*a*b^2 - 5040*a*b*d -
+    3360*a*d^2 - 945*b^3 - 3780*b^2*d - 5040*b*d^2 - 2240*d^3 + 1120*a^4 +
+    6720*a^3*b + 8960*a^3*d + 15120*a^2*b^2 + 40320*a^2*b*d + 26880*a^2*d^2 +
+    15120*a*b^3 + 60480*a*b^2*d + 80640*a*b*d^2 + 35840*a*d^3 + 5670*b^4 +
+    30240*b^3*d + 60480*b^2*d^2 + 53760*b*d^3 + 17920*d^4 - 4032*a^5 -
+    30240*a^4*b - 40320*a^4*d - 90720*a^3*b^2 - 241920*a^3*b*d - 161280*a^3*d^2
+    - 136080*a^2*b^3 - 544320*a^2*b^2*d - 725760*a^2*b*d^2 - 322560*a^2*d^3 -
+    102060*a*b^4 - 544320*a*b^3*d - 1088640*a*b^2*d^2 - 967680*a*b*d^3 -
+    322560*a*d^4 - 30618*b^5 - 204120*b^4*d - 544320*b^3*d^2 - 725760*b^2*d^3 -
+    483840*b*d^4 - 129024*d^5 + 13440*a^6 + 120960*a^5*b + 161280*a^5*d +
+    453600*a^4*b^2 + 1209600*a^4*b*d + 806400*a^4*d^2 + 907200*a^3*b^3 +
+    3628800*a^3*b^2*d + 4838400*a^3*b*d^2 + 2150400*a^3*d^3 + 1020600*a^2*b^4 +
+    5443200*a^2*b^3*d + 10886400*a^2*b^2*d^2 + 9676800*a^2*b*d^3 +
+    3225600*a^2*d^4 + 612360*a*b^5 + 4082400*a*b^4*d + 10886400*a*b^3*d^2 +
+    14515200*a*b^2*d^3 + 9676800*a*b*d^4 + 2580480*a*d^5 + 153090*b^6 +
+    1224720*b^5*d + 4082400*b^4*d^2 + 7257600*b^3*d^3 + 7257600*b^2*d^4 +
+    3870720*b*d^5 + 860160*d^6
+Time: 0.010
+</PRE>
+The valuation of s can be obtained as follows. The valuation of zero is
+a special case.
+<P>
+<P>
+<PRE>
+&gt; Valuation(s);
+[ 0, 0, 0, 0 ]
+&gt; Valuation(s*0);
+Infinity
+</PRE>
+<HR>
+<H5><A NAME = "5686"></A><A NAME = "RngLaz:CNS">CoefficientsNonSpiral</A>(s, n) : RngPowLazElt, [RngIntElt] -&gt; SeqEnum</H5>
+<H5>CoefficientsNonSpiral(s, n) : RngPowLazElt, RngIntElt -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Returns the coefficients of the monomials in the lazy series s 
+whose exponents are
+given by [i<sub>1</sub>, ..., i<sub>r</sub>] where each i<sub>j</sub> &le;n<sub>j</sub>.
+The argument n may either be a non negative integer (univariate case)
+or a sequence of non negative integers of length r where r is the 
+rank of the parent ring of s.
+The index of the [i<sub>1</sub>, ..., i<sub>r</sub>]-th coefficient in the return 
+sequence is given by
+&sum;<sub>j=1</sub><sup>r</sup> i<sub>j</sub> * (  &prod;<sub>k=j + 1</sub><sup>r</sup> (n<sub>k</sub> + 1)  ).
+</BLOCKQUOTE>
+<H5><A NAME = "5687">Index(s, i, n) : RngPowLazElt, [RngIntElt], [RngIntElt] -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Return the index in the return value of <A  HREF = "text523.htm#RngLaz:CNS">CoefficientsNonSpiral</A><TT>(s, n)</TT> 
+of the monomial in the lazy series s whose exponents are given
+by the (trivial in the univariate case) sequence i. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5688">Example <TT>RngLaz_coeff_non_spiral (H50E8)</TT></A></H3>
+We find the coefficients of the series used in the last example using the 
+alternative algorithm.
+<P>
+<P>
+<PRE>
+&gt; L&lt;a, b, c, d&gt; := LazyPowerSeriesRing(Rationals(), 4);
+&gt; s := (1 + 2*a + 3*b + 4*d)^-5;
+&gt; time CoefficientsNonSpiral(s, [3, 3, 3, 2]);
+[ 1, -20, 240, 0, 0, 0, 0, 0, 0, 0, 0, 0, -15, 360, -5040, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 135, -3780, 60480, 0, 0, 0, 0, 0, 0, 0, 0, 0, -945, 30240, -544320, 0, 0,
+0, 0, 0, 0, 0, 0, 0, -10, 240, -3360, 0, 0, 0, 0, 0, 0, 0, 0, 0, 180, -5040,
+80640, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1890, 60480, -1088640, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 15120, -544320, 10886400, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60, -1680, 26880, 0,
+0, 0, 0, 0, 0, 0, 0, 0, -1260, 40320, -725760, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15120,
+-544320, 10886400, 0, 0, 0, 0, 0, 0, 0, 0, 0, -136080, 5443200, -119750400, 0,
+0, 0, 0, 0, 0, 0, 0, 0, -280, 8960, -161280, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6720,
+-241920, 4838400, 0, 0, 0, 0, 0, 0, 0, 0, 0, -90720, 3628800, -79833600, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 907200, -39916800, 958003200, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+Time: 0.370
+&gt; #$1;
+192
+</PRE>
+It appears that the "spiral" algorithm may be faster since it computed more
+coefficients in less time. This may be because of the operations (inversion)
+involved in calculating s and that <TT>CoefficientsNonSpiral</TT> computed 
+coefficients of larger degree monomials than <TT>Coefficients</TT>. In 
+calculating these coefficients for larger degrees, coefficients which were
+not asked for may have been calculated. <TT>Coefficients</TT> will only need
+to calculate the coefficients which have been asked for --- all intermediate
+calculations would have been asked for.
+<HR>
+<H4><A NAME = "5689">Predicates on Lazy Series</A></H4>
+
+
+
+<H5><A NAME = "5690">s eq t : RngPowLazElt, RngPowLazElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if the lazy series s and t are exactly the same series.
+</BLOCKQUOTE>
+<H5><A NAME = "5691">IsZero(s) : RngPowLazElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if the lazy series s was created as the zero series.
+</BLOCKQUOTE>
+<H5><A NAME = "5692">IsOne(s) : RngPowLazElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if the lazy series s was created as the one series.
+</BLOCKQUOTE>
+<H5><A NAME = "5693">IsMinusOne(s) : RngPowLazElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if the lazy series s was created as the minus one series.
+</BLOCKQUOTE>
+<H5><A NAME = "5694">IsUnit(s) : RngPowLazElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if the lazy series s is a unit. 
+</BLOCKQUOTE>
+<H5><A NAME = "5695">IsWeaklyZero(s, n) : RngPowLazElt, RngIntElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if all the terms of the lazy series s with degree at 
+most n are zero.
+Calling this function without the second argument returns <TT>IsZero(s)</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "5696">IsWeaklyEqual(s, t, n) : RngPowLazElt, RngPowLazElt, RngIntElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if the terms of the lazy series s and t with degree 
+at most n
+are the same. Calling this function without the third argument returns
+<TT>s eq t</TT>.
+</BLOCKQUOTE>
+<H4><A NAME = "5697">Other Functions on Lazy Series</A></H4>
+
+
+
+<H5><A NAME = "5698">Derivative(s) : RngPowLazElt -&gt; RngPowLazElt</A></H5>
+<H5>Derivative(s, v) : RngPowLazElt, RngIntElt -&gt; RngPowLazElt</H5>
+<H5>Derivative(s, v, n) : RngPowLazElt, RngIntElt, RngIntElt -&gt; RngPowLazElt</H5>
+<BLOCKQUOTE>
+Return the (nth) derivative of the lazy series s with respect to 
+the vth variable
+of the parent ring of s. If v is not given, the parent ring of s 
+must be univariate and the derivative with respect to the unique variable is
+returned. It is only allowed to give values of v from 1 to the rank of the
+parent of s and for n to be a positive integer.
+</BLOCKQUOTE>
+<H5><A NAME = "5699">Integral(s) : RngPowLazElt -&gt; RngPowLazElt</A></H5>
+<H5>Integral(s, v) : RngPowLazElt, RngIntElt -&gt; RngPowLazElt</H5>
+<BLOCKQUOTE>
+Return the integral of the lazy series s with respect to the vth variable
+of the parent ring of s. If v is not given, the parent ring of s must
+be univariate and the integral with respect to the unique variable is returned.
+It is only allowed to give values of v from 1 to the rank of the parent
+of s.
+</BLOCKQUOTE>
+<H5><A NAME = "5700">Evaluate(s, t) : RngPowLazElt, RngPowLazElt -&gt; RngPowLazElt</A></H5>
+<H5>Evaluate(s, T) : RngPowLazElt, [RngPowLazElt] -&gt; RngPowLazElt</H5>
+<BLOCKQUOTE>
+Return the lazy series s evaluated at the lazy series t or the 
+sequence T of lazy series. The series t or the series in T must
+have zero constant term so that every coefficient of the result can be
+finitely calculated.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5701">Example <TT>RngLaz_eval (H50E9)</TT></A></H3>
+Some usage of <TT>Evaluate</TT> is shown below.
+<P>
+<P>
+<PRE>
+&gt; R := LazyPowerSeriesRing(Rationals(), 2);
+&gt; AssignNames(~R, ["x","y"]);
+&gt; m := map&lt;car&lt;Integers(), Integers()&gt; -&gt; Rationals() | t :-&gt; 1&gt;;
+&gt; s := elt&lt;R | m&gt;;
+&gt; PrintToPrecision(s, 3);
+1 + x + y + x^2 + x*y + y^2 + x^3 + x^2*y + x*y^2 + y^3
+&gt; R1 := LazyPowerSeriesRing(Rationals(), 1);
+&gt; AssignNames(~R1, ["z"]);
+&gt; m1 := map&lt;car&lt;Integers()&gt; -&gt; Rationals() | t :-&gt; t[1]&gt;;
+&gt; s1 := elt&lt;R1 | m1&gt;;
+&gt; PrintToPrecision(s1, 3);
+z + 2*z^2 + 3*z^3
+&gt; e := Evaluate(s, [s1,s1]);
+&gt; PrintToPrecision(e, 10);
+1 + 2*z + 7*z^2 + 22*z^3 + 67*z^4 + 200*z^5 + 588*z^6 + 1708*z^7 + 4913*z^8 +
+    14018*z^9 + 39725*z^10
+&gt; Parent(e);
+Lazy power series ring in 1 variable over Rational Field
+&gt; f := Evaluate(s1, s - 1);
+&gt; PrintToPrecision(f, 10);
+x + y + 3*x^2 + 5*x*y + 3*y^2 + 8*x^3 + 18*x^2*y + 18*x*y^2 + 8*y^3 + 20*x^4 +
+    56*x^3*y + 75*x^2*y^2 + 56*x*y^3 + 20*y^4 + 48*x^5 + 160*x^4*y + 264*x^3*y^2
+    + 264*x^2*y^3 + 160*x*y^4 + 48*y^5 + 112*x^6 + 432*x^5*y + 840*x^4*y^2 +
+    1032*x^3*y^3 + 840*x^2*y^4 + 432*x*y^5 + 112*y^6 + 256*x^7 + 1120*x^6*y +
+    2496*x^5*y^2 + 3600*x^4*y^3 + 3600*x^3*y^4 + 2496*x^2*y^5 + 1120*x*y^6 +
+    256*y^7 + 576*x^8 + 2816*x^7*y + 7056*x^6*y^2 + 11616*x^5*y^3 +
+    13620*x^4*y^4 + 11616*x^3*y^5 + 7056*x^2*y^6 + 2816*x*y^7 + 576*y^8 +
+    1280*x^9 + 6912*x^8*y + 19200*x^7*y^2 + 35392*x^6*y^3 + 47280*x^5*y^4 +
+    47280*x^4*y^5 + 35392*x^3*y^6 + 19200*x^2*y^7 + 6912*x*y^8 + 1280*y^9 +
+    2816*x^10 + 16640*x^9*y + 50688*x^8*y^2 + 103168*x^7*y^3 + 154000*x^6*y^4 +
+    175344*x^5*y^5 + 154000*x^4*y^6 + 103168*x^3*y^7 + 50688*x^2*y^8 +
+    16640*x*y^9 + 2816*y^10
+&gt; f := Evaluate(s1 + 1, s - 1);
+&gt; PrintToPrecision(f, 10);
+1 + x + y + 3*x^2 + 5*x*y + 3*y^2 + 8*x^3 + 18*x^2*y + 18*x*y^2 + 8*y^3 + 20*x^4
+    + 56*x^3*y + 75*x^2*y^2 + 56*x*y^3 + 20*y^4 + 48*x^5 + 160*x^4*y +
+    264*x^3*y^2 + 264*x^2*y^3 + 160*x*y^4 + 48*y^5 + 112*x^6 + 432*x^5*y +
+    840*x^4*y^2 + 1032*x^3*y^3 + 840*x^2*y^4 + 432*x*y^5 + 112*y^6 + 256*x^7 +
+    1120*x^6*y + 2496*x^5*y^2 + 3600*x^4*y^3 + 3600*x^3*y^4 + 2496*x^2*y^5 +
+    1120*x*y^6 + 256*y^7 + 576*x^8 + 2816*x^7*y + 7056*x^6*y^2 + 11616*x^5*y^3 +
+    13620*x^4*y^4 + 11616*x^3*y^5 + 7056*x^2*y^6 + 2816*x*y^7 + 576*y^8 +
+    1280*x^9 + 6912*x^8*y + 19200*x^7*y^2 + 35392*x^6*y^3 + 47280*x^5*y^4 +
+    47280*x^4*y^5 + 35392*x^3*y^6 + 19200*x^2*y^7 + 6912*x*y^8 + 1280*y^9 +
+    2816*x^10 + 16640*x^9*y + 50688*x^8*y^2 + 103168*x^7*y^3 + 154000*x^6*y^4 +
+    175344*x^5*y^5 + 154000*x^4*y^6 + 103168*x^3*y^7 + 50688*x^2*y^8 +
+    16640*x*y^9 + 2816*y^10
+</PRE>
+<HR>
+<H5><A NAME = "5702">SquareRoot(s) : RngPowLazElt -&gt; RngPowLazElt</A></H5>
+<H5>Sqrt(s) : RngPowLazElt -&gt; RngPowLazElt</H5>
+<BLOCKQUOTE>
+The square root of the lazy series s.
+</BLOCKQUOTE>
+<H5><A NAME = "5703">IsSquare(s) : RngPowLazElt -&gt; BoolElt, RngPowLazElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if the lazy series s is a square and the square root 
+if so.
+</BLOCKQUOTE>
+<H5><A NAME = "5704">PolynomialCoefficient(s, i) : RngPowLazElt, RngIntElt -&gt; RngPowLazElt</A></H5>
+<H5>PolynomialCoefficient(s, i) : RngPowLazElt, [RngIntElt] -&gt; RngPowLazElt</H5>
+<BLOCKQUOTE>
+Given a series s in a lazy series ring whose coefficient ring is a polynomial
+ring (either univariate or multivariate), consider the polynomial which would
+be formed if this series was written as a polynomial with series as the 
+coefficients. For i a non negative integer and the coefficient ring of the
+series ring a univariate polynomial ring
+this function returns the series which is the ith coefficient of 
+the polynomial resulting from the rewriting of the series.
+<P>
+When the coefficient ring of the parent of s is a multivariate polynomial ring
+i should be a sequence of non negative integers of length the rank of 
+the coefficient ring. The series returned will be the series which is 
+the coefficient of x<sub>1</sub><sup>i<sub>1</sub></sup> * ... * x<sub>r</sub><sup>i<sub>r</sub></sup> in the rewritten series 
+where r is the rank of the 
+coefficient ring and x<sub>j</sub> are the indeterminates of the coefficient ring.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text526.htm">[Next]</A><A  HREF = "text522.htm">[Prev]</A> [_____] <A  HREF = "text522.htm">[Left]</A> <A  HREF = "text519.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,2 @@
+174,1
+S,HomomorphismsLM,A sequence containing homomorphisms from the fp-group F to the permutation group G up to automorphisms induced by A where G is a subgroup of A. If Surjective is true the maps will be epimorphisms. This is an alternative to the intrinsic Homomorphisms which uses much less memory at the cost of being much slower. Unlike Homomorphisms it does not remove duplicate homomorphisms,0,2,0,0,0,0,0,0,0,224,,0,0,121,,82,-38,-38,-38,-38,-38

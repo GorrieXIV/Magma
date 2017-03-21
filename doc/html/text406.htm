@@ -1,0 +1,260 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Introduction</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text407.htm">[Next]</A><A  HREF = "text405.htm">[Prev]</A> <A  HREF = "text407.htm">[Right]</A> [____] <A  HREF = "text405.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "4196">Introduction</A></H3>
+
+<P>
+<P>
+This chapter presents the facilities provided in Magma for class field
+theory.
+The main objects of interest are abelian extensions of number fields 
+(<A NAME = "FldAb"><TT>FldAb</TT></A>) and maps between abelian groups and ideal groups.
+<P>
+Class field theory is concerned with the classification of all abelian 
+extensions of a given field. In particular, this covers abelian extensions
+of number fields, local fields and global function fields. While
+this chapter deals with the number field case only, Magma can
+also perform computations in the other cases. For the case of global
+function fields, see Chapter <A  HREF = "text462.htm#5061">CLASS FIELD THEORY FOR GLOBAL FUNCTION FIELDS</A> and for the case
+of p-adic local fields, Section <A  HREF = "text495.htm#5425">Class Field Theory</A>.
+<P>
+Abstractly, class field theory parametrizes abelian extensions
+in terms of abelian groups defined with respect to the base field.
+In Magma, ray class groups and their quotients are used to define the
+extensions. Ray class groups and their quotients are always represented as
+maps between a finite abelian group (<TT>GrpAb</TT>) and the power structure 
+of ideals (<TT>PowIdeal</TT>). The maps are usually obtained as products
+of the map returned by ray class groups and quotient maps.
+<P>
+In theory, a class field is completely determined by the corresponding
+class group (map). Currently there is only a small number of  invariants
+that can be
+computed directly from the map; for most other properties the class
+field has to be converted into a number field by computing a set of
+defining equations.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text406.htm#4197">Overview</A>
+<LI> <A  HREF = "text406.htm#4198">Magma</A>
+</UL>
+<H4><A NAME = "4197">Overview</A></H4>
+
+<P>
+<P>
+Class field theory classifies all abelian extensions of a given number field
+k in terms of quotients of ray class groups. Ray class groups should be 
+thought of as generalized class groups in that 
+they can be defined similarly to class groups:
+1 to U to k<sup> * </sup> to I to Cl to 1
+where k<sup> * </sup> is the multiplicative group of k, U is the group of units,
+and I the group of fractional ideals.
+(Recall, the class group is defined as the quotient of the ideals modulo the
+principal ideals).
+To define ray class groups we need to refine all of the above terms.
+Let o = Z<sub>k</sub> be the ring of integers in k and fix an integral ideal m<sub>0</sub>
+in o. Furthermore, let m_&infin; be a subset of the real embeddings of k
+into C and, formally, m := (m<sub>0</sub>, m_&infin;). Then for x &isin;k define
+x mod<sup> * </sup> m = 1  iff Biggl{
+((v<sub>p</sub>(x - 1) &ge;v<sub>p</sub>(m<sub>0</sub>)  for all prime ideals p)
+    atop
+(s(x)&gt;0  for s &isin;m_&infin;)) 
+Let I<sup>m</sup> denote the group of fractional ideals that are coprime to m<sub>0</sub>,
+U<sub>m</sub> the units u such that u mod<sup> * </sup> m = 1 and
+P<sub>m</sub> the elements x&isin;k such that x mod<sup> * </sup>m = 1. Then
+1 to U<sub>m</sub> to P<sub>m</sub> to I<sup>m</sup> to Cl<sub>m</sub>to 1
+defines the ray class groups modulo m.
+For m = (1o, emptyset), this corresponds to the usual class group.
+Given two moduli m and n such that m<sub>0</sub>|n<sub>0</sub> and 
+m_&infin;&sube;n_&infin; we have canonical surjections
+Cl<sub>n</sub> to Cl<sub>m</sub>.
+<P>
+Now, let H be a subgroup such that P<sub>m</sub> &lt; H &lt; I<sup>m</sup>. 
+There exists a minimal n such that
+the canonical embedding Cl<sub>m</sub>/H to Cl<sub>n</sub> is injective. This n is called
+the conductor of H.
+<P>
+The main theorem of class field theory asserts the following
+correspondence between
+abelian extensions K/k of k and quotients of ray class groups:
+Let K/k be abelian and G := Gal(K/k) the group of k-automorphisms of K.
+For each prime ideal p of k that is unramified in K, let
+Frob(p, K/k) be the Frobenius automorphism, i.e. the unique s&isin;G
+such that s(x) = x<sup>N</sup> mod p for all x&isin;k.
+Extend this map multiplicatively to all ideals coprime to d<sub>K/k</sub>, the 
+discriminant of K/k. 
+This is known as the Artin-map and is denoted  by (a, K/k).
+Class field theory asserts the existence
+of some modulus m and a subgroup H such that
+G isomorphic to Cl<sub>m</sub>/H  by the Artin-map.
+<P>
+Conversely, for each ray class group Cl<sub>m</sub> and each subgroup P<sub>m</sub>&lt; H there
+is an abelian extension K/k with the above property.
+<P>
+The correspondence is one-to-one if one restricts to pairs
+Cl<sub>m</sub> and H such that m is the conductor of H.
+<P>
+For m = (1o, emptyset), the corresponding field K is called the
+Hilbert class field of k (in the wide sense).
+<P>
+Perhaps best understood is the Hilbert class field. As conjectured 
+by Hilbert and proved by Furtw&auml;ngler, all ideals of k become
+principal in the Hilbert class field H<sub>k</sub>. Futhermore, H<sub>k</sub> is the
+maximal unramified abelian extension of k.
+<P>
+A different interpretation of H is provided by 
+<A NAME = "FldAb:norm_group">norm group</A>s. We have
+H = &lt; N<sub>K/k</sub>(a) | a &isin;I<sub>K</sub><sup>m</sup> &gt;
+This result may be used to convert an abelian number field into an 
+abelian extension. In addition, class field theory asserts that, 
+for an arbitrary normal extension K/k, the norm group defined above 
+corresponds to the maximal abelian subfield.
+
+
+<H4><A NAME = "4198">Magma</A></H4>
+
+<P>
+<P>
+In Magma maps are used to represent the ideal groups. If necessary, the map
+can be augmented by supplying m i.e. an integral ideal m<sub>0</sub> and a sequence
+of indices of the real places in m_&infin;. The map returned as a 
+second return value from <A  HREF = "text391.htm#RngOrd:ClassGroup">ClassGroup</A> or
+<A  HREF = "text407.htm#FldAb:RayClassGroup">RayClassGroup</A>
+carries the necessary information to recover m, even if this
+is hidden from the user. As an example, we consider the Hilbert class field
+of k := Q(&alpha;) with &alpha;<sup>3</sup> + &alpha;<sup>2</sup> + 3&alpha; - 6 = 0 
+with class group C<sub>4</sub>.
+
+
+<HR>
+<H3><A NAME = "4199">Example <TT>FldAb_hilbert (H40E1)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; k := NumberField(Polynomial([ -6, 3, 1, 1 ]));
+</PRE>
+Now, the easiest way to get the Hilbert class field is to call
+<TT>HilbertClassField</TT> directly on k:
+<P>
+<P>
+<PRE>
+&gt; K := HilbertClassField(k);
+&gt; K;
+Number Field with defining polynomial $.1^4 + (76*k.1^2 - 420*k.1 - 488)*$.1^2\
+ +    32080*k.1^2 + 41984*k.1 + 95168 over k
+</PRE>
+Let us now verify some of the properties, starting with the discriminant.
+Since K/k is totally unramified, the discriminant of the maximal order should
+be 1:
+<P>
+<P>
+<PRE>
+&gt; O := MaximalOrder(K);
+&gt; O;
+Maximal Order of Equation Order with defining polynomial x^4 + [-488, -420, 
+    76]*x^2 + [95168, 41984, 32080] over its ground order
+&gt; Discriminant(O);
+Ideal
+Basis:
+[1 0 0]
+[0 1 0]
+[0 0 1]
+</PRE>
+Now let us check that all ideals of k are principal in K.
+In order to do so, it is sufficient to demonstrate that a generator
+of the class group becomes principal:
+<P>
+<P>
+<PRE>
+&gt; g, m := ClassGroup(k);
+&gt; g;m;
+Abelian Group isomorphic to Z/4
+Defined on 1 generator
+Relations:
+    4*g.1 = 0
+Mapping from: GrpAb: g to Set of ideals of Maximal Equation Order with
+defining polynomial x^3 + x^2 + 3*x - 6 over its ground order
+
+&gt; i := m(g.1);
+&gt; I := O!!i;
+&gt; IsPrincipal(I);
+true
+&gt; f,g := IsPrincipal(I);
+&gt; g;
+[[2193497788678474035456, -1238066307883451022336, 
+-2319265120953032748288], [394272965034846395136, 
+-222653406238254306432, -417025104282566694144], 
+[167087257584, 71708840496, 32825469008], [495632919, 
+-279332235, -523526213]] / 10917386545536
+</PRE>
+However, to use the more sophisticated functions, the construction of the 
+class fields needs to be done step--by--step.
+We first create an abelian extension as an object of type <TT>FldAb</TT>.
+Since we wish to see how much of the class group becomes trivial 
+in the quadratic subfield K<sub>1</sub> of K (capitulates in K<sub>1</sub>),
+we also define this.
+<P>
+<P>
+<PRE>
+&gt; aK := AbelianExtension(m);
+&gt; g, m := ClassGroup(k);
+&gt; q, mq := quo&lt;g | 2*g.1&gt;;
+&gt; m2 := Inverse(mq)*m;m2;
+Mapping from: GrpAb: q to Set of ideals of Maximal 
+Equation Order with defining polynomial x^3 + x^2 + 3*x
+    - 6 over Z
+Composition of Mapping from: GrpAb: q to GrpAb: g and
+Mapping from: GrpAb: g to Set of ideals of Maximal 
+Equation Order with defining polynomial x^3 + x^2 + 3*x
+    - 6 over Z
+&gt; aK2 := AbelianExtension(m2);
+</PRE>
+This demonstrates a very important technique: the creation of a 
+quotient group of the class group together with the corresponding
+map.
+<P>
+A few invariants such as degree and discriminant may be calculated 
+directly from
+<TT>aK</TT> without the (costly) computation of a defining equation.
+<P>
+<P>
+<PRE>
+&gt; Discriminant(aK);
+Principal Ideal
+Generator:
+    [1, 0, 0]
+[ 4, 4 ]
+</PRE>
+The second return value  denotes the signature of the field
+as an extension of Q.
+<P>
+Now we compute a defining equation for <TT>aK2</TT> and see what happens
+to the class group of k.
+<P>
+<P>
+<PRE>
+&gt; O := MaximalOrder(aK2);O;
+Maximal Order of Equation Order with defining 
+polynomial x^2 + [-5, -2, -1] over its ground order
+&gt; O!!m(g.1);
+&gt; IsPrincipal($1);
+false
+&gt; IsPrincipal($2^2);
+true
+</PRE>
+So only "half" of the class group capitulates in <TT>aK2</TT>, the
+remaining part collapses in <TT>aK</TT>.
+<HR>
+<PRE></PRE> <A  HREF = "text407.htm">[Next]</A><A  HREF = "text405.htm">[Prev]</A> <A  HREF = "text407.htm">[Right]</A> [____] <A  HREF = "text405.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

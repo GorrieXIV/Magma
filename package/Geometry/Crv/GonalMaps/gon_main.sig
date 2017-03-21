@@ -1,0 +1,5 @@
+174,1
+S,GenusAndCanonicalMap,"Returns the genus of C, whether C is hyperelliptic or genus less than 2 and, if the genus is greater than 1, a map of C onto its canonical image in ordinary projective space",0,1,0,0,0,0,0,0,0,371,,148,36,376,-38,-38,-38
+S,Genus2GonalMap,Computes a degree 2 map to P^1 for a genus 2 curve,0,1,0,0,0,0,0,0,0,371,,376,-38,-38,-38,-38,-38
+S,Genus3GonalMap,"Computes smallest degree (gonal) maps to P^1 for a genus 3 curve, possibly over a finite extension of the base field. Returns the gonality and the map. If C is a canonical curve in ordinary projective space, IsCanonical should be set to true for efficiency",0,1,0,0,0,0,0,0,0,371,,148,376,-38,-38,-38,-38
+S,Genus4GonalMap,"Computes smallest degree (gonal) maps to P^1 for a genus 4 curve, possibly over a finite extension of the base field. Returns the gonality and the map. If C is a canonical curve in ordinary projective space, IsCanonical should be set to true for efficiency",0,1,0,0,0,0,0,0,0,371,,148,376,-38,-38,-38,-38

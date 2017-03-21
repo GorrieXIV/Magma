@@ -1,0 +1,47 @@
+
+// Test quadratic class group algorithm for fundamental discriminant
+// (binary forms implementation vs standard number field implementation)
+
+/* Before fixes, these were stuck (for some seeds):
+d := 202556;
+d := 157352;
+d := 618845;
+*/
+
+SetVerbose("ClassGroup", 1);
+
+SetSeed(1, 0);
+
+/*
+D := [1..10^6];
+D := [10^13..10^13+10^6];
+*/
+D := [1..100] cat [202556..202600] cat [10^10..10^10+7];
+
+for a in D, s in [1,-1] do
+//for a in D, s in [1] do
+   d := s*a;
+   if not IsFundamentalDiscriminant(d) then
+      continue;
+   end if;
+
+   print "d =", d;
+
+    // Binary quadratic forms
+    QF := QuadraticField(d);
+    time
+    C, mC := ClassGroup(QF : Al:="Relations"); 
+
+    // Standard
+    NF := NumberField(Polynomial([-d, 0, 1]));
+    time
+    C1, mC1 := ClassGroup(NF : Al:="NoSieve", Proof:="GRH");
+
+    assert IsIsomorphic(C, C1);
+
+end for;
+
+// TO DO: test the maps too
+
+// TO DO: test more Al's (Shanks?)
+

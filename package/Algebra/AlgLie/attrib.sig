@@ -1,0 +1,2 @@
+174,1
+A,AlgLie,20,Centre,DerivedSeries,LowerCentralSeries,UpperCentralSeries,NilRadical,SolvableRadical,CartanSubalgebra,SplittingCartanSubalgebra,LeviSubalgebra,DirectSumDecomposition,SemisimpleType,IsRestrictedLieAlgebra,IsReductive,IsSemisimple,IsNilpotent,IsSolvable,RootSystem,RationalRootDecomposition,RootDecomposition,IsClassicalType

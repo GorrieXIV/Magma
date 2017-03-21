@@ -1,0 +1,41 @@
+"Source: Text/Aggregates/Seq.text";
+"Line: 1028";
+"Date: Tue Jun  7 22:27:15 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Aggregates/Seq.text, line: 1028
+// Example: H10E3 ()
+print "Example: H10E3";
+ei := GetEchoInput();
+SetEchoInput(true);
+D := Denominator;
+N := Numerator;
+farey := function(n)
+   f := [ RationalField() | 0, 1/n ];
+   p := 0;
+   q := 1;
+   while p/q lt 1 do
+      p := ( D(f[#f-1]) + n) div D(f[#f]) * N(f[#f])  - N(f[#f-1]);
+      q := ( D(f[#f-1]) + n) div D(f[#f]) * D(f[#f])  - D(f[#f-1]);
+      Append(~f, p/q);
+   end while;
+   return f;
+end function;
+function farey(n)
+   if n eq 1 then
+      return [RationalField() | 0, 1 ];
+   else
+      f := farey(n-1);
+      i := 0;
+      while i lt #f-1 do
+         i +:= 1;
+         if D(f[i]) + D(f[i+1]) eq n then
+            Insert( ~f, i+1, (N(f[i]) + N(f[i+1]))/(D(f[i]) + D(f[i+1])));
+         end if;
+      end while;
+      return f;
+   end if;
+end function;
+farey := func< n |
+              Sort(Setseq({ a/b : a in { 0..n}, b in { 1..n} | a le b }))>;
+farey(6);
+SetEchoInput(ei);

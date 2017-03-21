@@ -1,0 +1,445 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Construction of a General Group</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text616.htm">[Next]</A><A  HREF = "text614.htm">[Prev]</A> <A  HREF = "text616.htm">[Right]</A> <A  HREF = "text614.htm">[Left]</A> <A  HREF = "text612.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "6643">Construction of a General Group</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text615.htm#6644">The General Group Constructors</A>
+<LI> <A  HREF = "text615.htm#6649">Construction of Subgroups</A>
+<LI> <A  HREF = "text615.htm#6653">Construction of Quotient Groups</A>
+</UL>
+<H4><A NAME = "6644">The General Group Constructors</A></H4>
+
+<P>
+<P>
+The chapters on the individual group categories describe several methods
+for constructing groups; this section indicates one approach only.
+
+
+<H5><A NAME = "6645">PermutationGroup&lt; X | L &gt; : Set, List -&gt; GrpPerm, Hom</A></H5>
+<H5>PermutationGroup&lt; n | L &gt; : RngIntElt, List -&gt; GrpPerm, Hom</H5>
+<H5>MatrixGroup&lt; n, R | L &gt; : RngIntElt, Rng, List -&gt; GrpMat, Hom</H5>
+<BLOCKQUOTE>
+These expressions construct, respectively: 
+a permutation group G acting on the set X;
+a permutation group G acting on the set X={ 1, ..., n };
+or a matrix group G of degree n over the ring R.
+The generic group U of which G is a subgroup
+will be Sym(X) in the permutation case or GL(n, R) in the matrix case.
+There are two return values: G, and the inclusion homomorphism
+from G to U. 
+<P>
+The generators of G are defined by the list L.
+Each term of L must be an object of one of the following types:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>Either (permutation case) a sequence of n elements of X,
+or (matrix case) a sequence of n<sup>2</sup> elements of R,
+defining an element of U;
+<DT>(b)</DT><DD>A set or sequence of sequences of type (a);
+<DT>(c)</DT><DD>An element of U;
+<DT>(d)</DT><DD>A set or sequence of elements of U;
+<DT>(e)</DT><DD>A subgroup of U;
+<DT>(f)</DT><DD>A set or sequence of subgroups of U.
+<P>
+<P>
+</DL>
+Each element or group specified by the list must belong to the
+<I>same</I> generic group. The group G will
+be constructed as a subgroup of some group which contains each
+of the elements and groups specified in the list.
+<P>
+The generators of G consist of the elements specified by the
+terms of the list L together with the stored generators for
+groups specified by terms of the list.  Repetitions of an element
+and occurrences of the identity element are removed (unless G
+is trivial).
+<P>
+The <TT>PermutationGroup</TT> constructor is shorthand for the two statements:
+<P>
+<TT>U := SymmetricGroup(X);
+<P>
+G := sub&lt; U | L &gt;;
+<P>
+</TT>
+<P>
+and the <TT>MatrixGroup</TT> constructor is shorthand for the two statements:
+<P>
+<TT>U := GeneralLinearGroup(n, R);
+<P>
+G := sub&lt; U | L &gt;;
+<P>
+</TT>
+<P>
+where <TT>sub&lt; ... &gt;</TT> is the subgroup constructor described in
+the next subsection.
+</BLOCKQUOTE>
+<H5><A NAME = "6646">Group&lt; X | R &gt; : List(Identifiers), List(GrpFPRel) -&gt; GrpFP, Hom(Grp)</A></H5>
+<H5>PolycyclicGroup&lt; X | R &gt; : List(Identifiers), List(GrpFPRel) -&gt; GrpPC, Hom</H5>
+<H5>AbelianGroup&lt; X | R &gt; : List(Identifiers), List(GrpAbRel) -&gt; GrpAb, Hom(GrpAb)</H5>
+<BLOCKQUOTE>
+These expressions construct, respectively,
+a finitely presented group, a finite soluble group given by a power-conjugate
+presentation or a polycyclic group, and an abelian group,
+in the categories <A  HREF = "text809.htm#GrpFP"> <TT>GrpFP</TT></A>, <A  HREF = "text707.htm#GrpPC"> <TT>GrpPC</TT></A> or <A  HREF = "text832.htm#GrpGPC"> <TT>GrpGPC</TT></A>, and <A  HREF = "text787.htm#GrpAb"> <TT>GrpAb</TT></A>.
+Given a list X of identifier names x<sub>1</sub>, ..., x<sub>r</sub>, 
+and a list of relations R over them, 
+first construct the free group F (in <A  HREF = "text809.htm#GrpFP"> <TT>GrpFP</TT></A> or <A  HREF = "text787.htm#GrpAb"> <TT>GrpAb</TT></A>)
+on the generators x<sub>1</sub>, ..., x<sub>r</sub>,
+and then construct the quotient G of F
+corresponding to the normal subgroup of F defined by the relations R.
+There are two return values: G, and the natural homomorphism
+from F to G.
+<P>
+The relations of G are defined by the list R.
+Each term of R must be an object of one of the following types:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>A word w of F, interpreted as the relator w=(identity)
+of F;
+<DT>(b)</DT><DD>A relation w<sub>1</sub>=w<sub>2</sub>, where w<sub>1</sub> and w<sub>2</sub> are words of F;
+<DT>(c)</DT><DD>A relation list w<sub>1</sub> = w<sub>2</sub> = ... = w<sub>r</sub>,
+where the w<sub>i</sub> are words of F,
+interpreted as the set of relations w<sub>1</sub> = w<sub>r</sub>, ..., w<sub>r - 1</sub> = w<sub>r</sub>.
+<P>
+<P>
+</DL>
+Within R, the identity element of F may be represented by the digit <TT>1</TT>
+for <TT>Group</TT> or <TT>PolycyclicGroup</TT>, and <TT>0</TT> for <TT>AbelianGroup</TT>.
+<P>
+The construct x<sub>1</sub>, ..., x<sub>n</sub> defines names for the generators of G
+that are local to the constructor, i.e., they are used when writing down
+the relations to the right of the bar. However, no assignment of
+<I>values</I> to these identifiers is made. If the user wants to refer to
+the generators by these (or other) names, then the <I>generators assignment</I>
+construct must be used on the left hand side of an assignment statement.
+<P>
+The constructor <TT>PolycyclicGroup</TT> returns either a finite soluble group
+given by a power-conjugate presentation (category <A  HREF = "text707.htm#GrpPC"> <TT>GrpPC</TT></A>) or a general
+polycyclic group (category <A  HREF = "text832.htm#GrpGPC"> <TT>GrpGPC</TT></A>), depending on the arguments.
+R must be either a valid power-conjugate presentation for a finite soluble
+group or a consistent polycyclic presentation.
+If R is a valid power-conjugate presentation for a finite soluble group,
+a group in the category <A  HREF = "text707.htm#GrpPC"> <TT>GrpPC</TT></A> is returned, unless the parameter
+<TT>Class</TT> is set to <TT>"GrpGPC"</TT>. If the parameter <TT>Class</TT> is set to
+<TT>"GrpGPC"</TT> or if R is not a valid power-conjugate presentation for a
+finite soluble group and the parameter <TT>Class</TT> is not set to <TT>"GrpPC"</TT>,
+a general polycyclic group in the category <A  HREF = "text832.htm#GrpGPC"> <TT>GrpGPC</TT></A> is returned. In any
+case, the free group F is in the category <A  HREF = "text809.htm#GrpFP"> <TT>GrpFP</TT></A>. If R is neither
+a valid power-conjugate presentation for a finite soluble group nor a
+consistent polycyclic presentation, or if R does not match the value of the
+parameter <TT>Class</TT>, a runtime error is caused.
+<P>
+For a detailed description of this constructor and in particular for a
+description of power-conjugate presentations and consistent polycyclic
+presentations, we refer to Chapter <A  HREF = "text706.htm#7978">FINITE SOLUBLE GROUPS</A> and Chapter
+<A  HREF = "text831.htm#9567">POLYCYCLIC GROUPS</A>, respectively.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6647">Example <TT>Grp_GroupConstructors (H62E4)</TT></A></H3>
+<DL COMPACT class='compact'>
+<DT>(1)</DT><DD>The permutation group of degree 8 generated by the permutations
+(1, 7, 2, 8)(3, 6, 4, 5) and (1, 4, 2, 3)(5, 7, 6, 8):
+<P>
+<P>
+</DL>
+<PRE>
+&gt; G := PermutationGroup&lt; 8 |                                                   
+&gt;     (1, 7, 2, 8)(3, 6, 4, 5), (1, 4, 2, 3)(5, 7, 6, 8) &gt;;
+&gt; G;
+Permutation group G acting on a set of cardinality 8
+    (1, 7, 2, 8)(3, 6, 4, 5)
+    (1, 4, 2, 3)(5, 7, 6, 8)
+</PRE>
+<DL COMPACT class='compact'>
+<DT>(2)</DT><DD>A matrix group of degree 2 over GF(9):
+<P>
+<P>
+</DL>
+<PRE>
+&gt; K&lt;w&gt; := GF(9);
+&gt; M := MatrixGroup&lt; 2, K | [w,w,1,2*w], [0,2*w,1,1], [1,0,1,2] &gt;;
+&gt; M;
+MatrixGroup(2, GF(3^2))
+Generators:
+    [  w   w]
+    [  1 w^5]
+
+
+    [  0 w^5]
+    [  1   1]
+
+
+    [  1   0]
+    [  1   2]
+&gt; Order(M);
+5760
+</PRE>
+<DL COMPACT class='compact'>
+<DT>(3)</DT><DD>The finitely presented group Q defined by the presentation
+&lt; s, t, u    |    t<sup>2</sup>, u<sup>17</sup>, s<sup>2</sup> = t<sup>s</sup> = t, u<sup>s</sup> = u<sup>16</sup>, u<sup>t</sup> = u &gt;,
+together with the natural homomorphism from the free group to Q:
+<P>
+<P>
+</DL>
+<PRE>
+&gt; Q&lt;s,t,u&gt;, h := Group&lt; s, t, u |
+&gt;     t^2, u^17, s^2 = t^s = t, u^s = u^16, u^t = u &gt;;
+&gt; Q;
+Finitely presented group Q on 3 generators
+Relations
+    t^2 = Id(Q)
+    u^17 = Id(Q)
+    s^2 = t
+    t^s = t
+    u^s = u^16
+    u^t = u
+&gt; Domain(h);  
+Finitely presented group on 3 generators (free)
+</PRE>
+<DL COMPACT class='compact'>
+<DT>(4)</DT><DD>The soluble group of order 70 defined by the presentation
+&lt; a, b, c    |    a<sup>2</sup> = b, b<sup>5</sup> = c, c<sup>7</sup> &gt;:
+<P>
+<P>
+</DL>
+<PRE>
+&gt; G&lt;a,b,c&gt; := PolycyclicGroup&lt; a, b, c | a^2 = b, b^5 = c, c^7 &gt;;
+&gt; G; 
+GrpPC : G of order 70 = 2 * 5 * 7
+PC-Relations:
+a^2 = b, 
+b^5 = c, 
+c^7 = Id(G)
+</PRE>
+<DL COMPACT class='compact'>
+<DT>(5)</DT><DD>A finite abelian group on 4 generators:
+<P>
+<P>
+</DL>
+<PRE>
+&gt; G := AbelianGroup&lt; h, i, j, k | 5*h, 4*i, 7*j, 2*k - h &gt;;   
+&gt; G;                                                 
+Abelian Group isomorphic to Z/2 + Z/140
+Defined on 4 generators
+Relations:
+    G.1 + 8*G.4 = 0
+    4*G.2 = 0
+    7*G.3 = 0
+    10*G.4 = 0
+&gt; Order(G);
+280
+</PRE>
+<HR>
+<H3><A NAME = "6648">Example <TT>Grp_PolycyclicGroup (H62E5)</TT></A></H3>
+Using the constructor <TT>PolycyclicGroup</TT> with different values of the
+parameter <TT>Class</TT>, we construct the dihedral group of order 10 first as
+a finite soluble group given by a power-conjugate presentation (<A  HREF = "text707.htm#GrpPC"> <TT>GrpPC</TT></A>)
+and next as a general polycyclic group (<A  HREF = "text832.htm#GrpGPC"> <TT>GrpGPC</TT></A>).  Note that the
+presentation &lt; a, b  | a<sup>2</sup>, b<sup>5</sup>, b<sup>a</sup>=b<sup>4</sup> &gt; is both a valid
+power-conjugate presentation and a consistent polycyclic presentation, so we
+have to set the parameter <TT>Class</TT> to <TT>"GrpGPC"</TT> if we want to construct
+a group in the category <A  HREF = "text832.htm#GrpGPC"> <TT>GrpGPC</TT></A>.
+<P>
+<P>
+<PRE>
+&gt; G1&lt;a,b&gt; := PolycyclicGroup&lt; a,b | a^2, b^5, b^a=b^4 &gt;;
+&gt; G1;
+GrpPC : G1 of order 10 = 2 * 5
+PC-Relations:
+    a^2 = Id(G1), 
+    b^5 = Id(G1), 
+    b^a = b^4
+&gt; G2&lt;a,b&gt; := PolycyclicGroup&lt; a,b | a^2, b^5, b^a=b^4 : Class := "GrpGPC"&gt;;
+&gt; G2;
+GrpGPC : G2 of order 10 = 2 * 5 on 2 PC-generators
+PC-Relations:
+    a^2 = Id(G2), 
+    b^5 = Id(G2), 
+    b^a = b^4
+</PRE>
+We construct the infinite dihedral group as a group in the category
+<A  HREF = "text832.htm#GrpGPC"> <TT>GrpGPC</TT></A> from a consistent polycyclic presentation. We do not have to
+use the parameter <TT>Class</TT> in this case.
+<P>
+<P>
+<PRE>
+&gt; G3&lt;a,b&gt; := PolycyclicGroup&lt; a,b | a^2, b^a=b^-1&gt;;
+&gt; G3;
+GrpGPC : G3 of infinite order on 2 PC-generators
+PC-Relations:
+    a^2 = Id(G3), 
+    b^a = b^-1
+</PRE>
+The presentation &lt; a, b  | a<sup>2</sup>, b<sup>4</sup>, b<sup>a</sup>=b<sup>3</sup> &gt; is not a valid
+power-conjugate presentation for the dihedral group of order 8, since the
+exponent of b is not prime. However, it is a consistent polycyclic
+presentation. Consequently, the constructor <TT>PolycyclicGroup</TT> without
+specifying a value for the parameter <TT>Class</TT> returns a group in the
+category <A  HREF = "text832.htm#GrpGPC"> <TT>GrpGPC</TT></A>.
+<P>
+<P>
+<PRE>
+&gt; G4&lt;a,b&gt; := PolycyclicGroup&lt; a,b | a^2, b^4, b^a=b^3 &gt;;
+&gt; G4;
+GrpGPC : G4 of order 2^3 on 2 PC-generators
+PC-Relations:
+    a^2 = Id(G3), 
+    b^4 = Id(G3), 
+    b^a = b^3
+</PRE>
+<HR>
+<H4><A NAME = "6649">Construction of Subgroups</A></H4>
+
+
+
+<H5><A NAME = "6650">sub&lt;G | L&gt; : Grp, List -&gt; Grp</A></H5>
+<BLOCKQUOTE>
+Given the group G, construct the subgroup H of G,
+generated by the elements specified by the list L, where L is a
+list of one or more items of the following types:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>A Magma object which may be coerced into G;
+<DT>(b)</DT><DD>A set or sequence of sequences of type (a);
+<DT>(c)</DT><DD>An element of G;
+<DT>(d)</DT><DD>A set or sequence of elements of G;
+<DT>(e)</DT><DD>A subgroup of G;
+<DT>(f)</DT><DD>A set or sequence of subgroups of G.
+<P>
+<P>
+</DL>
+Each element or group specified by the list must belong to the <I>same</I>
+generic group. The subgroup H will be constructed as a subgroup
+of some group which contains each of the elements and groups specified in
+the list.
+<P>
+The generators of H consist of the elements specified by the terms of
+the list L together with the stored generators for groups
+specified by terms of the list.  Repetitions of an element and occurrences
+of the identity element are removed (unless H is trivial).
+</BLOCKQUOTE>
+<H5><A NAME = "6651">ncl&lt;G | L&gt; : Grp, List -&gt; Grp</A></H5>
+<BLOCKQUOTE>
+Given the group G, construct the subgroup H of
+G that is the <I>normal closure</I> of the subgroup H
+generated by the elements specified by the list L,
+where the possibilities for L are the same as for
+the <TT>sub</TT>-constructor.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6652">Example <TT>Grp_Subgroup (H62E6)</TT></A></H3>
+Let Q be the finitely presented group in generators s, t, u
+constructed in an earlier example.
+We construct the subgroup S of Q generated by ts<sup>2</sup> and u<sup>4</sup>:
+<P>
+<P>
+<PRE>
+&gt; Q&lt;s,t,u&gt;, h := Group&lt; s, t, u |
+&gt;     t^2, u^17, s^2 = t^s = t, u^s = u^16, u^t = u &gt;;
+&gt; S := sub&lt; Q | t*s^2, u^4 &gt;;
+&gt; S;
+Finitely presented group S on 2 generators
+Generators as words
+    S.1 = $.2 * $.1^2
+    S.2 = $.3^4
+</PRE>
+<HR>
+<H4><A NAME = "6653">Construction of Quotient Groups</A></H4>
+
+
+
+<H5><A NAME = "6654">quo&lt;G | L&gt; : Grp, List -&gt; Grp, Map</A></H5>
+<BLOCKQUOTE>
+Given the group G, construct the quotient group
+Q = G/N, where N is the normal closure of the subgroup of
+G generated by the elements specified by L. The clause L
+is a list of one or more items of the following types:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>A Magma object which can be coerced into G;
+<DT>(b)</DT><DD>A set or sequence of sequences of type (a);
+<DT>(c)</DT><DD>An element of G;
+<DT>(d)</DT><DD>A set or sequence of elements of G;
+<DT>(e)</DT><DD>A subgroup of G;
+<DT>(f)</DT><DD>A set or sequence of subgroups of G.
+<P>
+<P>
+</DL>
+Each element or group specified by the list must belong to the
+<I>same</I> generic group. The function returns
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>the quotient group Q, and
+<DT>(b)</DT><DD>the natural homomorphism f: G -&gt; Q.
+<P>
+<P>
+<P>
+</DL>
+Arbitrary quotients may be readily constructed in the case of
+the categories <A  HREF = "text809.htm#GrpFP"> <TT>GrpFP</TT></A>, <A  HREF = "text832.htm#GrpGPC"> <TT>GrpGPC</TT></A>, <A  HREF = "text707.htm#GrpPC"> <TT>GrpPC</TT></A> and <A  HREF = "text787.htm#GrpAb"> <TT>GrpAb</TT></A>.
+However, in the case of permutation and matrix groups, currently the quotient 
+group is constructed via its regular representation, so that the 
+application of this operator is restricted to the case where the 
+index of N in G is less than 2<sup>30</sup>.
+<P>
+The second return value is the epimorphism from G to the resulting
+quotient group.
+</BLOCKQUOTE>
+<H5><A NAME = "6655">G / N : Grp, Grp -&gt; Grp</A></H5>
+<BLOCKQUOTE>
+Given a (normal) subgroup N of the group G, construct the quotient 
+of G by N.
+<P>
+<P>
+If G is in category <A  HREF = "text809.htm#GrpFP"> <TT>GrpFP</TT></A>, N is not checked to be normal in G. In
+fact, the returned group is the quotient of G by the normal closure of N
+in G.  For all other categories of groups, passing a subgroup which fails
+to be normal causes a runtime error.
+<P>
+<P>
+If G is a permutation or matrix group, the quotient 
+group is constructed via its regular representation, so that the 
+application of this operator is restricted to the case where the 
+index of N in G is at most a million. The result returned need
+not be regular, as an attempt is made to reduce the degree of the result.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6656">Example <TT>Grp_Quotient (H62E7)</TT></A></H3>
+Construction of the quotient of an abelian group, 
+with a demonstration of the use of the natural homomorphism:
+<P>
+<P>
+<PRE>
+&gt; G&lt;[x]&gt;, f := AbelianGroup&lt; h, i, j, k | 8*h, 4*i, 6*j, 2*k - h &gt;;   
+&gt; T, n := quo&lt; G | x[1] + 2*x[2] + 24*x[3], 16*x[3] &gt;;
+&gt; T;
+Abelian Group isomorphic to Z/2 + Z/16
+Defined on 2 generators
+Relations:
+    4*T.1 = 0
+    16*T.2 = 0
+&gt; n(x);
+[
+    2*T.1,
+    T.1 + 12*T.2,
+    T.2
+]
+&gt; n(sub&lt; G | x[1] + x[2] + x[3] &gt;);
+Abelian Group isomorphic to Z/16
+Defined on 1 generator in supergroup T:
+    $.1 = 3*T.1 + T.2
+Relations:
+    16*$.1 = 0
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text616.htm">[Next]</A><A  HREF = "text614.htm">[Prev]</A> <A  HREF = "text616.htm">[Right]</A> <A  HREF = "text614.htm">[Left]</A> <A  HREF = "text612.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

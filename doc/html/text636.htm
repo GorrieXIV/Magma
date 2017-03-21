@@ -1,0 +1,460 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Conjugacy</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text637.htm">[Next]</A><A  HREF = "text635.htm">[Prev]</A> <A  HREF = "text637.htm">[Right]</A> <A  HREF = "text635.htm">[Left]</A> <A  HREF = "text629.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "6982">Conjugacy</A></H3>
+
+
+
+<H5><A NAME = "6983">Class(H, x) : GrpPerm, GrpPermElt -&gt; { GrpPermElt }</A></H5>
+<H5>Conjugates(H, x) : GrpPerm, GrpPermElt -&gt; { GrpPermElt }</H5>
+<BLOCKQUOTE>
+Given a group H and an element x belonging to a group K
+such that H and K are subgroups of the same symmetric group,
+this function returns the set of conjugates of x under the
+action of H. If H = K, the function returns the conjugacy
+class of x in H.
+</BLOCKQUOTE>
+<H5><A NAME = "6984">ConjugacyClasses(G: parameters) : GrpPerm -&gt; [ &lt;RngIntElt, RngIntElt, GrpPermElt&gt; ]</A></H5>
+<H5>Classes(G: parameters) : GrpPerm -&gt; [ &lt;RngIntElt, RngIntElt, GrpPermElt&gt; ]</H5>
+<BLOCKQUOTE>
+Construct a set of representatives for the conjugacy classes of G.
+The classes are returned as a sequence of triples containing the
+element order, the class length and a representative element for the
+class. The parameters <TT>Reps</TT> and <TT>Al</TT> enable the user to select
+the algorithm that is to be used.
+<P>
+<P>
+<PRE>
+     Reps: [ GrpPermElt ]                Default: 
+</PRE>
+<TT>Reps := <I>Q</TT></I>: Create the classes of G by using the random algorithm
+but using the group elements in Q as the "random" elements tried.
+The element orders and 
+lengths of the classes will be computed and checked for consistency.
+<P>
+<P>
+<PRE>
+     Reps: [ &lt;GrpPermElt, RngIntElt&gt; ]   Default: 
+</PRE>
+<TT>Reps := <I>Q</TT></I> Create the classes of G assuming that the first 
+elements of the tuples in Q form a complete set
+of conjugacy class representatives and the corresponding integer is the
+size of the conjugacy class. The only check performed is that the class
+sizes sum to the group order.
+<P>
+<P>
+<PRE>
+     Al: MonStgElt                       Default: em "Default"
+</PRE>
+<P>
+<PRE>
+     WeakLimit: RngIntElt                Default: 500
+</PRE>
+<P>
+<PRE>
+     StrongLimit: RngIntElt              Default: 5000
+</PRE>
+<TT>Al := "Action"</TT>:  Create the classes of G by computing the orbits
+of the set of elements of G under the action of conjugation. This option
+is only feasible for small groups.
+<P>
+<P>
+<TT>Al := "Random"</TT>:  Construct the conjugacy classes of elements for
+a permutation group G using an algorithm that searches for
+representatives of all conjugacy classes of G by examining a random
+selection of group elements and their powers. The behaviour of this
+algorithm is controlled by two associated optional parameters <TT>WeakLimit</TT> and <TT>StrongLimit</TT>, whose values are positive integers
+n<sub>1</sub> and n<sub>2</sub>, say.  Before describing the effect of these
+parameters, some definitions are needed:  A mapping f: G -&gt; I
+is called a class invariant if f(g) = f(g<sup>h</sup>) for all g, h&isin;G.
+For permutation groups, the cycle structure of g is a readily
+computable class invariant.  Two elements g and h are said to be
+<I>weakly conjugate</I> with respect to the class invariant f if
+f(g) = f(h).  By definition, conjugacy implies weak conjugacy, but the
+converse is false. The random algorithm first examines n<sub>1</sub> random
+elements and their powers, using a test for weak conjugacy.  It then
+proceeds to examine a further n<sub>2</sub> random elements and their powers,
+using a test for ordinary conjugacy.  The idea behind this strategy is
+that the algorithm should attempt to find as many classes as possible
+using the very cheap test for weak conjugacy, before employing the more
+expensive ordinary conjugacy test to recognize the remaining classes.
+<P>
+<P>
+<TT>Al := "Inductive"</TT>: Use  G. Butler's inductive method to compute the
+classes. See Butler <A  HREF = "text628.htm#bib_inductive-classes">[But94]</A> for a description of the
+algorithm. The action and random algorithms are used by this algorithm to
+find the classes of any small groups it is called upon to deal with.
+<P>
+<P>
+<TT>Al := "Extend"</TT>:  Construct the conjugacy classes of G by first
+computing classes in a quotient G/N and then extending these classes
+to successively larger quotients G/H until the classes for G/1 are
+known.  More precisely, a series of subgroups 1 = G<sub>0</sub> &lt; G<sub>1</sub> &lt; ... &lt; G<sub>r</sub> = R &lt; G is computed such that R is the (solvable)
+radical of G and G<sub>i + 1</sub>/G<sub>i</sub> is elementary abelian.  The radical
+quotient G/R is computed and its classes and centralizers of their
+representatives found  and pulled back to G. 
+The parameters <TT>TFAl</TT> and <TT>ASAl</TT> control the algorithm
+used to compute the classes of G/R. 
+<P>
+To extend from G/G<sub>i + 1</sub> to the next larger quotient G/G<sub>i</sub>, an affine
+action of each centralizer on a quotient of the elementary abelian layer
+G<sub>i + 1</sub>/G<sub>i</sub> is computed.  Each distinct orbit in that action gives rise
+to a new class of the larger quotient
+(see Mecky and Neubuser <A  HREF = "text628.htm#bib_mecky-neubuser">[MN89]</A>).
+<P>
+<P>
+<TT>Al := "Default"</TT>:  First some special cases are checked for:  
+If <TT>IsAltsym(G)</TT>
+then the classes of G are computed from the partitions of <TT>Degree(G)</TT>.
+If G is solvable, an isomorphic representation of G as a pc-group is
+computed and the classes computed in that representation.
+In general, the action algorithm will be used if |G|&le;5000,
+otherwise the extension algorithm will be applied. 
+<P>
+<P>
+<PRE>
+     TFAl: MonStgElt                     Default: em "Default"
+</PRE>
+This parameter controls the algorithm used to compute the classes of
+a group with trivial Fitting subgroup, such as the group G/R in the
+description of the <TT>"Extend"</TT> method. The possible settings are the same
+as for <TT>Al</TT>, except that <TT>"Extend"</TT> is not a valid choice.
+The <TT>"Action"</TT>, <TT>"Random"</TT> and <TT>"Inductive</TT> settings behave
+as described above. The default algorithm is Derek Holt's generalisation
+of the Cannon/Souvignier fusion method to all classes of the group.
+The original fusion algorithm used fusion only on classes within a
+direct product normal subgroup, see <A  HREF = "text628.htm#bib_conj-classes-permg">[CS97]</A>. Holt has
+extended the use of fusion to all conjugacy classes, avoiding the random
+part of the Cannon/Souvignier method. This algorithm must use another algorithm
+to find the classes of almost simple groups arising from the socle of the
+TF-group. The algorithm used for this is controlled by the parameter <TT>ASAl</TT>.
+<P>
+<P>
+<PRE>
+     ASAl: MonStgElt                     Default: em "Default"
+</PRE>
+This parameter controls the algorithm used to compute the classes of
+an almost simple group from within the default TF-group algorithm.
+The possibilities for this parameter are as for <TT>TFAl</TT>. The default
+algorithm first determines if <TT>Altsym(G)</TT> is true. If so, classes
+are deduced from the partitions of <TT>Degree(G)</TT>. Next, if the order of G
+is &le;5000 then the action algorithm is used. If the socle
+of G has the correct order to be PSL(2, q), for some q, then
+the random algorithm is used on G. Otherwise the inductive
+algorithm is used.
+<P>
+<P>
+<PRE>
+     Centralisers: BoolElt               Default: <TT>false</TT>
+</PRE>
+A flag to force the storing of the centralisers of the class representatives
+with the class table. This does not apply to the action algorithm.
+In the case of the extension algorithm, this will do extra work to lift
+the centralisers through the final elementary abelian layer.
+<P>
+<P>
+<PRE>
+     PowerMap: BoolElt                   Default: <TT>false</TT>
+</PRE>
+A flag to force the storing of whatever power map information is produced
+by the classes algorithm used. In the case of the extension algorithm, this
+flag forces the computation of the full power map en-route, and may take
+considerably longer than not doing so. However, it is overall faster
+to set this flag true when the <TT>PowerMap</TT> is going to be computed
+anyway.
+</BLOCKQUOTE>
+<H5><A NAME = "6985">ClassRepresentative(G, x) : GrpPerm, GrpPermElt -&gt; GrpPermElt</A></H5>
+<H5>ClassRepresentative(G, i) : GrpPerm, RngIntElt -&gt; GrpPermElt</H5>
+<BLOCKQUOTE>
+Given a group G for which the conjugacy classes are known,
+return the stored representative for
+the conjugacy class of G containing x or the stored
+representative of conjugacy class i.
+</BLOCKQUOTE>
+<H5><A NAME = "6986">ClassCentraliser(G, i) : GrpPerm, RngIntElt -&gt; GrpPerm</A></H5>
+<H5>ClassCentralizer(G, i) : GrpPerm, RngIntElt -&gt; GrpPerm</H5>
+<BLOCKQUOTE>
+The centraliser of the representative element stored for conjugacy class
+number i in group G. The group computed is stored with the class
+table for reference by future calls to this function.
+</BLOCKQUOTE>
+<H5><A NAME = "6987">ClassMap(G: parameters) : GrpPerm -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Given a group G, construct the conjugacy classes and the class map f 
+for G. For any element x of G, f(x) will be the index of the
+conjugacy class of x in the sequence returned by the <TT>Classes</TT> function.
+If the parameter <TT>Orbits</TT> 
+is set <TT>true</TT>, the classes are computed as orbits of elements under 
+conjugation
+and the class  map is stored as a list of images of the elements 
+of G (a list of length |G|). This option gives fast evaluation 
+of the class map but is practical only in the case of very small groups.
+With <TT>Orbits := false</TT>, <TT>WeakLimit</TT> and <TT>StrongLimit</TT> are 
+used to control the random classes algorithm (see function <TT>Classes</TT>).
+</BLOCKQUOTE>
+<H5><A NAME = "6988">IsConjugate(G, g, h: parameters) : GrpPerm, GrpPermElt, GrpPermElt -&gt; BoolElt, GrpPermElt</A></H5>
+<BLOCKQUOTE>
+Given a group G and elements g and h belonging to G,
+return the value <TT>true</TT> if g and h are conjugate in G. The
+function returns a second value if the elements
+are conjugate: an element k which conjugates g into h.
+The method used is the backtrack search of Leon <A  HREF = "text628.htm#bib_Leon2">[Leo97]</A>.
+This search may be speeded considerably by knowledge of (subgroups of) the
+centralizers of g and h in G. The parameters relate to these subgroups.
+<P>
+<P>
+<PRE>
+     Centralizer: MonStgElt              Default: em "Default"
+</PRE>
+<P>
+<PRE>
+     LeftSubgroup: GrpPerm               Default: &lt; g &gt;
+</PRE>
+<P>
+<PRE>
+     RightSubgroup: GrpPerm              Default: &lt; h &gt;
+</PRE>
+The <TT>LeftSubgroup</TT> and <TT>RightSubgroup</TT> parameters
+enable the user to supply
+known subgroups of the centralizers of g and h respectively to the
+algorithm. By default, the cyclic subgroups generated by g and h are
+the known subgroups.
+The <TT>Centralizer</TT> parameter controls whether the algorithm
+starts by computing one or both centralizers in full before the conjugacy test.
+The <TT>"Default"</TT> behaviour is to compute the left centralizer, i.e. C<sub>G</sub>(g),
+unless either a left or right subgroup is specified, in which case no centralizer
+calculation is done. Other possible values are the four possibilities
+<TT>"Left"</TT> which forces computation of C<sub>G</sub>(g), <TT>"Right"</TT> which forces
+C<sub>G</sub>(h) to be computed, <TT>"Both"</TT> which computes both centralizers, and
+<TT>"None"</TT> which will compute no centralizers.
+</BLOCKQUOTE>
+<H5><A NAME = "6989">IsConjugate(G, H, K: parameters) : GrpPerm, GrpPerm, GrpPerm -&gt; BoolElt, GrpPermElt</A></H5>
+<BLOCKQUOTE>
+Given a group G and subgroups H and K of G,
+return the value <TT>true</TT> if H and K are conjugate in G. The
+function returns a second value if the subgroups
+are conjugate: an element z which conjugates H into K.
+The method used is the backtrack search of Leon <A  HREF = "text628.htm#bib_Leon2">[Leo97]</A>.
+<P>
+<P>
+<PRE>
+     Compute: MonStgElt                  Default: em "Default"
+</PRE>
+This parameter may be set to any of "Both", "Default", "Left", "None", or
+"Right". This controls which normalisers are computed before starting the
+conjugacy test. The default strategy is currently "Left", which computes the
+normalizer of H in G before starting the conjugacy test between H
+and K. The greater the difference between H and K and their normalizers
+in G, the more helpful to the search it is to compute their normalizers.
+<P>
+<P>
+<PRE>
+     LeftSubgroup: GrpPerm               Default: H
+</PRE>
+<P>
+<PRE>
+     RightSubgroup: GrpPerm              Default: K
+</PRE>
+Instead of having the <TT>IsConjugate</TT> function compute the normalizers
+of H and K, the user may supply any known subgroup of G normalizing
+H (as <TT>LeftSubgroup</TT>) or normalizing K (as <TT>RightSubgroup</TT>)
+to be used as the normalizing groups to aid the search.
+</BLOCKQUOTE>
+<H5><A NAME = "6990">Exponent(G) : GrpPerm -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The exponent of the group G. This is computed as the product
+of the exponents of the Sylow subgroups fo G.
+</BLOCKQUOTE>
+<H5><A NAME = "6991">NumberOfClasses(G) : GrpPerm -&gt; RngIntElt</A></H5>
+<H5>Nclasses(G) : GrpPerm -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The number of conjugacy classes of elements for the group G.
+</BLOCKQUOTE>
+<H5><A NAME = "6992">PowerMap(G) : GrpPerm -&gt; Map</A></H5>
+<BLOCKQUOTE>
+Given a group G, construct the power map for G. Suppose that the order 
+of G is m and that G has r conjugacy classes.  When the classes 
+are determined by Magma, they are numbered from 1 to r. Let C be 
+the set of class indices { 1, ..., r } and let Z be the 
+set of integers. The <I>power map</I> f for G is the mapping
+  f : C x Z -&gt; C
+where the value of f(i, j) for i &isin;C and j &isin;Z 
+is the number of the class which contains x<sub>i</sub><sup>j</sup>, 
+where x<sub>i</sub> is a representative of the i-th conjugacy class.
+</BLOCKQUOTE>
+<H5><A NAME = "6993">AssertAttribute(G, "Classes", Q) : GrpPerm, MonStgElt, SeqEnum -&gt;</A></H5>
+<BLOCKQUOTE>
+Assert the class representatives of G. The action taken is identical to
+using the <TT>ConjugacyClasses</TT> function described above, with the
+parameter <TT>Reps</TT> set to Q. Thus Q may be a sequence of group elements
+or a sequence of tuples giving class representatives and class lengths.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "6994">Example <TT>GrpPerm_Classes (H63E12)</TT></A></H3>
+The  conjugacy classes of the Mathieu group M<sub>11</sub> can be
+constructed as follows:
+<P>
+<P>
+<PRE>
+&gt; SetSeed(2);
+&gt; M11 := sub&lt;Sym(11) | (1,10)(2,8)(3,11)(5,7), (1,4,7,6)(2,11,10,9)&gt;;
+&gt; Classes(M11);
+Conjugacy Classes of group M11
+------------------------------
+[1]     Order 1       Length 1      
+        Rep Id(M11)
+
+
+[2]     Order 2       Length 165    
+        Rep (3, 10)(4, 9)(5, 6)(8, 11)
+
+
+[3]     Order 3       Length 440    
+        Rep (1, 2, 4)(3, 5, 10)(6, 8, 11)
+
+
+[4]     Order 4       Length 990    
+        Rep (3, 6, 10, 5)(4, 8, 9, 11)
+
+
+[5]     Order 5       Length 1584   
+        Rep (1, 3, 6, 2, 8)(4, 7, 10, 9, 11)
+
+
+[6]     Order 6       Length 1320   
+        Rep (1, 11, 2, 6, 4, 8)(3, 10, 5)(7, 9)
+
+
+[7]     Order 8       Length 990    
+        Rep (1, 4, 5, 6, 2, 7, 11, 10)(8, 9)
+
+
+[8]     Order 8       Length 990    
+        Rep (1, 7, 5, 10, 2, 4, 11, 6)(8, 9)
+
+
+[9]     Order 11      Length 720    
+        Rep (1, 11, 9, 10, 4, 3, 7, 2, 6, 5, 8)
+
+
+[10]    Order 11      Length 720    
+        Rep (1, 9, 4, 7, 6, 8, 11, 10, 3, 2, 5)
+
+
+</PRE>
+<HR>
+<H3><A NAME = "6995">Example <TT>GrpPerm_Classes-2 (H63E13)</TT></A></H3>
+<P>
+The default values for the random class algorithm are 
+adequate for a large variety of groups. We look at what happens when we vary 
+the parameters in the case of the Higman-Sims simple group represented 
+on 100 letters. In this case the default strategy reduces to a random search.
+The first choice of parameters does not look at enough
+random elements. Increasing the limit on the number of random elements 
+examined will ensure the algorithm succeeds.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := sub&lt;Sym(100) |
+&gt;    (2,8,13,17,20,22,7)(3,9,14,18,21,6,12)(4,10,15,19,5,11,16)
+&gt;        (24,77,99,72,64,82,40)(25,92,49,88,28,65,90)(26,41,70,98,91,38,75)
+&gt;        (27,55,43,78,86,87,45)(29,69,59,79,76,35,67)(30,39,42,81,36,57,89)
+&gt;        (31,93,62,44,73,71,50)(32,53,85,60,51,96,83)(33,37,58,46,84,100,56)
+&gt;        (34,94,80,61,97,48,68)(47,95,66,74,52,54,63),
+&gt;    (1,35)(3,81)(4,92)(6,60)(7,59)(8,46)(9,70)(10,91)(11,18)(12,66)(13,55)
+&gt;        (14,85)(15,90)(17,53)(19,45)(20,68)(21,69)(23,84)(24,34)(25,31)(26,32)
+&gt;        (37,39)(38,42)(40,41)(43,44)(49,64)(50,63)(51,52)(54,95)(56,96)(57,100)
+&gt;        (58,97)(61,62)(65,82)(67,83)(71,98)(72,99)(74,77)(76,78)(87,89) &gt;;
+&gt; K := Classes(G:WeakLimit := 20, StrongLimit := 50);
+Runtime error in 'Classes': Random classes algorithm failed
+&gt; K := Classes(G: WeakLimit := 20, StrongLimit := 100);
+&gt; NumberOfClasses(G);
+24
+</PRE>
+<P>
+As the group has only 24 classes, the first random search could have 
+succeeded by looking at 50 elements. On this occasion it did not, but
+looking at 100 elements did succeed. 
+<P>
+We print the order, length and cycle structure for each conjugacy class.
+<P>
+<P>
+<P>
+<PRE>
+&gt; [ &lt; k[1], k[2], CycleStructure(k[3]) &gt; : k in K ];
+[
+       &lt;1, 1, [ &lt;1, 100&gt; ]&gt;,
+       &lt;2, 5775, [ &lt;2, 40&gt;, &lt;1, 20&gt; ]&gt;,
+       &lt;2, 15400, [ &lt;2, 50&gt; ]&gt;,
+       &lt;3, 123200, [ &lt;3, 30&gt;, &lt;1, 10&gt; ]&gt;,
+       &lt;4, 11550, [ &lt;4, 20&gt;, &lt;2, 10&gt; ]&gt;,
+       &lt;4, 173250, [ &lt;4, 20&gt;, &lt;2, 6&gt;, &lt;1, 8&gt; ]&gt;,
+       &lt;4, 693000, [ &lt;4, 20&gt;, &lt;2, 8&gt;, &lt;1, 4&gt; ]&gt;,
+       &lt;5, 88704, [ &lt;5, 20&gt; ]&gt;,
+       &lt;5, 147840, [ &lt;5, 20&gt; ]&gt;,
+       &lt;5, 1774080, [ &lt;5, 19&gt;, &lt;1, 5&gt; ]&gt;,
+       &lt;6, 1232000, [ &lt;6, 15&gt;, &lt;2, 5&gt; ]&gt;,
+       &lt;6, 1848000, [ &lt;6, 12&gt;, &lt;3, 6&gt;, &lt;2, 4&gt;, &lt;1, 2&gt; ]&gt;,
+       &lt;7, 6336000, [ &lt;7, 14&gt;, &lt;1, 2&gt; ]&gt;,
+       &lt;8, 2772000, [ &lt;8, 10&gt;, &lt;4, 4&gt;, &lt;2, 2&gt; ]&gt;,
+       &lt;8, 2772000, [ &lt;8, 10&gt;, &lt;4, 3&gt;, &lt;2, 3&gt;, &lt;1, 2&gt; ]&gt;,
+       &lt;8, 2772000, [ &lt;8, 10&gt;, &lt;4, 4&gt;, &lt;2, 2&gt; ]&gt;,
+       &lt;10, 2217600, [ &lt;10, 8&gt;, &lt;5, 4&gt; ]&gt;,
+       &lt;10, 2217600, [ &lt;10, 10&gt; ]&gt;,
+       &lt;11, 4032000, [ &lt;11, 9&gt;, &lt;1, 1&gt; ]&gt;,
+       &lt;11, 4032000, [ &lt;11, 9&gt;, &lt;1, 1&gt; ]&gt;,
+       &lt;12, 3696000, [ &lt;12, 6&gt;, &lt;6, 3&gt;, &lt;4, 2&gt;, &lt;2, 1&gt; ]&gt;,
+       &lt;15, 2956800, [ &lt;15, 6&gt;, &lt;5, 2&gt; ]&gt;,
+       &lt;20, 2217600, [ &lt;20, 4&gt;, &lt;10, 2&gt; ]&gt;,
+       &lt;20, 2217600, [ &lt;20, 4&gt;, &lt;10, 2&gt; ]&gt;
+]
+</PRE>
+<P>
+We construct the power map and tabulate the second, third and fifth
+powers of each class.
+<P>
+<P>
+<P>
+<PRE>
+&gt; p := PowerMap(G);
+&gt; [ &lt; i, p(i, 2), p(i, 3), p(i, 5) &gt; : i in [1 .. #K] ];
+[ 
+    &lt;1, 1, 1, 1&gt;, 
+    &lt;2, 1, 2, 2&gt;, 
+    &lt;3, 1, 3, 3&gt;, 
+    &lt;4, 4, 1, 4&gt;, 
+    &lt;5, 2, 5, 5&gt;, 
+    &lt;6, 2, 6, 6&gt;, 
+    &lt;7, 2, 7, 7&gt;, 
+    &lt;8, 8, 8, 1&gt;, 
+    &lt;9, 9, 9, 1&gt;, 
+    &lt;10, 10, 10, 1&gt;, 
+    &lt;11, 4, 3, 11&gt;, 
+    &lt;12, 4, 2, 12&gt;, 
+    &lt;13, 13, 13, 13&gt;, 
+    &lt;14, 7, 14, 14&gt;, 
+    &lt;15, 6, 15, 15&gt;, 
+    &lt;16, 7, 16, 16&gt;, 
+    &lt;17, 8, 17, 2&gt;, 
+    &lt;18, 9, 18, 3&gt;, 
+    &lt;19, 20, 19, 19&gt;, 
+    &lt;20, 19, 20, 20&gt;, 
+    &lt;21, 12, 5, 21&gt;,
+    &lt;22, 22, 9, 4&gt;, 
+    &lt;23, 17, 23, 5&gt;, 
+    &lt;24, 17, 24, 5&gt; 
+]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text637.htm">[Next]</A><A  HREF = "text635.htm">[Prev]</A> <A  HREF = "text637.htm">[Right]</A> <A  HREF = "text635.htm">[Left]</A> <A  HREF = "text629.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

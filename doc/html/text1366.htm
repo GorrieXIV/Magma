@@ -1,0 +1,492 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Linear Equivalence of Divisors</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1367.htm">[Next]</A><A  HREF = "text1365.htm">[Prev]</A> <A  HREF = "text1367.htm">[Right]</A> <A  HREF = "text1365.htm">[Left]</A> <A  HREF = "text1356.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "15227">Linear Equivalence of Divisors</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1366.htm#15228">Linear Equivalence and Class  Group</A>
+<LI> <A  HREF = "text1366.htm#15240">Riemann--Roch Spaces</A>
+<LI> <A  HREF = "text1366.htm#15259">Index Calculus</A>
+</UL>
+<H4><A NAME = "15228">Linear Equivalence and Class  Group</A></H4>
+
+
+
+<H5><A NAME = "15229">IsPrincipal(D) : DivCrvElt -&gt; BoolElt, FldFunFracSchElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the divisor D is the divisor of zeros and poles of some
+rational function.
+A rational function which performs that role will also be returned.
+Recall that any two such functions differ only by a scalar factor.
+</BLOCKQUOTE>
+<H5><A NAME = "15230">IsLinearlyEquivalent(D1,D2) : DivCrvElt,DivCrvElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the difference D1 - D2 of the two divisor
+arguments is a principal divisor.
+In that case return also the rational function giving this equivalence.
+</BLOCKQUOTE>
+<H5><A NAME = "15231">IsHypersurfaceDivisor(D) : DivCrvElt -&gt;  BoolElt, RngElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+For an effective hypersurface divisor D on an ordinary projective curve C,
+returns <TT>true</TT> if and only if D is the scheme theoretic intersection of
+C with a hypersurface H of the ambient projective space. If so, also returns
+an equation for H and the degree of H.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15232">Example <TT>Crv_is-hyper-surface-divisor-example (H120E34)</TT></A></H3>
+We check that an effective canonical divisor on a non-singular degree 4
+plane curve is indeed a divisor coming from the intersection of the curve
+with a hyperplane.
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z&gt; := ProjectiveSpace(Rationals(),2);
+&gt; C := Curve(P,x^3*y+y^3*z+z^3*x);
+&gt; D0 := CanonicalDivisor(C);
+&gt; f := Basis(D0)[1];
+&gt; D := D0+PrincipalDivisor(f);
+&gt; IsEffective(D);
+true
+&gt; IsHypersurfaceDivisor(D);
+true -2/9*x
+1
+</PRE>
+<HR>
+<H5><A NAME = "15233">ClassGroup(C) : Crv[FldFin] -&gt; GrpAb, Map, Map</A></H5>
+<BLOCKQUOTE>
+The <I>divisor class group</I>, or simply <I>class group</I> of a curve
+is the group of divisors modulo principal divisors.
+If C is a curve defined over a finite field, then this function returns 
+an abelian group isomorphic to its divisor class group, a map of representatives 
+from the class group to the divisor group and the homomorphism from the divisor 
+group onto the class group.
+The second map has an inverse, so translation between the group and the
+divisors can be achieved using only this map.
+</BLOCKQUOTE>
+<H5><A NAME = "15234">ClassNumber(C) : Crv[FldFin] -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The order of the class group of the curve C.
+</BLOCKQUOTE>
+<H5><A NAME = "15235">GlobalUnitGroup(C) : Crv[FldFin] -&gt; GrpAb, Map</A></H5>
+<BLOCKQUOTE>
+The group of global units of the function field of the curve C, that is
+the multiplicative group of the field of geometric irreducibility of C 
+as an abelian group together with the map into the function field of C.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15236">Example <TT>Crv_divisor-class-group-example (H120E35)</TT></A></H3>
+We compute the class group of a curve defined over a finite field.
+The calculation takes a few seconds.
+<P>
+<P>
+<PRE>
+&gt; A&lt;x,y&gt; := AffineSpace(GF(2,5),2);
+&gt; C := Curve(A,x^7 + x^4*y^3 + x*y^2 + y);
+&gt; Genus(C);
+3
+&gt; Cl, _, phi := ClassGroup(C);
+&gt; Cl;
+Abelian Group isomorphic to Z/26425 + Z
+Defined on 2 generators
+Relations:
+    26425*Cl.1 = 0
+</PRE>
+We can use the map &phi; to pull elements of the abelian group back to
+the divisor group. For curves over finite fields, this is one way
+of constructing interesting divisors.
+<P>
+<P>
+<PRE>
+&gt; Div := DivisorGroup(C);
+&gt; Div eq Domain(phi);
+true
+&gt; D := Cl.1 @@ phi;
+&gt; D;
+Divisor of Curve over GF(2^5) defined by
+x^7 + x^4*y^3 + x*y^2 + y
+</PRE>
+The unpleasant printing with the dollar signs is happening because
+no names have yet been assigned to the projective closure of C.
+Notice that the printing is rather uninformative. This is because
+a factorization of d is not yet known and could be an extremely
+expensive computation.
+<P>
+<P>
+<PRE>
+&gt; Decomposition(D);
+[
+    &lt;Place at (0 : 0 : 1), -3&gt;,
+    &lt;Place at ($.1 : $.1^10*$.1^2 + $.1^26*$.1 + $.1^22 : 1), 1&gt;
+]
+&gt; Degree(D);
+0
+</PRE>
+The degree function simply returns the sum of the integer valuations
+in the factorization. Those valuations can be seen as the second
+entry of each tuple in the support.
+<HR>
+<H5><A NAME = "15237">ClassGroupAbelianInvariants(C) : Crv[FldFin] -&gt; [RngIntElt]</A></H5>
+<BLOCKQUOTE>
+The abelian invariants of the curve C.
+</BLOCKQUOTE>
+<H5><A NAME = "15238">ClassGroupPRank(C) : Crv[FldFin] -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The p-rank of the class group of C.
+</BLOCKQUOTE>
+<H5><A NAME = "15239">HasseWittInvariant(C) : Crv[FldFin] -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The Hasse--Witt invariant of the curve C.
+<P>
+<P>
+<P>
+</BLOCKQUOTE>
+<H4><A NAME = "15240">Riemann--Roch Spaces</A></H4>
+
+<P>
+<P>
+If D is a divisor on C then colloquially speaking the Riemann--Roch
+space L(D) is the finite dimensional vector subspace of the function 
+field of C consisting of functions with poles no worse that D (and at
+least as many zeros as the negative part of D if D is not effective).
+To be precise, we say that
+<P>
+L(D) = { f &isin;k(C) | (div)(f) + D &ge;0 }
+<P>
+where (div)(f) is the principal divisor of zeros and poles of f
+and the condition &ge;0 is simply shorthand to mean that the left-hand
+side is an effective divisor.
+<P>
+For any divisor on a projective curve defined over a field this vector
+space is finite dimensional.
+Its dimension ell(D) appears in the Riemann--Roch formula
+<P>
+ell(D) - ell(K<sub>C</sub> - D) = deg(D) + 1 - g
+<P>
+where K<sub>C</sub> is the canonical divisor and g is the genus of C.
+<P>
+The space of <I>effective</I> divisors linearly equivalent to D, the
+complete linear system of D, is the projectivisation of the
+Riemann--Roch space L(D).
+This can be used to create a map from the curve C to a projective
+space of dimension ell(D) - 1.
+
+
+<H5><A NAME = "15241">Reduction(D) : DivCrvElt -&gt; DivCrvElt, RngIntElt, DivCrvElt, FldFunFracSchElt</A></H5>
+<H5>Reduction(D, A) : DivCrvElt, DivCrvElt -&gt; DivCrvElt, RngIntElt, DivCrvElt, FldFunFracSchElt</H5>
+<BLOCKQUOTE>
+Let D be a divisor. Denote the result of both functions by
+tilde(D), r, A and a (for the second function the input A always
+equals the output A). The divisor A has (must have) positive degree and the
+following holds:
+<DL COMPACT class='compact'>
+<DT>(i)</DT><DD>D = tilde(D) + rA - (a),
+<DT>(ii)</DT><DD>tilde(D) &ge;0 and deg(tilde(D)) &lt; g + deg(A)
+(over the field of geometric irreducibility),
+<DT>(iii)</DT><DD>tilde(D) has minimal degree among all such
+divisors satisfying (i), (ii).</DL>
+</BLOCKQUOTE>
+<H5><A NAME = "15242">RiemannRochSpace(D) : DivCrvElt -&gt; ModFld,Map</A></H5>
+<BLOCKQUOTE>
+A vector space V and an isomorphism from V to the Riemann--Roch space of
+D in the function field of the curve on which the divisor D lies.
+</BLOCKQUOTE>
+<H5><A NAME = "15243">Basis(D) : DivCrvElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+A sequence containing a basis of the Riemann-Roch space L(D) of
+the divisor D.
+</BLOCKQUOTE>
+<H5><A NAME = "15244">ShortBasis(D) : DivCrvElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+A sequence containing a basis of the Riemann-Roch space L(D) of the divisor 
+D in short form.
+</BLOCKQUOTE>
+<H5><A NAME = "15245">Dimension(D) : DivCrvElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The dimension ell(d) of the Riemann-Roch space of the divisor D.
+</BLOCKQUOTE>
+<H5><A NAME = "15246">DifferentialSpace(D) : DivCrvElt -&gt; ModFld, Map</A></H5>
+<BLOCKQUOTE>
+Returns a vector space V and a map from V to the space of
+differentials of the curve C containing the divisor D with image
+the differentials of &omega;<sub>C</sub>(D).
+Colloquially, this means the differentials whose zeros are at least the
+positive (or effective) part of D and whose poles are no worse than the
+negative part of D.
+</BLOCKQUOTE>
+<H5><A NAME = "15247">DifferentialBasis(D) : DivCrvElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+A basis of the space of differentials of the divisor D.
+</BLOCKQUOTE>
+<H5><A NAME = "15248">IndexOfSpeciality(D) : DivCrvElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The index of speciality of the divisor D, that is the
+dimension ell(K<sub>C</sub> - D) appearing in the Riemann--Roch formula.
+</BLOCKQUOTE>
+<H5><A NAME = "15249">IsSpecial(D) : DivCrvElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Returns <TT>true</TT> if and only if the divisor D is special.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "15250">GapNumbers(D) : DivCrvElt -&gt; SeqEnum</A></H5>
+<H5>GapNumbers(D,p) : DivCrvElt,PlcCrvElt -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+The gap numbers of the divisor D, at the place p if included.
+</BLOCKQUOTE>
+<H5><A NAME = "15251">GapNumbers(p) : Pt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The gap numbers of the nonsingular point p.
+</BLOCKQUOTE>
+<H5><A NAME = "15252">WeierstrassPlaces(D) : DivCrvElt -&gt; SeqEnum</A></H5>
+<H5>WeierstrassPoints(D) : DivCrvElt -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+A sequence containing the Weierstrass places (or underlying points)
+of the divisor D.
+</BLOCKQUOTE>
+<H5><A NAME = "15253">WronskianOrders(D) : DivCrvElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The Wronskian orders of the divisor D.
+</BLOCKQUOTE>
+<H5><A NAME = "15254">RamificationDivisor(D) : DivCrvElt -&gt; DivCrvElt</A></H5>
+<BLOCKQUOTE>
+The ramification divisor of the divisor D.
+</BLOCKQUOTE>
+<H5><A NAME = "15255">DivisorMap(D) : DivCrvElt -&gt; MapSch</A></H5>
+<H5>DivisorMap(D,P) : DivCrvElt,Prj -&gt; MapSch</H5>
+<BLOCKQUOTE>
+A map from the curve of the divisor
+D to the projective space P (which will be created
+in the background if not given as an argument).
+The dimension of P must be ell(D) - 1.
+</BLOCKQUOTE>
+<H5><A NAME = "15256">CanonicalMap(C) : Crv -&gt; MapSch</A></H5>
+<H5>CanonicalMap(C,P) : Crv,Prj -&gt; MapSch</H5>
+<BLOCKQUOTE>
+The canonical map from the curve C to the projective space P (which
+will be created in the background if not given as an argument).
+This is the map determined by (a basis of the) Riemann--Roch space of
+the canonical divisor K<sub>C</sub>.
+In particular, the dimension of P must be ell(K<sub>C</sub>) - 1 = g - 1.
+</BLOCKQUOTE>
+<H5><A NAME = "15257">CanonicalImage(C, phi) : Crv, MapSch -&gt; Crv, BoolElt</A></H5>
+<H5>CanonicalImage(C, eqns) : Crv, SeqEnum -&gt; Crv, BoolElt</H5>
+<BLOCKQUOTE>
+These functions compute the canonical image of a projective curve C of 
+genus at least 2 much more efficiently than the generic image machinery 
+applied to the canonical map. In the first function, the second argument 
+should be the canonical map and in the alternative it should be a 
+sequence of polynomials defining the canonical map.
+<P>
+A second return value is a boolean which is true if and only if the
+image is a rational curve or equivalently if and only if C is a
+hyperelliptic curve.  Note that these functions may also be used for 
+computing the rational normal curve image of a genus 0 curve C 
+under the map given by any (non-trivial) complete linear system.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15258">Example <TT>Crv_canonical-map (H120E36)</TT></A></H3>
+We first make a curve and compute its genus.
+<P>
+<P>
+<PRE>
+&gt; P2&lt;X,Y,Z&gt; := ProjectiveSpace(Rationals(),2);
+&gt; C := Curve(P2,X^7 + X^3*Y^2*Z^2 + Z^7);
+&gt; Genus(C);
+3
+</PRE>
+If C is not hyperelliptic then its canonical map will embed it as
+a nonsingular quartic curve in the projective plane.
+We make the canonical map. We even include the plane P2 that we have
+already created as an argument so that it will be set as the codomain
+of the map.
+<P>
+<P>
+<PRE>
+&gt; phi := CanonicalMap(C,P2);
+&gt; phi;
+Mapping from: Prj: P2 to Prj: P2
+with equations : 
+X^2 X*Z Z^2
+&gt; phi(C);
+Curve over Rational Field defined by -X*Z + Y^2
+</PRE>
+That curve is certainly not a plane quartic.
+Indeed, it is evidently a rational curve, so C must have been hyperelliptic.
+<P>
+<P>
+<PRE>
+&gt; D := phi(C);
+&gt; Genus(D);
+0
+</PRE>
+The bicanonical map will embed C since its genus is strictly bigger than 2.
+<P>
+<P>
+<PRE>
+&gt; D := 2 * CanonicalDivisor(C);
+&gt; phi2 := DivisorMap(D);
+&gt; Dimension(Codomain(phi2));
+5
+&gt; P5&lt;a,b,c,d,e,f&gt; := Codomain(phi2);
+&gt; phi2(C);
+Scheme over Rational Field defined by
+a^2 + b^2 + e*f
+-b*d + c^2
+-b*e + c*d
+-b*f + d^2
+-b*f + c*e
+-c*f + d*e
+-d*f + e^2
+&gt; Dimension(phi2(C));
+1
+&gt; IsNonsingular(phi2(C));
+true
+</PRE>
+If you are familiar with the equations of rational normal curves, you will
+recognise this as a quadric section of a standard scroll---the cone on the
+rational normal curve of degree 4---which misses the vertex of the cone.
+This is exactly what gives the curve its hyperelliptic structure.
+One could go on to make a ruled surface with a map to P<sup>5</sup> with this
+scroll as its image and pull back the curve to the ruled surface on
+which the ruling cuts out the degree 2 linear system of the
+hyperelliptic curve.
+This is carried out for a particular trigonal curve later in
+Section <A  HREF = "text1367.htm#15265">Trigonal Curves</A>.
+<HR>
+<H4><A NAME = "15259">Index Calculus</A></H4>
+
+<P>
+<P>
+Magma contains functionality to compute discrete logarithms in the degree
+0 divisor class group of plane curves over finite fields. The algorithm 
+used for this is Diem's version of index calculus <A  HREF = "text1355.htm#bib_diem06">[Die06]</A>, which looks
+for relations by considering lines through the points of the factor base. 
+In order
+to use this algorithm, the group order must be know and given as input. 
+<P>
+As is always the case
+with index calculus, the algorithm consists of two main stages: the sieving 
+stage, during which relations are obtained and stored in a matrix, and the 
+linear algebra stage, during which a non-trivial element of the kernel of this
+matrix is computed. It is possible to only do the sieving and compute the 
+matrix. For this it is not necessary to know the group order. This can be used
+to obtain information on how fast sieving can be done. Generally, the linear 
+algebra stage will be the bottle neck for larger examples.
+<P>
+The running time of the algorithm mainly depends on the degree of the curve.
+In <A  HREF = "text1355.htm#bib_diem06">[Die06]</A> it is explained how one can obtain a model of a given curve
+with relatively low degree. This can greatly speed up the running time of
+the algorithm.
+<P>
+The algorithm will not work if the field is too small, as there will not be 
+enough lines to produce relations in that case. 
+One requires that at least q&ge;d! for a
+degree d curve over GF(q).
+<P>
+Elements in the degree 0 class group can be represented by divisors of degree 
+0. But we also allow divisors of non-zero degree D as input, together with a 
+fixed divisor D0 of degree 1. This will be interpreted as representing the
+divisor class D - (deg)(D)D0. Note that once D0 is fixed, and D is 
+effective of minimal degree, then D is uniquely determined by the divisor 
+class. Starting out with an arbitrary divisor E, this unique D can be 
+computed with the <TT>Reduction(E,D0)</TT> command.
+
+
+<H5><A NAME = "15260">IndexCalculus(D1, D2, D0, np) : DivCrvElt, DivCrvElt, DivCrvElt, RngIntElt -&gt; RngIntElt</A></H5>
+<H5>IndexCalculus(D1, D2, D0, np, n, rr) : DivCrvElt, DivCrvElt, DivCrvElt, RngIntElt, RngIntElt, RngIntElt -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Compute the discrete logarithm of D2 - (deg)(D2)D0 with base 
+D1 - (deg)(D1)D0. The group order np must be given. Optionally, one can 
+also give n as approximate size of the factor base to be used, and rr as 
+the number of required relations.
+</BLOCKQUOTE>
+<H5><A NAME = "15261">IndexCalculusMatrix(D1, D2, D0, n, rr) : DivCrvElt, DivCrvElt, DivCrvElt, RngIntElt, RngIntElt -&gt;  MtrxSprs, SeqEnum, SeqEnum, DivCrvElt, DivCrvElt, RngIntElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+Find the sparse matrix with relations found in the sieving stage. Input is the same as for <TT>IndexCalculus</TT>, except that the group order is not given. Outputs M, pos, fb, Da, Db, a, b, where M is the sparse relation matrix. 
+Da and Db are divisors that split over the factor base, and Da - (deg)(Da)D0 and Db - (deg)(Db)D0 are linearly equivalent to a(D1 - (deg)(D1)D0) and b(D2 - (deg)(D2)D0), respectively. fb is a sequence of points that contains the support of Da, Db and D0. pos is a sequence of integers that indicates the position of the points of fb in the factor base. The last two rows of M correspond to the divisors Da - (deg)(Da)D0 and Db - (deg)(Db)D0. 
+</BLOCKQUOTE>
+<H5><A NAME = "15262">MultiplyDivisor(n, D , D0) : RngIntElt, DivCrvElt, DivCrvElt -&gt; DivCrvElt</A></H5>
+<BLOCKQUOTE>
+Effective divisor E of minimal degree such that E - (deg)(E)D0 is equivalent to n(D - (deg(D))D0).
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15263">Example <TT>Crv_indexcalculus (H120E37)</TT></A></H3>
+<P>
+In this example we compute a discrete logarithm in the class group of a
+curve of degree 6. The curve is over GF(2<sup>13</sup>), but it is a base change of
+a curve over GF(2)
+<P>
+<P>
+<P>
+<PRE>
+&gt; A2&lt;x,y&gt;:=AffinePlane(GF(2));
+&gt; C1:=ProjectiveClosure(Curve(A2,x^5*y + x*y^2 + y^6 + y + 1));
+&gt; L:=LPolynomial(C1);
+&gt; Evaluate(L,1);
+752
+&gt; K&lt;z&gt;:=CyclotomicField(13);
+&gt; np:=Numerator(Norm(Evaluate(L,z)));
+&gt; Factorisation(np);
+[ &lt;1753104484044610457180695483606558837, 1&gt; ]
+</PRE>
+So the class group of C1 has order 752 over GF(2), and is has order
+752np over GF(2<sup>13</sup>), where np is a large prime. Now we create 
+some divisors, and make sure that D2 - (deg)(D2)D0 is in the subgroup generated by D1 - (deg)(D1)D0.
+<P>
+<P>
+<PRE>
+&gt; F13&lt;u&gt;:=GF(2^13);
+&gt; C13:=ChangeRing(C1,F13);
+&gt; D1:=Divisor(C13![u^4758,u^3]);
+&gt; D2:=752*Divisor(C13![u^1325,u^6]);
+&gt; D0:=Divisor(C13![u^2456,u^11]);
+</PRE>
+In order to get an idea what is going on, we set the verbose flag, and we 
+perform the discrete logarithm computation. In the end, we verify the result.
+<P>
+<P>
+<PRE>
+&gt; SetVerbose("CurveIndexcal",1);
+&gt; time dl:=IndexCalculus(D1,D2,D0,752*np);
+Try to find factor base of size 5087
+Try to find 5138 relations.
+
+First input divisor already splits.
+
+Second input divisor already splits.
+
+First index calculus input: Divisor 1*Place at (u^4758 : u^3 : 1)
+Multiple of original input: 1
+
+Second index calculus input: Divisor 752*Place at (u^1325 : u^6 : 1)
+Multiple of original input: 1
+
+Sieving
+
+Number of relations found: 5138
+Number of elements in factor base: 5089
+
+Find element of kernel of matrix
+Found kernel element
+
+DLP mod 1753104484044610457180695483606558837:
+12522086041061799120645274502697942
+Time: 164.900
+&gt; MultiplyDivisor(dl,D1,D0) eq Reduction(D2,D0);
+true
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1367.htm">[Next]</A><A  HREF = "text1365.htm">[Prev]</A> <A  HREF = "text1367.htm">[Right]</A> <A  HREF = "text1365.htm">[Left]</A> <A  HREF = "text1356.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

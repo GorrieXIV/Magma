@@ -1,0 +1,2 @@
+174,1
+S,HeegnerPoints,"Given an elliptic curve E over Q, and a negative integer D (which must be a fundamental discriminant times a square), the function returns a polynomial whose roots are the x-coordinates of the Heegner points on E associated to D. Two objects are returned: firstly a tuple containing the polynomial and a multiplicity, and secondly one of the Heegner points",0,2,0,0,0,0,0,0,0,148,,0,0,334,,303,372,-38,-38,-38,-38

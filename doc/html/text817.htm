@@ -1,0 +1,731 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Simplification</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text818.htm">[Next]</A><A  HREF = "text816.htm">[Prev]</A> <A  HREF = "text818.htm">[Right]</A> <A  HREF = "text816.htm">[Left]</A> <A  HREF = "text808.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "9407">Simplification</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text817.htm#9408">Reducing Generating Sets</A>
+<LI> <A  HREF = "text817.htm#9410">Tietze Transformations</A>
+</UL>
+<H4><A NAME = "9408">Reducing Generating Sets</A></H4>
+
+<P>
+<P>
+Subgroups of finitely presented groups constructed in certain ways may be
+created with a generating set containing redundant generators. The most
+important case in which this situation may occur is a subgroup of the domain
+of a homomorphism f of groups, defined as the preimage under f of some
+given subgroup of the codomain of f. In this case, the
+generating set of the preimage will contain generators of the kernel of f
+and is likely to be not minimal.
+<P>
+<P>
+Since reducing the generating set may be expensive and is not necessary in all
+situations, a reduction is not done automatically.  Instead, Magma provides
+a function for reducing generating sets of finitely presented groups.
+
+
+<H5><A NAME = "9409"></A><A NAME = "GrpFP_1:ReduceGenerators">ReduceGenerators</A>(G) : GrpFP -&gt; GrpFP, Map</H5>
+<BLOCKQUOTE>
+Given a finitely presented group G, attempt to construct a presentation H
+on fewer generators. H is returned as a subgroup of G (which of course is
+equal to G), so that element coerce is possible. The isomorphism from G
+to H is returned as second return value.
+<P>
+<P>
+If a presentation for G is known, this function attempts to simplify this
+presentation (cf. section <A  HREF = "text817.htm#9410">Tietze Transformations</A>). Otherwise, it
+tries to rewrite G with respect to a suitable supergroup to obtain a
+presentation on fewer generators.
+<P>
+<P>
+For a sample application of this function, see Example
+<A  HREF = "text818.htm#9436">H75E81</A>. 
+</BLOCKQUOTE>
+<H4><A NAME = "9410">Tietze Transformations</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+Given a finitely presented group G, the user can attempt to simplify
+its presentation using Tietze transformations and substring searching. The
+choice of simplification strategy can either be left to Magma or selected
+by the user.
+
+
+<P>
+<P>
+<P>
+The strategy employed by the function <A  HREF = "text817.htm#GrpFP_1:Simplify">Simplify</A> can be
+controlled using the following set of parameters.
+<P>
+var Preserve: [RngIntElt]               Default: []
+This parameter can be used to indicate that certain generators of G should
+not be eliminated (<I>default</I>: no restrictions). <TT>Preserve</TT> is assigned
+a sequence of integers in the range [1, ..., n], where n is the number of
+generators of G, containing the numbers of those generators of G which
+should be preserved.  See Example <A  HREF = "text817.htm#9427">H75E78</A> for
+a sample application.
+<P>
+var Iterations: RngIntElt               Default: 10000
+This parameter sets the maximal number of iterations of the main elimination /
+simplification cycle which will be performed.
+<P>
+var EliminationLimit: RngIntElt         Default: 100
+This parameter sets the maximal number of generators which may be eliminated
+in each elimination phase.
+<P>
+var LengthLimit: RngIntElt              Default: &infin;
+If <TT>LengthLimit</TT> is set to n, any eliminations which would make the
+total length of the relators grow beyond n will not be performed
+(<I>default</I>: no limit).
+<P>
+var ExpandLimit: RngIntElt              Default: 150
+If <TT>ExpandLimit</TT> is set to n, the total length of the relators is not
+permitted to grow by more than a factor of n% in any elimination phase
+(<I>default</I>: 150%). If this limit is reached, the elimination phase is
+aborted.
+<P>
+var GeneratorsLimit: RngIntElt          Default: 0
+Any eliminations which would reduce the number of generators below the value
+of <TT>GeneratorsLimit</TT> will not be performed (<I>default</I>: 0).
+<P>
+var SaveLimit: RngIntElt                Default: 10
+If <TT>SaveLimit</TT> is set to n, any simplification phase is repeated, if
+the reduction in the total length of the relators achieved during this phase
+exceeds n% (<I>default</I>: 10%).
+<P>
+var SearchSimultaneous: RngIntElt       Default: 20
+This parameter sets the number of relators processed simultaneously in a
+simplification phase.
+<P>
+var Print: RngIntElt                    Default: 0
+This parameter controls the volume of printing. By default its value
+is that returned by <A  HREF = "text50.htm#Env:GetVerbose">GetVerbose</A><TT>("Tietze")</TT>, which is
+0 unless it has been changed through use of <A  HREF = "text50.htm#Env:SetVerbose">SetVerbose</A>.
+<H5><A NAME = "9411"></A><A NAME = "GrpFP_1:Simplify">Simplify</A>(G: parameters) : GrpFP -&gt; GrpFP, Map</H5>
+<BLOCKQUOTE>
+Given a finitely presented group G, attempt to simplify the presentation
+of G by
+repeatedly eliminating generators and subsequently shortening relators by
+substitution of substrings that correspond to the left or right hand side of a
+relation. The order in which transformations are applied
+is determined by a set of heuristics. The transformation process terminates
+when no more eliminations of generators and no more length reducing substring
+replacements are possible.
+<P>
+<P>
+A new group K isomorphic to G is
+returned which is (hopefully) defined by a simpler presentation than
+G. K is returned as a subgroup of G. The isomorphism f:G -&gt; K
+is returned as second return value.
+<P>
+<P>
+The simplification process can be controlled by a set of parameters described
+below.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9412">Example <TT>GrpFP_1_Simplify1 (H75E76)</TT></A></H3>
+<P>
+<P>
+<PRE>
+Consider the Fibonacci group $F(8)$.
+&gt; F&lt;x1, x2, x3, x4, x5, x6, x7, x8&gt; := FreeGroup(8);
+&gt; F8&lt;x1, x2, x3, x4, x5, x6, x7, x8&gt; := 
+&gt;     quo&lt; F | x1*x2=x3, x2*x3=x4, x3*x4=x5, x4*x5=x6,
+&gt;              x5*x6=x7, x6*x7=x8, x7*x8=x1, x8*x1=x2&gt;;
+</PRE>
+We use the function <A  HREF = "text817.htm#GrpFP_1:Simplify">Simplify</A> in order to obtain a presentation
+of F(8) on two generators.
+<P>
+<P>
+<PRE>
+&gt; H&lt;[y]&gt;, f := Simplify(F8);
+&gt; H;
+Finitely presented group H on 2 generators
+Generators as words in group F8
+    y[1] = x3
+    y[2] = x4
+Relations
+    y[2] * y[1]^-2 * y[2] * y[1]^-1 * y[2]^2 * y[1] * y[2]^2 * 
+       y[1]^-1 = Id(H)
+    y[1] * y[2] * y[1] * y[2]^2 * y[1] * y[2] * y[1]^2 * y[2]^-1 
+       * y[1] = Id(H)
+</PRE>
+The isomorphism f can be used to express the old generators in terms of
+the new ones.
+<P>
+<P>
+<PRE>
+&gt; f;
+Mapping from: GrpFP: F8 to GrpFP: H
+&gt; f(x1);
+y[1]^2 * y[2]^-1
+</PRE>
+<HR>
+<H5><A NAME = "9413"></A><A NAME = "GrpFP_1:SimplifyLength">SimplifyLength</A>(G: parameters) : GrpFP -&gt; GrpFP, Map</H5>
+<BLOCKQUOTE>
+Given a finitely presented group G, attempt to eliminate generators and
+shorten relators by locating substrings that correspond to the left or
+right hand side of a relation. The order in which transformations are applied
+is determined by a set of heuristics. As opposed to the function
+<A  HREF = "text817.htm#GrpFP_1:Simplify">Simplify</A>, this function terminates the transformation 
+process when the total length of the presentation starts to increase with
+the elimination of further generators.
+<P>
+<P>
+A new group K isomorphic to G is
+returned which is (hopefully) defined by a simpler presentation than
+G. K is returned as a subgroup of G. The isomorphism f:G -&gt; K
+is returned as second return value. This function accepts the same set of
+parameters as the function <A  HREF = "text817.htm#GrpFP_1:Simplify">Simplify</A>.
+</BLOCKQUOTE>
+<H5><A NAME = "9414">TietzeProcess(G: parameters) : GrpFP -&gt; Process(Tietze)</A></H5>
+<BLOCKQUOTE>
+Create a Tietze process that takes the presentation for the fp-group G 
+as its starting point.  This process may now be manipulated by various
+procedures that will be described below.
+<P>
+<P>
+<PRE>
+     Preserve: [RngIntElt]               Default: []
+</PRE>
+<P>
+<PRE>
+     Iterations: RngIntElt               Default: 10000
+</PRE>
+<P>
+<PRE>
+     EliminationLimit: RngIntElt         Default: 100
+</PRE>
+<P>
+<PRE>
+     LengthLimit: RngIntElt              Default: &infin;
+</PRE>
+<P>
+<PRE>
+     ExpandLimit: RngIntElt              Default: 150
+</PRE>
+<P>
+<PRE>
+     GeneratorsLimit: RngIntElt          Default: 0
+</PRE>
+<P>
+<PRE>
+     SaveLimit: RngIntElt                Default: 10
+</PRE>
+<P>
+<PRE>
+     SearchSimultaneous: RngIntElt       Default: 20
+</PRE>
+<P>
+<PRE>
+     Print: RngIntElt                    Default: 0
+</PRE>
+These parameters define the defaults used for the Tietze operations.
+Each of the various procedures described below allows some or all of
+these control parameters to be overridden.
+<P>
+<P>
+For the meanings of the parameters, see the description
+under <A  HREF = "text817.htm#GrpFP_1:Simplify">Simplify</A> above.
+</BLOCKQUOTE>
+<H5><A NAME = "9415">ShowOptions(~P : parameters) : GrpFPTietzeProc -&gt;</A></H5>
+<BLOCKQUOTE>
+Display the defaults associated with the Tietze process P.
+The current status of all the control parameters may be viewed by using
+this function.
+</BLOCKQUOTE>
+<H5><A NAME = "9416">SetOptions(~P : parameters) : GrpFPTietzeProc -&gt;</A></H5>
+<BLOCKQUOTE>
+Change the defaults associated with the Tietze process P.  All of
+the control parameters may be overridden permanently by using this
+function.
+</BLOCKQUOTE>
+<H5><A NAME = "9417">Simplify(~P : parameters) : GrpFPTietzeProc -&gt;</A></H5>
+<H5>SimplifyPresentation(~P : parameters) : GrpFPTietzeProc -&gt;</H5>
+<BLOCKQUOTE>
+Use the default strategy to simplify the presentation as much as possible. The
+transformation process is terminated when no more eliminations of generators
+and no more length reducing substring replacements are possible.
+All the control parameters may be overridden for this function.
+</BLOCKQUOTE>
+<H5><A NAME = "9418">SimplifyLength(~P : parameters) : GrpFPTietzeProc -&gt;</A></H5>
+<BLOCKQUOTE>
+Use the default strategy to simplify the presentation as much as possible. The
+transformation process is terminated when the total length of the presentation
+starts to increase with the elimination of further generators.
+All the control parameters may be overridden for this function.
+</BLOCKQUOTE>
+<H5><A NAME = "9419">Eliminate(~P: parameters) : GrpFPTietzeProc -&gt;</A></H5>
+<H5>EliminateGenerators(~P: parameters) : GrpFPTietzeProc -&gt;</H5>
+<BLOCKQUOTE>
+Eliminate generators in the presentation defined by the Tietze process P 
+under the control of the parameters. First any relators of length one are 
+used to eliminate trivial generators.  Then, if there are any non-involutory 
+relators of length two, the generator with the higher number is eliminated.
+Of the control parameters, only <TT>EliminationLimit, ExpandLimit,
+GeneratorsLimit</TT> and <TT>LengthLimit</TT> may be overridden by this function.
+<P>
+<P>
+<PRE>
+     Relator: RngIntElt                  Default: 0
+</PRE>
+If n &gt; 0, try to eliminate a generator using the n-th relator.
+ If no generator is
+specified by the parameter <TT>Generator</TT> below, then the generator which
+is eliminated will be the one occurring once in the relator that
+produced the smallest total relator length.
+<P>
+<P>
+<PRE>
+     Generator: RngIntElt                Default: 0
+</PRE>
+If n &gt; 0, try to eliminate the n-th generator. 
+If no relation is specified by the parameter <TT>Relator</TT> above, then
+the shortest relator in which the n-th generator occurs exactly
+once (if any) is used.
+</BLOCKQUOTE>
+<H5><A NAME = "9420">Search(~P: parameters) : GrpFPTietzeProc -&gt;</A></H5>
+<BLOCKQUOTE>
+Simplifies the presentation by repeatedly searching for common
+substrings in pairs of relators where the length of the substring
+is greater than half the length of the shorter relator and making
+the corresponding transformations.  Relators of length 1 or 2 are
+also used to generate simplifications.  The control parameters
+<TT>SaveLimit</TT> and <TT>SearchSimultaneous</TT> can be overridden.
+</BLOCKQUOTE>
+<H5><A NAME = "9421">SearchEqual(~P: parameters) : GrpFPTietzeProc -&gt;</A></H5>
+<BLOCKQUOTE>
+Modifies the presentation by repeatedly searching for common
+substrings in pairs of relators where the length of the substring
+is exactly half the length of the shorter relator and making
+the corresponding transformations.
+The control parameter <TT>SearchSimultaneous</TT> can be overridden.
+</BLOCKQUOTE>
+<H5><A NAME = "9422"></A><A NAME = "GrpFP_1:Tietze:Group">Group</A>(P) : GrpFPTietzeProc -&gt; GrpFP, Map</H5>
+<BLOCKQUOTE>
+Extract the group G defined by the current presentation
+associated with the Tietze process P, together with the
+isomorphism between the original group and G. G is returned as a
+subgroup of the original group underlying P.
+</BLOCKQUOTE>
+<H5><A NAME = "9423">NumberOfGenerators(P) : GrpFPTietzeProc -&gt; RngIntElt</A></H5>
+<H5>Ngens(P) : GrpFPTietzeProc -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The number of generators for the presentation currently stored by
+the Tietze process P.
+</BLOCKQUOTE>
+<H5><A NAME = "9424">NumberOfRelations(P) : GrpFPTietzeProc -&gt; RngIntElt</A></H5>
+<H5>Nrels(P) : GrpFPTietzeProc -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+The number of relations in the presentation currently stored by
+the Tietze process P.
+</BLOCKQUOTE>
+<H5><A NAME = "9425">PresentationLength(P) : GrpFPTietzeProc -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The sum of the lengths of the relators in the presentation
+currently stored by the Tietze process P.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "9426">Example <TT>GrpFP_1_F276 (H75E77)</TT></A></H3>
+The Fibonacci group F(n) is generated by { x<sub>1</sub>, ..., x<sub>n</sub> }
+with defining relations
+x<sub>i</sub>x<sub>i + 1</sub> = x<sub>i + 2</sub>, i &isin;{ 1, ..., n },
+where the subscripts are taken modulo n. 
+Consider the Fibonacci group F(7), which is defined in terms of 
+the presentation
+<PRE>
+     &lt;x_1,x_2,x_3,x_4,x_5,x_6,x_7 | x_1x_2=x_3, x_2x_3=x_4, x_3x_4=x_5,
+         x_4x_5=x_6, x_5x_6=x_7, x_6x_7=x_1, x_7x_1=x_2&gt;.
+</PRE>The following code will produce a 2-generator, 2-relator presentation for
+F(7):
+<P>
+<P>
+<PRE>
+&gt; F&lt;x1, x2, x3, x4, x5, x6, x7&gt; := FreeGroup(7);
+&gt; F7&lt;x1, x2, x3, x4, x5, x6, x7&gt; := 
+&gt;    quo&lt; F | x1*x2=x3, x2*x3=x4, x3*x4=x5, x4*x5=x6,
+&gt;             x5*x6=x7, x6*x7=x1, x7*x1=x2 &gt;;
+&gt; P := TietzeProcess(F7);
+&gt; for i := 7 to 3 by -1 do
+&gt;    Eliminate(~P: Generator := i);
+&gt; end for;
+&gt; Search(~P);
+&gt; H&lt;x, y&gt;, f := Group(P);
+&gt; H;
+Finitely presented group H on 2 generators
+Generators as words in group F7
+    x = x1
+    y = x2
+Relations
+    x^-1 * y^-1 * x^-1 * y^-2 * x^-1 * y * x^-1 * y * x^-1 = Id(H)
+    x * y^3 * x^-1 * y * x^-1 * y^2 * x * y * x * y^-1 = Id(H)
+</PRE>
+The resulting presentation is
+&lt;a, b  |  a<sup> - 1</sup>b<sup> - 1</sup>a<sup> - 1</sup>b<sup> - 2</sup>a<sup> - 1</sup>ba<sup> - 1</sup>ba<sup> - 1</sup>, ab<sup>3</sup>a<sup> - 1</sup>ba<sup> - 1</sup>b<sup>2</sup>abab<sup> - 1</sup>&gt;.
+<P>
+We can use the isomorphism f returned by the function
+<A  HREF = "text817.htm#GrpFP_1:Tietze:Group">Group</A> to express arbitrary words in the original
+generators of F(7) in terms of the new generators x and y:
+<P>
+<P>
+<PRE>
+&gt; f;
+Mapping from: GrpFP: F7 to GrpFP: H
+&gt; f(x7);
+x * y^2 * x * y^2 * x * y * x * y^2 * x * y
+</PRE>
+Alternatively, a similar effect may be obtained using the
+<A  HREF = "text817.htm#GrpFP_1:Simplify">Simplify</A> function:
+<P>
+<P>
+<PRE>
+&gt; F&lt;x1, x2, x3, x4, x5, x6, x7&gt; := FreeGroup(7);
+&gt; F7&lt;x1, x2, x3, x4, x5, x6, x7&gt; := 
+&gt;    quo&lt; F | x1*x2=x3, x2*x3=x4, x3*x4=x5, x4*x5=x6,
+&gt;       x5*x6=x7, x6*x7=x1, x7*x1=x2&gt;;
+&gt; H&lt;x, y&gt;, f := Simplify(F7: Iterations := 5);
+&gt; H;
+Finitely presented group H on 2 generators
+Generators as words in group F7
+    x = x2
+    y = x3
+Relations
+    x * y^-1 * x * y^2 * x * y * x^2 * y^-1 = Id(H)
+    y * x * y^2 * x^-1 * y * x^-2 * y * x^-2 = Id(H)
+</PRE>
+Again, we can use the isomorphism f returned by the function
+<A  HREF = "text817.htm#GrpFP_1:Simplify">Simplify</A> to express arbitrary words in the original
+generators of F(7) in terms of the new generators x and y:
+<P>
+<P>
+<PRE>
+&gt; f;
+Mapping from: GrpFP: F7 to GrpFP: H
+&gt; f(x7);
+y * x * y * x * y^2 * x * y
+</PRE>
+<HR>
+<H3><A NAME = "9427">Example <TT>GrpFP_1_ReduceGeneratingSet (H75E78)</TT></A></H3>
+<P>
+In a situation where some proper subset S of the original generating set of
+a finitely group G is sufficient to generate G, the function
+<A  HREF = "text817.htm#GrpFP_1:Simplify">Simplify</A> can also be used to rewrite words in the original
+generators in terms of the elements of S. Consider again one of the Fibonacci
+groups, say F(8).
+<P>
+<P>
+<PRE>
+&gt; F&lt;x1, x2, x3, x4, x5, x6, x7, x8&gt; := FreeGroup(8);
+&gt; F8&lt;x1, x2, x3, x4, x5, x6, x7, x8&gt; := 
+&gt;     quo&lt; F | x1*x2=x3, x2*x3=x4, x3*x4=x5, x4*x5=x6,
+&gt;        x5*x6=x7, x6*x7=x8, x7*x8=x1, x8*x1=x2&gt;;
+</PRE>
+Obviously, F(8) is generated by x<sub>1</sub> and x<sub>2</sub>. We utilise the function
+<A  HREF = "text817.htm#GrpFP_1:Simplify">Simplify</A> to obtain a presentation H of F(8) on x<sub>1</sub> and
+x<sub>2</sub>, using the parameter <TT>Preserve</TT> to indicate that x<sub>1</sub> and x<sub>2</sub> --
+i.e. the first and the second generator -- are to be retained in the new
+presentation. We also compute the isomorphism f:F(8) -&gt; H.
+<P>
+<P>
+<PRE>
+&gt; H&lt;x, y&gt;, f := Simplify(F8: Preserve := [1,2]);
+</PRE>
+Mapping elements of F(8) to H using the map f basically means to
+rewrite these elements in terms of the generators x = x<sub>1</sub> and y = x<sub>2</sub>.
+Since H is returned as a subgroup of F(8), the resulting words can be
+coerced from H back into F(8), yielding words explicitly in x<sub>1</sub> and
+x<sub>2</sub>.
+<P>
+<P>
+<PRE>
+&gt; F8 ! f(x5*x6);
+x1 * x2^2 * x1 * x2 * x1^2 * x2^-1 * x1 * x2^-1
+</PRE>
+<HR>
+<H3><A NAME = "9428">Example <TT>GrpFP_1_F29 (H75E79)</TT></A></H3>
+The finiteness of the last of the Fibonacci groups, F(9), 
+was settled in 1988 by M.F. Newman using the following result:
+<P>
+<P>
+<B>Theorem.</B> <I>Let G be a group with a finite presentation on b
+generators and r relations, and suppose
+p is an odd prime. Let d denote the rank of the elementary abelian
+group G<sub>1</sub> = [G, G]G<sup>p</sup> and let e denote the rank 
+of G<sub>2</sub> = [G<sub>1</sub>, G]G<sup>p</sup>. If
+r - b &lt; d<sup>2</sup>/2 - d/2 - d - e
+or
+r - b &le;d<sup>2</sup>/2 - d/2 - d - e + (e + d/2 - d<sup>2</sup>/4)d/2,
+then G has arbitrary large quotients of p-power order.</I>
+<P>
+<P>
+We present a proof that F(9) is infinite using this result.
+<P>
+<P>
+<PRE>
+&gt; Left := func&lt; b, r | r - b &gt;;
+&gt; Right := func&lt; d, e | d^2 div 2 - d div 2 - d - e + 
+&gt;                       (e + d div 2 - d^2 div 4)*(d div 2) &gt;;
+&gt; 
+&gt; 
+&gt; F&lt; x1,x2,x3,x4,x5,x6,x7,x8,x9 &gt; := 
+&gt;  	Group&lt; x1, x2, x3, x4, x5, x6, x7, x8, x9 | 
+&gt;              x1*x2=x3, x2*x3=x4, x3*x4=x5, x4*x5=x6, x5*x6=x7, 
+&gt;              x6*x7=x8, x7*x8=x9, x8*x9=x1, x9*x1=x2 &gt;;
+&gt;
+&gt; F;
+Finitely presented group F on 9 generators
+Relations
+       x1 * x2 = x3
+       x2 * x3 = x4
+       x3 * x4 = x5
+       x4 * x5 = x6
+       x5 * x6 = x7
+       x6 * x7 = x8
+       x7 * x8 = x9
+       x8 * x9 = x1
+       x9 * x1 = x2
+
+&gt; AbelianQuotientInvariants(F);
+[ 2, 38 ]
+</PRE>
+Thus the nilpotent quotient of F is divisible by 2 and 19.
+We examine the 2- and 19-quotients of F.
+<P>
+<P>
+<PRE>
+&gt; Q1 := pQuotient(F, 2, 0: Print := 1);
+Class limit set to 127.
+
+Lower exponent-2 central series for F
+
+Group: F to lower exponent-2 central class 1 has order 2^2
+
+Group: F to lower exponent-2 central class 2 has order 2^3
+
+Group completed. Lower exponent-2 central class = 2, Order = 2^3
+&gt; Q2 := pQuotient(F, 19, 0: Print := 1);
+Class limit set to 127.
+
+Lower exponent-19 central series for F
+
+Group: F to lower exponent-19 central class 1 has order 19^1
+
+Group completed. Lower exponent-19 central class = 1, Order = 19^1
+</PRE>
+Thus, the nilpotent residual of F has index 152. We try to locate this
+subgroup. We first take a 2-generator presentation for F.
+<P>
+<P>
+<PRE>
+&gt; G := Simplify(F);
+&gt; G;
+Finitely presented group G on 2 generators
+Generators as words in group F
+   G.1 = x4
+   G.2 = x5
+Relations
+   G.2 * G.1 * G.2 * G.1 * G.2^2 * G.1 * G.2^2 * G.1^-1 * G.2 * G.1^-2 * G.2 *
+      G.1^-2 = Id(G)
+   G.1 * G.2^2 * G.1 * G.2 * G.1^2 * G.2^-1 * G.1^2 * G.2^-1 * G.1 * G.2^-1 * 
+      G.1^2 * G.2^-1 * G.1 * G.2^-1 = Id(G)
+&gt; H := ncl&lt; G | (G.1, G.2) &gt;;
+&gt; H;
+Finitely presented group H
+Index in group G is 76 = 2^2 * 19
+Subgroup of group G defined by coset table
+</PRE>
+We haven't got the full nilpotent residual yet, so we try again. 
+<P>
+<P>
+<PRE>
+&gt; H := ncl&lt; G | (G.1*G.1, G.2) &gt;;
+&gt; H;
+Finitely presented group H
+Index in group G is 152 = 2^3 * 19
+Subgroup of group G defined by coset table
+</PRE>
+Now, we have it.
+<P>
+<P>
+<PRE>
+&gt; AbelianQuotientInvariants(H);
+[ 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5 ]
+</PRE>
+The nilpotent residual H has a 5-quotient. We construct a 
+presentation for H and then calculate d and e for its 5-quotient.
+<P>
+<P>
+<PRE>
+&gt; K := Rewrite(G, H: Simplify := false);
+&gt; KP := pQuotientProcess(K, 5, 1);
+&gt; d := FactoredOrder(ExtractGroup(KP))[1][2];
+&gt; NextClass(~KP);
+&gt; e := FactoredOrder(ExtractGroup(KP))[1][2] - d;
+&gt; "D = ", d, "e = ", e;
+d =  18 e =  81
+&gt; "Right hand side = ", Right(d, e);
+Right hand side =  135
+&gt; "Left hand side = ", Left(Ngens(K), #Relations(K));
+Left hand side =  151
+</PRE>
+Since <TT>Left</TT> is greater than <TT>Right</TT>, this presentation for H
+doesn't work. Thus we start eliminating generators.
+<P>
+<P>
+<PRE>
+&gt; K := Simplify(K: Iterations := 1);
+&gt; "Left hand side = ", Left(Ngens(K), #Relations(K));
+Left hand side =  136
+&gt; K := Simplify(K: Iterations := 1);
+&gt; "Left hand side = ", Left(Ngens(K), #Relations(K));
+Left hand side =  123
+</PRE>
+Got it! By Newman's theorem, H has an infinite 5-quotient and so F
+must be infinite.
+<HR>
+<H3><A NAME = "9429">Example <TT>GrpFP_1_L372 (H75E80)</TT></A></H3>
+In this example, we consider a -- quite unpleasant -- presentation for some
+group G. In fact, it is a presentation for the group
+PSL(3,7):2,
+but we assume that we do not know this and want to compute the order of the
+finitely presented group G using coset enumeration.
+<P>
+We note in passing that the strategy outlined in this example is, together
+with other approaches, applied by the function <A  HREF = "text814.htm#GrpFP_1:Order">Order</A>.
+<P>
+<P>
+<PRE>
+&gt; F&lt;a,b,c&gt; := FreeGroup(3);
+&gt; rels := [ a^4, b^2, (a,b)^3, (a*b)^8, ((a*b)^2*(a^-1*b)^3)^2, 
+&gt;  c^2, (c*a*c*a^2)^2, (c*a)^3*(c*a^-1)^3,
+&gt;  c*a*b*c*a^-1*b*a^-1*c*a*b*c*a^2*a*b*a^-1,
+&gt;  c*a*b*c*b*a*c*a*c*a^-1*b*c*b*a^-1*c*a^-1,
+&gt;  c*a*b*a^-1*c*a*b*a^-1*c*a*b*a^-1*c*a*b*a^-1,
+&gt;  c*b*a^2*b*c*b*c*a^2*c*b*c*b*a^2*b,
+&gt;  c*a^2*c*b*a*c*b*a*c*b*a*c*a^-1*c*a*b*a^-1,
+&gt;  c*a^-1*b*a*c*a^-1*b*a*c*b*a*b*a^2*b*a^-1*b,
+&gt;  c*a*b*a^-1*b*c*b*a^-1*b*c*a^-1*b*a*b*a*c*b*c*b,
+&gt;  c*a*c*b*a*b*c*a*c*b*a*b*c*a*c*b*a*b,
+&gt;  c*b*a^-1*b*c*a^-1*c*a^-1*b*a*b*c*b*c*a^2*b*a*b*a^-1,
+&gt;  c*b*a^-1*b*a*b*c*b*a^-1*b*a*b*c*b*a^-1*b*a*b,
+&gt;  c*a^2*b*a^-1*b*c*b*c*b*a^-1*b*a*c*b*a^2*b*a^-1*b
+&gt; ];
+&gt; G&lt;a,b,c&gt; := quo&lt; F | rels &gt;;
+</PRE>
+As it happens, trying to determine the order of G by enumerating the cosets
+of the trivial subgroup is quite hard. -- Even the predefined enumeration
+strategy <TT>"Hard"</TT> (cf. <A  HREF = "text814.htm#GrpFP_1:ToddCoxeter">ToddCoxeter</A> and
+<A  HREF = "text826.htm#GrpFP_2:CosetEnumerationProcess">CosetEnumerationProcess</A>) does not give a finite result.
+<P>
+<P>
+<PRE>
+&gt; time ToddCoxeter(G, sub&lt;G|&gt; : Strategy := "Hard");
+0
+Time: 199.620
+</PRE>
+Of course we could try to increase the workspace for the coset enumeration,
+but we decide to be more clever. Trying random words in the generators of G,
+we easily find some subgroup S of G with pretty small index in G.
+<P>
+<P>
+<PRE>
+&gt; S := sub&lt; G | b, c*a*c*b*a*b &gt;;
+&gt; time Index(G, S);
+114
+Time: 0.120
+</PRE>
+We now have to compute the order of S. In order to be able to do this using
+coset enumeration, we have to construct a presentation for S by rewriting
+S w.r.t. G.
+<P>
+<P>
+<PRE>
+&gt; time R := Rewrite(G, S : Simplify := false);
+Time: 0.030
+</PRE>
+However, the presentation obtained by Reidemeister-Schreier rewriting without
+any simplification is not suitable for coset enumeration: it contains too
+many generators and its total length is quite high.
+<P>
+<P>
+<PRE>
+&gt; NumberOfGenerators(R);
+133
+&gt; PresentationLength(R);
+14384
+</PRE>
+An enumeration with the predefined enumeration strategy <TT>"Hard"</TT> does
+not produce a finite result. (Note that in consideration of the high total
+relator length, we select a coset table based enumeration style;
+cf. <A  HREF = "text826.htm#GrpFP_2:CosetEnumerationProcess">CosetEnumerationProcess</A> in Chapter <A  HREF = "text823.htm#9460">FINITELY PRESENTED GROUPS: ADVANCED</A>.)
+<P>
+<P>
+<PRE>
+&gt; time ToddCoxeter(R, sub&lt;R|&gt; : Strategy := "Hard", Style := "C");
+0
+Time: 4.330
+</PRE>
+On the other hand, simplifying the presentation by reducing the number of
+generators as much as possible is not a good idea either, since the total
+relator length grows massively.
+<P>
+<P>
+<PRE>
+&gt; time Rs := Simplify(R);
+Time: 43.900
+&gt; NumberOfGenerators(Rs);
+3
+&gt; PresentationLength(Rs);
+797701
+</PRE>
+Again, an enumeration with the predefined enumeration strategy <TT>"Hard"</TT>
+does not produce a finite result.
+<P>
+<P>
+<PRE>
+&gt; time ToddCoxeter(Rs, sub&lt;Rs|&gt; : Strategy := "Hard", Style := "C");
+0
+Time: 22015.849
+</PRE>
+The best strategy is, to simplify the presentation obtained from the
+Reidemeister-Schreier procedure by eliminating generators until the total
+length of the relators starts to grow.
+<P>
+<P>
+<PRE>
+&gt; time Rsl := SimplifyLength(R);
+Time: 0.330
+&gt; NumberOfGenerators(Rsl);
+48
+&gt; PresentationLength(Rsl);
+7152
+</PRE>
+A coset enumeration for this presentation produces a finite result in a
+reasonable amount of time.
+<P>
+<P>
+<PRE>
+&gt; time ToddCoxeter(Rsl, sub&lt;Rsl|&gt; : Strategy := "Hard", Style := "C");
+32928
+Time: 289.410
+</PRE>
+This finally proves that G is finite and has order 32928 * 114 = 3753792.
+<HR>
+<PRE></PRE> <A  HREF = "text818.htm">[Next]</A><A  HREF = "text816.htm">[Prev]</A> <A  HREF = "text818.htm">[Right]</A> <A  HREF = "text816.htm">[Left]</A> <A  HREF = "text808.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

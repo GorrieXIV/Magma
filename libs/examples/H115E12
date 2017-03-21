@@ -1,0 +1,40 @@
+"Source: Text/Commut/PMod.text";
+"Line: 2579";
+"Date: Tue Jun  7 22:27:15 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Commut/PMod.text, line: 2579
+// Example: H115E12 ()
+print "Example: H115E12";
+ei := GetEchoInput();
+SetEchoInput(true);
+function HilbertNumeratorBetti(M)
+   P<t> := PolynomialRing(IntegerRing());
+   return &+[
+       (-1)^i*BettiNumber(M, i, j)*t^j:
+          j in [0 .. MaximumBettiDegree(M, i)],
+          i in [0 .. #BettiNumbers(M)]
+   ];
+end function;
+Q := RationalField();
+R<x,y,z,t> := PolynomialRing(Q, 4, "grevlex");
+B := [
+    -x^2 + y*t, -y*z + x*t, x*z - t^2,
+    x*y - t^2, -y*z + x*t, -x^2 + z*t
+];
+M := GradedModule(Ideal(B));
+HilbertNumeratorBetti(M);  
+HilbertNumerator(M);     
+n := 4;
+R<[x]> := PolynomialRing(Q, n^2, "grevlex");
+A := Matrix(n, [R.i: i in [1 .. n^2]]);
+A;
+I := Ideal(Minors(A, 2));
+#Basis(I);
+assert $1 eq 36;
+M := QuotientModule(I);
+time HilbertNumeratorBetti(M);
+time HilbertNumerator(M);
+assert $1 eq $2;
+BettiNumbers(M);
+BettiTable(M);
+SetEchoInput(ei);

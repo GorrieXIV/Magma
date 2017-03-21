@@ -1,0 +1,61 @@
+
+// Test cyclotomic units etc
+// SRD, August 2014
+
+
+prec := 200;
+
+function regulator(S, I)
+    printf "Conjugates: ";
+    time
+    C := [Conjugates(u : Precision:=prec) : u in S];
+    L := [[Log(Abs(c)) : c in cc[I]] : cc in C];
+    return Determinant(Matrix(L))^2;
+end function;
+
+
+for N := 2 to 50 do 
+
+    "N =", N;
+    F := CyclotomicField(N);
+    ZF := Integers(F);
+
+    assert Basis(F) eq Basis(MaximalOrder(F)); // should maintain this convention
+
+    r1, r2 := Signature(F);
+    r := r1 + r2 - 1;
+    I := [1 .. r1] cat [r1+1 .. r1+2*r2-2 by 2];
+
+    printf "Cyclo units: ";
+    time
+    CU := CyclotomicUnits(F);
+    assert #CU eq r;
+
+    if r eq 0 then continue; end if;
+
+    for u in CU do
+        ui := 1/u;
+        assert IsIntegral(u);
+        assert IsIntegral(ui);
+        assert u in ZF;
+        assert ui in ZF;
+    end for;
+
+    RCU := regulator(CU, I);
+    assert RCU gt 0;
+
+    if N le 16 then
+        printf "Unit group: ";
+        time
+        U, mU := IndependentUnits(ZF);
+        BU := [U.i @ mU : i in [2..Ngens(U)]];
+        RU := regulator(BU, I);
+        assert RU gt 0;
+        bool, index := IsSquare(Round(RCU/RU)); assert bool and index gt 0;
+        "Index", index;
+
+        // assert Abs(R - h*R1) lt 10^(20-prec);
+    end if;
+
+end for;
+

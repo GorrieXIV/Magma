@@ -1,0 +1,211 @@
+function RandomPrimeIdeal(R)
+    if Type(R) in {RngOrd, RngQuad, RngCyc, RngFunOrd} then
+        p := RandomPrimeIdeal(CoefficientRing(R));
+        ps := Decomposition(R, p);
+        if Type(R) in {RngOrd, RngQuad, RngCyc} then
+            return ps[i][1] where i is Random([1 .. #ps]);
+        else
+            return ps[i] where i is Random([1 .. #ps]);
+        end if;
+    elif Type(R) eq  RngInt then
+        return RandomPrime(10);
+    elif Type(R) eq RngUPol then
+        if Characteristic(R) eq 0 then
+            return R!ChangeUniverse(Eltseq(RandomPrimePolynomial(PolynomialRing(GF(NextPrime(100))), 3)), Integers());
+        else
+            return RandomPrimePolynomial(R, 3);
+        end if;
+    elif Type(R) eq RngVal then
+        return R!(1/FieldOfFractions(R).1);
+    end if;
+
+end function;
+
+function RandomIdeal(R)
+//{Returns an ideal which is a random product of some random prime ideals}
+
+    if  Type(R) notin {RngOrd, RngQuad, RngCyc, RngFunOrd} then
+	error "Ring must be an order of a number field or a function field";
+    end if;
+
+    r := Random(1, 3);
+
+    I := 1*R;
+    for i in [1 .. r] do
+        I := I*RandomPrimeIdeal(R)^Random(1, 3);
+    end for;
+
+    return I;
+
+end function;
+
+//SetMemoryLimit(2*2^30);
+SetVerbose("ClassGroup", 3);
+SetVerbose("ClassGroupSieve", 3);
+
+procedure test_class_group_sieve(f, proof)
+    K<y> := NumberField(f);
+    O := MaximalOrder(K);
+    t := Cputime();
+    ShowMemoryUsage();
+    if proof then
+	time G, m := ClassGroup(O : Al := "Sieve");
+    else
+	time G, m := ClassGroup(O : Al := "Sieve", Proof := "GRH");
+    end if;
+    print G;
+    ShowMemoryUsage();
+    for i in [1 .. Ngens(G)] do
+	fi := m(G.i);
+	time assert fi @@ m eq G.i;
+	time assert not IsPrincipal(fi);
+	if Order(G.i) lt 10000 then
+	    fi := fi^Order(G.i);
+	    assert IsPrincipal(fi);
+	    _, g := IsPrincipal(fi);
+	    "Got generator";
+	    p, e := ProductRepresentation(g);
+	    if #p lt 10000 and Maximum(e) lt 1000000 then
+		assert g*O eq fi;
+	    end if;
+	end if;
+    end for;
+    if Ngens(G) eq 0 then
+	I := RandomIdeal(O);
+	assert IsPrincipal(I);
+	_, g := IsPrincipal(I);
+	"Got generator";
+	p, e := ProductRepresentation(g);
+	if #p lt 10000 and Maximum(e) lt 1000000 then
+	    assert g*O eq I;
+	end if;
+    end if;
+    #p, Maximum(e);
+    "TIME ", f, " = ", Cputime(t);
+    delete K, O, G, m;
+    ShowMemoryUsage();
+end procedure;
+
+R<x> := PolynomialRing ( Integers() );
+quick_polys := [x^3 + 295*x^2 + 220*x + 87, x^3 + 7427*x^2 + 443*x + 459, 
+x^3 + 3978*x^2 + 544*x + 227, //x^3 + 41*x^2 - 24182165285*x + 61443805587,
+x^4 - 211156*x^3 - 243*x^2 + 4154*x - 10610,
+x^5 + 62*x^4 + 4662*x^2 + 1178*x + 128,    //John's
+x^5 + x^4 - 3*x^3 - x + 18
+];
+
+for f in quick_polys do
+    test_class_group_sieve(f, f eq quick_polys[1]);
+end for;
+
+/*
+if not false then 
+f := x^3 - NextPrime(10^30);		// TOO LARGE! for deg > 2
+f:= x^3 + 7427*x^2 + 443*x + 459; 	// 32s 14/11 36s 12/11 38s 11/11	50s 10/11	69s 3/11 	47s 1/11	11s 27/10
+test_class_group_sieve(f);
+f := x^3 + 295*x^2 + 220*x + 87;	// 0.39s 12/11 0.33s 10/11	4s 3/11 	0.32s 1/11	0.5s 27/10
+test_class_group_sieve(f);
+f:= x^3 + 3978*x^2 + 544*x + 227; 	// 10.17s 14/11 18.34s 12/11 13.8s 11/11	17.28s 10/11	305.99s 3/11	164.44 1/11 	15s 27/10
+test_class_group_sieve(f);
+f:= x^3 + 1558688416*x^2 + 46255105539*x - 5521;// 1259s 14/11 594s 12/11	589s 11/11	1588.57s 10/11	62s 27/10 
+test_class_group_sieve(f);
+f:= x^3 - 17600246*x^2 - 418162665796*x - 6;	// 398s 12/11 372.78s 11/11	894.87s 10/11	38s 27/10
+test_class_group_sieve(f);
+f:= x^3 - 30882551580*x^2 + 199033597; 		// 1071s 12/11	318s 11/11	28s 27/10 trivial group
+test_class_group_sieve(f);
+f:= x^3 + 6245739995*x^2 + 751277842*x + 8366197355; 	// 412s 12/11 384s 11/11	46s 27/10 trivial group
+test_class_group_sieve(f);
+f:= x^3 + 65518174813*x^2 + 6318844895*x + 31844;	// 703s 12/11 720s 11/11	48.9s 27/10 
+test_class_group_sieve(f);
+f:= x^3 + 39410070986*x^2 + 241420812*x + 368026342; // 746s 12/11 759.93s 11/11	2111s 27/10 trivial group
+test_class_group_sieve(f);
+f:= x^3 - 121196043270*x^2 + 4061*x - 31236506;	// 2176.64s 12/11 491.25s 11/11	154s 27/10 
+test_class_group_sieve(f);
+f:= x^3 - 6757869338*x^2 + 110640701551*x + 26493497;  	// 1038s 12/11 976.8s 11/11	82s 27/10 trivial group
+test_class_group_sieve(f);
+f:= x^3 - 40984308336*x^2 - 27336898936*x - 15510365; 	// 856s 12/11 846s 11/11	64s 27/10 trivial group
+test_class_group_sieve(f);
+f:= x^3 + 36369432378*x^2 + 25*x + 104398806221; 	// 660s 12/11 654s 11/11	847s 27/10
+test_class_group_sieve(f);
+f:= x^3 - 236130794218*x^2 - 5689*x - 94748589;		// 1112 12/11 1111s 11/11	31813s 27/10
+test_class_group_sieve(f);
+f:= x^3 + 109701112325496*x^2 + 371785*x - 1;	// 1552s 12/11 1576s 11/11	// 2727s 6/10 
+test_class_group_sieve(f);
+f:= x^3 - 79121082839*x^2 - 515663565465*x + 3;	// 1670s 12/11 1721.46s 11/11	// 4913s 6/10
+test_class_group_sieve(f);
+end if;
+f:= x^4 + 5928924749*x^2 + 108968*x + 366053611558; // 63285s 1/11
+test_class_group_sieve(f);
+f:= x^3 + 3592347*x^2 - 6*x + 3989864; 	//65s 12/11 	// SEG FAULT
+test_class_group_sieve(f);
+f:= x^3 + 41*x^2 - 24182165285*x + 61443805587;		// 34s 12/11 12.69s 11/10 triv
+test_class_group_sieve(f);
+f:= x^4 - 211156*x^3 - 243*x^2 + 4154*x - 10610;		// 27s 12/11 21s 11/10
+test_class_group_sieve(f);
+f:= x^4 - 219883*x^3 - 18453*x^2 + 6*x - 1685335;		// 370s 12/11 25s 11/10 triv
+test_class_group_sieve(f);
+f:= x^4 + 33248*x^3 - 5269848*x^2 + 1778936*x - 64485723;	// 478s 12/11 65s 11/10 triv
+test_class_group_sieve(f);
+f:= x^4 + 17211*x^3 + 5213*x^2 - 176910463*x - 4958;		// 177s 12/11 51s 11/10 triv
+test_class_group_sieve(f);
+f:= x^4 - 50911634*x^3 - 1110*x^2 + 20*x + 25976;		// 68s 11/10 triv
+test_class_group_sieve(f);
+f:= x^4 + 240408237*x^3 + 29*x - 80;				// 67.27s 11/10
+test_class_group_sieve(f);
+f:= x^4 + 498898*x^3 - 461697*x^2 - 38857815*x - 25;		// 135s 11/10
+test_class_group_sieve(f);
+f:=  x^4 + 3151624*x^3 - 41437392*x^2 - 151*x - 8024;// 47s then PROB IN IsPrinc gen triv
+test_class_group_sieve(f);
+f:= x^4 + 232231*x^3 + 601*x^2 - 102002050*x - 33623;		// 69s 11/10 triv
+test_class_group_sieve(f);
+f:=  x^4 + 533493906*x^3 - 26921643*x^2 + 221*x + 477;		// 193s 11/10 triv
+test_class_group_sieve(f);
+f:=  x^4 - 293697*x^3 + 84313993*x^2 - 89954139;		// 57.5s 11/10
+test_class_group_sieve(f);
+f:=  x^4 + 458755623*x^2 - 41158370;//1350s 11/10 then PROB IN PREIMAGE OR IsPrinc
+test_class_group_sieve(f);
+f:=  x^4 - 1717*x^3 + 306768120*x^2 + 50163402*x + 1001861854; // 2288.290s 15/10 PROB IN PREIMAGE?
+test_class_group_sieve(f);
+f:=  x^4 + 19683205*x^3 - 62857574*x^2 + 12543*x + 3754534;// 495s 11/10 then PROB in IsPrinc
+test_class_group_sieve(f);
+f := x^5 + 62*x^4 + 4662*x^2 + 1178*x + 128;	//John's
+test_class_group_sieve(f);
+f := x^5 + x^4 - 3*x^3 - x + 18;				// 2.5s 8/10
+test_class_group_sieve(f);
+f:= x^5 + 637*x^4 - 14723*x^3 - 2398012*x^2 - 396*x + 23776;	// 35.49s 6/12
+test_class_group_sieve(f);
+f:= x^5 + 63*x^4 - 61634*x^3 - x^2 + 2821773*x - 49100;		// 969s 11/10
+test_class_group_sieve(f);
+f:= x^5 - 1450*x^4 + 36178*x^3 + 2*x^2 + 509702*x + 13492436;
+test_class_group_sieve(f);
+f:= x^5 + 2*x^4 - 140137*x^3 + 574696*x^2 + 1978784*x - 1671;
+test_class_group_sieve(f);
+f:= x^5 + 195225*x^4 + 167046*x^3 + 1048333*x^2 + 17540*x + 47;
+test_class_group_sieve(f);
+f:= x^5 + 14440*x^4 - 57580*x^2 + 1707330;			// 2235s 8/10
+test_class_group_sieve(f);
+f:= x^5 - 236581*x^4 + 18*x^2 + 389*x + 23523; 			// 1512s 8/10
+test_class_group_sieve(f);
+f:= x^5 + 3592347*x^3 - 6765189*x^2 + 3989864; 		// 12692s (ev) 8/10
+test_class_group_sieve(f);
+f:= x^5 + 3330*x^3 - 50*x + 107392;				// 23s 8/10
+test_class_group_sieve(f);
+f:= x^6 + 55*x^5 + 7981*x^3 + 18*x^2 + 5*x + 53;		// 174s 8/10
+test_class_group_sieve(f);
+f:= x^6 - 1200*x^5 - 206*x^4 - 2*x^3 + 22008*x^2 + 18*x + 189; 	// 100s 8/10
+test_class_group_sieve(f);
+f:= x^6 + 26*x^5 - 2078*x^4 + 2021*x^3 + 29704*x + 47;		// 3512s 8/10
+test_class_group_sieve(f);
+f:= x^6 + 47*x^5 + 27481*x^4 - 45*x^3 + 66272*x - 19410; 	// 879s 8/10
+test_class_group_sieve(f);
+f:= x^6 + 20*x^5 + 26407*x^4 + 331*x^3 + 18491*x^2 - 7*x + 61592;
+test_class_group_sieve(f);
+f:= x^6 + 1850*x^5 - 105*x^4 + 108707*x^3 - 1368*x^2 + 191*x - 4479;
+test_class_group_sieve(f);
+f:= x^7 - 1810*x^6 + 751*x^5 + 564*x^4 - x^3 + 44*x^2 + 540*x - 56; // 958s 8/10
+test_class_group_sieve(f);
+f:= x^7 + 2*x^6 - 1389*x^5 - 4587*x^4 - 1736*x^3 + 14*x^2 - 1983*x + 27545; //2968s 11/10 triv then PROB IN IsPrinc 
+test_class_group_sieve(f);
+f:= x^7 + x^6 + 135931*x^5 - 19984*x^4 + 17*x^2 + 3*x - 11; 	//1840s 8/10
+test_class_group_sieve(f);
+*/

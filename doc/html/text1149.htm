@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Semisimple Subalgebras of  Simple Lie Algebras</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1150.htm">[Next]</A><A  HREF = "text1148.htm">[Prev]</A> <A  HREF = "text1150.htm">[Right]</A> <A  HREF = "text1148.htm">[Left]</A> <A  HREF = "text1130.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "12946">Semisimple Subalgebras of  Simple Lie Algebras</A></H3>
+
+<P>
+<P>
+<P>
+Here we describe the functions for working with the classification
+of the semisimple subalgebras of the simple Lie algebras.
+These subalgebras have been classified for the simple Lie algebras
+over the complex numbers, of ranks up to 8. They have been classified
+up to linear equivalence. Two subalgebras K<sub>1</sub>, K<sub>2</sub> of a Lie algebra
+L are linearly equivalent if for every representation of L the
+induced representations of K<sub>1</sub>, K<sub>2</sub> are equivalent. 
+The basic function for dealing with them returns a directed graph, 
+describing the inclusions among the subalgebras, and having the subalgebras
+as labels of the vertices. (We refer to <A  HREF = "text1129.htm#bib_wdg-sssdb">[dG11]</A> for 
+the background details of this classification.)
+
+
+<H5><A NAME = "12947">SubalgebrasInclusionGraph( t ) : MonStgElt -&gt; GrphDir</A></H5>
+<BLOCKQUOTE>
+Here t has to be a simple type of rank not exceeding 8. 
+This function returns a directed graph G. The vertices of this
+graph are numbered from 1 to the number of semisimple subalgebras.
+Furthermore, the last vertex is numbered 0. A vertex has a label that
+is the semisimple subalgebra corresponding to it. The label of the 
+last vertex (numbered 0), has the Lie algebra L of type t as its
+label. All other semisimple Lie algebras are subalgebras of this one.
+<P>
+The Lie algebra L (and its subalgebras) is defined over the rational numbers,
+or over a cyclotomic field. It is sometimes necessary to take an extension,
+because for some types not all subalgebras are defined over the 
+rationals.
+<P>
+Moreover, in G there is an edge from the vertex with label K<sub>1</sub>
+to the vertex with label K<sub>2</sub> if and only if K<sub>1</sub> has a subalgebra 
+that is linearly equivalent (as subalgebra of L) to K<sub>2</sub>. We remark that
+it does not mean that K<sub>2</sub> is a subalgebra of K<sub>1</sub> (rather that it is
+linearly equivalent to a subalgebra of K<sub>1</sub>). 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "12948">Example <TT>AlgLie_SSSDB (H106E57)</TT></A></H3>
+We consider the subalgebras of the Lie algebra of type C<sub>3</sub>.
+We compute the types of its maximal subalgebras.
+<P>
+<P>
+<PRE>
+&gt; G:= SubalgebrasInclusionGraph( "C3" );
+&gt; G;
+Digraph
+Vertex  Neighbours
+
+1       ;
+2       ;
+3       ;
+4       ;
+5       ;
+6       ;
+7       ;
+8       2 4 ;
+9       5 10 ;
+10      1 2 ;
+11      1 2 3 ;
+12      1 5 6 ;
+13      3 4 6 ;
+14      10 11 ;
+15      9 12 14 ;
+0       7 8 13 15 ;
+
+&gt; v:= Vertices(G);
+&gt; Label( v[10] );
+Lie Algebra of dimension 6 with base ring Rational Field
+&gt; SemisimpleType( Label( v[7] ) );
+A1
+&gt; SemisimpleType( Label( v[8] ) );
+A2
+&gt; SemisimpleType( Label( v[13] ) );
+A1 A1
+&gt; SemisimpleType( Label( v[15] ) ); 
+A1 C2
+</PRE>
+<HR>
+<H5><A NAME = "12949">RestrictionMatrix( G, k ) : GrphDir, RngIntElt ) -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+Here G is a subalgebras inclusion graph of the simple Lie algebra L, 
+as output by the previous function, and k is a nonzero integer, 
+corresponding to a vertex. This function returns the restriction matrix 
+corresponding to L and the Lie algebra that is the label of the 
+k-th vertex of G. This restriction matrix maps weights in a 
+representation of L to weights of the subalgebra, and can be used
+to decompose a representation of L, as a representation of the subalgebra.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "12950">Example <TT>AlgLie_SSSDBRestr (H106E58)</TT></A></H3>
+We decompose the adjoint representation of the Lie algebra of type D<sub>4</sub>,
+when viewed as a representation of its subalgebra of type G<sub>2</sub>.
+<P>
+<P>
+<PRE>
+&gt; G:= SubalgebrasInclusionGraph( "D4" );
+&gt; v:= Vertices(G);
+&gt; tt:= [ SemisimpleType( Label(a) ) : a in v ];
+&gt; Index( tt, "G2" );
+17
+&gt; M:= RestrictionMatrix( G, 17 );
+&gt; R:= RootDatum( "D4" : Isogeny:= "SC" );
+&gt; S:= RootDatum( "G2" : Isogeny:= "SC" ); 
+&gt; D:= AdjointRepresentationDecomposition(R);
+&gt; E:= Branch( S, D, M );
+&gt; WeightsAndMultiplicities(E);
+[
+    (0 1),
+    (1 0)
+]
+[ 1, 2 ]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1150.htm">[Next]</A><A  HREF = "text1148.htm">[Prev]</A> <A  HREF = "text1150.htm">[Right]</A> <A  HREF = "text1148.htm">[Left]</A> <A  HREF = "text1130.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

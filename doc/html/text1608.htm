@@ -1,0 +1,340 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Modular Abelian Varieties</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1609.htm">[Next]</A><A  HREF = "text1607.htm">[Prev]</A> <A  HREF = "text1609.htm">[Right]</A> <A  HREF = "text1607.htm">[Left]</A> <A  HREF = "text1592.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "17861">Modular Abelian Varieties</A></H3>
+
+<P>
+<P>
+<P>
+Let M be a space of weight 2 cuspidal modular symbols with trivial
+character that corresponds to a Galois-conjugacy class of newforms,
+and let A<sub>M</sub>(C) be the cokernel of the period map.  G. Shimura
+proved that A<sub>M</sub>(C) is the set of complex points of an abelian
+variety A<sub>M</sub> defined over Q.  Let N be the level of M and let
+J<sub>0</sub>(N) be the Jacobian of the modular curve X<sub>0</sub>(N).  Shimura
+constructed A<sub>M</sub> as a quotient of J<sub>0</sub>(N) by an abelian subvariety.
+More precisely, if I is the annihilator of M in the Hecke
+algebra, then A<sub>M</sub> = J<sub>0</sub>(N)/I J<sub>0</sub>(N).
+<P>
+<P>
+When A<sub>M</sub> has dimension 1 it is an elliptic curve, and the theory
+of computing with A<sub>M</sub> is well developed, though many interesting
+problems remain.  In the contrary case, when A<sub>M</sub> has dimension
+greater than 1, the theory of computation with A<sub>M</sub> is still in its
+infancy.  Fortunately, it is possible to compute a number of
+interesting quantities about A<sub>M</sub> using algorithms that rely on our
+extensive knowledge of J<sub>0</sub>(N).
+<P>
+<P> Magma
+contains functions for computing the modular degree, 
+congruence modulus, upper and lower bounds on the order of the
+torsion subgroup, and the order of the component group of the closed
+fiber of the N&eacute;ron model of A<sub>M</sub> at primes that exactly divide the
+level of M.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1608.htm#17862">Modular Degree and Torsion</A>
+<LI> <A  HREF = "text1608.htm#17867">Tamagawa Numbers and Orders of Component Groups</A>
+</UL>
+<H4><A NAME = "17862">Modular Degree and Torsion</A></H4>
+
+
+
+<H5><A NAME = "17863">ModularDegree(M) : ModSym -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The modular degree of the space of modular symbols M, which is defined as follows.  
+Let M be a space of modular symbols of weight 2 and 
+trivial character.  The modular degree of M is 
+the square root of <TT>#ModularKernel(M)</TT>.  
+When M corresponds to an elliptic curve E=A<sub>M</sub>, 
+then the modular degree of M is the 
+degree of induced map X<sub>0</sub>(N) -&gt; E.
+</BLOCKQUOTE>
+<H5><A NAME = "17864">CongruenceModulus(M : parameters) : ModSym -&gt; RngIntElt</A></H5>
+
+<PRE>    Bound: RngIntElt                    Default: -1</PRE>
+<BLOCKQUOTE>
+The congruence number r of the space of modular symbols M.  This is the index in
+ S<sub>k</sub>(&Gamma;<sub>0</sub>(N), Z) of the sum L + W of the lattice W of 
+cusp forms L corresponding to M and the lattice 
+of cusp forms corresponding to the complement of L in S.
+</BLOCKQUOTE>
+<H5><A NAME = "17865">TorsionBound(M, maxp) : ModSym, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The following upper bound on the order of the
+torsion subgroup of the abelian variety A attached to the space of modular symbols M:   
+      (gcd) 
+          { #A(F<sub>p</sub>) : 3 &le;p &le;(maxp),    p not| N},
+where N is the level of M.
+This bound is an isogeny invariant, so it is also a bound on the
+order of the torsion subgroup of the dual abelian 
+variety A<sup>v</sup> of A.
+<P>
+<P> 
+To compute a lower bound, use
+<TT>#SubgroupOfTorus(M,WindingElement(M))</TT>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17866">Example <TT>ModSym_ModularAbVarArithmetic (H139E25)</TT></A></H3>
+We compute the first example of an optimal elliptic curve over Q
+such that the congruence modulus does not equal the modular
+degree.  (See <A  HREF = "text1591.htm#bib_frey-muller">[FM99]</A>
+for further discussion of this problem.  We warn the reader that the 
+divisibility r | deg(&phi;) | rN<sup>i</sup> cited there is 
+incorrect,  as our <TT>54B</TT> example shows.)
+<P>
+<P>
+<PRE>
+&gt; E := ModularSymbols("54B");
+&gt; ModularDegree(E);
+2
+&gt; CongruenceModulus(E);
+6
+</PRE>
+We next verify directly that the congruence modulus is divisible by 3.
+<P>
+<P>
+<PRE>
+&gt; A := ModularSymbols("27A"); A;   // 27=54/2.
+Modular symbols space of level 27, weight 2, and dimension 2
+&gt; A54 := ModularSymbols(A,54); A54;  // all images of A at level 54.
+Modular symbols space of level 54, weight 2, and dimension 4
+&gt; qE := qIntegralBasis(E,17);
+&gt; qA54 := qIntegralBasis(A54,17);
+&gt; &amp;+qA54 - &amp;+qE;
+-3*q^4 + 3*q^5 - 3*q^8 + 3*q^10 - 3*q^11 + 9*q^13 + 3*q^16 + O(q^17)
+&gt; IntersectionGroup(E,A54);   // however, the intersection is trivial.
+Abelian Group of order 1
+</PRE>
+<P>
+Ken Ribet proved that if E is an optimal elliptic curve quotient of
+J<sub>0</sub>(N), with N prime, and if f<sub>E</sub> is the corresponding newform,
+then the congruence modulus of f<sub>E</sub> equals the modular degree of E.
+The author is aware of no counterexamples to the following more
+general statement: "If E is an optimal elliptic curve of
+square-free conductor, then the congruence modulus of the newform
+f<sub>E</sub> attached to E equals the modular degree of E."  An
+analogous statement for abelian varieties is false, even at prime
+level.  The first counterexample is <TT>ModularSymbols("431F")</TT>,
+which corresponds to an abelian variety of dimension 24.  In this
+case, the modular degree is 2<sup>11</sup>.6947, whereas the congruence
+modulus is 2<sup>10</sup>.6947.
+<P>
+<P> The following code makes a table of congruence moduli and modular 
+degrees for the elliptic curves of conductor near 54.  Notice the
+counterexample at level 54.
+<P>
+<P>
+<PRE>
+&gt; for N in [53..55] do 
+&gt;    C := CuspidalSubspace(ModularSymbols(N,2));
+&gt;    newforms := NewSubspace(C);
+&gt;    D := EllipticFactors(newforms,19);
+&gt;    for E in D do
+&gt;       printf "%o:\t%o,\t%o\n", N, ModularDegree(E), CongruenceModulus(E);
+&gt;    end for;
+&gt; end for;
+53:     2,      2
+54:     2,      6      
+54:     6,      6
+55:     2,      2
+</PRE>
+<P>
+<P>
+<TT>ModularKernel</TT> makes sense even for spaces of modular symbols of
+weight greater than 2.  As in the case of weight 2, this number gives
+information about congruences between modular forms.  The following example
+illustrates how <TT>ModularKernel</TT> suggest a congruence between a form
+of level 10 and weight 4 with a form of level 5.
+<P>
+<P>
+<PRE>
+&gt; M := ModularSymbols(10,4);
+&gt; S := CuspidalSubspace(M);
+&gt; D := NewformDecomposition(S); D;
+[
+    Modular symbols space of level 10, weight 4, and dimension 2,
+    Modular symbols space of level 10, weight 4, and dimension 4
+]
+&gt; #ModularKernel(D[1]);
+10
+&gt; f := qEigenform(D[1],8); 
+&gt; g := qEigenform(D[2],8);
+&gt; g2 := Evaluate(g,Parent(g).1^2);
+&gt; f-(g+6*g2);   // a congruence modulo 10!
+-10*q^3 + 20*q^4 + 10*q^5 - 20*q^6 - 10*q^7 + O(q^8)
+</PRE>
+<HR>
+<H4><A NAME = "17867">Tamagawa Numbers and Orders of Component Groups</A></H4>
+
+<P>
+<P>
+<P>
+We provide several functions for computing the orders of component groups
+of optimal quotients of J<sub>0</sub>(N) at primes p that exactly divide N.
+Our algorithm involves Grothendieck's monodromy pairing on the character
+group of the toric part of the closed fiber at p of the N&eacute;ron model
+of J<sub>0</sub>(N); the theory behind this algorithm is described in
+<A  HREF = "text1591.htm#bib_stein-compgroup">[Ste01]</A> (or <A  HREF = "text1591.htm#bib_stein-phd">[Ste00]</A>);
+see <A  HREF = "text1591.htm#bib_kohel-stein-ants4">[KS00]</A> for a computationally-oriented introduction
+to the algorithm.
+When N is prime, we use the Mestre and Oesterl&eacute; method to 
+construct the character group of the torus, as described in
+<A  HREF = "text1591.htm#bib_mestre-graphs">[Mes86]</A>.
+In general, the ideal theory of quaternion algebras is used. 
+<P>
+<P>
+<P>
+<B>Note:</B> In the appendix to <A  HREF = "text1591.htm#bib_mazur-eisenstein">[Maz77]</A>, Mazur and
+Rapaport give an explicit formula for the order of the component group
+of J<sub>0</sub>(N) at primes p&ge;5 that exactly divide N.  Their
+formula is not currently used by the <TT>ComponentGroupOrder</TT>
+function.
+<P>
+The <TT>RealTamagawaNumber</TT> function computes the order of the
+"component group at infinity".
+
+
+<H5><A NAME = "17868">ComponentGroupOrder(M, p) : ModSym, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The order of the component group at p.  This is the
+order of the group of /line(F)<sub>p</sub>-points of the component 
+group of the reduction modulo p of the N&eacute;ron model of the abelian
+variety attached to the space of modular symbols M.
+At present, it is necessary that p exactly divides the level.   
+If <TT>Sign(M)</TT> is not equal to 0, then only the odd part of
+the order is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "17869">TamagawaNumber(M, p) : ModSym, RngIntElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The order of the group of F<sub>p</sub>-rational points of the 
+component group of the space of modular symbols M.  We require M to be associated to a single
+Galois-conjugacy class of newforms. 
+</BLOCKQUOTE>
+<H5><A NAME = "17870">RealTamagawaNumber(M) : ModSym -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The number of connected components of A<sub>M</sub>(R).
+</BLOCKQUOTE>
+<H5><A NAME = "17871">MinusTamagawaNumber(M) : ModSym -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The number of connected components of the subgroup A<sub>M</sub>(C)<sup> - </sup> of
+A<sub>M</sub>(C) on which complex conjugation acts as -1
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "17872">Example <TT>ModSym_ModularAbVarCompGrp (H139E26)</TT></A></H3>
+<P>
+We compute the orders of the component groups 
+of some abelian varieties.
+<P>
+<P>
+<PRE>
+&gt; X11 := ModularSymbols("11A");     // corresponds to X_0(11).
+&gt; ComponentGroupOrder(X11,11);
+5
+&gt; TamagawaNumber(X11,11);
+5
+&gt; RealTamagawaNumber(X11);
+1
+&gt; MinusTamagawaNumber(X11);
+1
+&gt; J37 := ModularSymbols("37"); J37;
+Modular symbols space of level 37, weight 2, and dimension 4
+&gt; ComponentGroupOrder(J37,37);
+3
+&gt; A, B := Explode(NewformDecomposition(J37));
+&gt; ComponentGroupOrder(A,37);
+3
+&gt; ComponentGroupOrder(B,37);
+1
+</PRE>
+<P>
+We can also compute component groups of optimal quotients whose
+dimension is greater than 1.  The abelian varieties <TT>B</TT> and <TT>C</TT> below correspond to the Jacobians labeled 65B and 65A in
+<A  HREF = "text1591.htm#bib_empirical_evidence">[FLS+01]</A>, respectively.
+<P>
+<P>
+<P>
+<PRE>
+&gt; J65 := ModularSymbols("65");
+&gt; A,B,C := Explode(SortDecomposition(NewformDecomposition(J65)));
+&gt; B;
+Modular symbols space of level 65, weight 2, and dimension 4
+&gt; C;
+Modular symbols space of level 65, weight 2, and dimension 4
+&gt; ComponentGroupOrder(B,5);      // not the Tamagawa number
+3
+&gt; ComponentGroupOrder(B,13);
+3
+&gt; ComponentGroupOrder(C,5);
+7
+&gt; ComponentGroupOrder(C,13);
+1
+&gt; HeckeEigenvalueField(C);
+Number Field with defining polynomial x^2 + 2*x - 1 over the
+Rational Field
+Mapping from: Univariate Quotient Polynomial Algebra in a over
+Rational Field
+with modulus a^2 + 2*a - 1 to Number Field with defining
+polynomial x^2 + 2*x - 1 over the Rational Field given by a rule
+[no inverse]
+&gt; ComponentGroupOrder(J65,5);
+42
+</PRE>
+<P>
+When the Atkin-Lehner involution W<sub>p</sub> acts as +1 on a modular abelian
+variety A, the order of the component group can be larger than the
+Tamagawa number c<sub>p</sub>=[A(Q<sub>p</sub>):A<sub>0</sub>(Q<sub>p</sub>)] that appears in the conjecture
+of Birch and Swinnerton-Dyer.
+<P>
+<P>
+<PRE>
+&gt; AtkinLehner(B,5);
+[1 0 0 0]
+[0 1 0 0]
+[0 0 1 0]
+[0 0 0 1]
+&gt; ComponentGroupOrder(B,5);
+3
+&gt; TamagawaNumber(B,5);
+1
+</PRE>
+<P>
+The real and minus Tamagawa numbers are defined for 
+spaces of modular symbols of any weight over the rationals.
+<P>
+<P>
+<PRE>
+&gt; Del := ModularSymbols("1k12A");
+&gt; Del;
+Modular symbols space of level 1, weight 12, and dimension 2
+</PRE>
+Next we see that the period lattice associated 
+to &Delta; is rectangular.
+<P>
+<P>
+<PRE>
+&gt; RealTamagawaNumber(Del);
+2
+&gt; MinusTamagawaNumber(Del);
+2
+&gt; Periods(Del,40);
+[
+    (-0.0004853381649299516049241304429*i),
+    (0.001140737449583079336044545337)
+]
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1609.htm">[Next]</A><A  HREF = "text1607.htm">[Prev]</A> <A  HREF = "text1609.htm">[Right]</A> <A  HREF = "text1607.htm">[Left]</A> <A  HREF = "text1592.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

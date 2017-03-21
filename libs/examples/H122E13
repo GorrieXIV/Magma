@@ -1,0 +1,46 @@
+"Source: Text/Geometry/AlgSrf.text";
+"Line: 2898";
+"Date: Wed Jun  8 13:59:58 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/AlgSrf.text, line: 2898
+// Example: H122E13 ()
+print "Example: H122E13";
+ei := GetEchoInput();
+SetEchoInput(true);
+P4<x,y,z,t,u> := ProjectiveSpace(Rationals(),4);
+S := Surface(P4,[z^2+x*t-y*t-z*u, x*z-y*z+x*u]);
+HasOnlySimpleSingularities(S : ReturnList := true);
+dsds := ResolveSingularSurface(S);
+L1 := Scheme(P4,[x,y,z]);
+L2 := Scheme(P4,[x-y,z,u]);
+MultiplicitiesAndIntersections(S,L1);
+MultiplicitiesAndIntersections(S,L2);
+D := Divisor(S,L1)+Divisor(S,L2)+Divisor(S,Scheme(S,x));
+rr := RiemannRochBasis(D);
+#rr; // too large by one
+// transform to numerators and denominators
+rr_fns := [ProjectiveRationalFunction(e) : e in rr];
+den := LCM([Denominator(f): f in rr_fns]);
+den;
+B := [R!(den*f) : f in rr_fns] where R is CoordinateRing(P4);
+ms := Multiplicities(S,Scheme(S,den)); ms;
+B1 := LinearSystemDivisorRestriction(S,B,ms);
+#B1; // too small by 5!
+D := Divisor(S,L1)+Divisor(S,L2)+Divisor(S,Scheme(S,x+t));
+rr := RiemannRochBasis(D);
+#rr; // too large by one again
+// transform to numerators and denominators
+rr_fns := [ProjectiveRationalFunction(e) : e in rr];
+den := LCM([Denominator(f): f in rr_fns]);
+den;
+B := [R!(den*f) : f in rr_fns] where R is CoordinateRing(P4);
+ms := Multiplicities(S,Scheme(S,den)); ms;
+B1 := LinearSystemDivisorRestriction(S,B,ms);
+#B1; // correct!
+P6<a,b,c,d,e,f,g> := ProjectiveSpace(Rationals(),6);
+bdmp := map<S->P6|B1>;
+X := Image(bdmp);
+MinimalBasis(Ideal(X));
+Degree(X);
+ChernNumber(X,1); //K^2 for X
+SetEchoInput(ei);

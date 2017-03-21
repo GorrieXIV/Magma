@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Examples</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1467.htm">[Next]</A><A  HREF = "text1479.htm">[Prev]</A> <A  HREF = "text1467.htm">[Right]</A> <A  HREF = "text1479.htm">[Left]</A> <A  HREF = "text1468.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "16725">Examples</A></H3>
+
+
+
+<HR>
+<H3><A NAME = "16726">Example <TT>CrvG1_visible-three-sha (H130E2)</TT></A></H3>
+We find a cubic which is a counterexample to the Hasse principle.
+The approach involves the idea of "visibility" of Tate--Shafarevich
+elements, which was introduced by Mazur (see <A  HREF = "text1467.htm#bib_mazur-cremona">[CM00]</A>).
+<P>
+The cubic will be a nontrivial element of the Tate--Shafarevich group
+of the curve 4343B1 in Cremona's tables, which we call E. The cubic will
+be obtained from a rational point on an auxiliary elliptic curve F.
+<P>
+First, we compute that E has rank 0, and F has rank 1:
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([ 0, 0, 1, -325259, -71398995 ]);
+&gt; F := EllipticCurve([ 1, -1, 1, -24545, 1486216 ]);
+&gt; CremonaReference(E);
+4343b1
+&gt; RankBounds(E);
+0 0
+&gt; RankBounds(F);
+1 1
+</PRE>
+<P>
+We take a plane cubic representing one of the nontrivial elements in
+the 3-Selmer group of F, which has order 3, so that its elements
+are all in the image of F(Q) since F(Q) has rank 1:
+<P>
+<P>
+<P>
+<PRE>
+&gt; SetClassGroupBounds("GRH");
+&gt; #ThreeSelmerGroup(F);
+3
+&gt; coverings := ThreeDescent(F);
+&gt; coverings;
+[
+    Curve over Rational Field defined by
+    -3*x^2*z - 3*x*y^2 - 27*x*y*z + 12*x*z^2 + 2*y^3 + 21*y^2*z + 3*y*z^2 - 4*z^3
+]
+&gt; C := Equation(coverings[1]);
+</PRE>
+<P>
+We now try to find a linear combination of C and its Hessian
+(which is also a plane cubic) that has j-invariant equal to the
+j-invariant of E. To find the right linear combination we
+may work geometrically (that is, with F instead of C
+since they are isomorphic over Qbar).
+We work with the family t F + H where t is an indeterminate.
+<P>
+<P>
+<PRE>
+&gt; B&lt;t&gt; := PolynomialRing(Rationals());
+&gt; F_BR := ChangeRing(Parent(Equation(F)), B);
+&gt; F_B := F_BR ! Equation(F);
+&gt; H_B := Hessian(F_B);
+&gt; c4,c6,Delta := Invariants(t*F_B + H_B);
+</PRE>
+Alternatively we could get these invariants as follows:
+<P>
+<P>
+<PRE>
+&gt; D,c4,c6 := HessePolynomials(3, 1, cInvariants(F) : Variables := [t, 1] );
+&gt; Delta := Discriminant(F)*D^3;
+// Solve c4(t)^3/Delta(t) = j(E) for t:
+&gt; jpoly := c4^3 - jInvariant(E)*Delta;
+&gt; Roots(jpoly);
+[ &lt;7479/7, 1&gt; ]
+</PRE>
+<P>
+So we take the following linear combination
+(and replace the equation by a nicer equation):
+<P>
+<P>
+<PRE>
+&gt; C2raw := 7479/7*C + Hessian(C);
+&gt; C2 := Reduce(Minimise(C2raw));
+&gt; C2;
+7*x^3 + 7*x^2*y + 3*x^2*z - 4*x*y^2 - 30*x*y*z + 12*x*z^2 - 13*y^3 - 2*y^2*z -
+    15*y*z^2 - 17*z^3
+</PRE>
+<P>
+The Jacobian of C2 is E, so C2 is a principal homogeneous
+space for E of index 3, and in fact it is everywhere
+locally soluble:
+<P>
+<P>
+<PRE>
+&gt; IsIsomorphic(Jacobian(C2), E);
+true
+&gt; PrimeDivisors(Integers()!Discriminant(GenusOneModel(C2)));
+[ 43, 101 ]
+&gt; C2_crv := Curve(ProjectiveSpace(Parent(C2)), C2);
+&gt; IsLocallySolvable(C2_crv, 43);
+true (7 + O(43) : 1 + O(43^50) : O(43))
+&gt; IsLocallySolvable(C2_crv, 101);
+true (1 + O(101^50) : 32 + O(101) : 1 + O(101))
+// Find the preimage of the covering map C2 -&gt; E:
+&gt; _, _, maptoE := nCovering(GenusOneModel(C2) : E := E);
+&gt; preimage := Pullback(maptoE, E!0);
+&gt; Points(preimage);   // Q-rational points
+{@ @}
+&gt; TorsionSubgroup(E);
+Abelian Group of order 1
+</PRE>
+<P>
+We conclude that C2 has no rational points since, as E(Q) is trivial,
+any rational points on C2 must map to O<sub>E</sub>.
+<PRE></PRE> <A  HREF = "text1467.htm">[Next]</A><A  HREF = "text1479.htm">[Prev]</A> <A  HREF = "text1467.htm">[Right]</A> <A  HREF = "text1479.htm">[Left]</A> <A  HREF = "text1468.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

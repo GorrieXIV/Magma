@@ -1,0 +1,13 @@
+{
+    ideals
+    {
+        a6ideals.m
+        a7ideals.m
+        h36ideals.m
+        l27ideals.m
+        m10ideals.m
+        pgu32ideals.m
+        psu32ideals.m
+    }
+    l3.m
+}

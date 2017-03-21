@@ -1,0 +1,111 @@
+tildedm := function(m, x)
+    _,p := HasAttribute(FldPr, "Precision");
+    AssertAttribute(FldPr, "Precision", p * 2);
+    xa := Sqrt(Norm(x));
+    if xa eq 1 then
+	res := Polylog(m, x);
+	if m eq 1 then
+	    res := res + Log(Modulus(1 - x));
+	end if;
+    else
+	last := (-Log(xa))^(m - 1) / Factorial(m) * Log(Sqrt(Norm(1 - x)));
+	itl := func<k | (-Log(xa))^k / Factorial(k) * Polylog(m - k, x)>;
+	res := zero;
+	for k := 0 to m - 1 do
+	    res := res + itl(k);
+	end for;
+	res := res + last;
+    end if;
+    AssertAttribute(FldPr, "Precision", p);
+    return IsOdd(m) select Re(res) else Im(res);
+end function;
+
+dm := function(m, x)
+    _,p := HasAttribute(FldPr, "Precision");
+    AssertAttribute(FldPr, "Precision", p * 2);
+    xa := Sqrt(Norm(x));
+    if xa eq 1 then
+	res := Polylog(m, x);
+    else
+	last := -1/2 * (-Log(xa))^m / Factorial(m);
+	itl := func<k | (-Log(xa))^k / Factorial(k) * Polylog(m - k, x)>;
+	res := zero;
+	for k := 0 to m - 1 do
+	    res := res + itl(k);
+	end for;
+	res := res + last;
+    end if;
+    AssertAttribute(FldPr, "Precision", p);
+    return IsOdd(m) select Re(res) else Im(res);
+end function;
+
+pm := function(m, x)
+    _,p := HasAttribute(FldPr, "Precision");
+    AssertAttribute(FldPr, "Precision", p * 2);
+    xa := Sqrt(Norm(x));
+    if xa eq 1 then
+	res := Polylog(m, x);
+    else
+	last := -2^(m-1)*BernoulliApproximation(m)/Factorial(m) * (Log(xa))^m;
+	itl := func<k |
+	    2^k * BernoulliApproximation(k) / Factorial(k)
+		* (Log(xa))^k * Polylog(m - k, x)
+	>;
+	res := zero;
+	for k := 0 to m - 1 do
+	    res := res + itl(k);
+	end for;
+	res := res + last;
+    end if;
+    AssertAttribute(FldPr, "Precision", p);
+    return IsOdd(m) select Re(res) else Im(res);
+end function;
+
+for x in Q do
+    if IsZero(x) or IsOne(x) then
+	continue;
+    end if;
+    print x;
+    if Norm(-Log(1-x) - Polylog(1, x)) gt epsilon then
+	print "ERROR: Polylog vs Log: ", x, Norm(Log(x) - Polylog(1, x));
+    end if;
+    if Norm(Dilog(x) - Polylog(2, x)) gt epsilon then
+	print "ERROR: Polylog vs Dilog: ", x, Norm(Dilog(x) - Polylog(2, x));
+    end if;
+    for m in [1 .. 10] do
+	print m;
+	v := PolylogD(m, x);
+	if Norm(v - tildedm(m, x)) gt epsilon then
+	    print "ERROR: tilde D_m: ", x, m, Norm(v - tildedm(m, x));
+	end if;
+	vi := PolylogD(m, 1/x);
+	if Norm(vi - tildedm(m, 1/x)) gt epsilon then
+	    print "ERROR: inv tilde D_m: ", x, m, Norm(vi - tildedm(m, 1/x));
+	end if;
+	if Norm(vi - (-1)^(m-1) * v) gt epsilon then
+	    print "ERROR: tilde D_m relation", x, Norm(vi - (-1)^(m-1) * v);
+	end if;
+	v := PolylogDold(m, x);
+	if Norm(v - dm(m, x)) gt epsilon then
+	    print "ERROR: D_m: ", x, m, Norm(v - dm(m, x));
+	end if;
+	vi := PolylogDold(m, 1/x);
+	if Norm(vi - dm(m, 1/x)) gt epsilon then
+	    print "ERROR: inv D_m: ", x, m, Norm(vi - dm(m, 1/x));
+	end if;
+	if Norm(vi - (-1)^(m-1) * v) gt epsilon then
+	    print "ERROR: D_m relation", x, Norm(vi - (-1)^(m-1) * v);
+	end if;
+	v := PolylogP(m, x);
+	if Norm(v - pm(m, x)) gt epsilon then
+	    print "ERROR: P_m: ", x, m, Norm(v - pm(m, x));
+	end if;
+	vi := PolylogP(m, 1/x);
+	if Norm(vi - pm(m, 1/x)) gt epsilon then
+	    print "ERROR: inv P_m: ", x, m, Norm(vi - pm(m, 1/x));
+	end if;
+	if Norm(vi - (-1)^(m-1) * v) gt epsilon then
+	    print "ERROR: P_m relation", x, Norm(vi - (-1)^(m-1) * v);
+	end if;
+    end for;
+end for;

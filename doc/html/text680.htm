@@ -1,0 +1,527 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>The LMG functions</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text681.htm">[Next]</A><A  HREF = "text679.htm">[Prev]</A> <A  HREF = "text681.htm">[Right]</A> <A  HREF = "text679.htm">[Left]</A> <A  HREF = "text673.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "7838">The LMG functions</A></H3>
+
+<P>
+<P>
+<P>
+The LMG (large matrix group) functions are designed to provide a user-friendly
+interface to the <TT>CompositionTree</TT> package, and thereby enable the user
+to carry out a limited range of structural calculations in a matrix group that
+is too large for the use of BSGS methods.
+<P>
+By default, these methods have a small probability of failing or even of
+returning incorrect results. For most examples, at the cost of some extra
+time, the user can ensure that the computed results are verified as correct
+by calling  <TT>LMGInitialise</TT> with the <TT>Verify</TT> flag on the group
+G before calling any of the other functions. (Once <TT>CompositionTree</TT>
+or any of the LMG functions has been called on a group, further calls
+of <TT>LMGInitialise</TT> will have no effect.)
+<P>
+Let G be a matrix group over a finite field. On the first call of any of
+the LMG functions on G,  Magma decides whether it will use BSGS or
+Composition Tree based methods on G. It does this by carrying out a quick
+calculation to decide whether any of the basic orbit lengths would be
+larger than a constant <TT>LMGSchreierBound</TT>, which is set to 40000 by
+default, but can be changed by the user. If all basic orbit lengths are
+at most <TT>LMGSchreierBound</TT>, then BSGS methods are used on G, and the
+LMG functions are executed using the corresponding standard Magma functions.
+Otherwise, Composition Tree methods are used, starting with a call of
+<TT>CompositionTree</TT>(G).
+<P>
+Composition Tree methods are also used if the user calls <TT>CompositionTree</TT>
+on the group before using th LMG functions, or if the user calls
+<TT>LMGInitialize</TT> with the <TT>Al</TT> option set to <TT>"CompositionTree"</TT>.
+<P>
+<TT>SetVerbose("LMG", n)</TT> with n=1, 2 or 3 will provide increasing levels
+of information on the progress of the functions.
+
+
+<P>
+The remaining functions in this section will work only if a permutation
+representation can be computed for G/L, where L is the soluble
+radical of G. Apart from <TT>LMGRadicalQuotient</TT> itself, they all operate
+by solving the problem first in G/L and then lifting the solution
+through elementary abelian layers of L. Results are returned using the
+same formats as for other types of finite groups.
+<H5><A NAME = "7839">SetLMGSchreierBound(n) : RngIntElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Set the constant <TT>LMGSchreierBound</TT> to n.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "7840">LMGInitialize(G : parameters) : GrpMat -&gt;</A></H5>
+<H5>LMGInitialise(G : parameters) : GrpMat -&gt;</H5>
+
+<PRE>    Al: MonStgElt                       Default: ""</PRE>
+
+<PRE>    Verify: BoolElt                     Default: <TT>false</TT></PRE>
+
+<PRE>    RandomSchreierBound: RngIntElt      Default: LMGSchreierBound</PRE>
+<BLOCKQUOTE>
+It is not normally necessary to call this function but, by setting the optional
+parameters, it can be used to initialise G for LMG computations with
+a different value of <TT>LMGSchreierBound</TT> or, by setting <TT>Al</TT> to be
+<TT>"CompositionTree"</TT> (or <TT>"CT"</TT> or <TT>"RandomSchreier"</TT>
+(or <TT>"RS"</TT>),
+to force the use of either Composition Tree or BSGS methods on G.
+<P>
+If the <TT>Verify</TT> flag is set, then an attempt will be made to verify
+the correctness of the computed BSGS or Composition Tree. This will make the
+initialisation process slower, and for some groups the increased
+memory requirements will make verification impractical. In that case, a
+warning message is displayed.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "7841">LMGOrder(G) : GrpMat[FldFin] -&gt;  RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, this intrinsic
+returns the order of G.
+</BLOCKQUOTE>
+<H5><A NAME = "7842">LMGFactoredOrder(G) : GrpMat[FldFin] -&gt;  SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, this intrinsic
+returns the factored order of G.
+</BLOCKQUOTE>
+<H5><A NAME = "7843">LMGIsIn(G, x) : GrpMat, GrpMatElt -&gt; BoolElt, GrpSLPElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field F<sub>q</sub>, and an
+element x of the generic overgroup GL(n, q) of G; if x &isin;G then 
+the intrinsic returns <TT>true</TT> and the corresponding element of 
+<TT>WordGroup(G)</TT>; and <TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "7844">LMGIsSubgroup(G, H) : GrpMat, GrpMat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field F<sub>q</sub>, and a
+subgroup H of the generic overgroup GL(n, q) of G, the intrinsic
+returns <TT>true</TT> if H &le;G and <TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "7845">LMGEqual(G, H) : GrpMat, GrpMat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix groups G and H belonging to a common overgroup 
+GL(n, q), the intrinsic returns <TT>true</TT> if G and H are equal 
+and <TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "7846">LMGIndex(G, H) : GrpMat, GrpMat -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, and a subgroup
+H of G, the intrinsic returns the index of H in G.
+</BLOCKQUOTE>
+<H5><A NAME = "7847">LMGIsNormal(G, H) : GrpMat, GrpMat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, and a subgroup
+H of G, the intrinsic returns <TT>true</TT> if H is normal in G
+and <TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "7848">LMGNormalClosure(G, H) : GrpMat, GrpMat -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, and a subgroup
+H of G, the intrinsic returns the normal closure of H in G.
+</BLOCKQUOTE>
+<H5><A NAME = "7849">LMGDerivedGroup(G) : GrpMat -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic 
+returns the derived subgroup of G.
+</BLOCKQUOTE>
+<H5><A NAME = "7850">LMGCommutatorSubgroup(G, H) : GrpMat, GrpMat -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Let g and H be subgroups of GL(n, q). This intrinsic returns 
+the commutator subgroup of G and H as a subgroup of GL(n, q).
+</BLOCKQUOTE>
+<H5><A NAME = "7851">LMGIsSoluble(G) : GrpMat -&gt; BoolElt</A></H5>
+<H5>LMGIsSolvable(G) : GrpMat -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic 
+returns <TT>true</TT> if G is soluble and <TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "7852">LMGIsNilpotent(G) : GrpMat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic 
+returns <TT>true</TT> if G is nilpotent and <TT>false</TT> otherwise.
+</BLOCKQUOTE>
+<H5><A NAME = "7853">LMGCompositionSeries(G) : GrpMat[FldFin] -&gt;  SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic 
+returns a composition series for G.
+</BLOCKQUOTE>
+<H5><A NAME = "7854">LMGCompositionFactors(G) : GrpMat[FldFin] -&gt;  SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic 
+returns the composition factors of G. The Handbook entry for
+<TT>CompositionFactors(G)</TT> of a finite group gives a detailed 
+description of how to interpret the returned sequence.
+</BLOCKQUOTE>
+<H5><A NAME = "7855">LMGChiefSeries(G) : GrpMat[FldFin] -&gt;  SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic 
+returns a chief series for G. 
+</BLOCKQUOTE>
+<H5><A NAME = "7856">LMGChiefFactors(G) : GrpMat[FldFin] -&gt;  SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic 
+returns the chief factors G. The Handbook entry for
+<TT>ChiefFactors(G)</TT> of a finite group gives a detailed 
+description of how to interpret the returned sequence.
+</BLOCKQUOTE>
+<H5><A NAME = "7857">LMGUnipotentRadical(G) : GrpMat -&gt; GrpMat, GrpPC, Map</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic 
+returns the unipotent radical U of the matrix group G.  A group 
+P of type <TT>GrpPC</TT> and an isomorphism U -&gt; P are 
+also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "7858">LMGSolubleRadical(G) : GrpMat -&gt; GrpMat, GrpPC, Map</A></H5>
+<H5>LMGSolvableRadical(G) : GrpMat -&gt; GrpMat, GrpPC, Map</H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic 
+returns the soluble radical S of G. A group P of type
+<TT>GrpPC</TT> and an isomorphism S -&gt; P are also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "7859">LMGFittingSubgroup(G) : GrpMat -&gt; GrpMat, GrpPC, Map</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic 
+returns the Fitting subgroup S of G. A group P of type
+<TT>GrpPC</TT> and an isomorphism S -&gt; P are also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "7860">LMGCentre(G) : GrpMat -&gt; GrpMat</A></H5>
+<H5>LMGCenter(G) : GrpMat -&gt; GrpMat</H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic 
+returns the centre of G.
+</BLOCKQUOTE>
+<H5><A NAME = "7861">LMGSylow(G,p) : GrpMat, RngIntElt -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic 
+returns a Sylow p-subgroup of G.
+</BLOCKQUOTE>
+<H5><A NAME = "7862">LMGSocleStar(G) : GrpMat -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic 
+returns the inverse image in G of the socle of G/S, where S 
+is the soluble radical of G.
+</BLOCKQUOTE>
+<H5><A NAME = "7863">LMGSocleStarFactors(G) : GrpMat -&gt; SeqEnum, SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic 
+returns the simple direct factors of 
+<TT>LMGSocleStar(G)</TT>/<TT>LMGSolubleRadical(G)</TT>,
+which may be represented projectively for large classical groups.
+A list of maps from the factors to G is also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "7864">LMGSocleStarAction(G) : GrpMat -&gt; Map, GrpPerm, GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic 
+returns the map &phi; representing the conjugation action of G on
+the simple direct factors of
+<TT>LMGSocleStar(G)</TT>/<TT>LMGSolubleRadical(G)</TT>.
+The image and kernel of &phi; are also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "7865">LMGSocleStarActionKernel(G) : GrpMat -&gt; GrpMat, GrpPC, Map</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, this intrinsic 
+returns three values. The first is the kernel of the conjugation action of G on the simple
+direct factors of <TT>LMGSocleStar(G)</TT>/<TT>LMGSolubleRadical(G)</TT>.
+A group P of type <TT>GrpPC</TT>
+isomorphic to <TT>LMGSocleStarActionKernel(G)</TT>/<TT>LMGSocleStar(G)</TT>
+and the epimorphism G -&gt; P are also returned.
+</BLOCKQUOTE>
+<H5><A NAME = "7866">LMGSocleStarQuotient(G) : GrpMat -&gt; GrpPerm, Map, GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic 
+returns the quotient group <TT>G</TT>/<TT>LMGSocleStar(G)</TT> represented 
+as a permutation group, with associated epimorphism and kernel.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7867">Example <TT>GrpMatFF_LMGex (H65E17)</TT></A></H3>
+<P>
+We apply the LMG functions to a maximal subgroup of SL(12, 5).
+<P>
+<P>
+<P>
+<PRE>
+&gt; SetVerbose("LMG", 1);              
+&gt; C := ClassicalMaximals("L", 12, 5);
+&gt; G := C[4];
+&gt; LMGFactoredOrder(G);
+RandomSchreierBound is 40000
+Using CompositionTree on this group
+Composition tree computed
+Composition series has length 40
+Order of group is:  27845944957511377275508129969239234924316406250000000000000\
+0000000000000000000
+[ &lt;2, 32&gt;, &lt;3, 7&gt;, &lt;5, 66&gt;, &lt;7, 1&gt;, &lt;11, 1&gt;, &lt;13, 3&gt;, &lt;31, 3&gt;, &lt;71, 1&gt;, &lt;313, 
+1&gt;, &lt;19531, 1&gt; ]
+&gt; LMGChiefFactors(G);   
+Classifying composition factors
+Defined PCGroup of solvable radical
+Computed PCGroup of SocleKernel/SocleStar
+    G
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    *
+    |  A(3, 5)                = L(4, 5)
+    *
+    |  A(7, 5)                = L(8, 5)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(5) (32 copies)
+    1
+&gt; D := LMGDerivedGroup(G);
+RandomSchreierBound is 40000
+Using CompositionTree on this group
+Composition tree computed
+Composition series has length 38
+Order of group is:  69614862393778443188770324923098087310791015625000000000000\
+000000000000000000
+&gt; LMGIndex(G, D);
+4
+&gt; SetVerbose("LMG", 0);
+&gt; LMGEqual( LMGDerivedGroup(D), D );
+true
+&gt; S := LMGSolubleRadical(G);
+&gt; LMGFactoredOrder(S);
+[ &lt;2, 4&gt;, &lt;5, 32&gt; ]
+&gt; LMGIsSoluble(G);
+false
+&gt; LMGIsSoluble(S);
+true
+&gt; LMGIsNilpotent(S);
+false
+&gt; #LMGCentre(G);
+4
+&gt; #LMGCentre(S);
+4
+</PRE>
+We carelessly used the standard Magma Order function in the above two
+commands, but it did not matter, because it was small. We will be
+more careful next time!
+<P>
+<P>
+<P>
+<PRE>
+&gt; F := LMGFittingSubgroup(G);
+&gt; LMGFactoredOrder( LMGCentre(F) );
+[ &lt;2, 2&gt;, &lt;5, 32&gt; ]
+&gt; P := LMGSylow(G, 5);
+&gt; LMGFactoredOrder(P);
+[ &lt;5, 66&gt; ]
+&gt; LMGEqual( D, LMGNormalClosure(G,P) );
+true
+&gt; facs, maps := LMGSocleStarFactors(G);
+&gt; #facs;  
+2
+&gt; LMGChiefFactors(facs[1]);
+    G
+    |  A(7, 5)                = L(8, 5)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    1
+</PRE>
+Note that, for large classical groups, the socle-star factors are
+represented projectively.
+<P>
+<P>
+<P>
+<PRE>
+&gt; I := sub&lt; Generic(G) | [ facs[2].i @ maps[2] : i in [1..Ngens(facs[2])] ] &gt;; 
+&gt; LMGChiefFactors( LMGNormalClosure(G, I) );
+    G
+    |  A(3, 5)                = L(4, 5)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(2)
+    *
+    |  Cyclic(5) (4 copies)
+    *
+    |  Cyclic(5) (4 copies)
+    *
+    |  Cyclic(5) (4 copies)
+    *
+    |  Cyclic(5) (4 copies)
+    *
+    |  Cyclic(5) (4 copies)
+    *
+    |  Cyclic(5) (4 copies)
+    *
+    |  Cyclic(5) (4 copies)
+    *
+    |  Cyclic(5) (4 copies)
+    1
+
+</PRE>
+<HR>
+<H5><A NAME = "7868">LMGRadicalQuotient(G) : GrpMat -&gt; GrpPerm, Map, GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic 
+returns a permutation group P isomorphic to G/L, where L is the 
+soluble radical of G. An epimorphism G to P and its kernel L
+are also returned.
+<P>
+Of course, this will only work if G/L has such a representation of
+sufficiently small degree. This function is called implicitly as a first
+step in all of the remaining functions in this section.
+</BLOCKQUOTE>
+<H5><A NAME = "7869">LMGCentraliser(G, g) : GrpMat, GrpMatElt -&gt; GrpMat</A></H5>
+<H5>LMGCentralizer(G, g) : GrpMat, GrpMatElt -&gt; GrpMat</H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic 
+returns the centraliser in the matrix group G of g &isin;G.
+</BLOCKQUOTE>
+<H5><A NAME = "7870">LMGIsConjugate(G, g, h) : GrpMat, GrpMatElt, GrpMatElt -&gt; BoolElt, GrpMatElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic 
+returns <TT>true</TT> if the elements g, h in G are conjugate. If so, a
+conjugating element will also be returned.
+</BLOCKQUOTE>
+<H5><A NAME = "7871">LMGClasses(G) : GrpMat -&gt; SeqEnum</A></H5>
+<H5>LMGConjugacyClasses(G) : GrpMat -&gt; SeqEnum</H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic 
+returns the conjugacy classes of G.
+</BLOCKQUOTE>
+<H5><A NAME = "7872">LMGNormaliser(G, H) : GrpMat, GrpMat -&gt; GrpMat</A></H5>
+<H5>LMGNormalizer(G, H) : GrpMat, GrpMat -&gt; GrpMat</H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, and a subgroup
+H of G, the intrinsic returns the normaliser of H in G.
+</BLOCKQUOTE>
+<H5><A NAME = "7873">LMGIsConjugate(G, H, K) : GrpMat, GrpMat, GrpMat -&gt; BoolElt, GrpMatElt</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, and subgroups
+H and K of G, the intrinsic returns <TT>true</TT> if the subgroups 
+H and K are conjugate in G. If so, a conjugating element will 
+also be returned.
+</BLOCKQUOTE>
+<H5><A NAME = "7874">LMGMeet(G, H, K) : GrpMat, GrpMat, GrpMat -&gt;  GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, and subgroups
+H and K of G, the intrinsic returns their intersection.
+</BLOCKQUOTE>
+<H5><A NAME = "7875">LMGMaximalSubgroups(G) : GrpMat -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic 
+returns a list of subgroup records defining representatives of the conjugacy
+classes of maximal subgroups of G.
+</BLOCKQUOTE>
+<H5><A NAME = "7876">LMGNormalSubgroups(G) : GrpMat -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic 
+returns a list of subgroup records defining the normal subgroups of  G.
+</BLOCKQUOTE>
+<H5><A NAME = "7877">LMGLowIndexSubgroups(G,n) : GrpMat, RngIntElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined over a finite field, the intrinsic returns a
+list of representatives of the conjugacy classes of subgroups of index
+at most n in G.
+</BLOCKQUOTE>
+<H5><A NAME = "7878">LMGCosetAction(G,H : parameters) : GrpMat, GrpMat -&gt;                                                   Map, GrpPerm, GrpMat</A></H5>
+
+<PRE>    ker: BoolElt                        Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Given a subgroup H of a matrix group G defined over a finite field,
+return the homomorphism f:G to P defining the action of G by
+multiplication on the right cosets of H in G. The image P (a
+permutation group) and the kernel of f are also returned.
+<P>
+If the optional parameter <TT>ker</TT> is set to <TT>false</TT> then the kernel
+of f is not computed.
+<P>
+A right transversal of H in G, in which the ordering corresponds to
+the order on the points permuted by P, is computed at the same time, and this
+can be accessed by calling <TT>LMGRightTransversal(G,H : ca:=f)</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "7879">LMGCosetImage(G,H) : GrpMat, GrpMat -&gt; GrpPerm</A></H5>
+<BLOCKQUOTE>
+Given a subgroup H of a matrix group G defined over a finite field, return
+the image P of the homomorphism f:G to P defining the action of G
+by multiplication on the right cosets of H in G.
+</BLOCKQUOTE>
+<H5><A NAME = "7880">LMGCosetActionInverseImage(G, f, i) : GrpMat, Map, RngIntElt -&gt; GrpMatElt</A></H5>
+<BLOCKQUOTE>
+The map f should be the result of a call of <TT>LMGCosetAction</TT> on some
+subgroup of the matrix group G. An element of g &isin;G for which
+1<sup>f(g)</sup> = i is returned.
+</BLOCKQUOTE>
+<H5><A NAME = "7881">LMGRightTransversal(G,H : parameters) : GrpMat, GrpMat -&gt; SeqEnum</A></H5>
+
+<PRE>    ca: Map                             Default: </PRE>
+<BLOCKQUOTE>
+Given a subgroup H of a matrix group G defined over a finite field,
+return a right transversal of H in G. The optional parameter <TT>ca</TT>
+should be the map returned by <TT>LMGCosetAction(G,H)</TT>, and if this
+option is used then the elements in the transversal will be ordered in the
+same way as the points permuted by the image of <TT>ca</TT>.
+</BLOCKQUOTE>
+<H5><A NAME = "7882">LMGIsPrimitive(G) : GrpMat -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Decide whether matrix group G defined over a finite field is primitive.
+</BLOCKQUOTE>
+<H5><A NAME = "7883">LMGCharacterTable(G : parameters) : GrpMat -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+Compute the character table of the matrix group G, using LMG functions
+for the calculations within the group. The overall method is as for the
+standard <TT>CharacterTable</TT> command.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "7884">Example <TT>GrpMatFF_LMGex2 (H65E18)</TT></A></H3>
+<P>
+We apply the LMG classes and character table functions to the Dempwolff Group.
+We will use <TT>LMGInitialize</TT> to force use of the composition tree
+methods.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := MatrixGroup(ATLASGroup("25L52"));
+&gt; G:Minimal; 
+MatrixGroup(69, GF(2)) of order 2^15 * 3^2 * 5 * 7 * 31
+&gt; LMGInitialize(G:Al := "CT");
+&gt; LMGChiefFactors(G);
+  G
+  |  A(4, 2)                    = L(5, 2)
+  *
+  |  Cyclic(2) (5 copies)
+  1
+&gt; time cl := LMGClasses(G);
+#Warning: we will need to find a perm rep of the radical quotient!
+#Found perm rep of the radical quotient of degree 31
+Time: 0.750
+&gt; #cl;
+41
+&gt; time X := LMGCharacterTable(G);
+Time: 4.510
+&gt; {* Degree(x): x in X *};
+{* 1, 30, 124, 155, 217, 248, 280, 315^^6, 465^^4, 496, 
+651^^3, 744^^2, 868, 930^^3, 960, 1024, 1240, 1488, 1736^^4, 
+1984, 3720^^3, 11160^^2 *}
+&gt; &amp;+[d^2 : d in $1] eq #G;
+true
+
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text681.htm">[Next]</A><A  HREF = "text679.htm">[Prev]</A> <A  HREF = "text681.htm">[Right]</A> <A  HREF = "text679.htm">[Left]</A> <A  HREF = "text673.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

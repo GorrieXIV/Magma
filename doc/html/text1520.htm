@@ -1,0 +1,143 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Precision</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1521.htm">[Next]</A><A  HREF = "text1519.htm">[Prev]</A> <A  HREF = "text1521.htm">[Right]</A> <A  HREF = "text1519.htm">[Left]</A> <A  HREF = "text1513.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "17240">Precision</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+The values of an L-series are computed numerically and the precision
+required in these computations can be specified using the <TT>Precision</TT>
+parameter when an L-function is created. For example,
+<P>
+<P>
+<PRE>
+&gt; K := CyclotomicField(3);
+&gt; L := LSeries(K: Precision:=60);
+&gt; Evaluate(L,2);
+1.28519095548414940291751179869957460396917839702892124395133
+</PRE>
+computes &zeta;(K, 2) to 60 digits precision.
+The default value <TT>Precision:=0</TT> is equivalent to
+the precision of the default real field at the time of the <TT>LSeries</TT>
+initialization call. If the user only wants to check numerically whether
+an L-function vanishes at a given point s and the value itself is not
+needed, it might make sense to decrease the precision (to 9 digits, say) 
+to speed up the computations. 
+<P>
+<P>
+<P>
+<PRE>
+&gt; E := EllipticCurve([0,0,1,-7,6]);
+&gt; RootNumber(E);
+-1
+&gt; L := LSeries(E: Precision:=9);
+&gt; Evaluate(L, 1: Derivative:=1);
+1.50193628E-11
+&gt; Rank(E);
+3
+</PRE>
+<P>
+This example checks numerically that L'(E, 1)=0 for the elliptic curve 
+E of conductor 5077 from Example <A  HREF = "text1516.htm#17208">H133E18</A>.
+<P>
+The precision may be changed at a later time using <TT>LSetPrecision</TT>.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1520.htm#17242">L-series with Unusual Coefficient Growth</A>
+<LI> <A  HREF = "text1520.htm#17243">Computing L(s) when Im(s) is  Large (<TT>ImS</TT> Parameter)</A>
+<LI> <A  HREF = "text1520.htm#17244">Implementation of L-series Computations (<TT>Asymptotics</TT> Parameter)</A>
+</UL>
+<H5><A NAME = "17241">LSetPrecision(L,precision) : LSer, RngIntElt -&gt;</A></H5>
+
+<PRE>    CoefficientGrowth: UserProgram      Default: </PRE>
+
+<PRE>    ImS: FldReElt                       Default: 0</PRE>
+
+<PRE>    Asymptotics: BoolElt                Default: <TT>true</TT></PRE>
+<BLOCKQUOTE>
+Change the number of digits to which the L-values are going to be computed
+to precision. The parameter <TT>CoefficientGrowth</TT> is described below in 
+Section <A  HREF = "text1520.htm#17242">L-series with Unusual Coefficient Growth</A>.
+</BLOCKQUOTE>
+<H4><A NAME = "17242">L-series with Unusual Coefficient Growth</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+The parameter <TT>CoefficientGrowth</TT> is the name f of a function f(x) 
+(or f(L, x), where L is an L-series) which is an increasing 
+function of a real positive variable x such that |a<sub>n</sub>|&le;f(n).
+This is used to truncate various infinite series in computations.
+It is set by default to the function f(x)=1.5.x<sup>&rho; - 1</sup> where &rho;
+is the largest real part of a pole of L<sup> * </sup>(s) if L<sup> * </sup>(s) has poles and
+f(x)=2x<sup>(weight - 1)/2</sup> if L<sup> * </sup>(s) has no poles. 
+The user will most likely leave this setting untouched.
+
+
+<H4><A NAME = "17243">Computing L(s) when Im(s) is  Large (<TT>ImS</TT> Parameter)</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+If s is a complex number having a large imaginary part, a great deal
+of cancellation occurs while computing L(s), resulting in a loss
+of precision. 
+(The time when all the precision-related parameters are
+pre-computed is when the function <TT>LSeries</TT> is invoked, and at that
+time Magma has no way of knowing whether L(s) is to be evaluated
+for complex numbers s having large imaginary part.) If this happens,
+a message is printed, warning of a precision loss. To avoid this, the
+user may specify the largest Im(s) for which the L-values are to be
+calculated as the value of the <TT>ImS</TT> parameter at the time of the 
+L-series initialization or, later, with a call to <TT>LSetPrecision</TT>:
+<P>
+<P>
+<P>
+<P>
+<PRE>
+&gt; C&lt;i&gt; := ComplexField();
+&gt; L := RiemannZeta();
+&gt; Evaluate(L, 1/2+40*i);            // wrong
+Warning: Loss of 13 digits due to cancellation
+0.793044952561928671982128851045 - 1.04127461465106502007452195086*i
+&gt; LSetPrecision(L, 30: ImS:=40);
+&gt; Evaluate(L, 1/2+40*i);            // right
+0.793044952561928671964892588898 - 1.04127461465106502005189059539*i
+</PRE>
+
+
+<H4><A NAME = "17244">Implementation of L-series Computations (<TT>Asymptotics</TT> Parameter)</A></H4>
+
+<P>
+<P>
+<P>
+The optional parameter <TT>Asymptotics</TT> in <TT>LSetPrecision</TT> and in 
+the general <TT>LSeries</TT> function specifies the method by which the
+special functions needed for the L-series evaluation are computed.
+<P>
+If set to <TT>false</TT>, Magma will use only Taylor expansions at the origin
+and these are always known to be convergent. With the default behaviour
+(<TT>Asymptotics:=true</TT>) Magma will use both the Taylor expansions
+and the continued fractions of the asymptotic expansions at infinity. 
+This is much faster, but these continued fractions are not proved to
+be convergent in all cases. 
+
+
+<PRE></PRE> <A  HREF = "text1521.htm">[Next]</A><A  HREF = "text1519.htm">[Prev]</A> <A  HREF = "text1521.htm">[Right]</A> <A  HREF = "text1519.htm">[Left]</A> <A  HREF = "text1513.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

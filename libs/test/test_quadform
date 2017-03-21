@@ -1,0 +1,312 @@
+/*****************************************************
+  Test code for quadform.m
+  
+  August 2010 Don Taylor
+  
+  $Id: test_quadform 39857 2012-08-31 07:19:37Z don $
+  
+******************************************************/
+// import "quadform.m": quadrep_;
+
+test := [];
+
+test[1] := procedure()
+
+  F := Integers();
+  B := Matrix(F,2,2,[1,1,1,1]);
+  V := QuadraticSpace(B);
+  assert IsQuadraticSpace(V);
+end procedure;
+
+test[2] := function()
+
+  F := GF(25);
+  B := Matrix(2,2,[F|2,1,3,1]);
+  V := QuadraticSpace(B);
+  return V;
+  
+end function;
+
+// Note that RSpace(F,n,B) does not require B to be symmetric
+// and so the InnerProduct function is not symmetric.
+
+test[3] := procedure()
+  F := GF(49);
+  B := Matrix(2,2,[F|2,1,3,1]);
+  V := QuadraticSpace(B);
+  v := V![1,2];
+  QuadraticNorm(v) eq 0;
+  
+end procedure;
+
+test[4] := function()
+  F<t> := GF(16);
+  B := Matrix(6,6,[F| 
+    0,1, 0,0, 0,0,
+    0,0, 0,0, 0,0,
+    0,0, 0,1, 0,0,
+    0,0, 0,0, 0,0,
+    0,0, 0,0, 0,1,
+    0,0, 0,0, 0,0]);
+  V := QuadraticSpace(B);
+  U := sub<V | V.1, t*V.2+V.3 >;
+  return OrthogonalComplement(V,U);
+end function;
+
+/*
+test5 := procedure(K,a,b)
+  for i := 1 to 5 do
+    c := Random(K);
+    print "";
+    print a,b,c;
+    x, y := quadrep_(a,b,c);
+    print x,y;
+    print a*x^2+b*y^2;
+  end for;
+end procedure;
+*/
+
+getquadspace := function()
+  F := GF(49);
+  B1 := Matrix(6,6,[F| 
+    0,1, 0,0, 0,0,
+    0,0, 0,0, 0,0,
+    0,0, 0,1, 0,0,
+    0,0, 0,0, 0,0,
+    0,0, 0,0, 1,1,
+    0,0, 0,0, 1,1]);
+  return QuadraticSpace(B1);
+
+end function;
+
+test[5] := procedure()
+  V := getquadspace();
+  e1 := Random(V);
+  e2 := Random(V);
+  U, f := sub<V|e1,e2>;
+  forall{ u : u in U | QuadraticNorm(u) eq QuadraticNorm(V!u) };
+end procedure;  
+
+test[6] := function()
+  F<t> := GF(49);
+  B := Matrix(6,6,[F| 
+    0,1, 0,0, 0,0,
+    0,0, 0,0, 0,0,
+    0,0, 0,1, 0,0,
+    0,0, 0,0, 0,0,
+    0,0, 0,0, 0,1,
+    0,0, 0,0, 0,0]);
+  V := QuadraticSpace(B);
+  e1 := V![t^7, t^9,t^12, t^2, 1, t^9];
+  e2 := V![t,   t^6, t^3,   0, t, t^5];
+  e3 := V![t^12,t^8, t^4,t^14,t^12, 1];
+  U := sub<V|e1,e2,e3>;
+  W := sub<U|e1,e2>; 
+  X := OrthogonalComplement(U,W);
+  assert Dimension(X) eq 1;
+  return V,U,W;
+end function;
+
+test[7] := procedure()
+  F<t> := GF(16);
+  B := Matrix(6,6,[F| 
+    0,1, 0,0, 0,0,
+    0,0, 0,0, 0,0,
+    0,0, 0,1, 0,0,
+    0,0, 0,0, 0,0,
+    0,0, 0,0, 0,1,
+    0,0, 0,0, 0,0]);
+  V := QuadraticSpace(B);
+  e1 := V![t^13, t^5,  t^4,  t^6,  t^14, t^10];
+  e2 := V![t^5,  t^12, t^12, t^14, t^7,  t^4];
+  e3 := V![t^12, t^8,  t^4,  t^14, t^12,   1];
+  U := sub<V|e1,e2,e3>;
+  W := sub<U|e1,e2>; 
+  flag, v := HasSingularVector(W);
+  assert not flag;
+  flag, v := HasSingularVector(U);
+  assert flag;
+  assert QuadraticNorm(v) eq 0;
+end procedure;
+  
+
+exampleform := function(n,q : eps := 0);
+  /* If n is odd, ignore the supplied value of eps and force eps=0
+     If n is even and eps=0, change to eps = 1
+  */
+  if IsOdd(n) then
+    eps := 0;
+  else
+    if eps eq 0 then eps := 1; end if;
+  end if;
+  F := GF(q);
+  B := Zero(MatrixAlgebra(F,n));
+  for i := 1 to n-1 by 2 do
+    B[i,i+1] := 1;
+  end for;
+  if IsOdd(n) then 
+    B[n,n] := 1;
+  elif eps eq -1 then
+    L := Coefficients(IrreduciblePolynomial(F,2));
+    B[n-1,n-1] := L[1];
+    B[n-1,n] := L[2];
+    B[n,n] := L[3];
+  end if;
+  return B;
+end function;
+
+// m is the Witt index
+singnum := func<n,q,m | (q^(n-m-1)+1)*(q^m-1) >;
+
+testA := function(n,q : eps := 0)
+// Count the number of singular vectors
+  print "Test A (",n,q,eps,")";
+  B := exampleform(n,q : eps := eps);
+  V := QuadraticSpace(B);
+  S := { v : v in V | v ne 0 and QuadraticNorm(v) eq 0 };
+  if IsEven(n) then 
+    m := n div 2;
+    if eps eq -1 then m -:= 1; end if;
+  else
+    m := (n-1) div 2;
+  end if;
+  assert #S eq singnum(n,q,m);
+  return #S;
+end function;
+
+testB := procedure(n,q:eps := 0)
+  print "Test B (",n,q,eps,")";
+  B := exampleform(n,q : eps := eps);
+  V := QuadraticSpace(B);
+  print WittIndex(V);
+end procedure;
+
+testC := function(n,q : eps := 0)
+  print "Test C (",n,q,eps,")";
+  B := exampleform(n,q: eps := eps);
+  V := QuadraticSpace(B);
+  M := MaximalTotallySingularSubspace(V);
+  return GramMatrix(M), [ QuadraticNorm(v) : v in Basis(M) ];
+end function;
+
+test[8] := procedure()
+  V := getquadspace();
+  assert not IsNonsingular(V); //false
+end procedure;
+
+test[9] := procedure()
+  V := getquadspace();
+  try
+    WittDecomposition(V); // should fail
+  catch e
+    print e`Position;
+    print "Expected failure\n";
+  end try;
+end procedure;
+
+test[10] := function()
+  V := getquadspace();
+  R := Radical(V);
+  assert Dimension(R) eq 1;
+//  B := ExtendBasis(R,V);
+//  U := sub<V| [v : v in B | v notin R ]>;
+  U := sub<V|Basis(Complement(V,R))>;
+  return HyperbolicSplitting(U);
+end function;
+
+test[11] := procedure()
+  n := 6;
+  q := 4;
+  B := exampleform(n,q : eps := 1);
+  V := QuadraticSpace(B);
+  if assigned V`hSplit then delete V`hSplit; end if;
+  assert WittIndex(V) eq 3;
+  B := exampleform(n,q : eps := -1);
+  V := QuadraticSpace(B);
+  delete V`hSplit;
+  assert WittIndex(V) eq 2;
+  n := 7;
+  q := 4;
+  B := exampleform(n,q);
+  V := QuadraticSpace(B);
+  delete V`hSplit;
+  assert WittIndex(V) eq 3;
+end procedure;
+
+test[12] := function()
+  F<t> := GF(49);
+  B := Matrix(6,6,[F| 
+    1,1, t^2,t, 1,1,
+    0,0, 0,0, t^3,0,
+    0,0, 0,1, 0,t^5,
+    0,0, 0,0, 3,t,
+    0,0, 0,0, 1,1,
+    0,0, 0,0, 0,t]);
+  V := QuadraticSpace(B);
+  return HyperbolicSplitting(V);
+end function;
+
+testD := procedure(n,q)
+  print "Test D (",n,q,")";
+  F := GF(q);
+  A := MatrixAlgebra(F,n);
+  for i := 1 to 20 do
+    B := Random(A);
+    V := QuadraticSpace(B);
+    if IsNonsingular(V) then
+      H := HyperbolicSplitting(V);
+      p := H[2];
+      if #p eq 2 then
+        assert QuadraticNorm(p[1]) eq InnerProduct(p[1],p[2]);
+        assert #p eq Dimension(sub<V|p>);
+      end if;
+    end if;
+  end for;
+end procedure;
+
+test[13] := function()
+  F<t> := GF(49);
+  B1 := Matrix(6,6,[F| 
+    1,1, t^2,t, 1,1,
+    0,0, 0,0, t^3,0,
+    0,0, 0,1, 0,t^5,
+    0,0, 0,0, 3,t,
+    0,0, 0,0, 1,1,
+    0,0, 0,0, 0,t]);
+  B2 := exampleform(6,49 : eps := -1);
+  V1 := QuadraticSpace(B1);
+  V2 := QuadraticSpace(B2);
+  return IsIsometric(V1,V2);
+end function;
+
+test[14] := procedure()
+  B1 := exampleform(6,4 : eps := 1);
+  B2 := exampleform(6,4 : eps := -1);
+  V1 := QuadraticSpace(B1);
+  V2 := QuadraticSpace(B2);
+  QuadraticFormMatrix(V1) ne QuadraticFormMatrix(V2);
+//  assert V1 ne V2;
+end procedure;
+
+all_tests := procedure()
+  for n := 1 to #test do
+    print "Test",n;
+    test[n]();
+  end for;
+  for n := 2 to 6 do
+    for q in [2,3,4,5,7,8,9] do
+      testA(n,q);
+      testB(n,q);
+      testC(n,q);
+      testD(n,q);
+      if IsEven(n) then
+        testA(n,q : eps := -1);
+        testB(n,q : eps := -1);
+        testC(n,q : eps := -1);
+      end if;
+    end for;
+  end for;
+end procedure;
+
+all_tests();
+

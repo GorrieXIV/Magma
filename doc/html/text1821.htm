@@ -1,0 +1,306 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Distances, Shortest Paths and Minimum Weight Trees</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1808.htm">[Next]</A><A  HREF = "text1820.htm">[Prev]</A> <A  HREF = "text1808.htm">[Right]</A> <A  HREF = "text1820.htm">[Left]</A> <A  HREF = "text1809.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "20253">Distances, Shortest Paths and Minimum Weight Trees</A></H3>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+<P>
+Two standard algorithms have been implemented for finding 
+  single-source shortest paths in weighted graphs.
+One is Dijsktra's algorithm for graphs without negative weight cycles,
+  the second is Bellman-Ford's for those graphs with negative weight
+  cycles.
+Dijsktra's algorithm is implemented either by a priority queue (binary
+  heap) or a Fibonacci heap.
+The Fibonacci heap is asymptotically faster for sparse  graphs.
+But for most practical purposes (graphs of small order) 
+  the binary heap outperforms 
+  the Fibonacci heap and is therefore chosen as the default 
+  data structure wherever relevant.
+<P>
+Johnson's algorithm has been chosen for the all-pairs shortest paths
+  computation.
+Indeed, it outperforms the simpler Floyd's algorithm, especially as the 
+  graphs get larger.
+<P>
+Finally, Prim's algorithm is used to implement the minimum weight tree
+  computation  for  undirected graphs.
+(The tree is a spanning tree if and only if the graph is connected.)
+<P>
+All the functions described below apply to general graphs whose
+  edges are assigned a weight.
+If the graph under consideration is not weighted, then
+  all its edges are assumed to have weight one.
+To assign weights to the edges of a graph, see 
+  Subsection <A  HREF = "text1813.htm#20081">Edge Decorations</A>.
+Note that all the functions described below accept negatively weighted
+  edges.
+
+
+<H5><A NAME = "20254">Reachable(u, v : parameters) : GrphVert, GrphVert -&gt; BoolElt, RngElt</A></H5>
+
+<PRE>    UseFibonacciHeap: Bool              Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only there is a path from vertex u to vertex v.
+If true, also returns the distance between u and v.
+</BLOCKQUOTE>
+<H5><A NAME = "20255">Distance(u, v : parameters) : GrphVert, GrphVert -&gt; RngElt</A></H5>
+
+<PRE>    UseFibonacciHeap: Bool              Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given vertices u and v in a graph G, computes 
+  the distance from u to v.
+Results in an error if there is no path in G from u to v.
+</BLOCKQUOTE>
+<H5><A NAME = "20256">Distances(u : parameters) : GrphVert -&gt;  Eseq</A></H5>
+
+<PRE>    UseFibonacciHeap: Bool              Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a vertex u in a graph G, computes the sequence D
+  of distances from u to v, v any vertex in G.
+Given any vertex v in G, let i be <TT>Index(v)</TT>.
+Then D[i], if  defined, is the distance from u to v.
+If there is no path from u to v, then the sequence
+  element D[i] is undefined.
+</BLOCKQUOTE>
+<H5><A NAME = "20257">PathExists(u, v : parameters) : GrphVert, GrphVert -&gt; BoolElt, Eseq</A></H5>
+
+<PRE>    UseFibonacciHeap: Bool              Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only there is a path from vertex u to vertex v in the 
+  parent graph G.
+If so, also returns a shortest path from u to v 
+  as a sequence of edges of G.
+</BLOCKQUOTE>
+<H5><A NAME = "20258">Path(u, v : parameters) : GrphVert, GrphVert -&gt;  Eseq</A></H5>
+<H5>ShortestPath(u, v : parameters) : GrphVert, GrphVert -&gt;  Eseq</H5>
+
+<PRE>    UseFibonacciHeap: Bool              Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given vertices u and v in a graph G, computes 
+  a shortest path from u to v as a sequence of edges of G.
+Results in an error if there is no path in G from u to v.
+</BLOCKQUOTE>
+<H5><A NAME = "20259">Paths(u : parameters) : GrphVert -&gt;  Eseq</A></H5>
+<H5>ShortestPaths(u : parameters) : GrphVert -&gt;  Eseq</H5>
+
+<PRE>    UseFibonacciHeap: Bool              Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a vertex u in a graph G, computes the sequence P of shortest 
+paths from u to v, for every vertex v in G.  Given any vertex v 
+in G, let i be <TT>Index(v)</TT>.  If there exists a path from u to v
+then P[i] is a sequence of edges giving a shortest path from u to v.  
+If there is no path from u to v, then the sequence element P[i] is 
+undefined.
+</BLOCKQUOTE>
+<H5><A NAME = "20260">GeodesicExists(u, v : parameters) : GrphVert, GrphVert -&gt; BoolElt, Eseq</A></H5>
+
+<PRE>    UseFibonacciHeap: Bool              Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only there is a path from vertex u to vertex v in the 
+  parent graph G.
+If true, also returns a shortest path from u to v 
+  as a sequence of vertices of G.
+</BLOCKQUOTE>
+<H5><A NAME = "20261">Geodesic(u, v : parameters) : GrphVert, GrphVert -&gt;  Eseq</A></H5>
+
+<PRE>    UseFibonacciHeap: Bool              Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given vertices u and v in a graph G, this function computes a shortest 
+path from u to v as a sequence of vertices of G.  An error results if 
+there is no path in G from u to v.
+</BLOCKQUOTE>
+<H5><A NAME = "20262">Geodesics(u : parameters) : GrphVert -&gt;  Eseq</A></H5>
+
+<PRE>    UseFibonacciHeap: Bool              Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a vertex u in a graph G, this function computes the sequence P
+of shortest paths from u to v, for every vertex v in G.  Given any 
+vertex v in G, let i be <TT>Index(v)</TT>.  If there exists a path from 
+u to v then P[i] is a sequence of vertices specifying a shortest path 
+from u to v.  If there is no path from u to v, then the sequence
+element P[i] is undefined.
+</BLOCKQUOTE>
+<H5><A NAME = "20263">HasNegativeWeightCycle(u : parameters) : GrphVert -&gt;  BoolElt</A></H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if there is a negative-weight cycle reachable
+   from vertex u.
+</BLOCKQUOTE>
+<H5><A NAME = "20264">HasNegativeWeightCycle(G) : Grph -&gt; BoolElt</A></H5>
+<H5>HasNegativeWeightCycle(G) : GrphMult -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Return <TT>true</TT> if and only if the graph G has negative-weight cycles.
+</BLOCKQUOTE>
+<H5><A NAME = "20265">AllPairsShortestPaths(G : parameters) : Grph -&gt; SeqEnum, SeqEnum</A></H5>
+<H5>AllPairsShortestPaths(G : parameters) : GrphMult -&gt; SeqEnum, SeqEnum</H5>
+
+<PRE>    UseFibonacciHeap: Bool              Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Computes the all-pairs shortest paths. 
+Let u and v be two vertices of a graph G and let
+  i = (Index(u)) and j = (Index(v)).
+Let S<sub>1</sub> and S<sub>2</sub> be the two sequences returned 
+  by <TT>AllPairsShortestPaths</TT>, and let 
+  s<sub>1</sub> = S<sub>1</sub>[i] and s<sub>2</sub> = S<sub>2</sub>[i].
+Then s<sub>1</sub>[j], if defined, gives the distance from u to v 
+  and s<sub>2</sub>[j], if defined,  gives the vertex preceding v 
+  in the shortest path from u to v.
+An error results if the graph G has a negative-weight cycle.
+</BLOCKQUOTE>
+<H5><A NAME = "20266">MinimumWeightTree(u : parameters) : GrphVert -&gt; SeqEnum</A></H5>
+
+<PRE>    UseFibonacciHeap: Bool              Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Returns a minimum weight tree rooted at vertex u,
+   u any vertex of an <I>undirected</I> graph G, 
+   as a subgraph of G.
+The tree spans G if and only if G is connected.
+The support of G as well as the 
+  vertex and edge decorations in G <I>are</I> transferred to the tree.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "20267">Example <TT>MultiGraph_GrphMult_ShortP (H156E12)</TT></A></H3>
+We create a weighted multidigraph.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := MultiDigraph&lt; 5 | [1, 2], [1, 2], [1, 3], [2, 4], [3, 5], [3, 4], [4, 5] &gt;;
+&gt; E := EdgeSet(G);
+&gt; AssignWeight(~G, E.1, 1);
+&gt; AssignWeight(~G, E.2, 5);
+&gt; AssignWeight(~G, E.3, 10);
+&gt; AssignWeight(~G, E.4, 1);
+&gt; AssignWeight(~G, E.5, -5);
+&gt; AssignWeight(~G, E.6, 1);
+&gt; AssignWeight(~G, E.7, 2);
+&gt; 
+&gt; 
+&gt; V := VertexSet(G);
+&gt; E := EdgeSet(G);
+&gt; for e in E do
+&gt;     e, "  ", Weight(e);
+&gt; end for;
+&lt; [1, 3], 3 &gt;    10
+&lt; [1, 2], 2 &gt;    5
+&lt; [1, 2], 1 &gt;    1
+&lt; [2, 4], 4 &gt;    1
+&lt; [3, 4], 6 &gt;    1
+&lt; [3, 5], 5 &gt;    -5
+&lt; [4, 5], 7 &gt;    2
+</PRE>
+We verify that it has no negative weight cycle reachable from vertex
+  1, and that there is a path from vertex 1 to vertex 5.
+<P>
+<P>
+<PRE>
+&gt; HasNegativeWeightCycle(V!1);
+false
+&gt; b, d := Reachable(V!1, V!5);
+&gt; assert b;
+&gt; P := Path(V!1, V!5);
+&gt; G := Geodesic(V!1, V!5);
+&gt; 
+&gt; d;
+4
+&gt; P;
+[ &lt; [1, 2], 1 &gt;, &lt; [2, 4], 4 &gt;, &lt; [4, 5], 7 &gt; ]
+&gt; G;
+[ 1, 2, 4, 5 ]
+</PRE>
+Finally, we verify that the shortest path found has length 4.
+<P>
+<P>
+<PRE>
+&gt; dP := 0;
+&gt; for e in P do
+&gt;     dP +:= Weight(e);
+&gt; end for;
+&gt; assert dP eq d;
+</PRE>
+Note that had we taken instead an undirected graph, we would have had to 
+assign only positive weights to the edges of the graph: any undirected 
+edge {u, v} with negative weight results in the negative weight 
+cycles {u, u} and {v, v}.
+<HR>
+<H3><A NAME = "20268">Example <TT>MultiGraph_GrphMult_MinW (H156E13)</TT></A></H3>
+We create a weighted multigraph with one edge assigned a negative
+<P>
+  weight.
+<P>
+<P>
+<PRE>
+&gt; G := MultiGraph&lt; 5 | {1, 2}, {1, 2}, {1, 3}, {2, 4}, {3, 5}, {3, 4}, {4, 5} &gt;;
+&gt; E := EdgeSet(G);
+&gt; AssignWeight(~G, E.1, 1);
+&gt; AssignWeight(~G, E.3, 5);
+&gt; AssignWeight(~G, E.5, 10);
+&gt; AssignWeight(~G, E.7, 1);
+&gt; AssignWeight(~G, E.9, -5);
+&gt; AssignWeight(~G, E.11, 1);
+&gt; AssignWeight(~G, E.13, 2);
+&gt; 
+&gt; V := VertexSet(G);
+&gt; E := EdgeSet(G);
+&gt; for e in E do
+&gt;     e, "  ", Weight(e);
+&gt; end for;
+&lt; {1, 3}, 5 &gt;    10
+&lt; {1, 2}, 3 &gt;    5
+&lt; {1, 2}, 1 &gt;    1
+&lt; {2, 4}, 7 &gt;    1
+&lt; {3, 4}, 11 &gt;    1
+&lt; {3, 5}, 9 &gt;    -5
+&lt; {4, 5}, 13 &gt;    2
+</PRE>
+We compute a minimum weight spanning tree rooted at vertex 1.
+<P>
+<P>
+<PRE>
+&gt; T := MinimumWeightTree(V!1);
+&gt; ET := EdgeSet(T);
+&gt; for e in ET do
+&gt;     e, "  ", Weight(e);
+&gt; end for;
+&lt; {1, 2}, 1 &gt;    1
+&lt; {2, 4}, 5 &gt;    1
+&lt; {3, 5}, 7 &gt;    -5
+&lt; {3, 4}, 3 &gt;    1
+</PRE>
+We compute any other spanning tree rooted at vertex 1
+  (say a depth first tree
+  using <A  HREF = "text1819.htm#MultiGraph:DFSTree">DFSTree</A>),
+  and verify that the weights of the edges in G corresponding
+  to the edges of the tree sum up to a total weight which is no
+  smaller than the weight of the minimum weight spanning tree.
+<P>
+<P>
+<PRE>
+&gt; DFST := DFSTree(V!1);
+&gt; EDT := EdgeSet(DFST);
+&gt; for e in EDT do
+&gt;     u := InitialVertex(e);
+&gt;     v := TerminalVertex(e);
+&gt;     w := Min([ Weight(edge) : edge in Edges(V!u, V!v) ]);
+&gt;     e, "  ", w;
+&gt; end for;
+&lt; {1, 3}, 1 &gt;    10
+&lt; {2, 4}, 7 &gt;    1
+&lt; {3, 4}, 3 &gt;    1
+&lt; {4, 5}, 5 &gt;    2
+</PRE>
+<PRE></PRE> <A  HREF = "text1808.htm">[Next]</A><A  HREF = "text1820.htm">[Prev]</A> <A  HREF = "text1808.htm">[Right]</A> <A  HREF = "text1820.htm">[Left]</A> <A  HREF = "text1809.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

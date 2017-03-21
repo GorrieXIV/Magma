@@ -1,0 +1,463 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Construction of K[G]-Modules</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1031.htm">[Next]</A><A  HREF = "text1029.htm">[Prev]</A> <A  HREF = "text1031.htm">[Right]</A> <A  HREF = "text1029.htm">[Left]</A> <A  HREF = "text1028.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "11602">Construction of K[G]-Modules</A></H3>
+
+<P>
+<P>
+<P>
+The following functions provide for the construction of finite-dimensional
+K[G]-modules for a group G, where the action of G is given in terms 
+of a matrix representation of G. Note that an Euclidean Domain may appear 
+in place of the field K. 
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1030.htm#11603">General K[G]-Modules</A>
+<LI> <A  HREF = "text1030.htm#11609">Natural K[G]-Modules</A>
+<LI> <A  HREF = "text1030.htm#11613">Action on an Elementary Abelian Section</A>
+<LI> <A  HREF = "text1030.htm#11616">Permutation Modules</A>
+<LI> <A  HREF = "text1030.htm#11623">Action on a Polynomial Ring</A>
+</UL>
+<H4><A NAME = "11603">General K[G]-Modules</A></H4>
+
+
+
+<H5><A NAME = "11604">GModule(G, A) : Grp, AlgMat -&gt; ModGrp</A></H5>
+<BLOCKQUOTE>
+Let G be a group defined on r generators and let A be a subalgebra
+of the matrix algebra M<sub>n</sub>(K), also defined by r non-singular matrices.
+It is assumed that the mapping from G to A defined by
+&phi;(G.i) |-&gt; A.i, for i = 1, ..., r, is a group homomorphism.
+Let M be an n-dimensional vector space over K. The function
+constructs a K[G]-module M of dimension n, where the action
+of the i-th generator of G on M is given by the i-th generator of
+A.
+<P>
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "11605">GModule(G, Q) : Grp, [ GrpMatElt ] -&gt; ModGrp</A></H5>
+<BLOCKQUOTE>
+Let G be a group defined on r generators and let Q be a sequence
+of r invertible elements of M<sub>n</sub>(K) or GL(n, K). It is assumed that
+the mapping from G to Q defined by 
+&phi;(G.i) |-&gt; Q[i], for i = 1, ..., r,
+is a group homomorphism from G into the matrix algebra A defined 
+by the terms of Q. The function constructs a K[G]-module M of 
+dimension n, where the action of G is defined by the matrix algebra A.
+<P>
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "11606">TrivialModule(G, K) : Grp, Fld -&gt; ModGrp</A></H5>
+<BLOCKQUOTE>
+Create the trivial K[G]-module for the group G.
+<P>
+<P>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11607">Example <TT>ModGrp_CreateL27 (H96E1)</TT></A></H3>
+We construct a 3-dimensional module for PSL(2, 7) over
+GF(2). The action of the group on M is described in terms of two
+elements, x and y, belonging to the ring of 3 x 3 matrices 
+over GF(2).
+<P>
+<P>
+<PRE>
+&gt; PSL27 := PermutationGroup&lt; 8 | (2,3,5)(6,7,8), (1,2,4)(3,5,6) &gt;;
+&gt; S := MatrixAlgebra&lt; FiniteField(2), 3 |
+&gt;        [ 0,1,0,  1,1,1,  0,0,1 ], [ 1,1,1,  0,1,1,  0,1,0 ] &gt;;
+&gt; M := GModule(PSL27, S);
+&gt; M: Maximal;
+GModule M of dimension 3 with base ring GF(2)
+Generators of acting algebra:
+
+
+[0 1 0]
+[1 1 1]
+[0 0 1]
+
+
+[1 1 1]
+[0 1 1]
+[0 1 0]
+</PRE>
+<HR>
+<H3><A NAME = "11608">Example <TT>ModGrp_CreateMatrices (H96E2)</TT></A></H3>
+We write a function which, given a matrix algebra A, together with
+a matrix group G acting on A by conjugation (so A is closed under
+action by G), computes the G-module M representing the action
+of G on A.  We then construct a particular (nilpotent) upper-triangular
+matrix algebra A, a group G = 1 + A which acts on A, and finally
+construct the appropriate G-module M.
+<P>
+<P>
+<PRE>
+&gt; MakeMod := function(A, G)
+&gt;     // Make G-module M of G acting on A by conjugation
+&gt;     k := CoefficientRing(A);
+&gt;     d := Dimension(A);
+&gt;     S := RMatrixSpace(A, k);
+&gt;     return GModule(
+&gt;         G,
+&gt;         [
+&gt;             MatrixAlgebra(k, d) |
+&gt;             &amp;cat[
+&gt;                 Coordinates(S, S.j^g): j in [1 .. d]
+&gt;             ] where g is G.i: i in [1 .. Ngens(G)]
+&gt;         ]
+&gt;     );
+&gt; end function;
+&gt;
+&gt; MakeGroup := function(A)
+&gt;     // Make group G from upper-triangular matrix algebra A
+&gt;     k := CoefficientRing(A);
+&gt;     n := Degree(A);
+&gt;     return MatrixGroup&lt;n, k | [Eltseq(1 + A.i): i in [1 .. Ngens(A)]]&gt;;
+&gt; end function;
+&gt;
+&gt; k := GF(3);
+&gt; n := 4;
+&gt; M := MatrixAlgebra(k, n);
+&gt; A := sub&lt;M |
+&gt;      [0,2,1,1, 0,0,1,1, 0,0,0,1, 0,0,0,0],
+&gt;      [0,1,0,0, 0,0,2,2, 0,0,0,1, 0,0,0,0]&gt;;
+&gt; G := MakeGroup(A);
+&gt; G;
+MatrixGroup(4, GF(3)) of order 3^4
+Generators:
+    [1 2 1 1]
+    [0 1 1 1]
+    [0 0 1 1]
+    [0 0 0 1]
+
+
+    [1 1 0 0]
+    [0 1 2 2]
+    [0 0 1 1]
+    [0 0 0 1]
+&gt; M := MakeMod(A, G);
+&gt; M: Maximal;
+GModule M of dimension 5 over GF(3)
+Generators of acting algebra:
+
+
+[1 1 1 2 0]
+[0 1 1 0 0]
+[0 0 1 0 0]
+[0 0 0 1 0]
+[0 0 0 0 1]
+
+
+[1 2 2 2 0]
+[0 1 1 0 0]
+[0 0 1 0 0]
+[0 0 0 1 0]
+[0 0 0 0 1]
+</PRE>
+<HR>
+<H4><A NAME = "11609">Natural K[G]-Modules</A></H4>
+
+<P>
+<P>
+<P>
+The following functions provide for the construction of K[G]-modules
+for a group G in one of its natural actions. Note that an
+Euclidean Domain may be used in place of the field K. 
+
+
+<H5><A NAME = "11610">GModule(G, K) : GrpPerm, Rng -&gt; ModGrp</A></H5>
+<BLOCKQUOTE>
+Given a finite permutation group G and a ring K, create the
+natural permutation module for G over K.
+</BLOCKQUOTE>
+<H5><A NAME = "11611">GModule(G) : GrpMat -&gt; ModGrp</A></H5>
+<BLOCKQUOTE>
+Given a matrix group G defined as a subgroup of the group of units
+of the ring Mat<sub>n</sub>(K), where K is a field, create the natural 
+K[G]-module for G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11612">Example <TT>ModGrp_CreateM11 (H96E3)</TT></A></H3>
+Given the Mathieu group M<sub>11</sub> presented as a group
+of 5 x 5 matrices over GF(3), we construct the natural
+K[G]-module associated with this representation.
+<P>
+<P>
+<P>
+<PRE>
+&gt; G := MatrixGroup&lt;5, FiniteField(3) |
+&gt;      [ 2,1,2,1,2,  2,0,0,0,2,  0,2,0,0,0,  0,1,2,0,1,  1,0,2,2,1],
+&gt;      [ 2,1,0,2,1,  1,2,0,2,2,  1,1,2,1,1,  0,2,0,1,1,  1,1,2,2,2] &gt;;
+&gt; Order(G);
+7920
+&gt;
+&gt; M := GModule(G);
+&gt; M : Maximal;
+GModule M of dimension 5 with base ring GF(3)
+Generators of acting algebra:
+
+
+[2 1 2 1 2]
+[2 0 0 0 2]
+[0 2 0 0 0]
+[0 1 2 0 1]
+[1 0 2 2 1]
+
+
+[2 1 0 2 1]
+[1 2 0 2 2]
+[1 1 2 1 1]
+[0 2 0 1 1]
+[1 1 2 2 2]
+</PRE>
+<HR>
+<H4><A NAME = "11613">Action on an Elementary Abelian Section</A></H4>
+
+
+
+<H5><A NAME = "11614">GModule(G, A, B) : Grp, Grp, Grp -&gt; ModGrp, Map</A></H5>
+<H5>GModule(G, A) : Grp, Grp -&gt; ModGrp, Map</H5>
+<BLOCKQUOTE>
+Given a group G, a normal subgroup A of G and a normal
+subgroup B of A such that the section A/B is elementary abelian
+of order p<sup>n</sup>, create the K[G]-module M corresponding to the action of
+G on A/B, where K is the field GF(p). If B is trivial, it
+may be omitted. The function returns
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>the module M; and
+<DT>(b)</DT><DD>the homomorphism &phi; : A/B -&gt; M.
+ </DL>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11615">Example <TT>ModGrp_CreateA4wrC3 (H96E4)</TT></A></H3>
+We construct a module M for the wreath product G of the alternating 
+group of degree 4 with the cyclic group of degree 3. The module is given 
+by the action of G on an elementary abelian normal subgroup H of 
+order 64.
+<P>
+<P>
+<PRE>
+&gt; G := WreathProduct(AlternatingGroup(4), CyclicGroup(3));
+&gt; G := PCGroup(G);
+&gt; A := pCore(G, 2);
+&gt; A;
+GrpPC of order 64 = 2^6
+Relations:
+A.1^2 = Id(A),
+A.2^2 = Id(A),
+A.3^2 = Id(A),
+A.4^2 = Id(A),
+A.5^2 = Id(A),
+A.6^2 = Id(A)
+&gt; M := GModule(G, A, sub&lt;G|&gt;);
+&gt; M;
+GModule of dimension 6 with base ring GF(2)
+</PRE>
+<HR>
+<H4><A NAME = "11616">Permutation Modules</A></H4>
+
+<P>
+<P>
+<P>
+The following functions provide for the construction of permutation
+modules for a group G. Note that an Euclidean Domain may be 
+used in place of the field K. 
+
+
+<P>
+<H5><A NAME = "11617">PermutationModule(G, H, K) : Grp, Grp, Fld -&gt; ModGrp</A></H5>
+<BLOCKQUOTE>
+Given a group G, a subgroup H of finite index in G and a field K,
+create the K[G]-module for G corresponding to the permutation action 
+of G on the cosets of H.
+</BLOCKQUOTE>
+<H5><A NAME = "11618">PermutationModule(G, K) : Grp, Fld -&gt; ModGrp</A></H5>
+<BLOCKQUOTE>
+Given a permutation group G and a field K, create the
+natural permutation module for G over K.
+</BLOCKQUOTE>
+<H5><A NAME = "11619">PermutationModule(G, V) : Grp, ModTupFld -&gt; ModGrp</A></H5>
+<BLOCKQUOTE>
+Given a permutation group G of degree n and an 
+n-dimensional vector space V, create the natural permutation 
+module for G over K.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "11620">PermutationModule(G, u) : Grp, ModTupFldElt -&gt; ModGrp</A></H5>
+<BLOCKQUOTE>
+Given a permutation group G of degree n, and a vector u
+belonging to the vector space V = K<sup>(n)</sup>, 
+construct the K[G]-module corresponding to the action of G on the
+K-subspace of V generated by the set of vectors obtained by
+applying the permutations of G to the vector u.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11621">Example <TT>ModGrp_CreateM12 (H96E5)</TT></A></H3>
+We construct the permutation module for the Mathieu group
+M<sub>12</sub> over the field GF(2).
+<P>
+<P>
+<PRE>
+&gt; M12 := PermutationGroup&lt;12 |
+&gt;       (1,2,3,4,5,6,7,8,9,10,11),
+&gt;       (1,12,5,2,9,4,3,7)(6,10,11,8) &gt;;
+&gt; M := PermutationModule(M12, FiniteField(2));
+&gt; M : Maximal;
+GModule M of dimension 12 with base ring GF(2)
+Generators of acting algebra:
+
+
+[0 1 0 0 0 0 0 0 0 0 0 0]
+[0 0 1 0 0 0 0 0 0 0 0 0]
+[0 0 0 1 0 0 0 0 0 0 0 0]
+[0 0 0 0 1 0 0 0 0 0 0 0]
+[0 0 0 0 0 1 0 0 0 0 0 0]
+[0 0 0 0 0 0 1 0 0 0 0 0]
+[0 0 0 0 0 0 0 1 0 0 0 0]
+[0 0 0 0 0 0 0 0 1 0 0 0]
+[0 0 0 0 0 0 0 0 0 1 0 0]
+[0 0 0 0 0 0 0 0 0 0 1 0]
+[1 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 1]
+
+
+[0 0 0 0 0 0 0 0 0 0 0 1]
+[0 0 0 0 0 0 0 0 1 0 0 0]
+[0 0 0 0 0 0 1 0 0 0 0 0]
+[0 0 1 0 0 0 0 0 0 0 0 0]
+[0 1 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 1 0 0]
+[1 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 1 0 0 0 0 0 0]
+[0 0 0 1 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 1 0]
+[0 0 0 0 0 0 0 1 0 0 0 0]
+[0 0 0 0 1 0 0 0 0 0 0 0]
+</PRE>
+<HR>
+<H3><A NAME = "11622">Example <TT>ModGrp_CreateA7 (H96E6)</TT></A></H3>
+We construct the constituent of the permutation module for the
+alternating group of degree 7 that contains the vector (1, 0, 1, 0, 1, 0, 1).
+<P>
+<P>
+<PRE>
+&gt; A7 := AlternatingGroup(7);
+&gt; V  := VectorSpace(FiniteField(2), 7);
+&gt; x  := V![1,0,1,0,1,0,1];
+&gt; M  := PermutationModule(A7, x);
+&gt; M : Maximal;
+GModule of dimension 6 with base ring GF(2)
+Generators of acting algebra:
+
+
+[1 0 1 0 0 0]
+[0 0 1 0 1 0]
+[0 1 1 0 0 0]
+[0 0 1 0 0 0]
+[0 0 1 1 0 0]
+[0 0 1 0 0 1]
+
+
+[0 0 0 0 0 1]
+[0 1 0 0 0 0]
+[1 0 0 0 0 0]
+[0 0 0 1 0 0]
+[0 0 0 0 1 0]
+[0 0 1 0 0 0]
+</PRE>
+<HR>
+<H4><A NAME = "11623">Action on a Polynomial Ring</A></H4>
+
+
+
+<H5><A NAME = "11624">GModule(G, P, d) : Grp, RngMPol, RngIntElt -&gt; ModGrp, Map, @ RngMPolElt @</A></H5>
+<BLOCKQUOTE>
+Let G be a permutation group of degree n or a or matrix group of degree
+n over a finite field, P=K[x<sub>1</sub>, ..., x<sub>n</sub>] a polynomial
+ring over a field K in n variables, and d a non-negative integer.
+This function creates
+the K[G]-module M corresponding to the action of
+G on the space of homogeneous polynomials of degree d of the polynomial
+ring P.
+The function also returns the isomorphism f between the space
+of homogeneous polynomials of degree d of P and M, together with
+an indexed set of monomials of degree d of P which correspond to the
+columns of M.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "11625">GModule(G, I, J) : Grp, RngMPol, RngMPol -&gt; ModGrp, Map, @ RngMPolElt @</A></H5>
+<BLOCKQUOTE>
+Let G be a permutation group of degree n or a or matrix group of degree
+n over a finite field, I an ideal of a multivariate polynomial ring
+P=K[x<sub>1</sub>, ..., x<sub>n</sub>] in n variables
+over a field K, and J a zero-dimensional subideal
+of I. This function creates the K[G]-module M corresponding to the
+action of G on the finite-dimensional quotient I/J.
+The function also returns the isomorphism f between the quotient space
+I/J and M, together with
+an indexed set of monomials of P, forming a (vector space) basis of I/J,
+and which correspond to the columns of M.
+<P>
+</BLOCKQUOTE>
+<H5><A NAME = "11626">GModule(G, Q) : Grp, RngMPolRes -&gt; ModGrp, Map, @ RngMPolElt @</A></H5>
+<BLOCKQUOTE>
+Let G be a permutation group of degree n or a or matrix group of degree
+n over a finite field and Q=I/J a
+finite-dimensional quotient ring of a multivariate polynomial ring
+P=K[x<sub>1</sub>, ..., x<sub>n</sub>] in n variables over a field K. This function
+creates the K[G]-module M corresponding to the action of
+G on the finite-dimensional quotient Q.
+The function also returns the isomorphism f between the quotient ring
+Q and M, together with
+an indexed set of monomials of P, forming a (vector space) basis of Q,
+and which correspond to the columns of M.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11627">Example <TT>ModGrp_CreatePolyAction (H96E7)</TT></A></H3>
+<P>
+Let T be the polynomial ring in five indeterminates over GF(5). We
+create the representation of the alternating group of degree 5
+that corresponds to its action on the space H<sub>4</sub> of homogeneous 
+polynomials of degree 4 of T.
+<P>
+<P>
+<PRE>
+&gt; G := Alt(5);
+&gt; R&lt;[x]&gt; := PolynomialRing(GF(5), 5);
+&gt; M, f := GModule(G, R, 4);
+&gt; M;
+GModule M of dimension 70 over GF(5)
+</PRE>
+Thus, the action of Alt(5) on H<sub>4</sub> yields a 70-dimensional
+module. We find its irreducible constituents.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Constituents(M);
+[
+    GModule of dimension 1 over GF(5),
+    GModule of dimension 3 over GF(5),
+    GModule of dimension 5 over GF(5)
+]
+&gt; t := x[1]^4 + x[2]^4 + x[3]^4 + x[4]^4 + x[5]^4;
+&gt; v := f(t); v;
+M: (1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 
+    1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 1)
+&gt; v@@f;
+x[1]^4 + x[2]^4 + x[3]^4 + x[4]^4 + x[5]^4
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text1031.htm">[Next]</A><A  HREF = "text1029.htm">[Prev]</A> <A  HREF = "text1031.htm">[Right]</A> <A  HREF = "text1029.htm">[Left]</A> <A  HREF = "text1028.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,84 @@
+"Source: Text/Geometry/AlgSrf.text";
+"Line: 2616";
+"Date: Wed Jun  8 13:59:58 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/AlgSrf.text, line: 2616
+// Example: H122E12 ()
+print "Example: H122E12";
+ei := GetEchoInput();
+SetEchoInput(true);
+P<a,b,c,d> := ProjectiveSpace(Rationals(),3);
+S := Surface(P, a^6+2*a^5*b-2*a^4*b^2+2*a^2*b^4+b^6+a^4*d^2+2*a^3*b*d^2+
+  a^2*b^2*d^2-a*b^3*d^2-2*b^4*d^2-a^2*b*d^3-2*a*b^2*d^3+2*a^2*d^4+b^2*d^4-
+  c^2*d^4-a*d^5);
+dsds := ResolveSingularSurface(S);
+#dsds; // only one singular point at [0,0,1,0]
+dsd := dsds[1];
+IntersectionMatrix(dsd);
+C1 := BlowUpDivisor(S,dsd,1); C1;
+CanonicalIntersection(dsd,1);
+C2 := BlowUpDivisor(S,dsd,2); C2;
+C3 := BlowUpDivisor(S,dsd,3); C3;
+Genus(Curve(C3));
+GeometricGenusOfDesingularization(S);
+PlurigenusOfDesingularization(S,2);
+ArithmeticGenusOfDesingularization(S);
+diffs := HomAdjoints(1,0,S); diffs;
+// Only one holomorphic differential up to a scalar. 
+// Curves on which it vanishes are those in S on which
+// d vanishes and blowup divisors on which $d^2$ vanishes
+// to a higher order than the differential multiplicity.
+// This turns out to be the first 2 blow-up divisors.
+Dd := S meet Scheme(P,d);
+divs1 := IrreducibleComponents(ReducedSubscheme(Dd));
+divs1;
+// The first divisor above splits into 5 disjoint lines
+// again over an extension of Q. We check that all 6
+// geometrically irreducible lines in divs1 have strict
+// transforms on the blow-up that are (-1)-curves by
+// computing that K.D=-1 for all of them
+CanonicalIntersection(S,divs1[1]);
+CanonicalIntersection(S,divs1[2]);
+DifferentialMultiplicities(dsd);
+[2*m : m in Multiplicities(S,dsd,Dd)];
+FirstChernClassOfDesingularization(S);
+_,ints := MultiplicitiesAndIntersections(S,dsd,divs1[1]);
+ints;
+_,ints := MultiplicitiesAndIntersections(S,dsd,divs1[2]);
+ints;
+// First get B and Z1
+// Z1 is one of the components of the pullback of a=0 to S
+cmps := IrreducibleComponents(S meet Scheme(P,a));
+cmps;
+Z1 := cmps[1];
+// B is the pullback of b=0 to S
+B := S meet Scheme(P,b);
+GroebnerBasis(B);
+rr,den := RiemannRochBasis(S,
+ EquidimensionalPart((Ideal(B)^2*Ideal(Z1))+Ideal(S)));
+rr;
+den;
+// Do the linear system restriction at blow-up divisors
+mults := Multiplicities(S,dsd,S meet Scheme(P,den)); mults;
+div_map_eqns := LinearSystemDivisorRestriction(S,rr,[mults]:
+     CheckB := false);
+div_map_eqns;
+P6<x,y,z,s,t,u,v> := ProjectiveSpace(Rationals(),6);
+div_map := map<S->P6|div_map_eqns>;
+X := Image(div_map);
+Xeqns := MinimalBasis(Ideal(X));
+Xeqns;
+P5 := ProjectiveSpace(Rationals(),5);
+hm := hom<CoordinateRing(P6)->CoordinateRing(P5)|
+  [P5.i : i in [1..6]] cat [0]>;
+Xquad := Surface(P5,[hm(Xeqns[i]) : i in [1..6]]);
+// The surface constructor has checked irreducibility
+// and dimension!
+IsNonsingular(Xquad);
+Degree(Xquad);
+ChernNumber(Xquad,1); // K^2 = 9
+// Check non-degeneracy : no linear form vanishes on Xquad
+Saturate(~Xquad);
+Min([TotalDegree(f) : f in Basis(Ideal(Xquad))]);
+HasOnlySimpleSingularities(X : ReturnList := true);
+SetEchoInput(ei);

@@ -1,0 +1,144 @@
+////////////////////////////////////////////////////////////////////////////////
+
+/*
+Finite Field Discrete Log test.
+AKS 19/07/00, 7/12/12.
+*/
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+if assigned PC then
+    SetQuitOnError(true);
+    SetLogFile("log");
+end if;
+
+v := GetVerbose("FFLog");
+ClearVerbose();
+SetVerbose("FFLog", v);
+
+ClearVerbose();
+
+////////////////////////////////////////////////////////////////////////////////
+
+procedure test_log(K)
+    // if #K eq 1027634706871 then SetVerbose("FFLog", 1); end if;
+
+    l2 := Log(2, #K);
+    if l2 ge 120 then
+	C := 1;
+    elif l2 ge 80 then
+	C := 2;
+    else
+	C := 5;
+    end if;
+
+    printf "Test Log on: %o, count %o\n", K, C;
+    // "Seed:", GetSeed();
+
+    T := Cputime();
+    w := PrimitiveElement(K);
+
+    assert Log(w) eq 1 or w eq 1;
+    assert w + 1 eq 0 or w^Log(w + 1) eq w + 1;
+
+    for i := 1 to C do
+	repeat
+	    r := Random(K);
+	until r ne 0;
+	l := Log(r);
+	assert w^l eq r;
+    end for;
+
+    repeat
+	b := Random(K);
+    until b ne 0;
+    l := Random(0, #K - 1);
+    r := b^l;
+    ll := Log(b, r);
+    //assert Log(b, r) eq l;
+    assert b^ll eq r;
+
+    "Time:", Cputime(T);
+end procedure;
+
+for p in [
+    987661457178779, 56192361108667920923, 857851975295519,
+    487985242189, 1027634706871,
+    1725890265811, 1861190309999, 1165565256917, 2137625696023
+] do
+    test_log(GF(p));
+end for;
+
+Z := IntegerRing();
+
+for i := 1 to 5 do
+    repeat
+	K := GF(RandomPrime(40));
+    until not IsPrime(Z!PrimitiveElement(K)) and Max(PrimeBasis(#K-1)) ge 10^10;
+
+    test_log(K);
+end for;
+
+for i in [1 .. 10] cat [15, 20, 25] do
+    test_log(GF(NextPrime(10^i)));
+end for;
+
+function rrange(B, E, minc)
+    R := [B];
+    r := B;
+    while true do
+	r +:= Random(1, minc);
+	if r gt E then
+	    return R;
+	end if;
+	Append(~R, r);
+    end while;
+end function;
+
+"Prime 2";
+for i in [10 .. 100] cat rrange(101, 150, 3) cat rrange(151, 173, 7) do
+    test_log(GF(2, i));
+end for;
+
+"Prime 3";
+for i in [10 .. 50] cat rrange(51, 98, 3) cat [99] do
+    test_log(GF(3, i));
+end for;
+
+"Prime 5";
+for i in [10 .. 40] cat rrange(41, 82, 3) cat [83] do
+    test_log(GF(5, i));
+end for;
+
+"Prime 7";
+for i in [10 .. 30] cat rrange(31, 72, 3) cat [73] do
+    test_log(GF(7, i));
+end for;
+
+"Prime 11";
+for i in [10 .. 23] do
+    test_log(GF(11, i));
+end for;
+
+"Prime 13";
+for i in [10 .. 19] do
+    test_log(GF(13, i));
+end for;
+
+"Degree 17";
+for p in [17, 19, 23 /*, 29, 31, 37, 41, 53, 59, 61, 71*/] do
+    test_log(GF(p, 17));
+end for;
+
+/*
+"Degree 19";
+for p in [17, 19, 22, 23, 25 ] do
+    test_log(GF(p, 19));
+end for;
+
+"Degree 23";
+for p in [11, 17, 19, 23, 27] do
+    test_log(GF(p, 23));
+end for;
+*/

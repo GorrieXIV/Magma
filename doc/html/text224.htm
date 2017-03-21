@@ -1,0 +1,264 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Polynomial Rings and Polynomials</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text225.htm">[Next]</A><A  HREF = "text223.htm">[Prev]</A> <A  HREF = "text225.htm">[Right]</A> <A  HREF = "text223.htm">[Left]</A> <A  HREF = "text222.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "1915">Polynomial Rings and Polynomials</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text224.htm#1916">Creation of Polynomial Rings</A>
+<LI> <A  HREF = "text224.htm#1921">Print Names</A>
+<LI> <A  HREF = "text224.htm#1924">Graded Polynomial Rings</A>
+<LI> <A  HREF = "text224.htm#1925">Creation of Polynomials</A>
+</UL>
+<H4><A NAME = "1916">Creation of Polynomial Rings</A></H4>
+
+<P>
+<P>
+<P>
+Multivariate polynomial rings are created from
+a coefficient ring, the number of indeterminates, and a monomial order.
+If no order is specified, the monomial order is taken to be the
+lexicographical order (see Section <A  HREF = "text1205.htm#13440">Representation and Monomial  Orders</A> for details).
+
+
+<H5><A NAME = "1917">PolynomialRing(R, n) : Rng, RngIntElt -&gt; RngMPol</A></H5>
+<H5>PolynomialAlgebra(R, n) : Rng, RngIntElt -&gt; RngMPol</H5>
+
+<PRE>    Global: BoolElt                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Create a multivariate polynomial ring in n&gt;0 indeterminates over the ring R.
+The ring is regarded as an R-algebra via the usual identification of elements of R and the constant polynomials.
+The lexicographical ordering
+on the monomials is used for this default construction
+(see Section <A  HREF = "text1205.htm#13440">Representation and Monomial  Orders</A>).
+The angle bracket notation can be used to assign names to the indeterminates;
+e.g.: <TT>P&lt;x, y&gt; := PolynomialRing(R, 2);</TT> etc.
+<P>
+By default, a <I>non-global</I> polynomial ring will be returned;
+if the parameter <TT>Global</TT> is set to <TT>true</TT>, then the
+unique global polynomial ring over R with n variables will be
+returned.  This may be useful in some contexts, but a non-global result
+is returned by default since one often wishes to have several rings
+with the same numbers of variables but with different variable names
+(and create mappings between them, for example).
+Explicit coercion is always allowed between polynomial rings having the
+same number of variables (and suitable base rings), whether they are
+global or not, and the coercion maps the i-variable of one ring to
+the i-th variable of the other ring.
+</BLOCKQUOTE>
+<H5><A NAME = "1918">PolynomialRing(R, n, order) : Rng, RngIntElt, MonStgElt, ... -&gt; RngMPol</A></H5>
+<H5>PolynomialAlgebra(R, n, order) : Rng, RngIntElt, MonStgElt, ... -&gt; RngMPol</H5>
+<BLOCKQUOTE>
+Create a multivariate polynomial ring in n&gt;0 indeterminates over the ring R
+with the given order order on the monomials.
+See Section <A  HREF = "text1205.htm#13440">Representation and Monomial  Orders</A> for details.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "1919">Example <TT>RngMPol_AssignNames (H24E1)</TT></A></H3>
+We show the use of angle brackets for generator names.
+<P>
+<P>
+<PRE>
+&gt; Z := IntegerRing();
+&gt; S := PolynomialRing(Z, 2);
+</PRE>
+If we define S this way, we can only refer to the indeterminates by
+S.1 and S.2 (see below). So we could assign these generators to variables,
+say x and y, as follows:
+<P>
+<P>
+<PRE>
+&gt; x := S.1;
+&gt; y := S.2;
+</PRE>
+In this case it is easy to construct polynomials, but printing is slightly
+awkward:
+<P>
+<P>
+<PRE>
+&gt; f := x^3*y +3*y^2;
+&gt; f;
+$.1^3*$.2 + 3*$.2^2
+</PRE>
+To overcome that, it is possible to assign names to the indeterminates
+that are used in the printing routines, using the <TT>AssignNames</TT>
+function, before assigning to x and y.
+<P>
+<P>
+<PRE>
+&gt; AssignNames(~S, ["x", "y"]);
+&gt; x := S.1; y := S.2;
+&gt; f := x^3*y +3*y^2;
+&gt; f;
+x^3*y + 3*y^2
+</PRE>
+Alternatively, we use the angle brackets to assign generator names that will
+be used in printing as well:
+<P>
+<P>
+<PRE>
+&gt; S&lt;x, y&gt; := PolynomialRing(Z, 2);
+&gt; f := x^3*y +3*y^2;
+&gt; f;
+x^3*y + 3*y^2
+</PRE>
+<HR>
+<H3><A NAME = "1920">Example <TT>RngMPol_Global (H24E2)</TT></A></H3>
+We demonstrate the difference between global and non-global rings.
+We first create the global multivariate polynomial ring over {Q} with
+3 variables twice.
+<P>
+<P>
+<PRE>
+&gt; Q := RationalField();
+&gt; P&lt;x,y,z&gt; := PolynomialRing(Q, 3: Global);
+&gt; PP := PolynomialRing(Q, 3: Global);
+&gt; P;
+Polynomial ring of rank 3 over Rational Field
+Lexicographical Order
+Variables: x, y, z
+&gt; PP;
+Polynomial ring of rank 3 over Rational Field
+Lexicographical Order
+Variables: x, y, z
+&gt; PP.1;
+x
+</PRE>
+PP is identical to P.  We now create default (non-global) multivariate
+polynomial rings (which are also different to the global polynomial ring
+P).
+Explicit coercion is allowed, and maps the i-variable of one ring
+to the i-th variable of the other ring.
+<P>
+<P>
+<PRE>
+&gt; P1&lt;a,b,c&gt; := PolynomialRing(Q, 3);
+&gt; P2&lt;d,e,f&gt; := PolynomialRing(Q, 3);
+&gt; P1;
+Polynomial ring of rank 3 over Rational Field
+Lexicographical Order
+Variables: a, b, c
+&gt; P2;
+Polynomial ring of rank 3 over Rational Field
+Lexicographical Order
+Variables: d, e, f
+&gt; a;
+a
+&gt; d;
+d
+&gt; P1 ! d;
+a
+&gt; P ! e;
+y
+</PRE>
+<HR>
+<H4><A NAME = "1921">Print Names</A></H4>
+
+<P>
+<P>
+The <TT>AssignNames</TT> and <TT>Name</TT> functions can be used to associate
+names with the indeterminates of polynomial rings after creation.
+
+
+<H5><A NAME = "1922">AssignNames(~P, s) : RngMPol, [ MonStgElt ]) -&gt;</A></H5>
+<BLOCKQUOTE>
+Procedure to change the name of the indeterminates of a polynomial ring P.
+The i-th indeterminate will be given the name of the i-th
+element of the sequence of strings s (for 1&le;i&le;#s);
+the sequence may have length less
+than the number of indeterminates of P, in which case the remaining
+indeterminate names remain unchanged.
+<P>
+This procedure only changes the name used in printing the elements of P.
+It does <I>not</I> assign to identifiers corresponding to the strings
+the indeterminates in P; to do this, use an assignment statement,
+or use angle brackets when creating the polynomial ring.
+<P>
+Note that since this is a procedure that modifies P,
+it is necessary to have a reference <TT>~P</TT> to P
+in the call to this function.
+</BLOCKQUOTE>
+<H5><A NAME = "1923">Name(P, i) : RngMPol, RngIntElt -&gt; RngMPolElt</A></H5>
+<BLOCKQUOTE>
+Given a polynomial ring P, return the i-th indeterminate
+of P (as an element of P).
+</BLOCKQUOTE>
+<H4><A NAME = "1924">Graded Polynomial Rings</A></H4>
+
+<P>
+<P>
+It is possible within Magma to assign weights to the variables of
+a multivariate polynomial ring.  This means that monomials of the ring
+then have a <I>weighted degree</I> with respect to the weights
+of the variables.  Such a multivariate polynomial ring is called
+<I>graded</I> or <I>weighted</I>.
+Since this subject is intimately related to ideals, it is covered
+in the chapter on ideals and Gr&ouml;bner bases
+(see Subsection <A  HREF = "text1206.htm#13458">Creation of Graded Polynomial  Rings</A>).
+
+
+<H4><A NAME = "1925">Creation of Polynomials</A></H4>
+
+<P>
+<P>
+The easiest way to create polynomials in a given ring is to use
+the angle bracket construction to attach variables to the indeterminates,
+and then to use these variables to create polynomials (see the examples).
+Below we list other options.
+
+
+<H5>One(P) : RngMPol -&gt; RngMPolElt</H5>
+
+<H5>Identity(P) : RngMPol -&gt; RngMPolElt</H5>
+
+
+<H5>Zero(P) : RngMPol -&gt; RngMPolElt</H5>
+
+<H5>Representative(P) : RngMPol -&gt; RngMPolElt</H5><P>
+
+
+<H5><A NAME = "1926">P . i : RngMPol, RngInt -&gt; RngMPolElt</A></H5>
+<BLOCKQUOTE>
+Return the i-th indeterminate for the polynomial ring P
+in n variables (1&le;i&le;n) as an element of P.
+</BLOCKQUOTE>
+<H5><A NAME = "1927">elt&lt; R | a  &gt; : RngMPol, RngElt -&gt; RngMPolElt</A></H5>
+<H5>R ! s : RngMPol, RngElt -&gt; RngMPolElt</H5>
+<H5>R ! s : RngMPol, [ RngElt ] -&gt; RngMPolElt</H5>
+<H5>elt&lt; R | s &gt; : RngMPol, [ RngElt ] -&gt; RngMPolElt</H5>
+<BLOCKQUOTE>
+This element constructor can only be used for trivial purposes
+in multivariate polynomial rings:
+given a polynomial ring P=R[x<sub>1</sub>, ..., x<sub>n</sub>]
+and an element a that can be coerced into the coefficient ring R,
+the constant polynomial a is returned; if a is in P already
+it will be returned unchanged.
+</BLOCKQUOTE>
+<H5><A NAME = "1928">MultivariatePolynomial(P, f, i) : RngMPol, RngUPolElt, RngIntElt -&gt; RngMPolElt</A></H5>
+<H5>MultivariatePolynomial(P, f, v) : RngMPol, RngUPolElt, RngMPolElt -&gt; RngMPolElt</H5>
+<BLOCKQUOTE>
+Given a multivariate polynomial ring P=R[x<sub>1</sub>, ..., x<sub>n</sub>], as well as
+a polynomial f in a univariate polynomial ring R[x] over the same
+coefficient ring R, return an element q of P corresponding to f
+in the indeterminate v=x<sub>i</sub>; that is, q&isin;P is defined by
+q=&sum;<sub>j</sub> f<sub>j</sub>x<sub>i</sub><sup>j</sup> where f=&sum;<sub>j</sub> f<sub>j</sub>x<sup>j</sup>. The indeterminate x<sub>i</sub> 
+can either be specified as a polynomial v=x<sub>i</sub> in P, or by simply
+providing the integer i with 1&le;i&le;n.
+<P>
+The inverse operation is performed by the <TT>UnivariatePolynomial</TT>
+function.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text225.htm">[Next]</A><A  HREF = "text223.htm">[Prev]</A> <A  HREF = "text225.htm">[Right]</A> <A  HREF = "text223.htm">[Left]</A> <A  HREF = "text222.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

@@ -1,0 +1,240 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Clifford Algebras</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1011.htm">[Next]</A><A  HREF = "text1009.htm">[Prev]</A> <A  HREF = "text1011.htm">[Right]</A> <A  HREF = "text1009.htm">[Left]</A> <A  HREF = "text1008.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "11344">Clifford Algebras</A></H3>
+
+<P>
+<P>
+<P>
+Clifford algebras are represented in Magma as structure constant
+algebras and therefore many of the functions described in 
+Chapter <A  HREF = "text903.htm#10210">ALGEBRAS</A> apply to Clifford algebras.  However, the 
+base ring of a Clifford algebra is required to be an <I>exact</I> field
+(see Chapter <A  HREF = "text145.htm#999">INTRODUCTION TO RINGS</A>).
+The Magma type of a Clifford algebra is <TT>AlgClff</TT> and the type of
+an element of a Clifford algebra is <TT>AlgClffElt</TT>.  All Clifford 
+algebras are created with the attributes
+<DL COMPACT class='compact'>
+<DT></DT><DD><B>space</B>: the quadratic space from which the Clifford algebra
+is derived;
+<DT></DT><DD><B>embedding</B>: the standard embedding of the quadratic space into 
+the Clifford algebra.
+<P>
+<P>
+<P>
+</DL>
+Let C be the Clifford algebra of the quadratic form Q
+defined on the vector space V.  If e<sub>1</sub>, e<sub>2</sub>, ..., e<sub>n</sub> is a basis for 
+V, a basis for C is the set of all products e<sub>1</sub><sup>i<sub>1</sub></sup>e<sub>2</sub><sup>i<sub>2</sub></sup> ... v<sub>n</sub><sup>i<sub>n</sub></sup>, where i<sub>k</sub> is 0 or 1 for all k.  The function k |-&gt; i<sub>k</sub>
+is the characteristic function of a subset of {1, 2, ..., n}, namely
+S = {k | i<sub>k</sub> = 1 }. The map S |-&gt; 1 + &sum;<sub>k&isin;S</sub> 2<sup>k - 1</sup>
+is a bijection between the subsets of {1, 2, ..., n} and the integers in 
+the interval [1 ... 2<sup>n</sup>]. 
+<P>
+Thus the elements of C can be represented by a sequence of pairs 
+&lt; S, a &gt; where S is a subset of {1, 2, ..., n} and a is a 
+field element.  Multiplication is determined
+by the fact that for all u, v&isin;V we have
+<P>
+v<sup>2</sup> = Q(v).1quadand  uv + vu = &beta;(u, v).1,
+<P>
+where &beta; is the polar form of Q.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1010.htm#11348">Print Names for Generators</A>
+<LI> <A  HREF = "text1010.htm#11354">Elements of a Clifford Algebra</A>
+</UL>
+<H5><A NAME = "11345">CliffordAlgebra(Q) : AlgMatElt -&gt; AlgClff, ModTupFld, Map</A></H5>
+<BLOCKQUOTE>
+This function returns a triple C, V, f, where C is the Clifford algebra 
+of the quadratic form Q, V is the quadratic space of Q, and f is 
+the standard embedding of V into C.
+</BLOCKQUOTE>
+<H5><A NAME = "11346">CliffordAlgebra(V) : ModTupFld -&gt; AlgClff, Map</A></H5>
+<BLOCKQUOTE>
+If V is a quadratic space with quadratic form Q, this function returns the 
+pair C, f, where C is the Clifford algebra of Q and f is the standard 
+embedding of V into C. 
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11347">Example <TT>AlgClff_CliffQuatEx (H93E1)</TT></A></H3>
+A quaternion algebra is a special case of a Clifford algebra.
+<P>
+<P>
+<P>
+<PRE>
+&gt; C,V,f := CliffordAlgebra(-IdentityMatrix(Rationals(),2));
+&gt; i := f(V.1);
+&gt; j := f(V.2);
+&gt; i^2 eq -One(C);
+true
+&gt; j^2 eq -One(C);
+true
+&gt; i*j eq -j*i;
+true
+</PRE>
+<HR>
+<H4><A NAME = "11348">Print Names for Generators</A></H4>
+
+<P>
+<P>
+The <I>generators</I> of a Clifford algebra C defined on a quadratic 
+space V are the images of the standard basis elements
+of V under the embedding of V in C.  If <TT>C</TT> is a Clifford algebra
+note that <TT>C.1</TT>, <TT>C.2</TT> and so on refer to the basis elements
+of the underlying vector space of <TT>C</TT> <I>not</I> its generators.
+<P>
+The <TT>AssignNames</TT> procedure can be used to associate
+names with the generators of a Clifford algebra after its creation.
+
+
+<H5><A NAME = "11349">AssignNames(~C, S) : AlgClff, [ MonStgElt ]) -&gt;</A></H5>
+<BLOCKQUOTE>
+Procedure to change the names of the generators of a Clifford algebra C.
+The i-th generator will be given the name of the i-th element of the 
+sequence S; the sequence may have length less than the number of 
+generators of C, in which case the remaining generator names remain 
+unchanged.
+<P>
+This procedure changes only the names used in printing the elements of C.
+It does <I>not</I> assign to identifiers corresponding to the strings
+in S; to do this, use assignment statements, or use angle brackets when
+creating the Clifford algebra. This procedure is called by the generator
+assignment operators <TT>&lt; &gt;</TT> at the time of creation of a Clifford algebra.
+</BLOCKQUOTE>
+<H5><A NAME = "11350">Name(C, i) : AlgClff, RngIntElt -&gt; AlgClffElt</A></H5>
+<BLOCKQUOTE>
+Given a Clifford algebra C, return the i-th generator of C
+(as an element of C).
+</BLOCKQUOTE>
+<H5><A NAME = "11351">AsPolynomial(v) : AlgClffElt -&gt;</A></H5>
+<BLOCKQUOTE>
+Print the element v of a Clifford algebra as a polynomial in its
+generators; that is, as a polynomial in the basis elements of its
+quadratic space. By default the generators are labelled e<sub>1</sub>, e<sub>2</sub>, ..., e<sub>n</sub>.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11352">Example <TT>AlgClff_CliffordGen (H93E2)</TT></A></H3>
+<P>
+The generator assignment construction (see Section <A  HREF = "text7.htm#20">Generator Assignment</A>) can 
+be used to assign names to the generators of a Clifford algebra.
+<P>
+<P>
+<PRE>
+&gt; C&lt;x,y,z&gt; := CliffordAlgebra(IdentityMatrix(GF(5),3));
+&gt; f := x^2 + 3*y + y*z;
+&gt; f;
+(1 0 3 0 0 0 1 0)
+&gt; AsPolynomial(f);
+y*z + 3*y + 1
+</PRE>
+<HR>
+<H3><A NAME = "11353">Example <TT>AlgClff_CliffordNames (H93E3)</TT></A></H3>
+The names of the generators for printing (via <TT>AsPolynomial</TT>) can 
+be changed using <TT>AssignNames</TT>.  Furthermore, assigning new print 
+names to the generators does <I>not</I> change the identifiers themselves.
+<P>
+<P>
+<PRE>
+&gt; C&lt;[x]&gt; := CliffordAlgebra(IdentityMatrix(GF(5),3));
+&gt; f := 3*C.1 + 2*C.2 + C.5 +C.6;
+&gt; AsPolynomial(f);
+x[1]*x[3] + 2*x[1] + x[3] + 3
+&gt; Name(C,3) eq C.5;
+true
+&gt; AssignNames(~C,["x","y","z"]);
+&gt; AsPolynomial(f);
+x*z + 2*x + z + 3
+&gt; x[2];
+(0 0 1 0 0 0 0 0)
+&gt; y;
+User error: Identifier 'y' has not been declared or assigned
+</PRE>
+<HR>
+<H4><A NAME = "11354">Elements of a Clifford Algebra</A></H4>
+
+
+
+<H5><A NAME = "11355">elt&lt; C | r<sub>1</sub>, r<sub>2</sub>, ..., r<sub>m</sub> &gt; : AlgClff, RngElt, RngElt, ..., RngElt -&gt; AlgClffElt</A></H5>
+<BLOCKQUOTE>
+Given a Clifford algebra C of dimension m = 2<sup>n</sup> over a field F, and field
+elements r<sub>1</sub>, r<sub>2</sub>, ..., r<sub>m</sub> &isin;F construct the element 
+r<sub>1</sub> * C.1 + r<sub>2</sub> * C.2 + ... + r<sub>m</sub> * C.m of C.
+</BLOCKQUOTE>
+<H5><A NAME = "11356">C ! L : AlgClff, SeqEnum[RngElt] -&gt; AlgGenElt</A></H5>
+<BLOCKQUOTE>
+Given a Clifford algebra C of dimension m = 2<sup>n</sup> and a sequence
+L = [r<sub>1</sub>, r<sub>2</sub>, ..., r<sub>m</sub>] of elements of the base ring R of C,
+construct the element r<sub>1</sub> * C.1 + r<sub>2</sub> * C.2 + ... + r<sub>m</sub> * C.m of C.
+</BLOCKQUOTE>
+<H5><A NAME = "11357">SeqToClifford(C, ss) : AlgClff, SeqEnum -&gt; AlgClffElt</A></H5>
+<BLOCKQUOTE>
+Convert a sequence <TT>ss</TT> of pairs &lt; S, a &gt; to an element
+of the Clifford algebra C, where S is a subset of {1, ..., n},
+a is in the base field and the dimension of C is 2<sup>n</sup>.
+</BLOCKQUOTE>
+<H5><A NAME = "11358">SeqFromClifford(v) : AlgClffElt -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+The sequence of pairs &lt; S, a &gt; which represents the element
+v of a Clifford algebra.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "11359">Example <TT>AlgClff_Eltfromseq (H93E4)</TT></A></H3>
+We illustrate the conversion of a Clifford algebra element to its 
+monomial representation.
+<P>
+<P>
+<P>
+<PRE>
+&gt; K&lt;z&gt; := GF(5,2);
+&gt; Q := StandardQuadraticForm(4,K);
+&gt; C,V,f := CliffordAlgebra(Q);
+&gt; x := elt&lt; C | 1,0,2,z,0,z^2,z^11,0,0,0,0,z,0,0,0,z^13 &gt;;
+&gt; L := SeqFromClifford(x);
+&gt; L;
+[
+    &lt;[], 1&gt;,
+    &lt;[ 2 ], 2&gt;,
+    &lt;[ 1, 2 ], z&gt;,
+    &lt;[ 1, 3 ], z^2&gt;,
+    &lt;[ 2, 3 ], z^11&gt;,
+    &lt;[ 1, 2, 4 ], z&gt;,
+    &lt;[ 1, 2, 3, 4 ], z^13&gt;
+]
+&gt; x eq SeqToClifford(C,L);
+true
+&gt; AsPolynomial(x);
+z^13*e1*e2*e3*e4 + z*e1*e2*e4 + z*e1*e2 + z^2*e1*e3 + z^11*e2*e3 + 2*e2 + 1
+</PRE>
+<HR>
+<H5><A NAME = "11360">BasisProduct(C, i, j) : AlgClff, RngIntElt, RngIntElt -&gt; AlgGenElt</A></H5>
+<BLOCKQUOTE>
+The product of the i-th and j-th basis element of the 
+Clifford algebra C.
+</BLOCKQUOTE>
+<H5><A NAME = "11361">BasisProduct(C, L) : AlgClff, SeqEnum -&gt; AlgGenElt</A></H5>
+<BLOCKQUOTE>
+The product of the basis elements (indexed by L) of the 
+quadratic space of the Clifford algebra C.
+</BLOCKQUOTE>
+<H5><A NAME = "11362">BasisElement(C, S) : AlgClff, SetEnum -&gt; AlgClffElt</A></H5>
+<BLOCKQUOTE>
+The basis element C.j of the Clifford algebra C corresponding to the subset
+S of {1, 2, ..., n} where j = 1 + &sum;<sub>k&isin;S</sub>2<sup>k - 1</sup>.  If e<sub>1</sub>, e<sub>2</sub>, ..., e<sub>n</sub> is the standard basis for the quadratic space of C, this 
+corresponds to the product e<sub>i<sub>1</sub></sub> * e<sub>i<sub>2</sub></sub> * ... * e<sub>i<sub>h</sub></sub>, where
+S = {i<sub>1</sub>, i<sub>2</sub>, ..., i<sub>h</sub>} and i<sub>1</sub> &lt; i<sub>2</sub> &lt; ... &lt; i<sub>h</sub>.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text1011.htm">[Next]</A><A  HREF = "text1009.htm">[Prev]</A> <A  HREF = "text1011.htm">[Right]</A> <A  HREF = "text1009.htm">[Left]</A> <A  HREF = "text1008.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

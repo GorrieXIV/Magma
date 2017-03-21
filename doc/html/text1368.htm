@@ -1,0 +1,243 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Curves over Global Fields</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1369.htm">[Next]</A><A  HREF = "text1367.htm">[Prev]</A> <A  HREF = "text1369.htm">[Right]</A> <A  HREF = "text1367.htm">[Left]</A> <A  HREF = "text1356.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "15269">Curves over Global Fields</A></H3>
+
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text1368.htm#15270">Finding Rational Points</A>
+<LI> <A  HREF = "text1368.htm#15273">Regular Models of Arithmetic Surfaces</A>
+<LI> <A  HREF = "text1368.htm#15280">Minimization and Reduction</A>
+</UL>
+<H4><A NAME = "15270">Finding Rational Points</A></H4>
+
+<P>
+<P>
+There are also various point search routines for more general schemes.
+
+
+<H5><A NAME = "15271">PointsCubicModel(C, B : parameters) : Crv, RngIntElt -&gt; SeqEnum</A></H5>
+
+<PRE>    OnlyOne: BoolElt                    Default: <TT>false</TT></PRE>
+
+<PRE>    ExactBound: BoolElt                 Default: <TT>false</TT></PRE>
+
+<PRE>    SetVerbose("CubicModelSearch", n):  Maximum: 1</PRE>
+<BLOCKQUOTE>
+Given a plane cubic over the rationals, this function searches,
+by a reasonably efficient method due to Elkies <A  HREF = "text1355.htm#bib_Elk2000">[Elk00]</A>,
+for a point on C of na&iuml;ve height up to B --- the
+asymptotic running time is O(B).
+<P>
+If <TT>OnlyOne</TT> is set to <TT>true</TT>, the search stops as soon as it finds
+one point; however, the algorithm is p-adic and there is no guarantee
+that points with small co-ordinates in Z will be found first.
+If <TT>ExactBound</TT> is set to <TT>true</TT>, then points that are found with
+height larger than B will be ignored.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15272">Example <TT>Crv_points-cubic-model (H120E40)</TT></A></H3>
+<P>
+<P>
+<PRE>
+&gt; P&lt;x,y,z&gt;:=ProjectiveSpace(Rationals(),2);
+&gt; C:=Curve(P,x^3+9*y^3+73*z^3);
+&gt; time PointsCubicModel(C,10^4);
+[ (31/2 : -15/2 : 1), (-353/824 : -1655/824 : 1), (-463/106 : 111/106 
+: 1), (-1 : -2 : 1), (-2347/526 : 635/526 : 1), (-206/5 : 99/5 : 1), 
+(22/5 : -13/5 : 1), (-43/16 : -29/16 : 1), (-25 : 12 : 1), (-4493/1076
+: -299/1076 : 1), (-215/47 : 64/47 : 1), (-631/151 : -22/151 : 1), (-4
+: -1 : 1), (278/193 : -393/193 : 1), (-328/55 : 137/55 : 1), (311/88 :
+-207/88 : 1), (145/71 : -148/71 : 1) ]
+Time: 2.790
+</PRE>
+<HR>
+<H4><A NAME = "15273">Regular Models of Arithmetic Surfaces</A></H4>
+
+<P>
+<P>
+<P>
+Let F be a global field (the rationals, a number field or a function field)
+with ring of integers O<sub>F</sub>.
+Given a curve C over F with integral defining equations,
+the associated <I>arithmetic surface</I> is the scheme of relative dimension 1
+over (Spec) O<sub>F</sub> defined by the same equations.
+In Magma, one can compute a regular model of the arithmetic surface locally 
+at a given prime of O<sub>F</sub>, and extract information from it.
+The `model' is a data structure which contains several affine patches with 
+maps between them, as well as the components of the special fibre, and 
+other data.  This raw data is quite bulky; the interesting information  
+is accessed via the functions described in this section.
+This functionality may be expanded (on request) in later versions.
+<P>
+The Magma category for these data structures is <TT>CrvRegModel</TT>.
+<P>
+Caveat: in the initial implementation there are some restrictions on which curves, 
+and which fields, can be handled.  These restrictions are not documented here,
+and may be lifted in the near future.
+
+
+<H5><A NAME = "15274">Creation of Regular Models</A></H5>
+
+
+
+<H5><A NAME = "15275">RegularModel(C, P) : Crv, Any -&gt; CrvRegModel</A></H5>
+
+<PRE>    SetVerbose("RegularModel", n):      Maximum: 2</PRE>
+<BLOCKQUOTE>
+This computes a regular model of the curve C at the prime P.
+Here C is a curve over a field F (the rationals, a number field 
+or a univariate rational function field), and P is a prime of the maximal order
+O<sub>F</sub> of F (given as an element or as an ideal).  The defining equations 
+of C must have integral coefficients, and the reduction of C modulo P must have 
+dimension 1.
+<P>
+The function returns a model of C: this consists of several affine patches, 
+given by integral equations, which together describe a scheme over O<sub>F</sub> whose 
+generic fibre is isomorphic to C.  (The gluing maps, and the isomorphism to C, 
+are part of the stored data).
+The model is regular on the special fibre above P.
+However it is not necessarily a minimal model.  
+<P>
+In some cases, the function may replace F by a finite extension L/F 
+in which P is unramified, and return a regular model for the base change C<sub>L</sub>.
+(This occurs when there is a non-regular point or component in the special fibre
+that is not geometrically irreducible over the residue field.)  When this occurs,
+a warning message is printed.
+</BLOCKQUOTE>
+<H5><A NAME = "15276">Using Regular Models</A></H5>
+
+
+
+<H5><A NAME = "15277">IntersectionMatrix(M) : CrvRegModel -&gt; Mtrx, SeqEnum</A></H5>
+<BLOCKQUOTE>
+Given a regular model, this returns a matrix whose entries are the intersection 
+multiplicities of the (reduced, irreducible) components of the special fibre.
+Secondly, it returns a sequence giving the multiplicities of the components.
+(The components of the model always come in the same order.)
+</BLOCKQUOTE>
+<H5><A NAME = "15278">ComponentGroup(M) : CrvRegModel -&gt; GrpAb</A></H5>
+<BLOCKQUOTE>
+Given a regular model of a curve C at a prime P, this returns (as an abstract 
+abelian group) the group of components of the Neron model of the Jacobian of C 
+over the completion at P.  
+(This is computed from the <TT>IntersectionMatrix</TT> of the model.)
+</BLOCKQUOTE>
+<H5><A NAME = "15279">PointOnRegularModel(M, x) : CrvRegModel, Pt -&gt; SeqEnum, SeqEnum, Tup</A></H5>
+<BLOCKQUOTE>
+Given a regular model of a curve C over a global field F, and a point 
+x &isin;C(F), this lifts x to a point on the regular model.  More precisely, 
+it finds a patch of the model, and a point on the generic fibre of that patch which 
+maps to x (under the isomorphism between the generic fibres of M and C).
+<P>
+Three objects are returned: a sequence giving coordinates of the point, a sequence 
+containing the equations of the relevant patch, and (for internal use) the `index' 
+of the patch. 
+</BLOCKQUOTE>
+<H4><A NAME = "15280">Minimization and Reduction</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+Minimization and reduction is a search for a linear transformation, that leads to
+nice equations. The general strategy is described in Section <A  HREF = "text1385.htm#15513">Minimization and Reduction of Surfaces</A>.
+<P>
+Here, we describe the routines for the minimization of plane quartic curves and the reduction
+for plane curves of degree at least 3. The reduction is done by constructing a cluster
+of special points on the curve. Thus, we start with this.
+
+
+<H5><A NAME = "15281">ReduceCluster(X) : SeqEnum -&gt; SeqEnum, Mtrx, Mtrx</A></H5>
+
+<PRE>    eps: FldReElt                       Default: 1e - 6</PRE>
+
+<PRE>    c: FldReElt                         Default: 1</PRE>
+
+<PRE>    SetVerbose("ClusterReduction", n):  Maximum: 3</PRE>
+<BLOCKQUOTE>
+Here X is a sequence of n-dimensional vectors of complex numbers.  
+The routine returns the cluster in a better embedded form, 
+the transformation matrix applied and its inverse.
+<P>
+Optional arguments: <TT>eps</TT> is the bound used to decide whether a 
+floating point number is zero, and <TT>c</TT> is the initial value of the
+acceleration factor.
+<P>
+The algorithm is due to Stoll (see <A  HREF = "text1355.htm#bib_stoll_cluster_reduction">[Sto11]</A>).
+<P>
+This routine can be used for reduction of any variety that has a finite and stable 
+set of special points, by using the transformation that reduces the point set.
+</BLOCKQUOTE>
+<H5><A NAME = "15282">ReducePlaneCurve(f) : MPolElt -&gt; RngMPolElt, Mtrx</A></H5>
+<BLOCKQUOTE>
+Here f is a homogeneous polynomial in 3 variables of degree &gt; 2 with integral or rational coefficients. 
+A new polynomial and the transformation matrix applied are returned.
+<P>
+The routine computes the intersection points of f with its hessian. Then the cluster reduction is 
+applied to this point set. 
+</BLOCKQUOTE>
+<H5><A NAME = "15283">Minimization and Reduction for Plane Quartics</A></H5>
+
+
+
+<H5><A NAME = "15284">MinimizePlaneQuartic(f,p) : MPolElt, RngIntElt -&gt; RngMPolElt, Mtrx</A></H5>
+
+<PRE>    SetVerbose("PlaneQuartic", n):      Maximum: 1</PRE>
+<BLOCKQUOTE>
+Given a plane quartic defined by the polynomial f with integer coefficients this routine computes
+an at p minimized model of the quartic. The new quartic and the transformation 
+used are returned.
+</BLOCKQUOTE>
+<H5><A NAME = "15285">MinimizeReducePlaneQuartic(f) : MPolElt -&gt; RngMPolElt, Mtrx</A></H5>
+
+<PRE>    SetVerbose("PlaneQuartic", n):      Maximum: 1</PRE>
+<BLOCKQUOTE>
+Given a smooth plane quartic curve defined by the polynomial f 
+with integer coefficients this 
+routine computes a minimized and reduced model of the curve. 
+The transformation matrix returned applied to f will evaluate to a 
+scalar multiple of the returned polynomial.
+<P>
+For the reduction step, <TT>ReducePlaneCurve</TT> is used.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "15286">Example <TT>Crv_minredplanequartic (H120E41)</TT></A></H3>
+Here we test the code by taking a bad embedding and a of curve.
+<P>
+<P>
+<PRE>
+&gt; _&lt;x,y,z&gt; := PolynomialRing(Integers(), 3);
+&gt; C := -3*x^4 + 7*x^3*y - 2*x^3*z + 6*x^2*y^2 + 9*x^2*y*z - 9*x^2*z^2 
+&gt;       + 10*x*y^3 - 7*x*y^2*z + 5*x*y*z^2 - 6*x*z^3 - 3*y^4 + 5*y^3*z 
+&gt;       - 3*y^2*z^2 + 4*y*z^3 + 6*z^4;
+&gt; C2 := Evaluate(C,[45*x+346*y,74*y+43*z,62324*z+3462*x]);
+&gt; C2;
+850482855369981*x^4 - 77028319604430*x^3*y + 61459466820119559*x^3*z - 
+11625449190228*x^2*y^2 - 4102113209795298*x^2*y*z + 1665400384362332772*x^2*z^2 
+- 62468022936*x*y^3 - 417499281622764*x*y^2*z - 72808467360772908*x*y*z^2 + 
+20055880711976359332*x*z^3 - 16293798512*y^4 - 875035770696*y^3*z - 
+3749491014537304*y^2*z^2 - 430694749052979580*y*z^3 + 90567449117290511049*z^4
+&gt; MinimizeReducePlaneQuartic(C2); 
+6*x^4 - 6*x^3*y + 4*x^3*z - 9*x^2*y^2 + 5*x^2*y*z - 3*x^2*z^2 - 2*x*y^3 + 
+9*x*y^2*z - 7*x*y*z^2 + 5*x*z^3 - 3*y^4 + 7*y^3*z + 6*y^2*z^2 + 10*y*z^3 - 3*z^4
+[    14878   4611976 -21564104]
+[    -1935    148866   2804580]
+[     3330   -256188   1197852]
+</PRE>
+We do not get the initial curve, but we get a curve with coefficients of the same size.
+<HR>
+<PRE></PRE> <A  HREF = "text1369.htm">[Next]</A><A  HREF = "text1367.htm">[Prev]</A> <A  HREF = "text1369.htm">[Right]</A> <A  HREF = "text1367.htm">[Left]</A> <A  HREF = "text1356.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

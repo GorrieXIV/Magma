@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Types, Category Names, and  Structures</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text18.htm">[Next]</A><A  HREF = "text16.htm">[Prev]</A> <A  HREF = "text18.htm">[Right]</A> <A  HREF = "text16.htm">[Left]</A> <A  HREF = "text3.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "113">Types, Category Names, and  Structures</A></H3>
+
+<P>
+<P>
+<P>
+The following functions deal with <I>types</I> or <I>category names</I> and
+general structures.  Magma has two levels of granularity when referring to
+types.  In most cases, the coarser grained types (of type <TT>Cat</TT>) are used.
+Examples of these kinds of types are "polynomial rings" (<TT>RngUPol</TT>) and
+"finite fields" (<TT>FldFin</TT>).  However, sometimes more specific typing
+information is sometimes useful.  For instance, the algorithm used to factorize
+polynomials differs significantly, depending on the coefficient ring.  Hence,
+we might wish to implement a specialized factorization algorithm polynomials
+over some particular ring type.  Due to this need, Magma also supports <I>extended types</I>.
+<P>
+An extended type (of type <TT>ECat</TT>) can be thought of as a type taking a
+parameter.  Using extended types, we can talk about "polynomial rings over the
+integers" (<TT>RngUPol[RngInt]</TT>), or "maps from the integers to the
+rationals" (<TT>Map[RngInt, FldRat]</TT>).  Extended types can interact with
+normal types in all ways, and thus generally only need to be used when the
+extra level of information is required.
+
+
+<H5><A NAME = "114">Type(x) : Elt -&gt; Cat</A></H5>
+<H5>Category(x) : Elt -&gt; Cat</H5>
+<BLOCKQUOTE>
+Given any object x, return the type (or category name) of x.
+</BLOCKQUOTE>
+<H5><A NAME = "115">ExtendedType(x) : Elt -&gt; ECat</A></H5>
+<H5>ExtendedCategory(x) : Elt -&gt; ECat</H5>
+<BLOCKQUOTE>
+Given any object x, return the extended type (or category name) of x.
+</BLOCKQUOTE>
+<H5><A NAME = "116">ISA(T, U) : Cat, Cat -&gt; BoolElt</A></H5>
+<H5>ISA(T, U) : Cat, ECat -&gt; BoolElt</H5>
+<H5>ISA(T, U) : ECat, Cat -&gt; BoolElt</H5>
+<H5>ISA(T, U) : ECat, ECat -&gt; BoolElt</H5>
+<BLOCKQUOTE>
+Given types (or extended types) T and U, return whether T ISA U, i.e.,
+whether objects of type T inherit properties of type U.  For example, <TT>ISA(RngInt, Rng)</TT> is true, because the ring of integers Z is a ring.
+</BLOCKQUOTE>
+<H5><A NAME = "117">MakeType(S) : MonStgElt -&gt; Cat</A></H5>
+<BLOCKQUOTE>
+Given a string S specifying a type return the actual type
+corresponding to S.  This is useful when some intrinsic name hides
+the symbol which normally refers to the actual type.
+</BLOCKQUOTE>
+<H5><A NAME = "118">ElementType(S) : Str -&gt; Cat</A></H5>
+<BLOCKQUOTE>
+Given any structure S, return the type of the elements of S.
+For example, the element type of the ring of integers Z is
+<TT>RngIntElt</TT> since that is the type of the integers which
+lie in Z.
+</BLOCKQUOTE>
+<H5><A NAME = "119">CoveringStructure(S, T) : Str, Str -&gt; Str</A></H5>
+<BLOCKQUOTE>
+Given structures S and T, return a covering structure C for
+S and T, so that S and T both embed into C.  An error
+results if no such covering structure exists.
+</BLOCKQUOTE>
+<H5><A NAME = "120">ExistsCoveringStructure(S, T) : Str, Str -&gt; BoolElt, Str</A></H5>
+<BLOCKQUOTE>
+Given structures S and T, return whether a covering structure C for
+S and T exists, and if so, return such a C, so that S and T
+both embed into C.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "121">Example <TT>State_TypeStructures (H1E21)</TT></A></H3>
+We demonstrate the type and structure functions.
+<P>
+<P>
+<PRE>
+&gt; Type(3);
+RngIntElt
+&gt; t := MakeType("RngIntElt");
+&gt; t;
+RngIntElt
+&gt; Type(3) eq t;
+true
+&gt; Z := IntegerRing();
+&gt; Type(Z);
+RngInt
+&gt; ElementType(Z);
+RngIntElt
+&gt; ISA(RngIntElt, RngElt);
+true
+&gt; ISA(RngIntElt, GrpElt);
+false
+&gt; ISA(FldRat, Fld);
+true
+</PRE>
+The following give examples of when covering structures exist or do not
+exist.
+<P>
+<P>
+<PRE>
+&gt; Q := RationalField();
+&gt; CoveringStructure(Z, Q);
+Rational Field
+&gt; ExistsCoveringStructure(Z, DihedralGroup(3));
+false
+&gt; ExistsCoveringStructure(Z, CyclotomicField(5));
+true Cyclotomic Field of order 5 and degree 4
+&gt; ExistsCoveringStructure(CyclotomicField(3), CyclotomicField(5));
+true Cyclotomic Field of order 15 and degree 8
+&gt; ExistsCoveringStructure(GF(2), GF(3));                          
+false
+&gt; ExistsCoveringStructure(GF(2^6), GF(2, 15));
+true Finite field of size 2^30
+</PRE>
+Our last example demonstrates the use of extended types:
+<P>
+<P>
+<PRE>
+&gt; R&lt;x&gt; := PolynomialRing(Integers());
+&gt; ExtendedType(R);
+RngUPol[RngInt]
+&gt; ISA(RngUPol[RngInt], RngUPol);
+true
+&gt; f := x + 1;  
+&gt; ExtendedType(f);
+RngUPolElt[RngInt]
+&gt; ISA(RngUPolElt[RngInt], RngUPolElt);
+true
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text18.htm">[Next]</A><A  HREF = "text16.htm">[Prev]</A> <A  HREF = "text18.htm">[Right]</A> <A  HREF = "text16.htm">[Left]</A> <A  HREF = "text3.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

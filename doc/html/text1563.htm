@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>ARITHMETIC FUCHSIAN GROUPS AND SHIMURA CURVES</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text1564.htm">[Next]</A><A  HREF = "text1550.htm">[Prev]</A> <A  HREF = "text1570.htm">[Right]</A> <A  HREF = "text1551.htm">[Left]</A> <A  HREF = "part17.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H2><A NAME = "17507">ARITHMETIC FUCHSIAN GROUPS AND SHIMURA CURVES</A></H2>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+In this chapter, we document algorithms for arithmetic Fuchsian groups.  
+Let F be a totally real number field.  
+Let A be a <I>quaternion algebra</I> over F, a central simple 
+algebra of dimension 4 (see Chapter <A  HREF = "text982.htm#11124">QUATERNION ALGEBRAS</A>), such that 
+A is split at exactly one real place, corresponding to the 
+injective map &iota;_&infin;:A to M<sub>2</sub>(R).   
+Let O be a maximal order in A (see also Section <A  HREF = "text920.htm#10368">Orders</A>), 
+let O<sup> * </sup> denote the group of elements 
+of O of reduced norm 1, and let &Gamma;(1)=&iota;_&infin;(O<sup> * </sup>)/{&#8723; 1} &sub;PSL<sub>2</sub>(R).  
+An <I>arithmetic Fuchsian group</I> &Gamma; is a discrete subgroup of
+PSL<sub>2</sub>(R) which is commensurable with &Gamma;(1) (for some choice of F and A).
+<P>
+The classical case of the modular groups corresponds to F=Q, A=M<sub>2</sub>(Q), 
+O=M<sub>2</sub>(Z), and &Gamma;(1)=PSL<sub>2</sub>(Z).  Specialized algorithms
+for this case apply, and they are treated in detail in Chapter <A  HREF = "text1551.htm#17401">CONGRUENCE SUBGROUPS OF PSL<sub>2</sub>(R)</A>. 
+To exclude this case, we assume 
+throughout that A is a division ring, or equivalently A not isomorphic to M<sub>2</sub>(Q).  
+<P>
+The group 
+&Gamma; acts properly and discontinuously on the upper half-plane Hh, 
+and the quotient &Gamma; \ Hh = X(&Gamma;) can be given the 
+structure of a compact Riemann surface, called a <I>Shimura curve</I>.  
+<P>
+We exhibit methods for computing with arithmetic Fuchsian groups &Gamma;,
+including the basic invariants of &Gamma; and a fundamental domain for X(&Gamma;).  We
+provide further specialized algorithms for triangle groups.  Along the way, we also 
+present an interface for computing with the unit disc, parallel to that for
+the upper half-plane (see Chapter <A  HREF = "text1551.htm#17401">CONGRUENCE SUBGROUPS OF PSL<sub>2</sub>(R)</A>).
+<P>
+<P>
+The algorithm used to compute fundamental domains is described in <A  HREF = "text1562.htm#bib_voight-fundamental-domain">[Voi09]</A>.
+We recommend the following additional reading concerning the algorithms in this section.  For an introduction to Fuchsian groups, see Katok <A  HREF = "text1562.htm#bib_Katok">[Kat92]</A> and Beardon <A  HREF = "text1562.htm#bib_Beardon">[Bea77]</A>, and for their relationship to quaternion algebras, see also Vign&eacute;ras <A  HREF = "text1562.htm#bib_Vigneras80">[Vig80]</A>.  For a computational perspective on arithmetic Fuchsian groups and Shimura curves, see Alsina-Bayer <A  HREF = "text1562.htm#bib_Alsina-Bayer">[AB04]</A>, Elkies <A  HREF = "text1562.htm#bib_Elkies">[Elk98]</A>, and Voight <A  HREF = "text1562.htm#bib_Voight1">[Voi05]</A>, and for a discussion of triangle groups, see Voight <A  HREF = "text1562.htm#bib_Voight2">[Voi06]</A>.
+
+
+&nbsp; <BR><FONT SIZE="+1"><I><A  HREF = "ackn.htm#GrpPSL2Shim">Acknowledgements</A></I></FONT><BR>&nbsp; <BR><FONT SIZE="+1"><B><A  HREF = "text1564.htm">Arithmetic Fuchsian Groups</A></B></FONT><BR>
+&nbsp; &nbsp; &nbsp; <B><A  HREF = "#-1">Creation</A></B><BR>
+&nbsp; &nbsp; &nbsp; <B><A  HREF = "#-2">Quaternionic Functions</A></B><BR>
+&nbsp; &nbsp; &nbsp; <B><A  HREF = "#-3">Basic Invariants</A></B><BR>
+&nbsp; &nbsp; &nbsp; <B><A  HREF = "#-4">Group Structure</A></B><BR>
+&nbsp; <BR><FONT SIZE="+1"><B><A  HREF = "text1565.htm">Unit Disc</A></B></FONT><BR>
+&nbsp; &nbsp; &nbsp; <B><A  HREF = "#-5">Creation</A></B><BR>
+&nbsp; &nbsp; &nbsp; <B><A  HREF = "#-6">Basic Operations</A></B><BR>
+&nbsp; &nbsp; &nbsp; <B><A  HREF = "#-7">Access Operations</A></B><BR>
+&nbsp; &nbsp; &nbsp; <B><A  HREF = "#-8">Distance and Angles</A></B><BR>
+&nbsp; &nbsp; &nbsp; <B><A  HREF = "#-9">Structural Operations</A></B><BR>
+&nbsp; <BR><FONT SIZE="+1"><B><A  HREF = "#-10">Fundamental Domains</A></B></FONT><BR>
+&nbsp; <BR><FONT SIZE="+1"><B><A  HREF = "text1567.htm">Triangle Groups</A></B></FONT><BR>
+&nbsp; &nbsp; &nbsp; <B><A  HREF = "#-11">Creation of Triangle Groups</A></B><BR>
+&nbsp; &nbsp; &nbsp; <B><A  HREF = "#-12">Fundamental Domain</A></B><BR>
+&nbsp; &nbsp; &nbsp; <B><A  HREF = "#-13">CM Points</A></B><BR>
+&nbsp; <BR><FONT SIZE="+1"><B><A  HREF = "text1562.htm">Bibliography</A></B></FONT><BR>
+<BR><BR><BR><BR><BR><BR><BR><H2>DETAILS</H2><P>&nbsp; <BR><FONT SIZE="+1"><B><A  HREF = "text1564.htm">Arithmetic Fuchsian Groups</A></B></FONT><BR>
+<P>&nbsp; &nbsp; &nbsp; <A NAME = "-1"></A><B><A  HREF = "text1564.htm#17509">Creation</A></B><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1564.htm#17510"><B>FuchsianGroup(O) :</B> AlgQuatOrd -&gt; GrpPSL2</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1564.htm#17511"><B>FuchsianGroup(A) :</B> AlgQuat -&gt; GrpPSL2</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1564.htm#17512"><B>FuchsianGroup(A, N) :</B> AlgQuat, RngOrdIdl -&gt; GrpPSL2</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1564.htm#17513">Example <B>GrpPSL2Shim_ConstructAFG1</B> (H137E1)</A></FONT><BR>
+<P>&nbsp; &nbsp; &nbsp; <A NAME = "-2"></A><B><A  HREF = "text1564.htm#17514">Quaternionic Functions</A></B><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1564.htm#17515"><B>QuaternionOrder(G) :</B> GrpPSL2 -&gt; AlgQuatOrd</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1564.htm#17516"><B>QuaternionAlgebra(G) :</B> GrpPSL2 -&gt; AlgQuat</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1564.htm#17517"><B>SplitRealPlace(A) :</B> AlgQuat -&gt; PlcNum</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1564.htm#17518"><B>FuchsianMatrixRepresentation(A) :</B> AlgQuat -&gt; Map</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1564.htm#17519"><B>DefiniteNorm(gamma) :</B> AlgQuatElt -&gt; FldReElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1564.htm#17520"><B>DefiniteGramMatrix(B) :</B> SeqEnum[AlgQuatElt] -&gt; FldReElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1564.htm#17521">Example <B>GrpPSL2Shim_QuaternionicFunctions</B> (H137E2)</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1564.htm#17522"><B>MultiplicativeOrder(gamma) :</B> AlgAssVOrdElt -&gt; SeqEnum</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1564.htm#17523"><B>Quaternion(g) :</B> GrpPSL2Elt -&gt; AlgQuatElt</A></FONT><BR>
+<P>&nbsp; &nbsp; &nbsp; <A NAME = "-3"></A><B><A  HREF = "text1564.htm#17524">Basic Invariants</A></B><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1564.htm#17525"><B>ArithmeticVolume(G) :</B> GrpPSL2 -&gt; FldRatElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1564.htm#17526"><B>EllipticInvariants(G) :</B> GrpPSL2 -&gt; SeqEnum</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1564.htm#17527"><B>Signature(G) :</B> GrpPSL2 -&gt; SeqEnum</A></FONT><BR>
+<P>&nbsp; &nbsp; &nbsp; <A NAME = "-4"></A><B><A  HREF = "text1564.htm#17528">Group Structure</A></B><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1564.htm#17529"><B>Group(G) :</B> GrpPSL2 -&gt; GrpFP, Map, Map</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1564.htm#17530">Example <B>GrpPSL2Shim_BasicInvariants</B> (H137E3)</A></FONT><BR>
+<P>&nbsp; <BR><FONT SIZE="+1"><B><A  HREF = "text1565.htm">Unit Disc</A></B></FONT><BR>
+<P>&nbsp; &nbsp; &nbsp; <A NAME = "-5"></A><B><A  HREF = "text1565.htm#17532">Creation</A></B><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17533"><B>UnitDisc() :</B> -&gt; SpcHyd</A></FONT><BR>
+<P>&nbsp; &nbsp; &nbsp; <A NAME = "-6"></A><B><A  HREF = "text1565.htm#17534">Basic Operations</A></B><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17535"><B>D ! x :</B> SpcHyd, . -&gt; SeqEnum</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17536"><B>x eq y :</B> SpcHydElt, SpcHydElt -&gt; BoolElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17537"><B>a * x :</B> RngElt, SpcHydElt -&gt; RngElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17538"><B>x + y :</B> SpcHydElt, RngElt -&gt; RngElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17539"><B>x - y :</B> SpcHydElt, RngElt -&gt; RngElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17540"><B>x / a :</B> SpcHydElt, RngElt -&gt; RngElt</A></FONT><BR>
+<P>&nbsp; &nbsp; &nbsp; <A NAME = "-7"></A><B><A  HREF = "text1565.htm#17541">Access Operations</A></B><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17542"><B>IsExact(z) :</B> SpcHydElt -&gt; BoolElt, .</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17543"><B>ExactValue(z) :</B> SpcHydElt -&gt; .</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17544"><B>ComplexValue(z) :</B> SpcHydElt -&gt; FldComElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17545"><B>Im(z) :</B> SpcHydElt -&gt; FldReElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17546"><B>Re(z) :</B> SpcHydElt -&gt; FldReElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17547"><B>Argument(z) :</B> SpcHydElt -&gt; FldReElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17548"><B>Abs(z) :</B> SpcHydElt -&gt; FldReElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17549">Example <B>GrpPSL2Shim_UnitDiscBasics</B> (H137E4)</A></FONT><BR>
+<P>&nbsp; &nbsp; &nbsp; <A NAME = "-8"></A><B><A  HREF = "text1565.htm#17550">Distance and Angles</A></B><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17551"><B>Distance(z,w) :</B> SpcHydElt, SpcHydElt -&gt; FldReElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17552"><B>Geodesic(z,w) :</B> SpcHydElt, SpcHydElt -&gt; RngElt, RngElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17553"><B>TangentAngle(x,y) :</B> SpcHydElt, SpcHydElt -&gt; FldReElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17554"><B>Angle(e1,e2) :</B> [SpcHydElt], [SpcHydElt] -&gt; FldReElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17555"><B>ArithmeticVolume(P) :</B> [SpcHydElt] -&gt; FldReElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17556">Example <B>GrpPSL2Shim_UnitDiscAngle</B> (H137E5)</A></FONT><BR>
+<P>&nbsp; &nbsp; &nbsp; <A NAME = "-9"></A><B><A  HREF = "text1565.htm#17557">Structural Operations</A></B><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17558"><B>T * x :</B> GrpPSL2Elt, SpcHydElt -&gt; SpcHydElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17559"><B>Center(D) :</B> SpcHyd -&gt; RngElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17560"><B>DiscToPlane(H,z) :</B> SpcHyp, SpcHydElt -&gt; SpcHypElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17561"><B>PlaneToDisc(D,z) :</B> SpcHyd, SpcHypElt -&gt; SpcHydElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17562"><B>Matrix(g,D) :</B> GrpPSL2Elt, SpcHyd -&gt; AlgMatElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17563"><B>FixedPoints(g,D) :</B> GrpPSL2Elt, SpcHyd -&gt; SeqEnum</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17564"><B>IsometricCircle(g) :</B> GrpPSL2Elt -&gt; RngElt, RngElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17565"><B>IsometricCircle(g,D) :</B> GrpPSL2Elt, SpcHyd -&gt; RngElt, RngElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17566"><B>GeodesicsIntersection(x1,x2) :</B> [SpcHydElt], [SpcHydElt]) -&gt; .</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17567"><B>BoundaryIntersection(x) :</B> [SpcHydElt] -&gt; [FldComElt]</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1565.htm#17568">Example <B>GrpPSL2Shim_UnitDiscPractice2</B> (H137E6)</A></FONT><BR>
+<P>&nbsp; <A NAME = "-10"></A><BR><FONT SIZE="+1"><B><A  HREF = "text1566.htm">Fundamental Domains</A></B></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1566.htm#17570"><B>FundamentalDomain(G,D) :</B> GrpPSL2, SpcHyd -&gt; SeqEnum</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1566.htm#17571"><B>FundamentalDomain(G) :</B> GrpPSL2 -&gt; SeqEnum</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1566.htm#17572">Example <B>GrpPSL2Shim_FundamentalDomains</B> (H137E7)</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1566.htm#17573"><B>ShimuraReduceUnit(delta, gammagens, G, D) :</B> AlgAssVOrdElt, SeqEnum[AlgAssVOrdElt],                                         GrpPSL2, SpcHyd -&gt; SeqEnum</A></FONT><BR>
+<P>&nbsp; <BR><FONT SIZE="+1"><B><A  HREF = "text1567.htm">Triangle Groups</A></B></FONT><BR>
+<P>&nbsp; &nbsp; &nbsp; <A NAME = "-11"></A><B><A  HREF = "text1567.htm#17575">Creation of Triangle Groups</A></B><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1567.htm#17576"><B>ArithmeticTriangleGroup(p,q,r) :</B> RngIntElt, RngIntElt, RngIntElt -&gt; GrpPSL2, Rng</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1567.htm#17577"><B>AdmissableTriangleGroups() :</B> -&gt; SeqEnum</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1567.htm#17578"><B>IsTriangleGroup(G) :</B> GrpPSL2 -&gt; BoolElt</A></FONT><BR>
+<P>&nbsp; &nbsp; &nbsp; <A NAME = "-12"></A><B><A  HREF = "text1567.htm#17579">Fundamental Domain</A></B><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1567.htm#17580"><B>ReduceToTriangleVertices(G,z) :</B> GrpPSL2, SpcHypElt -&gt; SpcHypElt</A></FONT><BR>
+<P>&nbsp; &nbsp; &nbsp; <A NAME = "-13"></A><B><A  HREF = "text1567.htm#17581">CM Points</A></B><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1567.htm#17582"><B>HypergeometricSeries2F1(A,B,C,z) :</B> FldRatElt, FldRatElt, FldRatElt, FldComElt -&gt; FldComElt</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1567.htm#17583">Example <B>GrpPSL2Shim_Hypergeometric2F1</B> (H137E8)</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1567.htm#17584"><B>ShimuraConjugates(mu) :</B> AlgAssVOrdElt -&gt; SeqEnum</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1567.htm#17585"><B>jParameter(G,z) :</B> GrpPSL2, SpcHypElt -&gt; FldComElt, SeqEnum</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1567.htm#17586">Example <B>GrpPSL2Shim_Triangle239CMPoints1</B> (H137E9)</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1567.htm#17587"><B>CMPoints(G,mu) :</B> GrpPSL2, AlgAssVOrdElt -&gt; RngUPolElt, SeqEnum</A></FONT><BR>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <FONT SIZE="-1"><A  HREF = "text1567.htm#17588">Example <B>GrpPSL2Shim_Triangle239CMPoints2</B> (H137E10)</A></FONT><BR>
+<P>&nbsp; <BR><FONT SIZE="+1"><B><A  HREF = "text1562.htm">Bibliography</A></B></FONT><BR>
+<br> <A  HREF = "text1565.htm">[Next]</A><A  HREF = "text1563.htm">[Prev]</A> <A  HREF = "text1565.htm">[Right]</A> [____] <A  HREF = "text1563.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

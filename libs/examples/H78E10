@@ -1,0 +1,99 @@
+"Source: Text/Group/GrpBrd.text";
+"Line: 3320";
+"Date: Wed Jun  8 13:46:39 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Group/GrpBrd.text, line: 3320
+// Example: H78E10 ()
+print "Example: H78E10";
+ei := GetEchoInput();
+SetEchoInput(true);
+Bn := BraidGroup(10);
+Sn := Sym(10);
+f := hom< Bn->Sn | [ Sn!(i,i+1) : i in [1..Ngens(Bn)] ] >;
+Image(f) eq Sn;
+assert $1;
+f(Random(Bn));
+l := 6;
+r := 7;
+B := BraidGroup(l+r : Presentation := "BKL");
+L := BraidGroup(l   : Presentation := "BKL");
+R := BraidGroup(r   : Presentation := "BKL");
+f := hom< L-> B | [ L.i -> B.i : i in [1..Ngens(L)] ] >;
+g := hom< R-> B | [ R.i -> B.(l+i) : i in [1..Ngens(R)] ] >;
+x := Random(B, 15, 25);
+x := B.4^-1*B.12*B.11^-1*B.9*B.4*B.9^-1*B.1^-1*B.6*B.8*B.9^-2*B.3*B.11*B.4^-1*B.7^-1*B.2^-1*B.4^-1*B.12*B.5^-1;
+a := Random(L, 15, 25);
+a := L.4^-1*L.3^-1*L.4*L.2*L.3^-1*L.5^-1*L.1*L.3*L.5^-1*L.3*L.5*L.2*L.3*L.2^-1*L.1^-1*L.5*L.4^-1*L.2*L.3;
+y1 := NormalForm(x^f(a));
+b := Random(R, 15, 25);
+b := R.6^-1*R.3*R.6*R.2*R.6*R.1^-1*R.2^-1*R.1^-1*R.5*R.1^-1*R.3^-1*R.2^2*R.1^-2*R.2^-2*R.5^-1*R.6*R.4*R.6^-1;
+y2 := NormalForm(x^g(b));
+K_A := NormalForm(y2^f(a));
+K_B := NormalForm(y1^g(b));
+AreIdentical(K_A, K_B);
+assert $1;
+SetPresentation(~B, "Artin");
+function MyIsConjugate(u, v)
+
+ // check obvious invariants
+ infu := SuperSummitInfimum(u);
+ infv := SuperSummitInfimum(v);
+ supu := SuperSummitSupremum(u);
+ supv := SuperSummitSupremum(v);
+ if infu ne infv or supu ne supv then
+    return false, _;
+ end if;
+
+ // compute an ultra summit element for v
+ sv, cv := UltraSummitRepresentative(v);
+
+ // set up a process for computing the ultra summit set of u
+ P := UltraSummitProcess(u);
+
+ // compute ultra summit elements of u until sv is found
+ //    or sv is seen not to be in the ultra summit set of u
+ while sv notin P and not IsEmpty(P) do
+    NextElement(~P);
+ end while;
+
+ print #P, "elements computed";
+ isconj, c := sv in P;
+ if isconj then
+    // return true and an element conjugating u to v
+    return true, c*cv^-1;
+ else
+    return false, _;
+ end if;
+
+end function;
+time _, c := MyIsConjugate(x, y1);
+NormalForm(y2^c) eq K_A;
+time Ux := UltraSummitSet(x);
+#Ux;
+assert $1 eq 1584;
+l := 50;
+r := 50;
+B := BraidGroup(l+r);
+L := BraidGroup(l);
+R := BraidGroup(r);
+
+f := hom< L-> B | [ L.i -> B.i : i in [1..Ngens(L)] ] >;
+g := hom< R-> B | [ R.i -> B.(l+i) : i in [1..Ngens(R)] ] >;
+
+x := Random(B, 0, 1, 500, 1000);
+
+a := Random(L, 0, 1, 500, 1000);
+y1 := NormalForm(x^f(a));
+
+b := Random(R, 0, 1, 500, 1000);
+y2 := NormalForm(x^g(b));
+
+K_A := NormalForm(y2^f(a));
+K_B := NormalForm(y1^g(b));
+AreIdentical(K_A, K_B);
+assert $1;
+time _, c := IsConjugate(x, y1);
+K_A eq NormalForm(y2^c);
+time _, c := IsConjugate(x, y2);
+K_B eq NormalForm(y1^c);      
+SetEchoInput(ei);

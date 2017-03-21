@@ -1,0 +1,9 @@
+174,1
+A,Grp,1,ProspectorData
+V,PRProspection,10
+S,InitialiseProspector,Initialises the Prospector on a permutation group. The test used is t : g |-> number of cycles of g,0,1,0,0,0,0,0,0,0,224,,36,-38,-38,-38,-38,-38
+S,InitialiseProspector,Initialises the Prospector on a matrix group. The test used is t : g |-> number of factor of characteristic polynomial of g,0,1,0,0,0,0,0,0,0,178,,36,-38,-38,-38,-38,-38
+S,InitProspector,"The Product Replacement Prospector An extension of the product replacement algorithm that tries to keep the resulting straight line programs short, using heuristics and statistical tests. This initialises the Prospector on the generators of G. The function TestPropertyEval takes group elements and produces their corresponding values that are used to collect statistics. It should take 3 arguments: 1. The element g of G whose value is to be calculated. 2. The batch of elements selected so far. 3. The values of the batch. The return value should be the value of g",1,1,1,82,0,41,2,0,0,0,0,0,0,0,82,,0,0,-27,,36,-38,-38,-38,-38,-38
+S,Prospector,"The Product Replacement Prospector An extension of the product replacement algorithm that tries to keep the resulting straight line programs short, using heuristics and statistical tests. This executes an already initialised Prospector on G and tries to find elements that satisfy a given property. The function WantedPropertyCheck should take GrpElt from G and produce BoolElt. The Prospector makes at most MaxTries random selections until it has found an element where the function returns true",0,2,0,0,0,0,0,0,0,41,,0,0,-27,,36,-28,137,-38,-38,-38
+S,InverseErf,Calculate inverse error function using well-known series expansion. http://mathworld.wolfram.com/InverseErf.html http://functions.wolfram.com/GammaBetaErf/InverseErf/06/,0,1,0,0,0,0,0,0,0,402,,402,-38,-38,-38,-38,-38
+S,Probit,The inverse of the normal cumulative distribution function,0,1,0,0,0,0,0,0,0,402,,402,-38,-38,-38,-38,-38

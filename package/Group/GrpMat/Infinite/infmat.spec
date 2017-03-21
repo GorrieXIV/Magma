@@ -1,0 +1,25 @@
+{
+   finn 
+   {
+   +finn.spec 
+   }
+   attributes.m
+   unipotent.m
+   random.m
+   general.m
+   congruence.m
+   jordan.m
+   present.m
+   isom.m
+   order.m
+   algebra.m
+   finite.m
+   nilpotent.m
+   virtual.m
+   soluble.m
+   properties.m
+   cr.m
+   ut.m
+   abelian.m
+   hirsch.m
+}

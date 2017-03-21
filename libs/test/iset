@@ -1,0 +1,139 @@
+
+VERB := false;
+
+iset_test := procedure(A, size, rand_alg)
+    print "iset_test:", size, A;
+
+    I := {@ rand_alg(A): i in {1 .. size} @};
+    J := {@ rand_alg(A): i in {1 .. size} @};
+
+    if VERB then
+	print "#I:", #I;
+	print "#J:", #J;
+    end if;
+
+    assert not IsNull(I);
+    assert not IsEmpty(I);
+
+    assert {@Universe(I) | @} eq {@ A | @};
+
+    assert {x: x in I} eq I;
+    assert {J | x: x in J} eq J;
+
+    C := {@ @};
+    for x in I do
+	Include(~C, x);
+    end for;
+    assert C eq I;
+
+    assert I in Parent(I);
+    assert Rep(I) in I;
+    assert I ! Rep(I) in I;
+
+    assert &and{Position(I, I[i]) eq i: i in {1 .. #I}};
+    assert &and{Position(J, J[i]) eq i: i in {1 .. #J}};
+
+    repeat 
+	x := rand_alg(A);
+    until x notin I;
+
+    assert Position(I, x) eq 0;
+
+    IC := I;
+    //assert Refcount(IC) eq 2;
+    Include(~IC, x);
+    //assert Refcount(IC) eq 1;
+    assert Position(IC, x) eq #IC;
+    assert IC ne I;
+
+    repeat 
+	x := rand_alg(A);
+    until x notin IC;
+
+    Include(~IC, x);
+    //assert Refcount(IC) eq 1;
+    assert Position(IC, x) eq #IC;
+    assert IC ne I;
+
+    S := IndexedSetToSet(I);
+    T := IndexedSetToSet(J);
+    SI := SetToIndexedSet(S);
+    TJ := SetToIndexedSet(T);
+    assert SI eq I;
+    assert IndexedSetToSet(SI) eq S;
+    assert TJ eq J;
+    assert IndexedSetToSet(TJ) eq T;
+
+    loop_size := Max(10, size div 2);
+
+    if VERB then
+	print "loop_size:", loop_size;
+    end if;
+    L := { 1 .. loop_size };
+
+    M := SetToIndexedSet(S meet T);
+    if VERB then
+	print "#M:", #M;
+    end if;
+    assert M subset I;
+    assert M subset J;
+    if #M gt 0 then
+	for i in L do
+	    r := Random(M);
+	    assert r in M;
+	    assert r in I;
+	    assert r in J;
+	end for;
+    end if;
+
+    Jo := SetToIndexedSet(S join T);
+    if VERB then
+	print "#Join:", #Jo;
+    end if;
+    assert I subset Jo;
+    assert J subset Jo;
+    assert {Random(I) : i in L} subset Jo;
+    assert {Random(J) : i in L} subset Jo;
+    assert {Random(I) : i in L} join {Random(J) : i in L} subset Jo;
+    for i in L do
+	r := Random(Jo);
+	assert r in I or r in J;
+    end for;
+end procedure;
+
+sym_rand := func<G | Random(G: Short := true)>;
+
+//show mem;
+//set mark := true;
+
+iset_test(
+    IntegerRing(), 100, func<x | Random(-50, 50)>
+);
+
+iset_test(MatrixAlgebra(GF(2), 4), 10000, Random);
+iset_test(MatrixAlgebra(GF(23), 10), 1000, Random);
+
+iset_test(Sym(5), 10, sym_rand);
+iset_test(Sym(10), 5000, sym_rand);
+
+iset_test(
+    IntegerRing(), 10000, func<x | Random(-1000000, 1000000)>
+);
+
+iset_test(
+    RationalField(), 1000, func<x | Random(-100, 100) / Random(1, 100)>
+);
+
+iset_test(
+    PowerSet(IntegerRing()), 100, func<x | {Random(1, 10) : i in {1..10}}>
+);
+
+iset_test(
+    PowerSet(PowerSet(RationalField())), 500,
+    func<x | {{Random(1, 3) / Random(1, 3) : i in {1..3}}: j in {1..3}}>
+);
+
+// show active;
+//show mem;
+
+//quit;

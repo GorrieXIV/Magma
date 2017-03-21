@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Related Functions</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text470.htm">[Next]</A><A  HREF = "text468.htm">[Prev]</A> <A  HREF = "text470.htm">[Right]</A> <A  HREF = "text468.htm">[Left]</A> <A  HREF = "text462.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "5153">Related Functions</A></H3>
+
+<P>
+<P>
+<P>
+This section list some related functions that are either useful in the context
+of class fields for function fields or are necessary for their computation.
+They will most certainly change their appearance.
+
+
+<H5><A NAME = "5154">StrongApproximation(m, S): DivFunElt, [&lt;PlcFunElt, FldFunElt&gt;]  -&gt; FldFunElt</A></H5>
+
+<PRE>    Strict: BoolElt                     Default: <TT>false</TT></PRE>
+
+<PRE>    Exception: DivFunElt                Default: <TT>false</TT></PRE>
+
+<PRE>    Raw: BoolElt                        Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given an effective divisor m and a sequence S of pairs (Q<sub>i</sub>, e<sub>i</sub>) of
+places and elements, find an element a and a place Q<sub>0</sub> such that
+v<sub>Q<sub>i</sub></sub>(a - e<sub>i</sub>) &ge;v<sub>Q<sub>i</sub></sub>(m),
+and a is integral everywhere outside Q<sub>i</sub> (0&le;i&le;n).
+<P>
+If <TT>Exception</TT> is not <TT>false</TT>, it has to be a place that will
+be used for Q<sub>0</sub>.
+<P>
+If <TT>Strict</TT> is <TT>true</TT>, the element a will be chosen such
+v<sub>Q<sub>i</sub></sub>(a - e<sub>i</sub>) = v<sub>Q<sub>i</sub></sub>(m)
+<P>
+If <TT>Raw</TT> is <TT>true</TT>, different rather technical return values are computed 
+that are used internally.
+</BLOCKQUOTE>
+<H5><A NAME = "5155">StrongApproximation(S, Z, V): [PlcFunElt], [FldFunGElt], [RngIntElt] -&gt; FldFunElt</A></H5>
+
+<PRE>    Strict: BoolElt                     Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a sequence S of either finite or infinite places of a function field, 
+a sequence Z of elements of a function field and a sequence V of integers,
+return an element z such that z - Z[i] has valuation at least 
+V[i] at S[i] and
+positive valuation at all other places of same finiteness as those in S which
+do not appear in S.
+If the parameter <TT>Strict</TT> is set to <TT>true</TT> then z will be computed such 
+that v<sub>S[i]</sub>(z - Z[i]) = V[i].
+</BLOCKQUOTE>
+<H5><A NAME = "5156">ChineseRemainderTheorem(S, Z, V): [PlcFunElt], [FldFunGElt], [RngIntElt] -&gt; FldFunElt</A></H5>
+<H5>CRT(S, Z, V): [PlcFunElt], [FldFunGElt], [RngIntElt] -&gt; FldFunElt</H5>
+
+<PRE>    IntegralOutside: BoolElt            Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a sequence S of either finite or infinite places of a function field, 
+a sequence Z of elements of a function field and a sequence V of integers,
+return an element z such that z - Z[i] has valuation at least 
+V[i] at S[i]. If the parameter <TT>IntegralOutside</TT> is set to <TT>true</TT> then
+z will be computed such that it is integral at all other places of same 
+finiteness as those in S which do not appear in S.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "5157">Example <TT>FldFunAb_strong-approximation (H45E7)</TT></A></H3>
+We first have to define a function field and some places:
+<P>
+<P>
+<PRE>
+&gt; k&lt;w&gt; := GF(4);
+&gt; kt&lt;t&gt; := PolynomialRing(k);
+&gt; ktx&lt;x&gt; := PolynomialRing(kt);
+&gt; K := FunctionField(x^3-w*t*x^2+x+t);
+&gt; lp := Places(K, 2);
+</PRE>
+We will now try to find an element x in K such that
+v<sub>p<sub>i</sub></sub>(x - e<sub>i</sub>) &ge;m<sub>i</sub> for p<sub>i</sub> = <TT>lp[i]</TT>, m<sub>i</sub> = i and
+random elements e<sub>i</sub>:
+<P>
+<P>
+<PRE>
+&gt; e := [Random(K, 3) : i in lp];
+&gt; m := [i : i in [1..#lp]];
+&gt; D := &amp;+ [ m[i]*lp[i] : i in [1..#lp]];
+&gt; x := StrongApproximation(D, [&lt;lp[i], e[i]&gt; : i in [1..#lp]]);
+&gt; [Valuation(x-e[i], lp[i]) : i in [1..#lp]];
+[ 1, 2, 3, 4, 5, 6 ]
+</PRE>
+Note, that we only required &ge; for the valuations, to enforce
+= we would need to pass the <TT>Strict</TT> option. This will double the
+running time.
+<HR>
+<H5><A NAME = "5158">NonSpecialDivisor(m): DivFunElt -&gt; DivFunElt, RngIntElt</A></H5>
+
+<PRE>    Exception: DivFunElt                Default: </PRE>
+<BLOCKQUOTE>
+Given an effective divisor m, find a place P coprime to m and
+an integer r&ge;0 such that rP - m is a non special divisor and return
+r and P.
+<P>
+If <TT>Exception</TT> is specified, it must be an effective divisor
+n coprime to m. In this case the function finds r&gt;0 such that
+rn - m is non special and returns r and n.
+</BLOCKQUOTE>
+<H5><A NAME = "5159">NormGroup(F) : FldFun -&gt; DivFunElt, GrpAb</A></H5>
+
+<PRE>    Cond: DivFunElt                     Default: </PRE>
+
+<PRE>    AS: RngWittElt                      Default: </PRE>
+
+<PRE>    Extra: RngIntElt                    Default: 5</PRE>
+<BLOCKQUOTE>
+Given a global function field, try to compute its norm group.
+The norm group is defined to be the group generated by norms
+of unramified divisors.
+This group
+can be related to a subgroup of some ray class group.
+<P>
+Provided F is abelian, this function will compute a divisor m and
+a sub group U of the ray class group modulo m such that F is
+isomorphic to the ray class field thus defined.
+<P>
+This function uses a heuristic algorithm. It will terminate after
+the size of the quotient by the norm group is less or equal than the degree for
+<TT>Extra</TT> many places.
+<P>
+If <TT>Cond</TT> is given, it must be an effective divisor that
+will be used as the potential conductor of F. Note: if <TT>Cond</TT> is too 
+small, ie. a proper divisor of the true conductor, the result of this
+function will be wrong. However, if the conductor is not passed in, the
+discriminant divisor is used as a starting point. As this is in general
+far too large, the function will be much quicker if a better (smaller)
+starting point is passed in.
+<P>
+If <TT>AS</TT> is given, it must be a Witt vector e of appropriate
+length and F should be the corresponding function field. This allows
+a much better initial guess for the conductor than using the discriminant.
+</BLOCKQUOTE>
+<H5><A NAME = "5160">Sign(a, p) : FldFunElt, PlcFunElt -&gt; RngElt</A></H5>
+<BLOCKQUOTE>
+Given a function a in some global function field and a place p
+such that a is integral at p (has non-negative valuation)
+return the sign of a, ie. the first non-zero coefficient if the
+expansion of a at p. The sign function is not unique. Magma 
+choses a sign function when creating the residue class field map.
+</BLOCKQUOTE>
+<H5><A NAME = "5161">ChangeModel(F, p) : FldFun, PlcFunElt -&gt; FldFun</A></H5>
+<BLOCKQUOTE>
+Given a global function field F and a place p, return a new function
+field G that is F<sub>q</sub>-isomorphic to F and has p as the only
+infinite place.
+</BLOCKQUOTE>
+<H5><A NAME = "5162">ArtinSchreierReduction(u, P): FldFunGElt, PlcFunElt -&gt; RngIntElt, FldFunElt</A></H5>
+<BLOCKQUOTE>
+Return the valuation of u - (z<sup>p</sup> - z) at P and an element z such that
+this valuation is either positive or not congruent to 0 mod p 
+where p is the characteristic of the field of u.
+</BLOCKQUOTE>
+<PRE></PRE> <A  HREF = "text470.htm">[Next]</A><A  HREF = "text468.htm">[Prev]</A> <A  HREF = "text470.htm">[Right]</A> <A  HREF = "text468.htm">[Left]</A> <A  HREF = "text462.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

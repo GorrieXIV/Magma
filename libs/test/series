@@ -1,0 +1,506 @@
+/*
+Series Test.
+AKS 25/05/98.
+
+SetDebugOnError(true);
+*/
+
+if assigned quick then
+    quick := true;
+else
+    quick := true;
+    quick := false;
+end if;
+
+ClearVerbose();
+SetIgnorePrompt(false);
+
+//SetDelCheck(true);
+//SetTrace(159492, true);
+//SetMark(true);
+
+Z := IntegerRing();
+Q := RationalField();
+Re := RealField();
+C<i> := ComplexField();
+
+pi := Pi(RealField(100));
+rand_rat := func<r | Random(-r, r) / Random(1, r)>;
+rand_re := func<r | rand_rat(r) + 0.0p100>;
+
+function rand_c(R, r)
+    if R cmpeq Re then
+	return rand_re(r);
+    elif R cmpeq C then
+	return rand_re(r) + R.1 * rand_re(r);
+    elif R cmpeq QuadraticField(-1) then
+	return rand_rat(r) + R.1 * rand_rat(r);
+    elif Type(R) eq FldFin then
+	return Random(R);
+    else
+	return R ! rand_rat(r);
+    end if;
+end function;
+
+rand_ed := func<S, e, ed, k, r |
+    S.1^(e/ed) * S![rand_c(CoefficientRing(S), r): i in [0 .. k]]
+>;
+rand_d := func<S, e, k, r | rand_ed(S, e, 1, k, r)>;
+rand_0 := func<S, k, r | rand_ed(S, 0, 1, k, r)>;
+rand_1 := func<S, k, r | rand_ed(S, 1, 1, k, r)>;
+
+procedure general_test(R, c)
+//SetMark(true); procedure()
+    "\nGENERAL TEST";
+    "Seed:", GetSeed();
+    //G: Minimal;
+    "R:", R;
+
+    CPU := Cputime();
+
+    S<x> := PuiseuxSeriesRing(R);
+    //S := PuiseuxSeriesRing(R);
+    //x := S.1;
+
+    over_q := R cmpeq Q;
+    over_r := Type(R) eq FldRe;
+    over_c := Type(R) eq FldCom;
+    over_rc := over_r or over_c;
+    exact := not over_rc;
+    char0 := Characteristic(R) eq 0;
+
+    if over_c then
+	has_I := true;
+	I := R.1;
+    elif Type(R) eq FldQuad and R.1^2 eq -1 then
+	has_I := true;
+	I := R.1;
+    else
+	has_I := false;
+	I := 0;
+    end if;
+
+    // printf "has_I: %o\n", has_I;
+
+    if over_r or over_c then
+	if over_r then
+	    tolerance := 10^-5;
+	    is_wz := func<x |
+		forall{c: c in Coefficients(x) | Abs(c) le tolerance}
+	    >;
+	else
+	    tolerance := 10^-5;
+	    is_wz := func<x |
+		forall{c: c in Coefficients(x) | Norm(c) le tolerance} >;
+	end if;
+
+	is_we := func<x, y | is_wz(x - y) or is_wz(x - y + O(Parent(x).1^(Valuation(x) + Ceiling(3*RelativePrecision(x)/4))))>;
+	is_we2 := func<x, y | is_wz(x - y)>;
+	is_id := func<
+	    x, y | is_wz(x - y) and RelativePrecision(x) eq RelativePrecision(y)
+	>;
+
+	// is x approx 2*integer*pi
+	is_2kpi_re := func<x |
+	    is_wz(x) or
+	    (
+		is_wz(x - c) and Abs(c/(2*pi) - Round(c/(2*pi))) le tolerance
+		where c is Coefficient(x, 0)
+	    )
+	>;
+	if R cmpeq Re then
+	    is_2kpi := is_2kpi_re;
+	else
+	    is_2kpi := func<x | is_2kpi_re(Real(x)) and is_wz(Imaginary(x))>;
+	end if;
+    else
+	tolerance := 0;
+	is_we := IsWeaklyEqual;
+	is_wz := IsWeaklyZero;
+	is_id := IsIdentical;
+	is_2kpi := func<x | false>;
+    end if;
+
+    is_idz := func<f, g | exact select is_we(f, g) else is_id(f, g)>;
+
+    procedure assert_is_id(f, g)
+	if not is_id(f, g) then
+	    "NOT ID:";
+	    "f:", f;
+	    "g:", g;
+	    assert false;
+	end if;
+    end procedure;
+
+    procedure assert_is_idz(f, g)
+	if not is_idz(f, g) then
+	    "NOT ID:";
+	    "f:", f;
+	    "g:", g;
+	    assert false;
+	end if;
+    end procedure;
+
+    is_wo := func<x | is_we(x, 1)>;
+    is_womo := func<x | is_we(x, Parent(x)!1) or is_we(x, Parent(x)!-1)>;
+    is_wea := func<x, y | is_we(x, y) or is_we(-x, y)>;
+    is_wea_2pi_minus := func<x, y | is_wea(x, y) or is_wea(2*pi - x, y)>;
+    is_we_sin := func<x, y | is_2kpi(x - y) or is_2kpi(pi - x - y)>;
+    is_we_cos := func<x, y |
+	is_2kpi(x - y) or is_2kpi(x - pi - y) or
+	is_2kpi(x + y) or is_2kpi(x - pi + y)
+    >;
+    is_we_tan := func<x, y | is_2kpi(x - y) or is_2kpi(pi + x - y)>;
+    is_abslt1 := func<x | x eq 0 or Abs(x) lt 1>;
+
+    zero := S ! 0;
+    one := S ! 1;
+    minus_one := S ! -1;
+    assert IsZero(zero);
+    assert IsOne(one);
+
+    if Type(R) eq FldFin then
+	e := 3;
+	ed := 3;
+	k := 100;
+	r := 5;
+	p := 100;
+    elif over_rc then
+	e := 3;
+	ed := 3;
+	k := 30;
+	r := 5;
+	p := 15;
+    else
+	e := 5;
+	ed := 5;
+	k := 15;
+	r := 10;
+	p := 20;
+    end if;
+
+    o := O(x^p);
+
+    procedure composition_test(f, g)
+	assert is_we(Composition(f, g), x);
+	assert is_we(Composition(g, f), x);
+	assert is_we(Reversion(f), g);
+	assert is_we(Reversion(g), f);
+    end procedure;
+
+    if char0 then
+	composition_test(Sin(x), Arcsin(x));
+	composition_test(Tan(x), Arctan(x));
+	composition_test(Sinh(x), Argsinh(x));
+	composition_test(Tanh(x), Argtanh(x));
+	composition_test(Tanh(x), Argtanh(x));
+	composition_test(Exp(x) - 1, Log(1 + x));
+    end if;
+
+    deriv_ok := func<f | char0 or ExponentDenominator(f) eq 1>;
+
+    /*
+    if over_rc then
+	composition_test(Cos(x), Arccos(x));
+	composition_test(Cosh(x), Argcosh(x));
+    end if;
+    */
+
+    // Laplace
+
+    for i in [1 .. c] do
+	"i:", i;
+	"Seed:", GetSeed();
+
+	L := [
+	    rand_ed(S, Random(-e, e), Random(2, ed), k div 2, r),
+	    (rand_ed(S, Random(-e, e), red, k div 2, r) + O(x^(p/red))
+		where red is Random(2, ed)),
+	    x^(1/2) * (1 + rand_ed(S, Random(1, e), Random(2, ed), k div 3, r)),
+	    rand_d(S, Random(-e, e), k, r),
+	    rand_d(S, Random(-e, e), k, r) + 0,
+	    rand_0(S, k, r),
+	    rand_1(S, k, r) + o,
+	    o,
+	    0
+	];
+
+	tg := over_rc select 'ge' else 'gt';
+
+	for f in L do
+//printf "f := %o;\n", f;
+//Parent(f);
+printf "*** f = %o ...\n", Substring(Sprint(f), 1, 50);
+
+	    vf := Valuation(f);
+
+	    assert_is_id((-1) * f, -f);
+	    assert_is_idz(3 * f, f + f + f);
+	    assert_is_idz(f * 4, f + f + f + f);
+	    assert_is_id(f^2, f * f);
+	    assert is_we(f - f, zero);
+	    assert is_wz(f - f);
+
+	    if char0 and IsZero(Coefficient(f, -1)) then
+//"f:", f;
+		int_f := Integral(f);
+		assert is_we(Derivative(int_f), f);
+	    end if;
+
+	    if char0 and not is_wz(f) and LeadingCoefficient(f) eq 1 then
+		exp := -5/2;
+		assert is_we((f^exp)^(1/exp), f);
+	    end if;
+
+	    if deriv_ok(f) then
+		df := Derivative(f);
+
+		assert_is_id(
+		    Derivative(f, 3),
+		    Derivative(Derivative(Derivative(f)))
+		);
+	    end if;
+
+	    if char0 and tg(vf, 0) then
+
+		sin_f, cos_f := Sincos(f);
+		assert_is_id(sin_f, Sin(f));
+		assert_is_id(cos_f, Cos(f));
+		sinh_f := Sinh(f);
+		cosh_f := Cosh(f);
+//"sin_f:", sin_f;
+//"cos_f:", cos_f;
+
+		assert is_we(Derivative(sin_f), cos_f * df);
+		assert is_we(Derivative(sinh_f), cosh_f * df);
+		assert is_we(Derivative(cos_f), -sin_f * df);
+		assert is_we(Derivative(cosh_f), sinh_f * df);
+
+
+		tan_f := Tan(f);
+		tanh_f := Tanh(f);
+		assert is_we(tan_f, sin_f / cos_f);
+		assert is_we(tanh_f, sinh_f / cosh_f);
+		assert is_we(Sec(f), 1 / cos_f);
+
+//"f:", f;
+//"sin_f:", sin_f;
+//"as:", Arcsin(sin_f);
+		// Sin(f) = Sin(pi - f)
+		//assert is_we_sin(Arcsin(sin_f), f);
+		assert is_we(Sin(Arcsin(sin_f)), sin_f);
+//"here now";
+if over_rc and not (is_wo(cos_f) and RelativePrecision(cos_f) ge 0) then
+//"cos_f:", cos_f;
+//ac:= Arccos(cos_f);
+//"ac:", ac;
+//"f:", f;
+//"diff:", ac-f;
+end if;
+		// wrong over C I think!!! (change to over_rc someday):
+		assert not over_r or
+		    (is_wo(cos_f) and RelativePrecision(cos_f) ge 0) or
+		    //is_we_cos(Arccos(cos_f), f);
+		    is_we(Cos(Arccos(cos_f)), cos_f);
+/*
+"f:", f;
+"tan_f:", tan_f;
+"at:", Arctan(tan_f);
+"t at:", Tan(Arctan(tan_f));
+*/
+		//assert is_we_tan(Arctan(tan_f), f);
+		tol := O(S.1^5);
+		assert is_we(Tan(Arctan(tan_f)) + tol, Tan(f) + tol);
+
+//"f:", f;
+//"as:", Arcsin(f);
+//"sas:", Sin(Arcsin(f));
+		//assert is_we(Sin(Arcsin(f)), f);
+		//assert not over_rc or is_we_cos(Cos(Arccos(f)), f);
+		//assert is_we(Tan(Arctan(f)), f);	// AKS 8/7/6
+
+		//assert is_we(Argsinh(sinh_f), f);
+		assert is_we(Sinh(Argsinh(sinh_f)), sinh_f);
+//"argc:", Argcosh(cosh_f);
+//"f:", f;
+		//Argcosh wrong over C:
+		//assert not over_c or
+		    //(is_wo(cosh_f) and RelativePrecision(cosh_f) ge 0) or
+		    //is_wea(Argcosh(cosh_f), f);
+		// Constant coefficient must not be +-1 for Argtanh
+// "argtanh f:", f;
+// Parent(f);
+		assert not is_abslt1(Coefficient(tanh_f, 0)) or
+		    is_we(Tanh(Argtanh(tanh_f)), Tanh(f));
+// "f:", f;
+// "s a:", Sinh(Argsinh(f));
+		tol := O(S.1^2);
+		assert is_we(Sinh(Argsinh(f)) + tol, f) or is_we(Argsinh(Sinh(Argsinh(f))) + tol, Argsinh(f));
+		//Argcosh wrong over C:
+		//assert not over_c or is_we(Cosh(Argcosh(f)), f);
+		//assert not over_c or Valuation(f) gt 0 or
+		    //is_we(Cosh(Argcosh(f)), f);
+//"argtanh f:", f;
+		tol := O(S.1^5);
+		assert not is_abslt1(Coefficient(f, 0)) or
+		    is_we(Tanh(Argtanh(f)) + tol, f + tol);
+
+		if not is_wz(sin_f) then
+		    assert is_we(Cot(f), cos_f / sin_f);
+		    assert is_we(Cosec(f), 1 / sin_f);
+		end if;
+
+		exp_f := Exp(f);
+		assert is_we(Exp(Log(exp_f)), exp_f);
+		assert is_we(Derivative(exp_f), exp_f * df);
+
+		c0 := Coefficient(f, 0);
+		fl := (is_wz(S!c0) select 1 else 2*Abs(c0)) + f;
+		log_ff := Log(fl);
+		assert is_we(Exp(log_ff), fl);
+		assert is_we(Derivative(log_ff), Derivative(fl)/fl);
+
+		if has_I then
+		    assert is_we(Sin(I * f), I * sinh_f);
+		    assert is_we(Cos(I * f), cosh_f);
+		    assert is_we(Tan(I * f), I * tanh_f);
+		    assert is_we(Exp(I * f), cos_f + I * sin_f);
+		end if;
+
+		if vf gt 0 then
+		    assert is_we(Composition(Sin(x), f), sin_f);
+		end if;
+	    end if;
+
+	    if char0 and not over_rc and not is_wz(f) and
+		(vf eq 1 or vf gt 0 and LeadingCoefficient(f) eq 1) then
+		//"doing rev";
+		rev_f := Reversion(f);
+		assert is_we(Composition(rev_f, f), x);
+		assert is_we(Composition(f, rev_f), x);
+		assert is_we(Reversion(rev_f), f);
+		//"done rev";
+	    end if;
+
+	    if char0 and not is_wz(f) then
+		fs := f / LeadingCoefficient(f);
+		sqrt_fs := Sqrt(fs);
+		assert is_we(sqrt_fs^2, fs);
+		assert is_we(
+		    Derivative(sqrt_fs), Derivative(fs)/(2 * sqrt_fs)
+		);
+	    end if;
+
+	    for g in L do
+//printf "    g := %o;\n", g;
+printf "    g = %o ...\n", Substring(Sprint(g), 1, 50);
+		vg := Valuation(g);
+
+		assert_is_id(f + g, g + f);
+		assert_is_id(f - g, -(g - f));
+		assert is_we((f + g) * (f - g), f^2 - g^2);
+		if not is_wz(g) then
+		    g_inv := 1 / g;
+		    if not is_we(g * g_inv, 1) then
+			"g:", g;
+			"ginv:", g_inv;
+			"p1:", g * g_inv;
+		    end if;
+		    assert is_we(g * g_inv, 1);
+		    x_div_y := f / g;
+		    if over_c then
+			if not is_we(g * x_div_y, f) then
+			    x_div_y := (f * g)/ f;
+			    assert is_we(x_div_y, g);
+			end if;
+		    else
+			assert is_we(g * x_div_y, f);
+		    end if;
+
+		    if exact then
+			LHS := g^-3;
+			RHS := g_inv * g_inv * g_inv;
+			if not (is_we)(LHS, RHS) then
+			    "LHS:", LHS;
+			    "RHS:", RHS;
+			    assert false;
+			end if;
+		    end if;
+		end if;
+
+		assert not deriv_ok(f) or not deriv_ok(g) or is_we(
+		    Derivative(f * g),
+		    f * Derivative(g) + g * Derivative(f)
+		);
+
+//"vg:", vg;
+		if char0 and tg(vf, 0) and tg(vg, 0) then
+		    sin_g, cos_g := Sincos(g);
+
+		    assert_is_id(sin_g, Sin(g));
+		    assert_is_id(cos_g, Cos(g));
+
+		    sinh_g := Sinh(g);
+		    cosh_g := Cosh(g);
+
+//"sin_g:", sin_g;
+//"cos_g:", cos_g;
+
+		    assert is_wo(sin_f^2 + cos_f^2);
+		    assert is_wo(cosh_f^2 - sinh_f^2);
+		    assert is_we(Sin(f + g), sin_f * cos_g + cos_f * sin_g) or
+			is_we(Sin(f + g) + O(x^AbsolutePrecision(f + g)), sin_f * cos_g + cos_f * sin_g);
+		    assert is_we(Cos(f + g), cos_f * cos_g - sin_f * sin_g) or
+			is_we(Cos(f + g) + O(x^AbsolutePrecision(f + g)), cos_f * cos_g - sin_f * sin_g);
+		    exp_g := Exp(g);
+		    assert is_we(Exp(f + g), exp_f * exp_g);
+		end if;
+//"";
+	    end for;
+	end for;
+    end for;
+
+    t := Cputime(CPU);
+    t, "seconds";
+//end procedure(); ShowActive();
+end procedure;
+
+/*
+if not IsOpt() then
+    c := 1;
+    c := 5;
+else
+    c := 1;
+    c := 20;
+end if;
+*/
+c := 1;
+
+// general_test(RealField(100), c);
+
+//SetSeed(1, 409547);
+//general_test(RealField(), c);
+
+//SetSeed(484956294);
+general_test(GF(2), 5*c);
+general_test(GF(3), 5*c);
+general_test(GF(4), 5*c);
+general_test(GF(2, 31), 1*c);
+general_test(GF(23, 2), 1*c);
+general_test(GF(65537), 3*c);
+general_test(GF(NextPrime(10^20)), 1*c);
+general_test(RationalField(), 5*c);
+general_test(RealField(100), c);
+general_test(ComplexField(), c);
+general_test(QuadraticField(-1), c);
+
+/*
+clear;
+;
+
+if not IsOpt() then
+    ShowActive();
+end if;
+*/
+
+quit;

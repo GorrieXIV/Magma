@@ -1,0 +1,3 @@
+174,1
+S,ReversePath,"Returns the path from a basis element of a projective module of a basic algebra to the idemptent. The input is the path tree and the index of the basis element in the standard basis. If the return for an element is [i1, i2, .. ij] then the element is the product of the generators indexed by the elements of the sequence in the given order",0,2,0,0,0,0,0,0,0,148,,0,0,82,,82,-38,-38,-38,-38,-38
+S,CoverAlgebra,constructs the maximal extension AA as in [0 -> K -> AA -> A -> 0] such that AA acts trivially on K and AA is an algebra with exactly the same minimal number of generators as A. Returns AA and the algebra homomorphism of AA onto A,0,1,0,0,0,0,0,0,0,34,,34,155,-38,-38,-38,-38

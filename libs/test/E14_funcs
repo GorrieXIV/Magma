@@ -1,0 +1,80 @@
+apply := function(u,g)
+ P := Parent(u);
+ return P!Eltseq(Matrix(B,u) * Matrix(B,g))
+  where B is BaseRing(P);
+end function;
+
+DerivationBasis := function(A)
+ F := BaseRing(A);
+ n := Dimension(A);
+ M := Zero(KMatrixSpace(F,n^2,n^3));
+ for i := 1 to n do
+  for j := 1 to n do
+   p := n^2*(i-1)+n*(j-1);
+   e := A.i*A.j;
+   for k := 1 to n do
+    pk := p+k; qq := n*(k-1);
+    qi := qq+i; qj := qq+j;
+    r := n*qq + n*(j-1);
+    s := n^2*(i-1)+qq;
+    for l := 1 to n do
+     f := e[l];
+     M[n*(l-1)+k,pk] +:= f;
+     M[qi,r+l] -:= f;
+     M[qj,s+l] -:= f;
+    end for;
+   end for;
+  end for;
+ end for;
+ return KernelMatrix(M);
+end function;
+
+KForm := function( RD, alpha, beta )
+ rtn := 0;
+ rts := Roots(RD);
+ ChangeUniverse(~rts,RSpace(Integers(),Rank(RD)));
+ if alpha eq -beta then
+  a := Index(rts,alpha);
+  aa := Index(rts,-alpha);
+  for gamma in rts do
+   if gamma ne -alpha then
+    c := LieConstant_N( RD, Index(rts,gamma), a );
+    if c ne 0 then
+     rtn +:= c * LieConstant_N( RD, ga, aa )
+        where ga is Index(rts,gamma+alpha);
+    end if;
+   else
+    rtn +:= 2;
+   end if;
+  end for;
+  rtn +:= 2;   /* contribution from the Cartan subalgebra */
+ end if;
+ return rtn;
+end function;
+
+LieAlg := function( D )
+ sq, n := IsSquare(Ncols(D));
+ error if not sq, "the number of columns must be a square";
+ m := Nrows(D);
+ F := BaseRing(D);
+ K := [ MatrixAlgebra(F,n) ! Eltseq(D[i]) : i in [1..m] ];
+ comm := func< a, b | a*b - b*a >;
+ struct := [ Eltseq( Solution(D, V!Eltseq(comm(K[i],K[j]))) ) :
+          i,j in [1..m] ]  where V is VectorSpace(F,n^2);
+ return LieAlgebra< F, m | struct >;
+end function;
+
+LieRootMatrix := function(R,alpha,X)
+ rts := Roots(R);
+ n := #X;
+ a := Index(rts,alpha);
+ ad:= Zero(MatrixRing(Integers(),n));
+ for j := 1 to n do
+  c := LieConstant_N( R, Index(rts,X[j]), a );
+  if c ne 0 then
+   ad[j][Index(X,alpha+X[j])] := c;
+  end if;
+ end for;
+ return ad;
+end function;
+

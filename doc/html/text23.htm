@@ -1,0 +1,391 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Functions and Procedures</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text24.htm">[Next]</A><A  HREF = "text22.htm">[Prev]</A> <A  HREF = "text24.htm">[Right]</A> <A  HREF = "text22.htm">[Left]</A> <A  HREF = "text21.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "135">Functions and Procedures</A></H3>
+
+<P>
+<P>
+There are two slightly different syntactic forms provided for the definition 
+of a user function (as opposed to an intrinsic function). For the case of a
+function whose definition can be expressed as a single expression, an abbreviated
+form is provided.  The syntax for the definition of user procedures is similar.
+Names for functions and procedures are ordinary identifiers and so obey the 
+rules as given in Chapter 1 for other variables.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text23.htm#136">Functions</A>
+<LI> <A  HREF = "text23.htm#145">Procedures</A>
+<LI> <A  HREF = "text23.htm#151">The forward Declaration</A>
+</UL>
+<H4><A NAME = "136">Functions</A></H4>
+
+
+
+<H5><A NAME = "137">f := function(x<sub>1</sub>, ..., x<sub>n</sub>: parameters) : -&gt;</A></H5>
+<H5>function f(x<sub>1</sub>, ..., x<sub>n</sub>: parameters) : -&gt;</H5>
+<BLOCKQUOTE>
+This creates a function taking n&ge;0 arguments, and assigns
+it to f. The statements may comprise any number of valid Magma
+statements, but at least one of them must be of the form
+<TT>return expression;</TT>. The value of that expression (possibly
+dependent on the values of the arguments x<sub>1</sub>, ..., x<sub>n</sub>) will be the
+return value for the function; failure to return a value will lead
+to a run-time error when the function is invoked. (In fact, a return
+statement is also required for every additional `branch' of the function that
+has been created using an <TT>if ... then ... else ... </TT> construction.)
+<P>
+The function may return multiple values.  Usually one uses the
+form <TT>return expression, ..., expression;</TT>.  If one wishes
+to make the last return value(s) undefined (so that the number of return
+values for the function is the same in all `branches' of the function)
+the underscore symbol (<TT>_</TT>) may be used.  (The undefined symbol
+may only be used for final values of the list.)
+This construct allows behaviour similar to the intrinsic function
+<TT>IsSquare</TT>, say, which
+returns <TT>true</TT> and the square root of its argument if that exists,
+and <TT>false</TT> and the undefined value otherwise.
+See also the example below.
+<P>
+If there are parameters given, they must consist of a comma-separated list
+of clauses each of the form <TT>identifier := value</TT>.  The identifier
+gives the name of the parameter, which can then be treated as a normal
+value argument within the statements.  The value gives a default value
+for the parameter, and may depend on any of the arguments or preceding
+parameters; if, when the function is called, the parameter is not
+assigned a value, this default value will be assigned to the parameter.
+Thus parameters are always initialized.  If no parameters are desired,
+the colon following the last argument, together with parameters, may
+be omitted.
+<P>
+The only difference between the two forms of function declaration
+lies in recursion. Functions may invoke themselves recursively since
+their name is part of the syntax;
+if the first of the above declarations is used, the identifier
+f cannot be used inside the definition of f (and <TT>$$</TT> will
+have to be used to refer to f itself instead), while the second form
+makes it possible to refer to f within its definition.
+<P>
+An invocation of the user function f takes the form  
+<TT>f(m<sub>1</sub>, ..., m<sub>n</sub>)</TT>, where m<sub>1</sub>, ..., m<sub>n</sub> are 
+the actual arguments.
+</BLOCKQUOTE>
+<H5><A NAME = "138">f := function(x<sub>1</sub>, ..., x<sub>n</sub>, ...: parameters) : -&gt;</A></H5>
+<BLOCKQUOTE>
+This creates a <I>variadic</I> function, which can take n or more arguments.
+The semantics are identical to the standard function definition described above,
+with the exception of function invocation.  An invocation of a variadic
+function f takes the form <TT>f(y<sub>1</sub>, ..., y<sub>m</sub>)</TT>, where y<sub>1</sub>, ..., y<sub>m</sub>
+are the arguments to the function, and m &ge;n.  These arguments get bound to
+the parameters as follows:  for i &lt; n, the argument y<sub>i</sub> is bound to the
+parameter x<sub>i</sub>.  For i &ge;n, the arguments y<sub>i</sub> are bound to the last
+parameter x<sub>n</sub> as a list [ * y<sub>n</sub>, ..., y<sub>m</sub> * ].
+</BLOCKQUOTE>
+<H5><A NAME = "139">function f(x<sub>1</sub>, ..., x<sub>n</sub>: parameters) : -&gt;</A></H5>
+<H5>f := func&lt; x<sub>1</sub>, ..., x<sub>n</sub>: parameters | expression &gt;;</H5>
+<BLOCKQUOTE>
+This is a short form of the function constructor designed for the
+situation in which the value of the function can be defined by a
+single expression. A function f is created which returns the value 
+of the expression (possibly involving the function arguments 
+x<sub>1</sub>, ..., x<sub>n</sub>).  Optional parameters are permitted as in 
+the standard function constructor.
+</BLOCKQUOTE>
+<H5><A NAME = "140">function f(x<sub>1</sub>, ..., x<sub>n</sub>, ...: parameters) : -&gt;</A></H5>
+<H5>f := func&lt; x<sub>1</sub>, ..., x<sub>n</sub>, ...: parameters | expression &gt;;</H5>
+<BLOCKQUOTE>
+This is a short form of the function constructor for <I>variadic functions</I>,
+otherwise identical to the short form describe above.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "141">Example <TT>Func_Recursion (H2E1)</TT></A></H3>
+This example illustrates recursive functions.
+<P>
+<P>
+<PRE>
+&gt; fibonacci := function(n)
+&gt;    if n le 2 then
+&gt;       return 1;
+&gt;    else
+&gt;       return $$(n-1) + $$(n-2);
+&gt;    end if;
+&gt; end function;
+&gt;
+&gt; fibonacci(10)+fibonacci(12);
+199
+
+
+&gt; function Lucas(n)
+&gt;    if n eq 1 then
+&gt;       return 1;
+&gt;    elif n eq 2 then
+&gt;       return 3;
+&gt;    else
+&gt;       return Lucas(n-1)+Lucas(n-2);
+&gt;    end if;
+&gt; end function;
+&gt;
+&gt; Lucas(11);
+199
+
+
+&gt; fibo := func&lt; n | n le 2 select 1 else $$(n-1) + $$(n-2) &gt;;
+&gt; fibo(10)+fibo(12);
+199
+</PRE>
+<HR>
+<H3><A NAME = "142">Example <TT>Func_Parameters (H2E2)</TT></A></H3>
+This example illustrates the use of parameters.
+<P>
+<P>
+<PRE>
+&gt; f := function(x, y: Proof := true, Al := "Simple")
+&gt;    return &lt;x, y, Proof, Al&gt;;
+&gt; end function;
+&gt;
+&gt; f(1, 2);
+&lt;1, 2, true, Simple&gt;
+&gt; f(1, 2: Proof := false);
+&lt;1, 2, false, Simple&gt;
+&gt; f(1, 2: Al := "abc", Proof := false);
+&lt;1, 2, false, abc&gt;
+</PRE>
+<HR>
+<H3><A NAME = "143">Example <TT>Func_Underscore (H2E3)</TT></A></H3>
+This example illustrates the returning of undefined values.
+<P>
+<P>
+<PRE>
+&gt; f := function(x)
+&gt;    if IsOdd(x) then
+&gt;        return true, x;
+&gt;    else
+&gt;        return false, _;
+&gt;    end if;
+&gt; end function;
+&gt;
+&gt; f(1);
+true 1
+&gt; f(2);
+false
+&gt; a, b := f(1);
+&gt; a;
+true
+&gt; b;
+1
+&gt; a, b := f(2);
+&gt; a;
+false
+&gt; // The following produces an error:
+&gt; b;
+
+&gt;&gt; b;
+   ^
+User error: Identifier 'b' has not been assigned
+</PRE>
+<HR>
+<H3><A NAME = "144">Example <TT>Func_Variadic (H2E4)</TT></A></H3>
+This example illustrates the use of variadic functions.
+<P>
+<P>
+<PRE>
+&gt; f := function(x, y, ...)
+&gt;     print "x: ", x;
+&gt;     print "y: ", y;
+&gt;     return [x + z : z in y];
+&gt; end function;
+&gt;
+&gt; f(1, 2);
+x:  1
+y:  [* 2*]
+[ 3 ]
+&gt; f(1, 2, 3);
+x:  1
+y:  [* 2, 3*]
+[ 3, 4 ]
+&gt; f(1, 2, 3, 4);
+x:  1
+y:  [* 2, 3, 4*]
+[ 3, 4, 5 ]
+</PRE>
+<HR>
+<H4><A NAME = "145">Procedures</A></H4>
+
+
+
+<H5><A NAME = "146">p := procedure(x<sub>1</sub>, ..., x<sub>n</sub>: parameters) statements : -&gt;</A></H5>
+<H5>procedure p(x<sub>1</sub>, ..., x<sub>n</sub>: parameters) statements : -&gt;</H5>
+<BLOCKQUOTE>
+The procedure, taking n&ge;0 arguments and 
+defined by the statements is created and assigned
+to p. Each of the arguments may be either a variable (y<sub>i</sub>) or
+a referenced variable (~y<sub>i</sub>). Inside the procedure
+only referenced variables (and local variables) may be (re-)assigned to.
+The procedure p is
+invoked by typing <TT>p(x<sub>1</sub>, ..., x<sub>n</sub>)</TT>, where the same 
+succession of variables and referenced variables is used (see
+the example below).
+Procedures cannot return values.
+<P>
+If there are parameters given, they must consist of a comma-separated list
+of clauses each of the form <TT>identifier := value</TT>.  The identifier
+gives the name of the parameter, which can then be treated as a normal
+value argument within the statements.  The value gives a default value
+for the parameter, and may depend on any of the arguments or preceding
+parameters; if, when the function is called, the parameter is not
+assigned a value, this default value will be assigned to the parameter.
+Thus parameters are always initialized.  If no parameters are desired,
+the colon following the last argument, together with parameters, may
+be omitted.
+<P>
+As in the case of <TT>function</TT>, the only difference between the
+two declarations lies in the fact that the second version allows
+recursive calls to the procedure within itself using the identifier
+(p in this case).
+</BLOCKQUOTE>
+<H5><A NAME = "147">p := procedure(x<sub>1</sub>, ..., x<sub>n</sub>, ...: parameters) statements : -&gt;</A></H5>
+<H5>procedure p(x<sub>1</sub>, ..., x<sub>n</sub>, ...: parameters) statements : -&gt;</H5>
+<BLOCKQUOTE>
+Creates and assigns a new <I>variadic</I> procedure to p.  The use of a
+variadic procedure is identical to that of a variadic function, described
+previously.
+</BLOCKQUOTE>
+<H5><A NAME = "148">p := proc&lt; x<sub>1</sub>, ..., x<sub>n</sub>: parameters | expression &gt;;</A></H5>
+<BLOCKQUOTE>
+This is a short form of the procedure constructor designed for the
+situation in which the action of the procedure may be accomplished by a
+single statement. A procedure p is defined which calls the procedure 
+given by the expression. This expression must be a simple procedure 
+call (possibly involving the procedure arguments x<sub>1</sub>, ..., x<sub>n</sub>).  
+Optional parameters are permitted as in the main procedure constructor.
+</BLOCKQUOTE>
+<H5><A NAME = "149">p := proc&lt; x<sub>1</sub>, ..., x<sub>n</sub>, ...: parameters | expression &gt;;</A></H5>
+<BLOCKQUOTE>
+This is a short form of the procedure constructor for variadic procedures.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "150">Example <TT>Func_Procedures (H2E5)</TT></A></H3>
+By way of simple example, the following (rather silly)
+procedure assigns a Boolean to the variable <TT>holds</TT>, according
+to whether or not the first three arguments x, y, z satisfy x<sup>2</sup> + y<sup>2</sup>=z<sup>2</sup>.
+Note that the fourth argument is referenced, and hence can be assigned to;
+the first three arguments cannot be changed inside the procedure.
+<P>
+<P>
+<PRE>
+&gt; procedure CheckPythagoras(x, y, z, ~h)
+&gt;     if x^2+y^2 eq z^2 then
+&gt;         h := true;
+&gt;     else
+&gt;         h := false;
+&gt;     end if;
+&gt; end procedure;
+</PRE>
+We use this to find some Pythagorean triples (in a particularly
+inefficient way):
+<P>
+<P>
+<PRE>
+&gt; for x, y, z in { 1..15 } do
+&gt;     CheckPythagoras(x, y, z, ~h);
+&gt;     if h then
+&gt;       "Yes, Pythagorean triple!", x, y, z;
+&gt;     end if;
+&gt; end for;
+Yes, Pythagorean triple! 3 4 5
+Yes, Pythagorean triple! 4 3 5
+Yes, Pythagorean triple! 5 12 13
+Yes, Pythagorean triple! 6 8 10
+Yes, Pythagorean triple! 8 6 10
+Yes, Pythagorean triple! 9 12 15
+Yes, Pythagorean triple! 12 5 13
+Yes, Pythagorean triple! 12 9 15
+</PRE>
+<HR>
+<H4><A NAME = "151">The forward Declaration</A></H4>
+
+
+
+<H5><A NAME = "152">forward  f; : identifier -&gt;</A></H5>
+<BLOCKQUOTE>
+The forward declaration of a function or procedure f; although the
+assignment of a value to f is deferred, f may be called from within
+another function or procedure already.
+<P>
+The <TT>forward</TT> statement must occur on the `main' level, that is,
+outside other functions or procedures. (See also Chapter <A  HREF = "text56.htm#535">MAGMA SEMANTICS</A>.)
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "153">Example <TT>Func_forward (H2E6)</TT></A></H3>
+We give an example of mutual recursion using the <TT>forward</TT> declaration.
+In this example we define a primality testing function which uses
+the factorization of n - 1, where n is the number to be tested.
+To obtain the complete factorization we need to test whether or not
+factors found are prime. Thus the prime divisor function and the
+primality tester call each other.
+<P>
+First we define a simple function that proves primality of n by finding
+an integer of multiplicative order n - 1 modulo n.
+<P>
+<P>
+<PRE>
+&gt; function strongTest(primdiv, n)
+&gt;     return exists{ x : x in [2..n-1] | \
+&gt;       Modexp(x, n-1, n) eq 1 and
+&gt;       forall{ p : p in primdiv | Modexp(x, (n-1) div p, n) ne 1 }
+&gt;     };
+&gt; end function;
+</PRE>
+Next we define a rather crude <TT>isPrime</TT> function: for odd n&gt;3 it first checks
+for a few (3) random values of a that a<sup>n - 1</sup> &equiv; 1 mod n, and if so,
+it applies the above primality prover. For that we need the not yet defined
+function for finding the prime divisors of an integer.
+<P>
+<P>
+<PRE>
+&gt; forward primeDivisors;
+&gt; function isPrime(n)
+&gt;    if n in { 2, 3 } or
+&gt;       IsOdd(n) and
+&gt;       forall{ a : a in { Random(2, n-2): i in [1..3] } |
+&gt;          Modexp(a, n-1, n) eq 1 } and
+&gt;          strongTest( primeDivisors(n-1), n )
+&gt;    then
+&gt;       return true;
+&gt;    else
+&gt;       return false;
+&gt;    end if;
+&gt; end function;
+</PRE>
+Finally, we define a function that finds the prime divisors. Note that
+it calls the <TT>isPrime</TT> function.
+Note also that this function is recursive, and that it calls a
+function upon its definition, in the form <TT>func&lt; ..&gt; ( .. )</TT>.
+<P>
+<P>
+<PRE>
+&gt; primeDivisors := function(n)
+&gt;    if isPrime(n) then 
+&gt;       return { n };
+&gt;    else
+&gt;       return func&lt; d | primeDivisors(d) join primeDivisors(n div d) &gt;
+&gt;          ( rep{ d : d in [2..Isqrt(n)] | n mod d eq 0 });
+&gt;    end if;
+&gt; end function;
+&gt; isPrime(1087);
+true;
+</PRE>
+<HR>
+<PRE></PRE> <A  HREF = "text24.htm">[Next]</A><A  HREF = "text22.htm">[Prev]</A> <A  HREF = "text24.htm">[Right]</A> <A  HREF = "text22.htm">[Left]</A> <A  HREF = "text21.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

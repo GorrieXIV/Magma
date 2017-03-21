@@ -1,0 +1,35 @@
+"Source: Text/Group/GrpCoh.text";
+"Line: 593";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Group/GrpCoh.text, line: 593
+// Example: H73E5 ()
+print "Example: H73E5";
+ei := GetEchoInput();
+SetEchoInput(true);
+G := GL(3, 2);                                                        
+M := GModule(G);
+H := Sylow(G, 2);
+CG := CohomologyModule(G, M); 
+CH := Restriction(CG, H);
+H1G := CohomologyGroup(CG, 1); H1G;
+H1H := CohomologyGroup(CH, 1); H1H;
+res1 := hom<H1G -> H1H | x:->IdentifyOneCocycle(CH,OneCocycle(CG,x)) >;
+res1(H1G.1);
+H2G := CohomologyGroup(CG, 2); H2G;
+H2H := CohomologyGroup(CH, 2); H2H;
+res2 := hom<H2G -> H2H | x:-> IdentifyTwoCocycle(CH,TwoCocycle(CG,x)) >;
+res2(H2G.1);                                                       
+H:=sub< G | G.2, G.2^(G.1*G.2*G.1) >;
+#H;
+assert $1 eq 21;
+CH := Restriction(CG, H);
+CohomologyGroup(CH, 1); CohomologyGroup(CH, 2);
+t:=TwoCocycle(CG,[1]);
+isc, o := IsTwoCoboundary(CH, t);
+isc;
+assert $1;
+forall{ <h,k> : h in H, k in H | t(<h,k>) eq
+           o(<h>)*MatrixOfElement(CH,k) + o(<k>) - o(<h*k>) };
+assert $1;
+SetEchoInput(ei);

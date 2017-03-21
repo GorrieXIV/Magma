@@ -1,0 +1,52 @@
+
+SetVerbose("EightDescent",2);
+SetVerbose("Conic",2);
+SetVerbose("ClassGroup",3);
+
+CDB := CremonaDatabase();
+
+NUM := 1;
+N0 := 1309;
+
+"\n\n\nStarting at conductor", N0;
+
+n := 0;
+
+for N := N0 to LargestConductor(CDB) do 
+    for E in EllipticCurves(CDB,N) do
+
+	if n ge NUM then 
+            break N;
+	elif
+	    AnalyticRank(E) gt 0 or Round(ConjecturalRegulator(E)) mod 16 ne 0
+	then
+	    continue;
+	end if;
+
+        printf "\n\n\nAfter %o calls, memory usage %oM\n\n\n", n, GetMemoryUsage() div 10^6;
+
+        printf "\nE = %o, doing TwoDescent with seed = %o, %o\n\n",
+               CremonaReference(E), s0, s1 where s0, s1 := GetSeed();
+	
+        time td := TwoDescent(E : RemoveTorsion); 
+	if #td ne 3 then continue; end if;
+        C2 := Random(td);
+
+        printf "\nE = %o, doing FourDescent on %o\nwith seed = %o, %o\n\n",
+               CremonaReference(E), C2, s0, s1 where s0, s1 := GetSeed();
+	
+        time FD := FourDescent(C2 : RemoveTorsion);
+        if #FD gt 0 then
+            n +:= 1;
+	    C4 := Random(FD);
+
+	    printf "\nE = %o, doing EightDescent on C4 = %o\nwith seed = %o, %o\n\n",
+                   CremonaReference(E), C4, s0, s1 where s0, s1 := GetSeed();
+
+	    time ed, edmaps := EightDescent(C4); 
+
+	end if;
+
+    end for;
+end for; 
+

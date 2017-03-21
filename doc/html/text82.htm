@@ -1,0 +1,367 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Restrictions on Sets and  Sequences</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text83.htm">[Next]</A><A  HREF = "text81.htm">[Prev]</A> <A  HREF = "text83.htm">[Right]</A> <A  HREF = "text81.htm">[Left]</A> <A  HREF = "text80.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "590">Restrictions on Sets and  Sequences</A></H3>
+
+<P>
+<P>
+Here we will explain the subtleties behind the mechanism dealing
+with sets and sequences and their universes and parents.
+Although the same principles apply to their formal counterparts, we will
+only talk about enumerated sets and sequences here, for two
+reasons: the enumerated versions are much more useful and common,
+and the very restricted number of operations on formal sets/sequences
+make issues of universe and overstructure of less importance for
+them.
+<P>
+In principle, every object e in Magma has
+some parent structure S such that e&isin;S; this structure
+can be used for type checking (are we allowed to apply function f
+to e?), algorithm look-up etc. To avoid storing the structure with
+every element of a set or sequence and having to look up the structure
+of every element separately, only elements of a <I>common structure</I>
+are allowed in sets or sequences, and that common parent will only be
+stored once.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text82.htm#591">Universe of a Set or Sequence</A>
+<LI> <A  HREF = "text82.htm#592">Modifying the Universe of a Set or Sequence</A>
+<LI> <A  HREF = "text82.htm#593">Parents of Sets and Sequences</A>
+</UL>
+<H4><A NAME = "591">Universe of a Set or Sequence</A></H4>
+
+<P>
+<P>
+This common structure is called the <I>universe</I> of the set or sequence.
+In the general constructors it may be specified up front to make clear
+what the universe for the set or sequence will be; the difference between
+the sets i and s in
+<P>
+<P>
+<PRE>
+&gt; i := { IntegerRing() | 1, 2, 3 };
+&gt; s := { RationalField() | 1, 2, 3 };
+</PRE>
+<P>
+lies entirely in their universes. The specification of the universe may
+be omitted if there is an obvious common overstructure for the elements.
+Thus the following provides a shorter way to create
+the set containing 1, 2, 3 and having the ring of integers as universe:
+<P>
+<P>
+<PRE>
+&gt; i := { 1, 2, 3 };
+</PRE>
+Only empty sets and sequences that have been obtained directly from the
+constructions
+<P>
+<P>
+<PRE>
+&gt; S := { };
+&gt; T := [ ];
+</PRE>
+<P>
+do not have their universe defined -- we will call them the <I>null</I>
+set or sequence. (There are two other ways in which empty sets and sequences
+arise: it is possible to create empty sequences with a prescribed universe,
+using 
+<P>
+<P>
+<PRE>
+&gt; S := { U | };
+&gt; T := [ U | ];
+</PRE>
+and it may happen that a non-empty set/sequence becomes empty in the course
+of a computation. In both cases these empty objects have their universe
+defined and will not be <I>null</I>).
+<P>
+Usually (but not always: the exception will be explained below)
+the universe of a set or sequence is the parent for all its elements; thus
+the ring of integers is the parent of 2 in the set i = {1, 2, 3},
+rather than that set itself.
+The universe is not static, and it is not necessarily
+the same structure as the parent of the elements <I>before</I>
+they were put in the
+set or sequence. To illustrate this point, suppose 
+that we try to create a set containing integers and rational
+numbers, say T = { 1, 2, 1/3 }; then we run into trouble with the rule
+that the universe must be common for all elements in T; the
+way this problem is solved in Magma is by automatic coercion: the obvious
+universe for T is the field of rational numbers of which 1/3
+is already an element and into which any integer can be coerced in an
+obvious way. Hence the assignment
+<P>
+<P>
+<PRE>
+&gt; T := { 1, 2, 1/3 }
+</PRE>
+will result in a set with universe the field of rationals (which
+is also present when Magma is started up). Consequently, when we take
+the element 1 of the set T, it will have the rational field as its parent
+rather than the integer ring! 
+It will now be clear that
+<P>
+<P>
+<PRE>
+&gt; s := { 1/1, 2, 3 };
+</PRE>
+is a shorter way to specify the set of rational numbers 1, 2, 3
+than the way we saw before, but in general it is preferable to declare the universe
+beforehand using the <TT>{ U | } </TT> notation.
+Of course
+<P>
+<P>
+<PRE>
+&gt; T := { Integers() | 1, 2, 1/3 }
+</PRE>
+<P>
+would result in an error because 1/3 cannot be coerced into the ring
+of integers.
+<P>
+So, usually not every element of a given
+structure can be coerced into another structure,
+and even if it can, it will not always be done automatically. The possible
+(automatic) coercions are listed in the descriptions of the various Magma 
+modules. For instance, the table in the introductory chapter
+on rings shows that integers can be
+coerced automatically into the rational field.
+<P>
+In general, every Magma structure
+is valid as a universe. This includes enumerated
+sets and sequences themselves, that is, it is possible to define a set
+or sequence whose elements are confined to be elements of a given
+set or sequence. So, for example,
+<P>
+<P>
+<PRE>
+&gt; S := [ [ 1..10 ] | x^2+x+1 : x in { -3 .. 2 by 1 } ];
+</PRE>
+produces the sequence [ 7, 3, 1, 1, 3, 7 ] of values of the polynomial
+x<sup>2</sup> + x + 1 for x&isin;Z with -3&le;x&le;2. However, an entry of S
+will in fact have the ring of integers as its parent (and <I>not</I> the
+sequence [ 1..10 ]), because the effect of the above assignment
+is that the values after the | are calculated and coerced into the
+universe, which is [ 1..10 ]; but coercing an element into a sequence
+or set means that it will in fact be coerced into the <I>universe</I> of
+that sequence/set, in this case the integers. So the main difference
+between the above assignment and
+<P>
+<P>
+<PRE>
+&gt; T := [ Integers() | x^2+x+1 : x in { -3 .. 2 by 1} ];
+</PRE>
+is that in the first case it is checked that the resulting values y
+satisfy 1&le;y&le;10, and an error would occur if this is violated:
+<P>
+<P>
+<PRE>
+&gt; S := [ [ 1..10 ] | x^2+x+1 : x in { -3 .. 3 by 1} ];
+</PRE>
+leads to a run-time error.
+<P>
+In general then, the parent of an element of a set or sequence will
+be the universe of the set or sequence, unless that universe is itself
+a set or sequence, in which case the parent will be the universe of this
+universe, and so on, until a non-set or sequence is encountered.
+
+
+<H4><A NAME = "592">Modifying the Universe of a Set or Sequence</A></H4>
+
+<P>
+<P>
+Once a (non-null) set or sequence S has been created, the universe
+has been defined. If one attempts to <I>modify</I> S (that is, to add
+elements, change entries etc. using a procedure that will not
+reassign the result to a new set or sequence), the universe will not be changed,
+and the modification will only be successful if the new element can be coerced
+into the current universe. Thus, 
+<P>
+<P>
+<PRE>
+&gt; Z := Integers();
+&gt; T := [ Z | 1, 2, 3/3 ];
+&gt; T[2] := 3/4;
+</PRE>
+will result in an error, because 3/4 cannot be coerced into Z.
+<P>
+The universe of a set or sequence S can be explicitly modified by
+creating a <I>parent</I> for S with the desired universe and
+using the <TT>!</TT> operator for the coercion; as we
+will see in the next subsection, such a parent can be created using the
+<TT>PowerSet</TT> and <TT>PowerSequence</TT> commands. Thus, for example,
+the set { 1, 2 } can be made into a sequence of rationals
+as follows:
+<P>
+<P>
+<PRE>
+&gt; I := { 1, 2 };
+&gt; P := PowerSet( RationalField() );
+&gt; J := P ! I;
+</PRE>
+The coercion will be successful if every element of the sequence can
+be coerced into the new universe, and it is <I>not</I> necessary
+that the old universe could be coerced completely into the new one:
+the set { 3/3 } of rationals can be coerced into <TT>PowerSet(Integers())</TT>.
+As a consequence, the empty set (or sequence) with any universe can be
+coerced into the power set (power sequence) of any other universe.
+<P>
+Binary functions on sets or sequences (like <TT>join</TT> or <TT>cat</TT>)
+can only applied to sets and sequences that are <I>compatible</I>:
+the operation on S with universe A and T with universe B can
+only be performed if a common universe C can be found such that the
+elements of S and T are all elements of C.
+The compatibility conditions are dependent on the particular Magma module
+to which A and B belong (we refer to the corresponding chapters of this
+manual for further information) and do also apply to elements of a&isin;A
+and b&isin;B --- that is, the compatibility conditions for S and T are
+the same as the ones that determine whether binary operations on a&isin;A and
+b&isin;B are allowed. For example, we are able to join a set of integers
+and a set of rationals:
+<P>
+<P>
+<PRE>
+&gt; T := { 1, 2 } join { 1/3 };
+</PRE>
+for the same reason that we can do
+<P>
+<P>
+<PRE>
+&gt; c := 1 + 1/3;
+</PRE>
+(automatic coercion for rings). The resulting set T will have the
+rationals as universe.
+<P>
+<P>
+The basic rules for compatibility of two sets or sequences are then:
+<DL COMPACT class='compact'>
+<DT>(1)</DT><DD>every set/sequence is compatible with the null set/sequence (which
+has no universe defined (see above));
+<DT>(2)</DT><DD>two sets/sequences with the same universe are compatible;
+<DT>(3)</DT><DD>a set/sequence S with universe A is compatible with
+set/sequence T with universe B if the elements of A can be
+automatically coerced into B, or vice versa;
+<DT>(4)</DT><DD>more generally,
+a set/sequence S with universe A is also compatible with
+set/sequence T with universe B if Magma can automatically find
+an <I>over-structure</I> for the parents A and B (see below);
+<DT>(5)</DT><DD>nested sets and sequences are compatible only when they
+are of the same `depth' and `type' (that is, sets and sequences appear
+in exactly the same recursive order in both) and the universes are compatible.
+<P>
+<P>
+<P>
+<P>
+</DL>
+The possibility of finding an overstructure C for the universe 
+A and B of sets or sequences S and T (such that A&sub;C&sup;B),
+is again module-dependent. We refer the reader for details to the Introductions
+of Parts III--VI, and we give some examples here; the next subsection
+contains the rules for parents of sets and sequences.
+<P>
+<P>
+Perhaps the most common example of universes that are <I>not</I> compatible
+would be a prime finite field with the rationals, as not <I>every</I>
+rational can be coerced into the finite field, while Magma does not
+allow coercion from finite fields into the rationals in any event.
+
+
+<H4><A NAME = "593">Parents of Sets and Sequences</A></H4>
+
+<P>
+<P>
+The universe of a set or sequence S is the common parent for all its
+elements; but S itself is a Magma object as well, so it should have a
+parent too.
+<P>
+The parent of a set is a <I>power set</I>: the set of all subsets
+of the universe of S.
+It can be created using the <TT>PowerSet</TT> function. Similarly,
+<TT>PowerSequence(A)</TT> creates the parent structure for a sequence of
+elements from the structure A -- that is,
+the elements of <TT>PowerSequence(A)</TT> are all sequences of elements of A.
+<P>
+The rules for finding a common overstructure for structures A and B,
+where either A or B is a set/sequence or the parent of a
+set/sequence, are as follows. (If neither
+A nor B is a set, sequence, or its parent
+we refer to the Part of this manual
+describing the operations on A and B.)
+<P>
+<DL COMPACT class='compact'>
+<DT>(1)</DT><DD>The overstructure of A and B is the same as that of B and A.
+<DT>(2)</DT><DD>If A is the null set or sequence (empty, and no universe specified)
+the overstructure of A and B is B.
+<DT>(3)</DT><DD>If A is a set or sequence with universe U, the overstructure of
+A and B is the overstructure of U and B; in particular, the
+overstructure of A and A will be the universe U of A.
+<DT>(4)</DT><DD>If A is the parent of a set (a power set), then A and B 
+can only have a common overstructure if B is also the parent of a set, in
+which case the overstructure is the power set of 
+the overstructure of the universes U and V of A and B
+respectively. Likewise for sequences instead of sets.
+<P>
+<P>
+</DL>
+We give two examples to illustrate rules (3) and (4).
+It is possible to create a set with a set as its universe:
+<P>
+<P>
+<PRE>
+&gt; S := { { 1..100 } | x^3 : x in [ 0..3 ] };
+</PRE>
+If we wish to intersect this set with some set of integers, say
+the formal set of odd integers
+<P>
+<P>
+<PRE>
+&gt; T := {! x : x in Integers() | IsOdd(x) !};
+&gt; W := S meet T;
+</PRE>
+then we can only do that if we can find a universe for W, which
+must be the common overstructure of the universe U = { 1, 2, ..., 100 }
+of S and the universe `ring of integers' of T. By rule (3)
+above, this overstructure of U = { 1, 2, ..., 100 } will
+be the overstructure of the universe of U and the
+ring of integers; but the universe of U is the ring of
+integers (because it is the default for the set  { 1, 2, ..., 100 }),
+and hence the overstructure we are looking for (and the universe for W) will
+be the ring of integers.
+<P>
+For the second example we look at sequences of sequences:
+<P>
+<P>
+<PRE>
+&gt; a := [ [ 1 ], [ 1, 2, 3 ] ];
+&gt; b := [ [ 2/3 ] ];
+</PRE>
+so a is a sequence of sequences of integers, and b is a sequence of
+sequences of rationals. If we wish to concatenate a and b,
+<P>
+<P>
+<PRE>
+&gt; c := a cat b;
+</PRE>
+we will only succeed if we find a universe for c. This universe
+must be the common overstructure of the universes of a and b,
+which are the `power sequence of the integers' and the `power sequence
+of the rationals' respectively. By rule (4), the overstructure of these
+two power sequences is the power sequence of the common overstructure
+of the rationals and the integers, which is the rationals themselves.
+Hence c will be a sequence of sequences of rationals, and the
+elements of a will have to be coerced.
+
+
+<PRE></PRE> <A  HREF = "text83.htm">[Next]</A><A  HREF = "text81.htm">[Prev]</A> <A  HREF = "text83.htm">[Right]</A> <A  HREF = "text81.htm">[Left]</A> <A  HREF = "text80.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

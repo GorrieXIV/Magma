@@ -1,0 +1,60 @@
+"Source: Text/Lat/GLat.text";
+"Line: 1120";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Lat/GLat.text, line: 1120
+// Example: H32E5 ()
+print "Example: H32E5";
+ei := GetEchoInput();
+SetEchoInput(true);
+G := MatrixGroup<8, IntegerRing() |
+   [-1,  0,  0,  0,  0,  0,  0,  0,
+     0,  0, -1,  0,  0,  0,  0,  0,
+     0,  0,  0,  1,  0,  0,  0,  0,
+     0,  1,  0,  0,  0,  0,  0,  0,
+    -1,  0,  0,  0,  1,  0,  0,  0,
+     0,  0, -1,  0,  0,  0,  1,  0,
+     0,  0,  0,  1,  0,  0,  0, -1,
+     0,  1,  0,  0,  0, -1,  0,  0],
+   [ 0,  0,  0,  0,  0,  0,  0,  1,
+     0,  0,  0,  0,  0,  0,  1,  0,
+     0,  0,  0,  0, -1,  0,  0,  0,
+     0,  0,  0,  0,  0,  1,  0,  0,
+     0,  0,  0, -1,  0,  0,  0,  1,
+     0,  0, -1,  0,  0,  0,  1,  0,
+     1,  0,  0,  0, -1,  0,  0,  0,
+     0, -1,  0,  0,  0,  1,  0,  0]>;
+time F := PositiveDefiniteForm(G);
+F;
+time Sub := Sublattices(G);  
+#Sub;
+assert $1 eq 18;
+PrimitiveMatrix := func<X |
+    P ! ((ChangeRing(P, RationalField()) ! X) / GCD(Eltseq(X)))
+        where P is Parent(X)>;
+FF := [PrimitiveMatrix(B * F * Transpose(B))
+            where B is BasisMatrix(L): L in Sub];
+Sub := [LatticeWithGram(LLLGram(F)) : F in FF];       
+#Sub;
+assert $1 eq 18;
+Rep := [];
+for L in Sub do
+    if forall{LL: LL in Rep | not IsIsometric(L, LL)} then
+        Append(~Rep, L);
+    end if;
+end for;
+#Rep;
+assert $1 eq 4;
+time A := [AutomorphismGroup(L) : L in Rep];  
+[#G: G in A];  
+[Determinant(L): L in Rep];
+[Minimum(L): L in Rep];    
+[KissingNumber(L): L in Rep];
+l := IsIsometric(Rep[1],
+       TensorProduct(Lattice("A", 2), StandardLattice(4))); l;
+l := IsIsometric(Rep[2],
+       TensorProduct(Lattice("A", 2), Lattice("F", 4))); l;
+l := IsIsometric(Rep[3], Lattice("E", 8)); l;
+l := IsIsometric(Rep[4],
+       TensorProduct(Lattice("F", 4), StandardLattice(2))); l;
+SetEchoInput(ei);

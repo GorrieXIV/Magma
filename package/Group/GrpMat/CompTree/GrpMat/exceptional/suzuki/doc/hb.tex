@@ -1,0 +1,651 @@
+%******************************************************************************
+%
+%    hb.tex      Magma Suzuki package handbook
+%
+%    File      : $HeadURL:: https://subversion.sfac.auckland.ac.nz/svn/prj_m#$:
+%    Author    : Henrik Bäärnhielm 
+%    Dev start : 2008-06-08
+%
+%    Version   : $Revision:: 10                                              $:
+%    Date      : $Date:: 2008-04-11 16:31:41 +1200 (fre, 11 apr 2008)        $:
+%    Last edit : $Author:: eobr007                                           $:
+%
+%    $Id:: design.tex 10 2008-04-11 04:31:41Z eobr007                        $:
+%
+%******************************************************************************
+
+\documentclass[twoside,a4paper,reqno]{amsart}
+%\usepackage[swedish,english]{babel} 
+%\usepackage[latin1]{inputenc} % svenska tecken skall tolkas
+\usepackage{graphicx}
+%\usepackage{pictex}
+\usepackage{amsmath}
+\usepackage{amsfonts} % for \mathbb
+\usepackage{amsthm}
+\usepackage{amscd}
+\usepackage{amsopn}
+\usepackage{amstext}
+\usepackage{amsxtra}
+%\usepackage{stmaryrd}
+\usepackage{amssymb}
+%\usepackage{amsbsy}
+\usepackage{textcase} % For correct case of swedish chars
+
+\usepackage{bm} % for \boldsymbol
+%\usepackage{draftcopy}
+\frenchspacing
+
+\numberwithin{equation}{section}
+\numberwithin{figure}{section}
+%\numberwithin{algorithm}{chapter}
+
+\theoremstyle{plain}
+\newtheorem{thm}{Theorem}[section]
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{cl}[thm]{Corollary}
+\newtheorem{prop}[thm]{Proposition}
+%\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{conj}[thm]{Conjecture}
+
+\theoremstyle{definition}
+\newtheorem{deff}[thm]{Definition}
+
+\theoremstyle{remark}
+%\newtheorem{note}[theorem]{Note}
+\newtheorem{rem}[thm]{Remark}
+
+\newcounter{algorithm2e}
+%\renewcommand{\thealgorithm2e}{\algorithmcfname~\arabic{section}.\arabic{algorithm2e}}
+
+%\renewcommand{\thetheorem}{Theorem~\arabic{chapter}.\arabic{theorem}}
+%\renewcommand{\thepr}{Proposition~\arabic{chapter}.\arabic{pr}}
+%\renewcommand{\thedeff}{Definition~\arabic{chapter}.\arabic{deff}}
+\providecommand{\abs}[1]{\left\lvert #1 \right\rvert}
+\providecommand{\norm}[1]{\left\lVert #1 \right\rVert}
+\providecommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\providecommand{\floor}[1]{\lfloor #1 \rfloor}
+\providecommand{\set}[1]{\left\lbrace #1 \right\rbrace}
+\providecommand{\gen}[1]{\left\langle #1 \right\rangle}
+%\providecommand{\ord}[1]{\operatorname{ord}( #1 )}
+\providecommand{\Sym}[1]{\operatorname{Sym}( #1 )}
+\renewcommand{\Pr}[1]{\operatorname{Pr}[ #1 ]}
+%\renewcommand{\char}[1]{\operatorname{char}[ #1 ]}
+
+\newcommand{\field}[1]{\mathbb{#1}}
+\newcommand{\vect}[1]{\boldsymbol{\mathrm{#1}}}
+\newcommand{\N}{\field{N}}
+\newcommand{\Z}{\field{Z}}
+\newcommand{\R}{\field{R}}
+\newcommand{\Q}{\field{Q}}
+\newcommand{\K}{\field{K}}
+\newcommand{\A}{\field{A}}
+\newcommand{\F}{\field{F}}
+\newcommand{\PS}{\field{P}}
+\newcommand{\GAP}{\textsf{GAP}}
+\newcommand{\MAGMA}{\textsc{Magma}}
+
+% for Cayley graphs
+\newcommand{\C}{\mathcal{C}}
+\newcommand{\OV}{\mathcal{O}}
+
+\DeclareMathOperator{\sgd}{sgd}
+\DeclareMathOperator{\mgm}{mgm}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\GL}{GL}
+\DeclareMathOperator{\GF}{GF}
+\DeclareMathOperator{\IM}{Im}
+\DeclareMathOperator{\RE}{Re}
+\DeclareMathOperator{\I}{Id}
+%\DeclareMathOperator{\OR}{O}
+\DeclareMathOperator{\SL}{SL}
+\DeclareMathOperator{\GO}{GO}
+\DeclareMathOperator{\SO}{SO}
+\DeclareMathOperator{\Sz}{Sz}
+\DeclareMathOperator{\Sp}{Sp}
+\DeclareMathOperator{\Ree}{Ree}
+\DeclareMathOperator{\chr}{char}
+\DeclareMathOperator{\Aut}{Aut}
+\DeclareMathOperator{\Alt}{Alt}
+\DeclareMathOperator{\PSL}{PSL}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator{\SLP}{\mathtt{SLP}}
+\DeclareMathOperator{\Norm}{N}
+\DeclareMathOperator{\Cent}{C}
+\DeclareMathOperator{\Zent}{Z}
+
+\newcommand{\OR}[1]{\operatorname{O} ( #1 )}
+
+\title{Handbook for \textsc{Magma} Suzuki package}
+\author{Henrik B\"a\"arnhielm}
+\address{School of Mathematical Sciences \\ Queen Mary, University of London \\ Mile End Road \\ London E1 4NS \\ United Kingdom}
+\date{2007-04-21}
+\urladdr{http://www.maths.qmul.ac.uk/\textasciitilde hb/}
+\email{h.baarnhielm@qmul.ac.uk}
+
+\begin{document}
+
+
+\maketitle
+%\end{frontmatter}
+
+The \textsc{Magma} Suzuki package primarily provides functionality for
+constructive recognition and constructive membership testing of the Suzuki
+groups $\mathrm{Sz}(q)$, with $q = 2^{2m + 1}$ for some $m > 0$. This
+family of finite simple groups is already available in \textsc{Magma}
+via the \texttt{Sz} intrinsic. It also provides routines for finding and conjugating Sylow and maximal subgroups of $\Sz(q)$.
+
+The main intrinsics of the package are \texttt{RecogniseSz(GrpMat G)}
+which performs constructive recognition of $G \cong \mathrm{Sz}(q)$,
+\texttt{SzElementToWord(GrpMat G, GrpMatElt g)} which returns a
+\texttt{GrpSLPElt} for $g$ in the generators of $G$, and
+\texttt{SuzukiRecognition(GrpMat G)} which is a non-constructive test
+for isomorphism between $G$ and $\mathrm{Sz}(q)$.
+  
+Sylow $p$-subgroups can be found using the \texttt{SuzukiSylow(GrpMat
+  G, RngIntElt p)} intrinsic. To find conjugating elements between
+Sylow $p$-subgroups, an intrinsic \texttt{SuzukiSylowConjugacy} is
+provided. A list of representatives of the conjugacy classes of
+maximal subgroups can be found using the
+\texttt{SuzukiMaximalSubgroups(GrpMat G)} intrinsic, and the intrinsic
+\texttt{SuzukiMaximalSubgroupsConjugacy} can be used to find
+conjugating elements between maximal subgroups.
+
+Presentations for $\mathrm{Sz}(q)$ can be handled via the
+intrinsics \texttt{SzPresentation} and
+\texttt{SatisfiesSzPresentation}.
+
+There are a few verbose flags used in the package.
+\begin{itemize}
+\item \texttt{SuzukiGeneral}, for the general routines.
+\item \texttt{SuzukiStandard}, for the routines related to the standard copy.
+\item \texttt{SuzukiConjugate}, for the routines related to conjugation.
+\item \texttt{SuzukiTensor}, for the routines related to tensor decomposition.
+\item \texttt{SuzukiMembership}, for the routines related to membership testing.
+\item \texttt{SuzukiCrossChar}, for the routines related to cross-characteristic representations.
+\item \texttt{SuzukiSylow}, for the routines related to Sylow subgroups.
+\item \texttt{SuzukiMaximals}, for the routines related to maximal subgroups.
+\item \texttt{SuzukiTrick}, for the routines related to the double coset trick.
+\item \texttt{SuzukiNewTrick}, for the routines related to the stabiliser trick.
+\item \texttt{SuzukiElements}, for the routines related to element conjugacy.
+\end{itemize}
+
+All the flags can be set to values up to $10$, with higher values resulting in more output.
+
+\section{Intrinsics}
+
+\paragraph{}
+
+\begin{verbatim}
+RecogniseSz(G : parameters) : GrpMat -> BoolElt, Map, Map, Map, Map
+\end{verbatim}
+Parameters:
+\begin{itemize}
+\item[] \texttt{Verify}, \textsc{BoolElt}, \emph{Default : true}
+\item[] \texttt{FieldSize}, \textsc{RngIntElt}
+\end{itemize}
+
+$G$ is absolutely irreducible and defined over minimal field.
+Constructively recognise $G$ as a Suzuki group. If $G$ is isomorphic to $\mathrm{Sz}(q)$ where $q$ is the size of the defining field of $G$, then return:
+\begin{enumerate}
+\item Isomorphism from $G$ to $\mathrm{Sz}(q)$.
+\item Isomorphism from $\mathrm{Sz}(q)$ to $G$.
+\item Map from $G$ to the word group of $G$.
+\item Map from the word group of $G$ to $G$.
+\end{enumerate}
+    
+The isomorphisms are composed of maps that are defined by rules, so
+\texttt{Function} can be used on each component, hence avoiding
+unnecessary built-in membership testing.
+
+The word group is the \texttt{GrpSLP} which is the parent of the
+elements returned by \texttt{SzElementToWord}. In general this is not
+the same as \texttt{WordGroup(G)}, but is created from it using
+\texttt{AddRedundantGenerators}.
+    
+If \texttt{Verify} is true, then it is checked that $G$ is isomorphic to
+$\mathrm{Sz}(q)$, using \texttt{SuzukiRecognition}, otherwise this is not checked. In that case, \texttt{FieldSize} must be set to the correct value of $q$.
+
+Constructive recognition of $2.\mathrm{Sz}(8)$ is also handled.
+
+The algorithms for constructive recognition are those of \cite{baarnhielm05} and \cite{sz_tensor_decompose}.
+
+\paragraph{}
+
+\begin{verbatim}
+SzElementToWord(G, g) : GrpMat, GrpMatElt -> BoolElt, GrpSLPElt
+\end{verbatim}
+
+If $G$ has been constructively recognised as a Suzuki group,
+and if $g$ is an element of $G$, then return \texttt{true} a \texttt{GrpSLPElt} from the word group of $G$ which evaluates to $g$, else return \texttt{false}.
+
+This facilitates membership testing in $G$.
+
+\paragraph{}
+
+\begin{verbatim}
+SzPresentation(q) : RngIntElt -> GrpFP, HomGrp
+\end{verbatim}
+
+If $q = 2^{2m + 1}$ for some $m > 0$, return a short presentation of
+$\mathrm{Sz}(q)$ on the \textsc{Magma} standard generators,
+\emph{i.e.} the generators returned by the \texttt{Sz} intrinsic.
+
+Note that it is an open problem whether or not this is a presentation
+of $\mathrm{Sz}(q)$ for every such $q$.
+
+\paragraph{}
+
+\begin{verbatim}
+SatisfiesSzPresentation(G) : GrpMat -> BoolElt
+\end{verbatim}
+
+$G$ is constructively recognised as $\mathrm{Sz}(q)$ for some $q$.
+Verify that it satisfies a presentation for this group.
+
+\paragraph{}
+
+\begin{verbatim}
+SuzukiRecognition(G) : GrpMat -> BoolElt, RngIntElt
+\end{verbatim}
+Determine (non-constructively) if $G$ is isomorphic to $\mathrm{Sz}(q)$. The corresponding $q$ is also returned.
+    
+If $G$ is over a field of odd characteristic or has degree greater
+than $4$, the Monte Carlo algorithm of \texttt{IdentifyLieType} is
+used. If $G$ has degree $4$ and is over a field of characteristic $2$,
+then a fast Las Vegas algorithm is used, described in
+\cite{baarnhielm05}.
+
+\paragraph{}
+
+\begin{verbatim}
+SuzukiIrreducibleRepresentation(F, twists : parameters) : 
+FldFin, SeqEnum[RngIntElt] -> GrpMat
+\end{verbatim}
+Parameters:
+\begin{itemize}
+\item[] \texttt{CheckInput}, \textsc{BoolElt}, \emph{Default : true}
+\end{itemize}
+
+$F$ must have size $q = 2^{2m + 1}$ for some $m > 0$, and \emph{twists} should be a sequence of $n$ distinct integers in the range $[0 \ldots 2m]$.
+
+Return an absolutely irreducible representation of $\mathrm{Sz}(q)$ of
+dimension $4^n$, a tensor product of twisted powers of the copy
+returned by the \texttt{Sz} intrinsic, where the twists are given by
+the input sequence.
+
+If \texttt{CheckInput} is true, then it is verified that $F$ and \emph{twists} satisfy the above requirements. Otherwise this is not checked.
+\paragraph{}
+
+\begin{verbatim}
+SuzukiSylow(G, p) : GrpMat, RngIntElt -> GrpMat, SeqEnum
+\end{verbatim}
+
+If $G$ has been constructively recognised as a Suzuki group, and if
+$p$ is a prime number, return a random Sylow $p$-subgroup $S$ of $G$.
+
+Also returns a list of \texttt{GrpSLPElt} from the word group of $G$,
+of the generators of $S$. If $p$ does not divide $\left\lvert G
+\right\rvert$, then the trivial subgroup is returned.
+
+\paragraph{}
+
+\begin{verbatim}
+SuzukiSylowConjugacy(G, R, S, p) : GrpMat, GrpMat, GrpMat, RngIntElt -> 
+GrpMatElt, GrpSLPElt
+\end{verbatim}
+
+If $G$ has been constructively recognised as a Suzuki group, if $p$ is
+a prime number and if $R$ and $S$ are Sylow $p$-subgroups of $G$, then
+return an element $g$ of $G$ that conjugates $R$ to $S$. A
+\texttt{GrpSLPElt} from the word group of $G$, that evaluates to $g$,
+is also returned.
+
+\paragraph{}
+
+\begin{verbatim}
+SuzukiMaximalSubgroups(G) : GrpMat -> SeqEnum, SeqEnum
+\end{verbatim}
+
+If $G$ has been constructively recognised as a Suzuki group, find a
+list of representatives of the maximal subgroups of $G$.
+
+Also returns lists of \texttt{GrpSLPElt} of the generators of the subgroups, from the word group of $G$.
+
+\paragraph{}
+
+\begin{verbatim}
+SuzukiMaximalSubgroupsConjugacy(G, R, S) : GrpMat, GrpMat, GrpMat -> GrpMatElt, GrpSLPElt
+\end{verbatim}
+
+If $G$ has been constructively recognised as a Suzuki group and if $R$
+and $S$ are conjugate maximal subgroups of $G$, then return an element
+$g$ of $G$ that conjugates $R$ to $S$. A \texttt{GrpSLPElt} from the
+word group of $G$, that evaluates to $g$, is also returned.
+
+\paragraph{}
+
+\begin{verbatim}
+SzConjugacyClasses(G) : GrpMat -> SeqEnum
+\end{verbatim}
+
+If $G$ has been constructively recognised as a Suzuki group, return a list of conjugacy classes, using the same format as the \texttt{ConjugacyClasses} intrinsic.
+
+\paragraph{}
+
+\begin{verbatim}
+SzClassRepresentative(G, g) : GrpMat, GrpMatElt -> GrpMatElt, GrpMatElt
+\end{verbatim}
+
+If $G$ has been constructively recognised as a Suzuki group, and $g
+\in G$, return the conjugacy class representative $h$ of $g$, such
+that $h$ is in the list returned by \texttt{SzConjugacyClasses}. Also
+returns $c \in G$ such that $g^c = h$.
+
+\paragraph{}
+
+\begin{verbatim}
+SzIsConjugate(G, g, h) : GrpMat, GrpMatElt, GrpMatElt -> BoolElt, GrpMatElt
+\end{verbatim}
+
+If $G$ has been constructively recognised as a Suzuki group, and $g, h
+\in G$, determine if $g$ is conjugate to $h$. If so, return \texttt{true} and an element $c$ such that $g^c = h$, otherwise return \texttt{false}.
+
+\paragraph{}
+
+\begin{verbatim}
+SzClassMap(G) : GrpMat -> Map
+\end{verbatim}
+
+If $G$ has been constructively recognised as a Suzuki group, return
+its class map, as in the \texttt{ClassMap} intrinsic.
+
+\section{Examples}
+
+Example showing the basic features.
+\begin{verbatim}
+> // Let's try a conjugate of the the standard copy
+> G := Sz(32);
+> G ^:= Random(Generic(G));
+> // perform non-constructive recognition
+> flag, q := SuzukiRecognition(G);
+> print flag, q eq 32;
+true true
+> // perform constructive recognition
+> flag, iso, inv, g2slp, slp2g := RecognizeSz(G);
+> print flag;
+true
+> // the explicit isomorphisms are defined by rules
+> print iso, inv;
+Mapping from: GrpMat: G to MatrixGroup(4, GF(2^5)) of order 32537600 = 2^10 * 
+5^2 * 31 * 41 given by a rule [no inverse]
+Mapping from: MatrixGroup(4, GF(2^5)) of order 32537600 = 2^10 * 5^2 * 31 * 41 
+to GrpMat: G given by a rule [no inverse]
+> // so we can use Function to avoid Magma built-in membership testing
+> // we might not obtain the shortest possible SLP
+> w := Function(g2slp)(G.1);
+> print #w;
+300
+> // and the algorithm is probabilistic, so different executions will most
+> // likely give different results
+> ww := Function(g2slp)(G.1);
+> print w eq ww;
+false
+> // the resulting SLPs are from another word group
+> W := WordGroup(G);
+> print NumberOfGenerators(Parent(w)), NumberOfGenerators(W);
+7 3
+> // but can be coerced into W
+> flag, ww := IsCoercible(W, w);
+> print flag;
+true
+> // so there are two ways to get the element back
+> print slp2g(w) eq Evaluate(ww, UserGenerators(G));
+true
+> // an alternative is this intrinsic, which is better if the elements are not 
+> // known to lie in the group
+> flag, ww := SzElementToWord(G, G.1);
+> print flag, slp2g(w) eq slp2g(ww);
+true true
+> // let's try something just outside the group
+> H := Sp(4, 32);
+> flag, ww := SzElementToWord(G, H.1);
+> print flag;
+false
+> // in this case we will not get an SLP
+> ww := Function(g2slp)(H.1);
+> print ww;
+false
+> // we do indeed have a Suzuki group
+> print SatisfiesSzPresentation(G);
+true
+> // finally, let's try 2.Sz(8)
+> A := ATLASGroup("2Sz8");
+> reps := MatRepKeys(A);
+> G := MatrixGroup(reps[3]);
+> print Degree(G), CoefficientRing(G);
+40 Finite field of size 7
+> // we can handle constructive recognition, although it takes some time
+> time flag, iso, inv, g2slp, slp2g := RecognizeSz(G);
+Time: 415.660
+> print flag;
+true
+> // and constructive membership testing
+> R := RandomProcess(G);
+> g := Random(R);
+> w := Function(g2slp)(g);
+> // in this case the elements is determined up to a scalar
+> print IsScalar(slp2g(w) * g^(-1));
+true
+\end{verbatim}
+
+Example showing a case in large dimension.
+\begin{verbatim}
+> // let's try a 64-dimensional Suzuki group
+> F := GF(2, 9);
+> twists := [0, 3, 6];
+> G := SuzukiIrreducibleRepresentation(F, twists);
+> print Degree(G), IsAbsolutelyIrreducible(G);
+64 true
+> // conjugate it to hide the tensor product
+> G ^:= Random(Generic(G));
+> // and write it over a smaller field to make things difficult
+> flag, GG := IsOverSmallerField(G);
+> print flag, CoefficientRing(GG);
+true Finite field of size 2^3
+> // non-constructive recognition is harder in this case
+> // and will give us the defining field size
+> time print SuzukiRecognition(GG);
+true 512
+Time: 1.030
+> // constructive recognition will decompose the tensor product
+> time flag, iso, inv, g2slp, slp2g := RecogniseSz(GG);
+Time: 2.170
+> print iso;
+Mapping from: GrpMat: GG to MatrixGroup(4, GF(2^9)) of order 2^18 * 5 * 7 * 13 *
+37 * 73 * 109 given by a rule [no inverse]
+> // constructive membership is again easy
+> R := RandomProcess(GG);
+> g := Random(R);
+> time w := Function(g2slp)(g);
+Time: 0.010
+> // but SLP evaluation is harder in large dimensions
+> time print slp2g(w) eq g;
+true
+Time: 0.040
+> // we still have a Suzuki group
+> time print SatisfiesSzPresentation(GG);
+true
+Time: 1.750
+\end{verbatim}
+
+Example showing a case in cross characteristic.
+
+\begin{verbatim}
+> // Let's try a Suzuki group in cross characteristic
+> G := Sz(8);
+> _, P := SuzukiPermutationRepresentation(G);
+> // for example over GF(9)
+> M := PermutationModule(P, GF(3, 2));
+> factors := CompositionFactors(M);
+> H := ActionGroup(factors[2]);
+> // we actually end up with a group over GF(3)
+> print IsAbsolutelyIrreducible(H);
+true
+> flag, G := IsOverSmallerField(H);
+> print Degree(G), CoefficientRing(G);
+64 Finite field of size 3
+> // constructive recognition is easy in this case
+> time flag, iso, inv, g2slp, slp2g := RecogniseSz(G);
+Time: 0.650
+> print iso;
+Mapping from: GrpMat: G to MatrixGroup(4, GF(2^3)) of order 29120 = 2^6 * 5 * 7 
+* 13 given by a rule [no inverse]
+> // as well as constructive membership
+> R := RandomProcess(G);
+> g := Random(R);
+> time w := Function(g2slp)(g);
+Time: 0.000
+> time print slp2g(w) eq g;
+true
+Time: 0.020
+> // we still have a Suzuki group
+> time print SatisfiesSzPresentation(G);
+true
+Time: 0.100
+\end{verbatim}
+
+Example showing a larger field case.
+
+\begin{verbatim}
+> // let's try a larger field
+> q := 2^121;
+> G := Sz(q);
+> // let's try a conjugate
+> G ^:= Random(Generic(G));
+> // also move to another generating set
+> G := DerivedGroupMonteCarlo(G);
+> print NumberOfGenerators(G);
+19
+> // non-constructive recognition is now a bit harder
+> time SuzukiRecognition(G);
+true 2658455991569831745807614120560689152
+Time: 0.090
+> // and is your machine up for this?
+> time flag, iso, inv, g2slp, slp2g := RecogniseSz(G);
+Time: 291.160
+> // each call to constructive membership is then easy
+> R := RandomProcess(G);
+> g := Random(R);
+> time w := Function(g2slp)(g);
+Time: 0.060
+> // evaluating SLPs always takes some time
+> time print slp2g(w) eq g;
+true
+Time: 1.470
+\end{verbatim}
+
+Example about Sylow subgroups.
+
+\begin{verbatim}
+> // let's try a small field
+> q := 2^9;
+> G := Sz(q);
+> // let's try a conjugate
+> G ^:= Random(Generic(G));
+> // also move to another generating set
+> G := DerivedGroupMonteCarlo(G);
+> print NumberOfGenerators(G);
+19
+> // first we must recognise the group
+> time flag, iso, inv, g2slp, slp2g := RecogniseSz(G);
+Time: 0.100
+> // try creating some Sylow subgroups
+> p := Random([x[1] : x in Factorization(q - 1)]);
+> print p;
+73
+> time R := SuzukiSylow(G, p);
+Time: 0.020
+> time S := SuzukiSylow(G, p);
+Time: 0.000
+> // that was easy, as is conjugating them
+> time g, slp := SuzukiSylowConjugacy(G, R, S, p);
+Time: 0.000
+> time print R^g eq S;
+true
+Time: 0.000
+> // in this case we also automatically get an SLP of the conjugating element
+> print slp2g(slp) eq g;
+true
+> // those Sylow subgroups are cyclic, and we know the order
+> print #R, NumberOfGenerators(R);
+73 1
+> // creating Sylow 2-subgroups is harder, since there are lots of generators
+> time R := SuzukiSylow(G, 2);
+Time: 0.040
+> time S := SuzukiSylow(G, 2);
+Time: 0.050
+> print NumberOfGenerators(R), #R;
+9 262144
+> // but conjugation is easy
+> time g, slp := SuzukiSylowConjugacy(G, R, S, 2);
+Time: 0.000
+> // verifying the conjugating element can be hard
+> time print R^g eq S;
+true
+Time: 201.470
+\end{verbatim}
+
+Example about maximal subgroups.
+
+\begin{verbatim}
+> // let's try a small field
+> m := 4;
+> F := GF(2, 2 * m + 1);
+> q := #F;
+> print q;
+512
+> G := Sz(F);
+> // let's try a conjugate
+> G ^:= Random(Generic(G));
+> // also move to another generating set
+> G := DerivedGroupMonteCarlo(G);
+> print NumberOfGenerators(G);
+19
+> // first we must recognise the group
+> time flag, iso, inv, g2slp, slp2g := RecogniseSz(G);
+Time: 0.140
+> // try finding the maximal subgroups
+> time l, slps := SuzukiMaximalSubgroups(G);
+Time: 0.070
+> // should have a parabolic, a torus normaliser, two Frobenius groups
+> // and one smaller Sz
+> print #l;
+5
+> // we can conjugate all maximals around
+> r := Random(G`RandomProcess);
+> for H in l do
+for>     time g, slp := SuzukiMaximalSubgroupsConjugacy(G, H, H^r);
+for>     time print H^g eq H^r;
+for> end for;
+Time: 0.010
+true
+Time: 193.440
+Time: 0.000
+true
+Time: 0.030
+Time: 0.020
+true
+Time: 0.040
+Time: 0.020
+true
+Time: 0.020
+Time: 0.140
+true
+Time: 0.040
+\end{verbatim}
+
+\bibliographystyle{amsplain}
+\bibliography{hb}
+
+\end{document}

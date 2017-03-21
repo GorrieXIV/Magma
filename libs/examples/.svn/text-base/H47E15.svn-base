@@ -1,0 +1,30 @@
+"Source: Text/Ring/RngLoc.text";
+"Line: 2609";
+"Date: Tue Jun  7 22:29:16 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Ring/RngLoc.text, line: 2609
+// Example: H47E15 ()
+print "Example: H47E15";
+ei := GetEchoInput();
+SetEchoInput(true);
+SetSeed(1); // pointless
+d := 50;
+FF := GF(2^d);
+E := EllipticCurve([FF | 1, 0, 0, 0, Random(FF)]);
+assert Degree(sub<BaseRing(E) | jInvariant(E)>) gt 2;
+
+n := (d + 1) div 2 + 3;
+R := ext<pAdicRing(2) | d>;
+R`DefaultPrecision := n;
+
+a6 := elt<R | jInvariant(E)^-1, 1>;
+lambda := 1 + 8 * a6;
+
+for k in [4..n] do
+    ChangePrecision(~lambda, k + 2);
+    lambda := (1 + lambda) * InverseSqrt(lambda) div 2;
+end for;
+lambda := 2 * lambda div (1 + lambda);
+Exp(Trace(Log(lambda))); 
+Trace(E) mod 2^26;
+SetEchoInput(ei);

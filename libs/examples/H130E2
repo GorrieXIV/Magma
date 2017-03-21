@@ -1,0 +1,43 @@
+"Source: Text/Geometry/CrvG1.text";
+"Line: 1077";
+"Date: Tue Jun  7 22:27:14 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/CrvG1.text, line: 1077
+// Example: H130E2 ()
+print "Example: H130E2";
+ei := GetEchoInput();
+SetEchoInput(true);
+E := EllipticCurve([ 0, 0, 1, -325259, -71398995 ]);
+F := EllipticCurve([ 1, -1, 1, -24545, 1486216 ]);
+CremonaReference(E);
+RankBounds(E);
+RankBounds(F);
+SetClassGroupBounds("GRH");
+#ThreeSelmerGroup(F);
+assert $1 eq 3;
+coverings := ThreeDescent(F);
+coverings;
+C := Equation(coverings[1]);
+B<t> := PolynomialRing(Rationals());
+F_BR := ChangeRing(Parent(Equation(F)), B);
+F_B := F_BR ! Equation(F);
+H_B := Hessian(F_B);
+c4,c6,Delta := Invariants(t*F_B + H_B);
+D,c4,c6 := HessePolynomials(3, 1, cInvariants(F) : Variables := [t, 1] );
+Delta := Discriminant(F)*D^3;
+jpoly := c4^3 - jInvariant(E)*Delta;
+Roots(jpoly);
+C2raw := 7479/7*C + Hessian(C);
+C2 := Reduce(Minimise(C2raw));
+C2;
+IsIsomorphic(Jacobian(C2), E);
+assert $1;
+PrimeDivisors(Integers()!Discriminant(GenusOneModel(C2)));
+C2_crv := Curve(ProjectiveSpace(Parent(C2)), C2);
+IsLocallySolvable(C2_crv, 43);
+IsLocallySolvable(C2_crv, 101);
+_, _, maptoE := nCovering(GenusOneModel(C2) : E := E);
+preimage := Pullback(maptoE, E!0);
+Points(preimage);   // Q-rational points
+TorsionSubgroup(E);
+SetEchoInput(ei);

@@ -1,0 +1,212 @@
+function RandomPrimeIdeal(R)
+
+    if Type(R) in {RngOrd, RngFunOrd} then
+        p := RandomPrimeIdeal(CoefficientRing(R));
+        ps := Decomposition(R, p);
+        if Type(R) eq RngOrd then
+            return ps[i][1] where i is Random([1 .. #ps]);
+        else
+            return ps[i] where i is Random([1 .. #ps]);
+        end if;
+    elif Type(R) eq  RngInt then
+        return RandomPrime(10);
+    elif Type(R) eq RngUPol then
+        if Characteristic(R) eq 0 then
+            return R!ChangeUniverse(Eltseq(RandomPrimePolynomial(PolynomialRing(GF(NextPrime(100))), 3)), Integers());
+        else
+            return RandomPrimePolynomial(R, 3);
+        end if;
+    elif Type(R) eq RngVal then
+        return R!(1/FieldOfFractions(R).1);
+    else
+	error "Wrong type of ring";
+    end if;
+
+end function;
+
+PR<x> := PolynomialRing(Rationals());
+P<y> := PolynomialRing(PR);
+FR1<a> := FunctionField(y^3 + 2);
+
+F<z> := GF(13, 3);
+PF<x> := PolynomialRing(F);
+P<y> := PolynomialRing(PF);
+FF1<b> := ext<FieldOfFractions(PF) | y^2 - 7>;
+
+MFR1F := MaximalOrderFinite(FR1);
+MFR1I := MaximalOrderInfinite(FR1);
+MFF1F := MaximalOrderFinite(FF1);
+MFF1I := MaximalOrderInfinite(FF1);
+
+p := Place(RandomPrimeIdeal(MFR1F));
+print "Degree(p) = ", Degree(p);
+C<t>, m := Completion(FR1, p : Precision := 5);
+assert RelativePrecision(m(m(a) @@ m) - m(a)) in {0, Infinity()};
+assert RelativePrecision(m(C.1 @@ m) - C.1) in {0, Infinity()};;
+r := Random(FR1, 3);
+assert RelativePrecision(m(m(r) @@ m) - m(r)) in {0, Infinity()};
+
+p := Place(RandomPrimeIdeal(MFR1I));
+print "Degree(p) = ", Degree(p);
+C<t>, m := Completion(FR1, p : Precision := 5);
+assert RelativePrecision(m(m(FR1.1) @@ m) - m(FR1.1)) in {0, Infinity()};
+assert m(m(FR1.1) @@ m) eq m(FR1.1);
+assert RelativePrecision(m(C.1 @@ m) - C.1) in {0, Infinity()};;
+r := Random(FR1, 3);
+assert RelativePrecision(m(m(r) @@ m) - m(r)) in {0, Infinity()};
+assert m(m(r) @@ m) eq m(r);
+
+p := Place(RandomPrimeIdeal(MFF1F));
+print "Degree(p) = ", Degree(p);
+C<t>, m := Completion(FF1, p : Precision := 5);
+assert RelativePrecision(m(m(b) @@ m) - m(b)) in {0, Infinity()};
+assert m(m(b) @@ m) eq m(b);
+assert RelativePrecision(m(C.1 @@ m) - C.1) in {0, Infinity()};;
+r := Random(FF1, 3);
+assert RelativePrecision(m(m(r) @@ m) - m(r)) in {0, Infinity()};
+assert m(m(r) @@ m) eq m(r);
+
+p := Place(RandomPrimeIdeal(MFF1I));
+print "Degree(p) = ", Degree(p);
+C<t>, m := Completion(FF1, p : Precision := 5);
+assert RelativePrecision(m(m(FF1.1) @@ m) - m(FF1.1)) in {0, Infinity()};
+assert m(m(b) @@ m) eq m(b);
+assert RelativePrecision(m(C.1 @@ m) - C.1) in {0, Infinity()};;
+r := Random(FF1, 3);
+assert RelativePrecision(m(m(r) @@ m) - m(r)) eq 0;
+assert m(m(r) @@ m) eq m(r);
+
+p := Place(RandomPrimeIdeal(MFR1F));
+print "Degree(p) = ", Degree(p);
+C<t>, m := Completion(MFR1F, p : Precision := 5);
+R<u> := CoefficientRing(C);
+assert RelativePrecision(m(m(MFR1F!FR1.1) @@ m) - m(MFR1F!FR1.1)) in {0, Infinity()};
+assert RelativePrecision(m(C.1 @@ m) - C.1) in {0, Infinity()};
+r := Random(MFR1F, 3);
+assert RelativePrecision(m(m(r) @@ m) - m(r)) eq 0;
+
+p := Place(RandomPrimeIdeal(MFR1I));
+print "Degree(p) = ", Degree(p);
+C<t>, m := Completion(MFR1I, p : Precision := 5);
+R<u> := CoefficientRing(C);
+assert RelativePrecision(m(m(MFR1I!(a/PR.1)) @@ m) - m(MFR1I!(a/PR.1))) in {0, Infinity()};
+assert RelativePrecision(m(C.1 @@ m) - C.1) in {0, Infinity()};;
+r := Random(MFR1I, 3);
+assert RelativePrecision(m(m(r) @@ m) - m(r)) eq 0;
+
+p := Place(RandomPrimeIdeal(MFF1F));
+print "Degree(p) = ", Degree(p);
+C<t>, m := Completion(MFF1F, p : Precision := 5);
+assert RelativePrecision(m(m(MFF1F!FF1.1) @@ m) - m(MFF1F!FF1.1)) eq 0;
+assert m(m(b) @@ m) eq m(b);
+assert RelativePrecision(m(C.1 @@ m) - C.1) in {0, Infinity()};;
+r := Random(MFF1F, 3);
+assert RelativePrecision(m(m(r) @@ m) - m(r)) eq 0;
+assert m(m(r) @@ m) eq m(r);
+
+p := Place(RandomPrimeIdeal(MFF1I));
+print "Degree(p) = ", Degree(p);
+C<t>, m := Completion(MFF1I, p : Precision := 5);
+assert RelativePrecision(m(m(MFF1I!(b/PF.1)) @@ m) - m(MFF1I!(b/PF.1))) eq 0;
+assert m(m(b/PF.1) @@ m) eq m(b/PF.1);
+assert RelativePrecision(m(C.1 @@ m) - C.1) in {0, Infinity()};;
+r := Random(MFF1I, 3);
+assert RelativePrecision(m(m(r) @@ m) - m(r)) eq 0;
+assert m(m(r) @@ m) eq m(r);
+
+
+P<x> := PolynomialRing(Rationals());
+P<y> := PolynomialRing(P);
+F<c> := FunctionField(y^5 - x^7);
+
+p := Place(RandomPrimeIdeal(MaximalOrderInfinite(F)));
+print "Degree(p) = ", Degree(p);
+C<t>, m := Completion(F, p : Precision := 5);
+assert RelativePrecision(m(m(c) @@ m) - m(c)) eq 0;
+assert RelativePrecision(m(C.1 @@ m) - C.1) in {0, Infinity()};;
+r := Random(F, 3);
+assert RelativePrecision(m(m(r) @@ m) - m(r)) in {0, Infinity()};
+
+p := Place(RandomPrimeIdeal(MaximalOrderFinite(F)));
+print "Degree(p) = ", Degree(p);
+C<t>, m := Completion(F, p : Precision := 5);
+assert RelativePrecision(m(m(c) @@ m) - m(c)) in {0, Infinity()};
+assert RelativePrecision(m(C.1 @@ m) - C.1) in {0, Infinity()};;
+r := Random(F, 3);
+assert RelativePrecision(m(m(r) @@ m) - m(r)) in {0, Infinity()};
+
+p := Place(RandomPrimeIdeal(MaximalOrderInfinite(F)));
+print "Degree(p) = ", Degree(p);
+C<t>, m := Completion(MaximalOrderInfinite(F), p : Precision := 5);
+assert RelativePrecision(m(m(c/x^2) @@ m) - m(c/x^2)) le 0;
+assert RelativePrecision(m(C.1 @@ m) - C.1) in {0, Infinity()};;
+r := Random(MaximalOrderInfinite(F), 3);
+assert RelativePrecision(m(m(r) @@ m) - m(r)) le 0;
+
+p := Place(RandomPrimeIdeal(MaximalOrderFinite(F)));
+print "Degree(p) = ", Degree(p);
+C<t>, m := Completion(MaximalOrderFinite(F), p : Precision := 5);
+assert RelativePrecision(m(m(c) @@ m) - m(c)) in {0, Infinity()};
+assert RelativePrecision(m(C.1 @@ m) - C.1) in {0, Infinity()};
+r := Random(MaximalOrderFinite(F), 3);
+assert RelativePrecision(m(m(r) @@ m) - m(r)) le 0;
+
+P<x> := PolynomialRing(GF(7, 5));
+P<y> := PolynomialRing(P);
+F<c> := FunctionField(y^4 - x^10*y^3 + 1);
+
+p := Place(RandomPrimeIdeal(MaximalOrderInfinite(F)));
+print "Degree(p) = ", Degree(p);
+C<t>, m := Completion(F, p : Precision := 5);
+assert RelativePrecision(m(m(c) @@ m) - m(c)) in {0, Infinity()};
+assert RelativePrecision(m(C.1 @@ m) - C.1) in {0, Infinity()};
+r := Random(F, 3);
+assert RelativePrecision(m(m(r) @@ m) - m(r)) in {0, Infinity()};
+
+p := Place(RandomPrimeIdeal(MaximalOrderFinite(F)));
+print "Degree(p) = ", Degree(p);
+C<t>, m := Completion(F, p : Precision := 5);
+assert RelativePrecision(m(m(c) @@ m) - m(c)) eq 0;
+assert RelativePrecision(m(C.1 @@ m) - C.1) in {0, Infinity()};;
+r := Random(F, 3);
+assert RelativePrecision(m(m(r) @@ m) - m(r)) eq 0;
+
+p := Place(RandomPrimeIdeal(MaximalOrderInfinite(F)));
+print "Degree(p) = ", Degree(p);
+C<t>, m := Completion(MaximalOrderInfinite(F), p : Precision := 5);
+R<u> := CoefficientRing(C);
+assert RelativePrecision(m(m(c/x^12) @@ m) - m(c/x^12)) eq 0;
+assert RelativePrecision(m(C.1 @@ m) - C.1) in {0, Infinity()};;
+r := Random(MaximalOrderInfinite(F), 3);
+assert RelativePrecision(m(m(r) @@ m) - m(r)) eq 0;
+
+p := Place(RandomPrimeIdeal(MaximalOrderFinite(F)));
+print "Degree(p) = ", Degree(p);
+C<t>, m := Completion(MaximalOrderFinite(F), p : Precision := 5);
+R<u> := CoefficientRing(C);
+assert RelativePrecision(m(m(c) @@ m) - m(c)) eq 0;
+assert RelativePrecision(m(C.1 @@ m) - C.1) in {0, Infinity()};;
+r := Random(MaximalOrderFinite(F), 3);
+assert RelativePrecision(m(m(r) @@ m) - m(r)) eq 0;
+
+P<x> := PolynomialRing(Rationals());
+P<y> := PolynomialRing(P);
+F<c> := FunctionField(y^4 - x^10*y^3 + 1);
+
+p := Place(RandomPrimeIdeal(MaximalOrderInfinite(F)));
+print "Degree(p) = ", Degree(p);
+C<t>, m := Completion(F, p : Precision := 5);
+assert RelativePrecision(m(m(c) @@ m) - m(c)) in {0, Infinity()};
+assert RelativePrecision(m(C.1 @@ m) - C.1) in {0, Infinity()};;
+
+C<t>, m := Completion(MaximalOrderInfinite(F), p : Precision := 5);
+assert Valuation(m(m(c/x^10) @@ m) - m(c/x^10)) ge AbsolutePrecision(m(c/x^10));
+r := Random(MaximalOrderInfinite(F), 3);
+assert RelativePrecision(m(m(r) @@ m) - m(r)) eq 0;
+
+p := Place(RandomPrimeIdeal(MaximalOrderFinite(F)));
+print "Degree(p) = ", Degree(p);
+C<t>, m := Completion(F, p : Precision := 3);
+// Should be able to put this first one back in : it is only 90s in vb
+time assert RelativePrecision(m(m(c) @@ m) - m(c)) in {0, Infinity()};
+//time assert RelativePrecision(m(C.1 @@ m) - C.1) in {0, Infinity()};;

@@ -1,0 +1,14 @@
+{
+    char.m
+    clean.m
+    cond.m
+    db.m
+    ind_cond.m
+    meataxe.m
+    modrep.m
+    modular.m
+    rational.m
+    reps.m
+    split.m
+    schur_index_group.m
+}

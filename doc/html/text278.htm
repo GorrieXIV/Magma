@@ -1,0 +1,435 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Linear Systems (Structured  Gaussian Elimination)</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text264.htm">[Next]</A><A  HREF = "text277.htm">[Prev]</A> <A  HREF = "text264.htm">[Right]</A> <A  HREF = "text277.htm">[Left]</A> <A  HREF = "text265.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "2570">Linear Systems (Structured  Gaussian Elimination)</A></H3>
+
+
+
+<H5><A NAME = "2571"></A><A NAME = "Smat:ModularSolution">ModularSolution</A>(A, M) : MtrxSprs, RngIntElt -&gt; ModTupRng</H5>
+<H5>ModularSolution(A, L) : MtrxSprs, RngIntEltFact -&gt; ModTupRng</H5>
+
+<PRE>    Lanczos: BoolElt                    Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+Given a sparse m x n matrix A, defined over the integer ring 
+Z, and a positive integer M, compute a vector v such 
+that v satisfies the equation v.A<sup>tr</sup>=0 modulo M.
+v will be non-zero with high probability.
+<P>
+This function is designed for index-calculus-type algorithms where
+a large sparse linear system defined by the matrix A is first 
+constructed and then a vector satisfying the above equation modulo 
+M is required.  For this reason it is natural that the
+transpose of A appears in this equation.
+The example <A  HREF = "text278.htm#2572">H27E3</A> below illustrates such a situation
+in detail.
+<P>
+The first version of the function takes the actual integer M as 
+the second argument given and so must be factored as part of the
+calculation, while the second version of the function takes the 
+factorization sequence L of M.
+If possible, the solution vector is multiplied by a unit modulo M
+so that its first entry is 1.
+<P>
+The function uses the <I>Structured Gaussian Elimination</I>
+algorithm <A  HREF = "text264.htm#bib_LO_SLinAlg">[LO91b, Sec. 5]</A>.  This reduces the linear
+system to be solved to a much smaller but denser system.
+By default, the function recurses on the smaller system until
+it is almost completely dense, and then this dense system is solved
+using the fast dense modular nullspace algorithm of Magma.
+<P>
+If the parameter <TT>Lanczos</TT> is set to <TT>true</TT>, then the <I>Lanczos</I> algorithm <A  HREF = "text264.htm#bib_LO_SLinAlg">[LO91b, Sec. 3]</A> will be used instead.
+This is generally <I>very much</I> slower than the default method (it is
+often 10 to 50 times slower), but it will take considerably less
+memory, so may be preferable in the case of extremely large matrices.
+<P>
+For typical matrices arising in index-calculus problems, and
+for most machines, the default method (reducing to a completely dense
+system) should solve a linear system of size roughly 100, 000 x 100, 000 using about 500MB of memory while a linear system of size
+roughly 200, 000 x 200, 000 should require about 1.5GB to 2.0GB of
+memory.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "2572">Example <TT>SMat_DiscreteLog (H27E3)</TT></A></H3>
+In this extended example, we demonstrate the application of the
+function <A  HREF = "text278.htm#Smat:ModularSolution">ModularSolution</A> to a sparse matrix arising
+in an index-calculus algorithm.
+<P>
+We present Magma code which performs the first stage of the basic
+linear sieve <A  HREF = "text264.htm#bib_COS_Log">[COS86]</A>, <A  HREF = "text264.htm#bib_LO_Log">[LO91a]</A> for computing discrete logarithms in
+a prime finite field GF(p).  This first stage determines most of the
+logarithms of the elements of the <I>factor basis</I> (which is the set
+of small primes up to a given limit) by using a <I>sieve</I> to compute
+a sparse linear system which is then solved modulo p - 1.
+<P>
+<P>
+<P>
+Even though the following sieving code is written in the Magma
+language and so is <I>much</I> slower than a serious C implementation, 
+it is sufficiently powerful to be able to compute the first stage logarithms
+in less than a minute for fields GF(p) where p is about
+10<sup>20</sup> and (p - 1)/2 is prime.  In comparison, the standard
+Pohlig-Hellman algorithm based on the Pollard-Rho method would take
+many hours for such fields.  This Magma code can also be adapted for
+other index-calculus methods.
+<P>
+<P>
+<P>
+Suppose p is an odd prime and let K=GF(p).  Let Q be the <I>factor base</I>, an ordered set consisting of all positive primes from 2 to
+a given limit <TT>qlimit</TT>.  Fix a primitive element &alpha; of K
+which is also <I>prime</I> as an integer, so &alpha; is in Q.  We wish
+to compute the discrete logarithms of most of the elements of Q with
+respect to &alpha;; i.e., we wish to compute l<sub>q</sub> with &alpha;<sup>l<sub>q</sub></sup>=q
+for most q&isin;Q.
+<P>
+<P>
+<P>
+The algorithm uses a <I>sieve</I> to search for linear relations
+involving the logarithms of the elements of Q.
+Let H=&lfloor;&#8730;p&rfloor; + 1 and J=H<sup>2</sup> - p.
+We search for pairs of integers (c<sub>1</sub>, c<sub>2</sub>) with 1&le;c<sub>1</sub>, c<sub>2</sub> &le;
+<TT>climit</TT> (where <TT>climit</TT> is a given limit which is much
+less than H) such that
+<P>
+[(H + c<sub>1</sub>)(H + c<sub>2</sub>)] mod p = J + (c<sub>1</sub> + c<sub>2</sub>)H + c<sub>1</sub> c<sub>2</sub>
+<P>
+is <I>smooth</I> with respect to Q (i.e., all of
+its prime factors are in Q).  If we include these H + c<sub>i</sub> in the factor base,
+then this gives a linear relation modulo (p - 1) among the logarithms
+of the elements of the extended factor base.
+<P>
+<P>
+<P>
+Fix c<sub>1</sub> with 1&le;c &le; <TT>climit</TT> and suppose we initialize a
+sieve array (to be indexed by c<sub>2</sub>) to have zero in each position.
+For each prime power
+q<sup>h</sup> with q&isin;Q and h sufficiently small, we compute
+<P>
+d = [(J + c<sub>1</sub> H)(H + c<sub>1</sub>)<sup> - 1</sup>] mod q<sup>h</sup>.
+<P>
+Then for all c<sub>2</sub> &equiv; d mod (q<sup>h</sup>), it turns out that
+<P>
+(H + c<sub>1</sub>)(H + c<sub>2</sub>) &equiv; 0 mod (q<sup>h</sup>).
+<P>
+So for each c<sub>2</sub> with c<sub>1</sub>&le;c<sub>2</sub>&le; <TT>climit</TT> and
+c<sub>2</sub> &equiv; d mod (q<sup>h</sup>),
+we add log(q) to the position of the sieve corresponding to c<sub>2</sub>.
+(Ensuring that c<sub>2</sub>&ge;c<sub>1</sub> avoids redundant relations.)
+When we have done this for each q&isin;Q, we perform
+trial division to obtain relations for each of the c<sub>2</sub> whose
+sieve values are beneath a suitable threshold.
+<P>
+<P>
+<P>
+We repeat this with a new c<sub>1</sub> value until we have more relations than
+elements of the factor base (typically we make the ratio be 1.1 or
+1.2), then we solve the corresponding linear system modulo M=p - 1 to
+obtain the desired logarithms.
+We ensure that &alpha; is the first element of Q so that when the
+vector is normalized modulo M (so that its first entry is 1),
+the logarithms will be with respect to &alpha;.
+For derivations of the above equations and for further details 
+concerning the sieving, see <A  HREF = "text264.htm#bib_LO_Log">[LO91a]</A>.
+<P>
+<P>
+<P>
+In practice, one first writes M=p - 1=M<sub>1</sub>.M<sub>2</sub> where M<sub>1</sub> contains
+the maximal powers of all the small primes dividing M
+(say, for primes &le;10000).
+The solution space modulo M<sub>1</sub> will often have high dimension, so
+the logarithms modulo M<sub>1</sub> usually cannot be correctly computed from
+the linear system alone.
+So we only compute the solution of the linear system modulo M<sub>2</sub>.
+It is still possible that some logarithms cannot be determined modulo M<sub>2</sub>
+(e.g., if 2 unknowns occur only in one equation), but usually most of
+the logarithms will be correctly computed modulo M<sub>2</sub>.
+Then the logarithm of each factor basis element can be easily
+computed modulo M<sub>1</sub> by the Pohlig-Hellman algorithm, and the
+Chinese Remainder Theorem can be used to combine these with the correct
+modulo-M<sub>2</sub> logarithms to compute the logarithms modulo M of most
+elements of the factor basis.
+<P>
+<P>
+<P>
+Similar index-calculus-type algorithms should have techniques for handling
+small prime divisors of the modulus M when the solution of the
+linear system has high nullity modulo these small primes.
+<P>
+<P>
+<P>
+<P>
+The following function <TT>Sieve</TT> has been developed by Allan Steel,
+based on code by Benjamin Costello.  Its arguments are the field
+K=GF(p), the factor base prime limit <TT>qlimit</TT>, the c<sub>1</sub>, c<sub>2</sub>
+range limit <TT>climit</TT>, and the desired stopping ratio of relations
+to unknowns.  The function returns the sparse relation matrix A
+together with an indexed set containing the corresponding extended
+factor base (the small primes and the H + c<sub>i</sub> values which yield
+relations).
+<P>
+<P>
+<P>
+<PRE>
+&gt; function Sieve(K, qlimit, climit, ratio)
+&gt;     p := #K;
+&gt;     Z := Integers();
+&gt;     H := Iroot(p, 2) + 1;
+&gt;     J := H^2 - p;
+&gt; 
+&gt;     // Get factor basis of all primes &lt;= qlimit.
+&gt;     fb_primes := [p: p in [2 .. qlimit] | IsPrime(p)];
+&gt; 
+&gt;     printf "Factor base has %o primes, climit is %o n", #fb_primes, climit;
+&gt; 
+&gt;     // Ensure that the primitive element of K is prime (as an integer).
+&gt;     a := rep{x: x in [2..qlimit] | IsPrime(x) and IsPrimitive(K!x)};
+&gt;     SetPrimitiveElement(K,K!a);
+&gt;     
+&gt;     // Initialize extended factor base FB to fb_primes (starting with a).
+&gt;     FB := {@ Z!a @};
+&gt;     for x in fb_primes do
+&gt;         Include(~FB, x);
+&gt;     end for;
+&gt; 
+&gt;     // Initialize A to 0 by 0 sparse matrix over Z.
+&gt;     A := SparseMatrix();
+&gt; 
+&gt;     // Get logs of all factor basis primes.
+&gt;     log2 := Log(2.0);
+&gt;     logqs := [Log(q)/log2: q in fb_primes];
+&gt; 
+&gt;     for c1 in [1 .. climit] do
+&gt; 
+&gt;         // Stop if ratio of relations to unknowns is high enough.
+&gt;         if Nrows(A)/#FB ge ratio then break; end if;
+&gt; 
+&gt;         if c1 mod 50 eq 0 then
+&gt;             printf "c1: %o, #rows: %o, #cols: %o, ratio: %o n",
+&gt;                 c1, Nrows(A), #FB, RealField(8)!Nrows(A)/#FB;
+&gt;         end if;
+&gt; 
+&gt;         // Initialize sieve.
+&gt;         sieve := [z: i in [1 .. climit]] where z := Log(1.0);
+&gt;         den := H + c1;                  // denominator of relation
+&gt;         num := -(J + c1*H);             // numerator
+&gt; 
+&gt;         for i := 1 to #fb_primes do
+&gt;             // For each prime q in factor base...
+&gt;             q := fb_primes[i];
+&gt;             logq := logqs[i];
+&gt; 
+&gt;             qpow := q;
+&gt;             while qpow le qlimit do
+&gt;                 // For all powers qpow of q up to qlimit...
+&gt; 
+&gt;                 if den mod qpow eq 0 then break; end if;
+&gt;                 c2 := num * Modinv(den, qpow) mod qpow;
+&gt;                 if c2 eq 0 then c2 := qpow; end if;
+&gt; 
+&gt;                 nextqpow := qpow*q;
+&gt;                 // Ensure c2 &gt;= c1 to remove redundant relations.
+&gt;                 while c2 lt c1 do 
+&gt;                     c2 +:= qpow;        
+&gt;                 end while;
+&gt; 
+&gt;                 while c2 le #sieve do
+&gt;                     // Add logq into sieve for c2.
+&gt;                     sieve[c2] +:= logq;
+&gt; 
+&gt;                     // Test higher powers of q if nextqpow is too large.
+&gt;                     if nextqpow gt qlimit then 
+&gt;                         prod := (J + (c1 + c2)*H + c1*c2) mod p;
+&gt;                         nextp := nextqpow;
+&gt;                         while prod mod nextp eq 0 do
+&gt;                             sieve[c2] +:= logq;
+&gt;                             nextp *:= q;
+&gt;                         end while;
+&gt;                     end if;
+&gt;                     c2 +:= qpow;
+&gt;                 end while;
+&gt;                 qpow := nextqpow;
+&gt;             end while;
+&gt;         end for;
+&gt; 
+&gt;         // Check sieve for full factorizations.
+&gt;         rel := den * (H + 1);   // the relation 
+&gt;         relinc := H + c1;       // add to relation to get next relation
+&gt;         count := 0;
+&gt;         for c2 in [1 .. #sieve] do
+&gt;             n := rel mod p;
+&gt;             if Abs(sieve[c2] - Ilog2(n)) lt 1 then
+&gt;                 fact, r := TrialDivision(n, qlimit);
+&gt;                 if r eq [] and (#fact eq 0 or fact[#fact][1] lt qlimit) then 
+&gt;                     // Include each H + c_i in extended factor basis.
+&gt;                     Include(~FB, H + c1);
+&gt;                     Include(~FB, H + c2);
+&gt; 
+&gt;                     // Include relation (H + c1)*(H + c2) = fact.
+&gt;                     row := Nrows(A) + 1;
+&gt;                     for t in fact do
+&gt;                         SetEntry(~A, row, Index(FB, t[1]), t[2]);
+&gt;                     end for;
+&gt;                     if c1 eq c2 then
+&gt;                         SetEntry(~A, row, Index(FB, H + c1), -2);
+&gt;                     else
+&gt;                         SetEntry(~A, row, Index(FB, H + c1), -1);
+&gt;                         SetEntry(~A, row, Index(FB, H + c2), -1);
+&gt;                     end if;
+&gt;                 end if;
+&gt;             end if;
+&gt;             rel +:= relinc;
+&gt;         end for;        
+&gt;     end for;
+&gt; 
+&gt;     // Check matrix by multiplying out relations in field.
+&gt;     assert {&amp;*[(K!FB[j])^A[k, j]: j in Support(A, k)]: k in [1..Nrows(A)]}
+&gt;             eq {1};
+&gt; 
+&gt;     return A, FB;
+&gt; end function;
+</PRE>
+We first apply the function to a trivial example to illustrate the
+main points.
+We let K be GF(103), and we make the factor basis include primes up to 35,
+the c<sub>i</sub> range be up to 27, and the stopping ratio be 1.1.  We first compute
+the relation matrix A and the extended factor basis F.
+<P>
+<P>
+<PRE>
+&gt; K := GF(103);
+&gt; A, F := Sieve(K, 35, 27, 1.1);
+Factor base has 11 primes, climit is 27
+&gt; A;
+Sparse matrix with 33 rows and 30 columns over Integer Ring
+</PRE>
+We examine a few rows of A and the extended factor basis F.
+Note that 5 is the smallest prime which is primitive in K, so
+it has been inserted first in F.
+<P>
+<P>
+<PRE>
+&gt; A[1]; A[2]; A[30];
+(1 0 0 0 0 1 0 0 0 0 0 -1 -1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+(0 0 0 1 1 0 0 0 0 0 0 -1 0 -1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0)
+(0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -1 0 0 -1 0 0 0 0 0)
+&gt; F;
+{@ 5, 2, 3, 7, 11, 13, 17, 19, 23, 29, 31, 12, 14, 15, 16, 21, 38,
+20, 26, 35, 22, 33, 34, 24, 25, 28, 30, 37, 32, 36 @}
+</PRE>
+<P>
+Next we compute a solution vector v such that v.A<sup>tr</sup> = 0
+modulo M=#K - 1.
+<P>
+<P>
+<P>
+<PRE>
+&gt; Factorization(#K-1);
+[ &lt;2, 1&gt;, &lt;3, 1&gt;, &lt;17, 1&gt; ]
+&gt; v := ModularSolution(A, #K - 1);
+&gt; v;
+(1 44 39 4 61 72 70 80 24 86 57 25 48 40 74 43 22 0 1 5 3 100 12 69 2 
+    92 84 93 16 64)
+</PRE>
+Notice that 0 occurs in v, so the corresponding logarithm is not
+known.  The vector is normalized so that the logarithm of 5 is 1, as
+desired.  We finally compute the powers of the primitive element of
+K by each element of v and check that all of these match the
+entries of F except for the one missed entry.
+Note also that because M has small prime divisors, it is fortunate
+that the logarithms are all correct, apart from the missed one.
+<P>
+<P>
+<PRE>
+&gt; a := PrimitiveElement(K);
+&gt; a;
+5
+&gt; Z := IntegerRing();
+&gt; [a^Z!x: x in Eltseq(v)];                   
+[ 5, 2, 3, 7, 11, 13, 17, 19, 23, 29, 31, 12, 14, 15, 16, 21, 38, 1, 
+5, 35, 22, 33, 34, 24, 25, 28, 30, 37, 32, 36 ]
+&gt; F;
+{@ 5, 2, 3, 7, 11, 13, 17, 19, 23, 29, 31, 12, 14, 15, 16, 21, 38, 20,
+26, 35, 22, 33, 34, 24, 25, 28, 30, 37, 32, 36 @}
+</PRE>
+<P>
+<P>
+Finally, we take K=GF(p), where p is the smallest prime above
+10<sup>20</sup> such that (p - 1)/2 is prime.
+The sparse matrix constructed here is
+close to 1000 x 1000, but the solution vector is still found
+in less than a second.
+<P>
+<P>
+<PRE>
+&gt; K := GF(100000000000000000763);
+&gt; Factorization(#K - 1);
+[ &lt;2, 1&gt;, &lt;50000000000000000381, 1&gt; ]
+&gt; time A, F := Sieve(K, 2200, 800, 1.1);
+Factor base has 327 primes, climit is 800
+c1: 50, #rows: 222, #cols: 555, ratio: 0.4
+c1: 100, #rows: 444, #cols: 738, ratio: 0.60162602
+c1: 150, #rows: 595, #cols: 836, ratio: 0.71172249
+c1: 200, #rows: 765, #cols: 921, ratio: 0.83061889
+c1: 250, #rows: 908, #cols: 973, ratio: 0.9331963
+c1: 300, #rows: 1014, #cols: 1011, ratio: 1.003
+c1: 350, #rows: 1105, #cols: 1023, ratio: 1.0802
+Time: 3.990
+&gt; A;
+Sparse matrix with 1141 rows and 1036 columns over Integer Ring
+&gt; time v := ModularSolution(A, #K - 1);
+Time: 0.170
+</PRE>
+We observe that the list consisting of the primitive element
+powered by the computed logarithms agrees with the factor basis for
+at least the first 30 elements.
+<P>
+<P>
+<PRE>
+&gt; a := PrimitiveElement(K);
+&gt; a;
+2
+&gt; v[1], v[2];
+1 71610399209536789314
+&gt; a^71610399209536789314;
+3
+&gt; P := [a^x: x in Eltseq(v)];
+&gt; [P[i]: i in [1 .. 30]];
+[ 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 
+67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113 ]
+&gt; [F[i]: i in [1 .. 30]];
+[ 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 
+67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113 ]
+</PRE>
+There are in fact 8 logarithms which could not be computed correctly.
+<P>
+<P>
+<PRE>
+&gt; [i: i in [1..#F] | P[i] ne F[i]];
+[ 671, 672, 673, 737, 738, 947, 1024, 1025 ]
+</PRE>
+A zero value appearing in the place of a logarithm indicates that the nullity 
+of the system was larger than 1, even considered modulo (#K - 1)/2.
+<P>
+<P>
+<PRE>
+&gt; [v[i]: i in [1..#F] | P[i] ne F[i]];
+[ 0, 22076788376647522787, 73252391663364176895, 0, 
+33553634905886614528, 42960107136526083388, 0, 57276316725691590267 ]
+&gt; [P[i]: i in [1..#F] | P[i] ne F[i]];
+[ 1, 7480000052677, 7960000056517, 1, 5220000041437, 
+8938028430619715763, 1, 11360000275636 ]
+</PRE>
+However, we have found the correct logarithms for nearly all factor basis
+elements.
+As pointed out above, the Pollard-Rho method applied to an element of
+the factor basis for this field would take many hours!
+<PRE></PRE> <A  HREF = "text264.htm">[Next]</A><A  HREF = "text277.htm">[Prev]</A> <A  HREF = "text264.htm">[Right]</A> <A  HREF = "text277.htm">[Left]</A> <A  HREF = "text265.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

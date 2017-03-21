@@ -1,0 +1,827 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Lattices from Matrix Groups</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text330.htm">[Next]</A><A  HREF = "text333.htm">[Prev]</A> <A  HREF = "text330.htm">[Right]</A> <A  HREF = "text333.htm">[Left]</A> <A  HREF = "text331.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "3215">Lattices from Matrix Groups</A></H3>
+
+<P>
+<P>
+<P>
+In Magma a G-lattice L is a lattice upon which a finite integral
+matrix group G acts by right multiplication.
+<P>
+Each G-lattice L has references to
+both the original ("natural") group G which acts on
+the standard lattice in which L is embedded and also the reduced group
+of L which is the reduced representation of G on the basis of L.
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text334.htm#3216">Creation of G-Lattices</A>
+<LI> <A  HREF = "text334.htm#3221">Operations on G-Lattices</A>
+<LI> <A  HREF = "text334.htm#3228">Invariant Forms</A>
+<LI> <A  HREF = "text334.htm#3239">Endomorphisms</A>
+<LI> <A  HREF = "text334.htm#3246">G-invariant Sublattices</A>
+<LI> <A  HREF = "text334.htm#3253">Lattice of Sublattices</A>
+</UL>
+<H4><A NAME = "3216">Creation of G-Lattices</A></H4>
+
+<P>
+<P>
+The following functions create G-lattices.  Note that the group G must
+be a finite integral matrix group.
+
+
+<H5><A NAME = "3217">Lattice(G) : GrpMat -&gt; Lat</A></H5>
+<BLOCKQUOTE>
+Given a finite integral matrix group G, return the standard G-lattice
+(with standard basis and rank equal to the degree of G).
+</BLOCKQUOTE>
+<H5><A NAME = "3218">LatticeWithBasis(G, B) : GrpMat, ModMatRngElt -&gt; Lat</A></H5>
+<BLOCKQUOTE>
+Given a finite integral matrix group G and a non-singular matrix B whose
+row space is invariant under G (i.e., Bg = T<sub>g</sub>B for each g&isin;G
+where T<sub>g</sub> is a unimodular integral matrix depending on g), return
+the G-lattice with basis matrix B.
+(The number of columns of B
+must equal the degree of G; G acts naturally on the lattice spanned
+by B.)
+</BLOCKQUOTE>
+<H5><A NAME = "3219">LatticeWithBasis(G, B, M) : GrpMat, ModMatRngElt, AlgMatElt -&gt; Lat</A></H5>
+<BLOCKQUOTE>
+Given a finite integral matrix group G, a non-singular matrix B whose
+row space is invariant under G (i.e., Bg = T<sub>g</sub>B for all g&isin;G
+where T<sub>g</sub> is a unimodular integral matrix depending on g) and
+a positive definite matrix M invariant under G (i.e., gMg<sup>tr</sup>=M
+for all g&isin;G) return the G-lattice with basis matrix B and
+inner product matrix M.
+(The number of columns of B
+must equal the degree of G and both the number of rows and the number of
+columns of M must equal the degree of G; G acts naturally on the
+lattice spanned by B and fixes the Gram matrix of the lattice).
+</BLOCKQUOTE>
+<H5><A NAME = "3220">LatticeWithGram(G, F) : GrpMat, AlgMatElt -&gt; Lat</A></H5>
+<BLOCKQUOTE>
+Given a finite integral matrix group G and
+a positive definite matrix F invariant under G (i.e., gFg<sup>tr</sup>=F
+for all g&isin;G) return the G-lattice with standard basis and
+inner product matrix F (and thus Gram matrix F).
+(Both the number of rows and the number of columns of M must equal
+the degree of G; G fixes the Gram matrix of the returned lattice).
+</BLOCKQUOTE>
+<H4><A NAME = "3221">Operations on G-Lattices</A></H4>
+
+<P>
+<P>
+The following functions provide basic operations on G-lattices.
+
+
+<H5><A NAME = "3222">IsGLattice(L) : Lat -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a lattice L, return whether L is a G-lattice
+(i.e., there is a group associated with L).
+</BLOCKQUOTE>
+<H5><A NAME = "3223">Group(L) : Lat -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a G-lattice L, return the matrix group of the (reduced)
+action of G on L.  The resulting group thus acts on
+the coordinate lattice of L (like the automorphism group).
+</BLOCKQUOTE>
+<H5><A NAME = "3224">NumberOfActionGenerators(L) : Lat -&gt; RngIntElt</A></H5>
+<H5>Nagens(L) : Lat -&gt; RngIntElt</H5>
+<BLOCKQUOTE>
+Given a G-lattice L, return the number of generators of G.
+</BLOCKQUOTE>
+<H5><A NAME = "3225">ActionGenerator(L, i) : Lat, RngIntElt -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a G-lattice L, return the i-th generator of the (reduced)
+action of G on L.  This is the reduced action of the i-th generator
+of the original group G (which may be the identity matrix).
+</BLOCKQUOTE>
+<H5><A NAME = "3226">NaturalGroup(L) : Lat -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a G-lattice L, return the matrix group of the (natural)
+action of G on L.  The resulting group thus acts on
+L naturally.
+</BLOCKQUOTE>
+<H5><A NAME = "3227">NaturalActionGenerator(L, i) : Lat, RngIntElt -&gt; GrpMat</A></H5>
+<BLOCKQUOTE>
+Given a G-lattice L, return the i-th generator of the natural
+action of G on L.  This is simply the i-th generator
+of the original group G.
+</BLOCKQUOTE>
+<H4><A NAME = "3228">Invariant Forms</A></H4>
+
+<P>
+<P>
+The functions in this section compute invariant forms for G-lattices.
+
+
+<H5><A NAME = "3229">InvariantForms(L) : Lat -&gt; [ AlgMatElt ]</A></H5>
+<BLOCKQUOTE>
+For a G-lattice L, return a basis for
+the space of invariant bilinear forms for G (represented by their
+Gram matrices) as a sequence of matrices.
+The first entry of the sequence 
+is a positive definite symmetric form for G.
+</BLOCKQUOTE>
+<H5><A NAME = "3230">InvariantForms(L, n) : Lat, RngIntElt -&gt; [ AlgMatElt ]</A></H5>
+<BLOCKQUOTE>
+For a G-lattice L, return a sequence consisting of
+n&ge;0 invariant bilinear forms for G.
+</BLOCKQUOTE>
+<H5><A NAME = "3231">SymmetricForms(L) : Lat -&gt; [ AlgMatElt ]</A></H5>
+<BLOCKQUOTE>
+For a G-lattice L, return a basis for
+the space of symmetric invariant bilinear forms for G.
+The first entry of the sequence is a positive definite symmetric form of G.
+</BLOCKQUOTE>
+<H5><A NAME = "3232">SymmetricForms(L, n) : Lat, RngIntElt -&gt; [ AlgMatElt ]</A></H5>
+<BLOCKQUOTE>
+For a G-lattice L, return a sequence
+of n&ge;0 independent symmetric invariant bilinear forms for G.
+The first entry of the first sequence (if n&gt;0)
+is a positive definite symmetric form for G.
+</BLOCKQUOTE>
+<H5><A NAME = "3233">AntisymmetricForms(L) : Lat -&gt; [ AlgMatElt ]</A></H5>
+<BLOCKQUOTE>
+For a G-lattice L, return a basis for
+the space of antisymmetric invariant bilinear forms for G.
+</BLOCKQUOTE>
+<H5><A NAME = "3234">AntisymmetricForms(L, n) : Lat, RngIntElt -&gt; [ AlgMatElt ]</A></H5>
+<BLOCKQUOTE>
+For a G-lattice L, return a sequence
+of n&ge;0 independent antisymmetric invariant bilinear forms for G.
+</BLOCKQUOTE>
+<H5><A NAME = "3235">NumberOfInvariantForms(L) : Lat -&gt; RngIntElt, RngIntElt</A></H5>
+<BLOCKQUOTE>
+For a G-lattice L, return
+the dimension of the space of (symmetric and anti-symmetric) invariant
+bilinear forms for G.
+The algorithm uses a modular method which is always correct
+and is faster than the actual computation of the forms.
+</BLOCKQUOTE>
+<H5><A NAME = "3236">NumberOfSymmetricForms(L) : Lat -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+For a G-lattice L, return
+the dimension of the space of symmetric invariant bilinear forms for G.
+</BLOCKQUOTE>
+<H5><A NAME = "3237">NumberOfAntisymmetricForms(L) : Lat -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+For a G-lattice L, return
+the dimension of the space of antisymmetric invariant bilinear forms for G.
+</BLOCKQUOTE>
+<H5><A NAME = "3238">PositiveDefiniteForm(L) : Lat -&gt; AlgMatElt</A></H5>
+<BLOCKQUOTE>
+For a G-lattice L, return a positive
+definite symmetric form for G.  This is a positive definite
+matrix F such that gFg<sup>tr</sup>=F for all g&isin;G.
+</BLOCKQUOTE>
+<H4><A NAME = "3239">Endomorphisms</A></H4>
+
+<P>
+<P>
+<P>
+The functions in this subsection compute endomorphisms of G-lattices.
+This is done by approximating the averaging operator over the group and 
+applying it to random elements.
+
+
+<H5><A NAME = "3240">EndomorphismRing(L) : Lat -&gt; AlgMat</A></H5>
+<BLOCKQUOTE>
+For a G-lattice L,
+return the endomorphism ring of L as a matrix algebra over Q.
+</BLOCKQUOTE>
+<H5><A NAME = "3241">Endomorphisms(L, n) : Lat, RngIntElt -&gt; [ AlgMatElt ]</A></H5>
+<BLOCKQUOTE>
+For a G-lattice L, return a sequence containing n independent
+endomorphisms of L as
+elements of the corresponding matrix algebra over Q.  n must be
+in the range [0 .. d], where d is the dimension of the endomorphism
+ring of L.
+This function may be useful in situations where the full endomorphism 
+algebra is not required, e.g., to split a reducible lattice.
+</BLOCKQUOTE>
+<H5><A NAME = "3242">DimensionOfEndomorphismRing(L) : Lat -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Return the dimension of the endomorphism algebra of the G-lattice L 
+by a modular method (which always yields a correct answer).
+</BLOCKQUOTE>
+<H5><A NAME = "3243">CentreOfEndomorphismRing(L) : Lat -&gt; AlgMat</A></H5>
+<BLOCKQUOTE>
+For a G-lattice L, return the centre of the endomorphism ring of L as
+a matrix algebra over Q.
+<P>
+This function can be used to split a reducible lattice into its homogeneous
+components.
+</BLOCKQUOTE>
+<H5><A NAME = "3244">CentralEndomorphisms(L, n) : Lat, RngIntElt -&gt; [ AlgMatElt ]</A></H5>
+<BLOCKQUOTE>
+For a G-lattice L,
+return a sequence containing n independent central endomorphisms of L as
+elements of the corresponding matrix algebra over Q.  n must be
+in the range [0 .. d], where d is the dimension of the centre
+of the endomorphism ring of L.
+</BLOCKQUOTE>
+<H5><A NAME = "3245">DimensionOfCentreOfEndomorphismRing(L) : Lat -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+Return the dimension of the centre of the endomorphism algebra of the G-lattice L
+by a modular method (which always yields a correct answer).
+</BLOCKQUOTE>
+<H4><A NAME = "3246">G-invariant Sublattices</A></H4>
+
+<P>
+<P>
+<P>
+<P>
+<P>
+The functions in this section compute G-invariant sublattices of
+a given G-lattice L.
+<P>
+For a fixed prime p, the algorithm constructs the maximal G-invariant
+sublattices of L as kernels of F<sub>p</sub> G-epimorphisms L/pL to S for some simple
+F<sub>p</sub>G-module S as described in <A  HREF = "text330.htm#bib_Plesken_thesis">[Ple74]</A>.
+<P>
+Iterating this process yields all G-invariant sublattices of L whose index in
+L is a p-power. Finally, intersecting lattices of coprime index yields all 
+sublattices of L.
+
+
+<H5><A NAME = "3247">Sublattices(G, Q) : GrpMat, [ RngIntElt ] -&gt; [ Lat ], BoolElt</A></H5>
+<H5>Sublattices(G, Q) : [ Mtrx ], [ RngIntElt ] -&gt; [ Lat ], BoolElt</H5>
+<H5>Sublattices(L, Q) : Lat, [ RngIntElt ] -&gt; [ Lat ], BoolElt</H5>
+
+<PRE>    Limit: RngIntElt                    Default: &infin;</PRE>
+
+<PRE>    Levels: RngIntElt                   Default: &infin;</PRE>
+
+<PRE>    Projections: [Mtrx]                 Default: []</PRE>
+<BLOCKQUOTE>
+Given either
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>an integral matrix group G with natural lattice L=Z<sup>n</sup>
+<DT>(b)</DT><DD>a sequence G of integral matrices generating a Z-order
+in Q<sup>n x n</sup> with natural lattice L= Z<sup>n</sup>
+<DT>(c)</DT><DD>a G-lattice L in Q<sup>n</sup>.
+<P>
+<P>
+</DL>
+together with a set or sequence Q of primes, compute the G-invariant
+sublattices of L (as a sequence) which are not contained in p L for any
+p &isin;Q and whose index in L is a product of elements of Q.
+<P>
+<P>
+This set of G-invariant sublattices of L is finite if and only if
+Q<sub>p</sub> tensor L is irreducible as a Q<sub>p</sub> G-module for all p&isin;Q.
+<P>
+Setting the parameter <TT>Limit := n</TT> will terminate the computation 
+after n sublattices have been found.
+<P>
+Setting the parameter <TT>Levels := n</TT> will only compute sublattices M
+such that L/M has at most n composition factors.
+<P>
+The optional parameter <TT>Projections</TT> can be a sequence of n by n
+matrices that describe projections on Q<sup>n</sup> that map L to itself.
+In this case, Magma will only compute those sublattices of L which 
+have the same images under the projections as L does.
+<P>
+<P>
+The second return value indicates whether the returned sequence contains 
+all such sublattices or not.
+</BLOCKQUOTE>
+<H5><A NAME = "3248">Sublattices(G, p) : GrpMat, RngIntElt -&gt; [ Lat ], BoolElt</A></H5>
+<H5>Sublattices(L, p) : Lat, RngIntElt -&gt; [ Lat ], BoolElt</H5>
+
+<PRE>    Limit: RngIntElt                    Default: &infin;</PRE>
+
+<PRE>    Levels: RngIntElt                   Default: &infin;</PRE>
+
+<PRE>    Projections: [Mtrx]                 Default: []</PRE>
+<BLOCKQUOTE>
+The same as the above where the set Q consists only of the given ptime p.
+</BLOCKQUOTE>
+<H5><A NAME = "3249">Sublattices(G) : GrpMat -&gt; [ Lat ], BoolElt</A></H5>
+<H5>Sublattices(L) : Lat -&gt; [ Lat ], BoolElt</H5>
+
+<PRE>    Limit: RngIntElt                    Default: &infin;</PRE>
+
+<PRE>    Levels: RngIntElt                   Default: &infin;</PRE>
+
+<PRE>    Projections: [Mtrx]                 Default: []</PRE>
+<BLOCKQUOTE>
+For an integral matrix group G or a G-lattice L this intrinsic 
+equals the one above with Q taken to be the prime divisors of the order
+of G.
+</BLOCKQUOTE>
+<H5><A NAME = "3250">SublatticeClasses(G) : GrpMat -&gt; [ Lat ]</A></H5>
+
+<PRE>    MaximalOrders: BoolElt              Default: <TT>false</TT></PRE>
+<BLOCKQUOTE>
+For an integral matrix group G returns representatives for the isomorphism
+classes of G-invariant lattices (i.e. the orbits under the unit group of
+the endomorphism ring E of G).
+<P>
+If <TT>MaximalOrders</TT> is set to <TT>true</TT>, only sublattice classes which are
+invariant under some maximal order of E are considered.
+<P>
+Currently the function requires E to be a field.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3251">Example <TT>GLat_Sublattices (H32E5)</TT></A></H3>
+We construct sublattices of the standard G-lattice where G is
+an absolutely irreducible degree-8 integral matrix representation
+of the group GL(2, 3) x (S)<sub>3</sub>.
+<P>
+<P>
+We first define the group G.
+<P>
+<P>
+<PRE>
+&gt; G := MatrixGroup&lt;8, IntegerRing() |
+&gt;    [-1,  0,  0,  0,  0,  0,  0,  0,
+&gt;      0,  0, -1,  0,  0,  0,  0,  0,
+&gt;      0,  0,  0,  1,  0,  0,  0,  0,
+&gt;      0,  1,  0,  0,  0,  0,  0,  0,
+&gt;     -1,  0,  0,  0,  1,  0,  0,  0,
+&gt;      0,  0, -1,  0,  0,  0,  1,  0,
+&gt;      0,  0,  0,  1,  0,  0,  0, -1,
+&gt;      0,  1,  0,  0,  0, -1,  0,  0],
+&gt;
+&gt;    [ 0,  0,  0,  0,  0,  0,  0,  1,
+&gt;      0,  0,  0,  0,  0,  0,  1,  0,
+&gt;      0,  0,  0,  0, -1,  0,  0,  0,
+&gt;      0,  0,  0,  0,  0,  1,  0,  0,
+&gt;      0,  0,  0, -1,  0,  0,  0,  1,
+&gt;      0,  0, -1,  0,  0,  0,  1,  0,
+&gt;      1,  0,  0,  0, -1,  0,  0,  0,
+&gt;      0, -1,  0,  0,  0,  1,  0,  0]&gt;;
+</PRE>
+We next compute the unique positive definite form F fixed by G.
+<P>
+<P>
+<PRE>
+&gt; time F := PositiveDefiniteForm(G);
+Time: 0.050
+&gt; F;
+[2 0 0 0 1 0 0 0]
+[0 2 0 0 0 1 0 0]
+[0 0 2 0 0 0 1 0]
+[0 0 0 2 0 0 0 1]
+[1 0 0 0 2 0 0 0]
+[0 1 0 0 0 2 0 0]
+[0 0 1 0 0 0 2 0]
+[0 0 0 1 0 0 0 2]
+</PRE>
+We now compute all sublattices of the standard G-lattice.
+<P>
+<P>
+<PRE>
+&gt; time Sub := Sublattices(G);  
+Time: 0.370
+&gt; #Sub;
+18
+</PRE>
+For each sublattice we compute the invariant positive definite form
+for the group given by the action of G on the sublattice.
+<P>
+<P>
+<PRE>
+&gt; PrimitiveMatrix := func&lt;X |
+&gt;     P ! ((ChangeRing(P, RationalField()) ! X) / GCD(Eltseq(X)))
+&gt;         where P is Parent(X)&gt;;
+&gt; FF := [PrimitiveMatrix(B * F * Transpose(B))
+&gt;             where B is BasisMatrix(L): L in Sub];
+</PRE>
+We next create the sequence of all the lattices whose Gram matrices
+are given by the (LLL-reduced) forms.
+<P>
+<P>
+<PRE>
+&gt; Sub := [LatticeWithGram(LLLGram(F)) : F in FF];       
+&gt; #Sub;
+18
+</PRE>
+We now compute representatives for the Z-isomorphism classes of the
+sequence of lattices.
+<P>
+<P>
+<PRE>
+&gt; Rep := [];
+&gt; for L in Sub do
+&gt;     if forall{LL: LL in Rep | not IsIsometric(L, LL)} then
+&gt;         Append(~Rep, L);
+&gt;     end if;
+&gt; end for;
+&gt; #Rep;
+4
+</PRE>
+Thus there are 4 non-isomorphic sublattices.
+We note the size of the automorphism
+group, the determinant, the minimum and the kissing number of each lattice.
+(In fact, the automorphism groups of these 4 lattices happen to be
+maximal finite subgroups of GL(8, Q) and all have
+GL(2, 3) x (S)<sub>3</sub> as a common irreducible subgroup.)
+<P>
+<P>
+<PRE>
+&gt; time A := [AutomorphismGroup(L) : L in Rep];  
+Time: 0.240
+&gt; [#G: G in A];  
+[ 497664, 6912, 696729600, 2654208 ]
+&gt; [Determinant(L): L in Rep];
+[ 81, 1296, 1, 16 ]
+&gt; [Minimum(L): L in Rep];    
+[ 2, 4, 2, 2 ]
+&gt; [KissingNumber(L): L in Rep];
+[ 24, 72, 240, 48 ]
+</PRE>
+Finally, we note that each lattice is isomorphic to a standard construction
+based on root lattices.
+<P>
+<P>
+<PRE>
+&gt; l := IsIsometric(Rep[1],
+&gt;        TensorProduct(Lattice("A", 2), StandardLattice(4))); l;
+true
+&gt; l := IsIsometric(Rep[2],
+&gt;        TensorProduct(Lattice("A", 2), Lattice("F", 4))); l;
+true
+&gt; l := IsIsometric(Rep[3], Lattice("E", 8)); l;
+true
+&gt; l := IsIsometric(Rep[4],
+&gt;        TensorProduct(Lattice("F", 4), StandardLattice(2))); l;
+</PRE>
+<HR>
+<H3><A NAME = "3252">Example <TT>GLat_Sublattices2 (H32E6)</TT></A></H3>
+This example illustrates the optional argument <TT>Projections</TT>.
+<P>
+<P>
+<PRE>
+&gt; G := MatrixGroup&lt;4, IntegerRing() |
+&gt; [ -1, 0, 1, 0, 0, -1, 1, -3, -1, 0, 0, 0, 0, 0, 0, 1 ],
+&gt; [ -1, 0, 0, 0, -3, 2, 0, 3, 0, 0, -1, 0, 1, -1, 0, -1 ] &gt;;
+&gt; E := EndomorphismRing(G);
+&gt; I := CentralIdempotents(ChangeRing(E, RationalField())); I;
+[
+    [ 0  0  0  0]
+    [-1  1  0  0]
+    [ 0  0  0  0]
+    [ 0  0  0  1],
+
+    [1 0 0 0]
+    [1 0 0 0]
+    [0 0 1 0]
+    [0 0 0 0]
+]
+</PRE>
+Since the central idempotents are all integral, they map the standard 
+lattice Z<sup>n</sup> to itself. Even though this group G fixes infinitely many
+sublattices of Z<sup>n</sup> (even up to scalar multiples), there can only be finitely
+many which have the same images under the central idempotents as Z<sup>n</sup>.
+<P>
+<P>
+<PRE>
+&gt; S := Sublattices(G : Projections:= I); #S;
+3
+</PRE>
+So in this case there are only three such lattices. To check that the lattices
+do project correctly, we can use
+<P>
+<P>
+<PRE>
+&gt; I := [ Matrix(Integers(), i) : i in I ];
+&gt; Images := [ [Image(BasisMatrix(s) * i) : i in I] : s in S ];
+&gt; #Set(Images) eq 1;
+true
+</PRE>
+<HR>
+<H4><A NAME = "3253">Lattice of Sublattices</A></H4>
+
+<P>
+<P>
+<P>
+Magma can construct the lattice V of all G-invariant sublattices of the
+standard lattice L = Z<sup>n</sup>. Various properties of the lattice V may then be
+examined. Magma only stores the primitive sublattices of L, i.e. those 
+sublattices that are not contained in kL for some k &gt; 1.
+<P>
+<P>
+In general, G fixes infinitely many primitive lattices. Thus one has to
+limit the number of sublattices to be constructed just as in the <TT>Sublattice</TT>
+intrinsic. In this case, all operations on V like coercions, intersections,
+sums etc. assume that the result of the operation is again is a scalar multiple
+of some element stored in V.
+<P>
+<P>
+The lattice V has type <TT>LatLat</TT> and elements of V have type
+<TT>LatLatElt</TT> and are numbered from 1 to n where n is the number of
+primitive sublattices of L that have been constructed in the beginning.
+
+
+<H5><A NAME = "3254">Creating the Lattice of Sublattices</A></H5>
+
+
+
+<H5><A NAME = "3255">SublatticeLattice(G, Q) : GrpMat, [ RngIntElt ] -&gt; LatLat, BoolElt</A></H5>
+<H5>SublatticeLattice(G, Q) : [ Mtrx ], [ RngIntElt ] -&gt; LatLat, BoolElt</H5>
+
+<PRE>    Limit: RngIntElt                    Default: &infin;</PRE>
+
+<PRE>    Levels: RngIntElt                   Default: &infin;</PRE>
+
+<PRE>    Projections: [ Mtrx ]               Default: []</PRE>
+<BLOCKQUOTE>
+Given either an integral matrix group G of degree n or a sequence G
+of integral matrices generating a Z-order in Q<sup>n x n</sup>
+together with a set or sequence Q of primes, compute the G-invariant
+sublattices of Z<sup>n</sup> (as a sequence) which are not contained in p Z<sup>n</sup> for any
+p &isin;Q and whose index in Z<sup>n</sup> is a product of elements of Q.
+<P>
+The second return value indicates whether all G-invariant lattices have been
+constructed.
+<P>
+<P>
+The optional parameters are the same as for the <TT>Sublattices</TT> intrinsic.
+</BLOCKQUOTE>
+<H5><A NAME = "3256">SublatticeLattice(G, p) : GrpMat, RngIntElt -&gt; LatLat, BoolElt</A></H5>
+<H5>SublatticeLattice(G, p) : [ Mtrx ], RngIntElt -&gt; LatLat, BoolElt</H5>
+
+<PRE>    Limit: RngIntElt                    Default: &infin;</PRE>
+
+<PRE>    Levels: RngIntElt                   Default: &infin;</PRE>
+
+<PRE>    Projections: [ Mtrx ]               Default: []</PRE>
+<BLOCKQUOTE>
+Same as above where the set Q consists only of the given prime p.
+</BLOCKQUOTE>
+<H5><A NAME = "3257">SublatticeLattice(G) : GrpMat -&gt; LatLat, BoolElt</A></H5>
+
+<PRE>    Limit: RngIntElt                    Default: &infin;</PRE>
+
+<PRE>    Levels: RngIntElt                   Default: &infin;</PRE>
+
+<PRE>    Projections: [ Mtrx ]               Default: []</PRE>
+<BLOCKQUOTE>
+Same as above where the set Q is taken to be set of prime divisors of the
+order of the group G.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3258">Example <TT>GLat_SublatticeLatticeCreate (H32E7)</TT></A></H3>
+This example shows how to create a lattice of sublattices.
+<P>
+<P>
+<PRE>
+&gt; G:= sub&lt; GL(2, Integers()) | [0,1,-1,0] &gt;;
+&gt; V:= SublatticeLattice(G); V;
+Lattice of 2 sublattices
+</PRE>
+<HR>
+<H5><A NAME = "3259">Operations on the Lattice of Sublattices</A></H5>
+
+<P>
+<P>
+In the following, V is a lattice of G-invariant lattices for some 
+group or Z-order G and Q denotes the set of primes that where used
+to create V.
+
+
+<H5><A NAME = "3260"># V : LatLat -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The number of (primitive) lattices stored in V.
+</BLOCKQUOTE>
+<H5><A NAME = "3261">V ! i: LatLat, RngIntElt -&gt; LatLatElt</A></H5>
+<BLOCKQUOTE>
+The i-th element of the lattice V with respect to the internal labeling.
+</BLOCKQUOTE>
+<H5><A NAME = "3262">V ! M: LatLat, Lat -&gt; LatLatElt</A></H5>
+<H5>V ! M: LatLat, Mtrx -&gt; LatLatElt</H5>
+<BLOCKQUOTE>
+Given a (basis matrix of some) G-invariant lattice M, create the element of
+the lattice V corresponding to M.
+</BLOCKQUOTE>
+<H5><A NAME = "3263">NumberOfLevels( V ) : LatLat -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The number of different levels (layers) stored in V.
+Note that levels are counted starting from 0.
+</BLOCKQUOTE>
+<H5><A NAME = "3264">Level(V, i) : LatLat, RngIntElt -&gt; [ LatLatElt ]</A></H5>
+<BLOCKQUOTE>
+The primitive lattices stored at the i-th level (layer). 
+Note that levels are counted starting from 0.
+</BLOCKQUOTE>
+<H5><A NAME = "3265">Levels(v) : LatLat -&gt; [ [LatLatElt] ]</A></H5>
+<BLOCKQUOTE>
+The i-th entry of the result is a sequence of the primitive lattice elements
+lying on the i - 1-th level.
+</BLOCKQUOTE>
+<H5><A NAME = "3266">Primes(V) : LatLat -&gt; [ RngIntElt ]</A></H5>
+<BLOCKQUOTE>
+The primes that where used to create V.
+</BLOCKQUOTE>
+<H5><A NAME = "3267">Constituents(V) : LatLat -&gt; SeqEnum</A></H5>
+<BLOCKQUOTE>
+A sequence containing the constituents (simple F<sub>p</sub> G - modules) that 
+where used during the construction of the G-lattices in V.
+</BLOCKQUOTE>
+<H5><A NAME = "3268">IntegerRing() ! e : RngInt, LatLatElt -&gt; RngIntElt</A></H5>
+<BLOCKQUOTE>
+The integer corresponding to lattice element e.
+</BLOCKQUOTE>
+<H5><A NAME = "3269">e + f : LatLatElt, LatLatElt -&gt; LatLatElt</A></H5>
+<BLOCKQUOTE>
+The sum of the lattice elements e and f.
+</BLOCKQUOTE>
+<H5><A NAME = "3270">e meet f : LatLatElt, LatLatElt -&gt; LatLatElt</A></H5>
+<BLOCKQUOTE>
+The intersection of the lattice elements e and f.
+</BLOCKQUOTE>
+<H5><A NAME = "3271">e eq f : LatLatElt, LatLatElt -&gt; BoolElt</A></H5>
+<BLOCKQUOTE>
+Tests whether e and f are equal.
+</BLOCKQUOTE>
+<H5><A NAME = "3272">MaximalSublattices(e) : LatLatElt -&gt; [ LatLatElt ], [ RngIntElt ]</A></H5>
+<BLOCKQUOTE>
+The sequence S of maximal sublattices of e having index p for some 
+p &isin;Q. 
+The second return value is a list C of integers such that S[i]/e is 
+isomorphic to the C[i]-th constituent of V. The ordering of the 
+constituents is the same as in the  <TT>Constituents</TT> intrinsic.
+</BLOCKQUOTE>
+<H5><A NAME = "3273">MinimalSuperlattices(e) : LatLatElt -&gt; [ LatLatElt ] , [ RngIntElt ]</A></H5>
+<BLOCKQUOTE>
+The sequence S of minimal superlattices of e in which e has index p 
+for some p &isin;Q.
+The second return value is a list C of integers such that e/S[i] is 
+isomorphic to the C[i]-th constituent of V. The ordering of the 
+constituents is the same as in the <TT>Constituents</TT> intrinsic.
+</BLOCKQUOTE>
+<H5><A NAME = "3274">Lattice(e) : SubModLatElt -&gt; Lat</A></H5>
+<BLOCKQUOTE>
+The G-lattice corresponding to e.
+</BLOCKQUOTE>
+<H5><A NAME = "3275">BasisMatrix(e) : SubModLatElt -&gt; Mtrx</A></H5>
+<H5>Morphism(e) : SubModLatElt -&gt; Mtrx</H5>
+<BLOCKQUOTE>
+The basis matrix of the G-lattice corresponding to e.
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME = "3276">Example <TT>GLat_SublatticeLattice (H32E8)</TT></A></H3>
+Let G be the automorphism group of the root lattice A<sub>5</sub>. Since G
+is absolutely irreducible, it fixes only finitely many lattices up to 
+scalars. We explore them.
+<P>
+<P>
+<PRE>
+&gt; G:= AutomorphismGroup(Lattice("A", 5));
+&gt; FactoredOrder(G);
+[ &lt;2, 5&gt;, &lt;3, 2&gt;, &lt;5, 1&gt; ]
+&gt; #SublatticeLattice(G, 5);
+1
+</PRE>
+Hence there are no primitive sublattices between L and 5L. Hence it
+suffices to check only the lattices at 2 and 3 the two remaining 
+prime divisors of the order of G.
+<P>
+<P>
+<PRE>
+&gt; V:= SublatticeLattice(G, {2,3}); #V;
+4
+&gt; M:= MaximalSublattices(V ! 1); M;
+[
+    sublattice number 2,
+    sublattice number 3
+]
+&gt; V ! 2 meet V ! 3;
+sublattice number 4
+</PRE>
+Moreover, the second and third lattice are (up to rescaling) dual to each 
+other with respect to some G-invariant form.
+<P>
+<P>
+<PRE>
+&gt; F:= PositiveDefiniteForm(G);
+&gt; L:= Dual(Lattice(BasisMatrix(V ! 2), F) : Rescale:= false);
+&gt; V ! L;
+sublattice number 3 times 1/6
+</PRE>
+In particular, every G-invariant lattice can be constructed from lattice 
+number 2 by taking scalar multiples, duals, sums and intersections. For
+example the standard lattice can be written as:
+<P>
+<P>
+<PRE>
+&gt; (V ! 2) + (V ! (6*L));
+sublattice number 1
+</PRE>
+<HR>
+<H3><A NAME = "3277">Example <TT>GLat_SublatticeLattice2 (H32E9)</TT></A></H3>
+Let G be the 8-dimensional (faithful) rational representation of
+SL(2, 7). Its endomorphism ring E is isomorphic to Q(Sqrt( - 7)).
+We find all G-invariant lattices of G that are invariant under the 
+maximal order M of E up to multiplication with elements in E. After
+this is done, we quickly obtain all finite subgroups of GL(8, Q) (up 
+to conjugacy) that include a normal subgroup conjugate to G.
+<P>
+<P>
+To shorten the example, we choose G such that the standard lattice L
+is already invariant under M.
+<P>
+<P>
+<PRE>
+&gt; SetSeed(1);
+&gt; G:= MatrixGroup&lt;8, IntegerRing() |
+&gt;    [ 0, 1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0, 0, 0, -1, 1,
+&gt;      0, 0, 0, 1, 0, 0, -1, 0, 0, 0, -1, 0, 0, 0, -1, 1,
+&gt;      0, 0, 0, 0, 0, 1, -1, 0, 0, 0, 0, 0, -1, 0, -1, 1,
+&gt;      0, 0, 0, 0, 0, 0, -1, 1, 0, 0, 0, 0, 0, 0, -2, 1 ],
+&gt;    [ 0, -1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0,
+&gt;     -1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, -1, 1,
+&gt;      0, 0, 0, -1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
+&gt;      0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 ] &gt;; #G;
+336
+&gt; E:= EndomorphismRing(G);
+&gt; M:= MaximalOrder(ChangeRing(E, RationalField()));
+&gt; ok, M:= CanChangeUniverse(Basis(M), MatrixRing(Integers(), 8)); ok;
+true
+</PRE>
+So L is M-invariant. The lattices at the primes 3 and 7 are multiples
+of L as we can see as follows:
+<P>
+<P>
+<PRE>
+&gt; w7:= IntegralMatrix(E.2 - Trace(E.2)/8);
+&gt; w7 div:= GCD( Eltseq(w7) );                   // a square root of 7
+&gt; V:= SublatticeLattice([ Matrix(G.i) : i in [1..Ngens(G)] ] cat M, [3,7]); #V;
+2
+&gt; V ! w7;
+sublattice number 2
+</PRE>
+So it remains to check the lattices at 2. The two prime ideals in M over
+2 are generated by <TT>p</TT> and <TT>q</TT> where
+<P>
+<P>
+<PRE>
+&gt; p:= 1 - (w7+1) div 2;
+&gt; q:= (w7+1) div 2;
+&gt; Gens:= [ Matrix(G.i) : i in [1..Ngens(G)] ];
+&gt; V:= SublatticeLattice(Gens cat M, 2: Levels:= 3);
+&gt; Levels(V);
+[
+    [
+        sublattice number 1
+    ],
+    [
+        sublattice number 2,
+        sublattice number 3
+    ],
+    [
+        sublattice number 4,
+        sublattice number 5,
+        sublattice number 6
+    ],
+    [
+        sublattice number 7,
+        sublattice number 8,
+        sublattice number 9,
+        sublattice number 10
+    ]
+]
+&gt; [ V | BasisMatrix(V ! i)*x : i in [1..3], x in [p,q] ];
+[
+    sublattice number 4,
+    sublattice number 7,
+    sublattice number 8,
+    sublattice number 6,
+    sublattice number 9,
+    sublattice number 10
+]
+</PRE>
+So the lattice numbers 1, 2, 3 and 5 represent the orbits of the action of E
+on the set of all MG-invariant lattices. Moreover, every matrix group N
+normalizing G acts on the MG-invariant lattices and (up to conjugacy) thus fixes one of 
+these four lattices. If it fixes L, it also fixes V!2 + V!3 = V!5 
+and vice versa. Similarly, it fixes V!2 if and only if it fixes V!3.
+<P>
+<P>
+<PRE>
+&gt; F:= PositiveDefiniteForm(G);
+&gt; N1:= Normalizer(AutomorphismGroup(LatticeWithGram(F)), G); #N1;
+672
+&gt; A:= AutomorphismGroup(Lattice(BasisMatrix(V ! 2), F) : NaturalAction);
+&gt; N2:= Normalizer(A, ChangeRing(G, Rationals())); #N2;
+336
+</PRE>
+So <TT>N1</TT> (which is isomorphic to 2.L(2, 7):2) is up to conjugacy the only proper
+finite extension of G in GL(8, Q).
+<PRE></PRE> <A  HREF = "text330.htm">[Next]</A><A  HREF = "text333.htm">[Prev]</A> <A  HREF = "text330.htm">[Right]</A> <A  HREF = "text333.htm">[Left]</A> <A  HREF = "text331.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

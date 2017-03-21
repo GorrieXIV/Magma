@@ -1,0 +1,40 @@
+"Source: Text/Geometry/Scheme.text";
+"Line: 6547";
+"Date: Wed Jun  8 17:42:16 2016";
+"Main: Mon May 30 13:40:42 2016";
+// original file: Text/Geometry/Scheme.text, line: 6547
+// Example: H118E52 ()
+print "Example: H118E52";
+ei := GetEchoInput();
+SetEchoInput(true);
+k := RationalField();
+P<x,y,z> := ProjectiveSpace(k, 2);
+funs := [ 2/3*x^2*y^2 + 2/3*x^2*y*z + x*y^2*z + x*y*z^2,
+    1/3*x^2*y^2 + 4/3*x^2*y*z + x^2*z^2 + 1/2*x*y^2*z + 1/2*x*y*z^2,
+    2/9*x^2*y^2 + 2/3*x^2*y*z + 2/3*x*y^2*z + x*y*z^2 + 1/2*y^2*z^2 ];
+g := map< P -> P | funs >;
+FunctionDegree(g);
+assert $1 eq 4;
+RationalPoints(BaseScheme(g));
+std_quad := QuadraticTransformation(P);
+g1 := std_quad * g;
+// (Expand and) extend the map to its maximal domain:
+g1:=Extend(g1);
+FunctionDegree(g1);
+assert $1 eq 2;
+S := BaseScheme(g1);
+RationalPoints(S);
+HasPointsOverExtension(S);
+assert not $1;
+tr := Translation(P,[ p : p in $2 ]);
+quad := std_quad * tr;
+g2 := quad * g1;
+g2:=Extend(g2);
+FunctionDegree(g2);
+assert $1 eq 1;
+f3 := f2 * g2
+    where f2 is f1 * std_quad
+    where f1 is std_quad * Inverse(tr);
+Expand(f3) eq g;
+assert $1;
+SetEchoInput(ei);

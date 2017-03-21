@@ -1,0 +1,220 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <link rel='stylesheet' href='help.css' type='text/css'>
+  <TITLE>Scope</TITLE>
+</head>
+<body BGCOLOR="#FFFFFF">
+
+ <A  HREF = "text63.htm">[Next]</A><A  HREF = "text61.htm">[Prev]</A> <A  HREF = "text63.htm">[Right]</A> <A  HREF = "text61.htm">[Left]</A> <A  HREF = "text56.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<PRE></PRE><H3><A NAME = "548">Scope</A></H3>
+
+<P>
+<P>
+Say we type the following,
+<P>
+<P>
+<PRE>
+&gt; temp := 7;
+&gt; f := function(a,b)
+&gt; temp := a * b;
+&gt; return temp^2;
+&gt; end function;
+</PRE>
+If the evaluation process is now followed verbatim, the resultant context
+will look like <TT>[ (temp,7), (f,FUNC(a,b : 7 := a*b; return 7^2;)) ]</TT>,
+which is quite clearly not what was intended! 
+
+
+
+<H5>Subsections</H5>
+<UL>
+<LI> <A  HREF = "text62.htm#549">Local Declarations</A>
+<LI> <A  HREF = "text62.htm#550">The `first use' Rule</A>
+<LI> <A  HREF = "text62.htm#551">Identifier Classes</A>
+<LI> <A  HREF = "text62.htm#552">The Evaluation Process Revisited</A>
+<LI> <A  HREF = "text62.htm#553">The `single use' Rule</A>
+</UL>
+<H4><A NAME = "549">Local Declarations</A></H4>
+
+<P>
+<P>
+What is needed in the previous example is some way of declaring that an 
+identifier, in this case <TT>temp</TT>, is a `new' identifier (i.e., distinct from
+other identifiers with the same name) whose use is confined to the enclosing 
+function. Magma  provides such a mechanism, called a local declaration.
+The previous example could be written,
+<P>
+<P>
+<PRE>
+&gt; temp := 7;
+&gt; f := function(a,b)
+&gt; local temp;
+&gt; temp := a * b;
+&gt; return temp^2;
+&gt; end function;
+</PRE>
+The identifier <TT>temp</TT> inside the body of f is said to be `(declared) local'
+to the enclosing function. Evaluation of these two assignments would result in 
+the context being <TT>[ (temp, 7), (f, FUNC(a,b : local temp := a*b;
+return local temp^2;)) ]</TT> as intended.
+<P>
+It is very important to remember that <TT>temp</TT> and <TT>local temp</TT> are <I>distinct</I>! 
+Hence if we now type,
+<P>
+<P>
+<PRE>
+&gt; r := f(3,4);
+</PRE>
+the resultant context would be <TT>[ (temp,7), (f,FUNC(a,b : local temp
+:= a*b; return local temp^2;)), (r,144) ]</TT>. The assignment to <TT>local temp</TT>
+inside
+the body of f does <I>not</I> change the value of <TT>temp</TT> outside the function.
+The effect of an assignment to a local identifier is thus localized to the 
+enclosing function.
+
+
+<H4><A NAME = "550">The `first use' Rule</A></H4>
+
+<P>
+<P>
+It can become tedious to have to declare all the local variables used in a 
+function body. Hence Magma  adopts a convention whereby an identifier can be 
+implicitly declared according to how it is first used in a function body. The 
+convention is that if the first use of an identifier inside a function body is 
+on the left hand side of a <TT>:=</TT>, then the identifier is considered to be local,
+and the function body is considered to have an implicit local declaration for 
+this identifier at its beginning. There is in fact no need therefore to declare 
+<TT>temp</TT> as local in the previous example as the first use of <TT>temp</TT> is on the 
+left hand side of a <TT>:=</TT> and hence <TT>temp</TT> is implicitly declared local.
+<P>
+It is very important to note that the term `first use' refers to the first 
+<I>textual</I> use of an identifier. Consider the following example,
+<P>
+<P>
+<PRE>
+&gt; temp := 7;
+&gt; f := function(a,b)
+&gt; if false then
+&gt; temp := a * b;
+&gt; return temp;
+&gt; else
+&gt; temp;
+&gt; return 1;
+&gt; end if;
+&gt; end function;
+</PRE>
+The first <I>textual</I> use of <TT>temp</TT> in this function body is in the line
+<P>
+<P>
+<PRE>
+&gt; temp := a * b;
+</PRE>
+Hence <TT>temp</TT> is considered as a local inside the function body. It is not
+relevant that the <TT>if false ...</TT> condition will never be true and so the first 
+time <TT>temp</TT> will be encountered when f is applied to some arguments is in 
+the line
+<P>
+<P>
+<PRE>
+&gt; temp;
+</PRE>
+`First use' means `first textual use', modulo the rule about examining the 
+right hand side of a <TT>:=</TT> before the left! 
+
+
+<H4><A NAME = "551">Identifier Classes</A></H4>
+
+<P>
+<P>
+It is now necessary to be more precise about the treatment of identifiers in
+Magma. Every identifier in a Magma  program is considered to belong to one
+of three possible classes, these being:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>the class of value identifiers
+<DT>(b)</DT><DD>the class of variable identifiers
+<DT>(c)</DT><DD>the class of reference identifiers
+<P>
+<P>
+</DL>
+The class an identifier belongs to indicates how the identifier is used in a 
+program.
+<P>
+The class of value identifiers includes all identifiers that stand as
+placeholders for values, namely:
+<DL COMPACT class='compact'>
+<DT>(a)</DT><DD>all loop identifiers;
+<DT>(b)</DT><DD>the $$ pseudo-identifier;
+<DT>(c)</DT><DD>all identifiers whose first use in a function expression is as a value 
+(i.e., not on the left hand side of an <TT>:=</TT>, nor as an actual reference argument to a procedure).
+<P>
+<P>
+</DL>
+Because value identifiers stand as placeholders for values to be substituted
+during the evaluation process, they are effectively constants, and hence they
+cannot be assigned to. Assigning to a value identifier would be akin to writing 
+something like <TT>7 := 8;</TT>!
+<P>
+The class of variable identifiers includes all those identifiers which are 
+declared as local, either implicitly by the first use rule, or explicitly 
+through a local declaration. Identifiers in this class may be assigned to.
+<P>
+The class of reference identifiers will be discussed later.
+
+
+<H4><A NAME = "552">The Evaluation Process Revisited</A></H4>
+
+<P>
+<P>
+The reason it is important to know the class of an identifier is that the
+class of an identifier effects how it is treated during the evaluation process.
+Previously it was stated that the evaluation process was,
+<DL COMPACT class='compact'>
+<DT>(1)</DT><DD>replace each identifier in the expression by its value in the current 
+context. 
+<DT>(2)</DT><DD>simplify the resultant <I>value</I> to its canonical form.
+<P>
+<P>
+</DL>
+Strictly speaking the first step of this process should read,
+<DL COMPACT class='compact'>
+<DT>(1')</DT><DD>replace each <I>free</I> identifier in the expression by its value in the 
+current context, where an identifier is said to be free if it is a value 
+identifier which is not a formal argument, a loop identifier, or the $$ 
+identifier.
+<P>
+<P>
+</DL>
+This definition of the replacement step ensures for example that while
+computing the value of a function expression F, Magma  does not attempt to 
+replace F's formal arguments with values from the current context!
+
+
+<H4><A NAME = "553">The `single use' Rule</A></H4>
+
+<P>
+<P>
+As a final point on identifier classes it should be noted that an identifier 
+may belong to only <I>one</I> class within an expression. Specifically
+therefore an identifier can only be used in one way inside a function body. 
+Consider the following function,
+<P>
+<P>
+<PRE>
+&gt; a := 7;
+&gt; f := function(n) a := a; return a; end function;
+</PRE>
+It is <I>not</I> the case that a is considered as a variable identifier on the 
+left hand side of the <TT>:=</TT>, and as a value identifier on the right hand side 
+of the <TT>:=</TT>. Rather a is considered to be a value identifier as its first
+use is as a value on the right hand side of the <TT>:=</TT> (remember that Magma  
+inspects the right hand side of an assignment, and hence sees a first as a
+value identifier, <I>before</I> it inspects the left hand side where it sees a 
+being used as a variable identifier).
+
+
+<PRE></PRE> <A  HREF = "text63.htm">[Next]</A><A  HREF = "text61.htm">[Prev]</A> <A  HREF = "text63.htm">[Right]</A> <A  HREF = "text61.htm">[Left]</A> <A  HREF = "text56.htm">[Up]</A> <A  HREF = "ind.htm">[Index]</A> <A  HREF = "MAGMA.htm">[Root]</A>
+<br><small>Version: V2.22 of <I>
+Thu Jun  9 16:37:49 EST 2016
+</I></small>
+</body></html>

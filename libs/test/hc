@@ -1,0 +1,951 @@
+
+// Test script for hyperelliptic stuff
+
+// curve.m
+
+P<x> := PolynomialRing(Rationals());
+P11<u> := PolynomialRing(GF(11));
+
+C1 := HyperellipticCurve(x^5-7);
+C2 := HyperellipticCurve(x^6,1);
+C3 := HyperellipticCurve(793881-1073610*x+181107*x^2+125476*x^3
+                          -19824*x^4-2704*x^5+574*x^6);
+EC := EllipticCurve([1,0,0,0,1]);
+C4, map4 := HyperellipticCurve(EC);
+assert(map4(EC![-1,0]) eq C4![-1, 0, 1]);
+assert(map4(EC![-1,0,1]) eq C4![-1, 0, 1]);
+
+
+
+
+assert IsHyperellipticCurve(C1);
+assert IsHyperellipticCurve(C2);
+assert IsHyperellipticCurve(C3);
+assert IsHyperellipticCurve(C4);
+
+TestC := Scheme(Ambient(C1), Equation(C1));
+Type(TestC);
+t, TC := IsHyperellipticCurve(TestC);
+Type(TC);
+assert C1 eq TC;
+
+
+
+//flag, EC1, map41 := IsEllipticCurve(C4);
+//assert(EC eq EC1);
+
+//assert(map41(map4(EC![-1,0])) eq EC![-1,0]);
+
+//assert(map4(map41(C4![-1,0])) eq C4![-1,0]);
+
+//assert not(IsEllipticCurve(C1));
+//assert not(IsEllipticCurve(C2));
+//assert not(IsEllipticCurve(C3));
+
+
+assert(Degree(C1) eq 5);
+assert(Degree(C2) eq 6);
+assert(Degree(C4) eq 3);
+
+assert(CoefficientRing(C3) eq Rationals());
+
+assert(BaseField(C3) eq Rationals());
+
+
+C5 := HyperellipticCurve(u^5+4);
+CC := ChangeRing(C1, GF(11));
+assert(C5 eq CC);
+
+
+
+
+
+
+
+
+
+
+
+ff := GF(2);
+HCC := ChangeRing(C4, GF(2));
+assert(Points(HCC) eq 
+  {@ HCC![1, 0, 0], HCC![0, 1, 1], HCC![1, 0, 1], HCC![1, 1, 1] @});
+
+HCC := BaseChange(HCC,4);
+Points(HCC);
+
+
+ff := GF(2^4);
+assert(Points(HCC) eq
+ {@ HCC![1, 0, 0], HCC![1, 0, 1], HCC![1, 1, 1], HCC![ff.1^3, ff.1^10, 1], HCC![ff.1^3, ff.1^12, 1], 
+      HCC![ff.1^5, 0, 1], HCC![ff.1^5, ff.1^5, 1], HCC![ff.1^6, ff.1^5, 1], HCC![ff.1^6, ff.1^9, 1], 
+      HCC![ff.1^9, ff.1^5, 1], HCC![ff.1^9, ff.1^6, 1], HCC![ff.1^10, 0, 1], HCC![ff.1^10, ff.1^10, 1],
+      HCC![ff.1^12, ff.1^3, 1], HCC![ff.1^12, ff.1^10, 1], HCC![0, 1, 1] @});
+
+
+
+
+/*********************************
+
+I don't know how to deal with transformations
+
+assert(TransformCurve(TransformCurve(C1, [0,1,1,0,1/2], x^2+1), [2,3,1,2,2], x-2)
+ eq (TransformCurve(C1, t, u) where
+     t, u := ComposeTransformations(2, [0,1,1,0,1/2], x^2+1, [2,3,1,2,2], x-2)));
+
+assert((TransformCurve(TransformCurve(C1, [0,1,1,0,1/2], x^2+1), t, u) where
+     t, u := InverseTransformation(2, [0,1,1,0,1/2], x^2+1)) eq C1);
+
+*********************************/
+/********************************
+
+this is David's version -- all obsolete
+
+// Removed ComposeTransformations and InverseTransformations
+
+assert(Transformation(
+   Transformation(C1, [0,1,1,0,1/2], x^2+1), [2,3,1,2,2], x-2)
+       eq (Transformation(C1, t, u) where
+          t, u := ComposeTransformations(2, [0,1,1,0,1/2], x^2+1, 
+                                            [2,3,1,2,2], x-2)));
+
+assert((Transformation(Transformation(C1, [0,1,1,0,1/2], x^2+1), t, u) 
+   where t, u := InverseTransformation(2, [0,1,1,0,1/2], x^2+1)) eq C1);
+*************************************/
+
+
+c3 := SimplifiedModel(C3);
+assert c3 eq C3;
+
+
+
+C2s, map21 := SimplifiedModel(C2);
+C2s;
+// Hyperelliptic Curve defined by y^2 = 4*x^6 + 1 over Rational Field
+
+/*
+assert(map21(map22(C2s![0,1])) eq C2s![0,1]);
+
+/********* help **************8/
+>> map22(C2s![0,1]);
+        ^
+Runtime error: Bad argument types
+Argument types given: CrvHypPtNew, Rec
+
+assert(map22(map21(C2![0,0])) eq C2![0,0]);
+***************************/
+
+
+
+assert([ Genus(C) : C in [C1,C2,C2s,C3,C4,C5] ] eq
+  [ 2, 2, 2, 2, 1, 2 ]);
+
+Equation(C2);
+
+
+pt1 := C1![2,5]; assert(pt1 eq C1![2, 5, 1]);
+
+assert(pt1 eq C1![4,40,2]);
+assert pt1 eq elt<C1(BaseRing(C1)) | 4, 40, 2>;
+
+
+
+pt11 := C5!pt1;
+assert(pt11 eq C5![2, 5, 1]);
+
+//assert not(pt11 eq pt1);
+
+//C1![0,0];
+/* Can't coerce  [ 0, 0 ]
+ into a point on
+ Hyperelliptic Curve defined by y^2 = x^5 - 7 over Rational Field
+*/
+//C1![0,0,0];
+/*
+>> C1![0,0,0];
+     ^
+Runtime error in '!': A point on a hyperelliptic curve cannot have all 
+coordinates zero.
+*/
+assert not(IsPoint(C1, [0,0]));
+
+
+padic<p> := pAdicField(2);
+HCC := BaseChange(C1, hom< Rationals() -> pAdicField(2) | >);
+
+
+/* assert(Points(HCC, 0) eq  */
+ /* {@ HCC![0, -474955 + O(p^20), 1], HCC![0, 474955 + O(p^20), 1] @}); */
+
+
+
+padic<p> := pAdicField(2,10);
+HCC := BaseChange(C1, hom< Rationals() -> pAdicField(2,10) | >);
+
+
+/* assert(Points(HCC, 0) eq  */
+   /* {@ HCC![0, 181 + O(p^9), 1 + O(p^10)], HCC![0, -181 + O(p^9), 1 + O(p^10)] @}); */
+
+
+
+
+
+
+disc := [ Discriminant(C) : C in [C1,C2,C2s,C3,C4] ];
+
+assert(disc
+  eq [ 1920800000, -11664, -12230590464,
+     -694439972658260946340642298852482919977451520000000, -433 ]);
+
+assert(Discriminant(C5) eq 9);
+
+
+assert(GF(11)!disc[1] eq 9);
+
+
+C6 := ChangeRing(C3, GF(19));
+
+assert([ #ChangeRing(C6, ext<BaseRing(C6) | n >) :  
+ n in [1..3] ] eq   [ 36, 310, 6972 ]);
+
+
+points := Points(C3 : Bound := 1000);
+
+assert(points eq 
+  {@ C3![-804, 12487659975, 1], C3![-804, -12487659975, 1], C3![-19, 174190, 1],
+      C3![-19, -174190, 1], C3![-10, 23459, 1], C3![-10, -23459, 1], C3![-9, 16380, 1],
+      C3![-9, -16380, 1], C3![-6, 2961, 1], C3![-6, -2961, 1], C3![-5, 184, 1],
+      C3![-5, -184, 1], C3![-4, 25, 1], C3![-4, -25, 1], C3![-3, 1314, 1], C3![-3, -1314, 1],
+      C3![0, 891, 1], C3![0, -891, 1], C3![1, 70, 1], C3![1, -70, 1], C3![2, 89, 1],
+      C3![2, -89, 1], C3![3, 864, 1], C3![3, -864, 1], C3![4, 1391, 1], C3![4, -1391, 1],
+      C3![6, 2835, 1], C3![6, -2835, 1], C3![7, 4436, 1], C3![7, -4436, 1], C3![8, 6979, 1],
+      C3![8, -6979, 1], C3![21, 188550, 1], C3![21, -188550, 1], C3![43, 1781416, 1], 
+      C3![43, -1781416, 1], C3![71, 8257900, 1], C3![71, -8257900, 1],
+      C3![155, 87789016, 1], C3![155, -87789016, 1], C3![861, 15249793410, 1],
+      C3![861, -15249793410, 1], C3![-7, 41680, 3], C3![-7, -41680, 3], C3![10, 28343, 3],
+      C3![10, -28343, 3], C3![13, 42100, 3], C3![13, -42100, 3], C3![17, 66808, 3],
+      C3![17, -66808, 3], C3![-19, 72982, 5], C3![-19, -72982, 5], C3![-4, 162853, 5],
+      C3![-4, -162853, 5], C3![63, 4340016, 5], C3![63, -4340016, 5],
+      C3![-141, 71218602, 7], C3![-141, -71218602, 7], C3![-15, 537012, 7],
+      C3![-15, -537012, 7], C3![6, 93303, 7], C3![6, -93303, 7], C3![447, 2050905150, 7],
+      C3![447, -2050905150, 7], C3![-61, 3980200, 9], C3![-61, -3980200, 9],
+      C3![-17, 1143644, 9], C3![-17, -1143644, 9], C3![-83, 5786144, 15],
+      C3![-83, -5786144, 15], C3![-49, 6749132, 17], C3![-49, -6749132, 17],
+      C3![3, 3839472, 17], C3![3, -3839472, 17], C3![9, 2660382, 17], C3![9, -2660382, 17],
+      C3![115, 19559008, 17], C3![115, -19559008, 17], C3![129, 27618120, 19],
+      C3![129, -27618120, 19], C3![-654, 7086874977, 25], C3![-654, -7086874977, 25],
+      C3![-87, 15047046, 25], C3![-87, -15047046, 25], C3![69, 11253438, 25],
+      C3![69, -11253438, 25], C3![17, 9183200, 27], C3![17,-9183200, 27],
+      C3![97, 23339120, 27], C3![97, -23339120, 27], C3![-41, 36663200, 29], 
+      C3![-41, -36663200, 29], C3![-16, 29048425, 29], C3![-16, -29048425, 29],
+      C3![64, 8081255, 29], C3![64, -8081255, 29], C3![324, 557839035, 29],
+      C3![324, -557839035, 29], C3![-159, 20279340, 31], C3![-159, -20279340, 31],
+      C3![-81, 44038134, 31], C3![-81, -44038134, 31],C3![-9, 31494510, 31],
+      C3![-9, -31494510, 31], C3![121, 47825008, 35], C3![121, -47825008, 35],
+      C3![363, 689640336, 41], C3![363, -689640336, 41], C3![-171, 15482052, 43],
+      C3![-171, -15482052, 43], C3![101, 33050038, 45], C3![101, -33050038, 45],
+      C3![-269, 76959428, 53], C3![-269, -76959428, 53], C3![-87, 230098050, 53],
+      C3![-87, -230098050, 53], C3![47, 35939152, 53], C3![47, -35939152, 53],
+      C3![57, 115775604, 71], C3![57, -115775604, 71], C3![141, 16543800, 71],
+      C3![141, -16543800, 71], C3![367, 736213454, 71], C3![367, -736213454, 71],
+      C3![477, 1420417584, 79], C3![477, -1420417584, 79], C3![-520, 1778731829, 89],
+      C3![-520, -1778731829, 89], C3![-126, 1270691973, 95], C3![-126, -1270691973, 95],
+      C3![93, 101516256, 95], C3![93, -101516256, 95], C3![622, 3096663115, 97],
+      C3![622, -3096663115, 97], C3![-23, 1115012612, 103], C3![-23, -1115012612, 103], 
+      C3![-404, 759654077, 107], C3![-404, -759654077, 107], C3![212, 20400485, 107], 
+      C3![212, -20400485, 107], C3![807, 6967127790, 107], C3![807, -6967127790, 107],
+      C3![-96, 4083875775, 149], C3![-96, -4083875775, 149], C3![121, 1448279756, 159],
+      C3![121, -1448279756, 159], C3![119, 1673524918, 163], C3![119, -1673524918, 163],
+      C3![443, 3004946630, 163], C3![443, -3004946630, 163], C3![489, 4079528712, 203],
+      C3![489, -4079528712, 203], C3![907, 15133736800, 217],
+      C3![907, -15133736800, 217], C3![874, 16431537283, 237],
+      C3![874, -16431537283, 237], C3![-325, 63198224096, 361],
+      C3![-325, -63198224096, 361], C3![363, 4836862602, 367],
+      C3![363, -4836862602,367], C3![291, 32501368872, 425], C3![291, -32501368872, 425],
+      C3![-906, 312378262425, 589], C3![-906, -312378262425, 589],
+      C3![18, 345054170475, 733], C3![18, -345054170475, 733] @}
+);
+
+assert(#points eq 166);
+
+
+Random(C5);
+
+assert(PointsAtInfinity(C1) eq {@ C1![1, 0, 0] @});
+
+assert(PointsAtInfinity(C2) eq 
+  {@ C2![1, 1, 0], C2![1, -1, 0] @});
+assert(PointsAtInfinity(C3) eq {@@});
+
+
+assert(Points(C1,2) eq 
+ {@ C1![2, 5, 1], C1![2, -5, 1] @});
+
+
+
+assert(Points(C1,Infinity()) eq {@ C1![1, 0, 0] @});
+
+
+
+
+cp := Random(C5);
+cp[1];
+cp[2];
+cp[3];
+
+
+
+////////////////////////
+
+// jacobian.m
+
+J1 := Jacobian(C1);
+J2 := Jacobian(C2);
+J3 := Jacobian(C3);
+assert(CoefficientRing(J1) eq Rationals());
+assert(BaseField(J1) eq Rationals());
+assert(BaseChange(J1, GF(11)) eq Jacobian(C5));
+
+J1!0;
+
+assert(Zero(J1) eq J1!0); assert(Identity(J1) eq J1!0);
+
+assert(IsZero(J1!0));
+
+jp1 := J1![x-2,5];
+assert not(jp1 eq J1!0);
+
+assert not(IsZero(jp1));
+
+assert([ n*jp1 : n in [0..4] ] eq
+[ elt< J1 | 1, 0, 0>, elt< J1 | x - 2, 5, 1>, elt< J1 | x^2 - 4*x + 4, 8*x - 11, 2>, elt< J1 | x^2 + 86/25*x + 
+  88/25, 488/125*x + 1279/125, 2>, elt< J1 | x^2 - 2929/1296*x + 1303/162, 
+  58679/46656*x - 83561/5832, 2> ]
+);
+
+
+
+assert({ n*jp1 : n in [0..4] }eq
+{ elt< J1 | 1, 0, 0>, elt< J1 | x - 2, 5, 1>, elt< J1 | x^2 - 4*x + 4, 8*x - 11, 2>, elt< J1 | x^2 + 86/25*x + 
+  88/25, 488/125*x + 1279/125, 2>, elt< J1 | x^2 - 2929/1296*x + 1303/162, 
+  58679/46656*x - 83561/5832, 2> }
+);
+
+
+assert({@ n*jp1 : n in [0..4] @} eq
+{@ elt< J1 | 1, 0, 0>, elt< J1 | x - 2, 5, 1>, elt< J1 | x^2 - 4*x + 4, 8*x - 11, 2>, elt< J1 | x^2 + 86/25*x + 
+  88/25, 488/125*x + 1279/125, 2>, elt< J1 | x^2 - 2929/1296*x + 1303/162, 
+  58679/46656*x - 83561/5832, 2> @}
+);
+
+
+
+
+
+
+jp2 := elt<J2 | 1,-x^3, 2>;
+assert(Order(jp2) eq 3);
+
+assert(Order(jp1) eq 0);
+
+assert(3*jp2 eq J2!0);
+
+jp3 := J3![(x-1)*(x-2), 70+19*(x-1)];
+assert(Order(jp3) eq 0);
+
+J5 := Jacobian(C5);
+ef1 := EulerFactor(J5);
+
+J5bis := BaseChange(J5,2);
+ef2 := EulerFactor(J5bis);
+
+
+
+assert(#Jacobian(C5) eq 305);
+
+assert(FactoredOrder(Jacobian(C5)) eq [ <5, 1, 61>, <61, 1, 5> ]);
+
+assert(TorsionBound(J1, 5) eq 5);
+
+assert(TorsionBound(J2, 5) eq 9);
+
+assert(TorsionBound(J3, 5) eq 1);
+
+
+newJ1 := BaseChange(J1, GF(11));
+G1, mj1 := AbelianGroup(newJ1);
+G1;
+/* Abelian Group isomorphic to Z/305
+   Defined on 1 generator
+   Relations:
+       305*P[1] = 0
+*/
+assert(Order(mj1(G1.1)) eq 305);
+
+// Order bug fixed May 2014
+K:=Rationals();
+P<x>:=PolynomialRing(K);
+f:=x^6+37*x^4+x^2+1;
+C:=HyperellipticCurve(f);
+J:=Jacobian(C);
+inf1:=C![1, 1, 0];
+inf2:=C![1, -1, 0];
+assert Order(inf1 - inf2) eq 0;
+
+////////////////////////
+
+jp1;
+// (x - 2, 5, 1)
+//jp1[0];
+// error
+jp1[1];
+// x - 2
+jp1[2];
+// 5
+jp1[3];
+// 1
+//jp1[4];
+// error
+Components(jp1);
+/* 
+x - 2
+5
+1
+*/
+////////////////////////
+
+// kummer.m
+
+K1 := KummerSurface(J1);
+K3 := KummerSurface(J3);
+
+//KummerSurface(J2);
+/*
+>> KummerSurface(J2);
+                ^
+Runtime error in 'KummerSurface': The curve of the Jacobian must be of the form 
+y^2 = f(x).
+*/
+
+assert(K1!0 eq K1![0, 0, 0, 1]);
+/* Point on Kummer surface of Jacobian of Hyperelliptic Curve defined by y^2 = x^5 
+    - 7 over Rational Field with attributes [* 0, 0, 0, 1 *]
+*/
+kp1 := K1![0,1,2,4];
+assert(kp1 eq K1!jp1);
+
+
+
+
+assert ([ n*kp1 : n in [0..3] ] eq [ K1 | [0, 0, 0, 1], [0, 1, 2, 4], [1, 4, 4, 16], 
+  [ 25, -86, 88, 1096 ] ]);
+
+assert ({ n*kp1 : n in [0..3] } eq { K1 | [0, 0, 0, 1], [0, 1, 2, 4], [1, 4, 4, 16], 
+  [ 25, -86, 88, 1096 ] });
+
+assert ({@ n*kp1 : n in [0..3] @} eq {@ K1 | [0, 0, 0, 1], [0, 1, 2, 4], [1, 4, 4, 16], 
+  [ 25, -86, 88, 1096 ] @});
+
+
+
+assert (Points(K1, [0,1,2]) eq {@ K1 | [0, 1, 2, 4] @});
+
+assert (Points(K3, [1,3,2]) eq  {@ K3 |  [1, 3, 2, -350100], [1, 3, 2, -325180] @});
+
+
+points := Points(J1, kp1);
+
+assert (points eq {@ elt<J1 | x - 2, 5, 1>, elt<J1 | x - 2, -5, 1> @});
+
+
+
+assert (jp1 in points);
+
+
+
+assert (K1!(5*jp1) eq 5*(K1!jp1));
+
+
+assert(BaseChange(K1, GF(11)) eq KummerSurface(Jacobian(C5)));
+
+
+
+assert(CoefficientRing(K3) eq Rationals());
+
+
+assert(BaseField(KummerSurface(Jacobian(C5))) eq GF(11));
+
+
+DefiningPolynomial(K1);
+/*
+28*x[1]^3*x[4] - 28*x[1]^2*x[2]*x[3] + 28*x[1]*x[2]^3 - 4*x[1]*x[3]*x[4]^2 + 
+    x[2]^2*x[4]^2 - 2*x[2]*x[3]^2*x[4] + x[3]^4
+*/
+////////////////////////
+
+assert (Eltseq(kp1) eq [ 0, 1, 2, 4 ]);
+assert (kp1[1] eq 0);
+assert (kp1[2] eq 1);
+assert (kp1[3] eq 2);
+assert (kp1[4] eq 4);
+
+
+
+////////////////////////
+
+// torsion.m
+
+HeightConstant(J1);
+// 6.86382193913713799573758742496
+HeightConstant(J3);
+// 43.184481981987469684530281559109
+NaiveHeight(jp1);
+// 1.386294361119890618834464242915
+[ NaiveHeight(n*jp1)/n^2 : n in [1..10] ];
+/*
+[ 1.386294361119890618834464242915, 0.69314718055994530941723212145, 
+0.77771360750088453817409849913, 0.57957046000468422252734544363, 
+0.61625059251288013740579920250, 0.61553980269543963952069965778, 
+0.61947765850536308781977291878, 0.61208735376320930145219974675, 
+0.62391859242287362940348567460, 0.59830882751454532020908054382 ]
+*/
+
+
+
+C7 := HyperellipticCurve(&*[x-n : n in [-3..2]]);
+J7 := Jacobian(C7);
+T, m := TwoTorsionSubgroup(J7);
+T; m;
+/*
+Abelian Group isomorphic to Z/2 + Z/2 + Z/2 + Z/2
+Defined on 4 generators
+Relations:
+    2*P[1] = 0
+    2*P[2] = 0
+    2*P[3] = 0
+    2*P[4] = 0
+Mapping from: Abelian Group isomorphic to Z/2 + Z/2 + Z/2 + Z/2
+Defined on 4 generators
+Relations:
+    2*P[1] = 0
+    2*P[2] = 0
+    2*P[3] = 0
+    2*P[4] = 0 to Jacobian of C7 given by function(g) ... end function
+*/
+
+assert ([ m(T.i) : i in [1..4] ] eq 
+  [ elt<J7 | x^2 - 3*x + 2, 0, 2>,
+    elt<J7 | x^2 - 2*x, 0, 2>,
+    elt<J7 | x^2 - x - 2, 0, 2>,
+    elt<J7 | x^2 - 4, 0, 2> ]);
+
+
+
+
+
+
+C8 := HyperellipticCurve((x^2+1)*(x^2+3)*(x^2-3));
+J8 := Jacobian(C8);
+T, m := TwoTorsionSubgroup(J8);         
+T;
+/*
+Abelian Group isomorphic to Z/2 + Z/2
+Defined on 2 generators
+Relations:
+    2*P[1] = 0
+    2*P[2] = 0
+*/
+assert ([ m(T.i) : i in [1..2] ] eq
+        [ elt< J8 | x^2 - 3, 0, 2>,
+	    elt< J8 | x^2 + 1, 0, 2> ]);
+
+
+
+TorsionSubgroup(J1);
+/*
+Abelian Group of order 1
+Mapping from: Abelian Group of order 1 to JacHyp: J1 given by function(g) ... 
+end function
+*/
+
+
+
+
+
+
+
+
+
+
+/*****************************************************/
+
+/* those are  Paulette's tests */
+
+
+
+///////////////////////////
+
+
+P<x> := PolynomialRing(Rationals());
+ 
+ 
+C1 := HyperellipticCurve(x^5-7, P!0);
+time p := Points(C1 : Bound := 1000);
+assert (#p eq 5);
+
+J1 := Jacobian(C1);
+time p := Points(J1 : Bound := 1000);
+assert(#p eq 25);
+
+
+
+///////////////////////////
+
+// cannot compute Points in this case
+
+
+P<x> := PolynomialRing(Rationals());
+ 
+ 
+C2 := HyperellipticCurve(x^6, P!1);
+//time p := Points(C2 : Bound := 1000);
+//#p;
+
+J2 := Jacobian(C2);
+//time p := Points(J2 : Bound := 1000);
+
+ 
+
+///////////////////////////
+
+
+
+P<x> := PolynomialRing(Rationals());
+C3 := HyperellipticCurve(793881-1073610*x+181107*x^2+125476*x^3-19824*x^
+4-2704*x^5+574*x^6, P!0);
+time p := Points(C3 : Bound := 1000);
+assert(#p eq 166);
+
+J3 := Jacobian(C3);
+time p := Points(J3: Bound := 100);
+assert(#p eq 1);
+
+
+ 
+
+
+////////////////////////////////
+
+
+
+F := GF(11);
+P<x> := PolynomialRing(F);
+
+
+
+C4 := HyperellipticCurve(x^3 + 1, x);
+assert (#C4 eq 16);
+time p := Points(C4);
+assert(#C4 eq #p);
+
+
+for x in C4(BaseRing(C4)) do
+	assert x in C4;
+end for;
+
+
+J4 := Jacobian(C4);
+time p := Points(J4);
+assert(#p eq 16);
+AbelianGroup(J4);
+
+
+
+
+////////////////////////////////////
+
+
+F := GF(11);
+P<x> := PolynomialRing(F);
+C5 := HyperellipticCurve(x^5 + 4, P!0);
+assert (#C5 eq 23);
+time p := Points(C5);
+assert(#C5 eq #p);
+
+
+J5 := Jacobian(C5);
+time p := Points(J5);
+assert(#p eq 305);
+AbelianGroup(J5);
+
+
+
+
+////////////////////////////////////
+
+
+
+F := GF(19);
+P<x> := PolynomialRing(F);
+
+C6 := HyperellipticCurve(4*x^6 + 13*x^5 + 12*x^4 + 18*x^2 + 4*x + 4, P!0);
+assert (#C6 eq 36);
+time p := Points(C6);
+assert(#C6 eq #p);
+
+J6 := Jacobian(C6);
+time p := Points(J6);
+assert(#p eq 784);
+AbelianGroup(J6);
+
+
+////////////////////////////////////
+
+
+F := GF(11);
+P<x> := PolynomialRing(F);
+
+C7 := HyperellipticCurve(x^6 + 3*x^5 + 6*x^4 + 7*x^3 + 4*x^2 + x, P!0);
+assert (#C7 eq 12);
+time p := Points(C7);
+assert(#C7 eq #p);
+ 
+J7 := Jacobian(C7);
+time p := Points(J7);
+assert(#p eq 128);
+AbelianGroup(J7);
+
+
+////////////////////////////////////
+
+
+F := GF(61);
+P<x> := PolynomialRing(F);
+
+C8 := HyperellipticCurve(x^6 + x^4 + 52*x^2 + 52, P!0);
+assert (#C8 eq 58);
+time p := Points(C8);
+assert(#C8 eq #p);
+ 
+
+J8 := Jacobian(C8);
+time p:= Points(J8);
+assert(#p eq 3536);
+AbelianGroup(J8);
+
+
+
+///////////////////////////////////////
+
+
+
+F := GF(3);
+P<x> := PolynomialRing(F);
+
+
+C10 := HyperellipticCurve(x^6 + 2*x^5 + x^4 + 2*x^3 + x + 1, P!0);
+assert (#C10 eq 6);
+time p := Points(C10);
+assert(#C10 eq #p);
+
+
+
+J10 := Jacobian(C10);
+time p := Points(J10);
+assert(#p eq 19);
+AbelianGroup(J10);
+
+
+
+
+///////////////////////////////////////
+
+
+F := GF(11);
+P<x> := PolynomialRing(F);
+
+
+C11 := HyperellipticCurve(x*(x^2+1)*(1+2*x-x^2), P!0);
+assert (#C11 eq 10);
+time p := Points(C11);
+assert(#C11 eq #p);
+
+
+
+
+J11 := Jacobian(C11);
+time p := Points(J11);
+assert(#p eq 100);
+AbelianGroup(J11);
+
+ 
+
+///////////////////////////////////////
+
+F := GF(17);
+P<x> := PolynomialRing(F);
+
+
+C12 := HyperellipticCurve(x^6-8*x^5+2*x^4+2*x^3-11*x^2+10*x-7, P!0);
+assert (#C12 eq 12);
+time p := Points(C12);
+assert(#C12 eq #p);
+
+
+
+
+
+
+J12 := Jacobian(C12);
+time p := Points(J12);
+assert(#p eq 220);
+AbelianGroup(J12);
+
+
+
+
+
+
+
+///////////////////////////////////////
+
+F := GF(19);
+P<x> := PolynomialRing(F);
+
+C13 := HyperellipticCurve(4*x^6+12*x^5+29*x^4+38*x^3+29*x^2+12*x+4, P!0);
+assert (#C13 eq 10);
+time p := Points(C13);
+assert(#C13 eq #p);
+ 
+J13 := Jacobian(C13);
+time p := Points(J13);
+assert(#p eq 225);
+AbelianGroup(J13);
+
+
+
+///////////////////////////////////////
+
+
+F := GF(19);
+P<x> := PolynomialRing(F);
+
+C14 := HyperellipticCurve((2*x^2-2*x-1)*(2*x^4-10*x^3+7*x^2+4*x-4), P!0);
+assert (#C14 eq 20);
+time p := Points(C14);
+assert(#C14 eq #p);
+
+
+J14 := Jacobian(C14);
+time p := Points(J14);
+assert(#p eq 384);
+AbelianGroup(J14);
+
+
+
+///////////////////////////////////////
+
+
+F := GF(29);
+P<x> := PolynomialRing(F);
+
+
+C15 := HyperellipticCurve(4*x^6+8*x^5-48*x^4+68*x^3+x^2-60*x+36, P!0);
+assert (#C15 eq 30);
+time p := Points(C15);
+assert(#C15 eq #p);
+
+
+
+
+J15 := Jacobian(C15);
+time p := Points(J15);
+assert(#p eq 825);
+AbelianGroup(J15);
+
+
+
+
+/////////////////////////////////////////////////////
+//////////////  a miscellany -- former bugs
+
+P<x> := PolynomialRing(GF(11));             
+C := HyperellipticCurve(x^5-7, P!0);
+C;
+pl1 := Places(C, 1);
+Places(C);
+
+P<x> := PolynomialRing(GF(11));             
+C := HyperellipticCurve(x^5-7, P!1);
+C;
+pl1 := Places(C, 1);
+Places(C);
+
+P<x> := PolynomialRing(Rationals());
+C := HyperellipticCurve(x^6, P!1);
+PointsAtInfinity(C);
+
+P<x> := PolynomialRing(Rationals());
+C := HyperellipticCurve(-3*x^6 - 2*x^5 + 7*x^4 - 4*x^3 - 13*x^2   + 10*x - 7, P!0);
+PointsAtInfinity(C);
+
+J := Jacobian(C);
+f := pAdicField(3,2);
+// Jacobian(BaseExtend(Curve(J), f));
+ff := ChangePrecision(f, 18);
+Jacobian(BaseExtend(Curve(J), ff));
+NumberOfPointsAtInfinity(BaseExtend(Curve(J), ff));
+
+
+P<x> := PolynomialRing(RationalField());
+C1 := HyperellipticCurve(15*x^5-75*x^3+60*x+225);
+n1, m1 := TwoSelmerGroupData(Jacobian(C1));
+C2 := HyperellipticCurve(x^5 - 1125*x^3 + 202500*x + 11390625);
+n2, m2 := TwoSelmerGroupData(Jacobian(C2));
+assert IsIsomorphic(C1,C2);
+assert n1 eq n2;
+assert m1 eq m2;
+ 
+
+P<x> := PolynomialRing(RationalField());
+C1 := HyperellipticCurve(15*x^5-75*x^3+60*x+225);
+C2 := HyperellipticCurve(x^5 - 1125*x^3 + 202500*x + 11390625);
+assert C1 ne C2;
+
+
+F<[f]> := FunctionField(Rationals(),7);
+P<X> := PolynomialRing(F);
+C := HyperellipticCurve(P![ f[7-i] : i in [0..6]]);
+K<x,y> := FunctionField(C);
+Evaluate(DefiningPolynomial(C),[x,y,1]);
+C(K)![x,y,1];
+
+
+//////////////////////////////////////////////////////////////////////////
+// Selmer examples
+
+// This one was a hard example in earlier versions of Algaem/selmer.m
+
+f := Polynomial([-2400826985379, 67072905, -3/4, 1]);
+//f := Polynomial([-2400826985379*4^3, 67072905*4^2, -3, 1]);
+ff := ChangeRing(f, RationalsAsNumberField());
+"\nTwo-descent on f =", f;
+
+time S := TwoSelmerGroup(EllipticCurve(f));
+assert #S eq 2;
+
+time S := TwoSelmerGroup(EllipticCurve(ff));
+assert #S eq 2;
+
+J := Jacobian(HyperellipticCurve(f));
+time S :=  TwoSelmerGroupOld(J);
+assert #S eq 2;
+
+J := Jacobian(HyperellipticCurve(ff));
+time S :=  TwoSelmerGroupOld(J);
+assert #S eq 2;
+
+J := Jacobian(HyperellipticCurve(f));
+time s :=  TwoSelmerGroupData(J);
+assert s eq 1;
+

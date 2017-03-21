@@ -1,0 +1,452 @@
+/*
+Finite Fields test.
+AKS 3/2/94.
+*/
+
+
+T_limit := 0.01;
+
+if false then
+    /*
+    set_mark := proc<| SetMark(true)>;
+    show_active := proc<| ShowActive()>;
+    */
+    ;
+else
+    set_mark := procedure() ; end procedure;
+    show_active := procedure() ; end procedure;
+end if;
+
+/*******************************************************************************
+			    Test Lattice
+*******************************************************************************/
+
+test_lattice := procedure(p)
+return;
+    print "test_lattice:", p;
+
+    F2<w2> := GF(p, 2);
+    F3<w3> := GF(p, 3);
+    F6<w6> := GF(p, 6);
+    F12<w12> := GF(p, 12);
+
+    assert (F12 ! w2) eq (F12 ! (F6 ! w2));
+    assert (F12 ! w3) eq (F12 ! (F6 ! w3));
+
+    E<e> := ext<F2 | 12>;
+    Embed(F3, E);
+    Embed(F6, E);
+    Embed(F12, E);
+
+    assert (E ! (F6 ! w2)) eq (E ! w2);
+    assert (E ! (F6 ! w3)) eq (E ! w3);
+end procedure;
+
+set_mark();
+for p in [2, 3, 5, 7, 257] do
+    test_lattice(p);
+    show_active();
+end for;
+
+delete test_lattice;
+
+/*******************************************************************************
+				Test field
+*******************************************************************************/
+
+test_ff := procedure(F)
+    q := #F;
+    p := Characteristic(F);
+    n := Degree(F);
+
+    assert IsIrreducible(DefiningPolynomial(F));
+
+    print "test_ff:", p, n;
+
+    assert p^n eq q;
+    small := q le 2^50;
+
+    LOG_PRIME_LIMIT := 10^8;
+
+    if Characteristic(F) eq 2 then
+	has_log := q eq 2 or
+	    (F[#F][1] le LOG_PRIME_LIMIT where F is Factorization(q - 1));
+    else
+	has_log := q le 10^35 and
+	    (F[#F][1] le LOG_PRIME_LIMIT where F is Factorization(q - 1));
+    end if;
+
+    assert F.1 eq Generator(F);
+    assert IsZero(F ! 0);
+    assert IsOne(F ! 1);
+    assert IsMinusOne(F ! -1);
+
+    if small or has_log then
+	alpha := PrimitiveElement(F);
+	assert IsPrimitive(alpha);
+	assert Order(alpha) eq q - 1;
+
+	if n gt 1 and not IsPrime(n) then
+	    d := rep{i: i in [2..n] | n mod i eq 0};;
+	    b := alpha^((q - 1) div (p^d - 1));
+	    E<w> := sub<F | b>;
+	    assert F!w eq b;
+	    assert E!b eq w;
+	    P := PrimeField(F);
+	    assert MinimalPolynomial(w, P) eq MinimalPolynomial(b, P);
+	    assert Order(w) eq Order(b);
+	end if;
+    end if;
+
+    T := Cputime();
+    C := 0;
+
+    //while Cputime(T) le T_limit do
+    count := 0;
+    while count lt 10 do
+	count +:= 1;
+
+	x := Random(F);
+	y := Random(F);
+
+	assert x + y eq y + x;
+	assert x * y eq y * x;
+	assert x * (x + y) eq x^2 + y*x;
+        assert x^2 - y^2 eq (x - y)*(x + y);
+	assert x + 0 eq x;
+	assert x * 0 eq 0;
+	assert x - x eq 0;
+	assert x - y eq -(y - x);
+	assert x^q eq x;
+
+	if not IsZero(x) then
+	    assert IsUnit(x);
+	    assert x^0 eq 1;
+	    xi := x^-1;
+	    assert x * xi eq 1;
+	    xq2 := x^(q - 2);
+	    assert xi eq xq2;
+	    assert (y/x) * x eq y;
+
+	    if small then
+		fo := FactoredOrder(x);
+		o := FactorizationToInteger(fo);
+		assert IsOne(x^o);
+		for t in fo do
+		    assert not IsOne(x^(o div t[1]));
+		end for;
+	    end if;
+
+	    if has_log and count mod 3 eq 0 then
+// "x:", x; "Log(x):", Log(x);
+		assert alpha^Log(x) eq x;
+	    end if;
+	end if;
+
+	i, sqrt := IsSquare(x);
+	assert not i or sqrt^2 eq x;
+
+	for e in [2 .. 3] cat [p] do
+	    xe := x^e;
+	    assert Root(x^e, e)^e eq xe;
+	end for;
+	C +:= 1;
+    end while;
+end procedure;
+
+/*******************************************************************************
+			    Test subfield relationship
+*******************************************************************************/
+
+test_ff_sub := procedure(F, E)
+    assert E subset F;
+    p := Characteristic(F);
+    F_n := Degree(F);
+    E_n := Degree(E);
+
+    print "test_ff_sub:", p, F_n, E_n;
+
+    assert Characteristic(E) eq p;
+    assert F_n mod E_n eq 0;
+
+    g := Generator(F, E);
+    assert MinimalPolynomial(g, E) eq DefiningPolynomial(F, E);
+
+    n := NormalElement(F, E);
+    assert IsNormal(n, E);
+
+    q := #E;
+    V, Vf := VectorSpace(F, E, [n^(q^i): i in [0 .. Degree(F, E) - 1]]);
+    for i in [0 .. Degree(F, E) - 1] do
+	assert Vf(n^(q^i)) eq CharacteristicVector(V, { i + 1 });
+    end for;
+
+    V, Vf := VectorSpace(F, E);
+    A, Af := MatrixAlgebra(F, E);
+
+    /*
+    T := Cputime();
+    C := 0;
+    while Cputime(T) le T_limit do
+    */
+    C := #F ge 2^50 select 50 else 500;
+    for c := 1 to C do
+	e := Random(E);
+
+	assert e in F;
+	assert F!e eq e;
+	assert E!(F!e) eq e;
+	
+	f1 := Random(F);
+	f2 := Random(F);
+
+	Q := Eltseq(f1, E);
+	assert Eltseq(Vf(f1)) eq Q;
+	assert SequenceToElement(Q, F) eq f1;
+
+	assert Vf(f1) @@ Vf eq f1;
+	assert Vf(f1) + Vf(f2) eq Vf(f1 + f2);
+	assert Vf(e * f1) eq e * Vf(f1);
+
+	a1 := Af(f1);
+	a2 := Af(f2);
+	assert a1 @@ Af eq f1;
+	assert a1 + a2 eq Af(f1 + f2);
+	assert a1 * a2 eq Af(f1 * f2);
+	assert Af(e * f1) eq e * a1;
+
+	min := MinimalPolynomial(f1, E);
+	assert MinimalPolynomial(a1) eq min;
+	assert IsIrreducible(min);
+	assert IsZero(Evaluate(min, f1));
+
+	t1 := Trace(f1, E);
+	t2 := Trace(f2, E);
+	n1 := Norm(f1, E);
+	n2 := Norm(f2, E);
+
+	assert t1 in E;
+	assert t2 in E;
+	assert n1 in E;
+	assert n2 in E;
+	assert Trace(f1 + f2, E) eq t1 + t2;
+	assert Norm(f1 * f2, E) eq n1 * n2;
+    //end while;
+    end for;
+    print C, "iterations";
+end procedure;
+
+/*******************************************************************************
+			    Test subfield lattice
+*******************************************************************************/
+
+test_ff_sub_lattice := procedure(F)
+    p := Characteristic(F);
+    n := Degree(F);
+    D := Divisors(n);
+
+    print "test_ff_sub_lattice:", p, n, D;
+
+    S := [];
+    for d in D do
+	S[d] := sub<F | d>;
+	test_ff(S[d]);
+    end for;
+
+    if Binomial(#D, 2) le 20 then
+	print "All relations:", Binomial(#D, 2);
+	for d in D do
+	    for e in D do
+		if d mod e eq 0 then
+		    test_ff_sub(S[d], S[e]);
+		end if;
+	    end for;
+	end for;
+    else
+	print "Random relations";
+	for i := 1 to 20 do
+	    repeat
+		d := Random(D);
+		e := Random(D);
+	    until d mod e eq 0;
+	    test_ff_sub(S[d], S[e]);
+	end for;
+    end if;
+end procedure;
+
+for d in [100 .. 300 by 100] do
+    test_ff(GF(3, d));
+end for;
+
+b := 32;
+
+for d in [1 .. 71] do //cat [32 .. 10*32 by 32] do
+    test_ff(GF(2, d));
+end for;
+
+for i := 13 to 40 do
+    test_ff_sub_lattice(GF(3, i));
+end for;
+
+for p in [2^b, 2^(2*b), 2^(3*b), 2^(4*b), 10^50, 10^100] do
+    test_ff(GF(NextPrime(p: Proof := false)));
+    test_ff(GF(PreviousPrime(p: Proof := false)));
+end for;
+
+for c := 1 to 5 do
+    p := Random(1, 10^10);
+    repeat
+	p := NextPrime(p);
+    until IsPrime((p - 1) div 2);
+    test_ff(GF(p));
+end for;
+
+for c := 1 to 2 do
+    p := Random(1, 10^11);
+    repeat
+	p := NextPrime(p);
+    until IsPrime((p - 1) div 2);
+    test_ff(GF(p));
+end for;
+
+test_ff_sub_lattice(GF(2, 100: Optimize := false));
+test_ff_sub_lattice(GF(2, 2*3*5*7: Optimize := false));
+test_ff_sub_lattice(GF(2, 128: Optimize := false));
+test_ff_sub_lattice(GF(2, 128));
+test_ff(GF(2, 503));
+
+test_ff_sub_lattice(GF(3, 37));
+test_ff_sub_lattice(GF(3, 39));
+
+set_mark();
+test_ff_sub_lattice(ext<GF(23) | 6>);
+show_active();
+
+set_mark();
+test_ff_sub_lattice(GF(3, 8));
+show_active();
+
+set_mark();
+test_ff_sub_lattice(GF(2^32 + 15, 4));
+show_active();
+
+set_mark();
+test_ff_sub_lattice(GF(NextPrime(10^50: Proof := false), 1));
+show_active();
+
+/*******************************************************************************
+				    Root
+*******************************************************************************/
+
+procedure test_root(K: Count := Min(#K, 1000))
+
+    "Test Root for", K;
+
+    D := Divisors(#K-1);
+
+    for i := 1 to Count do
+	r := Random(D) * Random(1, 10);
+//r;
+	a := Random(K);
+	b := a^r;
+	c := Root(b, r);
+	assert c^r eq b;
+    end for;
+
+end procedure;
+
+time test_root(GF(2^20));
+time test_root(GF(2^100));
+time test_root(GF(3^10));
+time test_root(GF(3^100));
+time test_root(GF(5^50));
+time test_root(GF(7^30));
+time test_root(GF(11^30));
+
+/*******************************************************************************
+				    Misc
+*******************************************************************************/
+
+K<w> := GF(3,20);
+a :=
+2*w^19 + w^18 + 2*w^17 + 2*w^15 + 2*w^13 + 2*w^12 + w^11 + w^10 
+    + 2*w^9 + 2*w^8 + 2*w^7 + w^5 + 2*w^4 + w^3 + w^2 + 2*w
+;
+
+r := Root(a, 59048);
+assert r^59048 eq a;
+
+/*******************************************************************************
+				    New Embed
+*******************************************************************************/
+
+/*
+SetVerbose("FFEmbed",1);
+K4 := GF(2, 2);
+K6 := GF(2, 3);
+K8 := GF(2, 8);
+K10 := GF(2, 10);
+K15 := GF(2, 15);
+K30:=ext<GF(2)|IrreduciblePolynomial(GF(2), 30)>;
+Embed(K6, K30);
+Embed(K10, K30);
+Embed(K15, K30);
+K20 := GF(2, 20);
+K30 := GF(2, 30);
+SetVerbose("FFEmbed",1);
+K25 := GF(2, 25);
+K50 := GF(2, 25);
+K50 := GF(2, 50);
+K100:=ext<GF(2)|IrreduciblePolynomial(GF(2), 100)>;
+K10:=GF(2,10);
+Embed(K10, K100);
+Embed(K20, K100);
+Embed(K50, K100);
+SetVerbose("FFEmbed",1);
+K4 := GF(2, 2);
+K6 := GF(2, 3);
+K8 := GF(2, 8);
+K10 := GF(2, 10);
+K15 := GF(2, 15);
+K30:=ext<GF(2)|IrreduciblePolynomial(GF(2), 30)>;
+Embed(K6, K30);
+Embed(K10, K30);
+Embed(K15, K30);
+K20 := GF(2, 20);
+K30 := GF(2, 30);
+SetVerbose("FFEmbed",1);
+K25 := GF(2, 25);
+K50 := GF(2, 25);
+K50 := GF(2, 50);
+K100:=ext<GF(2)|IrreduciblePolynomial(GF(2), 100)>;
+K10:=GF(2,10);
+Embed(K10, K100);
+Embed(K20, K100);
+Embed(K50, K100);
+K5:=GF(2,5);
+CheckEmbed;
+CheckEmbed(K5, K100);
+Embed(K5, K100);
+Embed(K25, K100);
+K4:=GF(2,4);
+K8:=GF(2,8);
+K40:=GF(2, 40);
+Embed(K4, K100);
+K200:=ext<GF(2)|IrreduciblePolynomial(GF(2), 200)>;
+Embed(K10, K200);
+Embed(K50, K200);
+Embed(K20, K200);
+Embed(K50, K200);
+Embed(K25, K200);
+Embed(K40, K200);
+Embed(K100, K200);
+for a in [K10,K20,K40,K100] do CheckEmbed(a, K200);end for;
+K400:=ext<GF(2)|IrreduciblePolynomial(GF(2), 400)>;
+Embed(K10, 400);
+time Embed(K10, K400);
+time Embed(K40, K400);
+*/
+
+
+
+//quit;
